@@ -1,0 +1,3 @@
+[submodule "include/tatami"]
+	path = external/tatami
+	url = https://github.com/LTLA/tatami
