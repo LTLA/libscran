@@ -18,6 +18,7 @@ enable_testing()
 add_executable(
     libtest 
     src/qc/PerCellQCMetrics.cpp
+    src/qc/IsOutlier.cpp
     src/data/data_sparse.cpp
 )
 
