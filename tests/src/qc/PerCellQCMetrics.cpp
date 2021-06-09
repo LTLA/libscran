@@ -25,9 +25,24 @@ protected:
     scran::PerCellQCMetrics<int> qc1, qc2, qc3, qc4;
 };
 
+template<typename T>
+void compare_vectors(size_t n, const T* ptr1, const T* ptr2) {
+    EXPECT_EQ(std::vector<T>(ptr1, ptr1+n), std::vector<T>(ptr2, ptr2+n));
+}
+
+template<typename T>
+void compare_vectors(size_t n, const T* ptr1, const std::vector<T>& ref) {
+    EXPECT_EQ(std::vector<T>(ptr1, ptr1+n), ref);
+}
+
+template<typename T>
+void compare_vectors(const std::vector<T>& ref, size_t n, const T* ptr1) {
+    EXPECT_EQ(std::vector<T>(ptr1, ptr1+n), ref);
+}
+
 TEST_F(PerCellQCMetricsTester, NoSubset) {
-    qc1.compute_metrics(dense_row.get());
-    EXPECT_EQ(qc1.get_sums(), tatami::column_sums(dense_row.get()));
+    qc1.run(dense_row.get());
+    compare_vectors(dense_row->ncol(), qc1.get_sums(), tatami::column_sums(dense_row.get()));
 
     std::vector<int> copy(sparse_matrix.size());
     auto smIt = sparse_matrix.begin();
@@ -36,19 +51,19 @@ TEST_F(PerCellQCMetricsTester, NoSubset) {
         ++smIt;
     }
     auto detected = std::unique_ptr<tatami::typed_matrix<int> >(new tatami::DenseRowMatrix<int>(sparse_nrow, sparse_ncol, copy));
-    EXPECT_EQ(qc1.get_detected(), tatami::column_sums(detected.get()));
+    compare_vectors(dense_row->ncol(), qc1.get_detected(), tatami::column_sums(detected.get()));
 
-    qc2.compute_metrics(dense_column.get());
-    EXPECT_EQ(qc1.get_sums(), qc2.get_sums());
-    EXPECT_EQ(qc1.get_detected(), qc2.get_detected());
+    qc2.run(dense_column.get());
+    compare_vectors(dense_row->ncol(), qc1.get_sums(), qc2.get_sums());
+    compare_vectors(dense_row->ncol(), qc1.get_detected(), qc2.get_detected());
 
-    qc3.compute_metrics(sparse_row.get());
-    EXPECT_EQ(qc1.get_sums(), qc3.get_sums());
-    EXPECT_EQ(qc1.get_detected(), qc3.get_detected());
+    qc3.run(sparse_row.get());
+    compare_vectors(dense_row->ncol(), qc1.get_sums(), qc3.get_sums());
+    compare_vectors(dense_row->ncol(), qc1.get_detected(), qc3.get_detected());
     
-    qc4.compute_metrics(sparse_column.get());
-    EXPECT_EQ(qc1.get_sums(), qc4.get_sums());
-    EXPECT_EQ(qc1.get_detected(), qc4.get_detected());
+    qc4.run(sparse_column.get());
+    compare_vectors(dense_row->ncol(), qc1.get_sums(), qc4.get_sums());
+    compare_vectors(dense_row->ncol(), qc1.get_detected(), qc4.get_detected());
 }
 
 TEST_F(PerCellQCMetricsTester, OneSubset) {
@@ -57,25 +72,25 @@ TEST_F(PerCellQCMetricsTester, OneSubset) {
     for (auto i : keep_i) { keep_s[i] = 1; }
 
     std::vector<const int*> subs(1, keep_s.data());
-    qc1.set_subsets(subs).compute_metrics(dense_row.get());
+    qc1.set_subsets(subs).run(dense_row.get());
 
     tatami::DelayedSubset<0, double> ref(dense_row, keep_i);
     auto refprop = tatami::column_sums(&ref);
-    auto sIt = qc1.get_sums().begin();
+    auto sIt = qc1.get_sums();
     for (auto& r : refprop) {
         r /= *sIt;
         ++sIt;
     }
-    EXPECT_EQ(refprop, qc1.get_subset_proportions()[0]);
+    compare_vectors(refprop, dense_row->ncol(), qc1.get_subset_proportions()[0]);
 
-    qc2.set_subsets(subs).compute_metrics(dense_column.get());
-    EXPECT_EQ(refprop, qc2.get_subset_proportions()[0]);
+    qc2.set_subsets(subs).run(dense_column.get());
+    compare_vectors(refprop, dense_row->ncol(), qc2.get_subset_proportions()[0]);
 
-    qc3.set_subsets(subs).compute_metrics(sparse_row.get());
-    EXPECT_EQ(refprop, qc3.get_subset_proportions()[0]);
+    qc3.set_subsets(subs).run(sparse_row.get());
+    compare_vectors(refprop, dense_row->ncol(), qc3.get_subset_proportions()[0]);
     
-    qc4.set_subsets(subs).compute_metrics(sparse_column.get());
-    EXPECT_EQ(refprop, qc4.get_subset_proportions()[0]);
+    qc4.set_subsets(subs).run(sparse_column.get());
+    compare_vectors(refprop, dense_row->ncol(), qc4.get_subset_proportions()[0]);
 }
 
 TEST_F(PerCellQCMetricsTester, TwoSubsets) {
@@ -86,37 +101,37 @@ TEST_F(PerCellQCMetricsTester, TwoSubsets) {
     for (auto i : keep_i2) { keep_s2[i] = 1; }
 
     std::vector<const int*> subs = { keep_s1.data(), keep_s2.data() };
-    qc1.set_subsets(subs).compute_metrics(dense_row.get());
+    qc1.set_subsets(subs).run(dense_row.get());
 
     tatami::DelayedSubset<0, double> ref1(dense_row, keep_i1);
     auto refprop1 = tatami::column_sums(&ref1);
-    auto s1It = qc1.get_sums().begin();
+    auto s1It = qc1.get_sums();
     for (auto& r : refprop1) {
         r /= *s1It;
         ++s1It;
     }
-    EXPECT_EQ(refprop1, qc1.get_subset_proportions()[0]);
+    compare_vectors(refprop1, dense_row->ncol(), qc1.get_subset_proportions()[0]);
 
     tatami::DelayedSubset<0, double> ref2(dense_row, keep_i2);
     auto refprop2 = tatami::column_sums(&ref2);
-    auto s2It = qc1.get_sums().begin();
+    auto s2It = qc1.get_sums();
     for (auto& r : refprop2) {
         r /= *s2It;
         ++s2It;
     }
-    EXPECT_EQ(refprop2, qc1.get_subset_proportions()[1]);
+    compare_vectors(refprop2, dense_row->ncol(), qc1.get_subset_proportions()[1]);
 
-    qc2.set_subsets(subs).compute_metrics(dense_column.get());
-    EXPECT_EQ(refprop1, qc2.get_subset_proportions()[0]);
-    EXPECT_EQ(refprop2, qc2.get_subset_proportions()[1]);
+    qc2.set_subsets(subs).run(dense_column.get());
+    compare_vectors(refprop1, dense_row->ncol(), qc2.get_subset_proportions()[0]);
+    compare_vectors(refprop2, dense_row->ncol(), qc2.get_subset_proportions()[1]);
 
-    qc3.set_subsets(subs).compute_metrics(sparse_row.get());
-    EXPECT_EQ(refprop1, qc3.get_subset_proportions()[0]);
-    EXPECT_EQ(refprop2, qc3.get_subset_proportions()[1]);
+    qc3.set_subsets(subs).run(sparse_row.get());
+    compare_vectors(refprop1, dense_row->ncol(), qc3.get_subset_proportions()[0]);
+    compare_vectors(refprop2, dense_row->ncol(), qc3.get_subset_proportions()[1]);
     
-    qc4.set_subsets(subs).compute_metrics(sparse_column.get());
-    EXPECT_EQ(refprop1, qc4.get_subset_proportions()[0]);
-    EXPECT_EQ(refprop2, qc4.get_subset_proportions()[1]);
+    qc4.set_subsets(subs).run(sparse_column.get());
+    compare_vectors(refprop1, dense_row->ncol(), qc4.get_subset_proportions()[0]);
+    compare_vectors(refprop2, dense_row->ncol(), qc4.get_subset_proportions()[1]);
 }
 
 TEST_F(PerCellQCMetricsTester, NASubsets) {
@@ -129,10 +144,10 @@ TEST_F(PerCellQCMetricsTester, NASubsets) {
 
     std::vector<const int*> subs = { keep_s.data() };
     scran::PerCellQCMetrics<int> QC;
-    QC.set_subsets(subs).compute_metrics(dense_zero.get());
+    QC.set_subsets(subs).run(dense_zero.get());
 
-    EXPECT_EQ(QC.get_sums(), std::vector<double>(dense_zero->ncol()));
-    EXPECT_EQ(QC.get_detected(), std::vector<int>(dense_zero->ncol()));
+    compare_vectors(dense_zero->ncol(), QC.get_sums(), std::vector<double>(dense_zero->ncol()));
+    compare_vectors(dense_zero->ncol(), QC.get_detected(), std::vector<int>(dense_zero->ncol()));
     EXPECT_TRUE(std::isnan(QC.get_subset_proportions()[0][0]));
     EXPECT_TRUE(std::isnan(QC.get_subset_proportions()[0][dense_zero->ncol()-1]));
 }

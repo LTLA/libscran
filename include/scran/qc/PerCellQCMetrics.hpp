@@ -4,43 +4,113 @@
 #include <vector>
 #include <algorithm>
 #include <limits>
+#include <cstdint>
 
 #include "tatami/base/typed_matrix.hpp"
 #include "../utils/vector_to_pointers.hpp"
 
 namespace scran {
 
-template<typename SUB>
+template<typename X=uint8_t, typename S=double, typename D=int, typename P=double>
 class PerCellQCMetrics {
 public:
     PerCellQCMetrics() {}
 
-    const std::vector<double>& get_sums() const {
-        return sums;
+    PerCellQCMetrics& set_sums(S* p) {
+        sums = p;
+        return *this;
     }
 
-    const std::vector<int>& get_detected() const {
-        return detected;
+    PerCellQCMetrics& set_detected(D* p) {
+        detected = p;
+        return *this;
     }
 
-    const std::vector<std::vector<double> >& get_subset_proportions() const {
-        return subset_proportions;
+    PerCellQCMetrics& set_subset_proportions(std::vector<P*> ptrs) {
+        subset_proportions = ptrs;
+        return *this;
     }
 
-    PerCellQCMetrics& set_subsets(std::vector<const SUB*> s) {
+    PerCellQCMetrics& set_subsets(std::vector<const X*> s) {
         subsets = s;
         return *this;
     }
 
 public:
-    template<typename T, typename IDX, typename S=T, typename N=int, typename P=double>
-    void compute_metrics(const tatami::typed_matrix<T, IDX>* mat, S* sums_out, N* detected_out, std::vector<P*>& subset_proportions_out) {
+    const S* get_sums() const {
+        if (sums == NULL) {
+            return internal_sums.data();
+        } else {
+            return sums;
+        }
+    }
+
+    const D* get_detected() const {
+        if (detected == NULL) {
+            return internal_detected.data();
+        } else {
+            return detected;
+        }
+    }
+
+    std::vector<const P*> get_subset_proportions() const {
+        if (subset_proportions.size()) {
+            return std::vector<const P*>(subset_proportions.begin(), subset_proportions.end());
+        } else {
+            std::vector<const P*> output;
+            for (const auto& x : internal_subset_proportions) {
+                output.push_back(x.data());
+            }
+            return output;
+        }
+    }
+
+public:
+    template<typename T, typename IDX>
+    void run(const tatami::typed_matrix<T, IDX>* mat) {
+        // Setting up the memory structures in a smart way
+        // that works when users don't provide it.
+        S* sums_out = sums;
+        if (sums == NULL) {
+            internal_sums.resize(mat->ncol());
+            sums_out = internal_sums.data();
+        }
+
+        D* detected_out = detected;
+        if (detected == NULL) {
+            internal_detected.resize(mat->ncol());
+            detected_out = internal_detected.data();
+        }
+
+        if (subset_proportions.size() != 0 && subset_proportions.size() != subsets.size()) {
+            throw std::runtime_error("mismatching number of input/outputs for subset proportions");
+        }
+        internal_subset_proportions.resize(subsets.size());
+
+        std::vector<double*> subset_proportions_out(subsets.size());
+        for (size_t s = 0; s < subsets.size(); ++s) {
+            if (subset_proportions.size()) {
+                subset_proportions_out[s] = subset_proportions[s];
+            } else {
+                internal_subset_proportions[s].resize(mat->ncol());
+                subset_proportions_out[s] = internal_subset_proportions[s].data();
+            }
+        }
+
+        // Actually running the function's logic.
+        internal_run(mat, sums_out, detected_out, subset_proportions_out);
+        return;
+    }
+
+private:
+    template<typename T, typename IDX>
+    void internal_run(const tatami::typed_matrix<T, IDX>* mat, S* sums_out, D* detected_out, std::vector<P*>& subset_proportions_out) {
         size_t nr = mat->nrow(), nc = mat->ncol();
 
         if (mat->prefer_rows()) {
             std::vector<T> buffer(nc);
-            std::fill(sums_out, sums_out + nc, static_cast<T>(0));
-            std::fill(detected_out, detected_out + nc, static_cast<N>(0));
+            std::fill(sums_out, sums_out + nc, static_cast<S>(0));
+            std::fill(detected_out, detected_out + nc, static_cast<D>(0));
             for (size_t s = 0; s < subsets.size(); ++s) {
                 std::fill(subset_proportions_out[s], subset_proportions_out[s] + nc, static_cast<P>(0));
             }
@@ -53,7 +123,7 @@ public:
 
                     for (size_t i = 0; i < range.number; ++i) {
                         sums_out[range.index[i]] += range.value[i];
-                        detected_out[range.index[i]] += static_cast<N>(range.value[i] > 0);
+                        detected_out[range.index[i]] += static_cast<D>(range.value[i] > 0);
                     }
 
                     for (size_t s = 0; s < subsets.size(); ++s) {
@@ -71,7 +141,7 @@ public:
 
                     for (size_t c = 0; c < nc; ++c) {
                         sums_out[c] += ptr[c];
-                        detected_out[c] += static_cast<N>(ptr[c] > 0);
+                        detected_out[c] += static_cast<D>(ptr[c] > 0);
                     }
 
                     for (size_t s = 0; s < subsets.size(); ++s) {
@@ -98,7 +168,7 @@ public:
                     detected_out[c] = 0;
                     for (size_t r = 0; r < range.number; ++r) {
                         sums_out[c] += range.value[r];
-                        detected_out[c] += static_cast<N>(range.value[r] > 0);
+                        detected_out[c] += static_cast<D>(range.value[r] > 0);
                     }
 
                     for (size_t s = 0; s < subsets.size(); ++s) {
@@ -118,7 +188,7 @@ public:
                     detected_out[c] = 0;
                     for (size_t r = 0; r < nr; ++r) {
                         sums_out[c] += ptr[r];
-                        detected_out[c] += static_cast<N>(ptr[r] > 0);
+                        detected_out[c] += static_cast<D>(ptr[r] > 0);
                     }
 
                     for (size_t s = 0; s < subsets.size(); ++s) {
@@ -146,25 +216,15 @@ public:
         return;
     }
 
-    template<typename T, typename IDX>
-    void compute_metrics(const tatami::typed_matrix<T, IDX>* mat) {
-        sums.resize(mat->ncol());
-        detected.resize(mat->ncol());
-        subset_proportions.resize(subsets.size());
-        for (size_t s = 0; s < subsets.size(); ++s) {
-            subset_proportions[s].resize(mat->ncol());
-        }
-
-        std::vector<double*> out_subset_proportions = vector_to_pointers(subset_proportions);
-        compute_metrics(mat, sums.data(), detected.data(), out_subset_proportions);
-        return;
-    }
-
 private:
-    std::vector<const SUB*> subsets;
-    std::vector<double> sums;
-    std::vector<int> detected;
-    std::vector<std::vector<double> > subset_proportions;
+    S* sums = NULL;
+    D* detected = NULL;
+    std::vector<P*> subset_proportions;
+
+    std::vector<const X*> subsets;
+    std::vector<S> internal_sums;
+    std::vector<D> internal_detected;
+    std::vector<std::vector<P> > internal_subset_proportions;
 };
 
 }
