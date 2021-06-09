@@ -5,72 +5,89 @@
 #include <limits>
 #include <cmath>
 #include <algorithm>
+#include <cstdint>
 
 namespace scran {
 
+template<typename X=uint8_t>
 class IsOutlier {
 public:
-    IsOutlier(size_t n) : buffer(n), lower_thresholds(1), upper_thresholds(1) {}
+    IsOutlier() : lower_thresholds(1), upper_thresholds(1) {}
 
-    IsOutlier& set_log(bool l) {
+    IsOutlier& set_log(bool l = false) {
         log = l;
         return *this;
     }
 
-    IsOutlier& set_lower(bool l) {
+    IsOutlier& set_lower(bool l = true) {
         lower = l;
         return *this;
     }
 
-    IsOutlier& set_upper(bool u) {
+    IsOutlier& set_upper(bool u = true) {
         upper = u;
         return *this;
     }
 
-    IsOutlier& set_nmads(double n) {
+    IsOutlier& set_nmads(double n = 3) {
         nmads = n;
         return *this;
     }
 
-    template<typename S = int>
-    IsOutlier& set_blocks(const S* b) {
-        if (b != NULL) {
-            int ngroups = (buffer.size() ? *std::max_element(b, b + buffer.size()) + 1 : 1);
+    template<typename SIT>
+    IsOutlier& set_blocks(size_t n, SIT p) {
+        int ngroups = (n ? *std::max_element(p, p + n) + 1 : 1);
 
-            by_group.resize(ngroups);
-            for (auto& g : by_group) { 
-                g.clear();
-            }
+        lower_thresholds.resize(ngroups);
+        upper_thresholds.resize(ngroups);
 
-            for (size_t i = 0; i < buffer.size(); ++i, ++b) {
-                by_group[*b].push_back(i);                                
-            }
-            lower_thresholds.resize(ngroups);
-            upper_thresholds.resize(ngroups);
-        } else {
-            by_group.clear();
-            lower_thresholds.resize(1);
-            upper_thresholds.resize(1);
+        by_group.resize(ngroups);
+        for (auto& g : by_group) { 
+            g.clear();
         }
+
+        for (size_t i = 0; i < n; ++i, ++p) {
+            by_group[*p].push_back(i);
+        }
+
+        return *this;
+    }
+
+    IsOutlier& set_blocks() {
+        by_group.clear();
+        lower_thresholds.resize(1);
+        upper_thresholds.resize(1);
+        return *this;
+    }
+
+    IsOutlier& set_outliers(X* p = NULL) {
+        outliers = p;
         return *this;
     }
 
 public:
-    template<typename T, typename X>
-    void find_outliers(const T* metrics, X* outliers) {
-        size_t n = buffer.size();
+    template<typename T>
+    IsOutlier& run(size_t n, const T* metrics) {
+        buffer.resize(n);
+        X* out;
+        if (outliers == NULL) {
+            internal_outliers.resize(n);
+            out = internal_outliers.data();
+        } else {
+            out = outliers;
+        }
 
         if (by_group.size() == 0) {
             std::copy(metrics, metrics + n, buffer.data());
 
             double& lthresh = lower_thresholds[0];
             double& uthresh = upper_thresholds[0];
-            compute_thresholds(buffer.data(), n, lthresh, uthresh);
+            compute_thresholds(n, buffer.data(), lthresh, uthresh);
 
             auto copy = metrics;
-            for (size_t i = 0; i < n; ++i, ++copy, ++outliers) {
+            for (size_t i = 0; i < n; ++i, ++copy, ++out) {
                 const double val = *copy;
-                *outliers = (val < lthresh || val > uthresh);
+                *out = (val < lthresh || val > uthresh);
             }
         } else {
             for (size_t g = 0; g < by_group.size(); ++g) {
@@ -83,27 +100,24 @@ public:
 
                 double& lthresh = lower_thresholds[g];
                 double& uthresh = upper_thresholds[g];
-                compute_thresholds(buffer.data(), curgroup.size(), lthresh, uthresh);
+                compute_thresholds(curgroup.size(), buffer.data(), lthresh, uthresh);
 
                 for (auto s : curgroup) {
                     const double val = metrics[s];
-                    outliers[s] = (val < lthresh || val > uthresh);
+                    out[s] = (val < lthresh || val > uthresh);
                 }
             }
         }
-        return;
-    }
-
-    template<typename T>
-    void find_outliers(const T* metrics) {
-        outlier_store.resize(buffer.size());
-        find_outliers(metrics, outlier_store.data());
-        return;
+        return *this;
     }
 
 public:
-    const std::vector<int>& get_outliers() const {
-        return outlier_store;
+    const X* get_outliers() const {
+        if (outliers) {
+            return outliers;
+        } else {
+            return internal_outliers.data();
+        }
     }
 
     const std::vector<double>& get_upper_thresholds() const {
@@ -115,7 +129,7 @@ public:
     }
 
 private:
-    void compute_thresholds(double* ptr, size_t n, double& lower_threshold, double& upper_threshold) {
+    void compute_thresholds(size_t n, double* ptr, double& lower_threshold, double& upper_threshold) {
         if (!n) {
             lower_threshold = std::numeric_limits<double>::quiet_NaN();
             upper_threshold = std::numeric_limits<double>::quiet_NaN();
@@ -207,8 +221,9 @@ private:
     std::vector<std::vector<size_t> > by_group;
 
 private:
+    X* outliers = NULL;
+    std::vector<X> internal_outliers;
     std::vector<double> lower_thresholds, upper_thresholds;
-    std::vector<int> outlier_store;
 };
 
 }
