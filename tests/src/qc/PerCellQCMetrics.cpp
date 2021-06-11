@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "../data/data.h"
+#include "../utils/compare_vectors.h"
 
 #include "tatami/base/DenseMatrix.hpp"
 #include "tatami/base/DelayedSubset.hpp"
@@ -24,21 +25,6 @@ protected:
     std::shared_ptr<tatami::numeric_matrix> dense_row, dense_column, sparse_row, sparse_column;
     scran::PerCellQCMetrics<int> qc1, qc2, qc3, qc4;
 };
-
-template<typename T>
-void compare_vectors(size_t n, const T* ptr1, const T* ptr2) {
-    EXPECT_EQ(std::vector<T>(ptr1, ptr1+n), std::vector<T>(ptr2, ptr2+n));
-}
-
-template<typename T>
-void compare_vectors(size_t n, const T* ptr1, const std::vector<T>& ref) {
-    EXPECT_EQ(std::vector<T>(ptr1, ptr1+n), ref);
-}
-
-template<typename T>
-void compare_vectors(const std::vector<T>& ref, size_t n, const T* ptr1) {
-    EXPECT_EQ(std::vector<T>(ptr1, ptr1+n), ref);
-}
 
 TEST_F(PerCellQCMetricsTester, NoSubset) {
     qc1.run(dense_row.get());
