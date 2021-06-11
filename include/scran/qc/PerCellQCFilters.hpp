@@ -153,7 +153,7 @@ public:
     }
 
     template<typename S=double, typename N=int, typename P=double>
-    PerCellQCFilters& run(size_t ncells, const PerCellQCMetrics<S, N, P>& metrics) {
+    PerCellQCFilters& run(size_t ncells, const PerCellQCMetrics<X, S, N, P>& metrics) {
         run(ncells, metrics.get_sums(), metrics.get_detected(), metrics.get_subset_proportions());
     }
 
@@ -163,7 +163,7 @@ private:
         X * filter_by_sums_out, X * filter_by_detected_out, std::vector<X*>& filter_by_subset_proportions_out, X* overall) 
     {
         // Filtering to remove outliers on the log-sum.
-        outliers.set_upper(false).set_log(true).set_outliers(filter_by_sums_out).run(ncells, sums);
+        outliers.set_lower(true).set_upper(false).set_log(true).set_outliers(filter_by_sums_out).run(ncells, sums);
         sums_thresholds = outliers.get_lower_thresholds();
         {
             auto ptr = outliers.get_outliers();
@@ -202,7 +202,7 @@ private:
     X* filter_by_sums = NULL;
     X* filter_by_detected = NULL;
     std::vector<X*> filter_by_subset_proportions;
-    X* overall_filter;
+    X* overall_filter = NULL;
 
     std::vector<X> internal_filter_by_sums, internal_filter_by_detected;
     std::vector<std::vector<X > > internal_filter_by_subset_proportions;
