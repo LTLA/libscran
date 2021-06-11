@@ -85,3 +85,18 @@ TEST_F(PerCellQCFiltersTester, Blocking) {
     compare_vectors(mat->ncol(), ref.get_outliers(), filters.get_filter_by_subset_proportions()[0]);
     EXPECT_EQ(ref.get_upper_thresholds(), filters.get_subset_proportions_thresholds()[0]);
 }
+
+TEST_F(PerCellQCFiltersTester, Overall) {
+    std::vector<uint8_t> keep_s(mat->nrow());
+    for (auto i : keep_i) { keep_s[i] = 1; }
+    qc.set_subsets(std::vector<const uint8_t*>(1, keep_s.data())).run(mat.get());
+
+    scran::PerCellQCFilters filters;
+    filters.run(mat->ncol(), qc);
+
+    std::vector<uint8_t> vec(mat->ncol());
+    for (size_t i = 0; i < vec.size(); ++i) {
+        vec[i] = filters.get_filter_by_sums()[i] || filters.get_filter_by_detected()[i] || filters.get_filter_by_subset_proportions()[0][i];
+    }
+    compare_vectors(mat->ncol(), filters.get_overall_filter(), vec);
+}
