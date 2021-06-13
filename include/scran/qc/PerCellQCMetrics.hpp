@@ -17,17 +17,17 @@ public:
     PerCellQCMetrics() {}
 
     PerCellQCMetrics& set_sums(S* p) {
-        sums = p;
+        stored_sums = p;
         return *this;
     }
 
     PerCellQCMetrics& set_detected(D* p) {
-        detected = p;
+        stored_detected = p;
         return *this;
     }
 
     PerCellQCMetrics& set_subset_proportions(std::vector<P*> ptrs) {
-        subset_proportions = ptrs;
+        stored_subset_proportions = ptrs;
         return *this;
     }
 
@@ -37,75 +37,59 @@ public:
     }
 
 public:
-    const S* get_sums() const {
-        if (sums == NULL) {
-            return internal_sums.data();
-        } else {
-            return sums;
-        }
-    }
-
-    const D* get_detected() const {
-        if (detected == NULL) {
-            return internal_detected.data();
-        } else {
-            return detected;
-        }
-    }
-
-    std::vector<const P*> get_subset_proportions() const {
-        if (subset_proportions.size()) {
-            return std::vector<const P*>(subset_proportions.begin(), subset_proportions.end());
-        } else {
-            std::vector<const P*> output;
-            for (const auto& x : internal_subset_proportions) {
-                output.push_back(x.data());
+    struct Results {
+        Results(size_t n, PerCellQCMetrics<X, S, D, P>& parent) : ncells(n) {
+            // Setting up the memory structures in a smart way
+            // that works when users don't provide it.
+            sums = parent.stored_sums;
+            if (sums == NULL) {
+                internal_sums.resize(n);
+                sums = internal_sums.data();
             }
-            return output;
+
+            detected = parent.stored_detected;
+            if (detected == NULL) {
+                internal_detected.resize(n);
+                detected = internal_detected.data();
+            }
+
+            size_t nsubsets = parent.subsets.size();
+            if (parent.stored_subset_proportions.size()) {
+                if (parent.stored_subset_proportions.size() != nsubsets) {
+                    throw std::runtime_error("mismatching number of input/outputs for subset proportions");
+                }
+                subset_proportions = parent.stored_subset_proportions;
+            } else {
+                internal_subset_proportions.resize(nsubsets);
+                subset_proportions.resize(nsubsets);
+                for (size_t s = 0; s < nsubsets; ++s) {
+                    internal_subset_proportions[s].resize(n);
+                    subset_proportions[s] = internal_subset_proportions[s].data();
+                }
+            }
+
+            return;
         }
-    }
+
+        size_t ncells;
+        S* sums = NULL;
+        D* detected = NULL;
+        std::vector<P*> subset_proportions;
+    private:
+        std::vector<S> internal_sums;
+        std::vector<D> internal_detected;
+        std::vector<std::vector<P> > internal_subset_proportions;
+    };
 
 public:
     template<typename T, typename IDX>
-    void run(const tatami::typed_matrix<T, IDX>* mat) {
-        // Setting up the memory structures in a smart way
-        // that works when users don't provide it.
-        S* sums_out = sums;
-        if (sums == NULL) {
-            internal_sums.resize(mat->ncol());
-            sums_out = internal_sums.data();
-        }
-
-        D* detected_out = detected;
-        if (detected == NULL) {
-            internal_detected.resize(mat->ncol());
-            detected_out = internal_detected.data();
-        }
-
-        if (subset_proportions.size() != 0 && subset_proportions.size() != subsets.size()) {
-            throw std::runtime_error("mismatching number of input/outputs for subset proportions");
-        }
-        internal_subset_proportions.resize(subsets.size());
-
-        std::vector<double*> subset_proportions_out(subsets.size());
-        for (size_t s = 0; s < subsets.size(); ++s) {
-            if (subset_proportions.size()) {
-                subset_proportions_out[s] = subset_proportions[s];
-            } else {
-                internal_subset_proportions[s].resize(mat->ncol());
-                subset_proportions_out[s] = internal_subset_proportions[s].data();
-            }
-        }
-
-        // Actually running the function's logic.
-        internal_run(mat, sums_out, detected_out, subset_proportions_out);
-        return;
-    }
-
-private:
-    template<typename T, typename IDX>
-    void internal_run(const tatami::typed_matrix<T, IDX>* mat, S* sums_out, D* detected_out, std::vector<P*>& subset_proportions_out) {
+    Results run(const tatami::typed_matrix<T, IDX>* mat) {
         size_t nr = mat->nrow(), nc = mat->ncol();
+        Results output(nc, *this);
+
+        S* sums_out = output.sums;
+        D* detected_out = output.detected;
+        auto& subset_proportions_out = output.subset_proportions;
 
         if (mat->prefer_rows()) {
             std::vector<T> buffer(nc);
@@ -213,18 +197,14 @@ private:
             }
         }
 
-        return;
+        return output;
     }
 
 private:
-    S* sums = NULL;
-    D* detected = NULL;
-    std::vector<P*> subset_proportions;
-
+    S* stored_sums = NULL;
+    D* stored_detected = NULL;
+    std::vector<P*> stored_subset_proportions;
     std::vector<const X*> subsets;
-    std::vector<S> internal_sums;
-    std::vector<D> internal_detected;
-    std::vector<std::vector<P> > internal_subset_proportions;
 };
 
 }
