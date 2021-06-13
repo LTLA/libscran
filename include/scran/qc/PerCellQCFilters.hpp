@@ -97,6 +97,7 @@ public:
         std::vector<X> internal_overall_filter;
     };
 
+public:
     template<typename S=double, typename D=int, typename PVEC=std::vector<const double*> >
     Results run(size_t ncells, const S* sums, const D* detected, const PVEC& subset_proportions) {
         Results output(ncells, *this);

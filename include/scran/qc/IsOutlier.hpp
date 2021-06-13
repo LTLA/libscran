@@ -34,6 +34,7 @@ public:
 
     template<typename SIT>
     IsOutlier& set_blocks(size_t n, SIT p) {
+        group_ncells = n;
         int ngroups = (n ? *std::max_element(p, p + n) + 1 : 1);
 
         by_group.resize(ngroups);
@@ -49,6 +50,7 @@ public:
     }
 
     IsOutlier& set_blocks() {
+        group_ncells = 0;
         by_group.clear();
         return *this;
     }
@@ -95,6 +97,10 @@ public:
                 *out = (val < lthresh || val > uthresh);
             }
         } else {
+            if (group_ncells != n) {
+                throw std::runtime_error("length of grouping vector and number of cells are not equal");
+            }
+
             for (size_t g = 0; g < by_group.size(); ++g) {
                 auto copy = buffer.data();
                 const auto& curgroup = by_group[g];
@@ -207,7 +213,9 @@ private:
     bool lower = true, upper = true, log = false;
     X* stored_outliers = NULL;
     std::vector<double> buffer;
+
     std::vector<std::vector<size_t> > by_group;
+    size_t group_ncells = 0;
 };
 
 }

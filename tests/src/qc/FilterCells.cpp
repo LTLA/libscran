@@ -29,10 +29,8 @@ TEST_F(FilterCellsTester, RetainSubset) {
     std::vector<size_t> keep_i = { 0, 5, 7, 8, 9 };
     auto keep_s = to_filter(keep_i);
 
-    FilterCells filter(mat->ncol());
-    filter.add_filter_retain(keep_s.data());
-
-    auto filtered = filter.run(mat);
+    FilterCells filter;
+    auto filtered = filter.add_filter_retain(mat->ncol(), keep_s.data()).run(mat);
     EXPECT_EQ(filtered->nrow(), mat->nrow());
     EXPECT_EQ(filtered->ncol(), keep_i.size());
     
@@ -52,10 +50,8 @@ TEST_F(FilterCellsTester, DiscardSubset) {
     std::vector<size_t> discard_i = { 1, 5, 7, 8 };
     auto discard_s = to_filter(discard_i);
 
-    FilterCells filter(mat->ncol());
-    filter.add_filter_discard(discard_s.data());
-
-    auto filtered = filter.run(mat);
+    FilterCells filter;
+    auto filtered = filter.add_filter_discard(mat->ncol(), discard_s.data()).run(mat);
     EXPECT_EQ(filtered->nrow(), mat->nrow());
     EXPECT_EQ(filtered->ncol(), mat->ncol() - discard_i.size());
 
@@ -82,11 +78,8 @@ TEST_F(FilterCellsTester, MultiSubset) {
     std::vector<size_t> keep_i = { 1, 2, 3, 4, 5 };
     auto keep_s = to_filter(keep_i);
 
-    FilterCells filter(mat->ncol());
-    filter.add_filter_retain(keep_s.data());
-    filter.add_filter_discard(discard_s.data());
-
-    auto filtered = filter.run(mat);
+    FilterCells filter;
+    auto filtered = filter.add_filter_retain(mat->ncol(), keep_s.data()).add_filter_discard(mat->ncol(), discard_s.data()).run(mat);
     EXPECT_EQ(filtered->nrow(), mat->nrow());
 
     std::vector<double> buffer(mat->nrow());
@@ -106,8 +99,8 @@ TEST_F(FilterCellsTester, MultiSubset) {
     EXPECT_EQ(filtered->ncol(), counter);
 
     // Restting the filter to not do any filtering.
-    auto unfiltered = filter.clear_filter().run(mat);
-    EXPECT_EQ(unfiltered->nrow(), mat->nrow());
-    EXPECT_EQ(unfiltered->ncol(), mat->ncol());
+    auto one_filtered = filter.clear_filter().add_filter_retain(mat->ncol(), keep_s.data()).run(mat);
+    EXPECT_EQ(one_filtered->nrow(), mat->nrow());
+    EXPECT_EQ(one_filtered->ncol(), keep_i.size());
 }
 
