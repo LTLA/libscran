@@ -20,6 +20,7 @@ add_executable(
     src/qc/PerCellQCMetrics.cpp
     src/qc/PerCellQCFilters.cpp
     src/qc/IsOutlier.cpp
+    src/qc/FilterCells.cpp
     src/data/data_sparse.cpp
 )
 
