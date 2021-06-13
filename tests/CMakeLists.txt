@@ -21,6 +21,7 @@ add_executable(
     src/qc/PerCellQCFilters.cpp
     src/qc/IsOutlier.cpp
     src/qc/FilterCells.cpp
+    src/normalization/LogNormCounts.cpp
     src/data/data_sparse.cpp
 )
 
