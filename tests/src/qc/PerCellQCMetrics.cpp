@@ -24,6 +24,12 @@ protected:
 protected:
     std::shared_ptr<tatami::numeric_matrix> dense_row, dense_column, sparse_row, sparse_column;
     scran::PerCellQCMetrics<int> qc1, qc2, qc3, qc4;
+
+    std::vector<int> to_filter (const std::vector<size_t>& indices) {
+        std::vector<int> keep_s(dense_row->nrow());
+        for (auto i : indices) { keep_s[i] = 1; }
+        return keep_s;        
+    }
 };
 
 TEST_F(PerCellQCMetricsTester, NoSubset) {
@@ -54,14 +60,12 @@ TEST_F(PerCellQCMetricsTester, NoSubset) {
 
 TEST_F(PerCellQCMetricsTester, OneSubset) {
     std::vector<size_t> keep_i = { 0, 5, 7, 8, 9, 10, 16, 17 };
-    std::vector<int> keep_s(dense_row->nrow());
-    for (auto i : keep_i) { keep_s[i] = 1; }
-
+    auto keep_s = to_filter(keep_i);
     std::vector<const int*> subs(1, keep_s.data());
     qc1.set_subsets(subs).run(dense_row.get());
 
-    tatami::DelayedSubset<0, double> ref(dense_row, keep_i);
-    auto refprop = tatami::column_sums(&ref);
+    auto ref = tatami::make_DelayedSubset<0>(dense_row, keep_i);
+    auto refprop = tatami::column_sums(ref.get());
     auto sIt = qc1.get_sums();
     for (auto& r : refprop) {
         r /= *sIt;
@@ -82,15 +86,12 @@ TEST_F(PerCellQCMetricsTester, OneSubset) {
 TEST_F(PerCellQCMetricsTester, TwoSubsets) {
     std::vector<size_t> keep_i1 = { 0, 5, 7, 8, 9, 10, 16, 17 };
     std::vector<size_t> keep_i2 = { 1, 8, 2, 6, 11, 5, 19, 17 };
-    std::vector<int> keep_s1(dense_row->nrow()), keep_s2(dense_row->nrow());
-    for (auto i : keep_i1) { keep_s1[i] = 1; }
-    for (auto i : keep_i2) { keep_s2[i] = 1; }
-
+    auto keep_s1 = to_filter(keep_i1), keep_s2 = to_filter(keep_i2);
     std::vector<const int*> subs = { keep_s1.data(), keep_s2.data() };
     qc1.set_subsets(subs).run(dense_row.get());
 
-    tatami::DelayedSubset<0, double> ref1(dense_row, keep_i1);
-    auto refprop1 = tatami::column_sums(&ref1);
+    auto ref1 = tatami::make_DelayedSubset<0>(dense_row, keep_i1);
+    auto refprop1 = tatami::column_sums(ref1.get());
     auto s1It = qc1.get_sums();
     for (auto& r : refprop1) {
         r /= *s1It;
@@ -98,8 +99,8 @@ TEST_F(PerCellQCMetricsTester, TwoSubsets) {
     }
     compare_vectors(refprop1, dense_row->ncol(), qc1.get_subset_proportions()[0]);
 
-    tatami::DelayedSubset<0, double> ref2(dense_row, keep_i2);
-    auto refprop2 = tatami::column_sums(&ref2);
+    auto ref2 = tatami::make_DelayedSubset<0>(dense_row, keep_i2);
+    auto refprop2 = tatami::column_sums(ref2.get());
     auto s2It = qc1.get_sums();
     for (auto& r : refprop2) {
         r /= *s2It;
@@ -122,8 +123,7 @@ TEST_F(PerCellQCMetricsTester, TwoSubsets) {
 
 TEST_F(PerCellQCMetricsTester, NASubsets) {
     std::vector<size_t> keep_i = { 0, 5, 7, 8, 9, 10, 16, 17 };
-    std::vector<int> keep_s(dense_row->nrow());
-    for (auto i : keep_i) { keep_s[i] = 1; }
+    auto keep_s = to_filter(keep_i);
 
     std::vector<double> nothing(100);
     auto dense_zero = std::unique_ptr<tatami::numeric_matrix>(new tatami::DenseColumnMatrix<double>(20, 5, std::move(nothing)));
