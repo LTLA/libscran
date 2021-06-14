@@ -8,44 +8,28 @@
 
 namespace {
 
-template<typename X = uint8_t>
 class FilterCells {
 public:
-    template<typename SIT>
-    FilterCells& add_filter_retain(size_t n, SIT ptr) {
-        keep.resize(n, true);
-        for (size_t i = 0; i < n; ++i, ++ptr) {
-            keep[i] &= *ptr;
-        }
+    FilterCells& set_retain() {
+        retain = true;
         return *this;
     }
 
-    template<typename SIT>
-    FilterCells& add_filter_discard(size_t n, SIT ptr) {
-        keep.resize(n, true);
-        for (size_t i = 0; i < n; ++i, ++ptr) {
-            keep[i] &= !(*ptr);
-        }
+    FilterCells& set_discard() {
+        retain = false;
         return *this;
     }
 
-    FilterCells& clear_filter() {
-        keep.clear();
-        return *this;
-    }
-
-    template<class MAT, typename IDX = int>
-    std::shared_ptr<MAT> run(std::shared_ptr<MAT> mat) {
-        if (mat->ncol() != keep.size()) {
-            throw std::runtime_error("number of columns and length of filtering vector is not the same");
-        }
-
-        auto num = std::accumulate(keep.begin(), keep.end(), static_cast<IDX>(0));
-        std::vector<IDX> retained(num);
+public:
+    template<class MAT, typename IDX = int, typename X = uint8_t>
+    std::shared_ptr<MAT> run(std::shared_ptr<MAT> mat, const X* filter) {
+        size_t NC = mat->ncol();
+        auto num = std::accumulate(filter, filter + NC, static_cast<IDX>(0));
+        std::vector<IDX> retained(retain ? num : (NC - num));
         auto rIt = retained.begin();
 
-        for (IDX i = 0; i < static_cast<IDX>(keep.size()); ++i) {
-            if (keep[i]) {
+        for (IDX i = 0; i < NC; ++i) {
+            if (retain == static_cast<bool>(filter[i])) {
                 *rIt = i;
                 ++rIt;
             }
@@ -55,7 +39,7 @@ public:
     }
 
 private:  
-    std::vector<X> keep;
+    bool retain = false;
 };
 
 }

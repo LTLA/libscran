@@ -26,24 +26,6 @@ public:
     }
 
 public:
-    template<class V>
-    LogNormCounts& set_size_factors(const V& sf) {
-        return set_size_factors(sf.size(), sf.begin());
-    }
-
-    template<class SIT>
-    LogNormCounts& set_size_factors(size_t n, SIT sf) {
-        size_factors.resize(n);
-        std::copy(sf, sf + size_factors.size(), size_factors.begin());
-        return *this;
-    }
-
-    LogNormCounts& set_size_factors() {
-        size_factors.clear();
-        return *this;
-    }
-
-public:
     template<typename SIT>
     LogNormCounts& set_blocks(size_t n, SIT b) {
         block_indices(n, b, by_group);
@@ -58,14 +40,9 @@ public:
     }
 
 public:
-    template<class MAT>
-    std::shared_ptr<MAT> run(std::shared_ptr<MAT> mat, bool reuse = true) {
-        std::vector<double> copy;
-        if (reuse) {
-            copy = size_factors;
-        }
-        auto& my_size_factors = (reuse ? copy : size_factors);
-        if (my_size_factors.size() != mat->ncol()) {
+    template<class MAT, class V>
+    std::shared_ptr<MAT> run(std::shared_ptr<MAT> mat, V size_factors) {
+        if (size_factors.size() != mat->ncol()) {
             throw std::runtime_error("number of size factors and columns are not equal");
         }
 
@@ -78,13 +55,13 @@ public:
                     if (g.size()) {
                         double mean = 0;
                         for (auto i : g) {
-                            mean += my_size_factors[i];
+                            mean += size_factors[i];
                         }
                         mean /= g.size();
 
                         if (mean > 0) {
                             for (auto i : g) {
-                                my_size_factors[i] /= mean;
+                                size_factors[i] /= mean;
                             }
                         }
                     }
@@ -92,20 +69,20 @@ public:
             } else if (size_factors.size()) {
                 double mean = std::accumulate(size_factors.begin(), size_factors.end(), static_cast<double>(0)) / size_factors.size();
                 if (mean) {
-                    for (auto& x : my_size_factors) {
+                    for (auto& x : size_factors) {
                         x /= mean;
                     }
                 }
             }
         }
 
-        for (auto x : my_size_factors) {
+        for (auto x : size_factors) {
             if (x <= 0) {
                 throw std::runtime_error("non-positive size factors detected");
             }
         }
 
-        auto div = tatami::make_DelayedIsometricOp(mat, tatami::make_DelayedDivideVectorHelper<true, 1>(std::move(my_size_factors)));
+        auto div = tatami::make_DelayedIsometricOp(mat, tatami::make_DelayedDivideVectorHelper<true, 1>(std::move(size_factors)));
         if (pseudo_count == 1) {
             return tatami::make_DelayedIsometricOp(div, tatami::DelayedLog1pHelper(2.0));
         } else {
@@ -115,7 +92,6 @@ public:
     }
 
 private:
-    std::vector<double> size_factors;
     double pseudo_count = 1;
     bool centered = false;
 

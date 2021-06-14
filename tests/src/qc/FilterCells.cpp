@@ -30,7 +30,7 @@ TEST_F(FilterCellsTester, RetainSubset) {
     auto keep_s = to_filter(keep_i);
 
     FilterCells filter;
-    auto filtered = filter.add_filter_retain(mat->ncol(), keep_s.data()).run(mat);
+    auto filtered = filter.set_retain().run(mat, keep_s.data());
     EXPECT_EQ(filtered->nrow(), mat->nrow());
     EXPECT_EQ(filtered->ncol(), keep_i.size());
     
@@ -51,7 +51,7 @@ TEST_F(FilterCellsTester, DiscardSubset) {
     auto discard_s = to_filter(discard_i);
 
     FilterCells filter;
-    auto filtered = filter.add_filter_discard(mat->ncol(), discard_s.data()).run(mat);
+    auto filtered = filter.run(mat, discard_s.data());
     EXPECT_EQ(filtered->nrow(), mat->nrow());
     EXPECT_EQ(filtered->ncol(), mat->ncol() - discard_i.size());
 
@@ -70,37 +70,3 @@ TEST_F(FilterCellsTester, DiscardSubset) {
         }
     }
 }
-
-TEST_F(FilterCellsTester, MultiSubset) {
-    std::vector<size_t> discard_i = { 1, 5, 7, 8 };
-    auto discard_s = to_filter(discard_i);
-
-    std::vector<size_t> keep_i = { 1, 2, 3, 4, 5 };
-    auto keep_s = to_filter(keep_i);
-
-    FilterCells filter;
-    auto filtered = filter.add_filter_retain(mat->ncol(), keep_s.data()).add_filter_discard(mat->ncol(), discard_s.data()).run(mat);
-    EXPECT_EQ(filtered->nrow(), mat->nrow());
-
-    std::vector<double> buffer(mat->nrow());
-    size_t counter = 0;
-    for (size_t c = 0; c < mat->ncol(); ++c) {
-        if (keep_s[c] && !discard_s[c]) {
-            auto ptr = filtered->column(counter, buffer.data());
-            std::vector<double> copy(ptr, ptr + mat->nrow());
-
-            auto rptr = mat->column(c, buffer.data());
-            std::vector<double> ref(rptr, rptr + mat->nrow());
-
-            EXPECT_EQ(copy, ref);
-            ++counter;
-        }
-    }
-    EXPECT_EQ(filtered->ncol(), counter);
-
-    // Restting the filter to not do any filtering.
-    auto one_filtered = filter.clear_filter().add_filter_retain(mat->ncol(), keep_s.data()).run(mat);
-    EXPECT_EQ(one_filtered->nrow(), mat->nrow());
-    EXPECT_EQ(one_filtered->ncol(), keep_i.size());
-}
-

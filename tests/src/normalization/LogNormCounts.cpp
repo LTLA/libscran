@@ -23,7 +23,7 @@ protected:
 
 TEST_F(LogNormCountsTester, SimpleTest) {
     scran::LogNormCounts lnc;
-    auto lognormed = lnc.set_size_factors(mat->ncol(), sf.data()).run(mat);
+    auto lognormed = lnc.run(mat, sf);
 
     // Reference calculation.
     double mean_sf = std::accumulate(sf.begin(), sf.end(), 0.0)/sf.size();
@@ -45,7 +45,7 @@ TEST_F(LogNormCountsTester, SimpleTest) {
 
 TEST_F(LogNormCountsTester, AnotherPseudoTest) {
     scran::LogNormCounts lnc;
-    auto lognormed = lnc.set_pseudo_count(1.5).set_size_factors(mat->ncol(), sf.data()).run(mat);
+    auto lognormed = lnc.set_pseudo_count(1.5).run(mat, sf);
 
     // Reference calculation.
     double mean_sf = std::accumulate(sf.begin(), sf.end(), 0.0)/sf.size();
@@ -79,7 +79,7 @@ TEST_F(LogNormCountsTester, BlockTest) {
     }
 
     scran::LogNormCounts lnc;
-    auto lognormed = lnc.set_blocks(block.size(), block.data()).set_size_factors(mat->ncol(), sf.data()).run(mat);
+    auto lognormed = lnc.set_blocks(block.size(), block.data()).run(mat, sf);
     std::vector<double> buffer(mat->nrow());
 
     for (size_t i = 0; i < mat->ncol(); ++i) {
@@ -98,10 +98,10 @@ TEST_F(LogNormCountsTester, BlockTest) {
 
 TEST_F(LogNormCountsTester, ErrorTest) {
     scran::LogNormCounts lnc;
-    lnc.set_size_factors(mat->ncol() - 1, sf.data());
-    EXPECT_ANY_THROW(lnc.run(mat));
+    auto sf2 = sf;
+    sf2.resize(sf.size() - 1);
+    EXPECT_ANY_THROW(lnc.run(mat, sf2));
 
     std::vector<double> empty(mat->ncol());
-    lnc.set_size_factors(mat->ncol(), empty.data());
-    EXPECT_ANY_THROW(lnc.run(mat));
+    EXPECT_ANY_THROW(lnc.run(mat, empty));
 }
