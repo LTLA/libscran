@@ -7,9 +7,10 @@
 #include <algorithm>
 #include <cstdint>
 
+#include "../utils/block_indices.hpp"
+
 namespace scran {
 
-template<typename X=uint8_t>
 class IsOutlier {
 public:
     IsOutlier& set_log(bool l = false) {
@@ -32,20 +33,16 @@ public:
         return *this;
     }
 
+public:
+    template<class V>
+    IsOutlier& set_blocks(const V& p) {
+        return set_blocks(p.size(), p.begin());
+    }
+
     template<typename SIT>
     IsOutlier& set_blocks(size_t n, SIT p) {
         group_ncells = n;
-        int ngroups = (n ? *std::max_element(p, p + n) + 1 : 1);
-
-        by_group.resize(ngroups);
-        for (auto& g : by_group) { 
-            g.clear();
-        }
-
-        for (size_t i = 0; i < n; ++i, ++p) {
-            by_group[*p].push_back(i);
-        }
-
+        block_indices(n, p, by_group);
         return *this;
     }
 
@@ -55,46 +52,50 @@ public:
         return *this;
     }
 
-    IsOutlier& set_outliers(X* p = NULL) {
-        stored_outliers = p;
-        return *this;
-    }
-
 public:
-    struct Results {
-        Results(size_t n, int nsub, IsOutlier<X>& parent) : lower_thresholds(std::max(1, nsub)), upper_thresholds(std::max(1, nsub)) {
-            outliers = parent.stored_outliers;
-            if (outliers == NULL) {
-                internal_outliers.resize(n);
-                outliers = internal_outliers.data();
-            }
-            return;
-        }
+    struct Thresholds {
+        Thresholds(int nblocks=0) : lower(nblocks), upper(nblocks) {}
+        std::vector<double> lower, upper;
+    };
 
-        X* outliers = NULL;
-        std::vector<double> lower_thresholds, upper_thresholds;
-    private:
-        std::vector<X> internal_outliers;
+    template<typename X = uint8_t>
+    struct Results {
+        Results(size_t ncells) : outliers(ncells) {}
+        std::vector<X> outliers;
+        Thresholds thresholds;
     };
 
 public:
-    template<typename T>
-    Results run(size_t n, const T* metrics) {
-        Results output(n, by_group.size(), *this);
-        auto out = output.outliers;
+    template<typename X = uint8_t, class V>
+    Results<X> run(const V& metrics) {
+        Results<X> output(metrics.size()); 
+        output.thresholds = run(metrics.size(), metrics.data(), output.outliers.data());
+        return output;
+    }
+
+    template<typename X = uint8_t, typename T>
+    Results<X> run(size_t n, const T* metrics) {
+        Results<X> output(n); 
+        output.thresholds = run(n, metrics, output.outliers.data());
+        return output;
+    }
+
+    template<typename X = uint8_t, typename T>
+    Thresholds run(size_t n, const T* metrics, X* outliers) {
+        Thresholds output(std::max(static_cast<size_t>(1), by_group.size()));
         buffer.resize(n);
 
         if (by_group.size() == 0) {
             std::copy(metrics, metrics + n, buffer.data());
 
-            double& lthresh = output.lower_thresholds[0];
-            double& uthresh = output.upper_thresholds[0];
+            double& lthresh = output.lower[0];
+            double& uthresh = output.upper[0];
             compute_thresholds(n, buffer.data(), lthresh, uthresh);
 
             auto copy = metrics;
-            for (size_t i = 0; i < n; ++i, ++copy, ++out) {
+            for (size_t i = 0; i < n; ++i, ++copy, ++outliers) {
                 const double val = *copy;
-                *out = (val < lthresh || val > uthresh);
+                *outliers = (val < lthresh || val > uthresh);
             }
         } else {
             if (group_ncells != n) {
@@ -109,13 +110,13 @@ public:
                     ++copy;
                 }
 
-                double& lthresh = output.lower_thresholds[g];
-                double& uthresh = output.upper_thresholds[g];
+                double& lthresh = output.lower[g];
+                double& uthresh = output.upper[g];
                 compute_thresholds(curgroup.size(), buffer.data(), lthresh, uthresh);
 
                 for (auto s : curgroup) {
                     const double val = metrics[s];
-                    out[s] = (val < lthresh || val > uthresh);
+                    outliers[s] = (val < lthresh || val > uthresh);
                 }
             }
         }
@@ -211,7 +212,6 @@ private:
 private:
     double nmads = 3;
     bool lower = true, upper = true, log = false;
-    X* stored_outliers = NULL;
     std::vector<double> buffer;
 
     std::vector<std::vector<size_t> > by_group;

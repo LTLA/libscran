@@ -4,17 +4,23 @@
 #include <vector>
 #include <cstdint>
 
+#include "../utils/vector_to_pointers.hpp"
+
 #include "PerCellQCMetrics.hpp"
 #include "IsOutlier.hpp"
 
 namespace scran {
 
-template<typename X = uint8_t>
 class PerCellQCFilters {
 public:
     PerCellQCFilters& set_nmads(double n = 3) {
         outliers.set_nmads(n);
         return *this;
+    }
+
+    template<class V>
+    PerCellQCFilters& set_blocks(const V& p) {
+        return set_blocks(p.size(), p.begin());
     }
 
     template<typename SIT>
@@ -29,143 +35,87 @@ public:
     }
 
 public:
-    PerCellQCFilters& set_filter_by_sums(X* p = NULL) {
-        stored_filter_by_sums = p;
-        return *this;
-    }
+    struct Thresholds {
+        std::vector<double> sums;
+        std::vector<double> detected;
+        std::vector<std::vector<double> > subset_proportions;
+    };
 
-    PerCellQCFilters& set_filter_by_detected(X* p = NULL) {
-        stored_filter_by_detected = p;
-        return *this;
-    }
-
-    PerCellQCFilters& set_filter_by_subset_proportions(std::vector<X*> ptrs) {
-        stored_filter_by_subset_proportions = ptrs;
-        return *this;
-    }
-
-    PerCellQCFilters& set_filter_by_subset_proportions() {
-        stored_filter_by_subset_proportions.clear();
-        return *this;
-    }        
-
-    PerCellQCFilters& set_overall_filter(X* p = NULL) {
-        stored_overall_filter = p;
-        return *this;
-    }
-
-public:
+    template<typename X = uint8_t>
     struct Results {
-        Results(size_t n, PerCellQCFilters<X>& parent) : ncells(n) {
-            // Setting up the overall filter.
-            overall_filter = parent.stored_overall_filter;
-            if (overall_filter == NULL) {
-                internal_overall_filter.resize(ncells);
-                overall_filter = internal_overall_filter.data();
-            }
+        Results(size_t ncells, int nsubsets) : filter_by_sums(ncells), filter_by_detected(ncells), 
+                                               filter_by_subset_proportions(nsubsets, std::vector<X>(ncells)),
+                                               overall_filter(ncells) {}
 
-            // Setting up the sums.
-            filter_by_sums = parent.stored_filter_by_sums;
-            if (filter_by_sums == NULL) {
-                internal_filter_by_sums.resize(ncells);
-                filter_by_sums = internal_filter_by_sums.data();
-            }
+        std::vector<X> filter_by_sums, filter_by_detected;
+        std::vector<std::vector<X> > filter_by_subset_proportions;
+        std::vector<X> overall_filter;
 
-            // Setting up the detected buffer.
-            filter_by_detected = parent.stored_filter_by_detected;
-            if (filter_by_detected == NULL) {
-                internal_filter_by_detected.resize(ncells);
-                filter_by_detected = internal_filter_by_detected.data();
-            }
-
-            return;
-        }
-
-        size_t ncells;
-        X* filter_by_sums = NULL;
-        X* filter_by_detected = NULL;
-        std::vector<X*> filter_by_subset_proportions;
-        X* overall_filter = NULL;
-       
-        std::vector<double> sums_thresholds;
-        std::vector<double> detected_thresholds;
-        std::vector<std::vector<double> > subset_proportions_thresholds;
-    private:
-        friend PerCellQCFilters<X>;
-        std::vector<X> internal_filter_by_sums, internal_filter_by_detected;
-        std::vector<std::vector<X > > internal_filter_by_subset_proportions;
-        std::vector<X> internal_overall_filter;
+        Thresholds thresholds;
     };
 
 public:
-    template<typename S=double, typename D=int, typename PVEC=std::vector<const double*> >
-    Results run(size_t ncells, const S* sums, const D* detected, const PVEC& subset_proportions) {
-        Results output(ncells, *this);
-        X* overall = output.overall_filter;
+    template<typename X=uint8_t, typename S=double, typename D=int, typename PTR=const double*>
+    Thresholds run(size_t ncells, const S* sums, const D* detected, std::vector<PTR> subset_proportions,
+                   X* filter_by_sums, X* filter_by_detected, std::vector<X*> filter_by_subset_proportions, X* overall_filter) 
+    {
+        Thresholds output;
 
         // Filtering to remove outliers on the log-sum.
         outliers.set_lower(true).set_upper(false).set_log(true);
         {
-            auto dump = output.filter_by_sums;
-            auto res = outliers.set_outliers(dump).run(ncells, sums);
-            output.sums_thresholds = res.lower_thresholds;
-            std::copy(dump, dump + ncells, overall);
+            auto res = outliers.run(ncells, sums, filter_by_sums);
+            output.sums = res.lower;
+            std::copy(filter_by_sums, filter_by_sums + ncells, overall_filter);
         }
 
         // Filtering to remove outliers on the log-detected number.
         {
-            auto dump = output.filter_by_detected;
-            auto res = outliers.set_outliers(dump).run(ncells, detected);
-            output.detected_thresholds = res.lower_thresholds;
+            auto res = outliers.run(ncells, detected, filter_by_detected);
+            output.detected = res.lower;
             for (size_t i = 0; i < ncells; ++i) {
-                overall[i] |= dump[i];
+                overall_filter[i] |= filter_by_detected[i];
             }
         }
 
         // Filtering to remove outliers on the subset proportions.
         size_t nsubsets = subset_proportions.size();
-        if (stored_filter_by_subset_proportions.size()) {
-            if (stored_filter_by_subset_proportions.size() != nsubsets) {
-                throw std::runtime_error("mismatching number of input/outputs for subset proportion filters");
-            }
-            output.filter_by_subset_proportions = stored_filter_by_subset_proportions;
-        } else {
-            output.internal_filter_by_subset_proportions.resize(nsubsets);
-            output.filter_by_subset_proportions.resize(nsubsets);
-            for (size_t s = 0; s < nsubsets; ++s) {
-                auto& internal = output.internal_filter_by_subset_proportions[s];
-                internal.resize(ncells);
-                output.filter_by_subset_proportions[s] = internal.data();
-            }
+        if (filter_by_subset_proportions.size() != nsubsets) {
+            throw std::runtime_error("mismatching number of input/outputs for subset proportion filters");
         }
 
         outliers.set_upper(true).set_lower(false).set_log(false);
-        output.subset_proportions_thresholds.resize(subset_proportions.size());
+        output.subset_proportions.resize(nsubsets);
 
         for (size_t s = 0; s < subset_proportions.size(); ++s) {
-            auto dump = output.filter_by_subset_proportions[s];
-            auto res = outliers.set_outliers(dump).run(ncells, subset_proportions[s]);
-            output.subset_proportions_thresholds[s] = res.upper_thresholds;
+            auto dump = filter_by_subset_proportions[s];
+            auto res = outliers.run(ncells, subset_proportions[s], dump);
+            output.subset_proportions[s] = res.upper;
             for (size_t i = 0; i < ncells; ++i) {
-                overall[i] |= dump[i];
+                overall_filter[i] |= dump[i];
             }
         }
 
         return output;
     }
 
-    template<class R>
-    Results run(const R& metrics) {
-        return run(metrics.ncells, metrics.sums, metrics.detected, metrics.subset_proportions);
+    template<typename X=uint8_t, typename S=double, typename D=int, typename PTR=const double*>
+    Results<X> run(size_t ncells, const S* sums, const D* detected, std::vector<PTR> subset_proportions) {
+        Results<X> output(ncells, subset_proportions.size());
+        output.thresholds = run(ncells, sums, detected, std::move(subset_proportions),
+                                output.filter_by_sums.data(), output.filter_by_detected.data(), 
+                                vector_to_pointers(output.filter_by_subset_proportions),
+                                output.overall_filter.data());
+        return output;
+    }
+
+    template<typename X=uint8_t, class R>
+    Results<X> run(const R& metrics) {
+        return run(metrics.sums.size(), metrics.sums.data(), metrics.detected.data(), vector_to_pointers(metrics.subset_proportions));
     }
 
 private:
-    X* stored_filter_by_sums = NULL;
-    X* stored_filter_by_detected = NULL;
-    std::vector<X*> stored_filter_by_subset_proportions;
-    X* stored_overall_filter = NULL;
-
-    IsOutlier<X> outliers;
+    IsOutlier outliers;
 };
 
 }

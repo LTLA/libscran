@@ -25,6 +25,12 @@ public:
         return *this;
     }
 
+public:
+    template<class V>
+    LogNormCounts& set_size_factors(const V& sf) {
+        return set_size_factors(sf.size(), sf.begin());
+    }
+
     template<class SIT>
     LogNormCounts& set_size_factors(size_t n, SIT sf) {
         size_factors.resize(n);
@@ -37,20 +43,23 @@ public:
         return *this;
     }
 
+public:
     template<typename SIT>
     LogNormCounts& set_blocks(size_t n, SIT b) {
-        by_group = block_indices(n, b);
+        block_indices(n, b, by_group);
+        group_ncells = n;
         return *this;
     }
 
     LogNormCounts& set_blocks() {
         by_group.clear();
+        group_ncells = 0;
         return *this;
     }
 
 public:
     template<class MAT>
-    std::shared_ptr<MAT> run(std::shared_ptr<MAT> mat, bool reuse = false) {
+    std::shared_ptr<MAT> run(std::shared_ptr<MAT> mat, bool reuse = true) {
         std::vector<double> copy;
         if (reuse) {
             copy = size_factors;
@@ -62,6 +71,9 @@ public:
 
         if (!centered) {
             if (by_group.size()) {
+                if (group_ncells != mat->ncol()) {
+                    throw std::runtime_error("length of grouping vector and number of columns are not equal");
+                }
                 for (const auto& g : by_group) {
                     if (g.size()) {
                         double mean = 0;

@@ -25,25 +25,25 @@ TEST_F(PerCellQCFiltersTester, NoSubset) {
     scran::PerCellQCFilters filters;
     auto res = filters.run(qcres);
 
-    scran::IsOutlier<> ref;
-    auto refres = ref.set_lower(true).set_upper(false).set_log(true).run(mat->ncol(), qcres.sums);
-    compare_vectors(mat->ncol(), refres.outliers, res.filter_by_sums);
-    EXPECT_EQ(refres.lower_thresholds, res.sums_thresholds);
+    scran::IsOutlier ref;
+    auto refres = ref.set_lower(true).set_upper(false).set_log(true).run(qcres.sums);
+    EXPECT_EQ(refres.outliers, res.filter_by_sums);
+    EXPECT_EQ(refres.thresholds.lower, res.thresholds.sums);
 
-    refres = ref.run(mat->ncol(), qcres.detected);
-    compare_vectors(mat->ncol(), refres.outliers, res.filter_by_detected);
-    EXPECT_EQ(refres.lower_thresholds, res.detected_thresholds);
+    refres = ref.run(qcres.detected);
+    EXPECT_EQ(refres.outliers, res.filter_by_detected);
+    EXPECT_EQ(refres.thresholds.lower, res.thresholds.detected);
 
     // Lowering the nmads to get some actual filtering happening.
     auto res2 = filters.set_nmads(0.5).run(qcres);
 
-    refres = ref.set_nmads(0.5).run(mat->ncol(), qcres.sums);
-    compare_vectors(mat->ncol(), refres.outliers, res2.filter_by_sums);
-    EXPECT_EQ(refres.lower_thresholds, res2.sums_thresholds);
+    refres = ref.set_nmads(0.5).run(qcres.sums);
+    EXPECT_EQ(refres.outliers, res2.filter_by_sums);
+    EXPECT_EQ(refres.thresholds.lower, res2.thresholds.sums);
 
-    refres = ref.run(mat->ncol(), qcres.detected);
-    compare_vectors(mat->ncol(), refres.outliers, res2.filter_by_detected);
-    EXPECT_EQ(refres.lower_thresholds, res2.detected_thresholds);
+    refres = ref.run(qcres.detected);
+    EXPECT_EQ(refres.outliers, res2.filter_by_detected);
+    EXPECT_EQ(refres.thresholds.lower, res2.thresholds.detected);
 }
 
 std::vector<int> keep_i = { 0, 1, 2, 3, 11, 12, 13, 14 };
@@ -56,10 +56,10 @@ TEST_F(PerCellQCFiltersTester, OneSubset) {
     scran::PerCellQCFilters filters;
     auto res = filters.set_nmads(1).run(qcres);
 
-    scran::IsOutlier<> ref;
-    auto refres = ref.set_nmads(1).set_lower(false).run(mat->ncol(), qcres.subset_proportions[0]);
-    compare_vectors(mat->ncol(), refres.outliers, res.filter_by_subset_proportions[0]);
-    EXPECT_EQ(refres.upper_thresholds, res.subset_proportions_thresholds[0]);
+    scran::IsOutlier ref;
+    auto refres = ref.set_nmads(1).set_lower(false).run(qcres.subset_proportions[0]);
+    EXPECT_EQ(refres.outliers, res.filter_by_subset_proportions[0]);
+    EXPECT_EQ(refres.thresholds.upper, res.thresholds.subset_proportions[0]);
 }
 
 TEST_F(PerCellQCFiltersTester, Blocking) {
@@ -70,20 +70,20 @@ TEST_F(PerCellQCFiltersTester, Blocking) {
     std::vector<int> block(mat->ncol());
     for (size_t i = 0; i < block.size(); ++i) { block[i] = i % 5; }
     scran::PerCellQCFilters filters;
-    auto res = filters.set_nmads(1).set_blocks(block.size(), block.data()).run(qcres);
+    auto res = filters.set_nmads(1).set_blocks(block).run(qcres);
 
-    scran::IsOutlier<> ref;
-    auto refres = ref.set_nmads(1).set_lower(true).set_upper(false).set_log(true).set_blocks(block.size(), block.data()).run(mat->ncol(), qcres.sums);
-    compare_vectors(mat->ncol(), refres.outliers, res.filter_by_sums);
-    EXPECT_EQ(refres.lower_thresholds, res.sums_thresholds);
+    scran::IsOutlier ref;
+    auto refres = ref.set_nmads(1).set_lower(true).set_upper(false).set_log(true).set_blocks(block.size(), block.data()).run(qcres.sums);
+    EXPECT_EQ(refres.outliers, res.filter_by_sums);
+    EXPECT_EQ(refres.thresholds.lower, res.thresholds.sums);
 
-    refres = ref.run(mat->ncol(), qcres.detected);
-    compare_vectors(mat->ncol(), refres.outliers, res.filter_by_detected);
-    EXPECT_EQ(refres.lower_thresholds, res.detected_thresholds);
+    refres = ref.run(qcres.detected);
+    EXPECT_EQ(refres.outliers, res.filter_by_detected);
+    EXPECT_EQ(refres.thresholds.lower, res.thresholds.detected);
 
-    refres = ref.set_lower(false).set_upper(true).set_log(false).run(mat->ncol(), qcres.subset_proportions[0]);
-    compare_vectors(mat->ncol(), refres.outliers, res.filter_by_subset_proportions[0]);
-    EXPECT_EQ(refres.upper_thresholds, res.subset_proportions_thresholds[0]);
+    refres = ref.set_lower(false).set_upper(true).set_log(false).run(qcres.subset_proportions[0]);
+    EXPECT_EQ(refres.outliers, res.filter_by_subset_proportions[0]);
+    EXPECT_EQ(refres.thresholds.upper, res.thresholds.subset_proportions[0]);
 }
 
 TEST_F(PerCellQCFiltersTester, Overall) {
@@ -98,5 +98,5 @@ TEST_F(PerCellQCFiltersTester, Overall) {
     for (size_t i = 0; i < vec.size(); ++i) {
         vec[i] = res.filter_by_sums[i] || res.filter_by_detected[i] || res.filter_by_subset_proportions[0][i];
     }
-    compare_vectors(mat->ncol(), res.overall_filter, vec);
+    EXPECT_EQ(res.overall_filter, vec);
 }
