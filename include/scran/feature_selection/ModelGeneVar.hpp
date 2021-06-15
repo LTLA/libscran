@@ -59,7 +59,7 @@ public:
         }
 
         if (mat->prefer_rows()) {
-            std::vector<T> obuffer(dim);
+            std::vector<T> obuffer(NC);
             auto wrk = p->new_workspace(true);
 
             // We use temporary buffers to improve memory locality for frequent
@@ -68,7 +68,7 @@ public:
 
             if (p->sparse()) {
                 std::vector<int> tmp_nzero(nblocks);
-                std::vector<IDX> ibuffer(dim);
+                std::vector<IDX> ibuffer(NC);
 
                 for (size_t i = 0; i < NR; ++i) {
                     auto range = p->sparse_row(i, obuffer.data(), ibuffer.data(), wrk.get());
@@ -126,7 +126,7 @@ public:
                 }
             }
         } else {
-            std::vector<T> obuffer(otherdim);
+            std::vector<T> obuffer(NR);
             auto wrk = p->new_workspace(false);
 
             for (size_t b = 0; b < nblocks; ++b) {
@@ -137,10 +137,10 @@ public:
             }
 
             if (p->sparse()) {
-                std::vector<IDX> ibuffer(otherdim);
+                std::vector<IDX> ibuffer(NR);
                 auto& my_nzero = fitted; // re-using the memory here.
 
-                for (size_t i = 0; i < dim; ++i) {
+                for (size_t i = 0; i < NC; ++i) {
                     auto range = p->sparse_column(i, obuffer.data(), ibuffer.data(), wrk.get());
 
                     auto b = blocks[j];
