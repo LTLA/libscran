@@ -1,8 +1,3 @@
-cmake_minimum_required(VERSION 3.14)
-project(my_project)
-
-set(CMAKE_CXX_STANDARD 17)
-
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -29,12 +24,10 @@ add_executable(
 target_link_libraries(
     libtest
     gtest_main
-)
-
-include_directories(
-    ../include
-    ../external/tatami/include
+    scran
 )
 
 include(GoogleTest)
 gtest_discover_tests(libtest)
+
+add_test(NAME scran_tests COMMAND libtest)
