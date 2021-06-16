@@ -6,12 +6,18 @@
 
 #include <algorithm>
 #include <vector>
+#include <limits>
 
 namespace scran {
 
 template<typename BLOCK = int>
 class ModelGeneVar {
 public:
+    ModelGeneVar& set_blocks(const std::vector<BLOCK>& b) {
+        set_blocks(b.size(), b.data());
+        return *this;
+    }
+
     ModelGeneVar& set_blocks(size_t n, const BLOCK* b) {
         blocks = b;
         group_ncells = n;
@@ -187,23 +193,41 @@ public:
                 }
 
             } else {
+                std::vector<int> used_sofar(nblocks);
+
                 for (size_t i = 0; i < NC; ++i) {
                     auto ptr = p->column(i, obuffer.data(), wrk.get());
 
                     auto b = (blocks == NULL ? 0 : blocks[i]);
                     double* mean = means[b];
                     double* var = variances[b];
+                    int& used = used_sofar[b];
+                    ++used;
 
                     for (size_t j = 0; j < NR; ++j, ++ptr, ++mean, ++var) {
                         const double delta = *ptr - *mean;
-                        *mean += delta/(i+1);
+                        *mean += delta/used;
                         *var += delta*(*ptr - *mean);
                     }
                 }
             }
         }
 
-        // Applying the trend fit to each thing.
+        for (size_t b = 0; b < nblocks; ++b) {
+            if (block_size[b] < 2) {
+                if (block_size[b] < 1) {
+                    std::fill(means[b], means[b] + NR, std::numeric_limits<double>::quiet_NaN());
+                }
+                std::fill(variances[b], variances[b] + NR, std::numeric_limits<double>::quiet_NaN());
+                continue;
+            }
+
+            for (size_t i = 0; i < NR; ++i) {
+                variances[b][i] /= block_size[b] - 1;
+            }
+
+            // Applying the trend fit to each block.
+        }
 
         return;
     }

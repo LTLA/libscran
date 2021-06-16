@@ -7,6 +7,7 @@
 #include "tatami/utils/convert_to_dense.hpp"
 #include "tatami/utils/convert_to_sparse.hpp"
 #include "tatami/stats/sums.hpp"
+#include "tatami/stats/variances.hpp"
 
 #include "scran/feature_selection/ModelGeneVar.hpp"
 
@@ -32,11 +33,12 @@ protected:
     }
 };
 
-TEST_F(ModelGeneVarTester, Unblocked) {
+TEST_F(ModelGeneVarTester, UnblockedStats) {
     auto res = var1.run(dense_row.get());
     auto res2 = var2.run(dense_column.get());
     almost_equal(res.means[0], res2.means[0]);
     almost_equal(res.variances[0], res2.variances[0]);
+    almost_equal(res.variances[0], tatami::row_variances(dense_row.get()));
 
     auto res3 = var3.run(sparse_row.get());
     almost_equal(res.means[0], res3.means[0]);
@@ -45,4 +47,33 @@ TEST_F(ModelGeneVarTester, Unblocked) {
     auto res4 = var4.run(sparse_column.get());
     almost_equal(res.means[0], res4.means[0]);
     almost_equal(res.variances[0], res4.variances[0]);
+}
+
+TEST_F(ModelGeneVarTester, BlockedStats) {
+    std::vector<int> blocks(dense_row->ncol());
+    for (size_t i = 0; i < blocks.size(); ++i) {
+        blocks[i] = i % 3;
+    }
+
+    var1.set_blocks(blocks);
+    auto res1 = var1.run(dense_row.get());
+
+    var2.set_blocks(blocks);
+    auto res2 = var2.run(dense_column.get());
+
+    var3.set_blocks(blocks);
+    auto res3 = var3.run(sparse_row.get());
+
+    var4.set_blocks(blocks);
+    auto res4 = var4.run(sparse_column.get());
+
+    for (size_t i = 0; i < 3; ++i) {
+        almost_equal(res1.means[i], res2.means[i]);
+        almost_equal(res1.means[i], res3.means[i]);
+        almost_equal(res1.means[i], res4.means[i]);
+
+        almost_equal(res1.variances[i], res2.variances[i]);
+        almost_equal(res1.variances[i], res3.variances[i]);
+        almost_equal(res1.variances[i], res4.variances[i]);
+    }
 }
