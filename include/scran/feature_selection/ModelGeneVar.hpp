@@ -3,6 +3,7 @@
 
 #include "tatami/base/typed_matrix.hpp"
 #include "../utils/vector_to_pointers.hpp"
+#include "FitTrendVar.hpp"
 
 #include <algorithm>
 #include <vector>
@@ -219,6 +220,8 @@ public:
                     std::fill(means[b], means[b] + NR, std::numeric_limits<double>::quiet_NaN());
                 }
                 std::fill(variances[b], variances[b] + NR, std::numeric_limits<double>::quiet_NaN());
+                std::fill(fitted[b], fitted[b] + NR, std::numeric_limits<double>::quiet_NaN());
+                std::fill(residuals[b], residuals[b] + NR, std::numeric_limits<double>::quiet_NaN());
                 continue;
             }
 
@@ -227,6 +230,7 @@ public:
             }
 
             // Applying the trend fit to each block.
+            fit.run(NR, means[b], variances[b], fitted[b], residuals[b]);
         }
 
         return;
@@ -236,6 +240,7 @@ private:
     const BLOCK* blocks = NULL;
     size_t group_ncells = 0;
     int nblocks = 1;
+    FitTrendVar fit;
 };
 
 }
