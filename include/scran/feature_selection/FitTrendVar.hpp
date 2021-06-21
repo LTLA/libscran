@@ -19,24 +19,67 @@ public:
         return *this;
     }
 
+    FitTrendVar& set_minimum_mean(double m = 0.1) {
+        min_mean = m;
+        return *this;
+    }
+
+    FitTrendVar& set_filter(bool f = true) {
+        filter = f;
+        return *this;
+    }
+
+    FitTrendVar& set_transform(bool t = true) {
+        transform = t;
+        return *this;
+    }
+
 public:
+    static double quad(double x) {
+        return x*x*x*x;
+    }
+
     void run(size_t n, const double* mean, const double* variance, double* fitted, double* residuals) {
         xbuffer.resize(n);
-        std::copy(mean, mean + n, xbuffer.begin());
-
-        // Using the same quarter-root transform that limma::voom uses.
         ybuffer.resize(n);
-        std::copy(variance, variance + n, ybuffer.begin());
-        for (auto& Y : ybuffer) {
-            Y = std::pow(Y, 0.25);
+
+        size_t counter = 0;
+        for (size_t i = 0; i < n; ++i) {
+            if (!filter || mean[i] >= min_mean) {
+                xbuffer[counter] = mean[i];
+                if (transform) {
+                    ybuffer[counter] = std::pow(variance[i], 0.25); // Using the same quarter-root transform that limma::voom uses.
+                } else {
+                    ybuffer[counter] = variance[i];
+                }
+                ++counter;
+            }
         }
 
-        rbuffer.resize(n);
-        smoother.run_in_place(n, xbuffer.data(), ybuffer.data(), NULL, fitted, residuals, rbuffer.data());
+        if (counter < 2) {
+            throw std::runtime_error("not enough observations above the minimum mean");
+        }
 
+        // Determining the left edge. This needs to be done before
+        // run_in_place, which mutates the input xbuffer.
+        size_t left_index = std::min_element(xbuffer.begin(), xbuffer.begin() + counter) - xbuffer.begin();
+        double left_x = xbuffer[left_index];
+
+        fbuffer.resize(counter);
+        rbuffer.resize(counter);
+        smoother.run(counter, xbuffer.data(), ybuffer.data(), NULL, fbuffer.data(), rbuffer.data());
+
+        // Identifying the left-most fitted value.
+        double left_fitted = (transform ? quad(fbuffer[left_index]) : fbuffer[left_index]);
+
+        counter = 0;
         for (size_t i = 0; i < n; ++i) {
-            double val = fitted[i];
-            fitted[i] = val * val * val * val;
+            if (!filter || mean[i] >= min_mean) {
+                fitted[i] = (transform ? quad(fbuffer[counter]) : fbuffer[counter]);
+                ++counter;
+            } else {
+                fitted[i] = mean[i] / left_x * left_fitted; // draw a y = x line to the origin from the left of the fitted trend.
+            }
             residuals[i] = variance[i] - fitted[i];
         }
         return;
@@ -55,8 +98,12 @@ public:
     }
 
 private:
+    double min_mean = 0.1;
+    bool filter = true;
+    bool transform = true;
+
     WeightedLowess::WeightedLowess smoother;
-    std::vector<double> xbuffer, ybuffer, rbuffer;
+    std::vector<double> xbuffer, ybuffer, rbuffer, fbuffer;
 };
 
 }
