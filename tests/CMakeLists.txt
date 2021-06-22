@@ -17,6 +17,8 @@ add_executable(
     src/qc/IsOutlier.cpp
     src/qc/FilterCells.cpp
     src/normalization/LogNormCounts.cpp
+    src/feature_selection/ModelGeneVar.cpp
+    src/feature_selection/FitTrendVar.cpp
     src/data/data_sparse.cpp
 )
 

@@ -9,3 +9,11 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(tatami)
+
+FetchContent_Declare(
+  WeightedLowess
+  GIT_REPOSITORY https://github.com/LTLA/CppWeightedLowess
+  GIT_TAG master
+)
+
+FetchContent_MakeAvailable(WeightedLowess)

@@ -13,7 +13,7 @@ target_include_directories(scran INTERFACE include/)
 
 add_subdirectory(extern)
 
-target_link_libraries(scran INTERFACE tatami)
+target_link_libraries(scran INTERFACE tatami WeightedLowess)
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     include(CTest)
