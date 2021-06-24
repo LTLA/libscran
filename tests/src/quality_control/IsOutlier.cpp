@@ -2,7 +2,7 @@
 
 #include "../data/data.h"
 
-#include "scran/qc/IsOutlier.hpp"
+#include "scran/quality_control/IsOutlier.hpp"
 
 std::vector<double> even_values = { 
     0.761164335, 0.347582428, 0.430822695, 0.888530395, 0.627701241, 0.678912751,

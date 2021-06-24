@@ -6,7 +6,7 @@
 #include "tatami/base/DenseMatrix.hpp"
 #include "tatami/base/DelayedSubset.hpp"
 
-#include "scran/qc/FilterCells.hpp"
+#include "scran/quality_control/FilterCells.hpp"
 
 #include <cmath>
 

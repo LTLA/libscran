@@ -8,7 +8,7 @@
 #include "tatami/utils/convert_to_sparse.hpp"
 #include "tatami/stats/sums.hpp"
 
-#include "scran/qc/PerCellQCMetrics.hpp"
+#include "scran/quality_control/PerCellQCMetrics.hpp"
 
 #include <cmath>
 

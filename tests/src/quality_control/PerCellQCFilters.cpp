@@ -4,8 +4,8 @@
 #include "../utils/compare_vectors.h"
 
 #include "tatami/base/DenseMatrix.hpp"
-#include "scran/qc/PerCellQCMetrics.hpp"
-#include "scran/qc/PerCellQCFilters.hpp"
+#include "scran/quality_control/PerCellQCMetrics.hpp"
+#include "scran/quality_control/PerCellQCFilters.hpp"
 
 #include <cmath>
 
