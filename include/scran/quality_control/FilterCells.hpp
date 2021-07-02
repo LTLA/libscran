@@ -6,7 +6,7 @@
 #include <numeric>
 #include <algorithm>
 
-namespace {
+namespace scran {
 
 class FilterCells {
 public:
