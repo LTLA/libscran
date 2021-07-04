@@ -35,6 +35,16 @@ public:
         return *this;
     }
 
+    ModelGeneVar& set_span() {
+        fit.set_span();
+        return *this;
+    }
+
+    ModelGeneVar& set_span(double s) {
+        fit.set_span(s);
+        return *this;
+    }
+
 public:
     struct Results {
         Results(size_t ngenes, int nblocks) : means(nblocks, std::vector<double>(ngenes)),
