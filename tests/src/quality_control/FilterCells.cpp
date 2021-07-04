@@ -29,7 +29,7 @@ TEST_F(FilterCellsTester, RetainSubset) {
     std::vector<size_t> keep_i = { 0, 5, 7, 8, 9 };
     auto keep_s = to_filter(keep_i);
 
-    FilterCells filter;
+    scran::FilterCells filter;
     auto filtered = filter.set_retain().run(mat, keep_s.data());
     EXPECT_EQ(filtered->nrow(), mat->nrow());
     EXPECT_EQ(filtered->ncol(), keep_i.size());
@@ -50,7 +50,7 @@ TEST_F(FilterCellsTester, DiscardSubset) {
     std::vector<size_t> discard_i = { 1, 5, 7, 8 };
     auto discard_s = to_filter(discard_i);
 
-    FilterCells filter;
+    scran::FilterCells filter;
     auto filtered = filter.run(mat, discard_s.data());
     EXPECT_EQ(filtered->nrow(), mat->nrow());
     EXPECT_EQ(filtered->ncol(), mat->ncol() - discard_i.size());

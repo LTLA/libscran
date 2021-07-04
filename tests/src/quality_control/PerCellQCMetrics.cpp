@@ -42,7 +42,7 @@ TEST_F(PerCellQCMetricsTester, NoSubset) {
         ++smIt;
     }
     auto detected = std::unique_ptr<tatami::typed_matrix<int> >(new tatami::DenseRowMatrix<int>(sparse_nrow, sparse_ncol, copy));
-    EXPECT_EQ(res.detected, tatami::column_sums(detected.get()));
+    EXPECT_EQ(std::vector<double>(res.detected.begin(), res.detected.end()), tatami::column_sums(detected.get()));
 
     auto res2 = qc2.run(dense_column.get());
     EXPECT_EQ(res.sums, res2.sums);
