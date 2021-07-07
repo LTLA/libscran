@@ -1,0 +1,4 @@
+<map id="scran::PerCellQCFilters::Results&lt; X &gt;" name="scran::PerCellQCFilters::Results&lt; X &gt;">
+<area shape="rect" id="node1" title="Results of the QC filtering." alt="" coords="5,109,163,151"/>
+<area shape="rect" id="node2" href="$structscran_1_1PerCellQCFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric." alt="" coords="5,5,163,47"/>
+</map>
