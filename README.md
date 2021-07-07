@@ -1,5 +1,8 @@
 # A C++ library for single-cell data analysis
 
+![Unit tests](https://github.com/LTLA/libscran/actions/workflows/run-tests.yaml/badge.svg)
+![Documentation](https://github.com/LTLA/libscran/actions/workflows/doxygenate.yaml/badge.svg)
+
 ## Motivation
 
 The **libscran** library takes the core parts of the [**scran**](https://github.com/MarioniLab/scran) Bioconductor package (as well as other useful bits from other packages) and implements them in C++.
