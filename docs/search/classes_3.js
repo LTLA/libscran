@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['results_35',['Results',['../structscran_1_1IsOutlier_1_1Results.html',1,'scran::IsOutlier::Results&lt; X &gt;'],['../structscran_1_1PerCellQCFilters_1_1Results.html',1,'scran::PerCellQCFilters::Results&lt; X &gt;'],['../structscran_1_1PerCellQCMetrics_1_1Results.html',1,'scran::PerCellQCMetrics&lt; X &gt;::Results']]]
+  ['percellqcfilters_39',['PerCellQCFilters',['../classscran_1_1PerCellQCFilters.html',1,'scran']]],
+  ['percellqcmetrics_40',['PerCellQCMetrics',['../classscran_1_1PerCellQCMetrics.html',1,'scran']]]
 ];
