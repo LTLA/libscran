@@ -17,3 +17,13 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(WeightedLowess)
+
+if(NOT SCRAN_EXCLUDE_IGRAPH)
+    FetchContent_Declare(
+      igraph
+      URL https://github.com/igraph/igraph/releases/download/0.9.4/igraph-0.9.4.tar.gz
+      URL_HASH MD5=ea8d7791579cfbc590060570e0597f6b
+    )
+
+    FetchContent_MakeAvailable(igraph)
+endif()
