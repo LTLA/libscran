@@ -18,11 +18,6 @@ public:
         return *this;
     }
 
-    BuildSNNGraph& set_shared(bool s = true) {
-        shared = s;
-        return *this;
-    }
-
 public:
     enum Scheme { RANKED, NUMBER, JACCARD };
 
@@ -151,8 +146,6 @@ public:
 private:
     int num_neighbors = 10;
     int weight_scheme = RANKED;
-    bool shared = true;
-    bool transposed = false;
 };
 
 };

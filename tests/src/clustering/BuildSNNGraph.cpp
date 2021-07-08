@@ -91,7 +91,6 @@ TEST_P(BuildSNNGraphRefTest, Reference) {
     auto ref = reference(ndim, nobs, data.data(), k, scheme);
     EXPECT_EQ(edges.size(), ref.size());
 
-    // Flattening.
     std::sort(edges.begin(), edges.end());
     std::sort(ref.begin(), ref.end());
     EXPECT_EQ(edges, ref);
