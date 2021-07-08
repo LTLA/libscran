@@ -18,6 +18,14 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(WeightedLowess)
 
+FetchContent_Declare(
+  knncolle 
+  GIT_REPOSITORY https://github.com/LTLA/knncolle
+  GIT_TAG master
+)
+
+FetchContent_MakeAvailable(knncolle)
+
 if(NOT SCRAN_EXCLUDE_IGRAPH)
     FetchContent_Declare(
       igraph
