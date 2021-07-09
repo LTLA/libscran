@@ -5,10 +5,6 @@
 #include <vector>
 #include <algorithm>
 
-#ifndef SCRAN_EXCLUDE_IGRAPH
-#include <igraph.h>
-#endif
-
 namespace scran {
 
 class BuildSNNGraph {
@@ -26,9 +22,11 @@ public:
         return *this;
     }
 
+public:
     typedef std::tuple<size_t, size_t, double> WeightedEdge;
-private:
-    void construct_shared_neighbor_edges(size_t ndims, size_t ncells, const double* mat, std::deque<WeightedEdge>& store) const {
+
+    std::deque<WeightedEdge> run(size_t ndims, size_t ncells, const double* mat) const {
+        std::deque<WeightedEdge> store;
         knncolle::VpTreeEuclidean<> vp(ncells, ndims, mat);
 
         // Collecting neighbors.
@@ -111,37 +109,9 @@ private:
             }
             current_added.clear();
         }
-        return;
-    }
 
-public:
-    std::deque<WeightedEdge> run(size_t ndims, size_t ncells, const double* mat) const {
-        std::deque<WeightedEdge> store;
-        construct_shared_neighbor_edges(ndims, ncells, mat, store);
         return store;
     }
-
-#ifndef SCRAN_EXCLUDE_IGRAPH
-    void run(size_t ndims, size_t ncells, const double* mat, igraph_t* graph, igraph_vector_t* weights) const {
-        auto store = run(ndims, ncells, mat);
-
-        igraph_vector_t edges;
-        igraph_vector_init(&edges, store.size() * 2);
-        igraph_vector_init(weights, store.size());
-
-        size_t counter = 0;
-        for (size_t i = 0; i < store.size(); ++i, counter += 2) { // not entirely sure it's safe to use std::copy here.
-            const auto& edge = store[i];
-            VECTOR(edges)[counter] = std::get<0>(edge);
-            VECTOR(edges)[counter + 1] = std::get<1>(edge);
-            VECTOR(*weights)[i] = std::get<2>(edge);
-        }
-        igraph_create(graph, &edges, ncells, 0); 
-        igraph_vector_destroy(&edges);
-
-        return;
-    }
-#endif
 
 private:
     int num_neighbors = 10;

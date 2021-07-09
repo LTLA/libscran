@@ -4,6 +4,7 @@
 
 #include <random>
 #include <cmath>
+#include <map>
 
 template<class PARAM>
 class BuildSNNGraphTestCore : public ::testing::TestWithParam<PARAM> {
@@ -23,6 +24,9 @@ protected:
         }
     }
 };
+
+/*****************************************
+ *****************************************/
 
 class BuildSNNGraphRefTest : public BuildSNNGraphTestCore<std::tuple<int, int, int, scran::BuildSNNGraph::Scheme> > {
 protected:
@@ -100,9 +104,52 @@ INSTANTIATE_TEST_CASE_P(
     BuildSNNGraph,
     BuildSNNGraphRefTest,
     ::testing::Combine(
-        ::testing::Values(20), // number of dimensions
-        ::testing::Values(100), // number of observations
+        ::testing::Values(10), // number of dimensions
+        ::testing::Values(200), // number of observations
         ::testing::Values(2, 5, 10), // number of neighbors
+        ::testing::Values(scran::BuildSNNGraph::RANKED, scran::BuildSNNGraph::NUMBER, scran::BuildSNNGraph::JACCARD) // weighting scheme
+    )
+);
+
+/*****************************************
+ *****************************************/
+
+class BuildSNNGraphSymmetryTest : public BuildSNNGraphTestCore<std::tuple<int, int, int, scran::BuildSNNGraph::Scheme> > {};
+
+TEST_P(BuildSNNGraphSymmetryTest, Symmetry) {
+    auto param = GetParam();
+    assemble(param);
+    int k = std::get<2>(param);
+    auto scheme = std::get<3>(param);
+
+    scran::BuildSNNGraph builder;
+    builder.set_neighbors(k).set_weighting_scheme(scheme);
+
+    // Checking for symmetry by flipping the matrix. The idea is that the
+    // identities of the first and second nodes are flipped, but if symmetry of
+    // the SNN calculations hold, then the original results should be recoverable
+    // by just flipping the indices of the edge.
+    std::vector<double> revdata(data.rbegin(), data.rend());
+    auto revgraph = builder.run(ndim, nobs, revdata.data());
+    for (auto& e : revgraph) {
+        std::get<0>(e) = nobs - std::get<0>(e) - 1;
+        std::get<1>(e) = nobs - std::get<1>(e) - 1;
+        std::swap(std::get<0>(e), std::get<1>(e));
+    }
+    std::sort(revgraph.begin(), revgraph.end());
+
+    auto refgraph = builder.run(ndim, nobs, data.data());
+    std::sort(refgraph.begin(), refgraph.end());
+    EXPECT_EQ(revgraph, refgraph);
+}
+
+INSTANTIATE_TEST_CASE_P(
+    BuildSNNGraph,
+    BuildSNNGraphSymmetryTest,
+    ::testing::Combine(
+        ::testing::Values(10), // number of dimensions
+        ::testing::Values(1000), // number of observations
+        ::testing::Values(4, 9), // number of neighbors
         ::testing::Values(scran::BuildSNNGraph::RANKED, scran::BuildSNNGraph::NUMBER, scran::BuildSNNGraph::JACCARD) // weighting scheme
     )
 );
