@@ -17,3 +17,11 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(WeightedLowess)
+
+FetchContent_Declare(
+  irlba 
+  GIT_REPOSITORY https://github.com/LTLA/CppIrlba
+  GIT_TAG master
+)
+
+FetchContent_MakeAvailable(irlba)
