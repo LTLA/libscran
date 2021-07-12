@@ -13,11 +13,11 @@
 class LogNormCountsTester : public ::testing::Test {
 protected:
     void SetUp() {
-        mat = std::unique_ptr<tatami::numeric_matrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
+        mat = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
         sf = tatami::column_sums(mat.get());
     }
 protected:
-    std::shared_ptr<tatami::numeric_matrix> mat;
+    std::shared_ptr<tatami::NumericMatrix> mat;
     std::vector<double> sf;
 };
 

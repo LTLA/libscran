@@ -1,5 +1,5 @@
-#ifndef FIT_TREND_VAR_H
-#define FIT_TREND_VAR_H
+#ifndef SCRAN_FIT_TREND_VAR_H
+#define SCRAN_FIT_TREND_VAR_H
 
 #include <algorithm>
 #include <vector>

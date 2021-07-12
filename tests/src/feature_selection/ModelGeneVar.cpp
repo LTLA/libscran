@@ -16,13 +16,13 @@
 class ModelGeneVarTester : public ::testing::Test {
 protected:
     void SetUp() {
-        dense_row = std::unique_ptr<tatami::numeric_matrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
+        dense_row = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
         dense_column = tatami::convert_to_dense(dense_row.get(), false);
         sparse_row = tatami::convert_to_sparse(dense_row.get(), true);
         sparse_column = tatami::convert_to_sparse(dense_row.get(), false);
     }
 protected:
-    std::shared_ptr<tatami::numeric_matrix> dense_row, dense_column, sparse_row, sparse_column;
+    std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
     scran::ModelGeneVar<int> var1, var2, var3, var4;
 
     void almost_equal(const std::vector<double>& left, const std::vector<double>& right) {

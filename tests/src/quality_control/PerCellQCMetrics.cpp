@@ -15,13 +15,13 @@
 class PerCellQCMetricsTester : public ::testing::Test {
 protected:
     void SetUp() {
-        dense_row = std::unique_ptr<tatami::numeric_matrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
+        dense_row = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
         dense_column = tatami::convert_to_dense(dense_row.get(), false);
         sparse_row = tatami::convert_to_sparse(dense_row.get(), true);
         sparse_column = tatami::convert_to_sparse(dense_row.get(), false);
     }
 protected:
-    std::shared_ptr<tatami::numeric_matrix> dense_row, dense_column, sparse_row, sparse_column;
+    std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
     scran::PerCellQCMetrics<int> qc1, qc2, qc3, qc4;
 
     std::vector<int> to_filter (const std::vector<size_t>& indices) {
@@ -41,8 +41,9 @@ TEST_F(PerCellQCMetricsTester, NoSubset) {
         s = (*smIt > 0); 
         ++smIt;
     }
-    auto detected = std::unique_ptr<tatami::typed_matrix<int> >(new tatami::DenseRowMatrix<int>(sparse_nrow, sparse_ncol, copy));
-    EXPECT_EQ(std::vector<double>(res.detected.begin(), res.detected.end()), tatami::column_sums(detected.get()));
+    auto detected = std::unique_ptr<tatami::Matrix<int> >(new tatami::DenseRowMatrix<int>(sparse_nrow, sparse_ncol, copy));
+    auto refsums = tatami::column_sums(detected.get());
+    EXPECT_EQ(res.detected, std::vector<int>(refsums.begin(), refsums.end())); // as column_sums always yeilds a vector of ints.
 
     auto res2 = qc2.run(dense_column.get());
     EXPECT_EQ(res.sums, res2.sums);
@@ -131,7 +132,7 @@ TEST_F(PerCellQCMetricsTester, NASubsets) {
     auto keep_s = to_filter(keep_i);
 
     std::vector<double> nothing(100);
-    auto dense_zero = std::unique_ptr<tatami::numeric_matrix>(new tatami::DenseColumnMatrix<double>(20, 5, std::move(nothing)));
+    auto dense_zero = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseColumnMatrix<double>(20, 5, std::move(nothing)));
 
     std::vector<const int*> subs = { keep_s.data() };
     scran::PerCellQCMetrics<int> QC;

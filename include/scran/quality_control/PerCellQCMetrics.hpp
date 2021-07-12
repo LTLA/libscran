@@ -6,7 +6,7 @@
 #include <limits>
 #include <cstdint>
 
-#include "tatami/base/typed_matrix.hpp"
+#include "tatami/base/Matrix.hpp"
 #include "../utils/vector_to_pointers.hpp"
 
 /**
@@ -105,7 +105,7 @@ public:
      * Subset proportions are returned depending on the subsets defined at construction or by `set_subsets()`.
      */
     template<typename T, typename IDX>
-    Results run(const tatami::typed_matrix<T, IDX>* mat) {
+    Results run(const tatami::Matrix<T, IDX>* mat) {
         Results output(mat->ncol(), subsets.size());
         run(mat, output.sums.data(), output.detected.data(), vector_to_pointers(output.subset_proportions));
         return output;
@@ -125,7 +125,7 @@ public:
      * @return `sums`, `detected`, and each array in `subset_proportions` is filled with the relevant statistics.
      */
     template<typename T, typename IDX, typename S, typename D, typename P>
-    void run(const tatami::typed_matrix<T, IDX>* mat, S* sums, D* detected, std::vector<P*> subset_proportions) {
+    void run(const tatami::Matrix<T, IDX>* mat, S* sums, D* detected, std::vector<P*> subset_proportions) {
         size_t nr = mat->nrow(), nc = mat->ncol();
 
         if (mat->prefer_rows()) {

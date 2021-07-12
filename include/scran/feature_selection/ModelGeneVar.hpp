@@ -1,7 +1,7 @@
-#ifndef MODEL_GENE_VAR_H
-#define MODEL_GENE_VAR_H
+#ifndef SCRAN_MODEL_GENE_VAR_H
+#define SCRAN_MODEL_GENE_VAR_H
 
-#include "tatami/base/typed_matrix.hpp"
+#include "tatami/base/Matrix.hpp"
 #include "../utils/vector_to_pointers.hpp"
 #include "FitTrendVar.hpp"
 
@@ -56,7 +56,7 @@ public:
 
 public:
     template<typename T, typename IDX>
-    Results run(const tatami::typed_matrix<T, IDX>* mat) {
+    Results run(const tatami::Matrix<T, IDX>* mat) {
         Results output(mat->nrow(), nblocks);
         run(mat, 
             vector_to_pointers(output.means),
@@ -67,7 +67,7 @@ public:
     }
 
     template<typename T, typename IDX>
-    void run(const tatami::typed_matrix<T, IDX>* p, 
+    void run(const tatami::Matrix<T, IDX>* p, 
              std::vector<double*> means,
              std::vector<double*> variances,
              std::vector<double*> fitted,

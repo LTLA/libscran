@@ -1,5 +1,5 @@
-#ifndef SCRAN_LOGNORMCOUNTS_H
-#define SCRAN_LOGNORMCOUNTS_H
+#ifndef SCRAN_LOG_NORM_COUNTS_H
+#define SCRAN_LOG_NORM_COUNTS_H
 
 #include <algorithm>
 #include <vector>
