@@ -71,10 +71,10 @@ $(function() {
 <div class="title">ModelGeneVar.hpp</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef MODEL_GENE_VAR_H</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define MODEL_GENE_VAR_H</span></div>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef SCRAN_MODEL_GENE_VAR_H</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define SCRAN_MODEL_GENE_VAR_H</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;tatami/base/typed_matrix.hpp&quot;</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;tatami/base/Matrix.hpp&quot;</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &quot;../utils/vector_to_pointers.hpp&quot;</span></div>
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &quot;FitTrendVar.hpp&quot;</span></div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160; </div>
@@ -129,7 +129,7 @@ $(function() {
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> IDX&gt;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    Results run(<span class="keyword">const</span> tatami::typed_matrix&lt;T, IDX&gt;* mat) {</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    Results run(<span class="keyword">const</span> tatami::Matrix&lt;T, IDX&gt;* mat) {</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        Results output(mat-&gt;nrow(), nblocks);</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        run(mat, </div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;            vector_to_pointers(output.means),</div>
@@ -140,7 +140,7 @@ $(function() {
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    }</div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160; </div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> IDX&gt;</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <span class="keywordtype">void</span> run(<span class="keyword">const</span> tatami::typed_matrix&lt;T, IDX&gt;* p, </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <span class="keywordtype">void</span> run(<span class="keyword">const</span> tatami::Matrix&lt;T, IDX&gt;* p, </div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;             std::vector&lt;double*&gt; means,</div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;             std::vector&lt;double*&gt; variances,</div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;             std::vector&lt;double*&gt; fitted,</div>
