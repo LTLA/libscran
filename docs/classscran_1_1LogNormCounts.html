@@ -86,29 +86,21 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a77b3a4d60721ae2a2a7fa4d682fc6dd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa78f6693201a9a1778891a57a38dc356"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#aa78f6693201a9a1778891a57a38dc356">set_center</a> (bool c=true)</td></tr>
 <tr class="separator:aa78f6693201a9a1778891a57a38dc356"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1a3e44065c34b373a58da3636de378e8"><td class="memTemplParams" colspan="2">template&lt;class V &gt; </td></tr>
-<tr class="memitem:a1a3e44065c34b373a58da3636de378e8"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#a1a3e44065c34b373a58da3636de378e8">set_blocks</a> (const V &amp;p)</td></tr>
-<tr class="separator:a1a3e44065c34b373a58da3636de378e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af7492893109b2657aba6220da6652d61"><td class="memTemplParams" colspan="2">template&lt;typename SIT &gt; </td></tr>
-<tr class="memitem:af7492893109b2657aba6220da6652d61"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#af7492893109b2657aba6220da6652d61">set_blocks</a> (size_t n, SIT b)</td></tr>
-<tr class="separator:af7492893109b2657aba6220da6652d61"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aec2d53378a117fa37b723ce56c6adc48"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#aec2d53378a117fa37b723ce56c6adc48">set_blocks</a> ()</td></tr>
-<tr class="separator:aec2d53378a117fa37b723ce56c6adc48"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2a50352164009a0f0fb9e1457bac463c"><td class="memTemplParams" colspan="2">template&lt;class MAT , class V &gt; </td></tr>
-<tr class="memitem:a2a50352164009a0f0fb9e1457bac463c"><td class="memTemplItemLeft" align="right" valign="top">std::shared_ptr&lt; MAT &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#a2a50352164009a0f0fb9e1457bac463c">run</a> (std::shared_ptr&lt; MAT &gt; mat, V size_factors)</td></tr>
-<tr class="separator:a2a50352164009a0f0fb9e1457bac463c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13833058e364ad99b1370bc60fddd25f"><td class="memTemplParams" colspan="2">template&lt;class MAT , class V , typename BPTR &gt; </td></tr>
+<tr class="memitem:a13833058e364ad99b1370bc60fddd25f"><td class="memTemplItemLeft" align="right" valign="top">std::shared_ptr&lt; MAT &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#a13833058e364ad99b1370bc60fddd25f">run</a> (std::shared_ptr&lt; MAT &gt; mat, V size_factors, BPTR block)</td></tr>
+<tr class="separator:a13833058e364ad99b1370bc60fddd25f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Compute log-normalized expression values. </p>
-<p>Given a count matrix and a set of size factors, compute log-transformed normalized expression values. This is done in a delayed manner using the <code>DelayedIsometricOp</code> class from the <b>tatami</b> library. </p>
+<p>Given a count matrix and a set of size factors, compute log-transformed normalized expression values. Each cell's counts are divided by the cell's size factor, to account for differences in capture efficiency and sequencing depth across cells. The normalized values are then log-transformed so that downstream analyses focus on the relative rather than absolute differences in expression; this process also provides some measure of variance stabilization. These operations are done in a delayed manner using the <code>DelayedIsometricOp</code> class from the <b>tatami</b> library. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a2a50352164009a0f0fb9e1457bac463c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2a50352164009a0f0fb9e1457bac463c">&#9670;&nbsp;</a></span>run()</h2>
+<a id="a13833058e364ad99b1370bc60fddd25f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13833058e364ad99b1370bc60fddd25f">&#9670;&nbsp;</a></span>run()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class MAT , class V &gt; </div>
+template&lt;class MAT , class V , typename BPTR &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -123,7 +115,13 @@ template&lt;class MAT , class V &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">V&#160;</td>
-          <td class="paramname"><em>size_factors</em>&#160;</td>
+          <td class="paramname"><em>size_factors</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">BPTR&#160;</td>
+          <td class="paramname"><em>block</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -138,143 +136,24 @@ template&lt;class MAT , class V &gt; </div>
 </table>
 </div><div class="memdoc">
 <p>Compute log-normalized expression values from an input matrix. To avoid copying the data, this is done in a delayed manner using the <code>DelayedIsometricOp</code> class from the <b>tatami</b> package.</p>
+<p>If <code>block</code> is specified, centering of size factors is performed within each block. This allows users to easily mimic normalization of different blocks of cells (e.g., from different samples) in the same matrix. In contrast, without blocking, the centering would depend on the size factors in different blocks.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">A</td><td><code>tatami::typed_matrix</code>, most typically a <code>tatami::numeric_matrix</code>. </td></tr>
-    <tr><td class="paramname">V</td><td>A vector class supporting <code>size()</code>, random access via <code>[</code>, <code>begin()</code>, <code>end()</code> and <code>data()</code>.</td></tr>
+    <tr><td class="paramname">V</td><td>A vector class supporting <code>size()</code>, random access via <code>[</code>, <code>begin()</code>, <code>end()</code> and <code>data()</code>. </td></tr>
+    <tr><td class="paramname">BPTR</td><td>Pointer to an integer type, to hold the block IDs.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">mat</td><td>Pointer to an input count matrix, with features in the rows and cells in the columns. </td></tr>
-    <tr><td class="paramname">size_factors</td><td>A vector of positive size factors, of length equal to the number of columns in <code>mat</code>.</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Pointer to an input count matrix, with features in the rows and cells in the columns. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">size_factors</td><td>A vector of positive size factors, of length equal to the number of columns in <code>mat</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of block identifiers. If provided, the array should be of length equal to the number of columns in <code>mat</code>. Values should be integer IDs in <img class="formulaInl" alt="$[0, N)$" src="form_0.png"/> where <img class="formulaInl" alt="$N$" src="form_1.png"/> is the number of blocks. This can also be a <code>nullptr</code>, in which case all cells are assumed to belong to the same block.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A pointer to a matrix of log-transformed and normalized values. </dd></dl>
-
-</div>
-</div>
-<a id="aec2d53378a117fa37b723ce56c6adc48"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aec2d53378a117fa37b723ce56c6adc48">&#9670;&nbsp;</a></span>set_blocks() <span class="overload">[1/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a>&amp; scran::LogNormCounts::set_blocks </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Unset any previous blocking structure.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PerCellQCFilters.html" title="Create filters to identify low-quality cells.">PerCellQCFilters</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="a1a3e44065c34b373a58da3636de378e8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1a3e44065c34b373a58da3636de378e8">&#9670;&nbsp;</a></span>set_blocks() <span class="overload">[2/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;class V &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a>&amp; scran::LogNormCounts::set_blocks </td>
-          <td>(</td>
-          <td class="paramtype">const V &amp;&#160;</td>
-          <td class="paramname"><em>p</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Define blocks of cells, where centering of size factors is performed within each block. This allows users to easily mimic normalization of different blocks of cells (e.g., from different samples) in the same matrix. In contrast, without blocking, the centering would depend on the size factors in different blocks.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">V</td><td>Class of the blocking vector. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">p</td><td>Blocking vector of length equal to the number of cells. Values should be integer block IDs in <img class="formulaInl" alt="$[0, N)$" src="form_0.png"/> where <img class="formulaInl" alt="$N$" src="form_1.png"/> is the number of blocks.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1LogNormCounts.html" title="Compute log-normalized expression values.">LogNormCounts</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="af7492893109b2657aba6220da6652d61"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af7492893109b2657aba6220da6652d61">&#9670;&nbsp;</a></span>set_blocks() <span class="overload">[3/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename SIT &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a>&amp; scran::LogNormCounts::set_blocks </td>
-          <td>(</td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>n</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">SIT&#160;</td>
-          <td class="paramname"><em>b</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Define blocks of cells, see <code><a class="el" href="classscran_1_1LogNormCounts.html#a1a3e44065c34b373a58da3636de378e8">set_blocks(const V&amp; p)</a></code>.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">SIT</td><td>Iterator class for the blocking vector.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">n</td><td>Length of the blocking vector, should be equal to the number of cells. </td></tr>
-    <tr><td class="paramname">p</td><td>Pointer or iterator to the start of the blocking vector.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1LogNormCounts.html" title="Compute log-normalized expression values.">LogNormCounts</a></code> object. </dd></dl>
 
 </div>
 </div>
@@ -301,7 +180,7 @@ template&lt;typename SIT &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Specify whether to center the size factors in <code><a class="el" href="classscran_1_1LogNormCounts.html#a2a50352164009a0f0fb9e1457bac463c">run()</a></code>. If <code>true</code>, we center the size factors across cells so that their average is equal to 1; this ensures that the normalized values can still be interpreted on the same scale as the input counts.</p>
+<p>Specify whether to center the size factors in <code><a class="el" href="classscran_1_1LogNormCounts.html#a13833058e364ad99b1370bc60fddd25f">run()</a></code>. If <code>true</code>, we center the size factors across cells so that their average is equal to 1; this ensures that the normalized values can still be interpreted on the same scale as the input counts.</p>
 <p>If <code>false</code>, no further centering is performed. This is more efficient when size factors are already centered; it may also be useful for re-using this class to compute other normalized values like log-CPMs.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

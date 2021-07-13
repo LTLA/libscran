@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['percellqcfilters_37',['PerCellQCFilters',['../classscran_1_1PerCellQCFilters.html',1,'scran']]],
-  ['percellqcmetrics_38',['PerCellQCMetrics',['../classscran_1_1PerCellQCMetrics.html',1,'scran']]]
+  ['modelgenevar_49',['ModelGeneVar',['../classscran_1_1ModelGeneVar.html',1,'scran']]]
 ];

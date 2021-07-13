@@ -107,217 +107,194 @@ $(function() {
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    }</div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">class</span> V&gt;</div>
-<div class="line"><a name="l00090"></a><span class="lineno"><a class="line" href="classscran_1_1IsOutlier.html#a9fbbec7947e20c5c612b4beff82b717b">   90</a></span>&#160;    <a class="code" href="classscran_1_1IsOutlier.html">IsOutlier</a>&amp; <a class="code" href="classscran_1_1IsOutlier.html#a9fbbec7947e20c5c612b4beff82b717b">set_blocks</a>(<span class="keyword">const</span> V&amp; p) {</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classscran_1_1IsOutlier.html#a7055c44b22c91889c61514c2d6f70426">set_blocks</a>(p.size(), p.begin());</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    }</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> SIT&gt;</div>
-<div class="line"><a name="l00105"></a><span class="lineno"><a class="line" href="classscran_1_1IsOutlier.html#aa3eedf2820eebbb6875f28a8cbaa4b13">  105</a></span>&#160;    <a class="code" href="classscran_1_1IsOutlier.html">IsOutlier</a>&amp; <a class="code" href="classscran_1_1IsOutlier.html#aa3eedf2820eebbb6875f28a8cbaa4b13">set_blocks</a>(<span class="keywordtype">size_t</span> n, SIT p) {</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;        group_ncells = n;</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        block_indices(n, p, by_group);</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    }</div>
+<div class="line"><a name="l00082"></a><span class="lineno"><a class="line" href="structscran_1_1IsOutlier_1_1Thresholds.html">   82</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html">Thresholds</a> {</div>
+<div class="line"><a name="l00086"></a><span class="lineno"><a class="line" href="structscran_1_1IsOutlier_1_1Thresholds.html#a20a0eedf427f07d34c78aee7e07fe839">   86</a></span>&#160;        <a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html#a20a0eedf427f07d34c78aee7e07fe839">Thresholds</a>(<span class="keywordtype">int</span> nblocks=1) : <a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html#adeb1415ad8f8ac50c661059789a90dbb">lower</a>(nblocks), <a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html#afefce35fa6cb2b103d581637682ba255">upper</a>(nblocks) {}</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160; </div>
+<div class="line"><a name="l00097"></a><span class="lineno"><a class="line" href="structscran_1_1IsOutlier_1_1Thresholds.html#adeb1415ad8f8ac50c661059789a90dbb">   97</a></span>&#160;        std::vector&lt;double&gt; <a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html#adeb1415ad8f8ac50c661059789a90dbb">lower</a>;</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160; </div>
+<div class="line"><a name="l00108"></a><span class="lineno"><a class="line" href="structscran_1_1IsOutlier_1_1Thresholds.html#afefce35fa6cb2b103d581637682ba255">  108</a></span>&#160;        std::vector&lt;double&gt; <a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html#afefce35fa6cb2b103d581637682ba255">upper</a>;</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    };</div>
 <div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160; </div>
-<div class="line"><a name="l00116"></a><span class="lineno"><a class="line" href="classscran_1_1IsOutlier.html#a7055c44b22c91889c61514c2d6f70426">  116</a></span>&#160;    <a class="code" href="classscran_1_1IsOutlier.html">IsOutlier</a>&amp; <a class="code" href="classscran_1_1IsOutlier.html#a7055c44b22c91889c61514c2d6f70426">set_blocks</a>() {</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        group_ncells = 0;</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        by_group.clear();</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    }</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160; </div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00126"></a><span class="lineno"><a class="line" href="structscran_1_1IsOutlier_1_1Thresholds.html">  126</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html">Thresholds</a> {</div>
-<div class="line"><a name="l00130"></a><span class="lineno"><a class="line" href="structscran_1_1IsOutlier_1_1Thresholds.html#a20a0eedf427f07d34c78aee7e07fe839">  130</a></span>&#160;        <a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html#a20a0eedf427f07d34c78aee7e07fe839">Thresholds</a>(<span class="keywordtype">int</span> nblocks=1) : <a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html#adeb1415ad8f8ac50c661059789a90dbb">lower</a>(nblocks), <a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html#afefce35fa6cb2b103d581637682ba255">upper</a>(nblocks) {}</div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160; </div>
-<div class="line"><a name="l00141"></a><span class="lineno"><a class="line" href="structscran_1_1IsOutlier_1_1Thresholds.html#adeb1415ad8f8ac50c661059789a90dbb">  141</a></span>&#160;        std::vector&lt;double&gt; <a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html#adeb1415ad8f8ac50c661059789a90dbb">lower</a>;</div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160; </div>
-<div class="line"><a name="l00152"></a><span class="lineno"><a class="line" href="structscran_1_1IsOutlier_1_1Thresholds.html#afefce35fa6cb2b103d581637682ba255">  152</a></span>&#160;        std::vector&lt;double&gt; <a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html#afefce35fa6cb2b103d581637682ba255">upper</a>;</div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    };</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160; </div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> X = u<span class="keywordtype">int</span>8_t&gt;</div>
-<div class="line"><a name="l00161"></a><span class="lineno"><a class="line" href="structscran_1_1IsOutlier_1_1Results.html">  161</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structscran_1_1IsOutlier_1_1Results.html">Results</a> {</div>
-<div class="line"><a name="l00165"></a><span class="lineno"><a class="line" href="structscran_1_1IsOutlier_1_1Results.html#a4d639722b5356beab69ed32306ff69f2">  165</a></span>&#160;        <a class="code" href="structscran_1_1IsOutlier_1_1Results.html#a4d639722b5356beab69ed32306ff69f2">Results</a>(<span class="keywordtype">size_t</span> n) : <a class="code" href="structscran_1_1IsOutlier_1_1Results.html#ae6931cb03537299d63127836fabb320f">outliers</a>(n), <a class="code" href="structscran_1_1IsOutlier_1_1Results.html#ab76c89d333a817bf7881d4eb2ba737bb">thresholds</a>(0) {}</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160; </div>
-<div class="line"><a name="l00170"></a><span class="lineno"><a class="line" href="structscran_1_1IsOutlier_1_1Results.html#ae6931cb03537299d63127836fabb320f">  170</a></span>&#160;        std::vector&lt;X&gt; <a class="code" href="structscran_1_1IsOutlier_1_1Results.html#ae6931cb03537299d63127836fabb320f">outliers</a>;</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160; </div>
-<div class="line"><a name="l00175"></a><span class="lineno"><a class="line" href="structscran_1_1IsOutlier_1_1Results.html#ab76c89d333a817bf7881d4eb2ba737bb">  175</a></span>&#160;        <a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html">Thresholds</a> <a class="code" href="structscran_1_1IsOutlier_1_1Results.html#ab76c89d333a817bf7881d4eb2ba737bb">thresholds</a>;</div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;    };</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160; </div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> X = u<span class="keywordtype">int</span>8_t, <span class="keyword">class</span> V&gt;</div>
-<div class="line"><a name="l00190"></a><span class="lineno"><a class="line" href="classscran_1_1IsOutlier.html#aadf79ca12b2cda338e92b47b3cbeeb26">  190</a></span>&#160;    <a class="code" href="structscran_1_1IsOutlier_1_1Results.html">Results&lt;X&gt;</a> <a class="code" href="classscran_1_1IsOutlier.html#aadf79ca12b2cda338e92b47b3cbeeb26">run</a>(<span class="keyword">const</span> V&amp; metrics) {</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;        <a class="code" href="structscran_1_1IsOutlier_1_1Results.html">Results&lt;X&gt;</a> output(metrics.size()); </div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;        output.<a class="code" href="structscran_1_1IsOutlier_1_1Results.html#ab76c89d333a817bf7881d4eb2ba737bb">thresholds</a> = <a class="code" href="classscran_1_1IsOutlier.html#aadf79ca12b2cda338e92b47b3cbeeb26">run</a>(metrics.size(), metrics.data(), output.<a class="code" href="structscran_1_1IsOutlier_1_1Results.html#ae6931cb03537299d63127836fabb320f">outliers</a>.data());</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;        <span class="keywordflow">return</span> output;</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;    }</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160; </div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> X = u<span class="keywordtype">int</span>8_t, <span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00208"></a><span class="lineno"><a class="line" href="classscran_1_1IsOutlier.html#a73b79a27398e2a0d0235d5eee4ec6ac9">  208</a></span>&#160;    <a class="code" href="structscran_1_1IsOutlier_1_1Results.html">Results&lt;X&gt;</a> <a class="code" href="classscran_1_1IsOutlier.html#a73b79a27398e2a0d0235d5eee4ec6ac9">run</a>(<span class="keywordtype">size_t</span> n, <span class="keyword">const</span> T* metrics) {</div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;        <a class="code" href="structscran_1_1IsOutlier_1_1Results.html">Results&lt;X&gt;</a> output(n); </div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;        output.<a class="code" href="structscran_1_1IsOutlier_1_1Results.html#ab76c89d333a817bf7881d4eb2ba737bb">thresholds</a> = <a class="code" href="classscran_1_1IsOutlier.html#aadf79ca12b2cda338e92b47b3cbeeb26">run</a>(n, metrics, output.<a class="code" href="structscran_1_1IsOutlier_1_1Results.html#ae6931cb03537299d63127836fabb320f">outliers</a>.data());</div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;        <span class="keywordflow">return</span> output;</div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;    }</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> X = u<span class="keywordtype">int</span>8_t&gt;</div>
+<div class="line"><a name="l00117"></a><span class="lineno"><a class="line" href="structscran_1_1IsOutlier_1_1Results.html">  117</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structscran_1_1IsOutlier_1_1Results.html">Results</a> {</div>
+<div class="line"><a name="l00121"></a><span class="lineno"><a class="line" href="structscran_1_1IsOutlier_1_1Results.html#a4d639722b5356beab69ed32306ff69f2">  121</a></span>&#160;        <a class="code" href="structscran_1_1IsOutlier_1_1Results.html#a4d639722b5356beab69ed32306ff69f2">Results</a>(<span class="keywordtype">size_t</span> n) : <a class="code" href="structscran_1_1IsOutlier_1_1Results.html#ae6931cb03537299d63127836fabb320f">outliers</a>(n), <a class="code" href="structscran_1_1IsOutlier_1_1Results.html#ab76c89d333a817bf7881d4eb2ba737bb">thresholds</a>(0) {}</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160; </div>
+<div class="line"><a name="l00126"></a><span class="lineno"><a class="line" href="structscran_1_1IsOutlier_1_1Results.html#ae6931cb03537299d63127836fabb320f">  126</a></span>&#160;        std::vector&lt;X&gt; <a class="code" href="structscran_1_1IsOutlier_1_1Results.html#ae6931cb03537299d63127836fabb320f">outliers</a>;</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160; </div>
+<div class="line"><a name="l00131"></a><span class="lineno"><a class="line" href="structscran_1_1IsOutlier_1_1Results.html#ab76c89d333a817bf7881d4eb2ba737bb">  131</a></span>&#160;        <a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html">Thresholds</a> <a class="code" href="structscran_1_1IsOutlier_1_1Results.html#ab76c89d333a817bf7881d4eb2ba737bb">thresholds</a>;</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;    };</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160; </div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> X = u<span class="keywordtype">int</span>8_t, <span class="keyword">class</span> V, <span class="keyword">typename</span> BPTR&gt;</div>
+<div class="line"><a name="l00154"></a><span class="lineno"><a class="line" href="classscran_1_1IsOutlier.html#a37c651a3889c10c31c2fa6b73934b9a1">  154</a></span>&#160;    <a class="code" href="structscran_1_1IsOutlier_1_1Results.html">Results&lt;X&gt;</a> <a class="code" href="classscran_1_1IsOutlier.html#a37c651a3889c10c31c2fa6b73934b9a1">run</a>(<span class="keyword">const</span> V&amp; metrics, BPTR block) {</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;        <a class="code" href="structscran_1_1IsOutlier_1_1Results.html">Results&lt;X&gt;</a> output(metrics.size()); </div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;        output.<a class="code" href="structscran_1_1IsOutlier_1_1Results.html#ab76c89d333a817bf7881d4eb2ba737bb">thresholds</a> = <a class="code" href="classscran_1_1IsOutlier.html#a37c651a3889c10c31c2fa6b73934b9a1">run</a>(metrics.size(), block, metrics.data(), output.<a class="code" href="structscran_1_1IsOutlier_1_1Results.html#ae6931cb03537299d63127836fabb320f">outliers</a>.data());</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;        <span class="keywordflow">return</span> output;</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;    }</div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160; </div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> X = u<span class="keywordtype">int</span>8_t, <span class="keyword">typename</span> BPTR, <span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00174"></a><span class="lineno"><a class="line" href="classscran_1_1IsOutlier.html#a29887a8b8a812d82c57f8de160d5b82f">  174</a></span>&#160;    <a class="code" href="structscran_1_1IsOutlier_1_1Results.html">Results&lt;X&gt;</a> <a class="code" href="classscran_1_1IsOutlier.html#a29887a8b8a812d82c57f8de160d5b82f">run</a>(<span class="keywordtype">size_t</span> n, BPTR block, <span class="keyword">const</span> T* metrics) {</div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;        <a class="code" href="structscran_1_1IsOutlier_1_1Results.html">Results&lt;X&gt;</a> output(n); </div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;        output.<a class="code" href="structscran_1_1IsOutlier_1_1Results.html#ab76c89d333a817bf7881d4eb2ba737bb">thresholds</a> = <a class="code" href="classscran_1_1IsOutlier.html#a37c651a3889c10c31c2fa6b73934b9a1">run</a>(n, block, metrics, output.<a class="code" href="structscran_1_1IsOutlier_1_1Results.html#ae6931cb03537299d63127836fabb320f">outliers</a>.data());</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;        <span class="keywordflow">return</span> output;</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;    }</div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160; </div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> BPTR, <span class="keyword">typename</span> T, <span class="keyword">typename</span> X&gt;</div>
+<div class="line"><a name="l00198"></a><span class="lineno"><a class="line" href="classscran_1_1IsOutlier.html#ad863d8a914d0b20feb7880e852b84b82">  198</a></span>&#160;    <a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html">Thresholds</a> <a class="code" href="classscran_1_1IsOutlier.html#ad863d8a914d0b20feb7880e852b84b82">run</a>(<span class="keywordtype">size_t</span> n, BPTR block, <span class="keyword">const</span> T* metrics, X* outliers) {</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;        BlockIndices by_block = block_indices(n, block);</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classscran_1_1IsOutlier.html#a37c651a3889c10c31c2fa6b73934b9a1">run</a>(n, by_block, metrics, outliers);</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;    }</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160; </div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> X&gt;</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    Thresholds <a class="code" href="classscran_1_1IsOutlier.html#a37c651a3889c10c31c2fa6b73934b9a1">run</a>(<span class="keywordtype">size_t</span> n, <span class="keyword">const</span> BlockIndices&amp; by_group, <span class="keyword">const</span> T* metrics, X* outliers) {</div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;        Thresholds output(std::max(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(1), by_group.size()));</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;        buffer.resize(n);</div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160; </div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;        <span class="keywordflow">if</span> (by_group.size() == 0) {</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;            std::copy(metrics, metrics + n, buffer.data());</div>
 <div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160; </div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> X = u<span class="keywordtype">int</span>8_t, <span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00229"></a><span class="lineno"><a class="line" href="classscran_1_1IsOutlier.html#ad94a76bb036c611475a67dbe1f08de73">  229</a></span>&#160;    <a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html">Thresholds</a> <a class="code" href="classscran_1_1IsOutlier.html#ad94a76bb036c611475a67dbe1f08de73">run</a>(<span class="keywordtype">size_t</span> n, <span class="keyword">const</span> T* metrics, X* outliers) {</div>
-<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;        <a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html">Thresholds</a> output(std::max(<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(1), by_group.size()));</div>
-<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;        buffer.resize(n);</div>
-<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160; </div>
-<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;        <span class="keywordflow">if</span> (by_group.size() == 0) {</div>
-<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;            std::copy(metrics, metrics + n, buffer.data());</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;            <span class="keywordtype">double</span>&amp; lthresh = output.lower[0];</div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;            <span class="keywordtype">double</span>&amp; uthresh = output.upper[0];</div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;            compute_thresholds(n, buffer.data(), lthresh, uthresh);</div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160; </div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;            <span class="keyword">auto</span> copy = metrics;</div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; n; ++i, ++copy, ++outliers) {</div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;                <span class="keyword">const</span> <span class="keywordtype">double</span> val = *copy;</div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;                *outliers = (val &lt; lthresh || val &gt; uthresh);</div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;            }</div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;        } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> g = 0; g &lt; by_group.size(); ++g) {</div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;                <span class="keyword">auto</span> copy = buffer.data();</div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;                <span class="keyword">const</span> <span class="keyword">auto</span>&amp; curgroup = by_group[g];</div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;                <span class="keywordflow">for</span> (<span class="keyword">auto</span> s : curgroup) {</div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;                    *copy = metrics[s];</div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;                    ++copy;</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;                }</div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160; </div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;                <span class="keywordtype">double</span>&amp; lthresh = output.lower[g];</div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;                <span class="keywordtype">double</span>&amp; uthresh = output.upper[g];</div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;                compute_thresholds(curgroup.size(), buffer.data(), lthresh, uthresh);</div>
 <div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160; </div>
-<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;            <span class="keywordtype">double</span>&amp; lthresh = output.<a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html#adeb1415ad8f8ac50c661059789a90dbb">lower</a>[0];</div>
-<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;            <span class="keywordtype">double</span>&amp; uthresh = output.<a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html#afefce35fa6cb2b103d581637682ba255">upper</a>[0];</div>
-<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;            compute_thresholds(n, buffer.data(), lthresh, uthresh);</div>
-<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160; </div>
-<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;            <span class="keyword">auto</span> copy = metrics;</div>
-<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; n; ++i, ++copy, ++outliers) {</div>
-<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;                <span class="keyword">const</span> <span class="keywordtype">double</span> val = *copy;</div>
-<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;                *outliers = (val &lt; lthresh || val &gt; uthresh);</div>
-<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;            }</div>
-<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;            <span class="keywordflow">if</span> (group_ncells != n) {</div>
-<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;                <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;length of grouping vector and number of cells are not equal&quot;</span>);</div>
-<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;            }</div>
-<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160; </div>
-<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> g = 0; g &lt; by_group.size(); ++g) {</div>
-<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;                <span class="keyword">auto</span> copy = buffer.data();</div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;                <span class="keyword">const</span> <span class="keyword">auto</span>&amp; curgroup = by_group[g];</div>
-<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;                <span class="keywordflow">for</span> (<span class="keyword">auto</span> s : curgroup) {</div>
-<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;                    *copy = metrics[s];</div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;                    ++copy;</div>
-<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;                }</div>
-<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160; </div>
-<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;                <span class="keywordtype">double</span>&amp; lthresh = output.<a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html#adeb1415ad8f8ac50c661059789a90dbb">lower</a>[g];</div>
-<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;                <span class="keywordtype">double</span>&amp; uthresh = output.<a class="code" href="structscran_1_1IsOutlier_1_1Thresholds.html#afefce35fa6cb2b103d581637682ba255">upper</a>[g];</div>
-<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;                compute_thresholds(curgroup.size(), buffer.data(), lthresh, uthresh);</div>
-<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160; </div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;                <span class="keywordflow">for</span> (<span class="keyword">auto</span> s : curgroup) {</div>
-<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;                    <span class="keyword">const</span> <span class="keywordtype">double</span> val = metrics[s];</div>
-<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;                    outliers[s] = (val &lt; lthresh || val &gt; uthresh);</div>
-<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;                }</div>
-<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;            }</div>
-<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;        }</div>
-<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160; </div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;        <span class="keywordflow">return</span> output;</div>
-<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;    }</div>
-<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160; </div>
-<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;    <span class="keywordtype">void</span> compute_thresholds(<span class="keywordtype">size_t</span> n, <span class="keywordtype">double</span>* ptr, <span class="keywordtype">double</span>&amp; lower_threshold, <span class="keywordtype">double</span>&amp; upper_threshold) {</div>
-<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;        <span class="keywordflow">if</span> (!n) {</div>
-<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;            lower_threshold = std::numeric_limits&lt;double&gt;::quiet_NaN();</div>
-<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;            upper_threshold = std::numeric_limits&lt;double&gt;::quiet_NaN();</div>
-<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;            <span class="keywordflow">return</span>;</div>
-<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;        }</div>
-<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160; </div>
-<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;        <span class="keywordflow">if</span> (log) {</div>
-<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;            <span class="keyword">auto</span> copy = ptr;</div>
-<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; n; ++i, ++copy) {</div>
-<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;                <span class="keywordflow">if</span> (*copy &gt; 0) {</div>
-<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;                    *copy = std::log(*copy);</div>
-<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;                } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (*copy == 0) {</div>
-<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;                    *copy = -std::numeric_limits&lt;double&gt;::infinity();</div>
-<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;                } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;                    <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;cannot log-transform negative values&quot;</span>);</div>
-<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;                }</div>
-<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;            }</div>
-<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;        }</div>
-<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160; </div>
-<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;        <span class="comment">// First, getting the median.</span></div>
-<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;        <span class="keywordtype">size_t</span> halfway = n / 2;</div>
-<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;        <span class="keywordtype">double</span> medtmp = compute_median(ptr, halfway, n);</div>
-<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160; </div>
-<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;        <span class="keywordflow">if</span> (log &amp;&amp; std::isinf(medtmp)) {</div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;            <span class="keywordflow">if</span> (lower) {</div>
-<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;                lower_threshold = 0;</div>
-<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;            } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;                lower_threshold = -std::numeric_limits&lt;double&gt;::infinity();</div>
-<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;            }</div>
-<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160; </div>
-<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;            <span class="keywordflow">if</span> (upper) {</div>
-<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;                upper_threshold = 0;</div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;            } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;                upper_threshold = std::numeric_limits&lt;double&gt;::infinity();</div>
-<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;            }</div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;                <span class="keywordflow">for</span> (<span class="keyword">auto</span> s : curgroup) {</div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;                    <span class="keyword">const</span> <span class="keywordtype">double</span> val = metrics[s];</div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;                    outliers[s] = (val &lt; lthresh || val &gt; uthresh);</div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;                }</div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;            }</div>
+<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;        }</div>
+<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160; </div>
+<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;        <span class="keywordflow">return</span> output;</div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;    }</div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;<span class="keyword">private</span>:</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    <span class="keywordtype">void</span> compute_thresholds(<span class="keywordtype">size_t</span> n, <span class="keywordtype">double</span>* ptr, <span class="keywordtype">double</span>&amp; lower_threshold, <span class="keywordtype">double</span>&amp; upper_threshold) {</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;        <span class="keywordflow">if</span> (!n) {</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;            lower_threshold = std::numeric_limits&lt;double&gt;::quiet_NaN();</div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;            upper_threshold = std::numeric_limits&lt;double&gt;::quiet_NaN();</div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;            <span class="keywordflow">return</span>;</div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;        }</div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160; </div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;        <span class="keywordflow">if</span> (log) {</div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;            <span class="keyword">auto</span> copy = ptr;</div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; n; ++i, ++copy) {</div>
+<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;                <span class="keywordflow">if</span> (*copy &gt; 0) {</div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;                    *copy = std::log(*copy);</div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;                } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (*copy == 0) {</div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;                    *copy = -std::numeric_limits&lt;double&gt;::infinity();</div>
+<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;                } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;                    <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;cannot log-transform negative values&quot;</span>);</div>
+<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;                }</div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;            }</div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;        }</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160; </div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;        <span class="comment">// First, getting the median.</span></div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;        <span class="keywordtype">size_t</span> halfway = n / 2;</div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;        <span class="keywordtype">double</span> medtmp = compute_median(ptr, halfway, n);</div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160; </div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;        <span class="keywordflow">if</span> (log &amp;&amp; std::isinf(medtmp)) {</div>
+<div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;            <span class="keywordflow">if</span> (lower) {</div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;                lower_threshold = 0;</div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;            } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;                lower_threshold = -std::numeric_limits&lt;double&gt;::infinity();</div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;            }</div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160; </div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;            <span class="keywordflow">if</span> (upper) {</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;                upper_threshold = 0;</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;            } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;                upper_threshold = std::numeric_limits&lt;double&gt;::infinity();</div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;            }</div>
+<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160; </div>
+<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;            <span class="keywordflow">return</span>;</div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;        }</div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160; </div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;        <span class="comment">// Now getting the MAD. No need to protect against -inf here;</span></div>
+<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;        <span class="comment">// if the median is finite, the MAD must also be finite.</span></div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;        <span class="keyword">auto</span> copy = ptr;</div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; n; ++i, ++copy) {</div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;            *copy = std::abs(*copy - medtmp);</div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;        }</div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;        <span class="keywordtype">double</span> madtmp = compute_median(ptr, halfway, n);</div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160; </div>
+<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;        madtmp *= 1.4826; <span class="comment">// for equivalence with the standard deviation under normality.</span></div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160; </div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;        <span class="comment">// Computing the outputs.</span></div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;        <span class="keywordflow">if</span> (lower) {</div>
+<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;            lower_threshold = medtmp - nmads * madtmp;</div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;            <span class="keywordflow">if</span> (log) {</div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;                lower_threshold = std::exp(lower_threshold);</div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;            }</div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;        } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;            lower_threshold = -std::numeric_limits&lt;double&gt;::infinity();</div>
+<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;        }</div>
 <div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160; </div>
-<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;            <span class="keywordflow">return</span>;</div>
-<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;        }</div>
-<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160; </div>
-<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;        <span class="comment">// Now getting the MAD. No need to protect against -inf here;</span></div>
-<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;        <span class="comment">// if the median is finite, the MAD must also be finite.</span></div>
-<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;        <span class="keyword">auto</span> copy = ptr;</div>
-<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; n; ++i, ++copy) {</div>
-<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;            *copy = std::abs(*copy - medtmp);</div>
-<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;        }</div>
-<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;        <span class="keywordtype">double</span> madtmp = compute_median(ptr, halfway, n);</div>
-<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160; </div>
-<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;        madtmp *= 1.4826; <span class="comment">// for equivalence with the standard deviation under normality.</span></div>
-<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160; </div>
-<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;        <span class="comment">// Computing the outputs.</span></div>
-<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;        <span class="keywordflow">if</span> (lower) {</div>
-<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;            lower_threshold = medtmp - nmads * madtmp;</div>
-<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;            <span class="keywordflow">if</span> (log) {</div>
-<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;                lower_threshold = std::exp(lower_threshold);</div>
-<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;            }</div>
-<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;            lower_threshold = -std::numeric_limits&lt;double&gt;::infinity();</div>
-<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;        }</div>
-<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160; </div>
-<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;        <span class="keywordflow">if</span> (upper) {</div>
-<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;            upper_threshold = medtmp + nmads * madtmp;</div>
-<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;            <span class="keywordflow">if</span> (log) {</div>
-<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;                upper_threshold = std::exp(upper_threshold);</div>
-<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;            }</div>
-<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;            upper_threshold = std::numeric_limits&lt;double&gt;::infinity();</div>
-<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;        }</div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;        <span class="keywordflow">if</span> (upper) {</div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;            upper_threshold = medtmp + nmads * madtmp;</div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;            <span class="keywordflow">if</span> (log) {</div>
+<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;                upper_threshold = std::exp(upper_threshold);</div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;            }</div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;        } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;            upper_threshold = std::numeric_limits&lt;double&gt;::infinity();</div>
+<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;        }</div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160; </div>
+<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;        <span class="keywordflow">return</span>;</div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;    }</div>
+<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160; </div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">double</span> compute_median (<span class="keywordtype">double</span>* ptr, <span class="keywordtype">size_t</span> halfway, <span class="keywordtype">size_t</span> n) {</div>
+<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;        std::nth_element(ptr, ptr + halfway, ptr + n);</div>
+<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;        <span class="keywordtype">double</span> medtmp = *(ptr + halfway);</div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160; </div>
+<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;        <span class="keywordflow">if</span> (n % 2 == 0) {</div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;            std::nth_element(ptr, ptr + halfway - 1, ptr + n);</div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;            medtmp = (medtmp + *(ptr + halfway - 1))/2;</div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;        }</div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160; </div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;        <span class="keywordflow">return</span> medtmp;</div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;    }</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160; </div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;<span class="keyword">private</span>:</div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;    <span class="keywordtype">double</span> nmads = 3;</div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;    <span class="keywordtype">bool</span> lower = <span class="keyword">true</span>, upper = <span class="keyword">true</span>, log = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;    std::vector&lt;double&gt; buffer;</div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;};</div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160; </div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;}</div>
 <div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160; </div>
-<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;        <span class="keywordflow">return</span>;</div>
-<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;    }</div>
-<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160; </div>
-<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">double</span> compute_median (<span class="keywordtype">double</span>* ptr, <span class="keywordtype">size_t</span> halfway, <span class="keywordtype">size_t</span> n) {</div>
-<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;        std::nth_element(ptr, ptr + halfway, ptr + n);</div>
-<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;        <span class="keywordtype">double</span> medtmp = *(ptr + halfway);</div>
-<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160; </div>
-<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;        <span class="keywordflow">if</span> (n % 2 == 0) {</div>
-<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;            std::nth_element(ptr, ptr + halfway - 1, ptr + n);</div>
-<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;            medtmp = (medtmp + *(ptr + halfway - 1))/2;</div>
-<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;        }</div>
-<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160; </div>
-<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;        <span class="keywordflow">return</span> medtmp;</div>
-<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;    }</div>
-<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160; </div>
-<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;    <span class="keywordtype">double</span> nmads = 3;</div>
-<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;    <span class="keywordtype">bool</span> lower = <span class="keyword">true</span>, upper = <span class="keyword">true</span>, log = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;    std::vector&lt;double&gt; buffer;</div>
-<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160; </div>
-<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;    std::vector&lt;std::vector&lt;size_t&gt; &gt; by_group;</div>
-<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;    <span class="keywordtype">size_t</span> group_ncells = 0;</div>
-<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;};</div>
-<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160; </div>
-<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;}</div>
-<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160; </div>
-<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aclassscran_1_1IsOutlier_html"><div class="ttname"><a href="classscran_1_1IsOutlier.html">scran::IsOutlier</a></div><div class="ttdoc">Define outlier values based on MADs.</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:27</div></div>
+<div class="ttc" id="aclassscran_1_1IsOutlier_html_a29887a8b8a812d82c57f8de160d5b82f"><div class="ttname"><a href="classscran_1_1IsOutlier.html#a29887a8b8a812d82c57f8de160d5b82f">scran::IsOutlier::run</a></div><div class="ttdeci">Results&lt; X &gt; run(size_t n, BPTR block, const T *metrics)</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:174</div></div>
 <div class="ttc" id="aclassscran_1_1IsOutlier_html_a2bddab775c12504534d38f38c6b7dfd9"><div class="ttname"><a href="classscran_1_1IsOutlier.html#a2bddab775c12504534d38f38c6b7dfd9">scran::IsOutlier::set_lower</a></div><div class="ttdeci">IsOutlier &amp; set_lower(bool l=true)</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:50</div></div>
+<div class="ttc" id="aclassscran_1_1IsOutlier_html_a37c651a3889c10c31c2fa6b73934b9a1"><div class="ttname"><a href="classscran_1_1IsOutlier.html#a37c651a3889c10c31c2fa6b73934b9a1">scran::IsOutlier::run</a></div><div class="ttdeci">Results&lt; X &gt; run(const V &amp;metrics, BPTR block)</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:154</div></div>
 <div class="ttc" id="aclassscran_1_1IsOutlier_html_a5825106689cb0e8f94c32110d899a05c"><div class="ttname"><a href="classscran_1_1IsOutlier.html#a5825106689cb0e8f94c32110d899a05c">scran::IsOutlier::set_nmads</a></div><div class="ttdeci">IsOutlier &amp; set_nmads(double n=3)</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:73</div></div>
-<div class="ttc" id="aclassscran_1_1IsOutlier_html_a7055c44b22c91889c61514c2d6f70426"><div class="ttname"><a href="classscran_1_1IsOutlier.html#a7055c44b22c91889c61514c2d6f70426">scran::IsOutlier::set_blocks</a></div><div class="ttdeci">IsOutlier &amp; set_blocks()</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:116</div></div>
-<div class="ttc" id="aclassscran_1_1IsOutlier_html_a73b79a27398e2a0d0235d5eee4ec6ac9"><div class="ttname"><a href="classscran_1_1IsOutlier.html#a73b79a27398e2a0d0235d5eee4ec6ac9">scran::IsOutlier::run</a></div><div class="ttdeci">Results&lt; X &gt; run(size_t n, const T *metrics)</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:208</div></div>
 <div class="ttc" id="aclassscran_1_1IsOutlier_html_a9b1c75a3d44c9f9999323047c2d32754"><div class="ttname"><a href="classscran_1_1IsOutlier.html#a9b1c75a3d44c9f9999323047c2d32754">scran::IsOutlier::set_log</a></div><div class="ttdeci">IsOutlier &amp; set_log(bool l=false)</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:37</div></div>
-<div class="ttc" id="aclassscran_1_1IsOutlier_html_a9fbbec7947e20c5c612b4beff82b717b"><div class="ttname"><a href="classscran_1_1IsOutlier.html#a9fbbec7947e20c5c612b4beff82b717b">scran::IsOutlier::set_blocks</a></div><div class="ttdeci">IsOutlier &amp; set_blocks(const V &amp;p)</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:90</div></div>
-<div class="ttc" id="aclassscran_1_1IsOutlier_html_aa3eedf2820eebbb6875f28a8cbaa4b13"><div class="ttname"><a href="classscran_1_1IsOutlier.html#aa3eedf2820eebbb6875f28a8cbaa4b13">scran::IsOutlier::set_blocks</a></div><div class="ttdeci">IsOutlier &amp; set_blocks(size_t n, SIT p)</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:105</div></div>
-<div class="ttc" id="aclassscran_1_1IsOutlier_html_aadf79ca12b2cda338e92b47b3cbeeb26"><div class="ttname"><a href="classscran_1_1IsOutlier.html#aadf79ca12b2cda338e92b47b3cbeeb26">scran::IsOutlier::run</a></div><div class="ttdeci">Results&lt; X &gt; run(const V &amp;metrics)</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:190</div></div>
 <div class="ttc" id="aclassscran_1_1IsOutlier_html_ab72b6eb05729891f1b4ae1d1c0e1a05d"><div class="ttname"><a href="classscran_1_1IsOutlier.html#ab72b6eb05729891f1b4ae1d1c0e1a05d">scran::IsOutlier::set_upper</a></div><div class="ttdeci">IsOutlier &amp; set_upper(bool u=true)</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:63</div></div>
-<div class="ttc" id="aclassscran_1_1IsOutlier_html_ad94a76bb036c611475a67dbe1f08de73"><div class="ttname"><a href="classscran_1_1IsOutlier.html#ad94a76bb036c611475a67dbe1f08de73">scran::IsOutlier::run</a></div><div class="ttdeci">Thresholds run(size_t n, const T *metrics, X *outliers)</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:229</div></div>
-<div class="ttc" id="astructscran_1_1IsOutlier_1_1Results_html"><div class="ttname"><a href="structscran_1_1IsOutlier_1_1Results.html">scran::IsOutlier::Results</a></div><div class="ttdoc">Results of the outlier identification.</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:161</div></div>
-<div class="ttc" id="astructscran_1_1IsOutlier_1_1Results_html_a4d639722b5356beab69ed32306ff69f2"><div class="ttname"><a href="structscran_1_1IsOutlier_1_1Results.html#a4d639722b5356beab69ed32306ff69f2">scran::IsOutlier::Results::Results</a></div><div class="ttdeci">Results(size_t n)</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:165</div></div>
-<div class="ttc" id="astructscran_1_1IsOutlier_1_1Results_html_ab76c89d333a817bf7881d4eb2ba737bb"><div class="ttname"><a href="structscran_1_1IsOutlier_1_1Results.html#ab76c89d333a817bf7881d4eb2ba737bb">scran::IsOutlier::Results::thresholds</a></div><div class="ttdeci">Thresholds thresholds</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:175</div></div>
-<div class="ttc" id="astructscran_1_1IsOutlier_1_1Results_html_ae6931cb03537299d63127836fabb320f"><div class="ttname"><a href="structscran_1_1IsOutlier_1_1Results.html#ae6931cb03537299d63127836fabb320f">scran::IsOutlier::Results::outliers</a></div><div class="ttdeci">std::vector&lt; X &gt; outliers</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:170</div></div>
-<div class="ttc" id="astructscran_1_1IsOutlier_1_1Thresholds_html"><div class="ttname"><a href="structscran_1_1IsOutlier_1_1Thresholds.html">scran::IsOutlier::Thresholds</a></div><div class="ttdoc">Thresholds to define outliers on each metric.</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:126</div></div>
-<div class="ttc" id="astructscran_1_1IsOutlier_1_1Thresholds_html_a20a0eedf427f07d34c78aee7e07fe839"><div class="ttname"><a href="structscran_1_1IsOutlier_1_1Thresholds.html#a20a0eedf427f07d34c78aee7e07fe839">scran::IsOutlier::Thresholds::Thresholds</a></div><div class="ttdeci">Thresholds(int nblocks=1)</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:130</div></div>
-<div class="ttc" id="astructscran_1_1IsOutlier_1_1Thresholds_html_adeb1415ad8f8ac50c661059789a90dbb"><div class="ttname"><a href="structscran_1_1IsOutlier_1_1Thresholds.html#adeb1415ad8f8ac50c661059789a90dbb">scran::IsOutlier::Thresholds::lower</a></div><div class="ttdeci">std::vector&lt; double &gt; lower</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:141</div></div>
-<div class="ttc" id="astructscran_1_1IsOutlier_1_1Thresholds_html_afefce35fa6cb2b103d581637682ba255"><div class="ttname"><a href="structscran_1_1IsOutlier_1_1Thresholds.html#afefce35fa6cb2b103d581637682ba255">scran::IsOutlier::Thresholds::upper</a></div><div class="ttdeci">std::vector&lt; double &gt; upper</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:152</div></div>
+<div class="ttc" id="aclassscran_1_1IsOutlier_html_ad863d8a914d0b20feb7880e852b84b82"><div class="ttname"><a href="classscran_1_1IsOutlier.html#ad863d8a914d0b20feb7880e852b84b82">scran::IsOutlier::run</a></div><div class="ttdeci">Thresholds run(size_t n, BPTR block, const T *metrics, X *outliers)</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:198</div></div>
+<div class="ttc" id="astructscran_1_1IsOutlier_1_1Results_html"><div class="ttname"><a href="structscran_1_1IsOutlier_1_1Results.html">scran::IsOutlier::Results</a></div><div class="ttdoc">Results of the outlier identification.</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:117</div></div>
+<div class="ttc" id="astructscran_1_1IsOutlier_1_1Results_html_a4d639722b5356beab69ed32306ff69f2"><div class="ttname"><a href="structscran_1_1IsOutlier_1_1Results.html#a4d639722b5356beab69ed32306ff69f2">scran::IsOutlier::Results::Results</a></div><div class="ttdeci">Results(size_t n)</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:121</div></div>
+<div class="ttc" id="astructscran_1_1IsOutlier_1_1Results_html_ab76c89d333a817bf7881d4eb2ba737bb"><div class="ttname"><a href="structscran_1_1IsOutlier_1_1Results.html#ab76c89d333a817bf7881d4eb2ba737bb">scran::IsOutlier::Results::thresholds</a></div><div class="ttdeci">Thresholds thresholds</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:131</div></div>
+<div class="ttc" id="astructscran_1_1IsOutlier_1_1Results_html_ae6931cb03537299d63127836fabb320f"><div class="ttname"><a href="structscran_1_1IsOutlier_1_1Results.html#ae6931cb03537299d63127836fabb320f">scran::IsOutlier::Results::outliers</a></div><div class="ttdeci">std::vector&lt; X &gt; outliers</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:126</div></div>
+<div class="ttc" id="astructscran_1_1IsOutlier_1_1Thresholds_html"><div class="ttname"><a href="structscran_1_1IsOutlier_1_1Thresholds.html">scran::IsOutlier::Thresholds</a></div><div class="ttdoc">Thresholds to define outliers on each metric.</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:82</div></div>
+<div class="ttc" id="astructscran_1_1IsOutlier_1_1Thresholds_html_a20a0eedf427f07d34c78aee7e07fe839"><div class="ttname"><a href="structscran_1_1IsOutlier_1_1Thresholds.html#a20a0eedf427f07d34c78aee7e07fe839">scran::IsOutlier::Thresholds::Thresholds</a></div><div class="ttdeci">Thresholds(int nblocks=1)</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:86</div></div>
+<div class="ttc" id="astructscran_1_1IsOutlier_1_1Thresholds_html_adeb1415ad8f8ac50c661059789a90dbb"><div class="ttname"><a href="structscran_1_1IsOutlier_1_1Thresholds.html#adeb1415ad8f8ac50c661059789a90dbb">scran::IsOutlier::Thresholds::lower</a></div><div class="ttdeci">std::vector&lt; double &gt; lower</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:97</div></div>
+<div class="ttc" id="astructscran_1_1IsOutlier_1_1Thresholds_html_afefce35fa6cb2b103d581637682ba255"><div class="ttname"><a href="structscran_1_1IsOutlier_1_1Thresholds.html#afefce35fa6cb2b103d581637682ba255">scran::IsOutlier::Thresholds::upper</a></div><div class="ttdeci">std::vector&lt; double &gt; upper</div><div class="ttdef"><b>Definition:</b> IsOutlier.hpp:108</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

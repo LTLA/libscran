@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['percellqcfilters_14',['PerCellQCFilters',['../classscran_1_1PerCellQCFilters.html',1,'scran']]],
-  ['percellqcfilters_2ehpp_15',['PerCellQCFilters.hpp',['../PerCellQCFilters_8hpp.html',1,'']]],
-  ['percellqcmetrics_16',['PerCellQCMetrics',['../classscran_1_1PerCellQCMetrics.html',1,'scran']]],
-  ['percellqcmetrics_2ehpp_17',['PerCellQCMetrics.hpp',['../PerCellQCMetrics_8hpp.html',1,'']]]
+  ['outliers_17',['outliers',['../structscran_1_1IsOutlier_1_1Results.html#ae6931cb03537299d63127836fabb320f',1,'scran::IsOutlier::Results']]],
+  ['overall_5ffilter_18',['overall_filter',['../structscran_1_1PerCellQCFilters_1_1Results.html#ae5fc3d3819045ee29b34e9af0c90a0f3',1,'scran::PerCellQCFilters::Results']]]
 ];

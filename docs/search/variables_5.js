@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['thresholds_67',['thresholds',['../structscran_1_1IsOutlier_1_1Results.html#ab76c89d333a817bf7881d4eb2ba737bb',1,'scran::IsOutlier::Results::thresholds()'],['../structscran_1_1PerCellQCFilters_1_1Results.html#ad3ab33eeb778199dc2c698d429099063',1,'scran::PerCellQCFilters::Results::thresholds()']]]
+  ['residuals_84',['residuals',['../structscran_1_1FitTrendVar_1_1Results.html#a3f2d7d595a07195ddb89319fa941a832',1,'scran::FitTrendVar::Results::residuals()'],['../structscran_1_1ModelGeneVar_1_1Results.html#a943930ea88c62c5bd5828d279d6d1a50',1,'scran::ModelGeneVar::Results::residuals()']]]
 ];

@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['outliers_63',['outliers',['../structscran_1_1IsOutlier_1_1Results.html#ae6931cb03537299d63127836fabb320f',1,'scran::IsOutlier::Results']]],
-  ['overall_5ffilter_64',['overall_filter',['../structscran_1_1PerCellQCFilters_1_1Results.html#ae5fc3d3819045ee29b34e9af0c90a0f3',1,'scran::PerCellQCFilters::Results']]]
+  ['means_81',['means',['../structscran_1_1ModelGeneVar_1_1Results.html#a30c93b46a06b60773cfe1cbb895c4f32',1,'scran::ModelGeneVar::Results']]]
 ];
