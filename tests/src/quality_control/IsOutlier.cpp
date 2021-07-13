@@ -130,7 +130,7 @@ TEST(IsOutlier, BlockTests) {
         1
     };
     scran::IsOutlier is;
-    auto isres = is.run(even_values.size(), even_values.data(), block.data());
+    auto isres = is.run(even_values.size(), block.data(), even_values.data());
 
     // Checking the thresholds.
     auto lower = isres.thresholds.lower;

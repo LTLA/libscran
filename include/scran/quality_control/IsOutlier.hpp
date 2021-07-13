@@ -221,10 +221,6 @@ public:
                 *outliers = (val < lthresh || val > uthresh);
             }
         } else {
-            if (group_ncells != n) {
-                throw std::runtime_error("length of grouping vector and number of cells are not equal");
-            }
-
             for (size_t g = 0; g < by_group.size(); ++g) {
                 auto copy = buffer.data();
                 const auto& curgroup = by_group[g];
@@ -339,9 +335,6 @@ private:
     double nmads = 3;
     bool lower = true, upper = true, log = false;
     std::vector<double> buffer;
-
-    std::vector<std::vector<size_t> > by_group;
-    size_t group_ncells = 0;
 };
 
 }
