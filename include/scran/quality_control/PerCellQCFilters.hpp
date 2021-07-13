@@ -30,6 +30,7 @@ namespace scran {
  * Outliers are defined on each metric by counting the number of MADs from the median value across all cells.
  * This assumes that most cells in the experiment are of high (or at least acceptable) quality;
  * any anomalies are indicative of low-quality cells that should be filtered out.
+ * See the `IsOutlier` class for implementation details.
  *
  * For the total counts and number of detected features, the outliers are defined after log-transformation of the metrics.
  * This improves resolution at low values and ensures that the defined threshold is not negative.
@@ -45,48 +46,6 @@ public:
      */
     PerCellQCFilters& set_nmads(double n = 3) {
         outliers.set_nmads(n);
-        return *this;
-    }
-
-    /**
-     * Define blocks of cells, where outliers are only computed within each block.
-     * This is useful in cases where cells in different blocks have different distributions for the QC metrics, e.g., because they were sequenced at different depth.
-     * In such cases, we avoid confounding the outlier detection with systematic differences between blocks.
-     *
-     * @tparam V Class of the blocking vector.
-     * @param p Blocking vector of length equal to the number of cells.
-     * Values should be integer block IDs in \f$[0, N)\f$ where \f$N\f$ is the number of blocks.
-     *
-     * @return A reference to this `PerCellQCFilters` object. 
-     */
-    template<class V>
-    PerCellQCFilters& set_blocks(const V& p) {
-        return set_blocks(p.size(), p.begin());
-    }
-
-    /**
-     * Define blocks of cells, see `set_blocks(const V& p)`.
-     *
-     * @tparam SIT Iterator class for the blocking vector.
-     *
-     * @param n Length of the blocking vector, should be equal to the number of cells.
-     * @param p Pointer or iterator to the start of the blocking vector.
-     *
-     * @return A reference to this `PerCellQCFilters` object. 
-     */
-    template<typename SIT>
-    PerCellQCFilters& set_blocks(size_t n, SIT p) {
-        outliers.set_blocks(n, p);
-        return *this;
-    }
-
-    /**
-     * Unset any previous blocking structure.
-     *
-     * @return A reference to this `PerCellQCFilters` object. 
-     */
-    PerCellQCFilters& set_blocks() {
-        outliers.set_blocks();
         return *this;
     }
 
@@ -171,13 +130,22 @@ public:
     /**
      * Identify low-quality cells as those that have outlier values for QC metrics.
      * This uses QC metrics that are typically computed by the `PerCellQCMetrics` class.
+     * 
+     * If `block` is set, outliers are only computed within each block.
+     * This is useful in cases where cells in different blocks have different distributions for the QC metrics, e.g., because they were sequenced at different depth.
+     * In such cases, we avoid confounding the outlier detection with systematic differences between blocks.
      *
+     * @tparam BPTR Pointer to an integer type, to hold the block IDs.
+     * @tparam S Floating point type, used for the sum.
+     * @tparam D Integer type, used for the number of detected features.
+     * @tparam PPTR Pointer to a floating point type, for the subset proportions.
      * @tparam X Boolean type to indicate whether a cell should be discarded.
-     * @tparam S Type of the sum.
-     * @tparam D Type of the number of detected features.
-     * @tparam PTR Type of the pointer to the subset proportions.
      *
      * @param ncells Number of cells.
+     * @param[in] block Pointer to an array of block identifiers.
+     * If provided, the array should be of length equal to `ncells`.
+     * Values should be integer IDs in \f$[0, N)\f$ where \f$N\f$ is the number of blocks.
+     * This can also be a `nullptr`, in which case all cells are assumed to belong to the same block.
      * @param[in] sums Pointer to an array of length equal to `ncells`, containing the per-cell sums.
      * @param[in] detected Pointer to an array of length equal to `ncells`, containing the number of detected features for each cell.
      * @param[in] subset_proportions Vector of pointers of length equal to the number of feature subsets.
@@ -189,29 +157,43 @@ public:
      * @param[out] filter_by_subset_proportions Vector of pointers of length equal to the number of feature subsets.
      * Each pointer corresponds to a feature subset and should point to an array of length equal to `ncells`, 
      * indicating whether a cell should be filtered out due to a high proportion of counts for that subset.
-     * @param[out] overall_filter  Pointer to an output array of length equal to `ncells`,
+     * @param[out] overall_filter Pointer to an output array of length equal to `ncells`,
      * indicating whether a cell should be filtered out for any reason.
      *
      * @return A `Thresholds` object defining the thresholds for each QC metric.
      */
-    template<typename X=uint8_t, typename S=double, typename D=int, typename PTR=const double*>
-    Thresholds run(size_t ncells, const S* sums, const D* detected, std::vector<PTR> subset_proportions,
-                   X* filter_by_sums, X* filter_by_detected, std::vector<X*> filter_by_subset_proportions, X* overall_filter) 
+    template<typename BPTR, typename S, typename D, typename PPTR, typename X>
+    Thresholds run(size_t ncells, BPTR block, const S* sums, const D* detected, std::vector<PPTR> subset_proportions,
+                   X* filter_by_sums, X* filter_by_detected, std::vector<X*> filter_by_subset_proportions, X* overall_filter)
     {
         Thresholds output;
+        BlockIndices by_block;
+        if (block) {
+            by_block = block_indices(ncells, block);
+        }
+        outliers.set_lower(true).set_upper(false).set_log(true);
 
         // Filtering to remove outliers on the log-sum.
-        outliers.set_lower(true).set_upper(false).set_log(true);
         {
-            auto res = outliers.run(ncells, sums, filter_by_sums);
-            output.sums = res.lower;
+            if (block) {
+                auto res = outliers.run(ncells, by_block, sums, filter_by_sums);
+                output.sums = res.lower;
+            } else {
+                auto res = outliers.run(ncells, nullptr, sums, filter_by_sums);
+                output.sums = res.lower;
+            }
             std::copy(filter_by_sums, filter_by_sums + ncells, overall_filter);
         }
 
         // Filtering to remove outliers on the log-detected number.
         {
-            auto res = outliers.run(ncells, detected, filter_by_detected);
-            output.detected = res.lower;
+            if (block) {
+                auto res = outliers.run(ncells, by_block, detected, filter_by_detected);
+                output.detected = res.lower;
+            } else {
+                auto res = outliers.run(ncells, nullptr, detected, filter_by_detected);
+                output.detected = res.lower;
+            }
             for (size_t i = 0; i < ncells; ++i) {
                 overall_filter[i] |= filter_by_detected[i];
             }
@@ -228,8 +210,15 @@ public:
 
         for (size_t s = 0; s < subset_proportions.size(); ++s) {
             auto dump = filter_by_subset_proportions[s];
-            auto res = outliers.run(ncells, subset_proportions[s], dump);
-            output.subset_proportions[s] = res.upper;
+
+            if (block) {
+                auto res = outliers.run(ncells, by_block, subset_proportions[s], dump);
+                output.subset_proportions[s] = res.upper;
+            } else {
+                auto res = outliers.run(ncells, nullptr, subset_proportions[s], dump);
+                output.subset_proportions[s] = res.upper;
+            }
+
             for (size_t i = 0; i < ncells; ++i) {
                 overall_filter[i] |= dump[i];
             }
@@ -242,11 +231,13 @@ public:
      * Identify low-quality cells as those that have outlier values for QC metrics.
      *
      * @tparam X Boolean type to indicate whether a cell should be discarded.
+     * @tparam BPTR Pointer to an integer type, to hold the block IDs.
      * @tparam S Type of the sum.
      * @tparam D Type of the number of detected features.
-     * @tparam PTR Type of the pointer to the subset proportions.
+     * @tparam PPTR Type of the pointer to the subset proportions.
      *
      * @param ncells Number of cells.
+     * @param[in] block Optional pointer to an array of block identifiers, see `run()` for details.
      * @param[in] sums Pointer to an array of length equal to `ncells`, containing the per-cell sums.
      * @param[in] detected Pointer to an array of length equal to `ncells`, containing the number of detected features for each cell.
      * @param[in] subset_proportions Vector of pointers of length equal to the number of feature subsets.
@@ -254,11 +245,16 @@ public:
      *
      * @return A `Results` object indicating whether a cell should be filtered out for each reason.
      */
-    template<typename X=uint8_t, typename S=double, typename D=int, typename PTR=const double*>
-    Results<X> run(size_t ncells, const S* sums, const D* detected, std::vector<PTR> subset_proportions) {
+    template<typename X = uint8_t, typename BPTR, typename S, typename D, typename PPTR>
+    Results<X> run(size_t ncells, BPTR block, const S* sums, const D* detected, std::vector<PPTR> subset_proportions) {
         Results<X> output(ncells, subset_proportions.size());
-        output.thresholds = run(ncells, sums, detected, std::move(subset_proportions),
-                                output.filter_by_sums.data(), output.filter_by_detected.data(), 
+        output.thresholds = run(ncells, 
+                                block, 
+                                sums, 
+                                detected, 
+                                std::move(subset_proportions),
+                                output.filter_by_sums.data(), 
+                                output.filter_by_detected.data(), 
                                 vector_to_pointers(output.filter_by_subset_proportions),
                                 output.overall_filter.data());
         return output;
@@ -269,14 +265,16 @@ public:
      *
      * @tparam X Boolean type to indicate whether a cell should be discarded.
      * @tparam R Class that holds the QC metrics, typically a `PerCellQCMetrics::Results`.
+     * @tparam BPTR Integer type, to hold the block IDs.
      *
      * @param metrics Precomputed QC metrics, typically generated by `PerCellQCMetrics::run`.
+     * @param[in] block Optional pointer to an array of block identifiers, see `run()` for details.
      *
      * @return A `Results` object indicating whether a cell should be filtered out for each reason.
      */
-    template<typename X=uint8_t, class R>
-    Results<X> run(const R& metrics) {
-        return run(metrics.sums.size(), metrics.sums.data(), metrics.detected.data(), vector_to_pointers(metrics.subset_proportions));
+    template<typename X=uint8_t, class R, typename BPTR>
+    Results<X> run(const R& metrics, BPTR block) {
+        return run(metrics.sums.size(), block, metrics.sums.data(), metrics.detected.data(), vector_to_pointers(metrics.subset_proportions));
     }
 
 private:
