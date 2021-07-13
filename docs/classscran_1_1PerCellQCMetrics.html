@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>scran: scran::PerCellQCMetrics&lt; X &gt; Class Template Reference</title>
+<title>scran: scran::PerCellQCMetrics Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -72,7 +72,7 @@ $(function() {
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classscran_1_1PerCellQCMetrics-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">scran::PerCellQCMetrics&lt; X &gt; Class Template Reference</div>  </div>
+<div class="title">scran::PerCellQCMetrics Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
@@ -89,155 +89,43 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a3805947ce4bf8d355d79d375c2a1eaf6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCMetrics.html#a3805947ce4bf8d355d79d375c2a1eaf6">PerCellQCMetrics</a> ()</td></tr>
-<tr class="separator:a3805947ce4bf8d355d79d375c2a1eaf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae7f6e6f6a45b0909bec33df36cbaf77d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCMetrics.html#ae7f6e6f6a45b0909bec33df36cbaf77d">PerCellQCMetrics</a> (const std::vector&lt; X * &gt; &amp;s)</td></tr>
-<tr class="separator:ae7f6e6f6a45b0909bec33df36cbaf77d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab875f8d10b1265311d2d62a5a8bac8dd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCMetrics.html#ab875f8d10b1265311d2d62a5a8bac8dd">PerCellQCMetrics</a> (std::vector&lt; const X * &gt; s)</td></tr>
-<tr class="separator:ab875f8d10b1265311d2d62a5a8bac8dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a945a454e04bfffb66b19e02027eaed71"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1PerCellQCMetrics.html">PerCellQCMetrics</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCMetrics.html#a945a454e04bfffb66b19e02027eaed71">set_subsets</a> (std::vector&lt; const X * &gt; s)</td></tr>
-<tr class="separator:a945a454e04bfffb66b19e02027eaed71"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1c92ce64f889f883aa34c91c91f7b34f"><td class="memTemplParams" colspan="2">template&lt;typename T , typename IDX &gt; </td></tr>
-<tr class="memitem:a1c92ce64f889f883aa34c91c91f7b34f"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCMetrics.html#a1c92ce64f889f883aa34c91c91f7b34f">run</a> (const tatami::Matrix&lt; T, IDX &gt; *mat)</td></tr>
-<tr class="separator:a1c92ce64f889f883aa34c91c91f7b34f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d63edaacdaeb64a79a30bb5ccea82c8"><td class="memTemplParams" colspan="2">template&lt;typename T , typename IDX , typename S , typename D , typename P &gt; </td></tr>
-<tr class="memitem:a7d63edaacdaeb64a79a30bb5ccea82c8"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCMetrics.html#a7d63edaacdaeb64a79a30bb5ccea82c8">run</a> (const tatami::Matrix&lt; T, IDX &gt; *mat, S *sums, D *detected, std::vector&lt; P * &gt; subset_proportions)</td></tr>
-<tr class="separator:a7d63edaacdaeb64a79a30bb5ccea82c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a063e01eb0e4daef4adab0b8391a15749"><td class="memTemplParams" colspan="2">template&lt;class MAT &gt; </td></tr>
+<tr class="memitem:a063e01eb0e4daef4adab0b8391a15749"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCMetrics.html#a063e01eb0e4daef4adab0b8391a15749">run</a> (const MAT *mat)</td></tr>
+<tr class="separator:a063e01eb0e4daef4adab0b8391a15749"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aedc028b2d8df9b5b28623599e060796e"><td class="memTemplParams" colspan="2">template&lt;class MAT , typename SUB &gt; </td></tr>
+<tr class="memitem:aedc028b2d8df9b5b28623599e060796e"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCMetrics.html#aedc028b2d8df9b5b28623599e060796e">run</a> (const MAT *mat, std::vector&lt; SUB &gt; subsets)</td></tr>
+<tr class="separator:aedc028b2d8df9b5b28623599e060796e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36d34c7a4b916eadf370c0bdf1a7da0e"><td class="memTemplParams" colspan="2">template&lt;class MAT , typename S , typename D &gt; </td></tr>
+<tr class="memitem:a36d34c7a4b916eadf370c0bdf1a7da0e"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCMetrics.html#a36d34c7a4b916eadf370c0bdf1a7da0e">run</a> (const MAT *mat, S *sums, D *detected)</td></tr>
+<tr class="separator:a36d34c7a4b916eadf370c0bdf1a7da0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad06fd7c9f3c7c1981ddff4f9cd4910a8"><td class="memTemplParams" colspan="2">template&lt;class MAT , typename SUB , typename S , typename D , typename PROP &gt; </td></tr>
+<tr class="memitem:ad06fd7c9f3c7c1981ddff4f9cd4910a8"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCMetrics.html#ad06fd7c9f3c7c1981ddff4f9cd4910a8">run</a> (const MAT *mat, std::vector&lt; SUB &gt; subsets, S *sums, D *detected, std::vector&lt; PROP &gt; subset_proportions)</td></tr>
+<tr class="separator:ad06fd7c9f3c7c1981ddff4f9cd4910a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><h3>template&lt;typename X = uint8_t&gt;<br />
-class scran::PerCellQCMetrics&lt; X &gt;</h3>
-
-<p>Compute typical per-cell quality control metrics. </p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">X</td><td>Type of the boolean flag to indicate whether a feature belongs to a feature subset.</td></tr>
-  </table>
-  </dd>
-</dl>
+<div class="textblock"><p>Compute typical per-cell quality control metrics. </p>
 <p>Given a feature-by-cell count matrix, this class computes several QC metrics:</p>
 <ul>
 <li>The total sum for each cell quantifies the efficiency of library preparation and sequencing.</li>
 <li>The number of detected features also quantifies the library preparation efficiency, but with a greater focus on capturing the transcriptional complexity.</li>
 <li>The interpretation of the subset proportions depend on the subsets. In the most common case of mitochondrial transcripts, higher proportions indicate cell damage. Spike-in proportions can be interpreted in a similar manner. </li>
 </ul>
-</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a3805947ce4bf8d355d79d375c2a1eaf6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3805947ce4bf8d355d79d375c2a1eaf6">&#9670;&nbsp;</a></span>PerCellQCMetrics() <span class="overload">[1/3]</span></h2>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a063e01eb0e4daef4adab0b8391a15749"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a063e01eb0e4daef4adab0b8391a15749">&#9670;&nbsp;</a></span>run() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename X  = uint8_t&gt; </div>
+template&lt;class MAT &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1PerCellQCMetrics.html">scran::PerCellQCMetrics</a>&lt; X &gt;::<a class="el" href="classscran_1_1PerCellQCMetrics.html">PerCellQCMetrics</a> </td>
+          <td class="memname"><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html">Results</a> scran::PerCellQCMetrics::run </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Default constructor. </p>
-
-</div>
-</div>
-<a id="ae7f6e6f6a45b0909bec33df36cbaf77d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae7f6e6f6a45b0909bec33df36cbaf77d">&#9670;&nbsp;</a></span>PerCellQCMetrics() <span class="overload">[2/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename X  = uint8_t&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1PerCellQCMetrics.html">scran::PerCellQCMetrics</a>&lt; X &gt;::<a class="el" href="classscran_1_1PerCellQCMetrics.html">PerCellQCMetrics</a> </td>
-          <td>(</td>
-          <td class="paramtype">const std::vector&lt; X * &gt; &amp;&#160;</td>
-          <td class="paramname"><em>s</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>A vector of pointers to boolean arrays. Each array represents a feature subset and is of length equal to the number of features. Each value should be non-zero if the corresponding feature belongs to the subset; otherwise, it should be zero. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ab875f8d10b1265311d2d62a5a8bac8dd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab875f8d10b1265311d2d62a5a8bac8dd">&#9670;&nbsp;</a></span>PerCellQCMetrics() <span class="overload">[3/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename X  = uint8_t&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1PerCellQCMetrics.html">scran::PerCellQCMetrics</a>&lt; X &gt;::<a class="el" href="classscran_1_1PerCellQCMetrics.html">PerCellQCMetrics</a> </td>
-          <td>(</td>
-          <td class="paramtype">std::vector&lt; const X * &gt;&#160;</td>
-          <td class="paramname"><em>s</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p></p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>A vector of pointers to boolean arrays. Each array represents a feature subset and is of length equal to the number of features. Each value should be non-zero if the corresponding feature belongs to the subset; otherwise, it should be zero. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<h2 class="groupheader">Member Function Documentation</h2>
-<a id="a1c92ce64f889f883aa34c91c91f7b34f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1c92ce64f889f883aa34c91c91f7b34f">&#9670;&nbsp;</a></span>run() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename X  = uint8_t&gt; </div>
-<div class="memtemplate">
-template&lt;typename T , typename IDX &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html">Results</a> <a class="el" href="classscran_1_1PerCellQCMetrics.html">scran::PerCellQCMetrics</a>&lt; X &gt;::run </td>
-          <td>(</td>
-          <td class="paramtype">const tatami::Matrix&lt; T, IDX &gt; *&#160;</td>
+          <td class="paramtype">const MAT *&#160;</td>
           <td class="paramname"><em>mat</em></td><td>)</td>
           <td></td>
         </tr>
@@ -249,34 +137,160 @@ template&lt;typename T , typename IDX &gt; </div>
 </table>
 </div><div class="memdoc">
 <p>Compute the QC metrics from an input matrix and return the results.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">mat</td><td>Pointer to a feature-by-cells matrix.</td></tr>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">MAT</td><td>Type of matrix, usually a <code>tatami::NumericMatrix</code>.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html" title="Result store for QC metric calculations.">PerCellQCMetrics::Results</a></code> object containing the QC metrics. Subset proportions are returned depending on the subsets defined at construction or by <code><a class="el" href="classscran_1_1PerCellQCMetrics.html#a945a454e04bfffb66b19e02027eaed71">set_subsets()</a></code>. </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">mat</td><td>Pointer to a feature-by-cells <b>tatami</b> matrix.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html" title="Result store for QC metric calculations.">PerCellQCMetrics::Results</a></code> object containing the QC metrics, without any subset proportions. </dd></dl>
 
 </div>
 </div>
-<a id="a7d63edaacdaeb64a79a30bb5ccea82c8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7d63edaacdaeb64a79a30bb5ccea82c8">&#9670;&nbsp;</a></span>run() <span class="overload">[2/2]</span></h2>
+<a id="a36d34c7a4b916eadf370c0bdf1a7da0e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a36d34c7a4b916eadf370c0bdf1a7da0e">&#9670;&nbsp;</a></span>run() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename X  = uint8_t&gt; </div>
-<div class="memtemplate">
-template&lt;typename T , typename IDX , typename S , typename D , typename P &gt; </div>
+template&lt;class MAT , typename S , typename D &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classscran_1_1PerCellQCMetrics.html">scran::PerCellQCMetrics</a>&lt; X &gt;::run </td>
+          <td class="memname">void scran::PerCellQCMetrics::run </td>
           <td>(</td>
-          <td class="paramtype">const tatami::Matrix&lt; T, IDX &gt; *&#160;</td>
+          <td class="paramtype">const MAT *&#160;</td>
           <td class="paramname"><em>mat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">S *&#160;</td>
+          <td class="paramname"><em>sums</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">D *&#160;</td>
+          <td class="paramname"><em>detected</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Compute the QC metrics from an input matrix and return the results.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">MAT</td><td>Type of matrix, usually a <code>tatami::NumericMatrix</code>. </td></tr>
+    <tr><td class="paramname">S</td><td>Floating-point value, to store the sums. </td></tr>
+    <tr><td class="paramname">D</td><td>Integer value, to store the detected number.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Pointer to a feature-by-cells matrix. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sums</td><td>Pointer to an array of length equal to the number of columns in <code>mat</code>. This is used to store the computed sums for all cells. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">detected</td><td>Pointer to an array of length equal to the number of columns in <code>mat</code>. This is used to store the number of detected features for all cells.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><code>sums</code> and <code>detected</code> are filled with the relevant statistics. </dd></dl>
+
+</div>
+</div>
+<a id="aedc028b2d8df9b5b28623599e060796e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aedc028b2d8df9b5b28623599e060796e">&#9670;&nbsp;</a></span>run() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class MAT , typename SUB &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html">Results</a> scran::PerCellQCMetrics::run </td>
+          <td>(</td>
+          <td class="paramtype">const MAT *&#160;</td>
+          <td class="paramname"><em>mat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; SUB &gt;&#160;</td>
+          <td class="paramname"><em>subsets</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Compute the QC metrics from an input matrix and return the results.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">MAT</td><td>Type of matrix, usually a <code>tatami::NumericMatrix</code>. </td></tr>
+    <tr><td class="paramname">SUB</td><td>Pointer to an array of values interpretable as booleans.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Pointer to a feature-by-cells <b>tatami</b> matrix. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">subsets</td><td>Vector of pointers to arrays of length equal to <code>mat-&gt;nrow()</code>. Each array represents a feature subset and indicating whether each feature in <code>mat</code> belongs to that subset.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html" title="Result store for QC metric calculations.">PerCellQCMetrics::Results</a></code> object containing the QC metrics. Subset proportions are returned depending on the subsets defined at construction or by <code>set_subsets()</code>. </dd></dl>
+
+</div>
+</div>
+<a id="ad06fd7c9f3c7c1981ddff4f9cd4910a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad06fd7c9f3c7c1981ddff4f9cd4910a8">&#9670;&nbsp;</a></span>run() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class MAT , typename SUB , typename S , typename D , typename PROP &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void scran::PerCellQCMetrics::run </td>
+          <td>(</td>
+          <td class="paramtype">const MAT *&#160;</td>
+          <td class="paramname"><em>mat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; SUB &gt;&#160;</td>
+          <td class="paramname"><em>subsets</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -293,7 +307,7 @@ template&lt;typename T , typename IDX , typename S , typename D , typename P &gt
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::vector&lt; P * &gt;&#160;</td>
+          <td class="paramtype">std::vector&lt; PROP &gt;&#160;</td>
           <td class="paramname"><em>subset_proportions</em>&#160;</td>
         </tr>
         <tr>
@@ -309,52 +323,27 @@ template&lt;typename T , typename IDX , typename S , typename D , typename P &gt
 </table>
 </div><div class="memdoc">
 <p>Compute the QC metrics from an input matrix and return the results.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">MAT</td><td>Type of matrix, usually a <code>tatami::NumericMatrix</code>. </td></tr>
+    <tr><td class="paramname">SUB</td><td>Pointer to a type interpretable as boolean. </td></tr>
+    <tr><td class="paramname">S</td><td>Floating-point value, to store the sums. </td></tr>
+    <tr><td class="paramname">D</td><td>Integer value, to store the number of detected features. </td></tr>
+    <tr><td class="paramname">PROP</td><td>Floating point value, to store the subset proportions.</td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Pointer to a feature-by-cells matrix. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">sums</td><td>Pointer to a (typically double-precision) array of length equal to the number of columns in <code>mat</code>. This is used to store the computed sums for all cells. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">detected</td><td>Pointer to a (typically integer) array of length equal to the number of columns in <code>mat</code>. This is used to store the number of detected features for all cells. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">subset_proportions</td><td>Vector of pointers (typically double-precision) arrays of length equal to the number of columns in <code>mat</code>. Each array corresponds to a feature subset and is used to store the proportion of counts in that subset across all cells.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">subsets</td><td>Vector of pointers to arrays of length equal to <code>mat-&gt;nrow()</code>. Each array represents a feature subset and indicating whether each feature in <code>mat</code> belongs to that subset. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sums</td><td>Pointer to an array of length equal to the number of columns in <code>mat</code>. This is used to store the computed sums for all cells. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">detected</td><td>Pointer to an array of length equal to the number of columns in <code>mat</code>. This is used to store the number of detected features for all cells. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">subset_proportions</td><td>Vector of pointers to arrays of length equal to the number of columns in <code>mat</code>. Each array corresponds to a feature subset and is used to store the proportion of counts in that subset across all cells.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><code>sums</code>, <code>detected</code>, and each array in <code>subset_proportions</code> is filled with the relevant statistics. </dd></dl>
-
-</div>
-</div>
-<a id="a945a454e04bfffb66b19e02027eaed71"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a945a454e04bfffb66b19e02027eaed71">&#9670;&nbsp;</a></span>set_subsets()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename X  = uint8_t&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1PerCellQCMetrics.html">PerCellQCMetrics</a>&amp; <a class="el" href="classscran_1_1PerCellQCMetrics.html">scran::PerCellQCMetrics</a>&lt; X &gt;::set_subsets </td>
-          <td>(</td>
-          <td class="paramtype">std::vector&lt; const X * &gt;&#160;</td>
-          <td class="paramname"><em>s</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Define feature subsets of interest. This is most commonly used to define mitochondrial transcripts or ribosomal genes.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>A vector of pointers to boolean arrays indicating which features belong in which feature subsets. Each array represents a feature subset and is of length equal to the number of features. Each value should be non-zero if the corresponding feature belongs to the subset; otherwise, it should be zero.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PerCellQCMetrics.html" title="Compute typical per-cell quality control metrics.">PerCellQCMetrics</a></code> object. </dd></dl>
 
 </div>
 </div>

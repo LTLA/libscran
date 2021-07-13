@@ -8,8 +8,7 @@ var searchData=
   ['set_5fnmads_25',['set_nmads',['../classscran_1_1IsOutlier.html#a5825106689cb0e8f94c32110d899a05c',1,'scran::IsOutlier::set_nmads()'],['../classscran_1_1PerCellQCFilters.html#a34371eda20e5a18a0b672dc44d1caa98',1,'scran::PerCellQCFilters::set_nmads()']]],
   ['set_5fpseudo_5fcount_26',['set_pseudo_count',['../classscran_1_1LogNormCounts.html#a77b3a4d60721ae2a2a7fa4d682fc6dd3',1,'scran::LogNormCounts']]],
   ['set_5fretain_27',['set_retain',['../classscran_1_1FilterCells.html#a0309536827430a7a4291494adcd15080',1,'scran::FilterCells']]],
-  ['set_5fsubsets_28',['set_subsets',['../classscran_1_1PerCellQCMetrics.html#a945a454e04bfffb66b19e02027eaed71',1,'scran::PerCellQCMetrics']]],
-  ['set_5fupper_29',['set_upper',['../classscran_1_1IsOutlier.html#ab72b6eb05729891f1b4ae1d1c0e1a05d',1,'scran::IsOutlier']]],
-  ['subset_5fproportions_30',['subset_proportions',['../structscran_1_1PerCellQCFilters_1_1Thresholds.html#a3621907e181dc5fe287c327263e044b6',1,'scran::PerCellQCFilters::Thresholds::subset_proportions()'],['../structscran_1_1PerCellQCMetrics_1_1Results.html#a1e7024d0847a5f11b6bbf21b0cd27aa9',1,'scran::PerCellQCMetrics::Results::subset_proportions()']]],
-  ['sums_31',['sums',['../structscran_1_1PerCellQCFilters_1_1Thresholds.html#a56559714161ee423014d0c337f250e3c',1,'scran::PerCellQCFilters::Thresholds::sums()'],['../structscran_1_1PerCellQCMetrics_1_1Results.html#ab5bb02c70da538cd219ab34ff251ac10',1,'scran::PerCellQCMetrics::Results::sums()']]]
+  ['set_5fupper_28',['set_upper',['../classscran_1_1IsOutlier.html#ab72b6eb05729891f1b4ae1d1c0e1a05d',1,'scran::IsOutlier']]],
+  ['subset_5fproportions_29',['subset_proportions',['../structscran_1_1PerCellQCFilters_1_1Thresholds.html#a3621907e181dc5fe287c327263e044b6',1,'scran::PerCellQCFilters::Thresholds::subset_proportions()'],['../structscran_1_1PerCellQCMetrics_1_1Results.html#ac2782fd6086b8920f4cef8cf3e44a3f8',1,'scran::PerCellQCMetrics::Results::subset_proportions()']]],
+  ['sums_30',['sums',['../structscran_1_1PerCellQCFilters_1_1Thresholds.html#a56559714161ee423014d0c337f250e3c',1,'scran::PerCellQCFilters::Thresholds::sums()'],['../structscran_1_1PerCellQCMetrics_1_1Results.html#a99596b61b240f739b71a66ed60f0143e',1,'scran::PerCellQCMetrics::Results::sums()']]]
 ];
