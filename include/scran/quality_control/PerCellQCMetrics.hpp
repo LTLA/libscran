@@ -62,32 +62,18 @@ public:
      * Compute the QC metrics from an input matrix and return the results.
      *
      * @tparam MAT Type of matrix, usually a `tatami::NumericMatrix`.
-     *
-     * @param mat Pointer to a feature-by-cells **tatami** matrix.
-     *
-     * @return A `PerCellQCMetrics::Results` object containing the QC metrics, without any subset proportions.
-     *
-     */
-    template<class MAT>
-    Results run(const MAT* mat) {
-        return run(mat, std::vector<const char*>());
-    }
-
-    /**
-     * Compute the QC metrics from an input matrix and return the results.
-     *
-     * @tparam MAT Type of matrix, usually a `tatami::NumericMatrix`.
      * @tparam SUB Pointer to an array of values interpretable as booleans.
      *
      * @param mat Pointer to a feature-by-cells **tatami** matrix.
      * @param[in] subsets Vector of pointers to arrays of length equal to `mat->nrow()`.
      * Each array represents a feature subset and indicating whether each feature in `mat` belongs to that subset.
+     * Users can pass `{}` if no subsets are to be used. 
      *
      * @return A `PerCellQCMetrics::Results` object containing the QC metrics.
      * Subset proportions are returned depending on the subsets defined at construction or by `set_subsets()`.
      *
      */
-    template<class MAT, typename SUB>
+    template<class MAT, typename SUB = const uint8_t*>
     Results run(const MAT* mat, std::vector<SUB> subsets) {
         Results output(mat->ncol(), subsets.size());
         run(mat, std::move(subsets), output.sums.data(), output.detected.data(), vector_to_pointers(output.subset_proportions));
@@ -95,27 +81,6 @@ public:
     }
 
 public:
-    /**
-     * Compute the QC metrics from an input matrix and return the results.
-     *
-     * @tparam MAT Type of matrix, usually a `tatami::NumericMatrix`.
-     * @tparam S Floating-point value, to store the sums.
-     * @tparam D Integer value, to store the detected number.
-     *
-     * @param mat Pointer to a feature-by-cells matrix.
-     * @param[out] sums Pointer to an array of length equal to the number of columns in `mat`.
-     * This is used to store the computed sums for all cells.
-     * @param[out] detected Pointer to an array of length equal to the number of columns in `mat`.
-     * This is used to store the number of detected features for all cells.
-     *
-     * @return `sums` and `detected` are filled with the relevant statistics.
-     */
-    template<class MAT, typename S, typename D>
-    void run(const MAT* mat, S* sums, D* detected) {
-        run(mat, std::vector<const char*>(), sums, detected, std::vector<double*>());
-        return;
-    }
-
     /**
      * Compute the QC metrics from an input matrix and return the results.
      *
@@ -128,16 +93,18 @@ public:
      * @param mat Pointer to a feature-by-cells matrix.
      * @param[in] subsets Vector of pointers to arrays of length equal to `mat->nrow()`.
      * Each array represents a feature subset and indicating whether each feature in `mat` belongs to that subset.
+     * Users can pass `{}` if no subsets are to be used. 
      * @param[out] sums Pointer to an array of length equal to the number of columns in `mat`.
      * This is used to store the computed sums for all cells.
      * @param[out] detected Pointer to an array of length equal to the number of columns in `mat`.
      * This is used to store the number of detected features for all cells.
      * @param[out] subset_proportions Vector of pointers to arrays of length equal to the number of columns in `mat`.
      * Each array corresponds to a feature subset and is used to store the proportion of counts in that subset across all cells.
+     * Users can pass `{}` if no subsets are used. 
      *
      * @return `sums`, `detected`, and each array in `subset_proportions` is filled with the relevant statistics.
      */
-    template<class MAT, typename SUB, typename S, typename D, typename PROP>
+    template<class MAT, typename SUB = const uint8_t*, typename S, typename D, typename PROP>
     void run(const MAT* mat, std::vector<SUB> subsets, S* sums, D* detected, std::vector<PROP> subset_proportions) {
         size_t nr = mat->nrow(), nc = mat->ncol();
 

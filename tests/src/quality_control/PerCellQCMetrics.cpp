@@ -32,7 +32,7 @@ protected:
 };
 
 TEST_F(PerCellQCMetricsTester, NoSubset) {
-    auto res = qc1.run(dense_row.get());
+    auto res = qc1.run(dense_row.get(), {});
     EXPECT_EQ(res.sums, tatami::column_sums(dense_row.get()));
 
     std::vector<int> copy(sparse_matrix.size());
@@ -45,15 +45,15 @@ TEST_F(PerCellQCMetricsTester, NoSubset) {
     auto refsums = tatami::column_sums(detected.get());
     EXPECT_EQ(res.detected, std::vector<int>(refsums.begin(), refsums.end())); // as column_sums always yeilds a vector of ints.
 
-    auto res2 = qc2.run(dense_column.get());
+    auto res2 = qc2.run(dense_column.get(), {});
     EXPECT_EQ(res.sums, res2.sums);
     EXPECT_EQ(res.detected, res2.detected);
 
-    auto res3 = qc3.run(sparse_row.get());
+    auto res3 = qc3.run(sparse_row.get(), {});
     EXPECT_EQ(res.sums, res3.sums);
     EXPECT_EQ(res.detected, res3.detected);
     
-    auto res4 = qc4.run(sparse_column.get());
+    auto res4 = qc4.run(sparse_column.get(), {});
     EXPECT_EQ(res.sums, res4.sums);
     EXPECT_EQ(res.detected, res4.detected);
 }
