@@ -64,7 +64,7 @@ public:
      * @tparam MAT Type of matrix, usually a `tatami::NumericMatrix`.
      * @tparam SUB Pointer to an array of values interpretable as booleans.
      *
-     * @param mat Pointer to a feature-by-cells **tatami** matrix.
+     * @param mat Pointer to a feature-by-cells **tatami** matrix containing counts.
      * @param[in] subsets Vector of pointers to arrays of length equal to `mat->nrow()`.
      * Each array represents a feature subset and indicating whether each feature in `mat` belongs to that subset.
      * Users can pass `{}` if no subsets are to be used. 
@@ -90,7 +90,7 @@ public:
      * @tparam D Integer value, to store the number of detected features.
      * @tparam PROP Floating point value, to store the subset proportions.
      *
-     * @param mat Pointer to a feature-by-cells matrix.
+     * @param mat Pointer to a feature-by-cells matrix containing counts.
      * @param[in] subsets Vector of pointers to arrays of length equal to `mat->nrow()`.
      * Each array represents a feature subset and indicating whether each feature in `mat` belongs to that subset.
      * Users can pass `{}` if no subsets are to be used. 

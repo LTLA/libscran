@@ -21,7 +21,10 @@ namespace scran {
  * @brief Compute log-normalized expression values.
  *
  * Given a count matrix and a set of size factors, compute log-transformed normalized expression values.
- * This is done in a delayed manner using the `DelayedIsometricOp` class from the **tatami** library.
+ * Each cell's counts are divided by the cell's size factor, to account for differences in capture efficiency and sequencing depth across cells.
+ * The normalized values are then log-transformed so that downstream analyses focus on the relative rather than absolute differences in expression;
+ * this process also provides some measure of variance stabilization.
+ * These operations are done in a delayed manner using the `DelayedIsometricOp` class from the **tatami** library.
  */
 class LogNormCounts {
 public:
