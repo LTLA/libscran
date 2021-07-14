@@ -64,31 +64,49 @@ public:
      * Compute log-normalized expression values from an input matrix.
      * To avoid copying the data, this is done in a delayed manner using the `DelayedIsometricOp` class from the **tatami** package.
      *
-     * If `block` is specified, centering of size factors is performed within each block.
+     * @tparam MAT `tatami::typed_matrix`, most typically a `tatami::numeric_matrix`.
+     * @tparam V A vector class supporting `size()`, random access via `[`, `begin()`, `end()` and `data()`.
+     *
+     * @param mat Pointer to an input count matrix, with features in the rows and cells in the columns.
+     * @param size_factors A vector of positive size factors, of length equal to the number of columns in `mat`.
+     *
+     * @return A pointer to a matrix of log-transformed and normalized values.
+     */
+    template<class MAT, class V>
+    std::shared_ptr<MAT> run(std::shared_ptr<MAT> mat, V size_factors) {
+        return run_blocked(std::move(mat), std::move(size_factors), static_cast<int*>(NULL));
+    }
+
+    /**
+     * Compute log-normalized expression values from an input matrix with blocking.
+     * Specifically, centering of size factors is performed within each block.
      * This allows users to easily mimic normalization of different blocks of cells (e.g., from different samples) in the same matrix.
      * In contrast, without blocking, the centering would depend on the size factors in different blocks.
      *
-     * @tparam A `tatami::typed_matrix`, most typically a `tatami::numeric_matrix`.
+     * @tparam MAT `tatami::typed_matrix`, most typically a `tatami::numeric_matrix`.
      * @tparam V A vector class supporting `size()`, random access via `[`, `begin()`, `end()` and `data()`.
-     * @tparam BPTR Pointer to an integer type, to hold the block IDs.
+     * @tparam B An integer type, to hold the block IDs.
      *
      * @param mat Pointer to an input count matrix, with features in the rows and cells in the columns.
      * @param size_factors A vector of positive size factors, of length equal to the number of columns in `mat`.
      * @param[in] block Pointer to an array of block identifiers.
      * If provided, the array should be of length equal to the number of columns in `mat`.
      * Values should be integer IDs in \f$[0, N)\f$ where \f$N\f$ is the number of blocks.
-     * This can also be a `nullptr`, in which case all cells are assumed to belong to the same block.
+     * This can also be a `NULL`, in which case all cells are assumed to belong to the same block.
      *
      * @return A pointer to a matrix of log-transformed and normalized values.
      */
-    template<class MAT, class V, typename BPTR>
-    std::shared_ptr<MAT> run(std::shared_ptr<MAT> mat, V size_factors, BPTR block) {
+    template<class MAT, class V, typename B>
+    std::shared_ptr<MAT> run_blocked(std::shared_ptr<MAT> mat, V size_factors, const B* block) {
+        // One might ask why we don't require a pointer for size_factors here.
+        // It's because size_factors need to be moved into the Delayed operation
+        // anyway, so we might as well ask the user to construct a vector for us.
         if (size_factors.size() != mat->ncol()) {
             throw std::runtime_error("number of size factors and columns are not equal");
         }
 
         if (center) {
-            if constexpr(!std::is_same<BPTR, std::nullptr_t>::value) {
+            if (block) {
                 auto by_group = block_indices(mat->ncol(), block);
                 for (const auto& g : by_group) {
                     if (g.size()) {

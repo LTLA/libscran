@@ -13,7 +13,7 @@ std::vector<double> even_values = {
 
 TEST(IsOutlier, BasicTests) {
     scran::IsOutlier is;
-    auto isres = is.run(even_values.size(), nullptr, even_values.data());
+    auto isres = is.run(even_values.size(), even_values.data());
     EXPECT_EQ(std::vector<uint8_t>(even_values.size()), isres.outliers);
 
     auto lower = isres.thresholds.lower;
@@ -25,7 +25,7 @@ TEST(IsOutlier, BasicTests) {
     EXPECT_FLOAT_EQ(upper[0], 1.564930261);
 
     // Stripping it back down to check that filtering works.
-    isres = is.set_nmads(1).run(even_values.size(), nullptr, even_values.data());
+    isres = is.set_nmads(1).run(even_values.size(), even_values.data());
 
     lower = isres.thresholds.lower;
     EXPECT_FLOAT_EQ(lower[0], 0.2480490797);
@@ -41,7 +41,7 @@ TEST(IsOutlier, BasicTests) {
 
     // Checking for odd.
     scran::IsOutlier odd;
-    auto oddres = odd.set_nmads(2).run(even_values.size() - 1, nullptr, even_values.data());
+    auto oddres = odd.set_nmads(2).run(even_values.size() - 1, even_values.data());
 
     lower = oddres.thresholds.lower;
     EXPECT_EQ(lower.size(), 1);
@@ -54,7 +54,7 @@ TEST(IsOutlier, BasicTests) {
 
 TEST(IsOutlier, OneSidedTests) {
     scran::IsOutlier is;
-    auto isres = is.set_nmads(0.5).set_upper(false).run(even_values.size(), nullptr, even_values.data());
+    auto isres = is.set_nmads(0.5).set_upper(false).run(even_values.size(), even_values.data());
 
     auto upper = isres.thresholds.upper;
     EXPECT_TRUE(std::isinf(upper[0]) && upper[0] > 0);
@@ -66,7 +66,7 @@ TEST(IsOutlier, OneSidedTests) {
     EXPECT_EQ(ref, isres.outliers);
 
     // Trying on the other side as well.
-    isres = is.set_upper(true).set_lower(false).run(even_values.size(), nullptr, even_values.data());
+    isres = is.set_upper(true).set_lower(false).run(even_values.size(), even_values.data());
     auto lower = isres.thresholds.lower;
     EXPECT_TRUE(std::isinf(lower[0]) && lower[0] < 0);
 
@@ -78,7 +78,7 @@ TEST(IsOutlier, OneSidedTests) {
      
 TEST(IsOutlier, LogTests) {
     scran::IsOutlier is;
-    auto isres = is.set_nmads(0.5).set_log(true).run(even_values.size(), nullptr, even_values.data());
+    auto isres = is.set_nmads(0.5).set_log(true).run(even_values.size(), even_values.data());
 
     auto lower = isres.thresholds.lower;
     EXPECT_FLOAT_EQ(lower[0], 0.4535230764);
@@ -98,10 +98,10 @@ TEST(IsOutlier, LogTests) {
     auto copy2 = even_values;
     copy2.push_back(0);
 
-    isres = is.run(copy1.size(), nullptr, copy1.data());
+    isres = is.run(copy1.size(), copy1.data());
     auto lower1 = isres.thresholds.lower;
     auto upper1 = isres.thresholds.upper;
-    isres = is.run(copy2.size(), nullptr, copy2.data());
+    isres = is.run(copy2.size(), copy2.data());
     auto lower2 = isres.thresholds.lower;
     auto upper2 = isres.thresholds.upper;
     EXPECT_EQ(lower1, lower2);
@@ -109,11 +109,11 @@ TEST(IsOutlier, LogTests) {
 
     // Does something sensible with loads of zeroes.
     std::vector<double> empty(even_values.size());
-    isres = is.set_log(true).run(empty.size(), nullptr, empty.data());
+    isres = is.set_log(true).run(empty.size(), empty.data());
     EXPECT_EQ(isres.thresholds.lower[0], 0);
     EXPECT_EQ(isres.thresholds.upper[0], 0);
 
-    isres = is.set_lower(false).set_upper(false).run(empty.size(), nullptr, empty.data());
+    isres = is.set_lower(false).set_upper(false).run(empty.size(), empty.data());
     upper = isres.thresholds.upper;
     EXPECT_TRUE(std::isinf(upper[0]) && upper[0] > 0);
     lower = isres.thresholds.lower;
@@ -130,7 +130,7 @@ TEST(IsOutlier, BlockTests) {
         1
     };
     scran::IsOutlier is;
-    auto isres = is.run(even_values.size(), block.data(), even_values.data());
+    auto isres = is.run_blocked(even_values.size(), block.data(), even_values.data());
 
     // Checking the thresholds.
     auto lower = isres.thresholds.lower;
@@ -150,7 +150,7 @@ TEST(IsOutlier, BlockTests) {
         }
 
         scran::IsOutlier is2;
-        auto is2res = is2.run(copy.size(), nullptr, copy.data());
+        auto is2res = is2.run(copy.size(), copy.data());
         EXPECT_EQ(lower[i], is2res.thresholds.lower[0]);
         EXPECT_EQ(upper[i], is2res.thresholds.upper[0]);
         EXPECT_EQ(discard, is2res.outliers);

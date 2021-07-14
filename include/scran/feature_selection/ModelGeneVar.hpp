@@ -45,87 +45,12 @@ public:
     }
 
 public:
-    /**
-     * @brief Results of the variance modelling.
-     */
-    struct Results {
-        /**
-         * @param ngenes Number of genes.
-         * @param nblocks Number of blocks.
-         */
-        Results(size_t ngenes, int nblocks) : means(nblocks, std::vector<double>(ngenes)),
-                                              variances(nblocks, std::vector<double>(ngenes)),
-                                              fitted(nblocks, std::vector<double>(ngenes)),
-                                              residuals(nblocks, std::vector<double>(ngenes)) {}
-
-        /**
-         * Vector of length equal to the number of blocks, containing vectors of length equal to the number of genes.
-         * Each vector contains the mean for each gene in each block.
-         */
-        std::vector<std::vector<double> > means;
-
-        /**
-         * Vector of length equal to the number of blocks, containing vectors of length equal to the number of genes.
-         * Each vector contains the variance for each gene in each block.
-         */
-        std::vector<std::vector<double> > variances;
-
-        /**
-         * Vector of length equal to the number of blocks, containing vectors of length equal to the number of genes.
-         * Each vector contains the fitted value for each gene in each block.
-         */
-        std::vector<std::vector<double> > fitted;
-
-        /**
-         * Vector of length equal to the number of blocks, containing vectors of length equal to the number of genes.
-         * Each vector contains the residual for each gene in each block.
-         */
-        std::vector<std::vector<double> > residuals;
-    };
-
     /** 
      * Compute and model the per-feature variances from a log-expression matrix.
      *
      * @tparam MAT Type of matrix, usually a `tatami::NumericMatrix`.
-     * @tparam BPTR Pointer to an integer type, to hold the block IDs.
      *
      * @param mat Pointer to a feature-by-cells **tatami** matrix containing log-expression values.
-     * @param[in] block Pointer to an array of block identifiers.
-     * If provided, the array should be of length equal to `ncells`.
-     * Values should be integer IDs in \f$[0, N)\f$ where \f$N\f$ is the number of blocks.
-     * This can also be a `nullptr`, in which case all cells are assumed to belong to the same block.
-     *
-     * @return A `Results` object containing the results of the variance modelling.
-     */
-    template<class MAT, typename BPTR>
-    Results run(const MAT* mat, BPTR block) {
-        int nblocks = 1;
-        if constexpr(!std::is_same<BPTR, std::nullptr_t>::value) {
-            if (mat->ncol()) {
-                nblocks = *std::max_element(block, block + mat->ncol()) + 1;
-            }
-        }
-
-        Results output(mat->nrow(), nblocks);
-        run(mat, 
-            block, 
-            vector_to_pointers(output.means),
-            vector_to_pointers(output.variances),
-            vector_to_pointers(output.fitted),
-            vector_to_pointers(output.residuals));
-
-        return output;
-    }
-
-public:
-    /** 
-     * Compute and model the per-feature variances from a log-expression matrix.
-     *
-     * @tparam MAT Type of matrix, usually a `tatami::NumericMatrix`.
-     * @tparam BPTR Pointer to an integer type, to hold the block IDs.
-     *
-     * @param mat Pointer to a feature-by-cells **tatami** matrix containing log-expression values.
-     * @param[in] block Pointer to an array of block identifiers, see `run()` for details.
      * @param[out] means Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in `mat`.
      * Each vector stores the mean of each feature in the corresponding block of cells.
      * @param[out] variances Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in `mat`.
@@ -137,20 +62,56 @@ public:
      *
      * @return `means`, `variances`, `fitted` and `residuals` are filled with the relevant statistics.
      */
-    template<class MAT, typename BPTR>
+    template<class MAT> 
     void run(const MAT* p, 
-             BPTR block,
              std::vector<double*> means,
              std::vector<double*> variances,
              std::vector<double*> fitted,
              std::vector<double*> residuals)
+    {
+        run_blocked(p, static_cast<int*>(NULL), std::move(means), std::move(variances), std::move(fitted), std::move(residuals));
+        return;
+    }
+
+    /** 
+     * Compute and model the per-feature variances from a log-expression matrix with blocking.
+     * The mean and variance of each gene is computed separately for all cells in each block, and a separate trend is fitted to each block to obtain residuals.
+     * This ensures that sample and batch effects do not confound the variance estimates.
+     * We suggest taking the average of the residuals as the effective statistic for feature selection.
+     *
+     * @tparam MAT Type of matrix, usually a `tatami::NumericMatrix`.
+     * @tparam B An integer type, to hold the block IDs.
+     *
+     * @param mat Pointer to a feature-by-cells **tatami** matrix containing log-expression values.
+     * @param[in] block Pointer to an array of block identifiers.
+     * If provided, the array should be of length equal to `ncells`.
+     * Values should be integer IDs in \f$[0, N)\f$ where \f$N\f$ is the number of blocks.
+     * This can also be a `nullptr`, in which case all cells are assumed to belong to the same block.
+     * @param[out] means Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in `mat`.
+     * Each vector stores the mean of each feature in the corresponding block of cells.
+     * @param[out] variances Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in `mat`.
+     * Each vector stores the variance of each feature in the corresponding block of cells.
+     * @param[out] fitted Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in `mat`.
+     * Each vector stores the fitted value of the trend for each feature in the corresponding block of cells.
+     * @param[out] residuals Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in `mat`.
+     * Each vector stores the residual from the trend for each feature in the corresponding block of cells.
+     *
+     * @return `means`, `variances`, `fitted` and `residuals` are filled with the relevant statistics.
+     */
+    template<class MAT, typename B>
+    void run_blocked(const MAT* p, 
+                     const B* block,
+                     std::vector<double*> means,
+                     std::vector<double*> variances,
+                     std::vector<double*> fitted,
+                     std::vector<double*> residuals)
     {
         // Estimating the raw values.
         size_t NR = p->nrow(), NC = p->ncol();
         size_t nblocks = means.size();
         std::vector<int> block_size(nblocks);
 
-        if constexpr(!std::is_same<BPTR, std::nullptr_t>::value) {
+        if (block) {
             auto copy = block;
             for (size_t j = 0; j < NC; ++j, ++copy) {
                 ++block_size[*copy];
@@ -188,10 +149,10 @@ public:
                     std::fill(tmp_nzero.begin(), tmp_nzero.end(), 0);
 
                     auto get_block = [&](size_t j) -> int {
-                        if constexpr(std::is_same<BPTR, std::nullptr_t>::value) {
-                            return 0;
-                        } else {
+                        if (block) {
                             return block[range.index[j]];
+                        } else {
+                            return 0;
                         }
                     };
 
@@ -220,10 +181,10 @@ public:
                     std::fill(tmp_vars.begin(), tmp_vars.end(), 0);
 
                     auto get_block = [&](size_t j) -> int {
-                        if constexpr(std::is_same<BPTR, std::nullptr_t>::value) {
-                            return 0;
-                        } else {
+                        if (block) {
                             return block[j];
+                        } else {
+                            return 0;
                         }
                     };
 
@@ -269,10 +230,10 @@ public:
             }
 
             auto get_block = [&](size_t i) -> int {
-                if constexpr(std::is_same<BPTR, std::nullptr_t>::value) {
-                    return 0;
-                } else {
+                if (block) {
                     return block[i];
+                } else {
+                    return 0;
                 }
             };
 
@@ -325,6 +286,97 @@ public:
 
         return;
     }
+
+public:
+    /**
+     * @brief Results of the variance modelling.
+     */
+    struct Results {
+        /**
+         * @param ngenes Number of genes.
+         * @param nblocks Number of blocks.
+         */
+        Results(size_t ngenes, int nblocks) : means(nblocks, std::vector<double>(ngenes)),
+                                              variances(nblocks, std::vector<double>(ngenes)),
+                                              fitted(nblocks, std::vector<double>(ngenes)),
+                                              residuals(nblocks, std::vector<double>(ngenes)) {}
+
+        /**
+         * Vector of length equal to the number of blocks, containing vectors of length equal to the number of genes.
+         * Each vector contains the mean for each gene in each block.
+         */
+        std::vector<std::vector<double> > means;
+
+        /**
+         * Vector of length equal to the number of blocks, containing vectors of length equal to the number of genes.
+         * Each vector contains the variance for each gene in each block.
+         */
+        std::vector<std::vector<double> > variances;
+
+        /**
+         * Vector of length equal to the number of blocks, containing vectors of length equal to the number of genes.
+         * Each vector contains the fitted value for each gene in each block.
+         */
+        std::vector<std::vector<double> > fitted;
+
+        /**
+         * Vector of length equal to the number of blocks, containing vectors of length equal to the number of genes.
+         * Each vector contains the residual for each gene in each block.
+         */
+        std::vector<std::vector<double> > residuals;
+    };
+
+    /** 
+     * Compute and model the per-feature variances from a log-expression matrix.
+     *
+     * @tparam MAT Type of matrix, usually a `tatami::NumericMatrix`.
+     *
+     * @param mat Pointer to a feature-by-cells **tatami** matrix containing log-expression values.
+     *
+     * @return A `Results` object containing the results of the variance modelling.
+     */
+    template<class MAT>
+    Results run(const MAT* mat) {
+        Results output(mat->nrow(), 1);
+        run(mat, 
+            vector_to_pointers(output.means),
+            vector_to_pointers(output.variances),
+            vector_to_pointers(output.fitted),
+            vector_to_pointers(output.residuals));
+        return output;
+    }
+
+    /** 
+     * Compute and model the per-feature variances from a log-expression matrix with blocking, see `run_blocked()` for details.
+     *
+     * @tparam MAT Type of matrix, usually a `tatami::NumericMatrix`.
+     * @tparam B An integer type, to hold the block IDs.
+     *
+     * @param mat Pointer to a feature-by-cells **tatami** matrix containing log-expression values.
+     * @param[in] block Pointer to an array of block identifiers, see `run_blocked()` for details.
+     *
+     * @return A `Results` object containing the results of the variance modelling.
+     */
+    template<class MAT, typename B>
+    Results run_blocked(const MAT* mat, const B* block) {
+        int nblocks = 1;
+        if (block) {
+            if (mat->ncol()) {
+                nblocks = *std::max_element(block, block + mat->ncol()) + 1;
+            }
+        }
+
+        Results output(mat->nrow(), nblocks);
+        run_blocked(mat, 
+                    block, 
+                    vector_to_pointers(output.means),
+                    vector_to_pointers(output.variances),
+                    vector_to_pointers(output.fitted),
+                    vector_to_pointers(output.residuals));
+
+        return output;
+    }
+
     
 private:
     FitTrendVar fit;

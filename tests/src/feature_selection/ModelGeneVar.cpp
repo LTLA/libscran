@@ -34,17 +34,17 @@ protected:
 };
 
 TEST_F(ModelGeneVarTester, UnblockedStats) {
-    auto res = var1.run(dense_row.get(), nullptr);
-    auto res2 = var2.run(dense_column.get(), nullptr);
+    auto res = var1.run(dense_row.get());
+    auto res2 = var2.run(dense_column.get());
     almost_equal(res.means[0], res2.means[0]);
     almost_equal(res.variances[0], res2.variances[0]);
     almost_equal(res.variances[0], tatami::row_variances(dense_row.get()));
 
-    auto res3 = var3.run(sparse_row.get(), nullptr);
+    auto res3 = var3.run(sparse_row.get());
     almost_equal(res.means[0], res3.means[0]);
     almost_equal(res.variances[0], res3.variances[0]);
 
-    auto res4 = var4.run(sparse_column.get(), nullptr);
+    auto res4 = var4.run(sparse_column.get());
     almost_equal(res.means[0], res4.means[0]);
     almost_equal(res.variances[0], res4.variances[0]);
 }
@@ -55,10 +55,10 @@ TEST_F(ModelGeneVarTester, BlockedStats) {
         blocks[i] = i % 3;
     }
 
-    auto res1 = var1.run(dense_row.get(), blocks.data());
-    auto res2 = var2.run(dense_column.get(), blocks.data());
-    auto res3 = var3.run(sparse_row.get(), blocks.data());
-    auto res4 = var4.run(sparse_column.get(), blocks.data());
+    auto res1 = var1.run_blocked(dense_row.get(), blocks.data());
+    auto res2 = var2.run_blocked(dense_column.get(), blocks.data());
+    auto res3 = var3.run_blocked(sparse_row.get(), blocks.data());
+    auto res4 = var4.run_blocked(sparse_column.get(), blocks.data());
 
     for (size_t i = 0; i < 3; ++i) {
         almost_equal(res1.means[i], res2.means[i]);
