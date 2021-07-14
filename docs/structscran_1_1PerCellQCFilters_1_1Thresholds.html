@@ -103,7 +103,7 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Lower thresholds to define small outliers on the number of detected features. Each entry contains the threshold used for the corresponding block.</p>
+<p>Lower thresholds to define small outliers on the number of detected features. Each entry contains the threshold used for the corresponding block. For unblocked analyses, this will be of length 1 as all cells are assumed to belong to the same block.</p>
 <p>Note that, despite the fact that the outliers are defined on the log-scale, these thresholds are reported on the original scale - see the <code><a class="el" href="classscran_1_1IsOutlier.html" title="Define outlier values based on MADs.">IsOutlier</a></code> class for details. </p>
 
 </div>
@@ -119,7 +119,7 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Upper thresholds to define large outliers on the subset proportions. Each vector corresponds to a block of cells, while each entry of the inner vector corresponds to a feature subset. </p>
+<p>Upper thresholds to define large outliers on the subset proportions. Each vector corresponds to a block of cells (for unblocked analyses, * all cells are assumed to belong to a single block), while each entry of the inner vector corresponds to a feature subset. </p>
 
 </div>
 </div>
@@ -134,7 +134,7 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Lower thresholds to define small outliers on the total counts. Each entry contains the threshold used for the corresponding block.</p>
+<p>Lower thresholds to define small outliers on the total counts. Each entry contains the threshold used for the corresponding block. For unblocked analyses, this will be of length 1 as all cells are assumed to belong to the same block.</p>
 <p>Note that, despite the fact that the outliers are defined on the log-scale, these thresholds are reported on the original scale - see the <code><a class="el" href="classscran_1_1IsOutlier.html" title="Define outlier values based on MADs.">IsOutlier</a></code> class for details. </p>
 
 </div>

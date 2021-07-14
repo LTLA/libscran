@@ -94,15 +94,24 @@ Classes</h2></td></tr>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a34371eda20e5a18a0b672dc44d1caa98"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1PerCellQCFilters.html">PerCellQCFilters</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#a34371eda20e5a18a0b672dc44d1caa98">set_nmads</a> (double n=3)</td></tr>
 <tr class="separator:a34371eda20e5a18a0b672dc44d1caa98"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a890ea767258faf2b0774a1cfb8c9e58c"><td class="memTemplParams" colspan="2">template&lt;typename BPTR , typename S , typename D , typename PPTR , typename X &gt; </td></tr>
-<tr class="memitem:a890ea767258faf2b0774a1cfb8c9e58c"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Thresholds.html">Thresholds</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#a890ea767258faf2b0774a1cfb8c9e58c">run</a> (size_t ncells, BPTR block, const S *sums, const D *detected, std::vector&lt; PPTR &gt; subset_proportions, X *filter_by_sums, X *filter_by_detected, std::vector&lt; X * &gt; filter_by_subset_proportions, X *overall_filter)</td></tr>
-<tr class="separator:a890ea767258faf2b0774a1cfb8c9e58c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a778a2308d90375f936a743639e6e7ebc"><td class="memTemplParams" colspan="2">template&lt;typename X  = uint8_t, typename BPTR , typename S , typename D , typename PPTR &gt; </td></tr>
-<tr class="memitem:a778a2308d90375f936a743639e6e7ebc"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a>&lt; X &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#a778a2308d90375f936a743639e6e7ebc">run</a> (size_t ncells, BPTR block, const S *sums, const D *detected, std::vector&lt; PPTR &gt; subset_proportions)</td></tr>
-<tr class="separator:a778a2308d90375f936a743639e6e7ebc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af816de05373dffa6a348a1ebe2080070"><td class="memTemplParams" colspan="2">template&lt;typename X  = uint8_t, class R , typename BPTR &gt; </td></tr>
-<tr class="memitem:af816de05373dffa6a348a1ebe2080070"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a>&lt; X &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#af816de05373dffa6a348a1ebe2080070">run</a> (const R &amp;metrics, BPTR block)</td></tr>
-<tr class="separator:af816de05373dffa6a348a1ebe2080070"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01c8cd43b53e8e2469d3ed4116ac4eec"><td class="memTemplParams" colspan="2">template&lt;typename S , typename D , typename PPTR , typename X &gt; </td></tr>
+<tr class="memitem:a01c8cd43b53e8e2469d3ed4116ac4eec"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Thresholds.html">Thresholds</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#a01c8cd43b53e8e2469d3ed4116ac4eec">run</a> (size_t ncells, const S *sums, const D *detected, std::vector&lt; PPTR &gt; subset_proportions, X *filter_by_sums, X *filter_by_detected, std::vector&lt; X * &gt; filter_by_subset_proportions, X *overall_filter)</td></tr>
+<tr class="separator:a01c8cd43b53e8e2469d3ed4116ac4eec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66f168b6493245a64d710d7ef92ed83c"><td class="memTemplParams" colspan="2">template&lt;typename B , typename S , typename D , typename PPTR , typename X &gt; </td></tr>
+<tr class="memitem:a66f168b6493245a64d710d7ef92ed83c"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Thresholds.html">Thresholds</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#a66f168b6493245a64d710d7ef92ed83c">run_blocked</a> (size_t ncells, const B *block, const S *sums, const D *detected, std::vector&lt; PPTR &gt; subset_proportions, X *filter_by_sums, X *filter_by_detected, std::vector&lt; X * &gt; filter_by_subset_proportions, X *overall_filter)</td></tr>
+<tr class="separator:a66f168b6493245a64d710d7ef92ed83c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a402b3f1af4ed0b9ef450a6ee6b6e65d7"><td class="memTemplParams" colspan="2">template&lt;typename X  = uint8_t, typename S , typename D , typename PPTR &gt; </td></tr>
+<tr class="memitem:a402b3f1af4ed0b9ef450a6ee6b6e65d7"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a>&lt; X &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#a402b3f1af4ed0b9ef450a6ee6b6e65d7">run</a> (size_t ncells, const S *sums, const D *detected, std::vector&lt; PPTR &gt; subset_proportions)</td></tr>
+<tr class="separator:a402b3f1af4ed0b9ef450a6ee6b6e65d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa61d8a76c9a1eaf7d101b9055a50bbec"><td class="memTemplParams" colspan="2">template&lt;typename X  = uint8_t, typename B , typename S , typename D , typename PPTR &gt; </td></tr>
+<tr class="memitem:aa61d8a76c9a1eaf7d101b9055a50bbec"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a>&lt; X &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#aa61d8a76c9a1eaf7d101b9055a50bbec">run_blocked</a> (size_t ncells, const B *block, const S *sums, const D *detected, std::vector&lt; PPTR &gt; subset_proportions)</td></tr>
+<tr class="separator:aa61d8a76c9a1eaf7d101b9055a50bbec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a063c253532b026d81d25333b2df399cd"><td class="memTemplParams" colspan="2">template&lt;typename X  = uint8_t, class R &gt; </td></tr>
+<tr class="memitem:a063c253532b026d81d25333b2df399cd"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a>&lt; X &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#a063c253532b026d81d25333b2df399cd">run</a> (const R &amp;metrics)</td></tr>
+<tr class="separator:a063c253532b026d81d25333b2df399cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21f0044c1ac2b699ca17938c51cd2707"><td class="memTemplParams" colspan="2">template&lt;typename X  = uint8_t, class R , typename B &gt; </td></tr>
+<tr class="memitem:a21f0044c1ac2b699ca17938c51cd2707"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a>&lt; X &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#a21f0044c1ac2b699ca17938c51cd2707">run_blocked</a> (const R &amp;metrics, const B *block)</td></tr>
+<tr class="separator:a21f0044c1ac2b699ca17938c51cd2707"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Create filters to identify low-quality cells. </p>
@@ -115,13 +124,13 @@ Public Member Functions</h2></td></tr>
 <p>Outliers are defined on each metric by counting the number of MADs from the median value across all cells. This assumes that most cells in the experiment are of high (or at least acceptable) quality; any anomalies are indicative of low-quality cells that should be filtered out. See the <code><a class="el" href="classscran_1_1IsOutlier.html" title="Define outlier values based on MADs.">IsOutlier</a></code> class for implementation details.</p>
 <p>For the total counts and number of detected features, the outliers are defined after log-transformation of the metrics. This improves resolution at low values and ensures that the defined threshold is not negative. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="af816de05373dffa6a348a1ebe2080070"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af816de05373dffa6a348a1ebe2080070">&#9670;&nbsp;</a></span>run() <span class="overload">[1/3]</span></h2>
+<a id="a063c253532b026d81d25333b2df399cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a063c253532b026d81d25333b2df399cd">&#9670;&nbsp;</a></span>run() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename X  = uint8_t, class R , typename BPTR &gt; </div>
+template&lt;typename X  = uint8_t, class R &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -130,18 +139,8 @@ template&lt;typename X  = uint8_t, class R , typename BPTR &gt; </div>
           <td class="memname"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a>&lt;X&gt; scran::PerCellQCFilters::run </td>
           <td>(</td>
           <td class="paramtype">const R &amp;&#160;</td>
-          <td class="paramname"><em>metrics</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramname"><em>metrics</em></td><td>)</td>
           <td></td>
-          <td class="paramtype">BPTR&#160;</td>
-          <td class="paramname"><em>block</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -150,19 +149,17 @@ template&lt;typename X  = uint8_t, class R , typename BPTR &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Identify low-quality cells as those that have outlier values for QC metrics.</p>
+<p>Identify low-quality cells from QC metrics, see <code><a class="el" href="classscran_1_1PerCellQCFilters.html#a01c8cd43b53e8e2469d3ed4116ac4eec">run()</a></code> for details.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">X</td><td>Boolean type to indicate whether a cell should be discarded. </td></tr>
-    <tr><td class="paramname">R</td><td>Class that holds the QC metrics, typically a <code><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html" title="Result store for QC metric calculations.">PerCellQCMetrics::Results</a></code>. </td></tr>
-    <tr><td class="paramname">BPTR</td><td>Integer type, to hold the block IDs.</td></tr>
+    <tr><td class="paramname">R</td><td>Class that holds the QC metrics, typically a <code><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html" title="Result store for QC metric calculations.">PerCellQCMetrics::Results</a></code>.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">metrics</td><td>Precomputed QC metrics, typically generated by <code><a class="el" href="classscran_1_1PerCellQCMetrics.html#aedc028b2d8df9b5b28623599e060796e">PerCellQCMetrics::run</a></code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Optional pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1PerCellQCFilters.html#a890ea767258faf2b0774a1cfb8c9e58c">run()</a></code> for details.</td></tr>
+    <tr><td class="paramname">metrics</td><td>Precomputed QC metrics, typically generated by <code><a class="el" href="classscran_1_1PerCellQCMetrics.html#aedc028b2d8df9b5b28623599e060796e">PerCellQCMetrics::run</a></code>.</td></tr>
   </table>
   </dd>
 </dl>
@@ -170,13 +167,13 @@ template&lt;typename X  = uint8_t, class R , typename BPTR &gt; </div>
 
 </div>
 </div>
-<a id="a778a2308d90375f936a743639e6e7ebc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a778a2308d90375f936a743639e6e7ebc">&#9670;&nbsp;</a></span>run() <span class="overload">[2/3]</span></h2>
+<a id="a402b3f1af4ed0b9ef450a6ee6b6e65d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a402b3f1af4ed0b9ef450a6ee6b6e65d7">&#9670;&nbsp;</a></span>run() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename X  = uint8_t, typename BPTR , typename S , typename D , typename PPTR &gt; </div>
+template&lt;typename X  = uint8_t, typename S , typename D , typename PPTR &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -186,12 +183,6 @@ template&lt;typename X  = uint8_t, typename BPTR , typename S , typename D , typ
           <td>(</td>
           <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>ncells</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">BPTR&#160;</td>
-          <td class="paramname"><em>block</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -223,11 +214,10 @@ template&lt;typename X  = uint8_t, typename BPTR , typename S , typename D , typ
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Identify low-quality cells as those that have outlier values for QC metrics.</p>
+<p>Identify low-quality cells from QC metrics, see <code><a class="el" href="classscran_1_1PerCellQCFilters.html#a01c8cd43b53e8e2469d3ed4116ac4eec">run()</a></code>.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">X</td><td>Boolean type to indicate whether a cell should be discarded. </td></tr>
-    <tr><td class="paramname">BPTR</td><td>Pointer to an integer type, to hold the block IDs. </td></tr>
     <tr><td class="paramname">S</td><td>Type of the sum. </td></tr>
     <tr><td class="paramname">D</td><td>Type of the number of detected features. </td></tr>
     <tr><td class="paramname">PPTR</td><td>Type of the pointer to the subset proportions.</td></tr>
@@ -237,7 +227,6 @@ template&lt;typename X  = uint8_t, typename BPTR , typename S , typename D , typ
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">ncells</td><td>Number of cells. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Optional pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1PerCellQCFilters.html#a890ea767258faf2b0774a1cfb8c9e58c">run()</a></code> for details. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">sums</td><td>Pointer to an array of length equal to <code>ncells</code>, containing the per-cell sums. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">detected</td><td>Pointer to an array of length equal to <code>ncells</code>, containing the number of detected features for each cell. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">subset_proportions</td><td>Vector of pointers of length equal to the number of feature subsets. Each pointer corresponds to a feature subset and should point to an array of length equal to <code>ncells</code>, containing the proportion of counts in that subset for each cell.</td></tr>
@@ -248,13 +237,13 @@ template&lt;typename X  = uint8_t, typename BPTR , typename S , typename D , typ
 
 </div>
 </div>
-<a id="a890ea767258faf2b0774a1cfb8c9e58c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a890ea767258faf2b0774a1cfb8c9e58c">&#9670;&nbsp;</a></span>run() <span class="overload">[3/3]</span></h2>
+<a id="a01c8cd43b53e8e2469d3ed4116ac4eec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01c8cd43b53e8e2469d3ed4116ac4eec">&#9670;&nbsp;</a></span>run() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename BPTR , typename S , typename D , typename PPTR , typename X &gt; </div>
+template&lt;typename S , typename D , typename PPTR , typename X &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -264,12 +253,6 @@ template&lt;typename BPTR , typename S , typename D , typename PPTR , typename X
           <td>(</td>
           <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>ncells</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">BPTR&#160;</td>
-          <td class="paramname"><em>block</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -326,10 +309,8 @@ template&lt;typename BPTR , typename S , typename D , typename PPTR , typename X
 </table>
 </div><div class="memdoc">
 <p>Identify low-quality cells as those that have outlier values for QC metrics. This uses QC metrics that are typically computed by the <code><a class="el" href="classscran_1_1PerCellQCMetrics.html" title="Compute typical per-cell quality control metrics.">PerCellQCMetrics</a></code> class.</p>
-<p>If <code>block</code> is set, outliers are only computed within each block. This is useful in cases where cells in different blocks have different distributions for the QC metrics, e.g., because they were sequenced at different depth. In such cases, we avoid confounding the outlier detection with systematic differences between blocks.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">BPTR</td><td>Pointer to an integer type, to hold the block IDs. </td></tr>
     <tr><td class="paramname">S</td><td>Floating point type, used for the sum. </td></tr>
     <tr><td class="paramname">D</td><td>Integer type, used for the number of detected features. </td></tr>
     <tr><td class="paramname">PPTR</td><td>Pointer to a floating point type, for the subset proportions. </td></tr>
@@ -340,7 +321,6 @@ template&lt;typename BPTR , typename S , typename D , typename PPTR , typename X
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">ncells</td><td>Number of cells. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of block identifiers. If provided, the array should be of length equal to <code>ncells</code>. Values should be integer IDs in <img class="formulaInl" alt="$[0, N)$" src="form_0.png"/> where <img class="formulaInl" alt="$N$" src="form_1.png"/> is the number of blocks. This can also be a <code>nullptr</code>, in which case all cells are assumed to belong to the same block. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">sums</td><td>Pointer to an array of length equal to <code>ncells</code>, containing the per-cell sums. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">detected</td><td>Pointer to an array of length equal to <code>ncells</code>, containing the number of detected features for each cell. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">subset_proportions</td><td>Vector of pointers of length equal to the number of feature subsets. Each pointer corresponds to a feature subset and should point to an array of length equal to <code>ncells</code>, containing the proportion of counts in that subset for each cell. </td></tr>
@@ -352,6 +332,245 @@ template&lt;typename BPTR , typename S , typename D , typename PPTR , typename X
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellQCFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object defining the thresholds for each QC metric. </dd></dl>
+
+</div>
+</div>
+<a id="a21f0044c1ac2b699ca17938c51cd2707"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a21f0044c1ac2b699ca17938c51cd2707">&#9670;&nbsp;</a></span>run_blocked() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename X  = uint8_t, class R , typename B &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a>&lt;X&gt; scran::PerCellQCFilters::run_blocked </td>
+          <td>(</td>
+          <td class="paramtype">const R &amp;&#160;</td>
+          <td class="paramname"><em>metrics</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const B *&#160;</td>
+          <td class="paramname"><em>block</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Identify low-quality cells from QC metrics with blocking, see <code><a class="el" href="classscran_1_1PerCellQCFilters.html#a66f168b6493245a64d710d7ef92ed83c">run_blocked()</a></code> for details.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">X</td><td>Boolean type to indicate whether a cell should be discarded. </td></tr>
+    <tr><td class="paramname">R</td><td>Class that holds the QC metrics, typically a <code><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html" title="Result store for QC metric calculations.">PerCellQCMetrics::Results</a></code>. </td></tr>
+    <tr><td class="paramname">B</td><td>Integer type, to hold the block IDs.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">metrics</td><td>Precomputed QC metrics, typically generated by <code><a class="el" href="classscran_1_1PerCellQCMetrics.html#aedc028b2d8df9b5b28623599e060796e">PerCellQCMetrics::run</a></code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Optional pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1PerCellQCFilters.html#a66f168b6493245a64d710d7ef92ed83c">run_blocked()</a></code> for details.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html" title="Results of the QC filtering.">Results</a></code> object indicating whether a cell should be filtered out for each reason. </dd></dl>
+
+</div>
+</div>
+<a id="aa61d8a76c9a1eaf7d101b9055a50bbec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa61d8a76c9a1eaf7d101b9055a50bbec">&#9670;&nbsp;</a></span>run_blocked() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename X  = uint8_t, typename B , typename S , typename D , typename PPTR &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a>&lt;X&gt; scran::PerCellQCFilters::run_blocked </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>ncells</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const B *&#160;</td>
+          <td class="paramname"><em>block</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const S *&#160;</td>
+          <td class="paramname"><em>sums</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const D *&#160;</td>
+          <td class="paramname"><em>detected</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; PPTR &gt;&#160;</td>
+          <td class="paramname"><em>subset_proportions</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Identify low-quality cells from QC metrics with blocking, see <code><a class="el" href="classscran_1_1PerCellQCFilters.html#a66f168b6493245a64d710d7ef92ed83c">run_blocked()</a></code>.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">X</td><td>Boolean type to indicate whether a cell should be discarded. </td></tr>
+    <tr><td class="paramname">B</td><td>Pointer to an integer type, to hold the block IDs. </td></tr>
+    <tr><td class="paramname">S</td><td>Type of the sum. </td></tr>
+    <tr><td class="paramname">D</td><td>Type of the number of detected features. </td></tr>
+    <tr><td class="paramname">PPTR</td><td>Type of the pointer to the subset proportions.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">ncells</td><td>Number of cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Optional pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1PerCellQCFilters.html#a66f168b6493245a64d710d7ef92ed83c">run_blocked()</a></code> for details. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sums</td><td>Pointer to an array of length equal to <code>ncells</code>, containing the per-cell sums. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">detected</td><td>Pointer to an array of length equal to <code>ncells</code>, containing the number of detected features for each cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">subset_proportions</td><td>Vector of pointers of length equal to the number of feature subsets. Each pointer corresponds to a feature subset and should point to an array of length equal to <code>ncells</code>, containing the proportion of counts in that subset for each cell.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html" title="Results of the QC filtering.">Results</a></code> object indicating whether a cell should be filtered out for each reason. </dd></dl>
+
+</div>
+</div>
+<a id="a66f168b6493245a64d710d7ef92ed83c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66f168b6493245a64d710d7ef92ed83c">&#9670;&nbsp;</a></span>run_blocked() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename B , typename S , typename D , typename PPTR , typename X &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Thresholds.html">Thresholds</a> scran::PerCellQCFilters::run_blocked </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>ncells</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const B *&#160;</td>
+          <td class="paramname"><em>block</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const S *&#160;</td>
+          <td class="paramname"><em>sums</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const D *&#160;</td>
+          <td class="paramname"><em>detected</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; PPTR &gt;&#160;</td>
+          <td class="paramname"><em>subset_proportions</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">X *&#160;</td>
+          <td class="paramname"><em>filter_by_sums</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">X *&#160;</td>
+          <td class="paramname"><em>filter_by_detected</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; X * &gt;&#160;</td>
+          <td class="paramname"><em>filter_by_subset_proportions</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">X *&#160;</td>
+          <td class="paramname"><em>overall_filter</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Identify low-quality cells from QC metrics, with blocking during outlier identification. Specifically, outliers are only computed within each block, which is useful when cells in different blocks have different distributions for the QC metrics, e.g., because they were sequenced at different depth. By blocking, we avoid confounding the outlier detection with systematic differences between blocks.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">B</td><td>Pointer to an integer type, to hold the block IDs. </td></tr>
+    <tr><td class="paramname">S</td><td>Floating point type, used for the sum. </td></tr>
+    <tr><td class="paramname">D</td><td>Integer type, used for the number of detected features. </td></tr>
+    <tr><td class="paramname">PPTR</td><td>Pointer to a floating point type, for the subset proportions. </td></tr>
+    <tr><td class="paramname">X</td><td>Boolean type to indicate whether a cell should be discarded.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">ncells</td><td>Number of cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of block identifiers. If provided, the array should be of length equal to <code>ncells</code>. Values should be integer IDs in <img class="formulaInl" alt="$[0, N)$" src="form_0.png"/> where <img class="formulaInl" alt="$N$" src="form_1.png"/> is the number of blocks. This can also be <code>NULL</code>, in which case all cells are assumed to belong to the same block. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sums</td><td>Pointer to an array of length equal to <code>ncells</code>, containing the per-cell sums. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">detected</td><td>Pointer to an array of length equal to <code>ncells</code>, containing the number of detected features for each cell. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">subset_proportions</td><td>Vector of pointers of length equal to the number of feature subsets. Each pointer corresponds to a feature subset and should point to an array of length equal to <code>ncells</code>, containing the proportion of counts in that subset for each cell. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">filter_by_sums</td><td>Pointer to an output array of length equal to <code>ncells</code>, indicating whether a cell should be filtered out due to low count sums. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">filter_by_detected</td><td>Pointer to an output array of length equal to <code>ncells</code>, indicating whether a cell should be filtered out due to a low number of detected features. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">filter_by_subset_proportions</td><td>Vector of pointers of length equal to the number of feature subsets. Each pointer corresponds to a feature subset and should point to an array of length equal to <code>ncells</code>, indicating whether a cell should be filtered out due to a high proportion of counts for that subset. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">overall_filter</td><td>Pointer to an output array of length equal to <code>ncells</code>, indicating whether a cell should be filtered out for any reason.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellQCFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object defining the thresholds for each QC metric in each block. </dd></dl>
 
 </div>
 </div>

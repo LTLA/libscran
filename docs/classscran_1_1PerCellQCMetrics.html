@@ -229,7 +229,7 @@ template&lt;class MAT , typename SUB  = const uint8_t*, typename S , typename D 
     <tr><td class="paramdir">[in]</td><td class="paramname">subsets</td><td>Vector of pointers to arrays of length equal to <code>mat-&gt;nrow()</code>. Each array represents a feature subset and indicating whether each feature in <code>mat</code> belongs to that subset. Users can pass <code>{}</code> if no subsets are to be used. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">sums</td><td>Pointer to an array of length equal to the number of columns in <code>mat</code>. This is used to store the computed sums for all cells. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">detected</td><td>Pointer to an array of length equal to the number of columns in <code>mat</code>. This is used to store the number of detected features for all cells. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">subset_proportions</td><td>Vector of pointers to arrays of length equal to the number of columns in <code>mat</code>. Each array corresponds to a feature subset and is used to store the proportion of counts in that subset across all cells. Users can pass <code>{}</code> if no subsets are used.</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">subset_proportions</td><td>Vector of pointers to arrays of length equal to the number of columns in <code>mat</code>. Each array corresponds to a feature subset and is used to store the proportion of counts in that subset across all cells. The vector should be of length equal to that of <code>subsets</code>. Users can pass <code>{}</code> if no subsets are used.</td></tr>
   </table>
   </dd>
 </dl>
