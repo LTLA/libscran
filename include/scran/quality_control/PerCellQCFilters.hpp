@@ -167,33 +167,20 @@ public:
                    X* filter_by_sums, X* filter_by_detected, std::vector<X*> filter_by_subset_proportions, X* overall_filter)
     {
         Thresholds output;
-        BlockIndices by_block;
-        if (block) {
-            by_block = block_indices(ncells, block);
-        }
+        auto by_block = block_indices(ncells, block);
         outliers.set_lower(true).set_upper(false).set_log(true);
 
         // Filtering to remove outliers on the log-sum.
         {
-            if (block) {
-                auto res = outliers.run(ncells, by_block, sums, filter_by_sums);
-                output.sums = res.lower;
-            } else {
-                auto res = outliers.run(ncells, nullptr, sums, filter_by_sums);
-                output.sums = res.lower;
-            }
+            auto res = outliers.run(ncells, by_block, sums, filter_by_sums);
+            output.sums = res.lower;
             std::copy(filter_by_sums, filter_by_sums + ncells, overall_filter);
         }
 
         // Filtering to remove outliers on the log-detected number.
         {
-            if (block) {
-                auto res = outliers.run(ncells, by_block, detected, filter_by_detected);
-                output.detected = res.lower;
-            } else {
-                auto res = outliers.run(ncells, nullptr, detected, filter_by_detected);
-                output.detected = res.lower;
-            }
+            auto res = outliers.run(ncells, by_block, detected, filter_by_detected);
+            output.detected = res.lower;
             for (size_t i = 0; i < ncells; ++i) {
                 overall_filter[i] |= filter_by_detected[i];
             }
@@ -210,14 +197,8 @@ public:
 
         for (size_t s = 0; s < subset_proportions.size(); ++s) {
             auto dump = filter_by_subset_proportions[s];
-
-            if (block) {
-                auto res = outliers.run(ncells, by_block, subset_proportions[s], dump);
-                output.subset_proportions[s] = res.upper;
-            } else {
-                auto res = outliers.run(ncells, nullptr, subset_proportions[s], dump);
-                output.subset_proportions[s] = res.upper;
-            }
+            auto res = outliers.run(ncells, by_block, subset_proportions[s], dump);
+            output.subset_proportions[s] = res.upper;
 
             for (size_t i = 0; i < ncells; ++i) {
                 overall_filter[i] |= dump[i];

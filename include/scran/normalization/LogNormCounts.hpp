@@ -88,7 +88,7 @@ public:
         }
 
         if (center) {
-            if (block) {
+            if constexpr(!std::is_same<BPTR, std::nullptr_t>::value) {
                 auto by_group = block_indices(mat->ncol(), block);
                 for (const auto& g : by_group) {
                     if (g.size()) {
@@ -105,11 +105,13 @@ public:
                         }
                     }
                 }
-            } else if (size_factors.size()) {
-                double mean = std::accumulate(size_factors.begin(), size_factors.end(), static_cast<double>(0)) / size_factors.size();
-                if (mean) {
-                    for (auto& x : size_factors) {
-                        x /= mean;
+            } else {
+                if (size_factors.size()) { // avoid division by zero
+                    double mean = std::accumulate(size_factors.begin(), size_factors.end(), static_cast<double>(0)) / size_factors.size();
+                    if (mean) { // avoid division by zero
+                        for (auto& x : size_factors) {
+                            x /= mean;
+                        }
                     }
                 }
             }
