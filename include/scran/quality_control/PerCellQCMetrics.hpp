@@ -100,7 +100,8 @@ public:
      * This is used to store the number of detected features for all cells.
      * @param[out] subset_proportions Vector of pointers to arrays of length equal to the number of columns in `mat`.
      * Each array corresponds to a feature subset and is used to store the proportion of counts in that subset across all cells.
-     * Users can pass `{}` if no subsets are used. 
+     * The vector should be of length equal to that of `subsets`.
+     * Users can pass `{}` if no subsets are used.
      *
      * @return `sums`, `detected`, and each array in `subset_proportions` is filled with the relevant statistics.
      */
