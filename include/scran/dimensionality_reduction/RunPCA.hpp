@@ -70,15 +70,15 @@ public:
 
 private:
     void clean_up(size_t NC, const Eigen::MatrixXd& U, const Eigen::VectorXd& D, Eigen::MatrixXd& pcs, Eigen::VectorXd& variance_explained) {
-        pcs.resize(U.rows(), U.cols());
-        for (int i = 0; i < rank; ++i) {
+        pcs = U;
+        for (int i = 0; i < U.cols(); ++i) {
             for (size_t j = 0; j < NC; ++j) {
                 pcs(j, i) *= D[i];
             }
         }
 
         variance_explained.resize(D.size());
-        for (int i = 0; i < rank; ++i) {
+        for (int i = 0; i < D.size(); ++i) {
             variance_explained[i] = D[i] * D[i] / static_cast<double>(NC - 1);
         }
 
@@ -135,12 +135,13 @@ private:
 
             running.finish();
             std::copy(running.means().begin(), running.means().end(), center_v.begin());
-            total_var = std::accumulate(running.statistics().begin(), running.statistics().end(), 0.0);
 
             if (scale) {
+                total_var = std::accumulate(running.statistics().begin(), running.statistics().end(), 0.0);
                 std::copy(running.statistics().begin(), running.statistics().end(), scale_v.begin());
                 for (auto& s : scale_v) { s = std::sqrt(s); }
             } else {
+                total_var = NR;
                 std::fill(scale_v.begin(), scale_v.end(), 1);
             }
         }
@@ -159,12 +160,11 @@ private:
 
         Eigen::MatrixXd output(NC, NR); // transposed.
         std::vector<double> xbuffer(NC);
-        auto outIt = output.data();
+        double* outIt = output.data();
 
         for (size_t r = 0; r < NR; ++r, outIt += NC) {
-            auto ptr = mat->row(r, xbuffer.data());
-            auto stats = tatami::stats::VarianceHelper::compute_with_mean(ptr, NC);
-            std::copy(ptr, ptr + NC, outIt);
+            auto ptr = mat->row_copy(r, outIt);
+            auto stats = tatami::stats::VarianceHelper::compute_with_mean(outIt, NC);
 
             auto copy = outIt;
             for (size_t c = 0; c < NC; ++c, ++copy) {
