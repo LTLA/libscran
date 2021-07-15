@@ -2,6 +2,7 @@
 #define SCRAN_RUN_PCA
 
 #include "tatami/stats/variances.hpp"
+#include "tatami/base/DelayedSubset.hpp"
 
 #include "irlba/irlba.hpp"
 #include "Eigen/Dense"
@@ -34,7 +35,7 @@ public:
         return *this;
     }
 
-public:
+private:
     template<typename T, typename IDX>
     void run(const tatami::Matrix<T, IDX>* mat, Eigen::MatrixXd& pcs, Eigen::VectorXd& variance_explained, double& total_var) {
         irlba::NormalSampler norm(42);
@@ -65,6 +66,28 @@ public:
     Results run(const tatami::Matrix<T, IDX>* mat) {
         Results output;
         run(mat, output.pcs, output.variance_explained, output.total_variance);
+        return output;
+    }
+
+    template<class MAT, typename X>
+    Results run(std::shared_ptr<MAT> mat, const X* features) {
+        Results output;
+
+        if (!features) {
+            run(mat.get(), output.pcs, output.variance_explained, output.total_variance);
+        } else {
+            std::vector<int> subset;
+            subset.reserve(mat->nrow());
+            for (size_t r = 0; r < mat->nrow(); ++r) {
+                if (features[r]) {
+                    subset.push_back(r);
+                }
+            }
+
+            auto subsetted = tatami::make_DelayedSubset<0>(std::move(mat), std::move(subset));
+            run(subsetted.get(), output.pcs, output.variance_explained, output.total_variance);
+        }
+
         return output;
     }
 

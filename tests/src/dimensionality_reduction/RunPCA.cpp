@@ -44,7 +44,6 @@ TEST_F(RunPCATester, Test) {
     auto res2 = runner.run(dense_column.get());
     std::vector<double> pcs2(eigen2vector(res2.pcs));
     std::vector<double> var2(eigen2vector(res2.variance_explained));
-    EXPECT_EQ(pcs1, pcs2);
     compare_almost_equal(pcs1, pcs2);
     compare_almost_equal(var1, var2);
     EXPECT_FLOAT_EQ(res1.total_variance, res2.total_variance);
@@ -62,4 +61,39 @@ TEST_F(RunPCATester, Test) {
     compare_almost_equal(pcs1, pcs4);
     compare_almost_equal(var1, var4);
     EXPECT_FLOAT_EQ(res1.total_variance, res4.total_variance);
+}
+
+TEST_F(RunPCATester, SubsetTest) {
+    std::vector<int> subset(dense_row->nrow());
+    std::vector<double> buffer(dense_row->ncol());
+    std::vector<double> submatrix;
+    auto it = sparse_matrix.begin();
+
+    size_t sub_nrows = 0;
+    for (size_t i = 0; i < subset.size(); ++i) {
+        subset[i] = i%2;
+        if (subset[i]) {
+            auto ptr = dense_row->row(i, buffer.data());
+            submatrix.insert(submatrix.end(), ptr, ptr + dense_row->ncol());
+            ++sub_nrows;
+        }
+    }
+
+    scran::RunPCA runner;
+    runner.set_rank(4);
+
+    auto out = runner.run(dense_row, subset.data());
+    std::vector<double> opcs(eigen2vector(out.pcs));
+    std::vector<double> ovar(eigen2vector(out.variance_explained));
+    EXPECT_EQ(ovar.size(), 4);
+
+    // Manually subsetting.
+    auto mat = std::shared_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double, int>(sub_nrows, dense_row->ncol(), std::move(submatrix)));
+    auto ref = runner.run(mat.get());
+    std::vector<double> rpcs(eigen2vector(ref.pcs));
+    std::vector<double> rvar(eigen2vector(ref.variance_explained));
+
+    compare_almost_equal(opcs, rpcs);
+    compare_almost_equal(ovar, rvar);
+    EXPECT_FLOAT_EQ(out.total_variance, ref.total_variance);
 }
