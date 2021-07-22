@@ -195,7 +195,7 @@ private:
     bool filter = true;
     bool transform = true;
 
-    WeightedLowess::WeightedLowess smoother;
+    WeightedLowess::WeightedLowess<> smoother;
     std::vector<double> xbuffer, ybuffer, rbuffer, fbuffer;
 };
 
