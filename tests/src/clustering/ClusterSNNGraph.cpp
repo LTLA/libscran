@@ -37,7 +37,7 @@ TEST_P(ClusterSNNGraphMultiLevelTest, Basic) {
     double res = std::get<3>(param);
     
     scran::ClusterSNNGraph cluster;
-    cluster.builder.set_neighbors(k);
+    cluster.set_neighbors(k);
     auto output = cluster.run_multilevel(ndim, nobs, data.data(), res);
 
     EXPECT_EQ(output.membership.size(), output.modularity.size());
