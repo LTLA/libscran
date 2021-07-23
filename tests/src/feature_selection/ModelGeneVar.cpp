@@ -16,14 +16,14 @@
 class ModelGeneVarTester : public ::testing::Test {
 protected:
     void SetUp() {
-        dense_row = std::unique_ptr<tatami::numeric_matrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
+        dense_row = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
         dense_column = tatami::convert_to_dense(dense_row.get(), false);
         sparse_row = tatami::convert_to_sparse(dense_row.get(), true);
         sparse_column = tatami::convert_to_sparse(dense_row.get(), false);
     }
 protected:
-    std::shared_ptr<tatami::numeric_matrix> dense_row, dense_column, sparse_row, sparse_column;
-    scran::ModelGeneVar<int> var1, var2, var3, var4;
+    std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
+    scran::ModelGeneVar var1, var2, var3, var4;
 
     void almost_equal(const std::vector<double>& left, const std::vector<double>& right) {
         ASSERT_EQ(left.size(), right.size());
@@ -55,17 +55,10 @@ TEST_F(ModelGeneVarTester, BlockedStats) {
         blocks[i] = i % 3;
     }
 
-    var1.set_blocks(blocks);
-    auto res1 = var1.run(dense_row.get());
-
-    var2.set_blocks(blocks);
-    auto res2 = var2.run(dense_column.get());
-
-    var3.set_blocks(blocks);
-    auto res3 = var3.run(sparse_row.get());
-
-    var4.set_blocks(blocks);
-    auto res4 = var4.run(sparse_column.get());
+    auto res1 = var1.run_blocked(dense_row.get(), blocks.data());
+    auto res2 = var2.run_blocked(dense_column.get(), blocks.data());
+    auto res3 = var3.run_blocked(sparse_row.get(), blocks.data());
+    auto res4 = var4.run_blocked(sparse_column.get(), blocks.data());
 
     for (size_t i = 0; i < 3; ++i) {
         almost_equal(res1.means[i], res2.means[i]);

@@ -1,5 +1,5 @@
-#ifndef SCRAN_LOGNORMCOUNTS_H
-#define SCRAN_LOGNORMCOUNTS_H
+#ifndef SCRAN_LOG_NORM_COUNTS_H
+#define SCRAN_LOG_NORM_COUNTS_H
 
 #include <algorithm>
 #include <vector>
@@ -21,7 +21,10 @@ namespace scran {
  * @brief Compute log-normalized expression values.
  *
  * Given a count matrix and a set of size factors, compute log-transformed normalized expression values.
- * This is done in a delayed manner using the `DelayedIsometricOp` class from the **tatami** library.
+ * Each cell's counts are divided by the cell's size factor, to account for differences in capture efficiency and sequencing depth across cells.
+ * The normalized values are then log-transformed so that downstream analyses focus on the relative rather than absolute differences in expression;
+ * this process also provides some measure of variance stabilization.
+ * These operations are done in a delayed manner using the `DelayedIsometricOp` class from the **tatami** library.
  */
 class LogNormCounts {
 public:
@@ -58,55 +61,10 @@ public:
 
 public:
     /**
-     * Define blocks of cells, where centering of size factors is performed within each block.
-     * This allows users to easily mimic normalization of different blocks of cells (e.g., from different samples) in the same matrix.
-     * In contrast, without blocking, the centering would depend on the size factors in different blocks.
-     *
-     * @tparam V Class of the blocking vector.
-     * @param p Blocking vector of length equal to the number of cells.
-     * Values should be integer block IDs in \f$[0, N)\f$ where \f$N\f$ is the number of blocks.
-     *
-     * @return A reference to this `LogNormCounts` object. 
-     */
-    template<class V>
-    LogNormCounts& set_blocks(const V& p) {
-        return set_blocks(p.size(), p.begin());
-    }
-
-    /**
-     * Define blocks of cells, see `set_blocks(const V& p)`.
-     *
-     * @tparam SIT Iterator class for the blocking vector.
-     *
-     * @param n Length of the blocking vector, should be equal to the number of cells.
-     * @param p Pointer or iterator to the start of the blocking vector.
-     *
-     * @return A reference to this `LogNormCounts` object. 
-     */
-    template<typename SIT>
-    LogNormCounts& set_blocks(size_t n, SIT b) {
-        block_indices(n, b, by_group);
-        group_ncells = n;
-        return *this;
-    }
-
-    /**
-     * Unset any previous blocking structure.
-     *
-     * @return A reference to this `PerCellQCFilters` object. 
-     */
-    LogNormCounts& set_blocks() {
-        by_group.clear();
-        group_ncells = 0;
-        return *this;
-    }
-
-public:
-    /**
      * Compute log-normalized expression values from an input matrix.
      * To avoid copying the data, this is done in a delayed manner using the `DelayedIsometricOp` class from the **tatami** package.
      *
-     * @tparam A `tatami::typed_matrix`, most typically a `tatami::numeric_matrix`.
+     * @tparam MAT `tatami::typed_matrix`, most typically a `tatami::numeric_matrix`.
      * @tparam V A vector class supporting `size()`, random access via `[`, `begin()`, `end()` and `data()`.
      *
      * @param mat Pointer to an input count matrix, with features in the rows and cells in the columns.
@@ -116,15 +74,40 @@ public:
      */
     template<class MAT, class V>
     std::shared_ptr<MAT> run(std::shared_ptr<MAT> mat, V size_factors) {
+        return run_blocked(std::move(mat), std::move(size_factors), static_cast<int*>(NULL));
+    }
+
+    /**
+     * Compute log-normalized expression values from an input matrix with blocking.
+     * Specifically, centering of size factors is performed within each block.
+     * This allows users to easily mimic normalization of different blocks of cells (e.g., from different samples) in the same matrix.
+     * In contrast, without blocking, the centering would depend on the size factors in different blocks.
+     *
+     * @tparam MAT `tatami::typed_matrix`, most typically a `tatami::numeric_matrix`.
+     * @tparam V A vector class supporting `size()`, random access via `[`, `begin()`, `end()` and `data()`.
+     * @tparam B An integer type, to hold the block IDs.
+     *
+     * @param mat Pointer to an input count matrix, with features in the rows and cells in the columns.
+     * @param size_factors A vector of positive size factors, of length equal to the number of columns in `mat`.
+     * @param[in] block Pointer to an array of block identifiers.
+     * If provided, the array should be of length equal to the number of columns in `mat`.
+     * Values should be integer IDs in \f$[0, N)\f$ where \f$N\f$ is the number of blocks.
+     * This can also be a `NULL`, in which case all cells are assumed to belong to the same block.
+     *
+     * @return A pointer to a matrix of log-transformed and normalized values.
+     */
+    template<class MAT, class V, typename B>
+    std::shared_ptr<MAT> run_blocked(std::shared_ptr<MAT> mat, V size_factors, const B* block) {
+        // One might ask why we don't require a pointer for size_factors here.
+        // It's because size_factors need to be moved into the Delayed operation
+        // anyway, so we might as well ask the user to construct a vector for us.
         if (size_factors.size() != mat->ncol()) {
             throw std::runtime_error("number of size factors and columns are not equal");
         }
 
         if (center) {
-            if (by_group.size()) {
-                if (group_ncells != mat->ncol()) {
-                    throw std::runtime_error("length of grouping vector and number of columns are not equal");
-                }
+            if (block) {
+                auto by_group = block_indices(mat->ncol(), block);
                 for (const auto& g : by_group) {
                     if (g.size()) {
                         double mean = 0;
@@ -140,11 +123,13 @@ public:
                         }
                     }
                 }
-            } else if (size_factors.size()) {
-                double mean = std::accumulate(size_factors.begin(), size_factors.end(), static_cast<double>(0)) / size_factors.size();
-                if (mean) {
-                    for (auto& x : size_factors) {
-                        x /= mean;
+            } else {
+                if (size_factors.size()) { // avoid division by zero
+                    double mean = std::accumulate(size_factors.begin(), size_factors.end(), static_cast<double>(0)) / size_factors.size();
+                    if (mean) { // avoid division by zero
+                        for (auto& x : size_factors) {
+                            x /= mean;
+                        }
                     }
                 }
             }
@@ -168,9 +153,6 @@ public:
 private:
     double pseudo_count = 1;
     bool center = true;
-
-    std::vector<std::vector<size_t> > by_group;
-    size_t group_ncells = 0;
 };
 
 };

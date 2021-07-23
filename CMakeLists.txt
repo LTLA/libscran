@@ -15,7 +15,7 @@ option(SCRAN_EXCLUDE_IGRAPH "build the igraph libraries" OFF)
 
 add_subdirectory(extern)
 
-target_link_libraries(scran INTERFACE tatami WeightedLowess knncolle)
+target_link_libraries(scran INTERFACE tatami WeightedLowess irlba knncolle)
 
 if (NOT SCRAN_EXCLUDE_IGRAPH)
     target_link_libraries(scran INTERFACE igraph)

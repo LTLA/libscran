@@ -77,50 +77,6 @@ public:
 
 public:
     /**
-     * Define blocks of observations where outliers are computed within each block.
-     * In other words, only the observations in each block are used to define the MAD and median (and subsequent thresholds) for identifying outliers in that block.
-     *
-     * @tparam V Class of the blocking vector.
-     * @param p Blocking vector of length equal to the number of input values.
-     * Values should be integer block IDs in \f$[0, N)\f$ where \f$N\f$ is the number of blocks.
-     *
-     * @return A reference to this `IsOutlier` object. 
-     */
-    template<class V>
-    IsOutlier& set_blocks(const V& p) {
-        return set_blocks(p.size(), p.begin());
-    }
-
-    /**
-     * Define blocks of observations, see `set_blocks(const V& p)`.
-     *
-     * @tparam SIT Iterator class for the blocking vector.
-     *
-     * @param n Length of the blocking vector, should be equal to the number of observations.
-     * @param p Pointer or iterator to the start of the blocking vector.
-     *
-     * @return A reference to this `IsOutlier` object. 
-     */
-    template<typename SIT>
-    IsOutlier& set_blocks(size_t n, SIT p) {
-        group_ncells = n;
-        block_indices(n, p, by_group);
-        return *this;
-    }
-
-    /**
-     * Unset any previous blocking structure.
-     *
-     * @return A reference to this `IsOutlier` object. 
-     */
-    IsOutlier& set_blocks() {
-        group_ncells = 0;
-        by_group.clear();
-        return *this;
-    }
-
-public:
-    /**
      * @brief Thresholds to define outliers on each metric.
      */
     struct Thresholds {
@@ -152,6 +108,105 @@ public:
         std::vector<double> upper;
     };
 
+public:
+    /**
+     * Identify outliers in an array of observations. 
+     * This is done according to the parameters specified in the various setters, i.e., `set_nmads()`, `set_lower()`, etc.
+     *
+     * @tparam T Type of observation, numeric.
+     * @tparam X Boolean type to indicate whether an observation is an outlier.
+     *
+     * @param n Number of observations.
+     * @param[in] metrics Pointer to an array of observations of length `n`.
+     * @param[out] outliers Pointer to an output array of length `n`,
+     * where the outlier identification results are to be stored.
+     *
+     * @return A `Thresholds` object containing the thresholds used to identify outliers.
+     * `outliers` is filled with the outlier calls for each observation in `metrics`.
+     */
+    template<typename T, typename X>
+    Thresholds run(size_t n, const T* metrics, X* outliers) {
+        Thresholds output(1);
+        buffer.resize(n);
+        std::copy(metrics, metrics + n, buffer.data());
+
+        double& lthresh = output.lower[0];
+        double& uthresh = output.upper[0];
+        compute_thresholds(n, buffer.data(), lthresh, uthresh);
+
+        auto copy = metrics;
+        for (size_t i = 0; i < n; ++i, ++copy, ++outliers) {
+            const double val = *copy;
+            *outliers = (val < lthresh || val > uthresh);
+        }
+
+        return output;
+    } 
+
+    /**
+     * Identify outliers in an array of observations with blocking.
+     * Outlier detection is performed separately within each block of observations, as if `run()` was called on each subset of observations with the same ID in `block`.
+     * This is occasionally useful when dealing with multi-batch datasets, see `PerCellQCFilters::run()` for an example.
+     *
+     * @tparam B Integer type, containing the block IDs.
+     * @tparam T Type of observation, numeric.
+     * @tparam X Boolean type to indicate whether an observation is an outlier.
+     *
+     * @param n Number of observations.
+     * @param[in] block Optional pointer to an array of block identifiers.
+     * If provided, the array should be of length equal to `ncells`.
+     * Values should be integer IDs in \f$[0, N)\f$ where \f$N\f$ is the number of blocks.
+     * If a null pointer is supplied, all observations are assumed to belong to the same block.
+     * @param[in] metrics Pointer to an array of observations of length `n`.
+     * @param[out] outliers Pointer to an output array of length `n`,
+     * where the outlier identification results are to be stored.
+     *
+     * @return A `Thresholds` object containing the thresholds used to identify outliers in each block.
+     * `outliers` is filled with the outlier calls for each observation in `metrics`.
+     */
+    template<typename B, typename T, typename X>
+    Thresholds run_blocked(size_t n, const B * block, const T* metrics, X* outliers) {
+        if (block) {
+            BlockIndices by_block = block_indices(n, block);
+            return run_blocked(n, by_block, metrics, outliers);
+        } else {
+            return run(n, metrics, outliers);
+        }
+    }
+
+    /**
+     * @cond
+     */
+    template<typename T, typename X>
+    Thresholds run_blocked(size_t n, const BlockIndices& by_group, const T* metrics, X* outliers) {
+        Thresholds output(by_group.size());
+        buffer.resize(n);
+
+        for (size_t g = 0; g < by_group.size(); ++g) {
+            auto copy = buffer.data();
+            const auto& curgroup = by_group[g];
+            for (auto s : curgroup) {
+                *copy = metrics[s];
+                ++copy;
+            }
+
+            double& lthresh = output.lower[g];
+            double& uthresh = output.upper[g];
+            compute_thresholds(curgroup.size(), buffer.data(), lthresh, uthresh);
+
+            for (auto s : curgroup) {
+                const double val = metrics[s];
+                outliers[s] = (val < lthresh || val > uthresh);
+            }
+        }
+
+        return output;
+    }
+    /**
+     * @endcond
+     */
+
+public:
     /**
      * @brief Results of the outlier identification.
      *
@@ -177,27 +232,10 @@ public:
 
 public:
     /**
-     * Identify outliers in an array of observations.
-     *
+     * Identify outliers in an array of observations, see `run()` for details.
+     * 
      * @tparam X Boolean type to indicate whether an observation is an outlier.
-     * @tparam V Vector class - typically a `std::vector`, but anything that supports the `size()` and `data()` methods can be used here.
-     *
-     * @param metrics A vector of observations.
-     *
-     * @return A `Results` object containing the outlier identification results.
-     */
-    template<typename X = uint8_t, class V>
-    Results<X> run(const V& metrics) {
-        Results<X> output(metrics.size()); 
-        output.thresholds = run(metrics.size(), metrics.data(), output.outliers.data());
-        return output;
-    }
-
-    /**
-     * Identify outliers in an array of observations.
-     *
-     * @tparam X Boolean type to indicate whether an observation is an outlier.
-     * @tparam T Type of observation.
+     * @tparam T Type of observation, numeric.
      *
      * @param n Number of observations.
      * @param[in] metrics Pointer to an array of observations of length `n`.
@@ -212,61 +250,60 @@ public:
     }
 
     /**
-     * Identify outliers in an array of observations.
+     * Identify outliers in an array of observations with blocking, see `run_blocked()` for details.
      *
      * @tparam X Boolean type to indicate whether an observation is an outlier.
-     * @tparam T Type of observation.
+     * @tparam T Type of observation, numeric.
+     * @tparam B Integer type, containing the block IDs.
      *
      * @param n Number of observations.
+     * @param[in] block Optional pointer to an array of block identifiers, see `run_blocked()` for details.
      * @param[in] metrics Pointer to an array of observations of length `n`.
-     * @param[out] outliers Pointer to an output array of length `n`,
-     * where the outlier identification results are to be stored.
      *
-     * @return A `Thresholds` object containing the thresholds used to identify outliers.
-     * `outliers` is filled with the outlier calls for each observation in `metrics`.
+     * @return A `Results` object containing the outlier identification results.
      */
-    template<typename X = uint8_t, typename T>
-    Thresholds run(size_t n, const T* metrics, X* outliers) {
-        Thresholds output(std::max(static_cast<size_t>(1), by_group.size()));
-        buffer.resize(n);
-
-        if (by_group.size() == 0) {
-            std::copy(metrics, metrics + n, buffer.data());
-
-            double& lthresh = output.lower[0];
-            double& uthresh = output.upper[0];
-            compute_thresholds(n, buffer.data(), lthresh, uthresh);
-
-            auto copy = metrics;
-            for (size_t i = 0; i < n; ++i, ++copy, ++outliers) {
-                const double val = *copy;
-                *outliers = (val < lthresh || val > uthresh);
-            }
+    template<typename X = uint8_t, typename B, typename T>
+    Results<X> run_blocked(size_t n, const B* block, const T* metrics) {
+        Results<X> output(n); 
+        if (block) {
+            output.thresholds = run_blocked(n, block, metrics, output.outliers.data());
         } else {
-            if (group_ncells != n) {
-                throw std::runtime_error("length of grouping vector and number of cells are not equal");
-            }
-
-            for (size_t g = 0; g < by_group.size(); ++g) {
-                auto copy = buffer.data();
-                const auto& curgroup = by_group[g];
-                for (auto s : curgroup) {
-                    *copy = metrics[s];
-                    ++copy;
-                }
-
-                double& lthresh = output.lower[g];
-                double& uthresh = output.upper[g];
-                compute_thresholds(curgroup.size(), buffer.data(), lthresh, uthresh);
-
-                for (auto s : curgroup) {
-                    const double val = metrics[s];
-                    outliers[s] = (val < lthresh || val > uthresh);
-                }
-            }
+            output.thresholds = run(n, metrics, output.outliers.data());
         }
-
         return output;
+    }
+
+public:
+    /**
+     * Identify outliers in an vector of observations, see `run()` for details.
+     * 
+     * @tparam X Boolean type to indicate whether an observation is an outlier.
+     * @tparam V Vector class - typically a `std::vector`, but anything that supports the `size()` and `data()` methods can be used here.
+     *
+     * @param metrics Vector of observations.
+     *
+     * @return A `Results` object containing the outlier identification results.
+     */
+    template<typename X = uint8_t, class V>
+    Results<X> run(const V& metrics) {
+        return run(metrics.size(), metrics.data());
+    }
+
+    /**
+     * Identify outliers in an vector of observations with blocking, see `run_blocked()` for details.
+     *
+     * @tparam X Boolean type to indicate whether an observation is an outlier.
+     * @tparam V Vector class - typically a `std::vector`, but anything that supports the `size()` and `data()` methods can be used here.
+     * @tparam B Integer type, containing the block IDs.
+     *
+     * @param metrics Vector of observations.
+     * @param[in] block Optional pointer to an array of block identifiers of length equal to `metrics`, see `run_blocked()` for details.
+     *
+     * @return A `Results` object containing the outlier identification results.
+     */
+    template<typename X = uint8_t, class V, typename B>
+    Results<X> run_blocked(const V& metrics, const B* block) {
+        return run_blocked(metrics.size(), block, metrics.data());
     }
 
 private:
@@ -358,9 +395,6 @@ private:
     double nmads = 3;
     bool lower = true, upper = true, log = false;
     std::vector<double> buffer;
-
-    std::vector<std::vector<size_t> > by_group;
-    size_t group_ncells = 0;
 };
 
 }

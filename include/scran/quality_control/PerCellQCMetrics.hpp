@@ -6,7 +6,7 @@
 #include <limits>
 #include <cstdint>
 
-#include "tatami/base/typed_matrix.hpp"
+#include "tatami/base/Matrix.hpp"
 #include "../utils/vector_to_pointers.hpp"
 
 /**
@@ -20,8 +20,6 @@ namespace scran {
 /**
  * @brief Compute typical per-cell quality control metrics.
  *
- * @tparam X Type of the boolean flag to indicate whether a feature belongs to a feature subset.
- *
  * Given a feature-by-cell count matrix, this class computes several QC metrics:
  * 
  * - The total sum for each cell quantifies the efficiency of library preparation and sequencing.
@@ -31,42 +29,7 @@ namespace scran {
  *   In the most common case of mitochondrial transcripts, higher proportions indicate cell damage.
  *   Spike-in proportions can be interpreted in a similar manner.
  */
-template<typename X=uint8_t>
 class PerCellQCMetrics {
-public:
-    /**
-     * Default constructor.
-     */
-    PerCellQCMetrics() {}
-
-    /**
-     * @param s A vector of pointers to boolean arrays.
-     * Each array represents a feature subset and is of length equal to the number of features.
-     * Each value should be non-zero if the corresponding feature belongs to the subset; otherwise, it should be zero.
-     */
-    PerCellQCMetrics(const std::vector<X*>& s) : subsets(s.begin(), s.end()) {}
-
-    /**
-     * @copydoc PerCellQCMetrics(const std::vector<X*>&)
-     */
-    PerCellQCMetrics(std::vector<const X*> s) : subsets(std::move(s)) {}
-
-public:
-    /**
-     * Define feature subsets of interest.
-     * This is most commonly used to define mitochondrial transcripts or ribosomal genes.
-     *
-     * @param s A vector of pointers to boolean arrays indicating which features belong in which feature subsets.
-     * Each array represents a feature subset and is of length equal to the number of features.
-     * Each value should be non-zero if the corresponding feature belongs to the subset; otherwise, it should be zero.
-     *
-     * @return A reference to this `PerCellQCMetrics` object.
-     */
-    PerCellQCMetrics& set_subsets(std::vector<const X*> s) {
-        subsets = s;
-        return *this;
-    }
-
 public:
     /**
      * @brief Result store for QC metric calculations.
@@ -95,50 +58,68 @@ public:
         std::vector<std::vector<double> > subset_proportions;
     };
 
+    /**
+     * Compute the QC metrics from an input matrix and return the results.
+     *
+     * @tparam MAT Type of matrix, usually a `tatami::NumericMatrix`.
+     * @tparam SUB Pointer to an array of values interpretable as booleans.
+     *
+     * @param mat Pointer to a feature-by-cells **tatami** matrix containing counts.
+     * @param[in] subsets Vector of pointers to arrays of length equal to `mat->nrow()`.
+     * Each array represents a feature subset and indicating whether each feature in `mat` belongs to that subset.
+     * Users can pass `{}` if no subsets are to be used. 
+     *
+     * @return A `PerCellQCMetrics::Results` object containing the QC metrics.
+     * Subset proportions are returned depending on the subsets defined at construction or by `set_subsets()`.
+     *
+     */
+    template<class MAT, typename SUB = const uint8_t*>
+    Results run(const MAT* mat, std::vector<SUB> subsets) {
+        Results output(mat->ncol(), subsets.size());
+        run(mat, std::move(subsets), output.sums.data(), output.detected.data(), vector_to_pointers(output.subset_proportions));
+        return output;
+    }
+
 public:
     /**
      * Compute the QC metrics from an input matrix and return the results.
      *
-     * @param mat Pointer to a feature-by-cells matrix.
+     * @tparam MAT Type of matrix, usually a `tatami::NumericMatrix`.
+     * @tparam SUB Pointer to a type interpretable as boolean.
+     * @tparam S Floating-point value, to store the sums.
+     * @tparam D Integer value, to store the number of detected features.
+     * @tparam PROP Floating point value, to store the subset proportions.
      *
-     * @return A `PerCellQCMetrics::Results` object containing the QC metrics.
-     * Subset proportions are returned depending on the subsets defined at construction or by `set_subsets()`.
-     */
-    template<typename T, typename IDX>
-    Results run(const tatami::typed_matrix<T, IDX>* mat) {
-        Results output(mat->ncol(), subsets.size());
-        run(mat, output.sums.data(), output.detected.data(), vector_to_pointers(output.subset_proportions));
-        return output;
-    }
-
-    /**
-     * Compute the QC metrics from an input matrix and return the results.
-     *
-     * @param mat Pointer to a feature-by-cells matrix.
-     * @param[out] sums Pointer to a (typically double-precision) array of length equal to the number of columns in `mat`.
+     * @param mat Pointer to a feature-by-cells matrix containing counts.
+     * @param[in] subsets Vector of pointers to arrays of length equal to `mat->nrow()`.
+     * Each array represents a feature subset and indicating whether each feature in `mat` belongs to that subset.
+     * Users can pass `{}` if no subsets are to be used. 
+     * @param[out] sums Pointer to an array of length equal to the number of columns in `mat`.
      * This is used to store the computed sums for all cells.
-     * @param[out] detected Pointer to a (typically integer) array of length equal to the number of columns in `mat`.
+     * @param[out] detected Pointer to an array of length equal to the number of columns in `mat`.
      * This is used to store the number of detected features for all cells.
-     * @param[out] subset_proportions Vector of pointers (typically double-precision) arrays of length equal to the number of columns in `mat`.
+     * @param[out] subset_proportions Vector of pointers to arrays of length equal to the number of columns in `mat`.
      * Each array corresponds to a feature subset and is used to store the proportion of counts in that subset across all cells.
+     * The vector should be of length equal to that of `subsets`.
+     * Users can pass `{}` if no subsets are used.
      *
      * @return `sums`, `detected`, and each array in `subset_proportions` is filled with the relevant statistics.
      */
-    template<typename T, typename IDX, typename S, typename D, typename P>
-    void run(const tatami::typed_matrix<T, IDX>* mat, S* sums, D* detected, std::vector<P*> subset_proportions) {
+    template<class MAT, typename SUB = const uint8_t*, typename S, typename D, typename PROP>
+    void run(const MAT* mat, std::vector<SUB> subsets, S* sums, D* detected, std::vector<PROP> subset_proportions) {
         size_t nr = mat->nrow(), nc = mat->ncol();
 
         if (mat->prefer_rows()) {
-            std::vector<T> buffer(nc);
+            std::vector<typename MAT::value> buffer(nc);
             std::fill(sums, sums + nc, static_cast<S>(0));
             std::fill(detected, detected + nc, static_cast<D>(0));
             for (size_t s = 0; s < subsets.size(); ++s) {
-                std::fill(subset_proportions[s], subset_proportions[s] + nc, static_cast<P>(0));
+                std::fill(subset_proportions[s], subset_proportions[s] + nc, static_cast<typename std::remove_reference<decltype(*std::declval<PROP>())>::type>(0));
             }
             auto wrk = mat->new_workspace(false);
 
             if (mat->sparse()) {
-                std::vector<IDX> ibuffer(nc);
+                std::vector<typename MAT::index> ibuffer(nc);
                 for (size_t r = 0; r < nr; ++r) {
                     auto range = mat->sparse_row(r, buffer.data(), ibuffer.data(), wrk.get());
 
@@ -177,11 +158,11 @@ public:
             }
 
         } else {
-            std::vector<T> buffer(nr);
+            std::vector<typename MAT::value> buffer(nr);
             auto wrk = mat->new_workspace(true);
 
             if (mat->sparse()) {
-                std::vector<IDX> ibuffer(nr);
+                std::vector<typename MAT::index> ibuffer(nr);
                 for (size_t c = 0; c < nc; ++c) {
                     auto range = mat->sparse_column(c, buffer.data(), ibuffer.data(), wrk.get());
 
@@ -236,9 +217,6 @@ public:
 
         return;
     }
-
-private:
-    std::vector<const X*> subsets;
 };
 
 }
