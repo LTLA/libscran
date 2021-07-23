@@ -20,6 +20,8 @@ add_executable(
     src/feature_selection/ModelGeneVar.cpp
     src/feature_selection/FitTrendVar.cpp
     src/dimensionality_reduction/RunPCA.cpp
+    src/clustering/BuildSNNGraph.cpp
+    src/clustering/ClusterSNNGraph.cpp
     src/data/data_sparse.cpp
 )
 
