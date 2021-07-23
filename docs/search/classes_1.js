@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['isoutlier_48',['IsOutlier',['../classscran_1_1IsOutlier.html',1,'scran']]]
+  ['clustersnngraph_67',['ClusterSNNGraph',['../classscran_1_1ClusterSNNGraph.html',1,'scran']]]
 ];

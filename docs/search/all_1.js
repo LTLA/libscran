@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['detected_1',['detected',['../structscran_1_1PerCellQCFilters_1_1Thresholds.html#a1e6c284b8aee5fefbf8cb762f49962ee',1,'scran::PerCellQCFilters::Thresholds::detected()'],['../structscran_1_1PerCellQCMetrics_1_1Results.html#a2961184e3b2a0193afb39440eaf6e712',1,'scran::PerCellQCMetrics::Results::detected()']]]
+  ['build_1',['build',['../classscran_1_1ClusterSNNGraph.html#a613d3b3cd5c6ab31848f8c0e2084ca89',1,'scran::ClusterSNNGraph::build(size_t ndims, size_t ncells, const double *mat) const'],['../classscran_1_1ClusterSNNGraph.html#a86208b4b339d88e3a93ef9ead03ef2bb',1,'scran::ClusterSNNGraph::build(size_t ncells, const std::deque&lt; BuildSNNGraph::WeightedEdge &gt; &amp;store) const']]],
+  ['buildsnngraph_2',['BuildSNNGraph',['../classscran_1_1BuildSNNGraph.html',1,'scran']]],
+  ['buildsnngraph_2ehpp_3',['BuildSNNGraph.hpp',['../BuildSNNGraph_8hpp.html',1,'']]]
 ];

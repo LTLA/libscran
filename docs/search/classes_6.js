@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['thresholds_54',['Thresholds',['../structscran_1_1IsOutlier_1_1Thresholds.html',1,'scran::IsOutlier::Thresholds'],['../structscran_1_1PerCellQCFilters_1_1Thresholds.html',1,'scran::PerCellQCFilters::Thresholds']]]
+  ['modelgenevar_73',['ModelGeneVar',['../classscran_1_1ModelGeneVar.html',1,'scran']]],
+  ['multilevelresult_74',['MultiLevelResult',['../structscran_1_1ClusterSNNGraph_1_1MultiLevelResult.html',1,'scran::ClusterSNNGraph']]]
 ];

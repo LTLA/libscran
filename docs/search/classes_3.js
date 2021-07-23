@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['modelgenevar_50',['ModelGeneVar',['../classscran_1_1ModelGeneVar.html',1,'scran']]]
+  ['graph_70',['Graph',['../structscran_1_1ClusterSNNGraph_1_1Graph.html',1,'scran::ClusterSNNGraph']]]
 ];

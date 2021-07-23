@@ -1,6 +1,7 @@
 var searchData=
 [
-  ['thresholds_41',['Thresholds',['../structscran_1_1IsOutlier_1_1Thresholds.html',1,'scran::IsOutlier::Thresholds'],['../structscran_1_1PerCellQCFilters_1_1Thresholds.html',1,'scran::PerCellQCFilters::Thresholds']]],
-  ['thresholds_42',['thresholds',['../structscran_1_1IsOutlier_1_1Results.html#ab76c89d333a817bf7881d4eb2ba737bb',1,'scran::IsOutlier::Results::thresholds()'],['../structscran_1_1PerCellQCFilters_1_1Results.html#ad3ab33eeb778199dc2c698d429099063',1,'scran::PerCellQCFilters::Results::thresholds()']]],
-  ['thresholds_43',['Thresholds',['../structscran_1_1IsOutlier_1_1Thresholds.html#a20a0eedf427f07d34c78aee7e07fe839',1,'scran::IsOutlier::Thresholds']]]
+  ['percellqcfilters_31',['PerCellQCFilters',['../classscran_1_1PerCellQCFilters.html',1,'scran']]],
+  ['percellqcfilters_2ehpp_32',['PerCellQCFilters.hpp',['../PerCellQCFilters_8hpp.html',1,'']]],
+  ['percellqcmetrics_33',['PerCellQCMetrics',['../classscran_1_1PerCellQCMetrics.html',1,'scran']]],
+  ['percellqcmetrics_2ehpp_34',['PerCellQCMetrics.hpp',['../PerCellQCMetrics_8hpp.html',1,'']]]
 ];

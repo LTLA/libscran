@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['outliers_84',['outliers',['../structscran_1_1IsOutlier_1_1Results.html#ae6931cb03537299d63127836fabb320f',1,'scran::IsOutlier::Results']]],
-  ['overall_5ffilter_85',['overall_filter',['../structscran_1_1PerCellQCFilters_1_1Results.html#ae5fc3d3819045ee29b34e9af0c90a0f3',1,'scran::PerCellQCFilters::Results']]]
+  ['max_116',['max',['../structscran_1_1ClusterSNNGraph_1_1MultiLevelResult.html#ac157220e34f7746a8fe2d94a25e0ea92',1,'scran::ClusterSNNGraph::MultiLevelResult']]],
+  ['means_117',['means',['../structscran_1_1ModelGeneVar_1_1Results.html#a30c93b46a06b60773cfe1cbb895c4f32',1,'scran::ModelGeneVar::Results']]],
+  ['membership_118',['membership',['../structscran_1_1ClusterSNNGraph_1_1MultiLevelResult.html#aa69ddee2f4c685aad6b39d7bea97758f',1,'scran::ClusterSNNGraph::MultiLevelResult']]],
+  ['modularity_119',['modularity',['../structscran_1_1ClusterSNNGraph_1_1MultiLevelResult.html#a4767412b6f3a3df07bcf5da9ee5ea591',1,'scran::ClusterSNNGraph::MultiLevelResult']]]
 ];

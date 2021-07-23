@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['lognormcounts_49',['LogNormCounts',['../classscran_1_1LogNormCounts.html',1,'scran']]]
+  ['filtercells_68',['FilterCells',['../classscran_1_1FilterCells.html',1,'scran']]],
+  ['fittrendvar_69',['FitTrendVar',['../classscran_1_1FitTrendVar.html',1,'scran']]]
 ];

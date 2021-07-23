@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['subset_5fproportions_87',['subset_proportions',['../structscran_1_1PerCellQCFilters_1_1Thresholds.html#a3621907e181dc5fe287c327263e044b6',1,'scran::PerCellQCFilters::Thresholds::subset_proportions()'],['../structscran_1_1PerCellQCMetrics_1_1Results.html#ac2782fd6086b8920f4cef8cf3e44a3f8',1,'scran::PerCellQCMetrics::Results::subset_proportions()']]],
-  ['sums_88',['sums',['../structscran_1_1PerCellQCFilters_1_1Thresholds.html#a56559714161ee423014d0c337f250e3c',1,'scran::PerCellQCFilters::Thresholds::sums()'],['../structscran_1_1PerCellQCMetrics_1_1Results.html#a99596b61b240f739b71a66ed60f0143e',1,'scran::PerCellQCMetrics::Results::sums()']]]
+  ['residuals_122',['residuals',['../structscran_1_1FitTrendVar_1_1Results.html#a3f2d7d595a07195ddb89319fa941a832',1,'scran::FitTrendVar::Results::residuals()'],['../structscran_1_1ModelGeneVar_1_1Results.html#a943930ea88c62c5bd5828d279d6d1a50',1,'scran::ModelGeneVar::Results::residuals()']]]
 ];

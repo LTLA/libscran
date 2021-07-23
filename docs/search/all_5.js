@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['means_15',['means',['../structscran_1_1ModelGeneVar_1_1Results.html#a30c93b46a06b60773cfe1cbb895c4f32',1,'scran::ModelGeneVar::Results']]],
-  ['modelgenevar_16',['ModelGeneVar',['../classscran_1_1ModelGeneVar.html',1,'scran']]]
+  ['graph_16',['graph',['../structscran_1_1ClusterSNNGraph_1_1Graph.html#a705ba30639aae97157d20e468294efe2',1,'scran::ClusterSNNGraph::Graph']]],
+  ['graph_17',['Graph',['../structscran_1_1ClusterSNNGraph_1_1Graph.html',1,'scran::ClusterSNNGraph']]]
 ];
