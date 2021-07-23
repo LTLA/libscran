@@ -1,20 +1,30 @@
 #ifndef SCRAN_BUILDSNNGRAPH_HPP
 #define SCRAN_BUILDSNNGRAPH_HPP
 
-#include "knncolle/VpTree/VpTree.hpp"
 #include <vector>
 #include <algorithm>
+
+#include "knncolle/knncolle.hpp"
 
 namespace scran {
 
 class BuildSNNGraph {
+private:
+    knncolle::DispatchAlgorithm algo = knncolle::VPTREE;
+    int num_neighbors = 10;
+    int weight_scheme = RANKED;
+
 public:
     BuildSNNGraph& set_neighbors(int k = 10) {
         num_neighbors = k;
         return *this;
     }
 
-public:
+    BuildSNNGraph& set_algorithm(knncolle::DispatchAlgorithm a = knncolle::VPTREE) {
+        algo = a;
+        return *this;
+    }
+
     enum Scheme { RANKED, NUMBER, JACCARD };
 
     BuildSNNGraph& set_weighting_scheme(Scheme w = RANKED) {
@@ -27,22 +37,30 @@ public:
 
     std::deque<WeightedEdge> run(size_t ndims, size_t ncells, const double* mat) const {
         std::deque<WeightedEdge> store;
-        knncolle::VpTreeEuclidean<> vp(ncells, ndims, mat);
+
+        typedef knncolle::Base<> knnbase;
+        std::shared_ptr<knnbase> ptr;
+        if (algo == knncolle::VPTREE) {
+            ptr = std::shared_ptr<knnbase>(new knncolle::VpTreeEuclidean<>(ndims, ncells, mat));
+        } else if (algo == knncolle::ANNOY) {
+            ptr = std::shared_ptr<knnbase>(new knncolle::AnnoyEuclidean<>(ndims, ncells, mat));
+        } else {
+            throw std::runtime_error("only Annoy and VP-tree searches are supported");
+        }
 
         // Collecting neighbors.
-        std::vector<double> distances;
-        std::vector<std::vector<knncolle::CellIndex_t> > indices(ncells);
+        std::vector<std::vector<int> > indices(ncells);
         std::vector<std::vector<std::pair<int, size_t> > > hosts(ncells);
 
         for (size_t i = 0; i < ncells; ++i) {
+            auto neighbors = ptr->find_nearest_neighbors(i, num_neighbors);
             auto& current = indices[i];
-            vp.find_nearest_neighbors(i, num_neighbors, current, distances, true, false, false);
 
             hosts[i].push_back(std::make_pair(0, i)); // each point is its own 0-th nearest neighbor
-
             int counter = 1;
-            for (auto x : current) {
-                hosts[x].push_back(std::make_pair(counter, i));
+            for (auto x : neighbors) {
+                current.push_back(x.first);
+                hosts[x.first].push_back(std::make_pair(counter, i));
                 ++counter;
             }
         }
@@ -112,10 +130,6 @@ public:
 
         return store;
     }
-
-private:
-    int num_neighbors = 10;
-    int weight_scheme = RANKED;
 };
 
 };
