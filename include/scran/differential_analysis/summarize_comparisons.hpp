@@ -22,11 +22,12 @@ double quantile(IT start, int size, int k, int q) {
     return ((k * (size - 1) - idx * q) * start[idx] + ((idx + 1) * q - k * (size - 1)) * start[idx + 1])/q;
 }
 
-template<class Function, typename OUT>
-void summarize_comparisons(size_t ngenes, int ngroups, const Function& fill, std::vector<std::vector<OUT*> > output) {
+template<class Source, typename OUT>
+void summarize_comparisons(size_t ngenes, int ngroups, const Source& src, std::vector<std::vector<OUT*> > output) {
+    // You'll need to make a copy of 'src' in each thread via openmP's firstprivate.
     std::vector<double> buffer(ngroups * ngroups);
     for (size_t g = 0; g < ngenes; ++g) {
-        fill(g, buffer.data());
+        src(g, buffer.data());
 
         for (int l = 0; l < ngroups; ++l) {
             auto start = buffer.data() + l * ngroups;
