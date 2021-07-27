@@ -44,9 +44,9 @@ namespace scran {
  */
 class BuildSNNGraph {
 private:
-    knncolle::DispatchAlgorithm algo = knncolle::VPTREE;
     int num_neighbors = 10;
     int weight_scheme = RANKED;
+    bool approximate = false;
 
 public:
     /** 
@@ -60,12 +60,12 @@ public:
     }
 
     /** 
-     * @param a The algorithm to use in the nearest neighbor search.
+     * @param a Whether to perform an approximate nearest neighbor search.
      *
      * @return A reference to this `BuildSNNGraph` object.
      */
-    BuildSNNGraph& set_algorithm(knncolle::DispatchAlgorithm a = knncolle::VPTREE) {
-        algo = a;
+    BuildSNNGraph& set_approximate(bool a = false) {
+        approximate = a;
         return *this;
     }
 
@@ -103,14 +103,11 @@ public:
     std::deque<WeightedEdge> run(size_t ndims, size_t ncells, const double* mat) const {
         std::deque<WeightedEdge> store;
 
-        typedef knncolle::Base<> knnbase;
-        std::shared_ptr<knnbase> ptr;
-        if (algo == knncolle::VPTREE) {
-            ptr = std::shared_ptr<knnbase>(new knncolle::VpTreeEuclidean<>(ndims, ncells, mat));
-        } else if (algo == knncolle::ANNOY) {
-            ptr = std::shared_ptr<knnbase>(new knncolle::AnnoyEuclidean<>(ndims, ncells, mat));
+        std::unique_ptr<knncolle::Base<> > ptr;
+        if (!approximate) {
+            ptr.reset(new knncolle::VpTreeEuclidean<>(ndims, ncells, mat));
         } else {
-            throw std::runtime_error("only Annoy and VP-tree searches are supported");
+            ptr.reset(new knncolle::AnnoyEuclidean<>(ndims, ncells, mat));
         }
 
         // Collecting neighbors.

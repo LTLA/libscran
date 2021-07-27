@@ -50,22 +50,22 @@ public:
     }
 
     /**
-     * Set the nearest neighbor algorithm to the default, see `BuildSNNGraph::set_algorithm()`.
+     * Set the approximate algorithm flag to the default, see `BuildSNNGraph::set_approximate()`.
      *
      * @return A reference to this `ClusterSNNGraph` object.
      */
-    ClusterSNNGraph& set_algorithm() {
-        builder.set_algorithm();
+    ClusterSNNGraph& set_approximate() {
+        builder.set_approximate();
         return *this;
     }
 
     /**
-     * @param a Nearest neighbor algorithm, see `BuildSNNGraph::set_algorithm()`.
+     * @param a Whether to use approximate nearest neighbor search, see `BuildSNNGraph::set_approximate()`.
      *
      * @return A reference to this `ClusterSNNGraph` object.
      */
-    ClusterSNNGraph& set_algorithm(knncolle::DispatchAlgorithm a) {
-        builder.set_algorithm(a);
+    ClusterSNNGraph& set_approximate(bool a) {
+        builder.set_approximate(a);
         return *this;
     }
 

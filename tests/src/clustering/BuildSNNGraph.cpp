@@ -163,7 +163,7 @@ TEST_P(BuildSNNGraphAnnoyTest, Annoy) {
     int k = std::get<2>(param);
 
     scran::BuildSNNGraph builder;
-    builder.set_neighbors(k).set_algorithm(knncolle::ANNOY);
+    builder.set_neighbors(k).set_approximate(true);
 
     auto output = builder.run(ndim, nobs, data.data());
     EXPECT_TRUE(output.size() > 1); // well, it gives _something_, at least.
