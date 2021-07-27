@@ -1,7 +1,7 @@
 var searchData=
 [
   ['scheme_40',['Scheme',['../classscran_1_1BuildSNNGraph.html#ae7e2167f6c3cf02432a3cdc6e4583e2a',1,'scran::BuildSNNGraph']]],
-  ['set_5falgorithm_41',['set_algorithm',['../classscran_1_1BuildSNNGraph.html#a1b567df702354a568b4fad11e4c1befc',1,'scran::BuildSNNGraph::set_algorithm()'],['../classscran_1_1ClusterSNNGraph.html#ac118055c8c4dadf2269cd1826096e605',1,'scran::ClusterSNNGraph::set_algorithm()'],['../classscran_1_1ClusterSNNGraph.html#ab90ba15e54c40f2dca265fb374fb02a4',1,'scran::ClusterSNNGraph::set_algorithm(knncolle::DispatchAlgorithm a)']]],
+  ['set_5fapproximate_41',['set_approximate',['../classscran_1_1BuildSNNGraph.html#a6e550f36508476f67b8af9a72da9919a',1,'scran::BuildSNNGraph::set_approximate()'],['../classscran_1_1ClusterSNNGraph.html#adc623b65f35ba0336cd5cfa6f4cbcf63',1,'scran::ClusterSNNGraph::set_approximate()'],['../classscran_1_1ClusterSNNGraph.html#a40f4aea8431058bb1503672b18aa0d41',1,'scran::ClusterSNNGraph::set_approximate(bool a)']]],
   ['set_5fcenter_42',['set_center',['../classscran_1_1LogNormCounts.html#aa78f6693201a9a1778891a57a38dc356',1,'scran::LogNormCounts']]],
   ['set_5fdiscard_43',['set_discard',['../classscran_1_1FilterCells.html#aad4845704e7c202fba62970d65b385db',1,'scran::FilterCells']]],
   ['set_5ffilter_44',['set_filter',['../classscran_1_1FitTrendVar.html#ae9d3f5513a31621d819389ae930750c0',1,'scran::FitTrendVar']]],

@@ -95,8 +95,8 @@ Public Types</h2></td></tr>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a31de66761c6c0583f8c4181dcdab28e3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1BuildSNNGraph.html">BuildSNNGraph</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1BuildSNNGraph.html#a31de66761c6c0583f8c4181dcdab28e3">set_neighbors</a> (int k=10)</td></tr>
 <tr class="separator:a31de66761c6c0583f8c4181dcdab28e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1b567df702354a568b4fad11e4c1befc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1BuildSNNGraph.html">BuildSNNGraph</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1BuildSNNGraph.html#a1b567df702354a568b4fad11e4c1befc">set_algorithm</a> (knncolle::DispatchAlgorithm a=knncolle::VPTREE)</td></tr>
-<tr class="separator:a1b567df702354a568b4fad11e4c1befc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e550f36508476f67b8af9a72da9919a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1BuildSNNGraph.html">BuildSNNGraph</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1BuildSNNGraph.html#a6e550f36508476f67b8af9a72da9919a">set_approximate</a> (bool a=false)</td></tr>
+<tr class="separator:a6e550f36508476f67b8af9a72da9919a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6b932bdfe682e617e6a17a7eda7d9a8e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1BuildSNNGraph.html">BuildSNNGraph</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1BuildSNNGraph.html#a6b932bdfe682e617e6a17a7eda7d9a8e">set_weighting_scheme</a> (<a class="el" href="classscran_1_1BuildSNNGraph.html#ae7e2167f6c3cf02432a3cdc6e4583e2a">Scheme</a> w=RANKED)</td></tr>
 <tr class="separator:a6b932bdfe682e617e6a17a7eda7d9a8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3835b310e3479311619a438fd8f44614"><td class="memItemLeft" align="right" valign="top">std::deque&lt; <a class="el" href="classscran_1_1BuildSNNGraph.html#af27e18b11231af9605b34495eb710d4e">WeightedEdge</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1BuildSNNGraph.html#a3835b310e3479311619a438fd8f44614">run</a> (size_t ndims, size_t ncells, const double *mat) const</td></tr>
@@ -197,8 +197,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a1b567df702354a568b4fad11e4c1befc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1b567df702354a568b4fad11e4c1befc">&#9670;&nbsp;</a></span>set_algorithm()</h2>
+<a id="a6e550f36508476f67b8af9a72da9919a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6e550f36508476f67b8af9a72da9919a">&#9670;&nbsp;</a></span>set_approximate()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -207,10 +207,10 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1BuildSNNGraph.html">BuildSNNGraph</a>&amp; scran::BuildSNNGraph::set_algorithm </td>
+          <td class="memname"><a class="el" href="classscran_1_1BuildSNNGraph.html">BuildSNNGraph</a>&amp; scran::BuildSNNGraph::set_approximate </td>
           <td>(</td>
-          <td class="paramtype">knncolle::DispatchAlgorithm&#160;</td>
-          <td class="paramname"><em>a</em> = <code>knncolle::VPTREE</code></td><td>)</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>a</em> = <code>false</code></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -222,7 +222,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">a</td><td>The algorithm to use in the nearest neighbor search.</td></tr>
+    <tr><td class="paramname">a</td><td>Whether to perform an approximate nearest neighbor search.</td></tr>
   </table>
   </dd>
 </dl>
