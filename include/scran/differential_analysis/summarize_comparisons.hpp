@@ -23,11 +23,11 @@ double quantile(IT start, int size, int k, int q) {
 }
 
 template<class Source, typename OUT>
-void summarize_comparisons(size_t ngenes, int ngroups, const Source& src, std::vector<std::vector<OUT*> > output) {
+void summarize_comparisons(size_t ngenes, int ngroups, Source src, std::vector<std::vector<OUT*> > output) {
     // You'll need to make a copy of 'src' in each thread via openmP's firstprivate.
     std::vector<double> buffer(ngroups * ngroups);
     for (size_t g = 0; g < ngenes; ++g) {
-        src(g, buffer.data());
+        src(g, buffer);
 
         for (int l = 0; l < ngroups; ++l) {
             auto start = buffer.data() + l * ngroups;
@@ -48,20 +48,20 @@ void summarize_comparisons(size_t ngenes, int ngroups, const Source& src, std::v
 
             std::sort(start + restart, start + ngroups);
 
-            output[l][0] = start[restart]; // minimum.
+            output[l][0][g] = start[restart]; // minimum.
 
             int ncomps = ngroups - restart;
             if (ncomps > 1) {
-                output[l][1] = quantile(start + restart, ncomps, 1, 4); // First quartile.
-                output[l][2] = quantile(start + restart, ncomps, 2, 4); // Median
-                output[l][3] = quantile(start + restart, ncomps, 3, 4); // Third quartile.
+                output[l][1][g] = quantile(start + restart, ncomps, 1, 4); // First quartile.
+                output[l][2][g] = quantile(start + restart, ncomps, 2, 4); // Median
+                output[l][3][g] = quantile(start + restart, ncomps, 3, 4); // Third quartile.
             } else {
-                output[l][1] = start[restart];
-                output[l][2] = start[restart];
-                output[l][3] = start[restart];
+                output[l][1][g] = start[restart];
+                output[l][2][g] = start[restart];
+                output[l][3][g] = start[restart];
             }
 
-            output[l][4] = start[ngroups-1]; // maximum.
+            output[l][4][g] = start[ngroups-1]; // maximum.
                    
         }
     }

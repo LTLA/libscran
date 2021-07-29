@@ -22,6 +22,7 @@ add_executable(
     src/dimensionality_reduction/RunPCA.cpp
     src/clustering/BuildSNNGraph.cpp
     src/clustering/ClusterSNNGraph.cpp
+    src/differential_analysis/CohensD.cpp
     src/data/data_sparse.cpp
 )
 
