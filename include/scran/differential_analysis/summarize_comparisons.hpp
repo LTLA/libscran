@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <numeric>
 #include <vector>
 
 namespace scran {
@@ -18,8 +19,8 @@ double quantile(IT start, int size, int k, int q) {
         return start[idx];
     }
 
-    // Compute interpolation between the two points.
-    return ((k * (size - 1) - idx * q) * start[idx] + ((idx + 1) * q - k * (size - 1)) * start[idx + 1])/q;
+    // Linearly interpolate between the two points.
+    return ((k * (size - 1) - idx * q) * start[idx + 1] + ((idx + 1) * q - k * (size - 1)) * start[idx])/q;
 }
 
 template<class Source, typename OUT>
@@ -46,23 +47,28 @@ void summarize_comparisons(size_t ngenes, int ngroups, Source src, std::vector<s
                 }
             }
 
-            std::sort(start + restart, start + ngroups);
-
-            output[l][0][g] = start[restart]; // minimum.
-
-            int ncomps = ngroups - restart;
-            if (ncomps > 1) {
-                output[l][1][g] = quantile(start + restart, ncomps, 1, 4); // First quartile.
-                output[l][2][g] = quantile(start + restart, ncomps, 2, 4); // Median
-                output[l][3][g] = quantile(start + restart, ncomps, 3, 4); // Third quartile.
+            if (restart == ngroups) {
+                const double nan=std::numeric_limits<double>::quiet_NaN();                                
+                output[l][0][g] = nan;
+                output[l][1][g] = nan;
+                output[l][2][g] = nan;
+                output[l][3][g] = nan;
             } else {
-                output[l][1][g] = start[restart];
-                output[l][2][g] = start[restart];
-                output[l][3][g] = start[restart];
-            }
+                std::sort(start + restart, start + ngroups);
 
-            output[l][4][g] = start[ngroups-1]; // maximum.
-                   
+                output[l][0][g] = start[restart]; // minimum.
+
+                int ncomps = ngroups - restart;
+                if (ncomps > 1) {
+                    output[l][1][g] = std::accumulate(start + restart, start + ngroups, 0.0) / ncomps; // Mean
+                    output[l][2][g] = quantile(start + restart, ncomps, 2, 4); // Median
+                } else {
+                    output[l][1][g] = start[restart];
+                    output[l][2][g] = start[restart];
+                }
+
+                output[l][3][g] = start[ngroups-1]; // maximum.
+            }
         }
     }
 }
