@@ -108,9 +108,9 @@ public:
     {
         std::vector<int> block_size;
         if (block) {
-            block_size = block_summaries<true>(p, block, means, variances);
+            block_size = feature_selection::block_summaries<true>(p, block, means, variances);
         } else {
-            block_size = block_summaries<false>(p, block, means, variances);
+            block_size = feature_selection::block_summaries<false>(p, block, means, variances);
         }
 
         // Applying the trend fit to each block.
