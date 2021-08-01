@@ -127,13 +127,13 @@ private:
             for (size_t r = 0; r < NR; ++r) {
                 auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data());
 
-                auto stats = tatami::stats::VarianceHelper::compute_with_mean(range, NC);
+                auto stats = tatami::stats::variances::compute_direct(range, NC);
                 center_v[r] = stats.first;
                 if (scale) {
-                    total_var += stats.second;
+                    ++total_var;
                     scale_v[r] = std::sqrt(stats.second);
                 } else {
-                    ++total_var;
+                    total_var += stats.second;
                     scale_v[r] = 1;
                 }
 
@@ -145,26 +145,27 @@ private:
         } else {
             std::vector<double> xbuffer(NR);
             std::vector<int> ibuffer(NR);
+
+            center_v.setZero();
+            scale_v.setZero();
+            std::vector<int> nonzeros(NR);
+            int count = 0;
             
-            tatami::stats::VarianceHelper::Sparse running(NR);
             for (size_t c = 0; c < NC; ++c) {
                 auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data());
-                running.add(range);
-
+                tatami::stats::variances::compute_running(range, center_v.data(), scale_v.data(), nonzeros.data(), count);
                 for (size_t i = 0; i < range.number; ++i) {
                     triplets.push_back(TRIPLET(c, range.index[i], range.value[i])); // transposing.
                 }
             }
 
-            running.finish();
-            std::copy(running.means().begin(), running.means().end(), center_v.begin());
+            tatami::stats::variances::finish_running(NR, center_v.data(), scale_v.data(), nonzeros.data(), count);
 
             if (scale) {
-                total_var = std::accumulate(running.statistics().begin(), running.statistics().end(), 0.0);
-                std::copy(running.statistics().begin(), running.statistics().end(), scale_v.begin());
                 for (auto& s : scale_v) { s = std::sqrt(s); }
-            } else {
                 total_var = NR;
+            } else {
+                total_var = std::accumulate(scale_v.begin(), scale_v.end(), 0.0);
                 std::fill(scale_v.begin(), scale_v.end(), 1);
             }
         }
@@ -187,7 +188,7 @@ private:
 
         for (size_t r = 0; r < NR; ++r, outIt += NC) {
             auto ptr = mat->row_copy(r, outIt);
-            auto stats = tatami::stats::VarianceHelper::compute_with_mean(outIt, NC);
+            auto stats = tatami::stats::variances::compute_direct(outIt, NC);
 
             auto copy = outIt;
             for (size_t c = 0; c < NC; ++c, ++copy) {
@@ -200,9 +201,9 @@ private:
                 for (size_t c = 0; c < NC; ++c, ++copy) {
                     *copy /= sd;
                 }
-                total_var += stats.second;
-            } else {
                 ++total_var;
+            } else {
+                total_var += stats.second;
             }
         }
 
