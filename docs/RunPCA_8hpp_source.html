@@ -200,13 +200,13 @@ $(function() {
 <div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> r = 0; r &lt; NR; ++r) {</div>
 <div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;                <span class="keyword">auto</span> range = mat-&gt;sparse_row(r, xbuffer.data(), ibuffer.data());</div>
 <div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160; </div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;                <span class="keyword">auto</span> stats = tatami::stats::VarianceHelper::compute_with_mean(range, NC);</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;                <span class="keyword">auto</span> stats = tatami::stats::variances::compute_direct(range, NC);</div>
 <div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;                center_v[r] = stats.first;</div>
 <div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;                <span class="keywordflow">if</span> (scale) {</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;                    total_var += stats.second;</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;                    ++total_var;</div>
 <div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;                    scale_v[r] = std::sqrt(stats.second);</div>
 <div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;                } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;                    ++total_var;</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;                    total_var += stats.second;</div>
 <div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;                    scale_v[r] = 1;</div>
 <div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;                }</div>
 <div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160; </div>
@@ -218,75 +218,76 @@ $(function() {
 <div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;        } <span class="keywordflow">else</span> {</div>
 <div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;            std::vector&lt;double&gt; xbuffer(NR);</div>
 <div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;            std::vector&lt;int&gt; ibuffer(NR);</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;            </div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;            tatami::stats::VarianceHelper::Sparse running(NR);</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> c = 0; c &lt; NC; ++c) {</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;                <span class="keyword">auto</span> range = mat-&gt;sparse_column(c, xbuffer.data(), ibuffer.data());</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;                running.add(range);</div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160; </div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; range.number; ++i) {</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;                    triplets.push_back(TRIPLET(c, range.index[i], range.value[i])); <span class="comment">// transposing.</span></div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;                }</div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;            }</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160; </div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;            running.finish();</div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;            std::copy(running.means().begin(), running.means().end(), center_v.begin());</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160; </div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;            center_v.setZero();</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;            scale_v.setZero();</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;            std::vector&lt;int&gt; nonzeros(NR);</div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;            <span class="keywordtype">int</span> count = 0;</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;            </div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> c = 0; c &lt; NC; ++c) {</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;                <span class="keyword">auto</span> range = mat-&gt;sparse_column(c, xbuffer.data(), ibuffer.data());</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;                tatami::stats::variances::compute_running(range, center_v.data(), scale_v.data(), nonzeros.data(), count);</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; range.number; ++i) {</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;                    triplets.push_back(TRIPLET(c, range.index[i], range.value[i])); <span class="comment">// transposing.</span></div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;                }</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;            }</div>
 <div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160; </div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;            <span class="keywordflow">if</span> (scale) {</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;                total_var = std::accumulate(running.statistics().begin(), running.statistics().end(), 0.0);</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;                std::copy(running.statistics().begin(), running.statistics().end(), scale_v.begin());</div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;            tatami::stats::variances::finish_running(NR, center_v.data(), scale_v.data(), nonzeros.data(), count);</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160; </div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;            <span class="keywordflow">if</span> (scale) {</div>
 <div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;                <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; s : scale_v) { s = std::sqrt(s); }</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;            } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;                total_var = NR;</div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;                std::fill(scale_v.begin(), scale_v.end(), 1);</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;            }</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;        }</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160; </div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;        Eigen::SparseMatrix&lt;double&gt; A(NC, NR); <span class="comment">// transposed</span></div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;        A.setFromTriplets(triplets.begin(), triplets.end());</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;        A.makeCompressed();</div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;        <span class="keywordflow">return</span> A;</div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;    }</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160; </div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> IDX&gt; </div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;    Eigen::MatrixXd create_eigen_matrix_dense(<span class="keyword">const</span> tatami::Matrix&lt;T, IDX&gt;* mat, <span class="keywordtype">double</span>&amp; total_var) {</div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;        <span class="keywordtype">size_t</span> NR = mat-&gt;nrow(), NC = mat-&gt;ncol();</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;        total_var = 0;</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160; </div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;        Eigen::MatrixXd output(NC, NR); <span class="comment">// transposed.</span></div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;        std::vector&lt;double&gt; xbuffer(NC);</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;        <span class="keywordtype">double</span>* outIt = output.data();</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160; </div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> r = 0; r &lt; NR; ++r, outIt += NC) {</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;            <span class="keyword">auto</span> ptr = mat-&gt;row_copy(r, outIt);</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;            <span class="keyword">auto</span> stats = tatami::stats::VarianceHelper::compute_with_mean(outIt, NC);</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160; </div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;            <span class="keyword">auto</span> copy = outIt;</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> c = 0; c &lt; NC; ++c, ++copy) {</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;                *copy -= stats.first;</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;            }</div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160; </div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;            <span class="keywordflow">if</span> (scale) {</div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;                <span class="keywordtype">double</span> sd = std::sqrt(stats.second);</div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;                <span class="keyword">auto</span> copy = outIt;</div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> c = 0; c &lt; NC; ++c, ++copy) {</div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;                    *copy /= sd;</div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;                }</div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;                total_var += stats.second;</div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;            } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;                ++total_var;</div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;            }</div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;        }</div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160; </div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;        <span class="keywordflow">return</span> output;</div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;    }</div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160; </div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;};</div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160; </div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;}</div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160; </div>
-<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;                total_var = NR;</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;            } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;                total_var = std::accumulate(scale_v.begin(), scale_v.end(), 0.0);</div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;                std::fill(scale_v.begin(), scale_v.end(), 1);</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;            }</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;        }</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160; </div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;        Eigen::SparseMatrix&lt;double&gt; A(NC, NR); <span class="comment">// transposed</span></div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;        A.setFromTriplets(triplets.begin(), triplets.end());</div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;        A.makeCompressed();</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;        <span class="keywordflow">return</span> A;</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;    }</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160; </div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;<span class="keyword">private</span>:</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> IDX&gt; </div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;    Eigen::MatrixXd create_eigen_matrix_dense(<span class="keyword">const</span> tatami::Matrix&lt;T, IDX&gt;* mat, <span class="keywordtype">double</span>&amp; total_var) {</div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;        <span class="keywordtype">size_t</span> NR = mat-&gt;nrow(), NC = mat-&gt;ncol();</div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;        total_var = 0;</div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160; </div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;        Eigen::MatrixXd output(NC, NR); <span class="comment">// transposed.</span></div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;        std::vector&lt;double&gt; xbuffer(NC);</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;        <span class="keywordtype">double</span>* outIt = output.data();</div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160; </div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> r = 0; r &lt; NR; ++r, outIt += NC) {</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;            <span class="keyword">auto</span> ptr = mat-&gt;row_copy(r, outIt);</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;            <span class="keyword">auto</span> stats = tatami::stats::variances::compute_direct(outIt, NC);</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160; </div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;            <span class="keyword">auto</span> copy = outIt;</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> c = 0; c &lt; NC; ++c, ++copy) {</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;                *copy -= stats.first;</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;            }</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160; </div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;            <span class="keywordflow">if</span> (scale) {</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;                <span class="keywordtype">double</span> sd = std::sqrt(stats.second);</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;                <span class="keyword">auto</span> copy = outIt;</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> c = 0; c &lt; NC; ++c, ++copy) {</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;                    *copy /= sd;</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;                }</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;                ++total_var;</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;            } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;                total_var += stats.second;</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;            }</div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;        }</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160; </div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;        <span class="keywordflow">return</span> output;</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;    }</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160; </div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;};</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160; </div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;}</div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160; </div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

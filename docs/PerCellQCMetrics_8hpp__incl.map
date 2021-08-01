@@ -1,9 +1,10 @@
 <map id="scran/quality_control/PerCellQCMetrics.hpp" name="scran/quality_control/PerCellQCMetrics.hpp">
-<area shape="rect" id="node1" title=" " alt="" coords="115,5,269,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="227,184,285,211"/>
-<area shape="rect" id="node3" title=" " alt="" coords="27,102,101,129"/>
-<area shape="rect" id="node4" title=" " alt="" coords="125,102,179,129"/>
-<area shape="rect" id="node5" title=" " alt="" coords="203,102,264,129"/>
-<area shape="rect" id="node6" title=" " alt="" coords="289,102,442,129"/>
-<area shape="rect" id="node7" href="$vector__to__pointers_8hpp_source.html" title=" " alt="" coords="467,95,581,136"/>
+<area shape="rect" id="node1" title=" " alt="" coords="158,5,313,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="315,184,374,211"/>
+<area shape="rect" id="node3" title=" " alt="" coords="29,102,103,129"/>
+<area shape="rect" id="node4" title=" " alt="" coords="127,102,181,129"/>
+<area shape="rect" id="node5" title=" " alt="" coords="205,102,266,129"/>
+<area shape="rect" id="node6" title=" " alt="" coords="291,102,444,129"/>
+<area shape="rect" id="node7" title=" " alt="" coords="469,102,618,129"/>
+<area shape="rect" id="node8" href="$vector__to__pointers_8hpp_source.html" title=" " alt="" coords="642,95,757,136"/>
 </map>
