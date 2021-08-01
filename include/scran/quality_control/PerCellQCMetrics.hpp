@@ -7,6 +7,7 @@
 #include <cstdint>
 
 #include "tatami/base/Matrix.hpp"
+#include "tatami/stats/apply.hpp"
 #include "../utils/vector_to_pointers.hpp"
 
 /**
@@ -80,6 +81,185 @@ public:
         return output;
     }
 
+private:
+    template<typename SUB, typename S, typename D, typename PROP>
+    struct Common {
+        Common(std::vector<SUB>& subs, S* su, D* de, std::vector<PROP>& subp) : subsets(subs), sums(su), detected(de), subset_proportions(subp) {}
+
+        std::vector<SUB>& subsets;
+        S* sums;
+        D* detected;
+        std::vector<PROP>& subset_proportions;
+    };
+
+    template<typename SUB, typename S, typename D, typename PROP>
+    struct Factory : public Common<SUB, S, D, PROP> {
+        typedef typename std::remove_reference<decltype(*std::declval<PROP>())>::type P;
+        
+        Factory(size_t nr, size_t nc, std::vector<SUB>& subs, S* s, D* d, std::vector<PROP>& subp) : NR(nr), NC(nc), Common<SUB, S, D, PROP>(subs, s, d, subp) {
+            std::fill(this->sums, this->sums + nc, static_cast<S>(0));
+            std::fill(this->detected, this->detected + nc, static_cast<D>(0));
+            for (size_t s = 0; s < this->subsets.size(); ++s) {
+                std::fill(this->subset_proportions[s], this->subset_proportions[s] + nc, static_cast<P>(0.0));
+            }
+        }
+
+        size_t NR, NC;
+        static constexpr bool supports_sparse = true;
+        static constexpr bool supports_running = true;
+
+    public:
+        struct DenseDirect : public Common<SUB, S, D, PROP> {
+            DenseDirect(size_t nr, std::vector<SUB>& subs, S* s, D* d, std::vector<PROP>& subp) : NR(nr), Common<SUB, S, D, PROP>(subs, s, d, subp) {}
+
+            template<typename T>
+            void compute(size_t c, const T* ptr, T* buffer) {
+                for (size_t r = 0; r < NR; ++r) {
+                    this->sums[c] += ptr[r];
+                    this->detected[c] += static_cast<D>(ptr[r] > 0);
+                }
+
+                for (size_t s = 0; s < this->subsets.size(); ++s) {
+                    const auto& sub = this->subsets[s];
+                    auto& prop = this->subset_proportions[s][c];
+                    for (size_t r = 0; r < NR; ++r) {
+                        prop += sub[r] * ptr[r];
+                    }
+
+                    if (this->sums[c]) {
+                        prop /= this->sums[c];
+                    } else {
+                        prop = std::numeric_limits<P>::quiet_NaN();
+                    }
+                }
+            }
+
+            size_t NR;
+        };
+
+        DenseDirect dense_direct() {
+            return DenseDirect(NR, this->subsets, this->sums, this->detected, this->subset_proportions);
+        }
+
+    public:
+        struct SparseDirect : public Common<SUB, S, D, PROP> {
+            SparseDirect(std::vector<SUB>& subs, S* s, D* d, std::vector<PROP>& subp) : Common<SUB, S, D, PROP>(subs, s, d, subp) {}
+
+            template<typename T, typename IDX>
+            void compute(size_t c, const tatami::SparseRange<T, IDX>& range, T* vbuffer, IDX* ibuffer) {
+                for (size_t r = 0; r < range.number; ++r) {
+                    this->sums[c] += range.value[r];
+                    this->detected[c] += static_cast<D>(range.value[r] > 0);
+                }
+
+                for (size_t s = 0; s < this->subsets.size(); ++s) {
+                    const auto& sub = this->subsets[s];
+                    auto& prop = this->subset_proportions[s][c];
+                    for (size_t i = 0; i < range.number; ++i) {
+                        prop += sub[range.index[i]] * range.value[i];
+                    }
+
+                    if (this->sums[c]) {
+                        prop /= this->sums[c];
+                    } else {
+                        prop = std::numeric_limits<P>::quiet_NaN();
+                    }
+                }
+            }
+        };
+        
+        SparseDirect sparse_direct() {
+            return SparseDirect(this->subsets, this->sums, this->detected, this->subset_proportions);
+        }
+
+    public:
+        struct DenseRunning : public Common<SUB, S, D, PROP> {
+            DenseRunning(size_t nc, std::vector<SUB>& subs, S* s, D* d, std::vector<PROP>& subp) : NC(nc), Common<SUB, S, D, PROP>(subs, s, d, subp) {}
+
+            template<class T>
+            void add (const T* ptr, T* buffer) {
+                for (size_t c = 0; c < NC; ++c) {
+                    this->sums[c] += ptr[c];
+                    this->detected[c] += static_cast<D>(ptr[c] > 0);
+                }
+
+                for (size_t s = 0; s < this->subsets.size(); ++s) {
+                    if (this->subsets[s][counter]) {
+                        auto& sub = this->subset_proportions[s];
+                        for (size_t c = 0; c < NC; ++c) {
+                            sub[c] += ptr[c];
+                        }
+                    }
+                }
+
+                ++counter;
+            }
+
+            void finish() {
+                for (size_t s = 0; s < this->subsets.size(); ++s) {
+                    for (size_t c = 0; c < NC; ++c) {
+                        auto& prop = this->subset_proportions[s][c];
+                        if (this->sums[c]) {
+                            prop /= this->sums[c];
+                        } else {
+                            prop = std::numeric_limits<P>::quiet_NaN();
+                        }
+                    }
+                }
+            }
+
+            size_t NC;
+            size_t counter = 0;
+        };
+
+        DenseRunning dense_running() {
+            return DenseRunning(NC, this->subsets, this->sums, this->detected, this->subset_proportions);
+        }
+
+    public:
+        struct SparseRunning : public Common<SUB, S, D, PROP> {
+            SparseRunning(size_t nc, std::vector<SUB>& subs, S* s, D* d, std::vector<PROP>& subp) : NC(nc), Common<SUB, S, D, PROP>(subs, s, d, subp) {}
+
+            template<typename T, typename IDX>
+            void add (const tatami::SparseRange<T, IDX> range, T* vbuffer, IDX* ibuffer) {
+                for (size_t i = 0; i < range.number; ++i) {
+                    this->sums[range.index[i]] += range.value[i];
+                    this->detected[range.index[i]] += static_cast<D>(range.value[i] > 0);
+                }
+
+                for (size_t s = 0; s < this->subsets.size(); ++s) {
+                    if (this->subsets[s][counter]) {
+                        for (size_t i = 0; i < range.number; ++i) {
+                            this->subset_proportions[s][range.index[i]] += range.value[i];
+                        }
+                    }
+                }
+
+                ++counter;
+            }
+
+            void finish() {
+                for (size_t s = 0; s < this->subsets.size(); ++s) {
+                    for (size_t c = 0; c < NC; ++c) {
+                        auto& prop = this->subset_proportions[s][c];
+                        if (this->sums[c]) {
+                            prop /= this->sums[c];
+                        } else {
+                            prop = std::numeric_limits<P>::quiet_NaN();
+                        }
+                    }
+                }
+            }
+
+            size_t NC;
+            size_t counter = 0;
+        };
+         
+        SparseRunning sparse_running() {
+            return SparseRunning(NC, this->subsets, this->sums, this->detected, this->subset_proportions);
+        }
+    };
+
 public:
     /**
      * Compute the QC metrics from an input matrix and return the results.
@@ -108,113 +288,8 @@ public:
     template<class MAT, typename SUB = const uint8_t*, typename S, typename D, typename PROP>
     void run(const MAT* mat, std::vector<SUB> subsets, S* sums, D* detected, std::vector<PROP> subset_proportions) {
         size_t nr = mat->nrow(), nc = mat->ncol();
-
-        if (mat->prefer_rows()) {
-            std::vector<typename MAT::value> buffer(nc);
-            std::fill(sums, sums + nc, static_cast<S>(0));
-            std::fill(detected, detected + nc, static_cast<D>(0));
-            for (size_t s = 0; s < subsets.size(); ++s) {
-                std::fill(subset_proportions[s], subset_proportions[s] + nc, static_cast<typename std::remove_reference<decltype(*std::declval<PROP>())>::type>(0));
-            }
-            auto wrk = mat->new_workspace(false);
-
-            if (mat->sparse()) {
-                std::vector<typename MAT::index> ibuffer(nc);
-                for (size_t r = 0; r < nr; ++r) {
-                    auto range = mat->sparse_row(r, buffer.data(), ibuffer.data(), wrk.get());
-
-                    for (size_t i = 0; i < range.number; ++i) {
-                        sums[range.index[i]] += range.value[i];
-                        detected[range.index[i]] += static_cast<D>(range.value[i] > 0);
-                    }
-
-                    for (size_t s = 0; s < subsets.size(); ++s) {
-                        if (subsets[s][r]) {
-                            for (size_t i = 0; i < range.number; ++i) {
-                                subset_proportions[s][range.index[i]] += range.value[i];
-                            }
-                        }
-                    }
-                }
-                
-            } else {
-                for (size_t r = 0; r < nr; ++r) {
-                    auto ptr = mat->row(r, buffer.data(), wrk.get());
-
-                    for (size_t c = 0; c < nc; ++c) {
-                        sums[c] += ptr[c];
-                        detected[c] += static_cast<D>(ptr[c] > 0);
-                    }
-
-                    for (size_t s = 0; s < subsets.size(); ++s) {
-                        if (subsets[s][r]) {
-                            auto& sub = subset_proportions[s];
-                            for (size_t c = 0; c < nc; ++c) {
-                                sub[c] += ptr[c];
-                            }
-                        }
-                    }
-                }
-            }
-
-        } else {
-            std::vector<typename MAT::value> buffer(nr);
-            auto wrk = mat->new_workspace(true);
-
-            if (mat->sparse()) {
-                std::vector<typename MAT::index> ibuffer(nr);
-                for (size_t c = 0; c < nc; ++c) {
-                    auto range = mat->sparse_column(c, buffer.data(), ibuffer.data(), wrk.get());
-
-                    sums[c] = 0;
-                    detected[c] = 0;
-                    for (size_t r = 0; r < range.number; ++r) {
-                        sums[c] += range.value[r];
-                        detected[c] += static_cast<D>(range.value[r] > 0);
-                    }
-
-                    for (size_t s = 0; s < subsets.size(); ++s) {
-                        const auto& sub = subsets[s];
-                        auto& prop = subset_proportions[s][c] = 0;
-                        for (size_t i = 0; i < range.number; ++i) {
-                            prop += sub[range.index[i]] * range.value[i];
-                        }
-                    }
-                }
-
-            } else {
-                for (size_t c = 0; c < nc; ++c) {
-                    auto ptr = mat->column(c, buffer.data(), wrk.get());
-
-                    sums[c] = 0;
-                    detected[c] = 0;
-                    for (size_t r = 0; r < nr; ++r) {
-                        sums[c] += ptr[r];
-                        detected[c] += static_cast<D>(ptr[r] > 0);
-                    }
-
-                    for (size_t s = 0; s < subsets.size(); ++s) {
-                        const auto& sub = subsets[s];
-                        auto& prop = subset_proportions[s][c] = 0;
-                        for (size_t r = 0; r < nr; ++r) {
-                            prop += sub[r] * ptr[r];
-                        }
-                    }
-                }
-            }
-        }
-
-        for (size_t s = 0; s < subsets.size(); ++s) {
-            auto& prop = subset_proportions[s];
-            for (size_t c = 0; c < nc; ++c) {
-                if (sums[c]!=0) {
-                    prop[c] /= sums[c];
-                } else {
-                    prop[c] = std::numeric_limits<double>::quiet_NaN();
-                }
-            }
-        }
-
+        Factory fact(nr, nc, subsets, sums, detected, subset_proportions);
+        tatami::apply<1>(mat, fact);
         return;
     }
 };

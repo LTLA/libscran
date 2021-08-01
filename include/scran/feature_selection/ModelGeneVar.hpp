@@ -1,8 +1,11 @@
 #ifndef SCRAN_MODEL_GENE_VAR_H
 #define SCRAN_MODEL_GENE_VAR_H
 
+#include "tatami/base/Matrix.hpp"
+#include "tatami/stats/apply.hpp"
+
 #include "../utils/vector_to_pointers.hpp"
-#include "block_summaries.hpp"
+#include "blocked_variances.hpp"
 #include "FitTrendVar.hpp"
 
 #include <algorithm>
@@ -43,6 +46,8 @@ public:
         fit.set_span(s);
         return *this;
     }
+
+private:
 
 public:
     /** 
@@ -106,15 +111,22 @@ public:
                      std::vector<double*> fitted,
                      std::vector<double*> residuals)
     {
-        std::vector<int> block_size;
+        size_t NR = p->nrow(), NC = p->ncol();
+        std::vector<int> block_size(means.size());
         if (block) {
-            block_size = feature_selection::block_summaries<true>(p, block, means, variances);
+            auto copy = block;
+            for (size_t j = 0; j < NC; ++j, ++copy) {
+                ++block_size[*copy];
+            }
+            feature_selection::BlockedVarianceFactory<true, decltype(means), B, decltype(block_size)> fact(NR, NC, means, variances, block, block_size);
+            tatami::apply<0>(p, fact);
         } else {
-            block_size = feature_selection::block_summaries<false>(p, block, means, variances);
+            block_size[0] = NC;
+            feature_selection::BlockedVarianceFactory<false, decltype(means), B, decltype(block_size)> fact(NR, NC, means, variances, block, block_size);
+            tatami::apply<0>(p, fact);
         }
 
         // Applying the trend fit to each block.
-        auto NR = p->nrow();
         for (size_t b = 0; b < block_size.size(); ++b) {
             if (block_size[b] >= 2) {
                 fit.run(NR, means[b], variances[b], fitted[b], residuals[b]);
