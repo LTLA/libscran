@@ -1,12 +1,10 @@
 #ifndef SCRAN_COHEN_D_HPP
 #define SCRAN_COHEN_D_HPP
 
-#include "../feature_selection/block_summaries.hpp"
-#include "summarize_comparisons.hpp"
-
 #include <vector>
 #include <limits>
 #include <algorithm>
+#include <cmath>
 
 namespace scran {
 
@@ -25,6 +23,7 @@ inline double compute_cohens_d(double m1, double m2, double sd, double threshold
             return std::numeric_limits<double>::infinity();
         } else {
             return -std::numeric_limits<double>::infinity();
+        }
     } else {
         return delta / sd;
     }
@@ -42,59 +41,57 @@ inline double cohen_denominator(double left_var, double right_var) {
     }
 }
 
-template<typename Stat, typename Level, typename Ls>
-void compute_pairwise_cohens_d (const Stat& means, const Stat& vars, const Level& levels, const Ls& level_size, int ngroups, int nblocks, Stat& output, Stat& weightsum, double threshold = 0) {
-    std::fill(output, output + ngroups * ngroups, 0);
-    std::fill(weightsum, weightsum + ngroups * ngroups, 0);
+template<typename Stat, typename Ls>
+void compute_pairwise_cohens_d (const Stat* means, const Stat* vars, const Ls& level_size, int ngroups, int nblocks, Stat* output, double threshold = 0) {
+    for (int g1 = 0; g1 < ngroups; ++g1) {
+        for (int g2 = 0; g2 < g1; ++g2) {
+            double total_weight = 0;
+            double& total_d1 = output[g1 * ngroups + g2];
+            total_d1 = 0;
+            double& total_d2 = output[g2 * ngroups + g1];
+            total_d2 = 0;
 
-    for (int b = 0; b < nblocks; ++b) {
-        int offset = b * ngroups;
+            for (int b = 0; b < nblocks; ++b) {
+                int offset1 = b * ngroups + g1;
+                const auto& left_mean = means[offset1];
+                const auto& left_var = vars[offset1];
+                const auto& left_size = level_size[offset1];
+                if (!left_size) {
+                    continue;
+                }
 
-        for (int g1 = 0; g1 < ngroups; ++g1) {
-            const auto& left_mean = means[offset + g1]; 
-            const auto& left_var = vars[offset + g1];
-            const auto& left_size = level_size[offset + g1];
-            if (!left_size) {
-                continue;
-            }
-
-            for (int g2 = 0; g2 < g1; ++g2) {
-                const auto& right_mean = means[offset + g2]; 
-                const auto& right_var = vars[offset + g2];
-                const auto& right_size = level_size[offset + g2];
+                int offset2 = b * ngroups + g2;
+                const auto& right_mean = means[offset2]; 
+                const auto& right_var = vars[offset2];
+                const auto& right_size = level_size[offset2];
                 if (!right_size) {
                     continue;
                 }
 
-                double denom = cohen_denominator(vars[g1], vars[g2]);
+                double denom = cohen_denominator(left_var, right_var);
                 if (std::isnan(denom)) {
                     continue;
                 }
 
                 double weight = left_size * right_size;
-                weightsum[g1 * ngroups + g2] += weight;
+                total_weight += weight;
 
-                output[g1 * ngroups + g2] += compute_cohens_d(means[g1], means[g2], denom, threshold) * weight;
+                total_d1 += compute_cohens_d(left_mean, right_mean, denom, threshold) * weight;
                 if (threshold != 0) { 
-                    output[g2 * ngroups + g1] = compute_cohens_d(means[g2], means[g1], denom, threshold) * weight;
+                    total_d2 += compute_cohens_d(right_mean, left_mean, denom, threshold) * weight;
                 }
             }
-        }
-    }
 
-    for (int g1 = 0; g1 < ngroups; ++g1) {
-        for (int g2 = 0; g2 < g1; ++g2) {
-            double total_weight = weightsum[g1 * ngroups + g2];
             if (total_weight) {
-                output[g1 * ngroups + g2] /= total_weight;
+                total_d1 /= total_weight;
                 if (threshold == 0) {
-                    output[g2 * ngroups + g1] = -output[g1 * ngroups + g2];
+                    total_d2 = -total_d1;
                 } else {
-                    output[g2 * ngroups + g1] /= total_weight;
+                    total_d2 /= total_weight;
                 }
             } else {
-                output[g1 * ngroups + g2] = std::numeric_limits<double>::quiet_NaN();
-                output[g2 * ngroups + g1] = std::numeric_limits<double>::quiet_NaN();
+                total_d1 = std::numeric_limits<double>::quiet_NaN();
+                total_d2 = std::numeric_limits<double>::quiet_NaN();
             }
         }
     }
