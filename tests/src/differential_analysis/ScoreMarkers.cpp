@@ -78,37 +78,40 @@ TEST_P(ScoreMarkersTest, CohensD) {
     scran::ScoreMarkers chd;
     auto res = chd.run(dense_row.get(), groupings.data());
 
-    // Checking that the mean and median lie within the min/max for each gene.
     size_t ngenes = dense_row->nrow();
     for (int l = 0; l < ngroups; ++l) {
-        const auto& current = res.effects[0][l];
-
         size_t ngenes = dense_row->nrow();
+
         for (size_t g = 0; g < ngenes; ++g) {
-            double curmin = current[g];
-            double curmean = current[g + ngenes];
-            double curmed = current[g + ngenes*2];
-            double curmax = current[g + ngenes*3];
+            double curmin = res.effects[0][0][g + l * ngenes];
+            double curmean = res.effects[0][1][g + l * ngenes];
+            double curmed = res.effects[0][2][g + l * ngenes];
+            double currank = res.effects[0][3][g + l * ngenes];
 
             EXPECT_TRUE(curmin <= curmean);
             EXPECT_TRUE(curmin <= curmed);
-            EXPECT_TRUE(curmean <= curmax);
-            EXPECT_TRUE(curmed <= curmax);
+            if (curmed > curmin) {
+                EXPECT_TRUE(curmean > curmin);
+            }
+            EXPECT_TRUE(currank >= 1);
+            EXPECT_TRUE(currank <= ngenes);
         }
     }
 
+    // Don't compare min-rank here, as minor numerical differences
+    // can change the ranks by a small amount when effects are tied.
     auto res2 = chd.run(sparse_row.get(), groupings.data());
-    for (int l = 0; l < ngroups; ++l) {
+    for (int l = 0; l < 3; ++l) {
         compare_almost_equal(res.effects[0][l], res2.effects[0][l]);
     }
 
     auto res3 = chd.run(dense_column.get(), groupings.data());
-    for (int l = 0; l < ngroups; ++l) {
+    for (int l = 0; l < 3; ++l) {
         compare_almost_equal(res.effects[0][l], res3.effects[0][l]);
     }
 
     auto res4 = chd.run(sparse_column.get(), groupings.data());
-    for (int l = 0; l < ngroups; ++l) {
+    for (int l = 0; l < 3; ++l) {
         compare_almost_equal(res.effects[0][l], res4.effects[0][l]);
     }
 }

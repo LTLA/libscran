@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "scran/differential_analysis/summarize_comparisons.hpp"
+#include "../utils/compare_vectors.h"
 
 #include <numeric>
 
@@ -19,9 +20,9 @@ protected:
     template<class Param>
     void assemble(Param& param) {
         ngroups = std::get<0>(param);
-        output.resize(ngroups * 4 * ngenes);
+        output.resize(ngroups * 3 * ngenes);
         auto ptr = output.data();
-        for (int g = 0; g < ngroups; ++g, ptr += 4 * ngenes) {
+        for (int g = 0; g < 3; ++g, ptr += ngroups * ngenes) {
             ptrs.push_back(ptr);
         }
     }
@@ -31,52 +32,53 @@ protected:
     int ngroups, ngenes = 3;
 };
 
-/* For each group, the effect sizes start from `group_id * ngenes` for the
+/* For each group, the effect sizes start from `group_id * gene` for the
  * comparison to group 0 and increase consecutively until the comparison to
  * group `ngroups - 1`. This should make it relatively straightforward to
  * compute the various metrics exactly for testing purposes. We add a `gene`
  * multiplier to ensure that `summarize_comparisons` responds to it properly.
  */
-std::vector<double> spawn_simple_values(int ngroups, int gene) {
-    std::vector<double> output(ngroups * ngroups);
+std::vector<double> spawn_simple_values(int ngroups, int ngenes) {
+    std::vector<double> output(ngroups * ngroups * ngenes);
     auto start = output.begin();
-    for (int g = 0; g < ngroups; ++g, start += ngroups) {
-        std::iota(start, start + ngroups, g * gene);
+    for (int gene = 0; gene < ngenes; ++gene) {
+        for (int g = 0; g < ngroups; ++g, start += ngroups) {
+            std::iota(start, start + ngroups, g * gene);
+        }
     }
     return output;
 }
 
 TEST_P(SummarizeComparisonsTest, Basic) {
     assemble(GetParam());
-
-    for (int gene = 0; gene < ngenes; ++gene) {
-        auto values = spawn_simple_values(ngroups, gene);
-        scran::differential_analysis::summarize_comparisons(ngroups, values.data(), gene, ngenes, ptrs);
-    }
+    auto values = spawn_simple_values(ngroups, ngenes);
+    scran::differential_analysis::summarize_comparisons(ngenes, ngroups, values.data(), ptrs);
 
     for (int gene = 0; gene < ngenes; ++gene) {
         for (int g = 0; g < ngroups; ++g) {
             // Checking that the minimum is correct.
-            EXPECT_FLOAT_EQ(ptrs[g][gene], g * gene + (g == 0));
-
-            // Checking that the maximum is correct.
-            EXPECT_FLOAT_EQ(ptrs[g][gene + 3 * ngenes], g * gene + ngroups - 1 - (g == ngroups - 1));
+            EXPECT_FLOAT_EQ(ptrs[0][gene + g * ngenes], g * gene + (g == 0));
 
             // Checking that the mean is correct.
-            EXPECT_FLOAT_EQ(ptrs[g][gene + ngenes], g * gene + ((ngroups - 1)*ngroups/2.0 - g)/(ngroups-1));
+            EXPECT_FLOAT_EQ(ptrs[1][gene + g * ngenes], g * gene + ((ngroups - 1)*ngroups/2.0 - g)/(ngroups-1));
+
+            // Checking that the median is greater than/equal to the minimum.
+            EXPECT_TRUE(ptrs[2][gene + g * ngenes] >= ptrs[0][gene + g * ngenes]); 
         }
     }
 }
 
-std::vector<double> spawn_missing_values(int ngroups, int gene, int lost) {
-    std::vector<double> output(ngroups * ngroups);
+std::vector<double> spawn_missing_values(int ngroups, int ngenes, int lost) {
+    std::vector<double> output(ngroups * ngroups * ngenes);
     auto start = output.begin();
-    for (int g = 0; g < ngroups; ++g, start += ngroups) {
-        if (g == lost) {
-            std::fill(start, start + ngroups, std::numeric_limits<double>::quiet_NaN());
-        } else {
-            std::iota(start, start + ngroups, g * gene);
-            *(start + lost) = std::numeric_limits<double>::quiet_NaN();
+    for (int gene = 0; gene < ngenes; ++gene) {
+        for (int g = 0; g < ngroups; ++g, start += ngroups) {
+            if (g == lost) {
+                std::fill(start, start + ngroups, std::numeric_limits<double>::quiet_NaN());
+            } else {
+                std::iota(start, start + ngroups, g * gene);
+                *(start + lost) = std::numeric_limits<double>::quiet_NaN();
+            }
         }
     }
     return output;
@@ -86,22 +88,20 @@ TEST_P(SummarizeComparisonsTest, Missing) {
     assemble(GetParam());
 
     for (int lost = 0; lost < ngroups; ++lost) {
-        for (int gene = 0; gene < ngenes; ++gene) {
-            auto values = spawn_missing_values(ngroups, gene, lost);
-            scran::differential_analysis::summarize_comparisons(ngroups, values.data(), gene, ngenes, ptrs);
-        }
+        auto values = spawn_missing_values(ngroups, ngenes, lost);
+        scran::differential_analysis::summarize_comparisons(ngenes, ngroups, values.data(), ptrs);
 
         for (int gene = 0; gene < ngenes; ++ gene) {
             for (int g = 0; g < ngroups; ++g) {
                 if (g == lost) {
-                    for (int i = 0; i < 4; ++i) {
-                        EXPECT_TRUE(std::isnan(ptrs[g][gene + i * ngenes]));
+                    for (int i = 0; i < 3; ++i) {
+                        EXPECT_TRUE(std::isnan(ptrs[i][gene + g * ngenes]));
                     }
                     continue;
                 }
 
                 // Checking that the minimum is correct.
-                auto curmin = ptrs[g][gene]; 
+                auto curmin = ptrs[0][gene + g * ngenes]; 
                 if ((g==0 && lost==1) || (g==1 && lost==0)) {
                     EXPECT_FLOAT_EQ(curmin, g * gene + 2);
                 } else if (g==0 || lost==0) {
@@ -110,18 +110,8 @@ TEST_P(SummarizeComparisonsTest, Missing) {
                     EXPECT_FLOAT_EQ(curmin, g * gene);
                 }
 
-                // Checking that the maximum is correct.
-                auto curmax = ptrs[g][gene + 3 * ngenes];
-                if ((g == ngroups - 1 && lost == ngroups - 2) || (g == ngroups - 2 && lost == ngroups - 1)) {
-                    EXPECT_FLOAT_EQ(curmax, g * gene + ngroups - 3);
-                } else if (g == ngroups - 1 || lost == ngroups - 1) {
-                    EXPECT_FLOAT_EQ(curmax, g * gene + ngroups - 2);
-                } else {
-                    EXPECT_FLOAT_EQ(curmax, g * gene + ngroups - 1);
-                }
-
                 // Checking that the mean is correct.
-                auto curmean = ptrs[g][gene + ngenes];
+                auto curmean = ptrs[1][gene + g * ngenes];
                 if (lost == g) {
                     EXPECT_FLOAT_EQ(curmean, g * gene + ((ngroups - 1)*ngroups/2.0 - g)/(ngroups-1));
                 } else {
@@ -140,3 +130,46 @@ INSTANTIATE_TEST_CASE_P(
     )
 );
 
+class ComputeMinRankTest : public ::testing::Test {
+protected:
+    void configure(int ngenes, int ngroups) {
+        buffer.resize(ngenes);
+        output.resize(ngroups * ngenes);
+    }
+
+    std::vector<std::pair<double, int> > buffer;
+    std::vector<double> output;
+};
+
+TEST_F(ComputeMinRankTest, Basic) {
+    size_t ngenes = 4, ngroups = 3;
+    std::vector<double> effects { 
+        0, 1, 1, 1, 0, 1, 1, 1, 0,
+        0, 2, 2, 2, 0, 2, 2, 2, 0,
+        0, 3, 3, 3, 0, 3, 3, 3, 0,
+        0, 4, 4, 4, 0, 4, 4, 4, 0
+    };
+
+    configure(ngenes, ngroups);
+    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), output.data(), buffer);
+    for (size_t i = 0; i < ngroups; ++i) {
+        compare_vectors(std::vector<double>{4, 3, 2, 1}, ngenes, output.data() + i * ngenes); // reversed, for maximum effect sizes.
+    }
+}
+
+TEST_F(ComputeMinRankTest, LessBasic) {
+    size_t ngenes = 4, ngroups = 3;
+    std::vector<double> effects { 
+        0, 1, 2, 2, 0, 4, 1, 3, 0,
+        0, 2, 4, 3, 0, 3, 2, 1, 0,
+        0, 3, 1, 1, 0, 2, 3, 2, 0,
+        0, 4, 3, 4, 0, 1, 4, 4, 0
+    };
+    for (auto& e : effects) { e *= -1; }
+
+    configure(ngenes, ngroups);
+    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), output.data(), buffer);
+    compare_vectors(std::vector<double>{1, 2, 1, 3}, ngenes, output.data());
+    compare_vectors(std::vector<double>{2, 3, 1, 1}, ngenes, output.data() + ngenes);
+    compare_vectors(std::vector<double>{1, 1, 2, 4}, ngenes, output.data() + ngenes * 2);
+}

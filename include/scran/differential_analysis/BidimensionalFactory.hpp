@@ -15,21 +15,22 @@ namespace differential_analysis {
 
 template<typename Effect, typename Level, typename Stat>
 struct Common {
-    Common(std::vector<Effect*>& comps, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb) : 
-        comparison_effects(comps), cluster_stats(clust), levels(l), level_size(ls), ngroups(ng), nblocks(nb) {}
+    Common(std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb, double t) : 
+        pairwise_effects(effects), cluster_stats(clust), levels(l), level_size(ls), ngroups(ng), nblocks(nb), threshold(t) {}
 
-    std::vector<Effect*>& comparison_effects;
+    std::vector<Effect*>& pairwise_effects;
     std::vector<Stat*>& cluster_stats;
     const Level* levels;
     std::vector<int>& level_size;
     int ngroups, nblocks;
+    double threshold;
 };
 
 template<typename Effect, typename Level, typename Stat> 
 struct BidimensionalFactory : public Common<Effect, Level, Stat> {
 public:
-    BidimensionalFactory(size_t nr, size_t nc, std::vector<Effect*>& comps, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb) : 
-        NR(nr), NC(nc), Common<Effect, Level, Stat>(comps, clust, l, ls, ng, nb) {}
+    BidimensionalFactory(size_t nr, size_t nc, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb, double t) : 
+        NR(nr), NC(nc), Common<Effect, Level, Stat>(effects, clust, l, ls, ng, nb, t) {}
 
     static constexpr bool supports_running = true;
     static constexpr bool supports_sparse = true;
@@ -38,11 +39,12 @@ private:
 
 public:
     struct ByRow : public Common<Effect, Level, Stat> {
-        ByRow(size_t nr, std::vector<Effect*>& comps, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb) : 
+        ByRow(size_t nr, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb, double t) : 
             NR(nr), tmp_means(ls.size()), tmp_vars(ls.size()), tmp_nzeros(ls.size()), buffer(ng * ng),
-            Common<Effect, Level, Stat>(comps, clust, l, ls, ng, nb) {}
+            Common<Effect, Level, Stat>(effects, clust, l, ls, ng, nb, t) {}
 
         void transfer(size_t i) {
+
             // Transferring the computed means.
             auto means = this->cluster_stats[0] + i;
             for (size_t l = 0; l < this->level_size.size(); ++l, means += NR) {
@@ -59,9 +61,8 @@ public:
                 }
             }
 
-            // Actually computing the effect sizes.
-            compute_pairwise_cohens_d(tmp_means.data(), tmp_vars.data(), this->level_size, this->ngroups, this->nblocks, buffer.data());
-            summarize_comparisons(this->ngroups, buffer.data(), i, NR, this->comparison_effects);
+            compute_pairwise_cohens_d(tmp_means.data(), tmp_vars.data(), this->level_size, this->ngroups, this->nblocks, 
+                this->pairwise_effects[0] + i * this->ngroups * this->ngroups, this->threshold);
         }
     protected:
         size_t NR;
@@ -70,8 +71,8 @@ public:
 
 public:
     struct DenseByRow : public ByRow {
-        DenseByRow(size_t nr, size_t nc, std::vector<Effect*>& comps, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb) : 
-            NC(nc), ByRow(nr, comps, clust, l, ls, ng, nb) {}
+        DenseByRow(size_t nr, size_t nc, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb, double t) : 
+            NC(nc), ByRow(nr, effects, clust, l, ls, ng, nb, t) {}
 
         template<typename T>
         void compute(size_t i, const T* ptr, T* buffer) {
@@ -89,13 +90,13 @@ public:
     };
 
     DenseByRow dense_direct() {
-        return DenseByRow(NR, NC, this->comparison_effects, this->cluster_stats, this->levels, this->level_size, this->ngroups, this->nblocks);
+        return DenseByRow(NR, NC, this->pairwise_effects, this->cluster_stats, this->levels, this->level_size, this->ngroups, this->nblocks, this->threshold);
     }
 
 public:
     struct SparseByRow : public ByRow {
-        SparseByRow(size_t nr, std::vector<Effect*>& comps, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb) : 
-            ByRow(nr, comps, clust, l, ls, ng, nb) {}
+        SparseByRow(size_t nr, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb, double t) : 
+            ByRow(nr, effects, clust, l, ls, ng, nb, t) {}
 
         template<class SparseRange, typename T, typename IDX>
         void compute(size_t i, SparseRange&& range, T* xbuffer, IDX* ibuffer) {
@@ -105,13 +106,13 @@ public:
     };
 
     SparseByRow sparse_direct() {
-        return SparseByRow(NR, this->comparison_effects, this->cluster_stats, this->levels, this->level_size, this->ngroups, this->nblocks);
+        return SparseByRow(NR, this->pairwise_effects, this->cluster_stats, this->levels, this->level_size, this->ngroups, this->nblocks, this->threshold);
     }
 
 private:
     struct ByCol : public Common<Effect, Level, Stat> {
-        ByCol(size_t nr, std::vector<Effect*>& comps, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb) : 
-            NR(nr), tmp_vars(nr * ls.size()), counts(ls.size()), Common<Effect, Level, Stat>(comps, clust, l, ls, ng, nb) {} 
+        ByCol(size_t nr, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb, double t) : 
+            NR(nr), tmp_vars(nr * ls.size()), counts(ls.size()), Common<Effect, Level, Stat>(effects, clust, l, ls, ng, nb, t) {} 
 
         void finalize () { 
             for (size_t b = 0; b < this->level_size.size(); ++b) {
@@ -125,16 +126,18 @@ private:
                 }
             }
 
-            std::vector<double> buffer(this->ngroups * this->ngroups), tmp_means(this->level_size.size()), tmp_vars_single(this->level_size.size());
-            for (size_t i = 0; i < NR; ++i) {
+            // Finalizing Cohen's d.
+            std::vector<double> tmp_means(this->level_size.size()), tmp_vars_single(this->level_size.size());
+            auto estart = this->pairwise_effects[0];
+            int shift = (this->ngroups) * (this->ngroups);
+            for (size_t i = 0; i < NR; ++i, estart += shift) {
                 for (size_t l = 0; l < tmp_means.size(); ++l) {
                     tmp_means[l] = this->cluster_stats[0][i + l * NR];
                 }
                 for (size_t l = 0; l < tmp_vars_single.size(); ++l) {
                     tmp_vars_single[l] = tmp_vars[i + l * NR];
                 }
-                compute_pairwise_cohens_d(tmp_means.data(), tmp_vars_single.data(), this->level_size, this->ngroups, this->nblocks, buffer.data());
-                summarize_comparisons(this->ngroups, buffer.data(), i, NR, this->comparison_effects);
+                compute_pairwise_cohens_d(tmp_means.data(), tmp_vars_single.data(), this->level_size, this->ngroups, this->nblocks, estart, this->threshold);
             }
         }
     protected:
@@ -146,7 +149,8 @@ private:
 
 public:
     struct DenseByCol : public ByCol {
-        DenseByCol(size_t nr, std::vector<Effect*>& comps, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb) : ByCol(nr, comps, clust, l, ls, ng, nb) {}
+        DenseByCol(size_t nr, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb, double t) : 
+            ByCol(nr, effects, clust, l, ls, ng, nb, t) {}
 
         template<typename T>
         void add(const T* ptr, T* buffer) {
@@ -172,12 +176,13 @@ public:
     };
 
     DenseByCol dense_running() {
-        return DenseByCol(NR, this->comparison_effects, this->cluster_stats, this->levels, this->level_size, this->ngroups, this->nblocks);
+        return DenseByCol(NR, this->pairwise_effects, this->cluster_stats, this->levels, this->level_size, this->ngroups, this->nblocks, this->threshold);
     }
 
 public:
     struct SparseByCol : public ByCol {
-        SparseByCol(size_t nr, std::vector<Effect*>& comps, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb) : ByCol(nr, comps, clust, l, ls, ng, nb) {}
+        SparseByCol(size_t nr, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb, double t) : 
+            ByCol(nr, effects, clust, l, ls, ng, nb, t) {}
 
         template<class SparseRange, typename T, typename IDX>
         void add(SparseRange&& range, T* xbuffer, IDX* ibuffer) {
@@ -197,7 +202,7 @@ public:
     };
 
     SparseByCol sparse_running() {
-        return SparseByCol(NR, this->comparison_effects, this->cluster_stats, this->levels, this->level_size, this->ngroups, this->nblocks);
+        return SparseByCol(NR, this->pairwise_effects, this->cluster_stats, this->levels, this->level_size, this->ngroups, this->nblocks, this->threshold);
     }
 };
 
