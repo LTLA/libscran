@@ -17,7 +17,7 @@ namespace scran {
  *
  * Markers are identified by pairwise comparisons between groups of cells (e.g., clusters, cell types).
  * Given `n` groups, each group has `n - 1` comparisons and thus `n - 1` effect sizes.
- * For each group, scores for each gene are obtained by taking summary statistics - namely, the minimum, median, mean and maximum - of the effect sizes across all of that group's comparisons.
+ * For each group, scores for each gene are obtained by taking summary statistics - e.g., the minimum, median, mean - of the effect sizes across all of that group's comparisons.
  * Users can then sort by any of these summaries to obtain a ranking of potential marker genes for each group.
  * The choice of effect size and summary statistic determines the characteristics of the resulting marker set.
  *
@@ -28,12 +28,13 @@ namespace scran {
  * Cohen's d is analogous to the t-statistic in a two-sample t-test and avoids spuriously large effect sizes from comparisons between highly variable groups.
  * We can also interpret Cohen's d as the number of standard deviations between the two group means.
  *
- * The definitions of these effect sizes are generalized when testing against a non-zero log-fold change threshold.
- * Cohen's d is redefined as the standardized difference between the observed log-fold change and the specified threshold, analogous to the TREAT method from **limma**.
+ * The definitions of these effect sizes are generalized when testing against a non-zero log-fold change threshold:
+ *
+ * - Cohen's d is redefined as the standardized difference between the observed log-fold change and the specified threshold, analogous to the TREAT method from **limma**.
  * Large positive values are only obtained when the observed log-fold change is significantly greater than the threshold.
  * 
  * @section Summary statistics
- * The choice of summary statistic dictates the interpretation of the ranking:
+ * The choice of summary statistic dictates the interpretation of the ranking.
  * Given a group X:
  * 
  * - A large mean effect size indicates that the gene is upregulated in X compared to the average of the other groups.
@@ -44,8 +45,12 @@ namespace scran {
  *   This is also good for ranking, with the advantage of being more robust to outlier effects (but also the disadvantage of being less sensitive to strong effects in a minority of comparisons).
  * - A large minimum effect size indicates that the gene is upregulated in X compared to all other groups.
  *   A small value indicates that the gene is downregulated in X compared to at least one other group.
- *   This can be used to obtain markers that are uniquely up/downregulated in X.
- * - A small minimum rank indicates that the gene is one of the top upregulated genes in at least one comparison to another group.
+ *   This is the most stringent summary as markers will only have extreme values if they are _uniquely_ up/downregulated in X compared to every other group.
+ *   However, it may not be effective if X is closely related to any of the groups.
+ * - The "minimum rank" (a.k.a. min-rank) is defined by ranking genes based on decreasing effect size _within_ each comparison, and then taking the smallest rank _across_ comparisons.
+ *   A minimum rank of 1 means that the gene is the top upregulated gene in at least one comparison to another group.
+ *   More generally, a minimum rank of T indicates that the gene is the T-th upregulated gene in at least one comparison. 
+ *   Applying a threshold on the minimum rank is useful for obtaining a set of genes that, in combination, are guaranteed to distinguish X from every other group.
  *
  * The exact definition of "large" and "small" depends on the choice of effect size.
  * For Cohen's d, the value must be positive to be considered "large", and negative to be considered "small".
@@ -61,14 +66,6 @@ class ScoreMarkers {
 private:
     double threshold = 0;
 
-    template<typename Stat>
-    static void shift_for_min_rank(size_t ngenes, std::vector<Stat*>& output) {
-        constexpr int minrank_col = 3;
-        for (auto& o : output) {
-            o += minrank_col * ngenes;
-        }
-    }
-
 public:
     ScoreMarkers& set_threshold(double t = 0) {
         threshold = t;
@@ -77,51 +74,38 @@ public:
 
 public:
     template<class MAT, typename G, typename Stat>
-    void run(const MAT* p, const G* group, std::vector<Stat*> output, Stat* means, Stat* detected) {
+    void run(const MAT* p, const G* group, Stat* means, Stat* detected, std::vector<Stat*> cohen) {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
-        run_internal(p, group, ngroups, std::move(output), means, detected);
+        std::vector<Stat*> auc;
+        run_internal(p, group, ngroups, means, detected, cohen, auc);
     }
 
     template<class MAT, typename G, typename B, typename Stat>
-    void run_blocked(const MAT* p, const G* group, const B* block, std::vector<Stat*> output, Stat* means, Stat* detected) {
+    void run_blocked(const MAT* p, const G* group, const B* block, Stat* means, Stat* detected, std::vector<Stat*> cohen) {
         if (block == NULL) {
-            run(p, group, std::move(output), means, detected);
+            run(p, group, std::move(cohen), means, detected);
             return;
         }
     
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
         auto nblocks = *std::max_element(block, block + p->ncol()) + 1;
-        run_blocked_internal(p, group, block, ngroups, nblocks, std::move(output), means, detected);
+        std::vector<Stat*> auc;
+        run_blocked_internal(p, group, block, ngroups, nblocks, means, detected, cohen, auc);
         return;
     }
 
 private:
     template<class MAT, typename G, typename Stat>
-    void run_internal(const MAT* p, const G* group, int ngroups, std::vector<Stat*> output, Stat* means, Stat* detected) {
+    void run_internal(const MAT* p, const G* group, int ngroups, Stat* means, Stat* detected, std::vector<Stat*>& cohen, std::vector<Stat*>& auc) {
         std::vector<int> group_size(ngroups);
         for (size_t i = 0; i < p->ncol(); ++i) {
             ++(group_size[group[i]]);
         }
-
-        std::vector<Stat*> stats { means, detected };
-        std::vector<Stat> cohens_d(p->nrow() * ngroups * ngroups);
-        std::vector<Stat*> pairwise_effects{ cohens_d.data() };
-
-        differential_analysis::BidimensionalFactory fact(p->nrow(), p->ncol(), pairwise_effects, stats, group, group_size, ngroups, 1, threshold);
-        tatami::apply<0>(p, fact);
-
-        std::vector<std::pair<double, size_t> > buffer(p->nrow());
-
-        // Finishing up Cohen's d.
-        {
-            differential_analysis::compute_min_rank(p->nrow(), ngroups, cohens_d.data(), output[3], buffer);
-            differential_analysis::summarize_comparisons(p->nrow(), ngroups, cohens_d.data(), output); // non-const w.r.t. cohens_d, so done after min-rank calculations.
-        }
-        return;
+        core(p, group, group_size, ngroups, 1, means, detected, cohen, auc);
     }
 
     template<class MAT, typename G, typename B, typename Stat>
-    void run_blocked_internal(const MAT* p, const G* group, const B* block, int ngroups, int nblocks, std::vector<Stat*> output, Stat* means, Stat* detected) {
+    void run_blocked_internal(const MAT* p, const G* group, const B* block, int ngroups, int nblocks, Stat* means, Stat* detected, std::vector<Stat*>& cohen, std::vector<Stat*>& auc) {
         int ncombos = ngroups * nblocks;
         std::vector<int> combos(p->ncol());
         std::vector<int> combo_size(ncombos);
@@ -130,22 +114,48 @@ private:
             combos[i] = block[i] * ngroups + group[i];
             ++(combo_size[combos[i]]);
         }
+        core(p, combos.data(), combo_size, ngroups, nblocks, means, detected, cohen, auc);
+    }
 
+    template<class MAT, typename G, class Gs, typename Stat>
+    void core(const MAT* p, const G* level, const Gs& level_size, int ngroups, int nblocks, Stat* means, Stat* detected, std::vector<Stat*>& cohen, std::vector<Stat*>& auc) {
         std::vector<Stat*> stats { means, detected };
-        std::vector<Stat> cohens_d(p->nrow() * ngroups * ngroups);
-        std::vector<Stat*> pairwise_effects{ cohens_d.data() };
-        differential_analysis::BidimensionalFactory fact(p->nrow(), p->ncol(), cohens_d, stats, combos.data(), combo_size, ngroups, nblocks, threshold);
-        tatami::apply<0>(p, fact);
+
+        const bool do_cohen = !cohen.empty();
+        std::vector<Stat> cohens_d(do_cohen ? p->nrow() * ngroups * ngroups : 0);
+        const bool do_wilcox = !auc.empty();
+        std::vector<Stat> wilcox_auc(do_wilcox ? p->nrow() * ngroups * ngroups : 0);
+
+        std::vector<Stat*> pairwise_effects(2, NULL);
+        if (do_cohen) {
+            pairwise_effects[0] = cohens_d.data();
+        }
+        if (do_wilcox) {
+            pairwise_effects[1] = wilcox_auc.data();
+        }
+
+        if (!do_wilcox) {
+            differential_analysis::BidimensionalFactory fact(p->nrow(), p->ncol(), pairwise_effects, stats, level, level_size, ngroups, nblocks, threshold);
+            tatami::apply<0>(p, fact);
+        }
 
         std::vector<std::pair<double, size_t> > buffer(p->nrow());
 
-        // Finishing up Cohen's d.
-        {
-            differential_analysis::compute_min_rank(p->nrow(), ngroups, cohens_d.data(), output[3], buffer);
-            differential_analysis::summarize_comparisons(p->nrow(), ngroups, cohens_d.data(), output); // non-const w.r.t. cohens_d, so done after min-rank calculations.
+        if (do_cohen) {
+            if (cohen[3]) {
+                differential_analysis::compute_min_rank(p->nrow(), ngroups, cohens_d.data(), cohen[3], buffer);
+            }
+            differential_analysis::summarize_comparisons(p->nrow(), ngroups, cohens_d.data(), cohen); // non-const w.r.t. cohens_d, so done after min-rank calculations.
+        }
+        if (do_wilcox) {
+            if (auc[3]) {
+                differential_analysis::compute_min_rank(p->nrow(), ngroups, wilcox_auc.data(), auc[3], buffer);
+            }
+            differential_analysis::summarize_comparisons(p->nrow(), ngroups, wilcox_auc.data(), auc); // non-const w.r.t. wilcox_auc, so done after min-rank calculations.
         }
         return;
     }
+
 public:
     struct Results {
         Results(size_t ngenes, int ngroups, int neffects) : 
@@ -167,7 +177,8 @@ public:
             cohen_ptrs.push_back(res.effects[0][o].data());
         }
 
-        run(p, group, std::move(cohen_ptrs), res.means.data(), res.detected.data());
+        std::vector<double*> auc_ptrs;
+        run_internal(p, group, ngroups, res.means.data(), res.detected.data(), cohen_ptrs, auc_ptrs);
         return res;
     }
 
@@ -185,7 +196,9 @@ public:
         for (size_t o = 0; o < ngroups; ++o) {
             cohen_ptrs.push_back(res.effects[0][o].data());
         }
-        run_blocked_internal(p, group, block, ngroups, nblocks, std::move(cohen_ptrs), res.means.data(), res.detected.data());
+
+        std::vector<double*> auc_ptrs;
+        run_blocked_internal(p, group, block, ngroups, nblocks, res.means.data(), res.detected.data(), cohen_ptrs, auc_ptrs);
 
         return res;
     }

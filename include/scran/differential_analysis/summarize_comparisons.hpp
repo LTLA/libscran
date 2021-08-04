@@ -25,7 +25,7 @@ double median (IT start, size_t n) {
 }
 
 template<typename Stat>
-void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vector<Stat*>& output, bool min = true, bool mean = true, bool med = true) {
+void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vector<Stat*>& output) {
     std::vector<Stat> buffer(ngroups);
 
     #pragma omp parallel for private(buffer)
@@ -50,35 +50,35 @@ void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vecto
 
             size_t offset = gene + ngenes * l;            
             if (restart == ngroups) {
-                if (min) {
+                if (output[0]) {
                     output[0][offset] = std::numeric_limits<double>::quiet_NaN();
                 }
-                if (mean) {
+                if (output[1]) {
                     output[1][offset] = std::numeric_limits<double>::quiet_NaN();
                 }
-                if (med) {
+                if (output[2]) {
                     output[2][offset] = std::numeric_limits<double>::quiet_NaN();
                 }
             } else {
                 int ncomps = ngroups - restart;
                 if (ncomps > 1) {
-                    if (min) {
+                    if (output[0]) {
                         output[0][offset] = *std::min_element(start + restart, start + ngroups);
                     }
-                    if (mean) {
+                    if (output[1]) {
                         output[1][offset] = std::accumulate(start + restart, start + ngroups, 0.0) / ncomps; // Mean
                     }
-                    if (med) {
+                    if (output[2]) {
                         output[2][offset] = median(start + restart, ncomps); // Median 
                     }
                 } else {
-                    if (min) {
+                    if (output[0]) {
                         output[0][offset] = start[restart]; 
                     }
-                    if (mean) {
+                    if (output[1]) {
                         output[1][offset] = start[restart]; 
                     }
-                    if (med) {
+                    if (output[2]) {
                         output[2][offset] = start[restart]; 
                     }
                 }

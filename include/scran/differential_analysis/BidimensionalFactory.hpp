@@ -15,13 +15,13 @@ namespace differential_analysis {
 
 template<typename Effect, typename Level, typename Stat>
 struct Common {
-    Common(std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb, double t) : 
+    Common(std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, const std::vector<int>& ls, int ng, int nb, double t) : 
         pairwise_effects(effects), cluster_stats(clust), levels(l), level_size(ls), ngroups(ng), nblocks(nb), threshold(t) {}
 
     std::vector<Effect*>& pairwise_effects;
     std::vector<Stat*>& cluster_stats;
     const Level* levels;
-    std::vector<int>& level_size;
+    const std::vector<int>& level_size;
     int ngroups, nblocks;
     double threshold;
 };
@@ -29,7 +29,7 @@ struct Common {
 template<typename Effect, typename Level, typename Stat> 
 struct BidimensionalFactory : public Common<Effect, Level, Stat> {
 public:
-    BidimensionalFactory(size_t nr, size_t nc, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb, double t) : 
+    BidimensionalFactory(size_t nr, size_t nc, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, const std::vector<int>& ls, int ng, int nb, double t) : 
         NR(nr), NC(nc), Common<Effect, Level, Stat>(effects, clust, l, ls, ng, nb, t) {}
 
     static constexpr bool supports_running = true;
@@ -39,7 +39,7 @@ private:
 
 public:
     struct ByRow : public Common<Effect, Level, Stat> {
-        ByRow(size_t nr, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb, double t) : 
+        ByRow(size_t nr, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, const std::vector<int>& ls, int ng, int nb, double t) : 
             NR(nr), tmp_means(ls.size()), tmp_vars(ls.size()), tmp_nzeros(ls.size()), buffer(ng * ng),
             Common<Effect, Level, Stat>(effects, clust, l, ls, ng, nb, t) {}
 
@@ -71,7 +71,7 @@ public:
 
 public:
     struct DenseByRow : public ByRow {
-        DenseByRow(size_t nr, size_t nc, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb, double t) : 
+        DenseByRow(size_t nr, size_t nc, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, const std::vector<int>& ls, int ng, int nb, double t) : 
             NC(nc), ByRow(nr, effects, clust, l, ls, ng, nb, t) {}
 
         template<typename T>
@@ -95,7 +95,7 @@ public:
 
 public:
     struct SparseByRow : public ByRow {
-        SparseByRow(size_t nr, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb, double t) : 
+        SparseByRow(size_t nr, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, const std::vector<int>& ls, int ng, int nb, double t) : 
             ByRow(nr, effects, clust, l, ls, ng, nb, t) {}
 
         template<class SparseRange, typename T, typename IDX>
@@ -111,7 +111,7 @@ public:
 
 private:
     struct ByCol : public Common<Effect, Level, Stat> {
-        ByCol(size_t nr, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb, double t) : 
+        ByCol(size_t nr, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, const std::vector<int>& ls, int ng, int nb, double t) : 
             NR(nr), tmp_vars(nr * ls.size()), counts(ls.size()), Common<Effect, Level, Stat>(effects, clust, l, ls, ng, nb, t) {} 
 
         void finalize () { 
@@ -149,7 +149,7 @@ private:
 
 public:
     struct DenseByCol : public ByCol {
-        DenseByCol(size_t nr, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb, double t) : 
+        DenseByCol(size_t nr, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, const std::vector<int>& ls, int ng, int nb, double t) : 
             ByCol(nr, effects, clust, l, ls, ng, nb, t) {}
 
         template<typename T>
@@ -181,7 +181,7 @@ public:
 
 public:
     struct SparseByCol : public ByCol {
-        SparseByCol(size_t nr, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, std::vector<int>& ls, int ng, int nb, double t) : 
+        SparseByCol(size_t nr, std::vector<Effect*>& effects, std::vector<Stat*>& clust, const Level* l, const std::vector<int>& ls, int ng, int nb, double t) : 
             ByCol(nr, effects, clust, l, ls, ng, nb, t) {}
 
         template<class SparseRange, typename T, typename IDX>
