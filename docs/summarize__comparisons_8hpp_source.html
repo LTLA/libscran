@@ -98,7 +98,7 @@ $(function() {
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;}</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="keyword">template</span>&lt;<span class="keyword">typename</span> Stat&gt;</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="keywordtype">void</span> summarize_comparisons(<span class="keywordtype">size_t</span> ngenes, <span class="keywordtype">int</span> ngroups, Stat* effects, std::vector&lt;Stat*&gt;&amp; output, <span class="keywordtype">bool</span> min = <span class="keyword">true</span>, <span class="keywordtype">bool</span> mean = <span class="keyword">true</span>, <span class="keywordtype">bool</span> med = <span class="keyword">true</span>) {</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="keywordtype">void</span> summarize_comparisons(<span class="keywordtype">size_t</span> ngenes, <span class="keywordtype">int</span> ngroups, Stat* effects, std::vector&lt;Stat*&gt;&amp; output) {</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    std::vector&lt;Stat&gt; buffer(ngroups);</div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">    #pragma omp parallel for private(buffer)</span></div>
@@ -123,35 +123,35 @@ $(function() {
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160; </div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;            <span class="keywordtype">size_t</span> offset = gene + ngenes * l;            </div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;            <span class="keywordflow">if</span> (restart == ngroups) {</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                <span class="keywordflow">if</span> (min) {</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                <span class="keywordflow">if</span> (output[0]) {</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;                    output[0][offset] = std::numeric_limits&lt;double&gt;::quiet_NaN();</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                }</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                <span class="keywordflow">if</span> (mean) {</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                <span class="keywordflow">if</span> (output[1]) {</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;                    output[1][offset] = std::numeric_limits&lt;double&gt;::quiet_NaN();</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                }</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                <span class="keywordflow">if</span> (med) {</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                <span class="keywordflow">if</span> (output[2]) {</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                    output[2][offset] = std::numeric_limits&lt;double&gt;::quiet_NaN();</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                }</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;            } <span class="keywordflow">else</span> {</div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                <span class="keywordtype">int</span> ncomps = ngroups - restart;</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                <span class="keywordflow">if</span> (ncomps &gt; 1) {</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;                    <span class="keywordflow">if</span> (min) {</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;                    <span class="keywordflow">if</span> (output[0]) {</div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                        output[0][offset] = *std::min_element(start + restart, start + ngroups);</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                    }</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                    <span class="keywordflow">if</span> (mean) {</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                    <span class="keywordflow">if</span> (output[1]) {</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                        output[1][offset] = std::accumulate(start + restart, start + ngroups, 0.0) / ncomps; <span class="comment">// Mean</span></div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                    }</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                    <span class="keywordflow">if</span> (med) {</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                    <span class="keywordflow">if</span> (output[2]) {</div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;                        output[2][offset] = median(start + restart, ncomps); <span class="comment">// Median </span></div>
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                    }</div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                    <span class="keywordflow">if</span> (min) {</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                    <span class="keywordflow">if</span> (output[0]) {</div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;                        output[0][offset] = start[restart]; </div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;                    }</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;                    <span class="keywordflow">if</span> (mean) {</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;                    <span class="keywordflow">if</span> (output[1]) {</div>
 <div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;                        output[1][offset] = start[restart]; </div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;                    }</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                    <span class="keywordflow">if</span> (med) {</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                    <span class="keywordflow">if</span> (output[2]) {</div>
 <div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;                        output[2][offset] = start[restart]; </div>
 <div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;                    }</div>
 <div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;                }</div>
