@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "tatami/base/Matrix.hpp"
+#include "tatami/base/DelayedBind.hpp"
 #include "tatami/utils/convert_to_dense.hpp"
 #include "tatami/utils/convert_to_sparse.hpp"
 #include "scran/differential_analysis/ScoreMarkers.hpp"
@@ -116,11 +117,68 @@ TEST_P(ScoreMarkersTest, CohensD) {
     }
 }
 
+TEST_P(ScoreMarkersTest, Blocked) {
+    // Check that everything is more or less computed correctly,
+    // by duplicating the matrices and blocking on them.
+    auto combined = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{dense_row, dense_row});
+
+    auto NC = dense_row->ncol();
+    auto ngroups = std::get<0>(GetParam());
+    std::vector<int> groupings = create_groupings(NC * 2, ngroups);
+    std::vector<int> blocks(groupings.size());
+    std::fill(blocks.begin() + NC, blocks.end(), 1);
+
+    scran::ScoreMarkers chd;
+    auto comres = chd.run_blocked(combined.get(), groupings.data(), blocks.data());
+    std::vector<int> g1(groupings.begin(), groupings.begin() + NC);
+    auto res1 = chd.run(dense_row.get(), g1.data());
+    std::vector<int> g2(groupings.begin() + NC, groupings.end());
+    auto res2 = chd.run(dense_row.get(), g2.data());
+
+    if (NC % ngroups == 0) {
+        // Everything should be equal to those in each batch, if the number of cells is a multiple
+        // of the number of groups (and thus the `grouping` vector is perfectly recycled).
+        for (int l = 0; l < 3; ++l) {
+            compare_almost_equal(comres.effects[0][l], res1.effects[0][l]);
+            compare_almost_equal(comres.effects[0][l], res2.effects[0][l]);
+        }
+
+        compare_almost_equal(comres.means, res1.means);
+        compare_almost_equal(comres.means, res2.means);
+        compare_almost_equal(comres.detected, res1.detected);
+        compare_almost_equal(comres.detected, res2.detected);
+    } else {
+        // Otherwise, only the means and proportion detected are equal to an analysis without blocking.
+        auto blindres = chd.run(combined.get(), groupings.data());
+        compare_almost_equal(comres.means, blindres.means);
+        compare_almost_equal(comres.detected, blindres.detected);
+    }
+
+    // Again, checking consistency across representations.
+    auto combined2 = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{sparse_row, sparse_row});
+    auto comres2 = chd.run_blocked(combined2.get(), groupings.data(), blocks.data());
+    for (int l = 0; l < 3; ++l) {
+        compare_almost_equal(comres.effects[0][l], comres2.effects[0][l]);
+    }
+
+    auto combined3 = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{dense_column, dense_column});
+    auto comres3 = chd.run_blocked(combined3.get(), groupings.data(), blocks.data());
+    for (int l = 0; l < 3; ++l) {
+        compare_almost_equal(comres.effects[0][l], comres3.effects[0][l]);
+    }
+
+    auto combined4 = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{sparse_column, sparse_column});
+    auto comres4 = chd.run_blocked(combined4.get(), groupings.data(), blocks.data());
+    for (int l = 0; l < 3; ++l) {
+        compare_almost_equal(comres.effects[0][l], comres4.effects[0][l]);
+    }
+}
+
 INSTANTIATE_TEST_CASE_P(
     ScoreMarkers,
     ScoreMarkersTest,
     ::testing::Combine(
-        ::testing::Values(2, 3, 4) // number of clusters
+        ::testing::Values(2, 3, 4, 5) // number of clusters
     )
 );
 
@@ -150,4 +208,3 @@ TEST(ScoreMarkers, MinRank) {
         EXPECT_EQ(res.effects[0][3][ngenes* 2 + i], i + 1); // +ngenes*2 to get the second column.
     }
 }
-
