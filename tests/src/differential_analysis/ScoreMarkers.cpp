@@ -123,3 +123,31 @@ INSTANTIATE_TEST_CASE_P(
         ::testing::Values(2, 3, 4) // number of clusters
     )
 );
+
+TEST(ScoreMarkers, MinRank) {
+    // Checking that the minimum rank is somewhat sensible,
+    // and we didn't feed in the wrong values somewhere.
+    int ngenes = 10;
+    int nsamples = 8;
+
+    std::vector<double> buffer(ngenes * nsamples, 0);
+    for (int i = 0; i < ngenes; ++i) {
+        buffer[i * nsamples + 1] = i;
+        buffer[i * nsamples + 3] = i+1;
+
+        buffer[i * nsamples + 4] = -i;
+        buffer[i * nsamples + 6] = -i + 1;
+    }
+
+    std::vector<int> grouping{0, 1, 0, 1, 2, 3, 2, 3};
+    tatami::DenseRowMatrix<double, int> mat(ngenes, nsamples, std::move(buffer));
+
+    scran::ScoreMarkers chd;
+    auto res = chd.run(&mat, grouping.data());
+
+    for (int i = 0; i < ngenes; ++i) {
+        EXPECT_EQ(res.effects[0][3][ngenes + i], ngenes - i); // 0 for Cohen's d, 3 for minrank, and then +ngenes to get the first column.
+        EXPECT_EQ(res.effects[0][3][ngenes* 2 + i], i + 1); // +ngenes*2 to get the second column.
+    }
+}
+
