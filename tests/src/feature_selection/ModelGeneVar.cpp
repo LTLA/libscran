@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "../data/data.h"
+#include "../utils/compare_almost_equal.h"
 
 #include "tatami/base/DenseMatrix.hpp"
 #include "tatami/base/DelayedSubset.hpp"
@@ -24,29 +25,32 @@ protected:
 protected:
     std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
     scran::ModelGeneVar var1, var2, var3, var4;
-
-    void almost_equal(const std::vector<double>& left, const std::vector<double>& right) {
-        ASSERT_EQ(left.size(), right.size());
-        for (size_t i = 0; i < left.size(); ++i) {
-            EXPECT_FLOAT_EQ(left[i], right[i]);
-        }
-    }
 };
 
 TEST_F(ModelGeneVarTester, UnblockedStats) {
     auto res = var1.run(dense_row.get());
+    EXPECT_EQ(res.means.size(), dense_row->nrow());
+    EXPECT_EQ(res.variances.size(), dense_row->nrow());
+
+    for (auto f : res.fitted) {
+        EXPECT_TRUE(f > 0);
+    }
+    for (auto f : res.residuals) {
+        EXPECT_TRUE(f != 0);
+    }
+
     auto res2 = var2.run(dense_column.get());
-    almost_equal(res.means[0], res2.means[0]);
-    almost_equal(res.variances[0], res2.variances[0]);
-    almost_equal(res.variances[0], tatami::row_variances(dense_row.get()));
+    compare_almost_equal(res.means, res2.means);
+    compare_almost_equal(res.variances, res2.variances);
+    compare_almost_equal(res.variances, tatami::row_variances(dense_row.get()));
 
     auto res3 = var3.run(sparse_row.get());
-    almost_equal(res.means[0], res3.means[0]);
-    almost_equal(res.variances[0], res3.variances[0]);
+    compare_almost_equal(res.means, res3.means);
+    compare_almost_equal(res.variances, res3.variances);
 
     auto res4 = var4.run(sparse_column.get());
-    almost_equal(res.means[0], res4.means[0]);
-    almost_equal(res.variances[0], res4.variances[0]);
+    compare_almost_equal(res.means, res4.means);
+    compare_almost_equal(res.variances, res4.variances);
 }
 
 TEST_F(ModelGeneVarTester, BlockedStats) {
@@ -56,17 +60,18 @@ TEST_F(ModelGeneVarTester, BlockedStats) {
     }
 
     auto res1 = var1.run_blocked(dense_row.get(), blocks.data());
+    EXPECT_EQ(res1.means.size(), dense_row->nrow() * 3);
+    EXPECT_EQ(res1.variances.size(), dense_row->nrow() * 3);
+
     auto res2 = var2.run_blocked(dense_column.get(), blocks.data());
+    compare_almost_equal(res1.means, res2.means);
+    compare_almost_equal(res1.variances, res2.variances);
+
     auto res3 = var3.run_blocked(sparse_row.get(), blocks.data());
+    compare_almost_equal(res1.means, res3.means);
+    compare_almost_equal(res1.variances, res3.variances);
+
     auto res4 = var4.run_blocked(sparse_column.get(), blocks.data());
-
-    for (size_t i = 0; i < 3; ++i) {
-        almost_equal(res1.means[i], res2.means[i]);
-        almost_equal(res1.means[i], res3.means[i]);
-        almost_equal(res1.means[i], res4.means[i]);
-
-        almost_equal(res1.variances[i], res2.variances[i]);
-        almost_equal(res1.variances[i], res3.variances[i]);
-        almost_equal(res1.variances[i], res4.variances[i]);
-    }
+    compare_almost_equal(res1.means, res4.means);
+    compare_almost_equal(res1.variances, res4.variances);
 }

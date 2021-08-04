@@ -54,27 +54,19 @@ public:
      * Compute and model the per-feature variances from a log-expression matrix.
      *
      * @tparam MAT Type of matrix, usually a `tatami::NumericMatrix`.
+     * @tparam Stat Floating-point type for the output statistics.
      *
      * @param mat Pointer to a feature-by-cells **tatami** matrix containing log-expression values.
-     * @param[out] means Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in `mat`.
-     * Each vector stores the mean of each feature in the corresponding block of cells.
-     * @param[out] variances Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in `mat`.
-     * Each vector stores the variance of each feature in the corresponding block of cells.
-     * @param[out] fitted Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in `mat`.
-     * Each vector stores the fitted value of the trend for each feature in the corresponding block of cells.
-     * @param[out] residuals Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in `mat`.
-     * Each vector stores the residual from the trend for each feature in the corresponding block of cells.
+     * @param[out] means Pointer to an output array of length equal to the number of rows in `mat`, used to store the mean of each feature.
+     * @param[out] variances Pointer to an output array of length equal to the number of rows in `mat`, used to store the variance of each feature.
+     * @param[out] fitted Pointer to an output array of length equal to the number of rows in `mat`, used to store the fitted value of the trend.
+     * @param[out] residuals Pointer to an output array of length equal to the number of rows in `mat`, used to store the residual from the trend for each feature.
      *
      * @return `means`, `variances`, `fitted` and `residuals` are filled with the relevant statistics.
      */
-    template<class MAT> 
-    void run(const MAT* p, 
-             std::vector<double*> means,
-             std::vector<double*> variances,
-             std::vector<double*> fitted,
-             std::vector<double*> residuals)
-    {
-        run_blocked(p, static_cast<int*>(NULL), std::move(means), std::move(variances), std::move(fitted), std::move(residuals));
+    template<class MAT, typename Stat> 
+    void run(const MAT* p, Stat* means, Stat* variances, Stat* fitted, Stat* residuals) {
+        run_blocked(p, static_cast<int*>(NULL), std::vector<Stat*>{means}, std::vector<Stat*>{variances}, std::vector<Stat*>{fitted}, std::vector<Stat*>{residuals});
         return;
     }
 
@@ -86,6 +78,7 @@ public:
      *
      * @tparam MAT Type of matrix, usually a `tatami::NumericMatrix`.
      * @tparam B An integer type, to hold the block IDs.
+     * @tparam Stat Floating-point type for the output statistics.
      *
      * @param mat Pointer to a feature-by-cells **tatami** matrix containing log-expression values.
      * @param[in] block Pointer to an array of block identifiers.
@@ -103,14 +96,8 @@ public:
      *
      * @return `means`, `variances`, `fitted` and `residuals` are filled with the relevant statistics.
      */
-    template<class MAT, typename B>
-    void run_blocked(const MAT* p, 
-                     const B* block,
-                     std::vector<double*> means,
-                     std::vector<double*> variances,
-                     std::vector<double*> fitted,
-                     std::vector<double*> residuals)
-    {
+    template<class MAT, typename B, typename Stat>
+    void run_blocked(const MAT* p, const B* block, std::vector<Stat*> means, std::vector<Stat*> variances, std::vector<Stat*> fitted, std::vector<Stat*> residuals) {
         size_t NR = p->nrow(), NC = p->ncol();
         std::vector<int> block_size(means.size());
         if (block) {
@@ -148,34 +135,34 @@ public:
          * @param ngenes Number of genes.
          * @param nblocks Number of blocks.
          */
-        Results(size_t ngenes, int nblocks) : means(nblocks, std::vector<double>(ngenes)),
-                                              variances(nblocks, std::vector<double>(ngenes)),
-                                              fitted(nblocks, std::vector<double>(ngenes)),
-                                              residuals(nblocks, std::vector<double>(ngenes)) {}
+        Results(size_t ngenes, int nblocks) : means(nblocks * ngenes),
+                                              variances(nblocks * ngenes),
+                                              fitted(nblocks * ngenes),
+                                              residuals(nblocks * ngenes) {}
 
         /**
-         * Vector of length equal to the number of blocks, containing vectors of length equal to the number of genes.
-         * Each vector contains the mean for each gene in each block.
+         * Array holding a column-major matrix where each row corresponds to a gene and each column corresponds to a block (defaulting to a single block for `run()`).
+         * Each entry contains the mean log-expression for each gene in each block.
          */
-        std::vector<std::vector<double> > means;
+        std::vector<double> means;
 
         /**
-         * Vector of length equal to the number of blocks, containing vectors of length equal to the number of genes.
-         * Each vector contains the variance for each gene in each block.
+         * Array holding a column-major matrix of the same shape as `means`.
+         * Each entry contains the variance for each gene in each block.
          */
-        std::vector<std::vector<double> > variances;
+        std::vector<double> variances;
 
         /**
-         * Vector of length equal to the number of blocks, containing vectors of length equal to the number of genes.
-         * Each vector contains the fitted value for each gene in each block.
+         * Array holding a column-major matrix of the same shape as `means`.
+         * Each entry contains the fitted value for each gene in each block.
          */
-        std::vector<std::vector<double> > fitted;
+        std::vector<double> fitted;
 
         /**
-         * Vector of length equal to the number of blocks, containing vectors of length equal to the number of genes.
+         * Array holding a column-major matrix of the same shape as `means`.
          * Each vector contains the residual for each gene in each block.
          */
-        std::vector<std::vector<double> > residuals;
+        std::vector<double> residuals;
     };
 
     /** 
@@ -190,11 +177,7 @@ public:
     template<class MAT>
     Results run(const MAT* mat) {
         Results output(mat->nrow(), 1);
-        run(mat, 
-            vector_to_pointers(output.means),
-            vector_to_pointers(output.variances),
-            vector_to_pointers(output.fitted),
-            vector_to_pointers(output.residuals));
+        run(mat, output.means.data(), output.variances.data(), output.fitted.data(), output.residuals.data());
         return output;
     }
 
@@ -219,13 +202,16 @@ public:
         }
 
         Results output(mat->nrow(), nblocks);
-        run_blocked(mat, 
-                    block, 
-                    vector_to_pointers(output.means),
-                    vector_to_pointers(output.variances),
-                    vector_to_pointers(output.fitted),
-                    vector_to_pointers(output.residuals));
+        std::vector<double*> mean_ptr, var_ptr, fit_ptr, resid_ptr;
+        for (int b = 0; b < nblocks; ++b) {
+            size_t offset = b * mat->nrow();
+            mean_ptr.push_back(output.means.data() + offset);
+            var_ptr.push_back(output.variances.data() + offset);
+            fit_ptr.push_back(output.fitted.data() + offset);
+            resid_ptr.push_back(output.residuals.data() + offset);
+        }
 
+        run_blocked(mat, block, std::move(mean_ptr), std::move(var_ptr), std::move(fit_ptr), std::move(resid_ptr));
         return output;
     }
 
