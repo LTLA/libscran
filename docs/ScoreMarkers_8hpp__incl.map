@@ -1,14 +1,15 @@
 <map id="scran/differential_analysis/ScoreMarkers.hpp" name="scran/differential_analysis/ScoreMarkers.hpp">
-<area shape="rect" id="node1" title="Compute marker scores for each gene in each group of cells." alt="" coords="463,5,648,47"/>
-<area shape="rect" id="node2" href="$BidimensionalFactory_8hpp_source.html" title=" " alt="" coords="327,95,498,121"/>
-<area shape="rect" id="node12" title=" " alt="" coords="693,259,842,285"/>
-<area shape="rect" id="node3" title=" " alt="" coords="333,259,391,285"/>
-<area shape="rect" id="node4" title=" " alt="" coords="234,259,309,285"/>
-<area shape="rect" id="node5" title=" " alt="" coords="415,259,469,285"/>
-<area shape="rect" id="node6" href="$cohens__d_8hpp_source.html" title=" " alt="" coords="272,177,375,203"/>
-<area shape="rect" id="node8" href="$summarize__comparisons_8hpp_source.html" title=" " alt="" coords="5,177,196,203"/>
-<area shape="rect" id="node10" href="$blocked__variances_8hpp_source.html" title=" " alt="" coords="501,169,660,211"/>
-<area shape="rect" id="node7" title=" " alt="" coords="151,259,210,285"/>
-<area shape="rect" id="node9" title=" " alt="" coords="59,259,127,285"/>
-<area shape="rect" id="node11" title=" " alt="" coords="493,259,668,285"/>
+<area shape="rect" id="node1" title="Compute marker scores for each gene in each group of cells." alt="" coords="286,5,471,47"/>
+<area shape="rect" id="node2" href="$BidimensionalFactory_8hpp_source.html" title=" " alt="" coords="293,102,464,129"/>
+<area shape="rect" id="node12" title=" " alt="" coords="677,273,826,300"/>
+<area shape="rect" id="node13" href="$vector__to__pointers_8hpp_source.html" title=" " alt="" coords="61,95,176,136"/>
+<area shape="rect" id="node3" title=" " alt="" coords="42,273,101,300"/>
+<area shape="rect" id="node4" title=" " alt="" coords="301,273,376,300"/>
+<area shape="rect" id="node5" title=" " alt="" coords="400,273,453,300"/>
+<area shape="rect" id="node6" href="$cohens__d_8hpp_source.html" title=" " alt="" coords="283,191,386,218"/>
+<area shape="rect" id="node8" href="$summarize__comparisons_8hpp_source.html" title=" " alt="" coords="68,191,259,218"/>
+<area shape="rect" id="node10" href="$blocked__variances_8hpp_source.html" title=" " alt="" coords="462,184,620,225"/>
+<area shape="rect" id="node7" title=" " alt="" coords="218,273,277,300"/>
+<area shape="rect" id="node9" title=" " alt="" coords="126,273,194,300"/>
+<area shape="rect" id="node11" title=" " alt="" coords="478,273,652,300"/>
 </map>
