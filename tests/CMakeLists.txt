@@ -25,6 +25,7 @@ add_executable(
     src/differential_analysis/summarize_comparisons.cpp
     src/differential_analysis/cohens_d.cpp
     src/differential_analysis/ScoreMarkers.cpp
+    src/utils/average_vectors.cpp
     src/data/data_sparse.cpp
 )
 
