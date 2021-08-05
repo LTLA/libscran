@@ -168,14 +168,14 @@ private:
 
         std::vector<std::pair<double, size_t> > buffer(p->nrow());
         if (do_cohen) {
-            if (cohen[3].size()) {
-                differential_analysis::compute_min_rank(p->nrow(), ngroups, cohens_d.data(), cohen[3], buffer);
+            if (cohen[4].size()) {
+                differential_analysis::compute_min_rank(p->nrow(), ngroups, cohens_d.data(), cohen[4], buffer);
             }
             differential_analysis::summarize_comparisons(p->nrow(), ngroups, cohens_d.data(), cohen); // non-const w.r.t. cohens_d, so done after min-rank calculations.
         }
         if (do_wilcox) {
-            if (auc[3].size()) {
-                differential_analysis::compute_min_rank(p->nrow(), ngroups, wilcox_auc.data(), auc[3], buffer);
+            if (auc[4].size()) {
+                differential_analysis::compute_min_rank(p->nrow(), ngroups, wilcox_auc.data(), auc[4], buffer);
             }
             differential_analysis::summarize_comparisons(p->nrow(), ngroups, wilcox_auc.data(), auc); // non-const w.r.t. wilcox_auc, so done after min-rank calculations.
         }
@@ -184,11 +184,9 @@ private:
     }
 
 public:
-    static constexpr int nsummaries = 4;
-
     struct Results {
         Results(size_t ngenes, int ngroups, int nblocks) : 
-            cohen(nsummaries, std::vector<std::vector<double> >(ngroups, std::vector<double>(ngenes))), 
+            cohen(differential_analysis::n_summaries, std::vector<std::vector<double> >(ngroups, std::vector<double>(ngenes))), 
             means(nblocks, std::vector<std::vector<double> >(ngroups, std::vector<double>(ngenes))),
             detected(means)
         {}

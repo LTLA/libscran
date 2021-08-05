@@ -20,11 +20,12 @@ protected:
     template<class Param>
     void assemble(Param& param) {
         ngroups = std::get<0>(param);
-        output.resize(ngroups * 3 * ngenes);
+        output.resize(ngroups * scran::differential_analysis::n_summaries * ngenes);
 
         auto ptr = output.data();
-        ptrs.resize(3);
-        for (int s = 0; s < 3; ++s) {
+        ptrs.resize(scran::differential_analysis::n_summaries);
+        for (int s = 0; s < ptrs.size(); ++s) {
+            ptrs[s].clear();
             for (int g = 0; g < ngroups; ++g, ptr += ngenes) {
                 ptrs[s].push_back(ptr);
             }
@@ -66,8 +67,12 @@ TEST_P(SummarizeComparisonsTest, Basic) {
             // Checking that the mean is correct.
             EXPECT_FLOAT_EQ(ptrs[1][g][gene], g * gene + ((ngroups - 1)*ngroups/2.0 - g)/(ngroups-1));
 
-            // Checking that the median is greater than/equal to the minimum.
+            // Checking that the median is between the min and max.
             EXPECT_TRUE(ptrs[2][g][gene] >= ptrs[0][g][gene]);
+            EXPECT_TRUE(ptrs[2][g][gene] <= ptrs[3][g][gene]);
+
+            // Checking that the maximum is correct.
+            EXPECT_FLOAT_EQ(ptrs[3][g][gene], g * gene + ngroups - 1 - (g == ngroups - 1));
         }
     }
 }
@@ -105,22 +110,31 @@ TEST_P(SummarizeComparisonsTest, Missing) {
                 }
 
                 // Checking that the minimum is correct.
-                auto curmin = ptrs[0][g][gene];
+                double baseline = g * gene;
                 if ((g==0 && lost==1) || (g==1 && lost==0)) {
-                    EXPECT_FLOAT_EQ(curmin, g * gene + 2);
+                    baseline += 2;
                 } else if (g==0 || lost==0) {
-                    EXPECT_FLOAT_EQ(curmin, g * gene + 1);
-                } else {
-                    EXPECT_FLOAT_EQ(curmin, g * gene);
+                    baseline += 1;
                 }
+                EXPECT_FLOAT_EQ(ptrs[0][g][gene], baseline);
 
                 // Checking that the mean is correct.
-                auto curmean = ptrs[1][g][gene];
+                baseline = g * gene;
                 if (lost == g) {
-                    EXPECT_FLOAT_EQ(curmean, g * gene + ((ngroups - 1)*ngroups/2.0 - g)/(ngroups-1));
+                    baseline += ((ngroups - 1)*ngroups/2.0 - g)/(ngroups-1);
                 } else {
-                    EXPECT_FLOAT_EQ(curmean, g * gene + ((ngroups - 1)*ngroups/2.0 - g - lost)/(ngroups-2));
+                    baseline += ((ngroups - 1)*ngroups/2.0 - g - lost)/(ngroups-2);
                 }
+                EXPECT_FLOAT_EQ(ptrs[1][g][gene], baseline);
+
+                // Checking that the maximum is correct.
+                baseline = g * gene + ngroups - 1;
+                if ((g==ngroups - 1 && lost==ngroups - 2) || (g==ngroups - 2  && lost==ngroups - 1)) {
+                    baseline -= 2;
+                } else if (g==ngroups - 1 || lost==ngroups - 1) {
+                    baseline -= 1;
+                }
+                EXPECT_FLOAT_EQ(ptrs[3][g][gene], baseline);
             }
         }
     }

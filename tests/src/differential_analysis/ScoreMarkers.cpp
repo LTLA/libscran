@@ -93,13 +93,21 @@ TEST_P(ScoreMarkersTest, CohensD) {
             double curmin = res.cohen[0][l][g];
             double curmean = res.cohen[1][l][g];
             double curmed = res.cohen[2][l][g];
-            double currank = res.cohen[3][l][g];
+            double curmax = res.cohen[3][l][g];
+            double currank = res.cohen[4][l][g];
 
             EXPECT_TRUE(curmin <= curmean);
             EXPECT_TRUE(curmin <= curmed);
+            EXPECT_TRUE(curmax >= curmean);
+            EXPECT_TRUE(curmax >= curmed);
+
             if (curmed > curmin) {
                 EXPECT_TRUE(curmean > curmin);
             }
+            if (curmed < curmax) {
+                EXPECT_TRUE(curmean < curmax);
+            }
+
             EXPECT_TRUE(currank >= 1);
             EXPECT_TRUE(currank <= ngenes);
         }
@@ -108,21 +116,21 @@ TEST_P(ScoreMarkersTest, CohensD) {
     // Don't compare min-rank here, as minor numerical differences
     // can change the ranks by a small amount when effects are tied.
     auto res2 = chd.run(sparse_row.get(), groupings.data());
-    for (int s = 0; s < 3; ++s) {
+    for (int s = 0; s < 4; ++s) {
         for (int l = 0; l < ngroups; ++l) {
             compare_almost_equal(res.cohen[s][l], res2.cohen[s][l]);
         }
     }
 
     auto res3 = chd.run(dense_column.get(), groupings.data());
-    for (int s = 0; s < 3; ++s) {
+    for (int s = 0; s < 4; ++s) {
         for (int l = 0; l < ngroups; ++l) {
             compare_almost_equal(res.cohen[s][l], res3.cohen[s][l]);
         }
     }
 
     auto res4 = chd.run(sparse_column.get(), groupings.data());
-    for (int s = 0; s < 3; ++s) {
+    for (int s = 0; s < 4; ++s) {
         for (int l = 0; l < ngroups; ++l) {
             compare_almost_equal(res.cohen[s][l], res4.cohen[s][l]);
         }
@@ -150,7 +158,7 @@ TEST_P(ScoreMarkersTest, Blocked) {
     if (NC % ngroups == 0) {
         // Everything should be equal to those in each batch, if the number of cells is a multiple
         // of the number of groups (and thus the `grouping` vector is perfectly recycled).
-        for (int s = 0; s < 3; ++s) {
+        for (int s = 0; s < 4; ++s) {
             for (int l = 0; l < ngroups; ++l) {
                 compare_almost_equal(comres.cohen[s][l], res1.cohen[s][l]);
                 compare_almost_equal(comres.cohen[s][l], res2.cohen[s][l]);
@@ -168,7 +176,7 @@ TEST_P(ScoreMarkersTest, Blocked) {
     // Again, checking consistency across representations.
     auto combined2 = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{sparse_row, sparse_row});
     auto comres2 = chd.run_blocked(combined2.get(), groupings.data(), blocks.data());
-    for (int s = 0; s < 3; ++s) {
+    for (int s = 0; s < 4; ++s) {
         for (int l = 0; l < ngroups; ++l) {
             compare_almost_equal(comres.cohen[s][l], comres2.cohen[s][l]);
         }
@@ -176,7 +184,7 @@ TEST_P(ScoreMarkersTest, Blocked) {
 
     auto combined3 = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{dense_column, dense_column});
     auto comres3 = chd.run_blocked(combined3.get(), groupings.data(), blocks.data());
-    for (int s = 0; s < 3; ++s) {
+    for (int s = 0; s < 4; ++s) {
         for (int l = 0; l < ngroups; ++l) {
             compare_almost_equal(comres.cohen[s][l], comres3.cohen[s][l]);
         }
@@ -184,7 +192,7 @@ TEST_P(ScoreMarkersTest, Blocked) {
 
     auto combined4 = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{sparse_column, sparse_column});
     auto comres4 = chd.run_blocked(combined4.get(), groupings.data(), blocks.data());
-    for (int s = 0; s < 3; ++s) {
+    for (int s = 0; s < 4; ++s) {
         for (int l = 0; l < ngroups; ++l) {
             compare_almost_equal(comres.cohen[s][l], comres4.cohen[s][l]);
         }
@@ -221,7 +229,7 @@ TEST(ScoreMarkersTest, MinRank) {
     auto res = chd.run(&mat, grouping.data());
 
     for (int i = 0; i < ngenes; ++i) {
-        EXPECT_EQ(res.cohen[3][1][i], ngenes - i); // second column
-        EXPECT_EQ(res.cohen[3][2][i], i + 1);  // third column
+        EXPECT_EQ(res.cohen[4][1][i], ngenes - i); // second column
+        EXPECT_EQ(res.cohen[4][2][i], i + 1);  // third column
     }
 }

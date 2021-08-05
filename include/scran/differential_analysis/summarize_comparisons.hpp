@@ -10,6 +10,8 @@ namespace scran {
 
 namespace differential_analysis {
 
+static constexpr int n_summaries = 5; // min, mean, median, max, min-rank.
+
 template<class IT>
 double median (IT start, size_t n) {
     int halfway = n / 2;
@@ -26,9 +28,7 @@ double median (IT start, size_t n) {
 
 template<typename Stat>
 void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vector<std::vector<Stat*> >& output) {
-    std::vector<Stat> buffer(ngroups);
-
-    #pragma omp parallel for private(buffer)
+    #pragma omp parallel for 
     for (size_t gene = 0; gene < ngenes; ++gene) {
         auto base = effects + gene * ngroups * ngroups;
         for (int l = 0; l < ngroups; ++l) {
@@ -49,14 +49,10 @@ void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vecto
             }
 
             if (restart == ngroups) {
-                if (output[0][l]) {
-                    output[0][l][gene] = std::numeric_limits<double>::quiet_NaN();
-                }
-                if (output[1][l]) {
-                    output[1][l][gene] = std::numeric_limits<double>::quiet_NaN();
-                }
-                if (output[2][l]) {
-                    output[2][l][gene] = std::numeric_limits<double>::quiet_NaN();
+                for (size_t i = 0; i < 4; ++i) {
+                    if (output[i][l]) {
+                        output[i][l][gene] = std::numeric_limits<double>::quiet_NaN();
+                    }
                 }
             } else {
                 int ncomps = ngroups - restart;
@@ -70,15 +66,14 @@ void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vecto
                     if (output[2][l]) {
                         output[2][l][gene] = median(start + restart, ncomps); // Median 
                     }
+                    if (output[3][l]) {
+                        output[3][l][gene] = *std::max_element(start + restart, start + ngroups); // Maximum
+                    }
                 } else {
-                    if (output[0][l]) {
-                        output[0][l][gene] = start[restart]; 
-                    }
-                    if (output[1][l]) {
-                        output[1][l][gene] = start[restart]; 
-                    }
-                    if (output[2][l]) {
-                        output[2][l][gene] = start[restart]; 
+                    for (size_t i = 0; i < 4; ++i) {
+                        if (output[i][l]) {
+                            output[i][l][gene] = start[restart]; 
+                        }
                     }
                 }
             }
