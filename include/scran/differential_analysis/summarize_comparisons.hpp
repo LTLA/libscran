@@ -25,7 +25,7 @@ double median (IT start, size_t n) {
 }
 
 template<typename Stat>
-void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vector<Stat*>& output) {
+void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vector<std::vector<Stat*> >& output) {
     std::vector<Stat> buffer(ngroups);
 
     #pragma omp parallel for private(buffer)
@@ -48,38 +48,37 @@ void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vecto
                 }
             }
 
-            size_t offset = gene + ngenes * l;            
             if (restart == ngroups) {
-                if (output[0]) {
-                    output[0][offset] = std::numeric_limits<double>::quiet_NaN();
+                if (output[0][l]) {
+                    output[0][l][gene] = std::numeric_limits<double>::quiet_NaN();
                 }
-                if (output[1]) {
-                    output[1][offset] = std::numeric_limits<double>::quiet_NaN();
+                if (output[1][l]) {
+                    output[1][l][gene] = std::numeric_limits<double>::quiet_NaN();
                 }
-                if (output[2]) {
-                    output[2][offset] = std::numeric_limits<double>::quiet_NaN();
+                if (output[2][l]) {
+                    output[2][l][gene] = std::numeric_limits<double>::quiet_NaN();
                 }
             } else {
                 int ncomps = ngroups - restart;
                 if (ncomps > 1) {
-                    if (output[0]) {
-                        output[0][offset] = *std::min_element(start + restart, start + ngroups);
+                    if (output[0][l]) {
+                        output[0][l][gene] = *std::min_element(start + restart, start + ngroups);
                     }
-                    if (output[1]) {
-                        output[1][offset] = std::accumulate(start + restart, start + ngroups, 0.0) / ncomps; // Mean
+                    if (output[1][l]) {
+                        output[1][l][gene] = std::accumulate(start + restart, start + ngroups, 0.0) / ncomps; // Mean
                     }
-                    if (output[2]) {
-                        output[2][offset] = median(start + restart, ncomps); // Median 
+                    if (output[2][l]) {
+                        output[2][l][gene] = median(start + restart, ncomps); // Median 
                     }
                 } else {
-                    if (output[0]) {
-                        output[0][offset] = start[restart]; 
+                    if (output[0][l]) {
+                        output[0][l][gene] = start[restart]; 
                     }
-                    if (output[1]) {
-                        output[1][offset] = start[restart]; 
+                    if (output[1][l]) {
+                        output[1][l][gene] = start[restart]; 
                     }
-                    if (output[2]) {
-                        output[2][offset] = start[restart]; 
+                    if (output[2][l]) {
+                        output[2][l][gene] = start[restart]; 
                     }
                 }
             }
@@ -89,12 +88,12 @@ void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vecto
 }
 
 template<typename Stat, class V>
-void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, Stat* output, V& buffer) {
+void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vector<Stat*>& output, V& buffer) {
     auto shift = ngroups * ngroups;
 
     #pragma omp parallel for
     for (int g = 0; g < ngroups; ++g) {
-        auto target = output + g * ngenes;
+        auto target = output[g];
         std::fill(target, target + ngenes, ngenes + 1); 
 
         for (int g2 = 0; g2 < ngroups; ++g2) {

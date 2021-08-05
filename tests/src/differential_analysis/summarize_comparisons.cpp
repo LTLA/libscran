@@ -21,15 +21,19 @@ protected:
     void assemble(Param& param) {
         ngroups = std::get<0>(param);
         output.resize(ngroups * 3 * ngenes);
+
         auto ptr = output.data();
-        for (int g = 0; g < 3; ++g, ptr += ngroups * ngenes) {
-            ptrs.push_back(ptr);
+        ptrs.resize(3);
+        for (int s = 0; s < 3; ++s) {
+            for (int g = 0; g < ngroups; ++g, ptr += ngenes) {
+                ptrs[s].push_back(ptr);
+            }
         }
     }
 
     std::vector<double> output;
-    std::vector<double*> ptrs;
-    int ngroups, ngenes = 3;
+    std::vector<std::vector<double*> > ptrs;
+    int ngroups, ngenes = 11;
 };
 
 /* For each group, the effect sizes start from `group_id * gene` for the
@@ -57,13 +61,13 @@ TEST_P(SummarizeComparisonsTest, Basic) {
     for (int gene = 0; gene < ngenes; ++gene) {
         for (int g = 0; g < ngroups; ++g) {
             // Checking that the minimum is correct.
-            EXPECT_FLOAT_EQ(ptrs[0][gene + g * ngenes], g * gene + (g == 0));
+            EXPECT_FLOAT_EQ(ptrs[0][g][gene], g * gene + (g == 0));
 
             // Checking that the mean is correct.
-            EXPECT_FLOAT_EQ(ptrs[1][gene + g * ngenes], g * gene + ((ngroups - 1)*ngroups/2.0 - g)/(ngroups-1));
+            EXPECT_FLOAT_EQ(ptrs[1][g][gene], g * gene + ((ngroups - 1)*ngroups/2.0 - g)/(ngroups-1));
 
             // Checking that the median is greater than/equal to the minimum.
-            EXPECT_TRUE(ptrs[2][gene + g * ngenes] >= ptrs[0][gene + g * ngenes]); 
+            EXPECT_TRUE(ptrs[2][g][gene] >= ptrs[0][g][gene]);
         }
     }
 }
@@ -95,13 +99,13 @@ TEST_P(SummarizeComparisonsTest, Missing) {
             for (int g = 0; g < ngroups; ++g) {
                 if (g == lost) {
                     for (int i = 0; i < 3; ++i) {
-                        EXPECT_TRUE(std::isnan(ptrs[i][gene + g * ngenes]));
+                        EXPECT_TRUE(std::isnan(ptrs[i][g][gene]));
                     }
                     continue;
                 }
 
                 // Checking that the minimum is correct.
-                auto curmin = ptrs[0][gene + g * ngenes]; 
+                auto curmin = ptrs[0][g][gene];
                 if ((g==0 && lost==1) || (g==1 && lost==0)) {
                     EXPECT_FLOAT_EQ(curmin, g * gene + 2);
                 } else if (g==0 || lost==0) {
@@ -111,7 +115,7 @@ TEST_P(SummarizeComparisonsTest, Missing) {
                 }
 
                 // Checking that the mean is correct.
-                auto curmean = ptrs[1][gene + g * ngenes];
+                auto curmean = ptrs[1][g][gene];
                 if (lost == g) {
                     EXPECT_FLOAT_EQ(curmean, g * gene + ((ngroups - 1)*ngroups/2.0 - g)/(ngroups-1));
                 } else {
@@ -135,9 +139,14 @@ protected:
     void configure(int ngenes, int ngroups) {
         buffer.resize(ngenes);
         output.resize(ngroups * ngenes);
+        auto ptr = output.data();
+        for (int g = 0; g < ngroups; ++g, ptr += ngenes) {
+            ptrs.push_back(ptr);
+        }
     }
 
     std::vector<std::pair<double, int> > buffer;
+    std::vector<double*> ptrs;
     std::vector<double> output;
 };
 
@@ -151,7 +160,7 @@ TEST_F(ComputeMinRankTest, Basic) {
     };
 
     configure(ngenes, ngroups);
-    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), output.data(), buffer);
+    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), ptrs, buffer);
     for (size_t i = 0; i < ngroups; ++i) {
         compare_vectors(std::vector<double>{4, 3, 2, 1}, ngenes, output.data() + i * ngenes); // reversed, for maximum effect sizes.
     }
@@ -164,11 +173,12 @@ TEST_F(ComputeMinRankTest, LessBasic) {
         0, 2, 4, 3, 0, 3, 2, 1, 0,
         0, 3, 1, 1, 0, 2, 3, 2, 0,
         0, 4, 3, 4, 0, 1, 4, 4, 0
+     /* 1  1  1  2  2  2  3  3  3 => comparisons for each group */
     };
     for (auto& e : effects) { e *= -1; }
 
     configure(ngenes, ngroups);
-    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), output.data(), buffer);
+    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), ptrs, buffer);
     compare_vectors(std::vector<double>{1, 2, 1, 3}, ngenes, output.data());
     compare_vectors(std::vector<double>{2, 3, 1, 1}, ngenes, output.data() + ngenes);
     compare_vectors(std::vector<double>{1, 1, 2, 4}, ngenes, output.data() + ngenes * 2);
