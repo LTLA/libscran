@@ -83,25 +83,25 @@ $(function() {
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160; </div>
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keyword">namespace </span>differential_analysis {</div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160; </div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keyword">template</span>&lt;<span class="keyword">class</span> IT&gt;</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keywordtype">double</span> median (IT start, <span class="keywordtype">size_t</span> n) {</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;    <span class="keywordtype">int</span> halfway = n / 2;</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;    std::nth_element(start, start + halfway, start + n);</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160; </div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    <span class="keywordflow">if</span> (n % 2 == 1) {</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;        <span class="keywordflow">return</span> start[halfway];</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    }</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160; </div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <span class="keywordtype">double</span> med = start[halfway];</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    std::nth_element(start, start + halfway - 1, start + halfway);</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    <span class="keywordflow">return</span> (med + start[halfway - 1])/ 2;</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;}</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="keyword">template</span>&lt;<span class="keyword">typename</span> Stat&gt;</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="keywordtype">void</span> summarize_comparisons(<span class="keywordtype">size_t</span> ngenes, <span class="keywordtype">int</span> ngroups, Stat* effects, std::vector&lt;std::vector&lt;Stat*&gt; &gt;&amp; output) {</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    std::vector&lt;Stat&gt; buffer(ngroups);</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">    #pragma omp parallel for private(buffer)</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keyword">static</span> constexpr <span class="keywordtype">int</span> n_summaries = 5; <span class="comment">// min, mean, median, max, min-rank.</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160; </div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="keyword">template</span>&lt;<span class="keyword">class</span> IT&gt;</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keywordtype">double</span> median (IT start, <span class="keywordtype">size_t</span> n) {</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;    <span class="keywordtype">int</span> halfway = n / 2;</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    std::nth_element(start, start + halfway, start + n);</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160; </div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    <span class="keywordflow">if</span> (n % 2 == 1) {</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;        <span class="keywordflow">return</span> start[halfway];</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    }</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160; </div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    <span class="keywordtype">double</span> med = start[halfway];</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    std::nth_element(start, start + halfway - 1, start + halfway);</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <span class="keywordflow">return</span> (med + start[halfway - 1])/ 2;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;}</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="keyword">template</span>&lt;<span class="keyword">typename</span> Stat&gt;</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="keywordtype">void</span> summarize_comparisons(<span class="keywordtype">size_t</span> ngenes, <span class="keywordtype">int</span> ngroups, Stat* effects, std::vector&lt;std::vector&lt;Stat*&gt; &gt;&amp; output) {</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">    #pragma omp parallel for </span></div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> gene = 0; gene &lt; ngenes; ++gene) {</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;        <span class="keyword">auto</span> base = effects + gene * ngroups * ngroups;</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> l = 0; l &lt; ngroups; ++l) {</div>
@@ -122,78 +122,73 @@ $(function() {
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;            }</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160; </div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;            <span class="keywordflow">if</span> (restart == ngroups) {</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;                <span class="keywordflow">if</span> (output[0][l]) {</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                    output[0][l][gene] = std::numeric_limits&lt;double&gt;::quiet_NaN();</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;                }</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                <span class="keywordflow">if</span> (output[1][l]) {</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                    output[1][l][gene] = std::numeric_limits&lt;double&gt;::quiet_NaN();</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;                }</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                <span class="keywordflow">if</span> (output[2][l]) {</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                    output[2][l][gene] = std::numeric_limits&lt;double&gt;::quiet_NaN();</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                }</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;            } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;                <span class="keywordtype">int</span> ncomps = ngroups - restart;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                <span class="keywordflow">if</span> (ncomps &gt; 1) {</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                    <span class="keywordflow">if</span> (output[0][l]) {</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;                        output[0][l][gene] = *std::min_element(start + restart, start + ngroups);</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                    }</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                    <span class="keywordflow">if</span> (output[1][l]) {</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                        output[1][l][gene] = std::accumulate(start + restart, start + ngroups, 0.0) / ncomps; <span class="comment">// Mean</span></div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                    }</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                    <span class="keywordflow">if</span> (output[2][l]) {</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                        output[2][l][gene] = median(start + restart, ncomps); <span class="comment">// Median </span></div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;                    }</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                } <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                    <span class="keywordflow">if</span> (output[0][l]) {</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                        output[0][l][gene] = start[restart]; </div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;                    }</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;                    <span class="keywordflow">if</span> (output[1][l]) {</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;                        output[1][l][gene] = start[restart]; </div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;                    }</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;                    <span class="keywordflow">if</span> (output[2][l]) {</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                        output[2][l][gene] = start[restart]; </div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;                    }</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;                }</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;            }</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        }</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    }</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <span class="keywordflow">return</span>;</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;}</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160; </div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;<span class="keyword">template</span>&lt;<span class="keyword">typename</span> Stat, <span class="keyword">class</span> V&gt;</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;<span class="keywordtype">void</span> compute_min_rank(<span class="keywordtype">size_t</span> ngenes, <span class="keywordtype">int</span> ngroups, <span class="keyword">const</span> Stat* effects, std::vector&lt;Stat*&gt;&amp; output, V&amp; buffer) {</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    <span class="keyword">auto</span> shift = ngroups * ngroups;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; 4; ++i) {</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                    <span class="keywordflow">if</span> (output[i][l]) {</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;                        output[i][l][gene] = std::numeric_limits&lt;double&gt;::quiet_NaN();</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                    }</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                }</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;            } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                <span class="keywordtype">int</span> ncomps = ngroups - restart;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                <span class="keywordflow">if</span> (ncomps &gt; 1) {</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                    <span class="keywordflow">if</span> (output[0][l]) {</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                        output[0][l][gene] = *std::min_element(start + restart, start + ngroups);</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;                    }</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                    <span class="keywordflow">if</span> (output[1][l]) {</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                        output[1][l][gene] = std::accumulate(start + restart, start + ngroups, 0.0) / ncomps; <span class="comment">// Mean</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;                    }</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                    <span class="keywordflow">if</span> (output[2][l]) {</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                        output[2][l][gene] = median(start + restart, ncomps); <span class="comment">// Median </span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                    }</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                    <span class="keywordflow">if</span> (output[3][l]) {</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                        output[3][l][gene] = *std::max_element(start + restart, start + ngroups); <span class="comment">// Maximum</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                    }</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;                } <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; 4; ++i) {</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                        <span class="keywordflow">if</span> (output[i][l]) {</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                            output[i][l][gene] = start[restart]; </div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;                        }</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;                    }</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;                }</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;            }</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;        }</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    }</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    <span class="keywordflow">return</span>;</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;}</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="keyword">template</span>&lt;<span class="keyword">typename</span> Stat, <span class="keyword">class</span> V&gt;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="keywordtype">void</span> compute_min_rank(<span class="keywordtype">size_t</span> ngenes, <span class="keywordtype">int</span> ngroups, <span class="keyword">const</span> Stat* effects, std::vector&lt;Stat*&gt;&amp; output, V&amp; buffer) {</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <span class="keyword">auto</span> shift = ngroups * ngroups;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160; </div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="preprocessor">    #pragma omp parallel for</span></div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> g = 0; g &lt; ngroups; ++g) {</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;        <span class="keyword">auto</span> target = output[g];</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;        std::fill(target, target + ngenes, ngenes + 1); </div>
 <div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="preprocessor">    #pragma omp parallel for</span></div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> g = 0; g &lt; ngroups; ++g) {</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        <span class="keyword">auto</span> target = output[g];</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        std::fill(target, target + ngenes, ngenes + 1); </div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160; </div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> g2 = 0; g2 &lt; ngroups; ++g2) {</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;            <span class="keywordflow">if</span> (g == g2) {</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;                <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> g2 = 0; g2 &lt; ngroups; ++g2) {</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;            <span class="keywordflow">if</span> (g == g2) {</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;                <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;            }</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;            <span class="keyword">auto</span> copy = effects + g * ngroups + g2;</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; ngenes; ++i, copy += shift) {</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;                buffer[i].first = -*copy; <span class="comment">// negative to sort by decreasing value.</span></div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;                buffer[i].second = i;</div>
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;            }</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;            <span class="keyword">auto</span> copy = effects + g * ngroups + g2;</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; ngenes; ++i, copy += shift) {</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;                buffer[i].first = -*copy; <span class="comment">// negative to sort by decreasing value.</span></div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;                buffer[i].second = i;</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;            }</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;            std::sort(buffer.begin(), buffer.end());</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160; </div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;            <span class="keywordtype">double</span> counter = 1;</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;            <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; x : buffer) {</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;                target[x.second] = std::min(counter, target[x.second]);</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;                ++counter;</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;            }</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        }</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    }</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;}</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160; </div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;}</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160; </div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;}</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160; </div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;            std::sort(buffer.begin(), buffer.end());</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160; </div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;            <span class="keywordtype">double</span> counter = 1;</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;            <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; x : buffer) {</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;                target[x.second] = std::min(counter, target[x.second]);</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;                ++counter;</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;            }</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;        }</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    }</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;}</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160; </div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;}</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160; </div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;}</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160; </div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
