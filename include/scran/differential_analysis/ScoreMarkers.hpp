@@ -82,7 +82,7 @@ public:
     {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
         decltype(cohen) auc;
-        run_internal(p, group, ngroups, std::move(means), std::move(detected), cohen, auc);
+        run_internal(p, group, ngroups, means, detected, cohen, auc);
     }        
 
     template<class MAT, typename G, typename B, typename Stat>
@@ -91,14 +91,14 @@ public:
         std::vector<std::vector<Stat*> > detected, 
         std::vector<std::vector<Stat*> > cohen)
     {
+        auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
+        decltype(cohen) auc;
         if (block == NULL) {
-            run(p, group, std::move(means), std::move(detected), std::move(cohen));
+            run_internal(p, group, ngroups, means[0], detected[0], cohen, auc);
             return;
         }
     
-        auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
         auto nblocks = *std::max_element(block, block + p->ncol()) + 1;
-        decltype(cohen) auc;
         run_blocked_internal(p, group, block, ngroups, nblocks, means, detected, cohen, auc);
         return;
     }
