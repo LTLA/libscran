@@ -76,8 +76,8 @@ public:
 
         /**
          * Upper thresholds to define large outliers on the subset proportions.
-         * Each vector corresponds to a block of cells (for unblocked analyses, * all cells are assumed to belong to a single block),
-         * while each entry of the inner vector corresponds to a feature subset.
+         * Each vector corresponds to a feature subset while each entry of the inner vector corresponds to a block of cells.
+         * For unblocked analyses, all cells are assumed to belong to a single block, i.e., all inner vectors have length 1.
          */
         std::vector<std::vector<double> > subset_proportions;
     };
