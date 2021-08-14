@@ -77,19 +77,21 @@ TEST(CohensD, Blocked) {
     std::vector<double> output(ngroups * ngroups);
     scran::differential_analysis::compute_pairwise_cohens_d(means.data(), variances.data(), group_sizes, ngroups, nblocks, output.data());
 
-    for (size_t g = 0; g < ngroups; ++g) {
+    for (size_t g1 = 0; g1 < ngroups; ++g1) {
+        int offset1 = g1 * nblocks;
+
         for (size_t g2 = 0; g2 < ngroups; ++g2) {
+            int offset2 = g2 * nblocks;
             double totalnum = 0, totaldenom = 0;
 
             for (int b = 0; b < nblocks; ++b) {
-                int offset = b * ngroups;
-                double d = (means[g + offset] - means[g2 + offset])/std::sqrt((variances[g + offset] + variances[g2 + offset])/2);
-                double w = group_sizes[g + offset] * group_sizes[g2 + offset];
+                double d = (means[offset1 + b] - means[offset2 + b])/std::sqrt((variances[offset1 + b] + variances[offset2 + b])/2);
+                double w = group_sizes[offset1 + b] * group_sizes[offset2 + b];
                 totalnum += d * w;
                 totaldenom += w;
             }
 
-            EXPECT_FLOAT_EQ(output[g * ngroups + g2], totalnum/totaldenom);
+            EXPECT_FLOAT_EQ(output[g1 * ngroups + g2], totalnum/totaldenom);
         }
     }
 }
@@ -98,7 +100,7 @@ TEST(CohensD, BlockedMissing) {
     double nan = std::numeric_limits<double>::quiet_NaN();
     int nblocks = 2, ngroups = 4;
     std::vector<double> means{0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8 };
-    std::vector<double> variances{nan, nan, nan, nan, 0.1, 1.2, 0.4, 0.5 };
+    std::vector<double> variances{nan, 0.1, nan, 1.2, nan, 0.4, nan, 0.5 };
     std::vector<int> group_sizes{ 10, 5, 12, 34, 15, 2, 3, 6 }; 
 
     std::vector<double> output(ngroups * ngroups);
@@ -106,10 +108,18 @@ TEST(CohensD, BlockedMissing) {
 
     // Effectively excising the first group.
     std::vector<double> output2(ngroups * ngroups);
-    std::vector<int> subgroup_sizes(group_sizes.begin() + ngroups, group_sizes.end());
-    scran::differential_analysis::compute_pairwise_cohens_d(means.data() + ngroups, variances.data() + ngroups, subgroup_sizes, ngroups, nblocks - 1, output2.data());
+
+    std::vector<int> subgroup_sizes;
+    std::vector<double> sub_means, sub_variances;
+    for (size_t i = 0; i < means.size(); ++i) {
+        if (!std::isnan(variances[i])) {
+            sub_means.push_back(means[i]);
+            sub_variances.push_back(variances[i]);
+            subgroup_sizes.push_back(group_sizes[i]);
+        }
+    }
+
+    scran::differential_analysis::compute_pairwise_cohens_d(sub_means.data(), sub_variances.data(), subgroup_sizes, ngroups, nblocks - 1, output2.data());
 
     EXPECT_EQ(output, output2);
 }
-
-

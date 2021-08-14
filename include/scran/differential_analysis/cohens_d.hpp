@@ -52,7 +52,7 @@ void compute_pairwise_cohens_d (const Stat* means, const Stat* vars, const Ls& l
             total_d2 = 0;
 
             for (int b = 0; b < nblocks; ++b) {
-                int offset1 = b * ngroups + g1;
+                int offset1 = g1 * nblocks + b;
                 const auto& left_mean = means[offset1];
                 const auto& left_var = vars[offset1];
                 const auto& left_size = level_size[offset1];
@@ -60,7 +60,7 @@ void compute_pairwise_cohens_d (const Stat* means, const Stat* vars, const Ls& l
                     continue;
                 }
 
-                int offset2 = b * ngroups + g2;
+                int offset2 = g2 * nblocks + b;
                 const auto& right_mean = means[offset2]; 
                 const auto& right_var = vars[offset2];
                 const auto& right_size = level_size[offset2];

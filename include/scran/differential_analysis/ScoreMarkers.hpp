@@ -130,16 +130,16 @@ private:
         std::vector<int> combo_size(ncombos);
 
         for (size_t i = 0; i < combos.size(); ++i) {
-            combos[i] = block[i] * ngroups + group[i];
+            combos[i] = group[i] * nblocks + block[i];
             ++(combo_size[combos[i]]);
         }
 
         std::vector<Stat*> means2(ncombos), detected2(ncombos);
         auto mIt = means2.begin(), dIt = detected2.begin();
-        for (int b = 0; b < nblocks; ++b) {
-            for (int g = 0; g < ngroups; ++g, ++mIt, ++dIt) {
-                *mIt = means[b][g];
-                *dIt = detected[b][g];
+        for (int g = 0; g < ngroups; ++g) {
+            for (int b = 0; b < nblocks; ++b, ++mIt, ++dIt) {
+                *mIt = means[g][b];
+                *dIt = detected[g][b];
             }
         }
 
@@ -187,7 +187,7 @@ public:
     struct Results {
         Results(size_t ngenes, int ngroups, int nblocks) : 
             cohen(differential_analysis::n_summaries, std::vector<std::vector<double> >(ngroups, std::vector<double>(ngenes))), 
-            means(nblocks, std::vector<std::vector<double> >(ngroups, std::vector<double>(ngenes))),
+            means(ngroups, std::vector<std::vector<double> >(nblocks, std::vector<double>(ngenes))),
             detected(means)
         {}
 
@@ -202,8 +202,8 @@ public:
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
         Results res(p->nrow(), ngroups, 1); 
 
-        auto mean_ptrs = vector_to_pointers(res.means[0]);
-        auto detect_ptrs = vector_to_pointers(res.detected[0]);
+        auto mean_ptrs = vector_to_pointers3(res.means);
+        auto detect_ptrs = vector_to_pointers3(res.detected);
 
         auto cohen_ptrs = vector_to_pointers2(res.cohen);
         decltype(cohen_ptrs) auc_ptrs;
@@ -235,6 +235,14 @@ private:
         std::vector<std::vector<double*> > ptrs;
         for (auto& current : input) {
             ptrs.push_back(vector_to_pointers(current));
+        }
+        return ptrs;
+    }
+
+    std::vector<double*> vector_to_pointers3(std::vector<std::vector<std::vector<double> > >& input) {
+        std::vector<double*> ptrs;
+        for (auto& current : input) {
+            ptrs.push_back(current[0].data()); // first vector from each element.
         }
         return ptrs;
     }

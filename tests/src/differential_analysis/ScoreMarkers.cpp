@@ -52,29 +52,29 @@ TEST_P(ScoreMarkersTest, Basics) {
             }
 
             curmean /= count;
-            EXPECT_EQ(curmean, res.means[0][l][g]);
+            EXPECT_EQ(curmean, res.means[l][0][g]);
             curdetected /= count;
-            EXPECT_EQ(curdetected, res.detected[0][l][g]);
+            EXPECT_EQ(curdetected, res.detected[l][0][g]);
         }
     }
 
     // Comparing to other implementations.
     auto res2 = chd.run(sparse_row.get(), groupings.data());
     for (int l = 0; l < ngroups; ++l) {
-        compare_almost_equal(res.means[0][l], res2.means[0][l]);
-        compare_almost_equal(res.detected[0][l], res2.detected[0][l]);
+        compare_almost_equal(res.means[l][0], res2.means[l][0]);
+        compare_almost_equal(res.detected[l][0], res2.detected[l][0]);
     }
 
     auto res3 = chd.run(dense_column.get(), groupings.data());
     for (int l = 0; l < ngroups; ++l) {
-        compare_almost_equal(res.means[0][l], res3.means[0][l]);
-        compare_almost_equal(res.detected[0][l], res3.detected[0][l]);
+        compare_almost_equal(res.means[l][0], res3.means[l][0]);
+        compare_almost_equal(res.detected[l][0], res3.detected[l][0]);
     }
 
     auto res4 = chd.run(sparse_column.get(), groupings.data());
     for (int l = 0; l < ngroups; ++l) {
-        compare_almost_equal(res.means[0][l], res4.means[0][l]);
-        compare_almost_equal(res.detected[0][l], res4.detected[0][l]);
+        compare_almost_equal(res.means[l][0], res4.means[l][0]);
+        compare_almost_equal(res.detected[l][0], res4.detected[l][0]);
     }
 }
 
@@ -167,10 +167,10 @@ TEST_P(ScoreMarkersTest, Blocked) {
     }
 
     for (int l = 0; l < ngroups; ++l) {
-        compare_almost_equal(comres.means[0][l], res1.means[0][l]);
-        compare_almost_equal(comres.detected[0][l], res1.detected[0][l]);
-        compare_almost_equal(comres.means[1][l], res2.means[0][l]);
-        compare_almost_equal(comres.detected[1][l], res2.detected[0][l]);
+        compare_almost_equal(comres.means[l][0], res1.means[l][0]);
+        compare_almost_equal(comres.detected[l][0], res1.detected[l][0]);
+        compare_almost_equal(comres.means[l][1], res2.means[l][0]);
+        compare_almost_equal(comres.detected[l][1], res2.detected[l][0]);
     }
 
     // Again, checking consistency across representations.
