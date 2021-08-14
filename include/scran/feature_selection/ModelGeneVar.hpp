@@ -135,34 +135,34 @@ public:
          * @param ngenes Number of genes.
          * @param nblocks Number of blocks.
          */
-        Results(size_t ngenes, int nblocks) : means(nblocks * ngenes),
-                                              variances(nblocks * ngenes),
-                                              fitted(nblocks * ngenes),
-                                              residuals(nblocks * ngenes) {}
+        Results(size_t ngenes, int nblocks) : means(nblocks, std::vector<double>(ngenes)),
+                                              variances(nblocks, std::vector<double>(ngenes)),
+                                              fitted(nblocks, std::vector<double>(ngenes)),
+                                              residuals(nblocks, std::vector<double>(ngenes)) {}
 
         /**
-         * Array holding a column-major matrix where each row corresponds to a gene and each column corresponds to a block (defaulting to a single block for `run()`).
+         * Vector of length equal to the number of blocks, where each internal vector is of length equal to the number of genes.
          * Each entry contains the mean log-expression for each gene in each block.
          */
-        std::vector<double> means;
+        std::vector<std::vector<double> > means;
 
         /**
-         * Array holding a column-major matrix of the same shape as `means`.
+         * Vector of vectors of the same dimensions as `means`.
          * Each entry contains the variance for each gene in each block.
          */
-        std::vector<double> variances;
+        std::vector<std::vector<double> > variances;
 
         /**
-         * Array holding a column-major matrix of the same shape as `means`.
+         * Vector of vectors of the same dimensions as `means`.
          * Each entry contains the fitted value for each gene in each block.
          */
-        std::vector<double> fitted;
+        std::vector<std::vector<double> > fitted;
 
         /**
-         * Array holding a column-major matrix of the same shape as `means`.
+         * Vector of vectors of the same dimensions as `means`.
          * Each vector contains the residual for each gene in each block.
          */
-        std::vector<double> residuals;
+        std::vector<std::vector<double> > residuals;
     };
 
     /** 
@@ -177,7 +177,7 @@ public:
     template<class MAT>
     Results run(const MAT* mat) {
         Results output(mat->nrow(), 1);
-        run(mat, output.means.data(), output.variances.data(), output.fitted.data(), output.residuals.data());
+        run(mat, output.means[0].data(), output.variances[0].data(), output.fitted[0].data(), output.residuals[0].data());
         return output;
     }
 
@@ -204,11 +204,10 @@ public:
         Results output(mat->nrow(), nblocks);
         std::vector<double*> mean_ptr, var_ptr, fit_ptr, resid_ptr;
         for (int b = 0; b < nblocks; ++b) {
-            size_t offset = b * mat->nrow();
-            mean_ptr.push_back(output.means.data() + offset);
-            var_ptr.push_back(output.variances.data() + offset);
-            fit_ptr.push_back(output.fitted.data() + offset);
-            resid_ptr.push_back(output.residuals.data() + offset);
+            mean_ptr.push_back(output.means[b].data());
+            var_ptr.push_back(output.variances[b].data());
+            fit_ptr.push_back(output.fitted[b].data());
+            resid_ptr.push_back(output.residuals[b].data());
         }
 
         run_blocked(mat, block, std::move(mean_ptr), std::move(var_ptr), std::move(fit_ptr), std::move(resid_ptr));
