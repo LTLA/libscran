@@ -207,8 +207,6 @@ TEST_P(ScoreMarkersTest, Self) {
     // All AUCs should be 0.5, all Cohen's should be 0.
     size_t ngenes = dense_row->nrow();
     for (int l = 0; l < 2; ++l) {
-        size_t ngenes = dense_row->nrow();
-
         for (size_t g = 0; g < ngenes; ++g) {
             if (do_auc) {
                 EXPECT_EQ(res.auc[0][l][g], 0.5);
@@ -249,6 +247,54 @@ TEST_P(ScoreMarkersTest, Thresholds) {
 
     if (do_auc) {
         EXPECT_TRUE(some_diff); // but at least one is '>', hopefully.
+    }
+}
+
+TEST_P(ScoreMarkersTest, Missing) {
+    auto ngroups = std::get<0>(GetParam());
+    std::vector<int> groupings = create_groupings(dense_row->ncol(), ngroups);
+
+    scran::ScoreMarkers chd;
+    bool do_auc = std::get<1>(GetParam());
+    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
+    auto ref = chd.run(dense_row.get(), groupings.data());
+    
+    for (auto& g : groupings) { // 0 is the missing group.
+        ++g;
+    }
+    auto lost = chd.run(dense_row.get(), groupings.data());
+
+    // Everything should be NaN.
+    size_t ngenes = dense_row->nrow();
+    for (size_t g = 0; g < ngenes; ++g) {
+        if (do_auc) {
+            EXPECT_TRUE(std::isnan(lost.auc[0][0][g]));
+            EXPECT_TRUE(std::isnan(lost.auc[1][0][g]));
+            EXPECT_TRUE(std::isnan(lost.auc[2][0][g]));
+            EXPECT_TRUE(std::isnan(lost.auc[3][0][g]));
+        }
+
+        EXPECT_TRUE(std::isnan(lost.cohen[0][0][g]));
+        EXPECT_TRUE(std::isnan(lost.cohen[1][0][g]));
+        EXPECT_TRUE(std::isnan(lost.cohen[2][0][g]));
+        EXPECT_TRUE(std::isnan(lost.cohen[3][0][g]));
+    }
+
+    // Other metrics should be the same as usual.
+    for (int l = 0; l < ngroups; ++l) {
+        for (size_t g = 0; g < ngenes; ++g) {
+            if (do_auc) {
+                EXPECT_EQ(ref.auc[0][l][g], lost.auc[0][l+1][g]);
+                EXPECT_EQ(ref.auc[1][l][g], lost.auc[1][l+1][g]);
+                EXPECT_EQ(ref.auc[2][l][g], lost.auc[2][l+1][g]);
+                EXPECT_EQ(ref.auc[3][l][g], lost.auc[3][l+1][g]);
+            }
+
+            EXPECT_EQ(ref.cohen[0][l][g], lost.cohen[0][l+1][g]);
+            EXPECT_EQ(ref.cohen[1][l][g], lost.cohen[1][l+1][g]);
+            EXPECT_EQ(ref.cohen[2][l][g], lost.cohen[2][l+1][g]);
+            EXPECT_EQ(ref.cohen[3][l][g], lost.cohen[3][l+1][g]);
+        }
     }
 }
 
