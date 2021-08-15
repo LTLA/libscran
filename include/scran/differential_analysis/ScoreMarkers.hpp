@@ -1,7 +1,9 @@
 #ifndef SCRAN_SCORE_MARKERS_HPP
 #define SCRAN_SCORE_MARKERS_HPP
 
-#include "BidimensionalFactory.hpp"
+#include "Factory.hpp"
+#include "summarize_comparisons.hpp"
+
 #include "tatami/stats/apply.hpp"
 #include "../utils/vector_to_pointers.hpp"
 
@@ -115,7 +117,7 @@ private:
         for (size_t i = 0; i < p->ncol(); ++i) {
             ++(group_size[group[i]]);
         }
-        core(p, group, group_size, ngroups, 1, means, detected, cohen, auc);
+        core(p, group, group_size, group, ngroups, static_cast<const int*>(NULL), 1, means, detected, cohen, auc);
     }
 
     template<class MAT, typename G, typename B, typename Stat>
@@ -143,11 +145,14 @@ private:
             }
         }
 
-        core(p, combos.data(), combo_size, ngroups, nblocks, means2, detected2, cohen, auc);
+        core(p, combos.data(), combo_size, group, ngroups, block, nblocks, means2, detected2, cohen, auc);
     }
 
-    template<class MAT, typename G, class Gs, typename Stat>
-    void core(const MAT* p, const G* level, const Gs& level_size, int ngroups, int nblocks, 
+    template<class MAT, typename L, class Ls, typename G, typename B, typename Stat>
+    void core(const MAT* p, 
+        const L* level, const Ls& level_size, 
+        const G* group, int ngroups, 
+        const B* block, int nblocks, 
         std::vector<Stat*>& means, 
         std::vector<Stat*>& detected, 
         std::vector<std::vector<Stat*> >& cohen, 
@@ -161,9 +166,21 @@ private:
         std::vector<Stat> wilcox_auc(do_wilcox ? p->nrow() * ngroups * ngroups : 0);
 
         if (!do_wilcox) {
-            differential_analysis::BidimensionalFactory fact(p->nrow(), p->ncol(), means, detected, cohens_ptr, level, level_size, ngroups, nblocks, threshold);
+            std::vector<double*> effects{cohens_ptr};
+            differential_analysis::BidimensionalFactory fact(p->nrow(), p->ncol(), means, detected, effects, level, level_size, ngroups, nblocks, threshold);
             tatami::apply<0>(p, fact);
         } else {
+            std::vector<double*> effects{cohens_ptr, wilcox_auc.data()};
+
+            // Need to remake this, as there's no guarantee that 'blocks' exists.
+            std::vector<B> tmp_blocks;
+            if (block) {
+                tmp_blocks.resize(p->ncol());
+                block = tmp_blocks.data();
+            }
+
+            differential_analysis::PerRowFactory fact(p->nrow(), p->ncol(), means, detected, effects, level, level_size, group, ngroups, block, nblocks, threshold);
+            tatami::apply<0>(p, fact);
         }
 
         std::vector<std::pair<double, size_t> > buffer(p->nrow());
