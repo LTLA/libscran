@@ -10,7 +10,7 @@ namespace differential_analysis {
 
 typedef std::vector<std::pair<double, int> > PairedStore;
 
-inline void compute_pairwise_auc(PairedStore& input, const std::vector<int>& num_zeros, double* output) {
+inline void compute_pairwise_auc(PairedStore& input, const std::vector<int>& num_zeros, const std::vector<int>& totals, double* output, bool normalize) {
     size_t ngroups = num_zeros.size();
     std::sort(input.begin(), input.end());
     std::vector<double> less_than(ngroups), equal(ngroups);
@@ -80,9 +80,27 @@ inline void compute_pairwise_auc(PairedStore& input, const std::vector<int>& num
     while (pos != input.size()) {
         inner_loop(pos);
     }
+
+    // Filling in the other side.
+    for (size_t l = 0; l < ngroups; ++l) {
+        for (size_t g = 0; g < l; ++g) {
+            int prod = totals[l] * totals[g];
+            outputs[g][l] = prod - outputs[l][g];
+
+            if (normalize) {
+                if (prod) {
+                    outputs[l][g] /= prod;
+                    outputs[g][l] /= prod;
+                } else {
+                    outputs[l][g] = std::numeric_limits<double>::quiet_NaN();
+                    outputs[g][l] = std::numeric_limits<double>::quiet_NaN();
+                }
+            }
+        }
+    }
 }
 
-inline void compute_pairwise_auc(PairedStore& input, const std::vector<int>& num_zeros, double* output, double threshold) {
+inline void compute_pairwise_auc(PairedStore& input, const std::vector<int>& num_zeros, const std::vector<int>& totals, double* output, double threshold, bool normalize) {
     size_t ngroups = num_zeros.size();
     std::sort(input.begin(), input.end());
     std::vector<double> less_than(ngroups), equal(ngroups);
@@ -233,6 +251,20 @@ inline void compute_pairwise_auc(PairedStore& input, const std::vector<int>& num
 
     while (pos != input.size()) {
         inner_loop(pos, comp);
+    }
+
+    // Dividing by the product of sizes.
+    if (normalize) {
+        for (size_t l = 0; l < ngroups; ++l) {
+            for (size_t g = 0; g < ngroups; ++g) {
+                int prod = totals[l] * totals[g];
+                if (prod) {
+                    outputs[l][g] /= prod;
+                } else {
+                    outputs[l][g] = std::numeric_limits<double>::quiet_NaN();
+                }
+            }
+        }
     }
 }
 

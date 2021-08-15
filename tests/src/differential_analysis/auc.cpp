@@ -23,17 +23,20 @@ protected:
 
             auc += collected + ties * 0.5;
         }
+
+        return auc / (left.size() * right.size());
     }
 
     typedef scran::differential_analysis::PairedStore PairedStore;
     PairedStore input; 
-    std::vector<int> num_zeros;
+    std::vector<int> num_zeros, totals;
     std::vector<double> output;
 
     void add_to_store(std::vector<double>& contents) {
         std::sort(contents.begin(), contents.end());
         size_t group = num_zeros.size();
         num_zeros.resize(group + 1);
+        totals.push_back(contents.size());
         for (auto c : contents) {
             if (c) {
                 input.push_back(std::make_pair(c, group));
@@ -50,23 +53,27 @@ TEST_F(AUCTest, Self) {
     add_to_store(group1);
 
     double n = group1.size();
-    EXPECT_FLOAT_EQ(slow_reference(group1, group1), 0.5 * n * n); // checking that the default calculation is correct.
+    EXPECT_FLOAT_EQ(slow_reference(group1, group1), 0.5); // checking that the default calculation is correct.
 
     output.resize(4);
-    scran::differential_analysis::compute_pairwise_auc(input, num_zeros, output.data());
+    scran::differential_analysis::compute_pairwise_auc(input, num_zeros, totals, output.data(), true);
 
-    EXPECT_FLOAT_EQ(output[2], 0.5 * n * n); // only one valid entry with 2 groups. 
+    EXPECT_FLOAT_EQ(output[1], 0.5);
+    EXPECT_FLOAT_EQ(output[2], 0.5);
 
     // Trying again with 3 groups.
     add_to_store(group1);
 
     output.clear();
     output.resize(9);
-    scran::differential_analysis::compute_pairwise_auc(input, num_zeros, output.data());
+    scran::differential_analysis::compute_pairwise_auc(input, num_zeros, totals, output.data(), true);
 
-    EXPECT_FLOAT_EQ(output[3 + 0], 0.5 * n * n); 
-    EXPECT_FLOAT_EQ(output[6 + 0], 0.5 * n * n); 
-    EXPECT_FLOAT_EQ(output[6 + 1], 0.5 * n * n); 
+    EXPECT_FLOAT_EQ(output[0 + 1], 0.5); 
+    EXPECT_FLOAT_EQ(output[0 + 2], 0.5); 
+    EXPECT_FLOAT_EQ(output[3 + 0], 0.5); 
+    EXPECT_FLOAT_EQ(output[3 + 2], 0.5); 
+    EXPECT_FLOAT_EQ(output[6 + 0], 0.5); 
+    EXPECT_FLOAT_EQ(output[6 + 1], 0.5); 
 }
 
 TEST_F(AUCTest, NoZeros) {
@@ -79,11 +86,15 @@ TEST_F(AUCTest, NoZeros) {
     add_to_store(group3);
 
     output.resize(9);
-    scran::differential_analysis::compute_pairwise_auc(input, num_zeros, output.data());
+    scran::differential_analysis::compute_pairwise_auc(input, num_zeros, totals, output.data(), true);
 
     EXPECT_FLOAT_EQ(output[3 + 0], slow_reference(group2, group1)); 
     EXPECT_FLOAT_EQ(output[6 + 0], slow_reference(group3, group1)); 
     EXPECT_FLOAT_EQ(output[6 + 1], slow_reference(group3, group2)); 
+
+    EXPECT_FLOAT_EQ(output[0 + 1], 1 - output[3 + 0]);
+    EXPECT_FLOAT_EQ(output[0 + 2], 1 - output[6 + 0]);
+    EXPECT_FLOAT_EQ(output[3 + 2], 1 - output[6 + 1]); 
 }
 
 TEST_F(AUCTest, Zeros) {
@@ -96,7 +107,7 @@ TEST_F(AUCTest, Zeros) {
     add_to_store(group3);
 
     output.resize(9);
-    scran::differential_analysis::compute_pairwise_auc(input, num_zeros, output.data());
+    scran::differential_analysis::compute_pairwise_auc(input, num_zeros, totals, output.data(), true);
 
     EXPECT_FLOAT_EQ(output[3 + 0], slow_reference(group2, group1)); 
     EXPECT_FLOAT_EQ(output[6 + 0], slow_reference(group3, group1)); 
@@ -114,7 +125,7 @@ TEST_F(AUCTest, ThresholdSelf) {
         output.clear();
         output.resize(4);
 
-        scran::differential_analysis::compute_pairwise_auc(input, num_zeros, output.data(), threshold);
+        scran::differential_analysis::compute_pairwise_auc(input, num_zeros, totals, output.data(), threshold, true);
         EXPECT_FLOAT_EQ(output[2], slow_reference(group, group, threshold));
         EXPECT_FLOAT_EQ(output[1], output[2]);
     }
@@ -122,10 +133,10 @@ TEST_F(AUCTest, ThresholdSelf) {
     // Consistent results with a threshold of zero.
     output.clear();
     output.resize(4);
-    scran::differential_analysis::compute_pairwise_auc(input, num_zeros, output.data(), 0);
+    scran::differential_analysis::compute_pairwise_auc(input, num_zeros, totals, output.data(), 0, true);
 
     double n = group.size();
-    EXPECT_FLOAT_EQ(output[2], 0.5 * n * n);
+    EXPECT_FLOAT_EQ(output[2], 0.5);
     EXPECT_FLOAT_EQ(output[1], output[2]);
 }
 
@@ -142,7 +153,7 @@ TEST_F(AUCTest, ThresholdNoZero) {
     for (double threshold = 0; threshold <= 2; threshold += 0.5) {
         output.clear();
         output.resize(9);
-        scran::differential_analysis::compute_pairwise_auc(input, num_zeros, output.data(), threshold);
+        scran::differential_analysis::compute_pairwise_auc(input, num_zeros, totals, output.data(), threshold, true);
 
         EXPECT_FLOAT_EQ(output[0 + 1], slow_reference(group1, group2, threshold)); 
         EXPECT_FLOAT_EQ(output[0 + 2], slow_reference(group1, group3, threshold)); 
@@ -165,7 +176,7 @@ TEST_F(AUCTest, ThresholdZeros) {
     for (double threshold = 0; threshold <= 0; threshold += 0.5) {
         output.clear();
         output.resize(9);
-        scran::differential_analysis::compute_pairwise_auc(input, num_zeros, output.data(), threshold);
+        scran::differential_analysis::compute_pairwise_auc(input, num_zeros, totals, output.data(), threshold, true);
 
         EXPECT_FLOAT_EQ(output[0 + 1], slow_reference(group1, group2, threshold)); 
         EXPECT_FLOAT_EQ(output[0 + 2], slow_reference(group1, group3, threshold)); 
