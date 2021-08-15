@@ -9,7 +9,7 @@
 #include "../data/data.h"
 #include "../utils/compare_almost_equal.h"
 
-class ScoreMarkersTest : public ::testing::TestWithParam<std::tuple<int> > {
+class ScoreMarkersTest : public ::testing::TestWithParam<std::tuple<int, bool> > {
 protected:
     std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
 
@@ -34,6 +34,7 @@ TEST_P(ScoreMarkersTest, Basics) {
     std::vector<int> groupings = create_groupings(dense_row->ncol(), ngroups);
 
     scran::ScoreMarkers chd;
+    chd.set_compute_auc(std::get<1>(GetParam())); // false, if we want to check the running implementations.
     auto res = chd.run(dense_row.get(), groupings.data());
 
     // Running cursory checks on the metrics.
@@ -58,31 +59,33 @@ TEST_P(ScoreMarkersTest, Basics) {
         }
     }
 
-    // Comparing to other implementations.
+    // Comparing to other implementations. 
+    auto compare = [&](const auto& other) -> void {
+        for (int l = 0; l < ngroups; ++l) {
+            EXPECT_EQ(other.means[l].size(), 1);
+            EXPECT_EQ(other.detected[l].size(), 1);
+            compare_almost_equal(res.means[l][0], other.means[l][0]);
+            compare_almost_equal(res.detected[l][0], other.detected[l][0]);
+        }
+    };
+
     auto res2 = chd.run(sparse_row.get(), groupings.data());
-    for (int l = 0; l < ngroups; ++l) {
-        compare_almost_equal(res.means[l][0], res2.means[l][0]);
-        compare_almost_equal(res.detected[l][0], res2.detected[l][0]);
-    }
+    compare(res2);
 
     auto res3 = chd.run(dense_column.get(), groupings.data());
-    for (int l = 0; l < ngroups; ++l) {
-        compare_almost_equal(res.means[l][0], res3.means[l][0]);
-        compare_almost_equal(res.detected[l][0], res3.detected[l][0]);
-    }
+    compare(res3);
 
     auto res4 = chd.run(sparse_column.get(), groupings.data());
-    for (int l = 0; l < ngroups; ++l) {
-        compare_almost_equal(res.means[l][0], res4.means[l][0]);
-        compare_almost_equal(res.detected[l][0], res4.detected[l][0]);
-    }
+    compare(res4);
 }
 
-TEST_P(ScoreMarkersTest, CohensD) {
+TEST_P(ScoreMarkersTest, Effects) {
     auto ngroups = std::get<0>(GetParam());
     std::vector<int> groupings = create_groupings(dense_row->ncol(), ngroups);
 
     scran::ScoreMarkers chd;
+    bool do_auc = std::get<1>(GetParam());
+    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
     auto res = chd.run(dense_row.get(), groupings.data());
 
     size_t ngenes = dense_row->nrow();
@@ -111,29 +114,141 @@ TEST_P(ScoreMarkersTest, CohensD) {
             EXPECT_TRUE(currank >= 1);
             EXPECT_TRUE(currank <= ngenes);
         }
-    }
 
-    // Don't compare min-rank here, as minor numerical differences
-    // can change the ranks by a small amount when effects are tied.
-    auto res2 = chd.run(sparse_row.get(), groupings.data());
-    for (int s = 0; s < 4; ++s) {
-        for (int l = 0; l < ngroups; ++l) {
-            compare_almost_equal(res.cohen[s][l], res2.cohen[s][l]);
+        if (do_auc) {
+            for (size_t g = 0; g < ngenes; ++g) {
+                double curmin = res.auc[0][l][g];
+                double curmean = res.auc[1][l][g];
+                double curmed = res.auc[2][l][g];
+                double curmax = res.auc[3][l][g];
+                double currank = res.auc[4][l][g];
+
+                EXPECT_TRUE(curmin >= 0);
+                EXPECT_TRUE(curmin <= curmean);
+                EXPECT_TRUE(curmin <= curmed);
+                EXPECT_TRUE(curmax >= curmean);
+                EXPECT_TRUE(curmax >= curmed);
+                EXPECT_TRUE(curmax <= 1);
+
+                if (curmed > curmin) {
+                    EXPECT_TRUE(curmean > curmin);
+                }
+                if (curmed < curmax) {
+                    EXPECT_TRUE(curmean < curmax);
+                }
+
+                EXPECT_TRUE(currank >= 1);
+                EXPECT_TRUE(currank <= ngenes);
+            }
         }
     }
+
+    auto compare = [&](const auto& other) -> void {
+        // Don't compare min-rank here, as minor numerical differences
+        // can change the ranks by a small amount when effects are tied.
+        for (int s = 0; s < 4; ++s) {
+            EXPECT_EQ(res.cohen[s].size(), other.cohen[s].size());
+            for (int l = 0; l < ngroups; ++l) {
+                compare_almost_equal(res.cohen[s][l], other.cohen[s][l]);
+            }
+        }
+    };
+
+    auto res2 = chd.run(sparse_row.get(), groupings.data());
+    compare(res2);
 
     auto res3 = chd.run(dense_column.get(), groupings.data());
+    compare(res3);
+
+    auto res4 = chd.run(sparse_column.get(), groupings.data());
+    compare(res4);
+
+    if (do_auc) {
+        auto compare_auc = [&](const auto& other) -> void {
+            // Don't compare min-rank here, as minor numerical differences
+            // can change the ranks by a small amount when effects are tied.
+            for (int s = 0; s < 4; ++s) {
+                EXPECT_EQ(res.auc[s].size(), other.auc[s].size());
+                for (int l = 0; l < ngroups; ++l) {
+                    compare_almost_equal(res.auc[s][l], other.auc[s][l]);
+                }
+            }
+        };
+
+        compare_auc(res2);
+        compare_auc(res3);
+        compare_auc(res4);
+    } else {
+        EXPECT_EQ(res.auc.size(), 0);
+    }
+}
+
+TEST_P(ScoreMarkersTest, Self) {
+    // Replicating the same matrix 'ngroups' times.
+    int ngroups = std::get<0>(GetParam());
+    std::vector<std::shared_ptr<tatami::NumericMatrix> > stuff;
+    for (int i = 0; i < ngroups; ++i) {
+        stuff.push_back(dense_row);
+    }
+    auto combined = tatami::make_DelayedBind<1>(std::move(stuff));
+
+    // Creating two groups; second group can be larger than the first, to check
+    // for correct behavior w.r.t. imbalanced groups.
+    size_t NC = dense_row->ncol();
+    std::vector<int> groupings(NC * ngroups);
+    std::fill(groupings.begin(), groupings.begin() + NC, 0);
+    std::fill(groupings.begin() + NC, groupings.end(), 1); 
+
+    scran::ScoreMarkers chd;
+    bool do_auc = std::get<1>(GetParam());
+    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
+    auto res = chd.run(combined.get(), groupings.data());
+
+    // All AUCs should be 0.5, all Cohen's should be 0.
+    size_t ngenes = dense_row->nrow();
+    for (int l = 0; l < 2; ++l) {
+        size_t ngenes = dense_row->nrow();
+
+        for (size_t g = 0; g < ngenes; ++g) {
+            if (do_auc) {
+                EXPECT_EQ(res.auc[0][l][g], 0.5);
+                EXPECT_EQ(res.auc[3][l][g], 0.5);
+            }
+
+            // Handle some numerical imprecision...
+            EXPECT_TRUE(std::abs(res.cohen[0][l][g]) < 1e-10);
+            EXPECT_TRUE(std::abs(res.cohen[3][l][g]) < 1e-10);
+        }
+    }
+}
+
+TEST_P(ScoreMarkersTest, Thresholds) {
+    auto ngroups = std::get<0>(GetParam());
+    std::vector<int> groupings = create_groupings(dense_row->ncol(), ngroups);
+
+    scran::ScoreMarkers chd;
+    bool do_auc = std::get<1>(GetParam());
+    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
+    auto ref = chd.run(dense_row.get(), groupings.data());
+    auto out = chd.set_threshold(1).run(dense_row.get(), groupings.data());
+
+    bool some_diff = false;
     for (int s = 0; s < 4; ++s) {
         for (int l = 0; l < ngroups; ++l) {
-            compare_almost_equal(res.cohen[s][l], res3.cohen[s][l]);
+            for (size_t g = 0; g < dense_row->nrow(); ++g) {
+                EXPECT_TRUE(ref.cohen[s][l][g] > out.cohen[s][l][g]);
+
+                if (do_auc) {
+                    // '>' is not guaranteed due to imprecision with ranks
+                    some_diff |= (ref.auc[s][l][g] > out.auc[s][l][g]);
+                    EXPECT_TRUE(ref.auc[s][l][g] >= out.auc[s][l][g]); 
+                }
+            }
         }
     }
 
-    auto res4 = chd.run(sparse_column.get(), groupings.data());
-    for (int s = 0; s < 4; ++s) {
-        for (int l = 0; l < ngroups; ++l) {
-            compare_almost_equal(res.cohen[s][l], res4.cohen[s][l]);
-        }
+    if (do_auc) {
+        EXPECT_TRUE(some_diff); // but at least one is '>', hopefully.
     }
 }
 
@@ -149,7 +264,10 @@ TEST_P(ScoreMarkersTest, Blocked) {
     std::fill(blocks.begin() + NC, blocks.end(), 1);
 
     scran::ScoreMarkers chd;
+    bool do_auc = std::get<1>(GetParam());
+    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
     auto comres = chd.run_blocked(combined.get(), groupings.data(), blocks.data());
+
     std::vector<int> g1(groupings.begin(), groupings.begin() + NC);
     auto res1 = chd.run(dense_row.get(), g1.data());
     std::vector<int> g2(groupings.begin() + NC, groupings.end());
@@ -162,6 +280,11 @@ TEST_P(ScoreMarkersTest, Blocked) {
             for (int l = 0; l < ngroups; ++l) {
                 compare_almost_equal(comres.cohen[s][l], res1.cohen[s][l]);
                 compare_almost_equal(comres.cohen[s][l], res2.cohen[s][l]);
+
+                if (do_auc) {
+                    compare_almost_equal(comres.auc[s][l], res1.auc[s][l]);
+                    compare_almost_equal(comres.auc[s][l], res2.auc[s][l]);
+                }
             }
         }
     }
@@ -174,28 +297,37 @@ TEST_P(ScoreMarkersTest, Blocked) {
     }
 
     // Again, checking consistency across representations.
+    auto compare = [&](const auto& other) -> void {
+        for (int s = 0; s < 4; ++s) {
+            for (int l = 0; l < ngroups; ++l) {
+                compare_almost_equal(comres.cohen[s][l], other.cohen[s][l]);
+            }
+        }
+    };
+
     auto combined2 = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{sparse_row, sparse_row});
     auto comres2 = chd.run_blocked(combined2.get(), groupings.data(), blocks.data());
-    for (int s = 0; s < 4; ++s) {
-        for (int l = 0; l < ngroups; ++l) {
-            compare_almost_equal(comres.cohen[s][l], comres2.cohen[s][l]);
-        }
-    }
+    compare(comres2);
 
     auto combined3 = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{dense_column, dense_column});
     auto comres3 = chd.run_blocked(combined3.get(), groupings.data(), blocks.data());
-    for (int s = 0; s < 4; ++s) {
-        for (int l = 0; l < ngroups; ++l) {
-            compare_almost_equal(comres.cohen[s][l], comres3.cohen[s][l]);
-        }
-    }
+    compare(comres3);
 
     auto combined4 = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{sparse_column, sparse_column});
     auto comres4 = chd.run_blocked(combined4.get(), groupings.data(), blocks.data());
-    for (int s = 0; s < 4; ++s) {
-        for (int l = 0; l < ngroups; ++l) {
-            compare_almost_equal(comres.cohen[s][l], comres4.cohen[s][l]);
-        }
+    compare(comres4);
+
+    if (do_auc) {
+        auto compare_auc = [&](const auto& other) -> void {
+            for (int s = 0; s < 4; ++s) {
+                for (int l = 0; l < ngroups; ++l) {
+                    compare_almost_equal(comres.auc[s][l], other.auc[s][l]);
+                }
+            }
+        };
+        compare_auc(comres2);
+        compare_auc(comres2);
+        compare_auc(comres2);
     }
 }
 
@@ -203,7 +335,8 @@ INSTANTIATE_TEST_CASE_P(
     ScoreMarkers,
     ScoreMarkersTest,
     ::testing::Combine(
-        ::testing::Values(2, 3, 4, 5) // number of clusters
+        ::testing::Values(2, 3, 4, 5), // number of clusters
+        ::testing::Values(false, true)  // with or without the AUC?
     )
 );
 

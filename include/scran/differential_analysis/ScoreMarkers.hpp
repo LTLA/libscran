@@ -68,10 +68,52 @@ namespace scran {
 class ScoreMarkers {
 private:
     double threshold = 0;
+    bool do_cohen = true;
+    bool do_auc = true;
+    bool use_min = true;
+    bool use_mean = true;
+    bool use_median = true;
+    bool use_max = true;
+    bool use_rank = true;
 
 public:
     ScoreMarkers& set_threshold(double t = 0) {
         threshold = t;
+        return *this;
+    }
+
+    ScoreMarkers& set_compute_cohen(bool c = true) {
+        do_cohen = c;
+        return *this;
+    }
+
+    ScoreMarkers& set_compute_auc(bool c = true) {
+        do_auc = c;
+        return *this;
+    }
+
+    ScoreMarkers& set_summary_min(bool s = true) {
+        use_min = s;
+        return *this;
+    }
+
+    ScoreMarkers& set_summary_mean(bool s = true) {
+        use_mean = s;
+        return *this;
+    }
+
+    ScoreMarkers& set_summary_median(bool s = true) {
+        use_median = s;
+        return *this;
+    }
+
+    ScoreMarkers& set_summary_max(bool s = true) {
+        use_max = s;
+        return *this;
+    }
+
+    ScoreMarkers& set_summary_rank(bool s = true) {
+        use_rank = s;
         return *this;
     }
 
@@ -174,7 +216,7 @@ private:
 
             // Need to remake this, as there's no guarantee that 'blocks' exists.
             std::vector<B> tmp_blocks;
-            if (block) {
+            if (!block) {
                 tmp_blocks.resize(p->ncol());
                 block = tmp_blocks.data();
             }
@@ -202,11 +244,38 @@ private:
 
 public:
     struct Results {
-        Results(size_t ngenes, int ngroups, int nblocks) : 
-            cohen(differential_analysis::n_summaries, std::vector<std::vector<double> >(ngroups, std::vector<double>(ngenes))), 
+        Results(size_t ngenes, int ngroups, int nblocks, bool do_cohen, bool do_auc, bool do_min, bool do_mean, bool do_median, bool do_max, bool do_rank) : 
             means(ngroups, std::vector<std::vector<double> >(nblocks, std::vector<double>(ngenes))),
             detected(means)
-        {}
+        {
+            auto fill = [&](auto& effect) {
+                effect.resize(differential_analysis::n_summaries);
+                if (do_min) {
+                    effect[0].resize(ngroups, std::vector<double>(ngenes));
+                }
+                if (do_mean) {
+                    effect[1].resize(ngroups, std::vector<double>(ngenes));
+                }
+                if (do_median) {
+                    effect[2].resize(ngroups, std::vector<double>(ngenes));
+                }
+                if (do_max) {
+                    effect[3].resize(ngroups, std::vector<double>(ngenes));
+                }
+                if (do_rank) {
+                    effect[4].resize(ngroups, std::vector<double>(ngenes));
+                }
+                return;
+            };
+
+            if (do_cohen) {
+                fill(cohen);
+            }
+            if (do_auc) {
+                fill(auc);
+            }
+            return;
+        }
 
         std::vector<std::vector<std::vector<double> > > cohen;
         std::vector<std::vector<std::vector<double> > > auc;
@@ -217,13 +286,13 @@ public:
     template<class MAT, typename G> 
     Results run(const MAT* p, const G* group) {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
-        Results res(p->nrow(), ngroups, 1); 
+        Results res(p->nrow(), ngroups, 1, do_cohen, do_auc, use_min, use_mean, use_median, use_max, use_rank); 
 
         auto mean_ptrs = vector_to_pointers3(res.means);
         auto detect_ptrs = vector_to_pointers3(res.detected);
 
         auto cohen_ptrs = vector_to_pointers2(res.cohen);
-        decltype(cohen_ptrs) auc_ptrs;
+        auto auc_ptrs = vector_to_pointers2(res.auc);
         run_internal(p, group, ngroups, mean_ptrs, detect_ptrs, cohen_ptrs, auc_ptrs);
         return res;
     }
@@ -236,12 +305,12 @@ public:
     
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
         auto nblocks = *std::max_element(block, block + p->ncol()) + 1;
-        Results res(p->nrow(), ngroups, nblocks); 
+        Results res(p->nrow(), ngroups, nblocks, do_cohen, do_auc, use_min, use_mean, use_median, use_max, use_rank); 
 
         auto mean_ptrs = vector_to_pointers2(res.means);
         auto detect_ptrs = vector_to_pointers2(res.detected);
         auto cohen_ptrs = vector_to_pointers2(res.cohen);
-        decltype(cohen_ptrs) auc_ptrs;
+        auto auc_ptrs = vector_to_pointers2(res.auc);
         run_blocked_internal(p, group, block, ngroups, nblocks, mean_ptrs, detect_ptrs, cohen_ptrs, auc_ptrs);
 
         return res;

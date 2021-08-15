@@ -231,14 +231,15 @@ struct PerRowFactory {
 public:
     PerRowFactory(size_t nr, size_t nc, std::vector<Stat*>& m, std::vector<Stat*>& d, std::vector<Effect*>& e, const Level* l, const std::vector<int>& ls, 
         const Group* g, int ng, const Block* b, int nb, double t) : 
-        group(g), block(b), factory(nr, nc, m, d, e, l, ls, ng, nb, t) {}
+        NC(nc), group(g), block(b), factory(nr, nc, m, d, e, l, ls, ng, nb, t) {}
 
     static constexpr bool supports_sparse = true;
     static constexpr bool supports_running = false;
 private:
-    BidimensionalFactory<Effect, Level, Stat> factory;
+    size_t NC;
     const Group* group;
     const Block* block;
+    BidimensionalFactory<Effect, Level, Stat> factory;
 
 public:
     template<class Component>
@@ -248,7 +249,7 @@ public:
             num_zeros(component.details.nblocks, std::vector<int>(component.details.ngroups)), 
             totals(component.details.nblocks, std::vector<int>(component.details.ngroups)), 
             auc_buffer(component.details.ngroups * component.details.ngroups), 
-            denominator(component.details.nblocks, std::vector<double>(component.details.ngroups * component.details.ngroups)),
+            denominator(component.details.ngroups, std::vector<double>(component.details.ngroups)),
             group(g), block(b)
         {
             const auto& ngroups = component.details.ngroups;
@@ -263,8 +264,8 @@ public:
 
             for (size_t b = 0; b < nblocks; ++b) {
                 for (int g1 = 0; g1 < ngroups; ++g1) {
-                    for (int g2 = 0; g2 < ngroups; ++g1) {
-                        denominator[b][g1 * ngroups + g2] += totals[b][g1] * totals[b][g2];
+                    for (int g2 = 0; g2 < ngroups; ++g2) {
+                        denominator[g1][g2] += totals[b][g1] * totals[b][g2];
                     }
                 }
             }
@@ -281,9 +282,10 @@ public:
         const Group* group;
         const Block* block;
 
-        void process() {
+        void process(size_t i) {
             const auto& ngroups = component.details.ngroups;
-            auto output = component.details.auc();
+            auto output = component.details.auc() + i * ngroups * ngroups;
+
             for (size_t b = 0; b < component.details.nblocks; ++b) {
                 auto& pr = paired[b];
                 auto& nz = num_zeros[b];
@@ -299,14 +301,14 @@ public:
 
                 // Adding to the blocks.
                 for (size_t g1 = 0; g1 < ngroups; ++g1) {
-                    for (size_t g2 = 0; g2 < ngroups; ++g1) {
+                    for (size_t g2 = 0; g2 < ngroups; ++g2) {
                         output[g1 * ngroups + g2] += auc_buffer[g1 * ngroups + g2];
                     }
                 }
             }
 
             for (size_t g1 = 0; g1 < ngroups; ++g1) {
-                for (size_t g2 = 0; g2 < ngroups; ++g1) {
+                for (size_t g2 = 0; g2 < ngroups; ++g2) {
                     if (denominator[g1][g2]) {
                         output[g1 * ngroups + g2] /= denominator[g1][g2];
                     } else {
@@ -320,7 +322,7 @@ public:
 public:
     template<class Component>
     struct DenseByRow : public ByRow<Component>  {
-        DenseByRow(const Group* g, const Block* b, Component c) : ByRow<Component>(g, b, std::move(c)) {}
+        DenseByRow(size_t nc, const Group* g, const Block* b, Component c) : NC(nc), ByRow<Component>(g, b, std::move(c)) {}
 
         template<typename T>
         void compute(size_t i, const T* ptr, T* buffer) {
@@ -341,7 +343,7 @@ public:
                 }
             }
 
-            this->process();
+            this->process(i);
             this->component.template compute(i, ptr, buffer);
             return;
         }
@@ -350,7 +352,7 @@ public:
     };
 
     auto dense_direct() {
-        return DenseByRow<decltype(factory.dense_direct())>(group, block, factory.dense_direct());
+        return DenseByRow<decltype(factory.dense_direct())>(NC, group, block, factory.dense_direct());
     }
 
 public:
@@ -377,7 +379,7 @@ public:
                 }
             }
 
-            this->process();
+            this->process(i);
             this->component.template compute(i, range, xbuffer, ibuffer);
             return;
         }
