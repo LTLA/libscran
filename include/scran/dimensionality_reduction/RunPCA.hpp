@@ -9,6 +9,7 @@
 #include "Eigen/Sparse"
 
 #include <vector>
+#include <deque>
 #include <cmath>
 
 namespace scran {
@@ -16,7 +17,6 @@ namespace scran {
 class RunPCA {
     int rank = 10;
     bool scale = false;
-    double sparsity = 0.1;
 public:
     irlba::Irlba irb;
 public:
@@ -31,7 +31,7 @@ public:
     }
 
     RunPCA& set_sparsity(double s = 0.1) {
-        sparsity = s;
+        // deprecated.
         return *this;
     }
 
@@ -114,15 +114,14 @@ private:
         size_t NR = mat->nrow(), NC = mat->ncol();
         total_var = 0;
 
-        // Filling up the vector of triplets. We pre-allocate at an assumed 10%
-        // density, so as to avoid unnecessary movements.
-        typedef Eigen::Triplet<double> TRIPLET;
-        std::vector<TRIPLET> triplets;
-        triplets.reserve(static_cast<double>(NR * NC) * sparsity);
+        Eigen::SparseMatrix<double> A(NC, NR); // transposed; we want genes in the columns.
+        std::deque<double> values;
+        std::deque<int> indices;
 
         if (mat->prefer_rows()) {
             std::vector<double> xbuffer(NC);
             std::vector<int> ibuffer(NC);
+            std::vector<int> nnzeros(NR);
 
             for (size_t r = 0; r < NR; ++r) {
                 auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data());
@@ -137,25 +136,42 @@ private:
                     scale_v[r] = 1;
                 }
 
+                nnzeros[r] = range.number;
                 for (size_t i = 0; i < range.number; ++i) {
-                    triplets.push_back(TRIPLET(range.index[i], r, range.value[i])); // transposing.
+                    values.push_back(range.value[i]);
+                    indices.push_back(range.index[i]);
+                }
+            }
+
+            // Actually filling the matrix. Note the implicit transposition.
+            A.reserve(nnzeros);
+            auto vIt = values.begin();
+            auto iIt = indices.begin();
+            for (size_t r = 0; r < NR; ++r) {
+                for (int i = 0; i < nnzeros[r]; ++i, ++vIt, ++iIt) {
+                    A.insert(*iIt, r) = *vIt;
                 }
             }
 
         } else {
             std::vector<double> xbuffer(NR);
             std::vector<int> ibuffer(NR);
+            std::vector<int> runlengths(NC);
 
             center_v.setZero();
             scale_v.setZero();
             std::vector<int> nonzeros(NR);
             int count = 0;
-            
+
+            // First pass to compute variances and extract non-zero values.
             for (size_t c = 0; c < NC; ++c) {
                 auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data());
                 tatami::stats::variances::compute_running(range, center_v.data(), scale_v.data(), nonzeros.data(), count);
+
+                runlengths[c] = range.number;
                 for (size_t i = 0; i < range.number; ++i) {
-                    triplets.push_back(TRIPLET(c, range.index[i], range.value[i])); // transposing.
+                    values.push_back(range.value[i]);
+                    indices.push_back(range.index[i]);
                 }
             }
 
@@ -168,10 +184,18 @@ private:
                 total_var = std::accumulate(scale_v.begin(), scale_v.end(), 0.0);
                 std::fill(scale_v.begin(), scale_v.end(), 1);
             }
+
+            // Actually filling the matrix. Note the implicit transposition.
+            A.reserve(nonzeros);
+            auto vIt = values.begin();
+            auto iIt = indices.begin();
+            for (size_t c = 0; c < NC; ++c) {
+                for (int i = 0; i < runlengths[c]; ++i, ++vIt, ++iIt) {
+                    A.insert(c, *iIt) = *vIt;
+                }
+            }
         }
 
-        Eigen::SparseMatrix<double> A(NC, NR); // transposed
-        A.setFromTriplets(triplets.begin(), triplets.end());
         A.makeCompressed();
         return A;
     }
