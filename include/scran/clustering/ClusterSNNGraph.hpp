@@ -230,6 +230,9 @@ public:
         igraph_vector_init(&membership, 0);
         igraph_matrix_init(&memberships, 0, 0);
 
+        // I just can't be bothered to do anything fancier here, so this is what we've got.
+        igraph_rng_seed(igraph_rng_default(), 42);
+
         MultiLevelResult output;
         output.status = igraph_community_multilevel(&graph_info.graph, &graph_info.weights, resolution, &membership, &memberships, &modularity);
 
