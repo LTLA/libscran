@@ -115,13 +115,15 @@ private:
         total_var = 0;
 
         Eigen::SparseMatrix<double> A(NC, NR); // transposed; we want genes in the columns.
-        std::deque<double> values;
-        std::deque<int> indices;
+        std::vector<std::vector<double> > values;
+        std::vector<std::vector<int> > indices;
 
         if (mat->prefer_rows()) {
             std::vector<double> xbuffer(NC);
             std::vector<int> ibuffer(NC);
             std::vector<int> nnzeros(NR);
+            values.reserve(NR);
+            indices.reserve(NR);
 
             for (size_t r = 0; r < NR; ++r) {
                 auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data());
@@ -137,26 +139,25 @@ private:
                 }
 
                 nnzeros[r] = range.number;
-                for (size_t i = 0; i < range.number; ++i) {
-                    values.push_back(range.value[i]);
-                    indices.push_back(range.index[i]);
-                }
+                values.emplace_back(range.value, range.value + range.number);
+                indices.emplace_back(range.index, range.index + range.number);
             }
 
             // Actually filling the matrix. Note the implicit transposition.
             A.reserve(nnzeros);
-            auto vIt = values.begin();
-            auto iIt = indices.begin();
             for (size_t r = 0; r < NR; ++r) {
-                for (int i = 0; i < nnzeros[r]; ++i, ++vIt, ++iIt) {
-                    A.insert(*iIt, r) = *vIt;
+                const auto& curi = indices[r];
+                const auto& curv = values[r];
+                for (size_t i = 0; i < curi.size(); ++i) {
+                    A.insert(curi[i], r) = curv[i];
                 }
             }
 
         } else {
             std::vector<double> xbuffer(NR);
             std::vector<int> ibuffer(NR);
-            std::vector<int> runlengths(NC);
+            values.reserve(NC);
+            indices.reserve(NC);
 
             center_v.setZero();
             scale_v.setZero();
@@ -167,12 +168,8 @@ private:
             for (size_t c = 0; c < NC; ++c) {
                 auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data());
                 tatami::stats::variances::compute_running(range, center_v.data(), scale_v.data(), nonzeros.data(), count);
-
-                runlengths[c] = range.number;
-                for (size_t i = 0; i < range.number; ++i) {
-                    values.push_back(range.value[i]);
-                    indices.push_back(range.index[i]);
-                }
+                values.emplace_back(range.value, range.value + range.number);
+                indices.emplace_back(range.index, range.index + range.number);
             }
 
             tatami::stats::variances::finish_running(NR, center_v.data(), scale_v.data(), nonzeros.data(), count);
@@ -187,11 +184,11 @@ private:
 
             // Actually filling the matrix. Note the implicit transposition.
             A.reserve(nonzeros);
-            auto vIt = values.begin();
-            auto iIt = indices.begin();
             for (size_t c = 0; c < NC; ++c) {
-                for (int i = 0; i < runlengths[c]; ++i, ++vIt, ++iIt) {
-                    A.insert(c, *iIt) = *vIt;
+                const auto& curi = indices[c];
+                const auto& curv = values[c];
+                for (size_t i = 0; i < curi.size(); ++i) {
+                    A.insert(c, curi[i]) = curv[i];
                 }
             }
         }
