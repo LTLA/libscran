@@ -139,6 +139,9 @@ public:
      * @return A `Graph` object containing an **igraph** graph with weights.
      */
     Graph build(size_t ncells, const std::deque<BuildSNNGraph::WeightedEdge>& store) const {
+#ifdef SCRAN_LOGGER
+        SCRAN_LOGGER("scran::ClusterSNNGraph", "Filling the graph object");
+#endif
         Graph output;
         igraph_vector_t edges;
         igraph_vector_init(&edges, store.size() * 2);
@@ -233,6 +236,9 @@ public:
         // I just can't be bothered to do anything fancier here, so this is what we've got.
         igraph_rng_seed(igraph_rng_default(), 42);
 
+#ifdef SCRAN_LOGGER
+        SCRAN_LOGGER("scran::ClusterSNNGraph", "Performing multilevel community detection");
+#endif
         MultiLevelResult output;
         output.status = igraph_community_multilevel(&graph_info.graph, &graph_info.weights, resolution, &membership, &memberships, &modularity);
 
