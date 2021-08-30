@@ -288,6 +288,11 @@ public:
     template<class MAT, typename SUB = const uint8_t*, typename S, typename D, typename PROP>
     void run(const MAT* mat, std::vector<SUB> subsets, S* sums, D* detected, std::vector<PROP> subset_proportions) {
         size_t nr = mat->nrow(), nc = mat->ncol();
+
+#ifdef SCRAN_LOGGER
+        SCRAN_LOGGER("scran::PerCellQCMetrics", "Computing quality control metrics for each cell");
+#endif
+
         Factory fact(nr, nc, subsets, sums, detected, subset_proportions);
         tatami::apply<1>(mat, fact);
         return;

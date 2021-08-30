@@ -207,6 +207,9 @@ private:
         const bool do_wilcox = !auc.empty();
         std::vector<Stat> wilcox_auc(do_wilcox ? p->nrow() * ngroups * ngroups : 0);
 
+#ifdef SCRAN_LOGGER
+        SCRAN_LOGGER("scran::ScoreMarkers", "Performing pairwise comparisons between groups of cells");
+#endif
         if (!do_wilcox) {
             std::vector<double*> effects{cohens_ptr};
             differential_analysis::BidimensionalFactory fact(p->nrow(), p->ncol(), means, detected, effects, level, level_size, ngroups, nblocks, threshold);
@@ -227,12 +230,18 @@ private:
 
         std::vector<std::pair<double, size_t> > buffer(p->nrow());
         if (do_cohen) {
+#ifdef SCRAN_LOGGER
+            SCRAN_LOGGER("scran::ScoreMarkers", "Summarizing Cohen's D across comparisons");
+#endif
             if (cohen[4].size()) {
                 differential_analysis::compute_min_rank(p->nrow(), ngroups, cohens_d.data(), cohen[4], buffer);
             }
             differential_analysis::summarize_comparisons(p->nrow(), ngroups, cohens_d.data(), cohen); // non-const w.r.t. cohens_d, so done after min-rank calculations.
         }
         if (do_wilcox) {
+#ifdef SCRAN_LOGGER
+            SCRAN_LOGGER("scran::ScoreMarkers", "Summarizing the AUC across comparisons");
+#endif
             if (auc[4].size()) {
                 differential_analysis::compute_min_rank(p->nrow(), ngroups, wilcox_auc.data(), auc[4], buffer);
             }

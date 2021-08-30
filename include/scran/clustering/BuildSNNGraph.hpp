@@ -111,6 +111,9 @@ public:
         }
 
         // Collecting neighbors.
+#ifdef SCRAN_LOGGER
+        SCRAN_LOGGER("scran::BuildSNNGraph", "Identifying nearest neighbors");
+#endif
         std::vector<std::vector<int> > indices(ncells);
         std::vector<std::vector<std::pair<int, size_t> > > hosts(ncells);
 
@@ -128,6 +131,9 @@ public:
         }
 
         // Constructing the shared neighbor graph.
+#ifdef SCRAN_LOGGER
+        SCRAN_LOGGER("scran::BuildSNNGraph", "Computing shared neighbor weights");
+#endif
         std::vector<size_t> current_added;
         current_added.reserve(ncells);
         std::vector<int> current_score(ncells);
