@@ -100,6 +100,11 @@ public:
     void run_blocked(const MAT* p, const B* block, std::vector<Stat*> means, std::vector<Stat*> variances, std::vector<Stat*> fitted, std::vector<Stat*> residuals) {
         size_t NR = p->nrow(), NC = p->ncol();
         std::vector<int> block_size(means.size());
+
+#ifdef PROGRESS_PRINTER
+        PROGRESS_PRINTER("scran::ModelGeneVar", "Estimating mean and variance of each gene");
+#endif
+
         if (block) {
             auto copy = block;
             for (size_t j = 0; j < NC; ++j, ++copy) {
@@ -114,6 +119,10 @@ public:
         }
 
         // Applying the trend fit to each block.
+#ifdef PROGRESS_PRINTER
+        PROGRESS_PRINTER("scran::ModelGeneVar", "Fitting a mean-variance trend across genes");
+#endif
+
         for (size_t b = 0; b < block_size.size(); ++b) {
             if (block_size[b] >= 2) {
                 fit.run(NR, means[b], variances[b], fitted[b], residuals[b]);

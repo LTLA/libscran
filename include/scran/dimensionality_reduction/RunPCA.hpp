@@ -9,7 +9,6 @@
 #include "Eigen/Sparse"
 
 #include <vector>
-#include <deque>
 #include <cmath>
 
 namespace scran {
@@ -44,10 +43,20 @@ private:
         if (mat->sparse()) {
             Eigen::VectorXd center_v(mat->nrow()), scale_v(mat->nrow());
             auto emat = create_eigen_matrix_sparse(mat, center_v, scale_v, total_var);
+
+#ifdef PROGRESS_PRINTER
+            PROGRESS_PRINTER("scran::RunPCA", "Running the IRLBA algorithm");
+#endif
+
             auto result = irb.run(emat, center_v, scale_v, norm);
             clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
         } else {
             auto emat = create_eigen_matrix_dense(mat, total_var);
+
+#ifdef PROGRESS_PRINTER
+            PROGRESS_PRINTER("scran::RunPCA", "Running the IRLBA algorithm");
+#endif
+
             auto result = irb.run(emat, norm); // already centered and scaled, if relevant.
             clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
         }
@@ -76,6 +85,9 @@ public:
         if (!features) {
             run(mat.get(), output.pcs, output.variance_explained, output.total_variance);
         } else {
+#ifdef PROGRESS_PRINTER
+            PROGRESS_PRINTER("RunPCA", "Subsetting to features of interest");
+#endif
             std::vector<int> subset;
             subset.reserve(mat->nrow());
             for (size_t r = 0; r < mat->nrow(); ++r) {
@@ -93,6 +105,10 @@ public:
 
 private:
     void clean_up(size_t NC, const Eigen::MatrixXd& U, const Eigen::VectorXd& D, Eigen::MatrixXd& pcs, Eigen::VectorXd& variance_explained) {
+#ifdef PROGRESS_PRINTER
+       PROGRESS_PRINTER("scran::RunPCA", "Reformatting the output PCs");
+#endif
+
         pcs = U;
         for (int i = 0; i < U.cols(); ++i) {
             for (size_t j = 0; j < NC; ++j) {
@@ -117,6 +133,10 @@ private:
         Eigen::SparseMatrix<double> A(NC, NR); // transposed; we want genes in the columns.
         std::vector<std::vector<double> > values;
         std::vector<std::vector<int> > indices;
+
+#ifdef PROGRESS_PRINTER
+        PROGRESS_PRINTER("scran::RunPCA", "Preparing the input matrix");
+#endif
 
         if (mat->prefer_rows()) {
             std::vector<double> xbuffer(NC);
@@ -206,6 +226,10 @@ private:
         Eigen::MatrixXd output(NC, NR); // transposed.
         std::vector<double> xbuffer(NC);
         double* outIt = output.data();
+
+#ifdef PROGRESS_PRINTER
+        PROGRESS_PRINTER("scran::RunPCA", "Preparing the input matrix");
+#endif
 
         for (size_t r = 0; r < NR; ++r, outIt += NC) {
             auto ptr = mat->row_copy(r, outIt);

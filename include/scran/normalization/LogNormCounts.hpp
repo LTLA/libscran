@@ -106,6 +106,10 @@ public:
         }
 
         if (center) {
+#ifdef SCRAN_LOGGER
+            SCRAN_LOGGER("scran::LogNormCounts", "Centering size factors to unity");
+#endif
+
             if (block) {
                 auto by_group = block_indices(mat->ncol(), block);
                 for (const auto& g : by_group) {
@@ -141,7 +145,14 @@ public:
             }
         }
 
+#ifdef SCRAN_LOGGER
+        SCRAN_LOGGER("scran::LogNormCounts", "Dividing each cell by its size factor");
+#endif
         auto div = tatami::make_DelayedIsometricOp(mat, tatami::make_DelayedDivideVectorHelper<true, 1>(std::move(size_factors)));
+
+#ifdef SCRAN_LOGGER
+        SCRAN_LOGGER("scran::LogNormCounts", "Applying the log-transformation");
+#endif
         if (pseudo_count == 1) {
             return tatami::make_DelayedIsometricOp(div, tatami::DelayedLog1pHelper(2.0));
         } else {
