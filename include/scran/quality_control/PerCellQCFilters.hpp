@@ -200,6 +200,9 @@ private:
 
         // Filtering to remove outliers on the log-sum.
         {
+#ifdef SCRAN_LOGGER
+            SCRAN_LOGGER("scran::PerCellQCFilters", "Filtering on the total count per cell");
+#endif
             auto res = fun(ncells, sums, filter_by_sums);
             output.sums = res.lower;
             std::copy(filter_by_sums, filter_by_sums + ncells, overall_filter);
@@ -207,6 +210,9 @@ private:
 
         // Filtering to remove outliers on the log-detected number.
         {
+#ifdef SCRAN_LOGGER
+            SCRAN_LOGGER("scran::PerCellQCFilters", "Filtering on the number of detected genes");
+#endif
             auto res = fun(ncells, detected, filter_by_detected);
             output.detected = res.lower;
             for (size_t i = 0; i < ncells; ++i) {
@@ -215,6 +221,10 @@ private:
         }
 
         // Filtering to remove outliers on the subset proportions.
+#ifdef SCRAN_LOGGER
+        SCRAN_LOGGER("scran::PerCellQCFilters", "Filtering on the proportions in control subsets");
+#endif
+
         size_t nsubsets = subset_proportions.size();
         if (filter_by_subset_proportions.size() != nsubsets) {
             throw std::runtime_error("mismatching number of input/outputs for subset proportion filters");

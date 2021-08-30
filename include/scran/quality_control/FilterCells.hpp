@@ -59,6 +59,10 @@ public:
      */
     template<class MAT, typename IDX = int, typename X = uint8_t>
     std::shared_ptr<MAT> run(std::shared_ptr<MAT> mat, const X* filter) {
+#ifdef SCRAN_LOGGER
+        SCRAN_LOGGER("scran::FilterCells", "Filtering out low-quality cells");
+#endif
+
         size_t NC = mat->ncol();
         auto num = std::accumulate(filter, filter + NC, static_cast<IDX>(0));
         std::vector<IDX> retained(retain ? num : (NC - num));
