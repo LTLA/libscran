@@ -101,8 +101,8 @@ public:
         size_t NR = p->nrow(), NC = p->ncol();
         std::vector<int> block_size(means.size());
 
-#ifdef PROGRESS_PRINTER
-        PROGRESS_PRINTER("scran::ModelGeneVar", "Estimating mean and variance of each gene");
+#ifdef SCRAN_LOGGER
+        SCRAN_LOGGER("scran::ModelGeneVar", "Estimating mean and variance of each gene");
 #endif
 
         if (block) {
@@ -119,8 +119,8 @@ public:
         }
 
         // Applying the trend fit to each block.
-#ifdef PROGRESS_PRINTER
-        PROGRESS_PRINTER("scran::ModelGeneVar", "Fitting a mean-variance trend across genes");
+#ifdef SCRAN_LOGGER
+        SCRAN_LOGGER("scran::ModelGeneVar", "Fitting a mean-variance trend across genes");
 #endif
 
         for (size_t b = 0; b < block_size.size(); ++b) {

@@ -44,8 +44,8 @@ private:
             Eigen::VectorXd center_v(mat->nrow()), scale_v(mat->nrow());
             auto emat = create_eigen_matrix_sparse(mat, center_v, scale_v, total_var);
 
-#ifdef PROGRESS_PRINTER
-            PROGRESS_PRINTER("scran::RunPCA", "Running the IRLBA algorithm");
+#ifdef SCRAN_LOGGER
+            SCRAN_LOGGER("scran::RunPCA", "Running the IRLBA algorithm");
 #endif
 
             auto result = irb.run(emat, center_v, scale_v, norm);
@@ -53,8 +53,8 @@ private:
         } else {
             auto emat = create_eigen_matrix_dense(mat, total_var);
 
-#ifdef PROGRESS_PRINTER
-            PROGRESS_PRINTER("scran::RunPCA", "Running the IRLBA algorithm");
+#ifdef SCRAN_LOGGER
+            SCRAN_LOGGER("scran::RunPCA", "Running the IRLBA algorithm");
 #endif
 
             auto result = irb.run(emat, norm); // already centered and scaled, if relevant.
@@ -85,8 +85,8 @@ public:
         if (!features) {
             run(mat.get(), output.pcs, output.variance_explained, output.total_variance);
         } else {
-#ifdef PROGRESS_PRINTER
-            PROGRESS_PRINTER("RunPCA", "Subsetting to features of interest");
+#ifdef SCRAN_LOGGER
+            SCRAN_LOGGER("RunPCA", "Subsetting to features of interest");
 #endif
             std::vector<int> subset;
             subset.reserve(mat->nrow());
@@ -105,8 +105,8 @@ public:
 
 private:
     void clean_up(size_t NC, const Eigen::MatrixXd& U, const Eigen::VectorXd& D, Eigen::MatrixXd& pcs, Eigen::VectorXd& variance_explained) {
-#ifdef PROGRESS_PRINTER
-       PROGRESS_PRINTER("scran::RunPCA", "Reformatting the output PCs");
+#ifdef SCRAN_LOGGER
+       SCRAN_LOGGER("scran::RunPCA", "Reformatting the output PCs");
 #endif
 
         pcs = U;
@@ -134,8 +134,8 @@ private:
         std::vector<std::vector<double> > values;
         std::vector<std::vector<int> > indices;
 
-#ifdef PROGRESS_PRINTER
-        PROGRESS_PRINTER("scran::RunPCA", "Preparing the input matrix");
+#ifdef SCRAN_LOGGER
+        SCRAN_LOGGER("scran::RunPCA", "Preparing the input matrix");
 #endif
 
         if (mat->prefer_rows()) {
@@ -227,8 +227,8 @@ private:
         std::vector<double> xbuffer(NC);
         double* outIt = output.data();
 
-#ifdef PROGRESS_PRINTER
-        PROGRESS_PRINTER("scran::RunPCA", "Preparing the input matrix");
+#ifdef SCRAN_LOGGER
+        SCRAN_LOGGER("scran::RunPCA", "Preparing the input matrix");
 #endif
 
         for (size_t r = 0; r < NR; ++r, outIt += NC) {
