@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['weightededge_133',['WeightedEdge',['../classscran_1_1BuildSNNGraph.html#af27e18b11231af9605b34495eb710d4e',1,'scran::BuildSNNGraph']]]
+  ['clusterkmeans_0',['ClusterKmeans',['../ClusterKmeans_8hpp.html#a836b35676870dd7296db5763e317c702',1,'scran']]]
 ];
