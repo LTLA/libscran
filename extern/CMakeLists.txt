@@ -27,6 +27,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(irlba)
 
 FetchContent_Declare(
+  kmeans 
+  GIT_REPOSITORY https://github.com/LTLA/CppKmeans
+  GIT_TAG 3d5f21df81014e23f83301132a15abf662ad2536
+)
+FetchContent_MakeAvailable(kmeans)
+
+FetchContent_Declare(
   knncolle 
   GIT_REPOSITORY https://github.com/LTLA/knncolle
   GIT_TAG master
