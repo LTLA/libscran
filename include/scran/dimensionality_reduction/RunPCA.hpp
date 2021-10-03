@@ -14,23 +14,25 @@
 namespace scran {
 
 class RunPCA {
-    int rank = 10;
-    bool scale = false;
 public:
+    struct Defaults {
+        static constexpr int rank = 10;
+
+        static constexpr bool scale = 10;
+    };
+private:
+    int rank = Defaults::rank;
+    bool scale = Defaults::scale;
     irlba::Irlba irb;
+
 public:
-    RunPCA& set_rank(int r = 10) {
+    RunPCA& set_rank(int r = Defaults::rank) {
         rank = r;
         return *this;
     }
 
-    RunPCA& set_scale(bool s = false) {
+    RunPCA& set_scale(bool s = Defaults::scale) {
         scale = s;
-        return *this;
-    }
-
-    RunPCA& set_sparsity(double s = 0.1) {
-        // deprecated.
         return *this;
     }
 
@@ -78,12 +80,12 @@ public:
         return output;
     }
 
-    template<class MAT, typename X>
-    Results run(std::shared_ptr<MAT> mat, const X* features) {
+    template<typename T, typename IDX, typename X>
+    Results run(const tatami::Matrix<T, IDX>* mat, const X* features) {
         Results output;
 
         if (!features) {
-            run(mat.get(), output.pcs, output.variance_explained, output.total_variance);
+            run(mat, output.pcs, output.variance_explained, output.total_variance);
         } else {
 #ifdef SCRAN_LOGGER
             SCRAN_LOGGER("RunPCA", "Subsetting to features of interest");
@@ -96,7 +98,13 @@ public:
                 }
             }
 
-            auto subsetted = tatami::make_DelayedSubset<0>(std::move(mat), std::move(subset));
+            // Using a no-op deleter in a shared pointer to get it to work with
+            // the DelayedSubset. This hacky shared pointer dies once we move
+            // out of this block, and the matrix will continue to exist
+            // outside, so we shouldn't have any problems with lifetimes. 
+            std::shared_ptr<const tatami::Matrix<T, IDX> > ptr(mat, [](const tatami::Matrix<T, IDX>*){});
+
+            auto subsetted = tatami::make_DelayedSubset<0>(std::move(ptr), std::move(subset));
             run(subsetted.get(), output.pcs, output.variance_explained, output.total_variance);
         }
 

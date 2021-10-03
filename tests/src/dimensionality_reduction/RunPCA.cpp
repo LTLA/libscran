@@ -82,7 +82,7 @@ TEST_F(RunPCATester, SubsetTest) {
     scran::RunPCA runner;
     runner.set_rank(4);
 
-    auto out = runner.run(dense_row, subset.data());
+    auto out = runner.run(dense_row.get(), subset.data());
     std::vector<double> opcs(eigen2vector(out.pcs));
     std::vector<double> ovar(eigen2vector(out.variance_explained));
     EXPECT_EQ(ovar.size(), 4);
