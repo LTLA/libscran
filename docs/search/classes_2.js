@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['filtercells_0',['FilterCells',['../classscran_1_1FilterCells.html',1,'scran']]],
-  ['fittrendvar_1',['FitTrendVar',['../classscran_1_1FitTrendVar.html',1,'scran']]]
+  ['defaults_0',['Defaults',['../structscran_1_1ChooseHVGs_1_1Defaults.html',1,'scran::ChooseHVGs']]]
 ];

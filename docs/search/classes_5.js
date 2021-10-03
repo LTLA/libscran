@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['lognormcounts_0',['LogNormCounts',['../classscran_1_1LogNormCounts.html',1,'scran']]]
+  ['isoutlier_0',['IsOutlier',['../classscran_1_1IsOutlier.html',1,'scran']]]
 ];
