@@ -38,18 +38,8 @@ public:
      *
      * @return A reference to this `FitTrendVar` object.
      */
-    FitTrendVar& set_span(double s) {
+    FitTrendVar& set_span(double s = WeightedLowess::WeightedLowess<>::Defaults::span) {
         smoother.set_span(s);
-        return *this;
-    }
-
-    /** 
-     * Use the default span for the LOWESS smoother, see https://ltla.github.io/CppWeightedLowess for details.
-     *
-     * @return A reference to this `FitTrendVar` object.
-     */
-    FitTrendVar& set_span() {
-        smoother.set_span();
         return *this;
     }
 

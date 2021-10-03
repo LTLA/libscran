@@ -13,7 +13,7 @@ FetchContent_MakeAvailable(tatami)
 FetchContent_Declare(
   WeightedLowess
   GIT_REPOSITORY https://github.com/LTLA/CppWeightedLowess
-  GIT_TAG v1.0.0
+  GIT_TAG b9cf104772d899d318cc90a1e6913be353fc9a60
 )
 
 FetchContent_MakeAvailable(WeightedLowess)
