@@ -19,6 +19,7 @@ add_executable(
     src/normalization/LogNormCounts.cpp
     src/feature_selection/ModelGeneVar.cpp
     src/feature_selection/FitTrendVar.cpp
+    src/feature_selection/ChooseHVGs.cpp
     src/dimensionality_reduction/RunPCA.cpp
     src/clustering/BuildSNNGraph.cpp
     src/clustering/ClusterSNNGraph.cpp
