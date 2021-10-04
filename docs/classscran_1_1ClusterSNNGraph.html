@@ -116,6 +116,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aba7a965d75258ff343371e0507a7a2f9"><td class="memTemplParams" colspan="2">template&lt;class Algorithm &gt; </td></tr>
 <tr class="memitem:aba7a965d75258ff343371e0507a7a2f9"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1ClusterSNNGraph_1_1MultiLevelResult.html">MultiLevelResult</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ClusterSNNGraph.html#aba7a965d75258ff343371e0507a7a2f9">run_multilevel</a> (const Algorithm *search, double resolution=1)</td></tr>
 <tr class="separator:aba7a965d75258ff343371e0507a7a2f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69ea1e0c1997744a584f46a6aa701bbc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1ClusterSNNGraph_1_1MultiLevelResult.html">MultiLevelResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ClusterSNNGraph.html#a69ea1e0c1997744a584f46a6aa701bbc">run_multilevel</a> (size_t ncells, const std::deque&lt; <a class="el" href="classscran_1_1BuildSNNGraph.html#af27e18b11231af9605b34495eb710d4e">BuildSNNGraph::WeightedEdge</a> &gt; &amp;store, double resolution=1)</td></tr>
+<tr class="separator:a69ea1e0c1997744a584f46a6aa701bbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abc25750c86c4a5c59bd009156266e050"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1ClusterSNNGraph_1_1MultiLevelResult.html">MultiLevelResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ClusterSNNGraph.html#abc25750c86c4a5c59bd009156266e050">run_multilevel</a> (const <a class="el" href="structscran_1_1ClusterSNNGraph_1_1Graph.html">Graph</a> &amp;graph_info, double resolution=1)</td></tr>
 <tr class="separator:abc25750c86c4a5c59bd009156266e050"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -263,7 +265,7 @@ template&lt;class Algorithm &gt; </div>
 </div>
 </div>
 <a id="aba7a965d75258ff343371e0507a7a2f9" name="aba7a965d75258ff343371e0507a7a2f9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aba7a965d75258ff343371e0507a7a2f9">&#9670;&nbsp;</a></span>run_multilevel() <span class="overload">[1/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aba7a965d75258ff343371e0507a7a2f9">&#9670;&nbsp;</a></span>run_multilevel() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -316,7 +318,7 @@ template&lt;class Algorithm &gt; </div>
 </div>
 </div>
 <a id="abc25750c86c4a5c59bd009156266e050" name="abc25750c86c4a5c59bd009156266e050"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abc25750c86c4a5c59bd009156266e050">&#9670;&nbsp;</a></span>run_multilevel() <span class="overload">[2/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#abc25750c86c4a5c59bd009156266e050">&#9670;&nbsp;</a></span>run_multilevel() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -360,8 +362,60 @@ template&lt;class Algorithm &gt; </div>
 
 </div>
 </div>
+<a id="a69ea1e0c1997744a584f46a6aa701bbc" name="a69ea1e0c1997744a584f46a6aa701bbc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69ea1e0c1997744a584f46a6aa701bbc">&#9670;&nbsp;</a></span>run_multilevel() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structscran_1_1ClusterSNNGraph_1_1MultiLevelResult.html">MultiLevelResult</a> scran::ClusterSNNGraph::run_multilevel </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>ncells</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::deque&lt; <a class="el" href="classscran_1_1BuildSNNGraph.html#af27e18b11231af9605b34495eb710d4e">BuildSNNGraph::WeightedEdge</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>store</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>resolution</em> = <code>1</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Run the multi-level community detection algorithm on a shared nearest-neighbor graph constructed from <code>knncolle::Base</code> object.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ncells</td><td>Number of cells. </td></tr>
+    <tr><td class="paramname">store</td><td>A <code>deque</code> of edges, usually generated by a previous call to <code><a class="el" href="classscran_1_1BuildSNNGraph.html#a6f2a0276125b2f8426afecb32cd7080e">BuildSNNGraph::run()</a></code>. </td></tr>
+    <tr><td class="paramname">resolution</td><td>Resolution of the clustering, must be non-negative. Lower values favor fewer, larger communities; higher values favor more, smaller communities.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ClusterSNNGraph_1_1MultiLevelResult.html" title="Result of the igraph multi-level community detection algorithm.">MultiLevelResult</a></code> object containing the clustering results for all cells. </dd></dl>
+
+</div>
+</div>
 <a id="a71a5a037ac921859a62cf7b73cd4b29e" name="a71a5a037ac921859a62cf7b73cd4b29e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a71a5a037ac921859a62cf7b73cd4b29e">&#9670;&nbsp;</a></span>run_multilevel() <span class="overload">[3/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a71a5a037ac921859a62cf7b73cd4b29e">&#9670;&nbsp;</a></span>run_multilevel() <span class="overload">[4/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
