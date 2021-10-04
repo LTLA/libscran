@@ -131,6 +131,21 @@ public:
     }
 
     /**
+     * Build a shared nearest neighbor graph from an existing `knncolle::Base` object.
+     *
+     * @tparam Algorithm Any instance of a `knncolle::Base` subclass.
+     *
+     * @param search Pointer to a `knncolle::Base` instance to use for the nearest-neighbor search.
+     *
+     * @return A `Graph` object containing an **igraph** graph with weights.
+     */
+    template<class Algorithm>
+    Graph build(const Algorithm* search) const {
+        auto store = builder.run(search);
+        return build(search->nobs(), store);
+    }
+
+    /**
      * Convert pre-built edges of a shared nearest neighbor graph into an **igraph**-compatible form.
      *
      * @param ncells Number of cells.
@@ -212,6 +227,25 @@ public:
      */
     MultiLevelResult run_multilevel(size_t ndims, size_t ncells, const double* mat, double resolution = 1) {
         auto graph_info = build(ndims, ncells, mat);
+        auto output = run_multilevel(graph_info, resolution);
+        graph_info.destroy();
+        return output;
+    }
+
+    /**
+     * Run the multi-level community detection algorithm on a shared nearest-neighbor graph constructed from `knncolle::Base` object.
+     *
+     * @tparam Algorithm Any instance of a `knncolle::Base` subclass.
+     *
+     * @param search Pointer to a `knncolle::Base` instance to use for the nearest-neighbor search.
+     * @param resolution Resolution of the clustering, must be non-negative.
+     * Lower values favor fewer, larger communities; higher values favor more, smaller communities.
+     *
+     * @return A `MultiLevelResult` object containing the clustering results for all cells.
+     */
+    template<class Algorithm>
+    MultiLevelResult run_multilevel(const Algorithm* search, double resolution = 1) {
+        auto graph_info = build(search);
         auto output = run_multilevel(graph_info, resolution);
         graph_info.destroy();
         return output;

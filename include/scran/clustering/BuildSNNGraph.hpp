@@ -101,31 +101,49 @@ public:
      * In each `WeightedEdge`, the first index is guaranteed to be larger than the second index, so as to avoid unnecessary duplicates.
      */
     std::deque<WeightedEdge> run(size_t ndims, size_t ncells, const double* mat) const {
-        std::deque<WeightedEdge> store;
-
         std::unique_ptr<knncolle::Base<> > ptr;
         if (!approximate) {
             ptr.reset(new knncolle::VpTreeEuclidean<>(ndims, ncells, mat));
         } else {
             ptr.reset(new knncolle::AnnoyEuclidean<>(ndims, ncells, mat));
         }
+        return run(ptr.get());
+    }
 
+    /**
+     * @tparam Algorithm Any instance of a `knncolle::Base` subclass.
+     *
+     * @param search Pointer to a `knncolle::Base` instance to use for the nearest-neighbor search.
+     *
+     * @return A `deque` containing all the edges of the graph as `WeightedEdge`s.
+     * In each `WeightedEdge`, the first index is guaranteed to be larger than the second index, so as to avoid unnecessary duplicates.
+     */
+    template<class Algorithm>
+    std::deque<WeightedEdge> run(const Algorithm* search) const {
         // Collecting neighbors.
 #ifdef SCRAN_LOGGER
         SCRAN_LOGGER("scran::BuildSNNGraph", "Identifying nearest neighbors");
 #endif
+        size_t ncells = search->nobs();
         std::vector<std::vector<int> > indices(ncells);
-        std::vector<std::vector<std::pair<int, size_t> > > hosts(ncells);
 
+        #pragma omp parallel for
         for (size_t i = 0; i < ncells; ++i) {
-            auto neighbors = ptr->find_nearest_neighbors(i, num_neighbors);
+            auto neighbors = search->find_nearest_neighbors(i, num_neighbors);
             auto& current = indices[i];
-
-            hosts[i].push_back(std::make_pair(0, i)); // each point is its own 0-th nearest neighbor
-            int counter = 1;
             for (auto x : neighbors) {
                 current.push_back(x.first);
-                hosts[x.first].push_back(std::make_pair(counter, i));
+            }
+        }
+
+        // Not parallel-frendly, so we don't construct this with the neighbor search
+        std::vector<std::vector<std::pair<int, size_t> > > hosts(ncells);
+        for (size_t i = 0; i < ncells; ++i) {
+            hosts[i].push_back(std::make_pair(0, i)); // each point is its own 0-th nearest neighbor
+            const auto& current = indices[i];
+            int counter = 1;
+            for (auto x : current) {
+                hosts[x].push_back(std::make_pair(counter, i));
                 ++counter;
             }
         }
@@ -137,6 +155,7 @@ public:
         std::vector<size_t> current_added;
         current_added.reserve(ncells);
         std::vector<int> current_score(ncells);
+        std::deque<WeightedEdge> store;
 
         for (size_t j = 0; j < ncells; ++j) {
             const auto& current_neighbors = indices[j];
