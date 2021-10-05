@@ -18,7 +18,7 @@ public:
     struct Defaults {
         static constexpr int rank = 10;
 
-        static constexpr bool scale = 10;
+        static constexpr bool scale = false;
     };
 private:
     int rank = Defaults::rank;
