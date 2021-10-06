@@ -84,19 +84,19 @@ public:
 private:
     template<typename SUB, typename S, typename D, typename PROP>
     struct Common {
-        Common(std::vector<SUB>& subs, S* su, D* de, std::vector<PROP>& subp) : subsets(subs), sums(su), detected(de), subset_proportions(subp) {}
+        Common(std::vector<SUB> subs, S* su, D* de, std::vector<PROP> subp) : subsets(std::move(subs)), sums(su), detected(de), subset_proportions(std::move(subp)) {}
 
-        std::vector<SUB>& subsets;
+        std::vector<SUB> subsets;
         S* sums;
         D* detected;
-        std::vector<PROP>& subset_proportions;
+        std::vector<PROP> subset_proportions;
     };
 
     template<typename SUB, typename S, typename D, typename PROP>
     struct Factory : public Common<SUB, S, D, PROP> {
         typedef typename std::remove_reference<decltype(*std::declval<PROP>())>::type P;
         
-        Factory(size_t nr, size_t nc, std::vector<SUB>& subs, S* s, D* d, std::vector<PROP>& subp) : NR(nr), NC(nc), Common<SUB, S, D, PROP>(subs, s, d, subp) {
+        Factory(size_t nr, size_t nc, std::vector<SUB> subs, S* s, D* d, std::vector<PROP> subp) : NR(nr), NC(nc), Common<SUB, S, D, PROP>(std::move(subs), s, d, std::move(subp)) {
             std::fill(this->sums, this->sums + nc, static_cast<S>(0));
             std::fill(this->detected, this->detected + nc, static_cast<D>(0));
             for (size_t s = 0; s < this->subsets.size(); ++s) {
@@ -105,12 +105,10 @@ private:
         }
 
         size_t NR, NC;
-        static constexpr bool supports_sparse = true;
-        static constexpr bool supports_running = true;
 
     public:
         struct DenseDirect : public Common<SUB, S, D, PROP> {
-            DenseDirect(size_t nr, std::vector<SUB>& subs, S* s, D* d, std::vector<PROP>& subp) : NR(nr), Common<SUB, S, D, PROP>(subs, s, d, subp) {}
+            DenseDirect(size_t nr, std::vector<SUB>& subs, S* s, D* d, std::vector<PROP>& subp) : NR(nr), Common<SUB, S, D, PROP>(std::move(subs), s, d, std::move(subp)) {}
 
             template<typename T>
             void compute(size_t c, const T* ptr, T* buffer) {
@@ -143,7 +141,7 @@ private:
 
     public:
         struct SparseDirect : public Common<SUB, S, D, PROP> {
-            SparseDirect(std::vector<SUB>& subs, S* s, D* d, std::vector<PROP>& subp) : Common<SUB, S, D, PROP>(subs, s, d, subp) {}
+            SparseDirect(std::vector<SUB> subs, S* s, D* d, std::vector<PROP> subp) : Common<SUB, S, D, PROP>(std::move(subs), s, d, std::move(subp)) {}
 
             template<typename T, typename IDX>
             void compute(size_t c, const tatami::SparseRange<T, IDX>& range, T* vbuffer, IDX* ibuffer) {
@@ -174,7 +172,7 @@ private:
 
     public:
         struct DenseRunning : public Common<SUB, S, D, PROP> {
-            DenseRunning(size_t nc, std::vector<SUB>& subs, S* s, D* d, std::vector<PROP>& subp) : NC(nc), Common<SUB, S, D, PROP>(subs, s, d, subp) {}
+            DenseRunning(size_t nc, std::vector<SUB> subs, S* s, D* d, std::vector<PROP> subp) : NC(nc), Common<SUB, S, D, PROP>(std::move(subs), s, d, std::move(subp)) {}
 
             template<class T>
             void add (const T* ptr, T* buffer) {
@@ -216,9 +214,23 @@ private:
             return DenseRunning(NC, this->subsets, this->sums, this->detected, this->subset_proportions);
         }
 
+        DenseRunning dense_running(size_t start, size_t end) {
+            auto subs = this->subset;
+            for (auto& s : subs) {
+                s += start;
+            }
+
+            auto subp = this->subset_proportions;
+            for (auto& s : subp) {
+                s += start;
+            }
+
+            return DenseRunning(end - start, std::move(subs), this->sums, this->detected, std::move(subp));
+        }
+
     public:
         struct SparseRunning : public Common<SUB, S, D, PROP> {
-            SparseRunning(size_t nc, std::vector<SUB>& subs, S* s, D* d, std::vector<PROP>& subp) : NC(nc), Common<SUB, S, D, PROP>(subs, s, d, subp) {}
+            SparseRunning(size_t nc, std::vector<SUB> subs, S* s, D* d, std::vector<PROP> subp) : NC(nc), Common<SUB, S, D, PROP>(std::move(subs), s, d, std::move(subp)) {}
 
             template<typename T, typename IDX>
             void add (const tatami::SparseRange<T, IDX> range, T* vbuffer, IDX* ibuffer) {
@@ -257,6 +269,20 @@ private:
          
         SparseRunning sparse_running() {
             return SparseRunning(NC, this->subsets, this->sums, this->detected, this->subset_proportions);
+        }
+
+        SparseRunning sparse_running(size_t start, size_t end) {
+            auto subs = this->subset;
+            for (auto& s : subs) {
+                s += start;
+            }
+
+            auto subp = this->subset_proportions;
+            for (auto& s : subp) {
+                s += start;
+            }
+
+            return SparseRunning(end - start, std::move(subs), this->sums, this->detected, std::move(subp));
         }
     };
 

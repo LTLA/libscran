@@ -84,35 +84,33 @@ void blocked_variance_with_mean(SparseRange&& range, const B* block, Bs& block_s
     finish_variances(block_size, tmp_vars);
 }
 
-template<class V, typename B, class Bs>
+template<typename S, typename B, class Bs>
 struct Common {
-    Common(V& m, V& v, const B* b, const Bs& bs) : means(m), variances(v), block(b), block_size(bs) {}
-    V& means;
-    V& variances;
+    Common(std::vector<S*> m, std::vector<S*> v, const B* b, const Bs& bs) : means(std::move(m)), variances(std::move(v)), block(b), block_size(bs) {}
+    std::vector<S*> means;
+    std::vector<S*> variances;
     const B* block;
     const Bs& block_size;
 };
 
-template<bool blocked, class V, typename B, class Bs>
-struct BlockedVarianceFactory : public Common<V, B, Bs> {
+template<bool blocked, typename S, typename B, class Bs>
+struct BlockedVarianceFactory : public Common<S, B, Bs> {
 public:
-    BlockedVarianceFactory(size_t nr, size_t nc, V& m, V& v, const B* b, const Bs& bs) : NR(nr), NC(nc), Common<V, B, Bs>(m, v, b, bs) {}
+    BlockedVarianceFactory(size_t nr, size_t nc, std::vector<S*> m, std::vector<S*> v, const B* b, const Bs& bs) : NR(nr), NC(nc), Common<S, B, Bs>(std::move(m), std::move(v), b, bs) {}
 
-    static constexpr bool supports_running = true;
-    static constexpr bool supports_sparse = true;
 private:
     size_t NR, NC;
 
 private:
-    struct ByRow : Common<V, B, Bs> {
-        ByRow(V& m, V& v, const B* b, const Bs& bs) : Common<V, B, Bs>(m, v, b, bs), tmp_means(bs.size()), tmp_vars(bs.size()) {}
+    struct ByRow : Common<S, B, Bs> {
+        ByRow(std::vector<S*> m, std::vector<S*> v, const B* b, const Bs& bs) : Common<S, B, Bs>(std::move(m), std::move(v), b, bs), tmp_means(bs.size()), tmp_vars(bs.size()) {}
     protected:
         std::vector<double> tmp_means, tmp_vars;
     };
 
 public:
     struct DenseByRow : public ByRow {
-        DenseByRow(size_t nc, V& m, V& v, const B* b, const Bs& bs) : NC(nc), ByRow(m, v, b, bs) {}
+        DenseByRow(size_t nc, std::vector<S*> m, std::vector<S*> v, const B* b, const Bs& bs) : NC(nc), ByRow(std::move(m), std::move(v), b, bs) {}
 
         template<typename T>
         void compute(size_t i, const T* ptr, T* buffer) {
@@ -132,7 +130,7 @@ public:
 
 public:
     struct SparseByRow : public ByRow {
-        SparseByRow(V& m, V& v, const B* b, const Bs& bs) : ByRow(m, v, b, bs), tmp_nzero(bs.size()) {}
+        SparseByRow(std::vector<S*> m, std::vector<S*> v, const B* b, const Bs& bs) : ByRow(std::move(m), std::move(v), b, bs), tmp_nzero(bs.size()) {}
 
         template<class SparseRange, typename T, typename IDX>
         void compute(size_t i, SparseRange&& range, T* xbuffer, IDX* ibuffer) {
@@ -151,8 +149,8 @@ public:
     }
 
 private:
-    struct ByCol : public Common<V, B, Bs> {
-        ByCol(size_t nr, V& m, V& v, const B* b, const Bs& bs) : NR(nr), counts(bs.size()), Common<V, B, Bs>(m, v, b, bs) {
+    struct ByCol : public Common<S, B, Bs> {
+        ByCol(size_t nr, std::vector<S*> m, std::vector<S*> v, const B* b, const Bs& bs) : NR(nr), counts(bs.size()), Common<S, B, Bs>(std::move(m), std::move(v), b, bs) {
             for (auto& mptr : this->means) {
                 std::fill(mptr, mptr + nr, 0);
             }
@@ -168,7 +166,7 @@ private:
 
 public:
     struct DenseByCol : public ByCol {
-        DenseByCol(size_t nr, V& m, V& v, const B* b, const Bs& bs) : ByCol(nr, m, v, b, bs) {}
+        DenseByCol(size_t nr, std::vector<S*> m, std::vector<S*> v, const B* b, const Bs& bs) : ByCol(nr, std::move(m), std::move(v), b, bs) {}
 
         template<typename T>
         void add(const T* ptr, T* buffer) {
@@ -188,9 +186,23 @@ public:
         return DenseByCol(this->NR, this->means, this->variances, this->block, this->block_size);
     }
 
+    DenseByCol dense_running(size_t start, size_t end) {
+        auto mymean = this->means;
+        for (auto& m : mymean) {
+            m += start;
+        }
+
+        auto myvar = this->variances;
+        for (auto& m : myvar) {
+            m += start;
+        }
+
+        return DenseByCol(end - start, std::move(mymean), std::move(myvar), this->block, this->block_size);
+    }
+
 public:
     struct SparseByCol : public ByCol {
-        SparseByCol(size_t nr, V& m, V& v, const B* b, const Bs& bs) : nonzeros(bs.size(), std::vector<int>(nr)), ByCol(nr, m, v, b, bs) {}
+        SparseByCol(size_t nr, std::vector<S*> m, std::vector<S*> v, const B* b, const Bs& bs) : nonzeros(bs.size(), std::vector<int>(nr)), ByCol(nr, std::move(m), std::move(v), b, bs) {}
 
         template<class SparseRange, typename T, typename IDX>
         void add(SparseRange&& range, T* xbuffer, IDX* ibuffer) {
@@ -211,6 +223,20 @@ public:
 
     SparseByCol sparse_running() {
         return SparseByCol(NR, this->means, this->variances, this->block, this->block_size);
+    }
+
+    SparseByCol sparse_running(size_t start, size_t end) {
+        auto mymean = this->means;
+        for (auto& m : mymean) {
+            m += start;
+        }
+
+        auto myvar = this->variances;
+        for (auto& m : myvar) {
+            m += start;
+        }
+
+        return SparseByCol(NR, std::move(mymean), std::move(myvar), this->block, this->block_size);
     }
 };
 
