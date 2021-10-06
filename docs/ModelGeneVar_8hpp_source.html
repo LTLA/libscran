@@ -122,11 +122,11 @@ $(function() {
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> j = 0; j &lt; NC; ++j, ++copy) {</div>
 <div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>                ++block_size[*copy];</div>
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>            }</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>            feature_selection::BlockedVarianceFactory&lt;<span class="keyword">true</span>, <span class="keyword">decltype</span>(means), B, <span class="keyword">decltype</span>(block_size)&gt; fact(NR, NC, means, variances, block, block_size);</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>            feature_selection::BlockedVarianceFactory&lt;<span class="keyword">true</span>, Stat, B, <span class="keyword">decltype</span>(block_size)&gt; fact(NR, NC, means, variances, block, block_size);</div>
 <div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>            tatami::apply&lt;0&gt;(p, fact);</div>
 <div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        } <span class="keywordflow">else</span> {</div>
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>            block_size[0] = NC;</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>            feature_selection::BlockedVarianceFactory&lt;<span class="keyword">false</span>, <span class="keyword">decltype</span>(means), B, <span class="keyword">decltype</span>(block_size)&gt; fact(NR, NC, means, variances, block, block_size);</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>            feature_selection::BlockedVarianceFactory&lt;<span class="keyword">false</span>, Stat, B, <span class="keyword">decltype</span>(block_size)&gt; fact(NR, NC, means, variances, block, block_size);</div>
 <div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>            tatami::apply&lt;0&gt;(p, fact);</div>
 <div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        }</div>
 <div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
