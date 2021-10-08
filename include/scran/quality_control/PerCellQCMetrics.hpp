@@ -215,7 +215,7 @@ private:
         }
 
         DenseRunning dense_running(size_t start, size_t end) {
-            auto subs = this->subset;
+            auto subs = this->subsets;
             for (auto& s : subs) {
                 s += start;
             }
@@ -272,7 +272,7 @@ private:
         }
 
         SparseRunning sparse_running(size_t start, size_t end) {
-            auto subs = this->subset;
+            auto subs = this->subsets;
             for (auto& s : subs) {
                 s += start;
             }
