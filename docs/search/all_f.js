@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['variances_0',['variances',['../structscran_1_1ModelGeneVar_1_1Results.html#aebc0aed5c5e50f0471766b6dc870fc58',1,'scran::ModelGeneVar::Results']]]
+  ['upper_0',['upper',['../structscran_1_1IsOutlier_1_1Thresholds.html#afefce35fa6cb2b103d581637682ba255',1,'scran::IsOutlier::Thresholds']]]
 ];

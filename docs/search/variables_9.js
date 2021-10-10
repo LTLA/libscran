@@ -1,4 +1,7 @@
 var searchData=
 [
-  ['upper_0',['upper',['../structscran_1_1IsOutlier_1_1Thresholds.html#afefce35fa6cb2b103d581637682ba255',1,'scran::IsOutlier::Thresholds']]]
+  ['seed_0',['seed',['../structscran_1_1ClusterSNNGraph_1_1Defaults.html#acec9c14821286817986c3ad493296aa3',1,'scran::ClusterSNNGraph::Defaults']]],
+  ['status_1',['status',['../structscran_1_1ClusterSNNGraph_1_1MultiLevelResult.html#a70fa50618db48ffa23e8bd2946738d16',1,'scran::ClusterSNNGraph::MultiLevelResult']]],
+  ['subset_5fproportions_2',['subset_proportions',['../structscran_1_1PerCellQCFilters_1_1Thresholds.html#a3621907e181dc5fe287c327263e044b6',1,'scran::PerCellQCFilters::Thresholds::subset_proportions()'],['../structscran_1_1PerCellQCMetrics_1_1Results.html#ac2782fd6086b8920f4cef8cf3e44a3f8',1,'scran::PerCellQCMetrics::Results::subset_proportions()']]],
+  ['sums_3',['sums',['../structscran_1_1PerCellQCFilters_1_1Thresholds.html#a56559714161ee423014d0c337f250e3c',1,'scran::PerCellQCFilters::Thresholds::sums()'],['../structscran_1_1PerCellQCMetrics_1_1Results.html#a99596b61b240f739b71a66ed60f0143e',1,'scran::PerCellQCMetrics::Results::sums()']]]
 ];

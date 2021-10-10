@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['detected_0',['detected',['../structscran_1_1PerCellQCFilters_1_1Thresholds.html#a1e6c284b8aee5fefbf8cb762f49962ee',1,'scran::PerCellQCFilters::Thresholds::detected()'],['../structscran_1_1PerCellQCMetrics_1_1Results.html#a2961184e3b2a0193afb39440eaf6e712',1,'scran::PerCellQCMetrics::Results::detected()']]]
+  ['approximate_0',['approximate',['../structscran_1_1BuildSNNGraph_1_1Defaults.html#af6d0a1c84cd739442a6767171e0202e0',1,'scran::BuildSNNGraph::Defaults']]]
 ];

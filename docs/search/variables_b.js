@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['weights_0',['weights',['../structscran_1_1ClusterSNNGraph_1_1Graph.html#a1c0c132d946cf3883956168bea6f30f2',1,'scran::ClusterSNNGraph::Graph']]]
+  ['upper_0',['upper',['../structscran_1_1IsOutlier_1_1Thresholds.html#afefce35fa6cb2b103d581637682ba255',1,'scran::IsOutlier::Thresholds']]]
 ];
