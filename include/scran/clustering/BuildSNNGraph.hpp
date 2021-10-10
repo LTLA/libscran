@@ -43,10 +43,35 @@ namespace scran {
  * _Bioinformatics_ 31, 1974-80
  */
 class BuildSNNGraph {
+public:
+    /** 
+     * Choices for the edge weighting scheme during graph construction.
+     */
+    enum Scheme { RANKED, NUMBER, JACCARD };
+
+    /**
+     * @brief Default parameter settings.
+     */
+    struct Defaults {
+        /**
+         * See `set_neighbors()` for details.
+         */
+        static constexpr int neighbors = 10;
+
+        /**
+         * See `set_weighting_scheme()` for details.
+         */
+        static constexpr Scheme weighting_scheme = RANKED;
+
+        /**
+         * See `set_approximate()` for details.
+         */
+        static constexpr bool approximate = false;
+    };
 private:
-    int num_neighbors = 10;
-    int weight_scheme = RANKED;
-    bool approximate = false;
+    int num_neighbors = Defaults::neighbors;
+    Scheme weight_scheme = Defaults::weighting_scheme;
+    bool approximate = Defaults::approximate;
 
 public:
     /** 
@@ -54,7 +79,7 @@ public:
      *
      * @return A reference to this `BuildSNNGraph` object.
      */
-    BuildSNNGraph& set_neighbors(int k = 10) {
+    BuildSNNGraph& set_neighbors(int k = Defaults::neighbors) {
         num_neighbors = k;
         return *this;
     }
@@ -64,22 +89,17 @@ public:
      *
      * @return A reference to this `BuildSNNGraph` object.
      */
-    BuildSNNGraph& set_approximate(bool a = false) {
+    BuildSNNGraph& set_approximate(bool a = Defaults::approximate) {
         approximate = a;
         return *this;
     }
-
-    /** 
-     * Choices for the edge weighting scheme during graph construction.
-     */
-    enum Scheme { RANKED, NUMBER, JACCARD };
 
     /** 
      * @param w The edge weighting scheme to use.
      *
      * @return A reference to this `BuildSNNGraph` object.
      */
-    BuildSNNGraph& set_weighting_scheme(Scheme w = RANKED) {
+    BuildSNNGraph& set_weighting_scheme(Scheme w = Defaults::weighting_scheme) {
         weight_scheme = w;
         return *this;
     }

@@ -25,8 +25,20 @@ namespace scran {
  * This yields a clustering on the cells that can be used for further characterization of subpopulations.
  */
 class ClusterSNNGraph {
+public:
+    /**
+     * @brief Default parameter settings.
+     */
+    struct Defaults {
+        /**
+         * See `set_seed()` for more details.
+         */
+        static constexpr int seed = 42;
+    };
 private:
     BuildSNNGraph builder;
+
+    int seed = Defaults::seed;
 
 public:
     /**
@@ -34,17 +46,7 @@ public:
      *
      * @return A reference to this `ClusterSNNGraph` object.
      */
-    ClusterSNNGraph& set_neighbors() {
-        builder.set_neighbors();
-        return *this;
-    }
-
-    /**
-     * @param k Number of neighbors, see `BuildSNNGraph::set_neighbors()`.
-     *
-     * @return A reference to this `ClusterSNNGraph` object.
-     */
-    ClusterSNNGraph& set_neighbors(int k) {
+    ClusterSNNGraph& set_neighbors(int k = BuildSNNGraph::Defaults::neighbors) {
         builder.set_neighbors(k);
         return *this;
     }
@@ -54,28 +56,8 @@ public:
      *
      * @return A reference to this `ClusterSNNGraph` object.
      */
-    ClusterSNNGraph& set_approximate() {
-        builder.set_approximate();
-        return *this;
-    }
-
-    /**
-     * @param a Whether to use approximate nearest neighbor search, see `BuildSNNGraph::set_approximate()`.
-     *
-     * @return A reference to this `ClusterSNNGraph` object.
-     */
-    ClusterSNNGraph& set_approximate(bool a) {
+    ClusterSNNGraph& set_approximate(bool a = BuildSNNGraph::Defaults::approximate) {
         builder.set_approximate(a);
-        return *this;
-    }
-
-    /**
-     * Set the weighting scheme to the default, see `BuildSNNGraph::set_weighting_scheme()`.
-     *
-     * @return A reference to this `ClusterSNNGraph` object.
-     */
-    ClusterSNNGraph& set_weighting_scheme() {
-        builder.set_weighting_scheme();
         return *this;
     }
 
@@ -84,8 +66,18 @@ public:
      *
      * @return A reference to this `ClusterSNNGraph` object.
      */
-    ClusterSNNGraph& set_weighting_scheme(BuildSNNGraph::Scheme s) {
+    ClusterSNNGraph& set_weighting_scheme(BuildSNNGraph::Scheme s = BuildSNNGraph::Defaults::weighting_scheme) {
         builder.set_weighting_scheme(s);
+        return *this;
+    }
+
+    /**
+     * @param s Seed for the default **igraph** random number generator.
+     * 
+     * @return A reference to this `ClusterSNNGraph` object.
+     */
+    ClusterSNNGraph& set_seed(int s = Defaults::seed) {
+        seed = s;
         return *this;
     }
 
@@ -285,7 +277,7 @@ public:
         igraph_matrix_init(&memberships, 0, 0);
 
         // I just can't be bothered to do anything fancier here, so this is what we've got.
-        igraph_rng_seed(igraph_rng_default(), 42);
+        igraph_rng_seed(igraph_rng_default(), seed);
 
 #ifdef SCRAN_LOGGER
         SCRAN_LOGGER("scran::ClusterSNNGraph", "Performing multilevel community detection");
