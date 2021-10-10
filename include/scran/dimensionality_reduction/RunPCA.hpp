@@ -39,7 +39,6 @@ public:
 private:
     template<typename T, typename IDX>
     void run(const tatami::Matrix<T, IDX>* mat, Eigen::MatrixXd& pcs, Eigen::VectorXd& variance_explained, double& total_var) {
-        irlba::NormalSampler norm(42);
         irb.set_number(rank);
 
         if (mat->sparse()) {
@@ -50,7 +49,7 @@ private:
             SCRAN_LOGGER("scran::RunPCA", "Running the IRLBA algorithm");
 #endif
 
-            auto result = irb.run(emat, center_v, scale_v, norm);
+            auto result = irb.run(emat, center_v, scale_v);
             clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
         } else {
             auto emat = create_eigen_matrix_dense(mat, total_var);
@@ -59,7 +58,7 @@ private:
             SCRAN_LOGGER("scran::RunPCA", "Running the IRLBA algorithm");
 #endif
 
-            auto result = irb.run(emat, norm); // already centered and scaled, if relevant.
+            auto result = irb.run(emat); // already centered and scaled, if relevant.
             clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
         }
 
