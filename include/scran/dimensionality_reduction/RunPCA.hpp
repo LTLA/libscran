@@ -11,6 +11,8 @@
 #include <vector>
 #include <cmath>
 
+#include "pca_utils.hpp"
+
 namespace scran {
 
 class RunPCA {
@@ -50,7 +52,7 @@ private:
 #endif
 
             auto result = irb.run(emat, center_v, scale_v);
-            clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
+            pca_utils::clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
         } else {
             auto emat = create_eigen_matrix_dense(mat, total_var);
 
@@ -59,7 +61,7 @@ private:
 #endif
 
             auto result = irb.run(emat); // already centered and scaled, if relevant.
-            clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
+            pca_utils::clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
         }
 
         return;
@@ -111,27 +113,6 @@ public:
     }
 
 private:
-    void clean_up(size_t NC, const Eigen::MatrixXd& U, const Eigen::VectorXd& D, Eigen::MatrixXd& pcs, Eigen::VectorXd& variance_explained) {
-#ifdef SCRAN_LOGGER
-       SCRAN_LOGGER("scran::RunPCA", "Reformatting the output PCs");
-#endif
-
-        pcs = U;
-        for (int i = 0; i < U.cols(); ++i) {
-            for (size_t j = 0; j < NC; ++j) {
-                pcs(j, i) *= D[i];
-            }
-        }
-
-        variance_explained.resize(D.size());
-        for (int i = 0; i < D.size(); ++i) {
-            variance_explained[i] = D[i] * D[i] / static_cast<double>(NC - 1);
-        }
-
-        return;
-    }
-
-private:
     template<typename T, typename IDX> 
     Eigen::SparseMatrix<double> create_eigen_matrix_sparse(const tatami::Matrix<T, IDX>* mat, Eigen::VectorXd& center_v, Eigen::VectorXd& scale_v, double& total_var) {
         size_t NR = mat->nrow(), NC = mat->ncol();
@@ -148,7 +129,7 @@ private:
         if (mat->prefer_rows()) {
             std::vector<double> xbuffer(NC);
             std::vector<int> ibuffer(NC);
-            std::vector<int> nnzeros(NR);
+            std::vector<int> nonzeros(NR);
             values.reserve(NR);
             indices.reserve(NR);
 
@@ -165,21 +146,12 @@ private:
                     scale_v[r] = 1;
                 }
 
-                nnzeros[r] = range.number;
+                nonzeros[r] = range.number;
                 values.emplace_back(range.value, range.value + range.number);
                 indices.emplace_back(range.index, range.index + range.number);
             }
 
-            // Actually filling the matrix. Note the implicit transposition.
-            A.reserve(nnzeros);
-            for (size_t r = 0; r < NR; ++r) {
-                const auto& curi = indices[r];
-                const auto& curv = values[r];
-                for (size_t i = 0; i < curi.size(); ++i) {
-                    A.insert(curi[i], r) = curv[i];
-                }
-            }
-
+            pca_utils::fill_sparse_matrix<true>(A, indices, values, nonzeros);
         } else {
             std::vector<double> xbuffer(NR);
             std::vector<int> ibuffer(NR);
@@ -209,15 +181,7 @@ private:
                 std::fill(scale_v.begin(), scale_v.end(), 1);
             }
 
-            // Actually filling the matrix. Note the implicit transposition.
-            A.reserve(nonzeros);
-            for (size_t c = 0; c < NC; ++c) {
-                const auto& curi = indices[c];
-                const auto& curv = values[c];
-                for (size_t i = 0; i < curi.size(); ++i) {
-                    A.insert(c, curi[i]) = curv[i];
-                }
-            }
+            pca_utils::fill_sparse_matrix<false>(A, indices, values, nonzeros);
         }
 
         A.makeCompressed();
