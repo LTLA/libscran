@@ -2,6 +2,7 @@
 
 #include "../data/data.h"
 #include "../utils/compare_almost_equal.h"
+#include "../utils/eigen2vector.h"
 
 #include "tatami/base/Matrix.hpp"
 #include "tatami/base/DenseMatrix.hpp"
@@ -21,15 +22,6 @@ protected:
         sparse_column = tatami::convert_to_sparse(dense_row.get(), false);
     }
 };
-
-std::vector<double> eigen2vector(const Eigen::MatrixXd& input) {
-    auto ptr = input.data();
-    return std::vector<double>(ptr, ptr + input.rows() * input.cols());
-}
-
-std::vector<double> eigen2vector(const Eigen::VectorXd& input) {
-    return std::vector<double>(input.begin(), input.end());
-}
 
 TEST_F(RunPCATester, Test) {
     scran::RunPCA runner;
