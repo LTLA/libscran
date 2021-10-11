@@ -2,6 +2,8 @@
 #define SCRAN_PCA_UTILS_HPP
 
 #include "Eigen/Dense"
+#include <algorithm>
+#include <cmath>
 
 namespace scran {
 
@@ -41,6 +43,37 @@ void fill_sparse_matrix(SparseMat& A,
                 A.insert(z, curi[i]) = curv[i];
             }
         }
+    }
+}
+
+inline void set_scale(bool scale, Eigen::VectorXd& scale_v, double& total_var) {
+    if (scale) {
+        total_var = 0;
+        for (auto& s : scale_v) {
+            if (s) {
+                s = std::sqrt(s);
+                ++total_var;
+            } else {
+                s = 1;
+            }
+        }
+    } else {
+        total_var = std::accumulate(scale_v.begin(), scale_v.end(), 0.0);
+        std::fill(scale_v.begin(), scale_v.end(), 1);
+    }
+}
+
+inline void apply_scale(bool scale, double val, size_t n, double* ptr, double& total_var) {
+    if (scale) {
+        if (val) {
+            double sd = std::sqrt(val);
+            for (size_t c = 0; c < n; ++c, ++ptr) {
+                *ptr /= sd;
+            }
+            ++total_var;
+        }
+    } else {
+        total_var += val;
     }
 }
 

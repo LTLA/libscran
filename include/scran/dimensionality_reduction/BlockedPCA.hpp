@@ -213,7 +213,8 @@ private:
                 // Computing the variance from the sum of squared differences.
                 // This is technically not the correct variance estimate if 
                 // we were to consider the blocks, but it's what the PCA sees.
-                double proxyvar = 0;
+                double& proxyvar = scale_v[r];
+                proxyvar = 0;
                 {
                     auto block_copy = block_size;
                     for (size_t i = 0; i < range.number; ++i) {
@@ -230,23 +231,12 @@ private:
                     proxyvar /= NC - 1;
                 }
 
-                if (scale) {
-                    if (proxyvar) {
-                        ++total_var;
-                        scale_v[r] = std::sqrt(proxyvar);
-                    } else {
-                        scale_v[r] = 1;
-                    }
-                } else {
-                    total_var += proxyvar;
-                    scale_v[r] = 1;
-                }
-
                 nnzeros[r] = range.number;
                 values.emplace_back(range.value, range.value + range.number);
                 indices.emplace_back(range.index, range.index + range.number);
             }
 
+            pca_utils::set_scale(scale, scale_v, total_var);
             pca_utils::fill_sparse_matrix<true>(A, indices, values, nnzeros);
         } else {
             std::vector<double> xbuffer(NR);
@@ -313,21 +303,7 @@ private:
                 }
             }
 
-            if (scale) {
-                total_var = 0;
-                for (auto& s : scale_v) { 
-                    if (s) {
-                        s = std::sqrt(s);
-                        ++total_var;
-                    } else {
-                        s = 1;
-                    }
-                }
-            } else {
-                total_var = std::accumulate(scale_v.begin(), scale_v.end(), 0.0);
-                std::fill(scale_v.begin(), scale_v.end(), 1);
-            }
-
+            pca_utils::set_scale(scale, scale_v, total_var);
             pca_utils::fill_sparse_matrix<false>(A, indices, values, nnzeros);
         }
 
@@ -388,18 +364,7 @@ private:
                 proxyvar /= NC - 1;
             }
 
-            if (scale) {
-                if (proxyvar) {
-                    double sd = std::sqrt(proxyvar);
-                    auto copy = outIt;
-                    for (size_t c = 0; c < NC; ++c, ++copy) {
-                        *copy /= sd;
-                    }
-                    ++total_var;
-                }
-            } else {
-                total_var += proxyvar;
-            }
+            pca_utils::apply_scale(scale, proxyvar, NC, outIt, total_var);
         }
 
         return output;

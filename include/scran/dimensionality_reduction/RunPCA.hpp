@@ -116,7 +116,6 @@ private:
     template<typename T, typename IDX> 
     Eigen::SparseMatrix<double> create_eigen_matrix_sparse(const tatami::Matrix<T, IDX>* mat, Eigen::VectorXd& center_v, Eigen::VectorXd& scale_v, double& total_var) {
         size_t NR = mat->nrow(), NC = mat->ncol();
-        total_var = 0;
 
         Eigen::SparseMatrix<double> A(NC, NR); // transposed; we want genes in the columns.
         std::vector<std::vector<double> > values;
@@ -138,19 +137,14 @@ private:
 
                 auto stats = tatami::stats::variances::compute_direct(range, NC);
                 center_v[r] = stats.first;
-                if (scale) {
-                    ++total_var;
-                    scale_v[r] = std::sqrt(stats.second);
-                } else {
-                    total_var += stats.second;
-                    scale_v[r] = 1;
-                }
+                scale_v[r] = stats.second;
 
                 nonzeros[r] = range.number;
                 values.emplace_back(range.value, range.value + range.number);
                 indices.emplace_back(range.index, range.index + range.number);
             }
 
+            pca_utils::set_scale(scale, scale_v, total_var);
             pca_utils::fill_sparse_matrix<true>(A, indices, values, nonzeros);
         } else {
             std::vector<double> xbuffer(NR);
@@ -173,14 +167,7 @@ private:
 
             tatami::stats::variances::finish_running(NR, center_v.data(), scale_v.data(), nonzeros.data(), count);
 
-            if (scale) {
-                for (auto& s : scale_v) { s = std::sqrt(s); }
-                total_var = NR;
-            } else {
-                total_var = std::accumulate(scale_v.begin(), scale_v.end(), 0.0);
-                std::fill(scale_v.begin(), scale_v.end(), 1);
-            }
-
+            pca_utils::set_scale(scale, scale_v, total_var);
             pca_utils::fill_sparse_matrix<false>(A, indices, values, nonzeros);
         }
 
@@ -211,16 +198,7 @@ private:
                 *copy -= stats.first;
             }
 
-            if (scale) {
-                double sd = std::sqrt(stats.second);
-                auto copy = outIt;
-                for (size_t c = 0; c < NC; ++c, ++copy) {
-                    *copy /= sd;
-                }
-                ++total_var;
-            } else {
-                total_var += stats.second;
-            }
+            pca_utils::apply_scale(scale, stats.second, NC, outIt, total_var);
         }
 
         return output;
