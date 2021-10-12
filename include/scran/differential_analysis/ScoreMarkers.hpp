@@ -66,15 +66,36 @@ namespace scran {
  * We report the mean log-expression of all cells in each cluster, as well as the proportion of cells with detectable expression in each cluster.
  */
 class ScoreMarkers {
+public:
+    /**
+     * @brief Default parameter settings.
+     */
+    struct Defaults {
+        static constexpr double threshold = 0;
+
+        static constexpr bool compute_cohen = true;
+
+        static constexpr bool compute_auc = true;
+
+        static constexpr bool summary_min = true;
+
+        static constexpr bool summary_mean = true;
+
+        static constexpr bool summary_median = true;
+
+        static constexpr bool summary_max = true;
+
+        static constexpr bool summary_rank = true;
+    };
 private:
-    double threshold = 0;
-    bool do_cohen = true;
-    bool do_auc = true;
-    bool use_min = true;
-    bool use_mean = true;
-    bool use_median = true;
-    bool use_max = true;
-    bool use_rank = true;
+    double threshold = Defaults::threshold;
+    bool do_cohen = Defaults::compute_cohen;
+    bool do_auc = Defaults::compute_auc;
+    bool use_min = Defaults::summary_min;
+    bool use_mean = Defaults::summary_mean;
+    bool use_median = Defaults::summary_median;
+    bool use_max = Defaults::summary_max;
+    bool use_rank = Defaults::summary_rank;
 
 public:
     ScoreMarkers& set_threshold(double t = 0) {
@@ -122,10 +143,10 @@ public:
     void run(const MAT* p, const G* group, 
         std::vector<Stat*> means, 
         std::vector<Stat*> detected, 
-        std::vector<std::vector<Stat*> > cohen) 
+        std::vector<std::vector<Stat*> > cohen, 
+        std::vector<std::vector<Stat*> > auc) 
     {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
-        decltype(cohen) auc;
         run_internal(p, group, ngroups, means, detected, cohen, auc);
     }        
 
@@ -133,10 +154,10 @@ public:
     void run_blocked(const MAT* p, const G* group, const B* block, 
         std::vector<std::vector<Stat*> > means, 
         std::vector<std::vector<Stat*> > detected, 
-        std::vector<std::vector<Stat*> > cohen)
+        std::vector<std::vector<Stat*> > cohen,
+        std::vector<std::vector<Stat*> > auc) 
     {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
-        decltype(cohen) auc;
         if (block == NULL) {
             run_internal(p, group, ngroups, means[0], detected[0], cohen, auc);
             return;
