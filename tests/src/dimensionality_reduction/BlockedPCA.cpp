@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "../data/data.h"
-#include "../utils/compare_almost_equal.h"
-#include "../utils/eigen2vector.h"
+#include "compare_pcs.h"
 
 #include "tatami/base/Matrix.hpp"
 #include "tatami/base/DenseMatrix.hpp"
@@ -18,6 +17,17 @@ std::vector<int> generate_blocks(int nobs, int nblocks) {
         blocks[i] = i % nblocks;
     }
     return blocks;
+}
+
+void compare_almost_equal(const Eigen::MatrixXd& left, const Eigen::MatrixXd& right) {
+    ASSERT_EQ(left.cols(), right.cols());
+    ASSERT_EQ(left.rows(), right.rows());
+    
+    for (size_t c = 0; c < left.cols(); ++c) {
+        for (size_t r = 0; r < left.rows(); ++r) {
+            EXPECT_FLOAT_EQ(left(r, c), right(r, c));
+        }
+    }
 }
 
 TEST(BlockedMatrixTest, Test) {
@@ -55,7 +65,7 @@ TEST(BlockedMatrixTest, Test) {
 
         Eigen::MatrixXd prod1 = blocked * rhs;
         Eigen::MatrixXd prod2 = realized * rhs;
-        compare_almost_equal(eigen2vector(prod1), eigen2vector(prod2));
+        compare_almost_equal(prod1, prod2);
     }
 
     // Trying in the transposed orientation.
@@ -70,11 +80,11 @@ TEST(BlockedMatrixTest, Test) {
 
         Eigen::MatrixXd tprod1 = blocked.adjoint() * rhs;
         Eigen::MatrixXd tprod2 = realized.adjoint() * rhs;
-        compare_almost_equal(eigen2vector(tprod1), eigen2vector(tprod2));
+        compare_almost_equal(tprod1, tprod2);
     }
 }
 
-class BlockedPCATester : public ::testing::Test {
+class BlockedPCATester : public ::testing::TestWithParam<std::tuple<bool, int, int> > {
 protected:
     std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
 
@@ -84,64 +94,77 @@ protected:
         sparse_row = tatami::convert_to_sparse(dense_row.get(), true);
         sparse_column = tatami::convert_to_sparse(dense_row.get(), false);
     }
+
+    template<class Param>
+    void assemble(Param param) {
+        scale = std::get<0>(param);
+        rank = std::get<1>(param);
+        nblocks = std::get<2>(param);
+        return;
+    }
+
+    bool scale;
+    int rank;
+    int nblocks;
 };
 
-TEST_F(BlockedPCATester, Test) {
+TEST_P(BlockedPCATester, Test) {
+    assemble(GetParam());
+
     scran::BlockedPCA runner;
-    runner.set_rank(3);
-    auto block = generate_blocks(dense_row->ncol(), 3);
+    runner.set_scale(scale).set_rank(rank);
+    auto block = generate_blocks(dense_row->ncol(), nblocks);
 
     // Checking that we get more-or-less the same results. 
     auto res1 = runner.run(dense_row.get(), block.data());
-    std::vector<double> pcs1(eigen2vector(res1.pcs));
-    std::vector<double> var1(eigen2vector(res1.variance_explained));
-    EXPECT_EQ(var1.size(), 3);
+    EXPECT_EQ(res1.variance_explained.size(), rank);
 
     auto res2 = runner.run(dense_column.get(), block.data());
-    std::vector<double> pcs2(eigen2vector(res2.pcs));
-    std::vector<double> var2(eigen2vector(res2.variance_explained));
-    compare_almost_equal(pcs1, pcs2);
-    compare_almost_equal(var1, var2);
+    expect_equal_pcs(res1.pcs, res2.pcs);
+    expect_equal_vectors(res1.variance_explained, res2.variance_explained);
     EXPECT_FLOAT_EQ(res1.total_variance, res2.total_variance);
 
     auto res3 = runner.run(sparse_row.get(), block.data());
-    std::vector<double> pcs3(eigen2vector(res3.pcs));
-    std::vector<double> var3(eigen2vector(res3.variance_explained));
-    compare_almost_equal(pcs1, pcs3);
-    compare_almost_equal(var1, var3);
+    expect_equal_pcs(res1.pcs, res3.pcs);
+    expect_equal_vectors(res1.variance_explained, res3.variance_explained);
     EXPECT_FLOAT_EQ(res1.total_variance, res3.total_variance);
 
     auto res4 = runner.run(sparse_column.get(), block.data());
-    std::vector<double> pcs4(eigen2vector(res4.pcs));
-    std::vector<double> var4(eigen2vector(res4.variance_explained));
-    compare_almost_equal(pcs1, pcs4);
-    compare_almost_equal(var1, var4);
+    expect_equal_pcs(res1.pcs, res4.pcs);
+    expect_equal_vectors(res1.variance_explained, res4.variance_explained);
     EXPECT_FLOAT_EQ(res1.total_variance, res4.total_variance);
 }
 
-TEST_F(BlockedPCATester, SingleBlock) {
-    scran::BlockedPCA runner;
-    runner.set_rank(3);
-    auto block = generate_blocks(dense_row->ncol(), 1);
+TEST_P(BlockedPCATester, SingleBlock) {
+    assemble(GetParam());
+    auto block = generate_blocks(dense_row->ncol(), nblocks);
 
+    scran::BlockedPCA runner;
+    runner.set_scale(scale).set_rank(rank);
     auto res1 = runner.run(dense_row.get(), block.data());
-    std::vector<double> pcs1(eigen2vector(res1.pcs));
-    std::vector<double> var1(eigen2vector(res1.variance_explained));
 
     // Checking that we get more-or-less the same results
     // from the vanilla PCA algorithm in the absence of blocks.
     scran::RunPCA ref;
-    ref.set_rank(3);
-
+    ref.set_scale(scale).set_rank(rank);
     auto res2 = ref.run(dense_row.get());
-    std::vector<double> pcs2(eigen2vector(res2.pcs));
-    std::vector<double> var2(eigen2vector(res2.variance_explained));
 
-    compare_almost_equal(pcs1, pcs2);
-    compare_almost_equal(var1, var2);
+    if (nblocks == 1) {
+        expect_equal_pcs(res1.pcs, res2.pcs);
+        expect_equal_vectors(res1.variance_explained, res2.variance_explained);
+        EXPECT_FLOAT_EQ(res1.total_variance, res2.total_variance);
+    } else {
+        // check that blocking actually has an effect.
+        EXPECT_TRUE(std::abs(res1.pcs(0,0) - res2.pcs(0,0)) > 1e-8);
+        if (!scale) {
+            EXPECT_NE(res1.total_variance, res2.total_variance);
+        }
+    }
 }
 
-TEST_F(BlockedPCATester, SubsetTest) {
+TEST_P(BlockedPCATester, SubsetTest) {
+    assemble(GetParam());
+
     std::vector<int> subset(dense_row->nrow());
     std::vector<double> buffer(dense_row->ncol());
     std::vector<double> submatrix;
@@ -158,21 +181,27 @@ TEST_F(BlockedPCATester, SubsetTest) {
     }
 
     scran::BlockedPCA runner;
-    runner.set_rank(4);
+    runner.set_scale(scale).set_rank(rank);
 
     auto block = generate_blocks(dense_row->ncol(), 3);
     auto out = runner.run(dense_row.get(), block.data(), subset.data());
-    std::vector<double> opcs(eigen2vector(out.pcs));
-    std::vector<double> ovar(eigen2vector(out.variance_explained));
-    EXPECT_EQ(ovar.size(), 4);
+    EXPECT_EQ(out.variance_explained.size(), rank);
 
     // Manually subsetting.
     auto mat = std::shared_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double, int>(sub_nrows, dense_row->ncol(), std::move(submatrix)));
     auto ref = runner.run(mat.get(), block.data());
-    std::vector<double> rpcs(eigen2vector(ref.pcs));
-    std::vector<double> rvar(eigen2vector(ref.variance_explained));
 
-    compare_almost_equal(opcs, rpcs);
-    compare_almost_equal(ovar, rvar);
+    expect_equal_pcs(ref.pcs, out.pcs);
+    expect_equal_vectors(ref.variance_explained, out.variance_explained);
     EXPECT_FLOAT_EQ(out.total_variance, ref.total_variance);
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    BlockedPCA,
+    BlockedPCATester,
+    ::testing::Combine(
+        ::testing::Values(false, true), // to scale or not to scale?
+        ::testing::Values(2, 3, 4), // number of PCs to obtain
+        ::testing::Values(1, 2, 3) // number of blocks
+    )
+);

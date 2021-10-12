@@ -1,8 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "../data/data.h"
-#include "../utils/compare_almost_equal.h"
-#include "../utils/eigen2vector.h"
+#include "compare_pcs.h"
 
 #include "tatami/base/Matrix.hpp"
 #include "tatami/base/DenseMatrix.hpp"
@@ -11,7 +10,7 @@
 
 #include "scran/dimensionality_reduction/RunPCA.hpp"
 
-class RunPCATester : public ::testing::Test {
+class RunPCATester : public ::testing::TestWithParam<std::tuple<bool, int> > {
 protected:
     std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
 
@@ -21,41 +20,46 @@ protected:
         sparse_row = tatami::convert_to_sparse(dense_row.get(), true);
         sparse_column = tatami::convert_to_sparse(dense_row.get(), false);
     }
+
+    template<class Param>
+    void assemble(Param param) {
+        scale = std::get<0>(param);
+        rank = std::get<1>(param);
+        return;
+    }
+
+    bool scale;
+    int rank;
 };
 
-TEST_F(RunPCATester, Test) {
+TEST_P(RunPCATester, Test) {
+    assemble(GetParam());
     scran::RunPCA runner;
-    runner.set_rank(3);
+    runner.set_scale(scale).set_rank(rank);
 
     // Checking that we get more-or-less the same results. 
     auto res1 = runner.run(dense_row.get());
-    std::vector<double> pcs1(eigen2vector(res1.pcs));
-    std::vector<double> var1(eigen2vector(res1.variance_explained));
-    EXPECT_EQ(var1.size(), 3);
+    EXPECT_EQ(res1.variance_explained.size(), rank);
 
     auto res2 = runner.run(dense_column.get());
-    std::vector<double> pcs2(eigen2vector(res2.pcs));
-    std::vector<double> var2(eigen2vector(res2.variance_explained));
-    compare_almost_equal(pcs1, pcs2);
-    compare_almost_equal(var1, var2);
+    expect_equal_pcs(res1.pcs, res2.pcs);
+    expect_equal_vectors(res1.variance_explained, res2.variance_explained);
     EXPECT_FLOAT_EQ(res1.total_variance, res2.total_variance);
 
     auto res3 = runner.run(sparse_row.get());
-    std::vector<double> pcs3(eigen2vector(res3.pcs));
-    std::vector<double> var3(eigen2vector(res3.variance_explained));
-    compare_almost_equal(pcs1, pcs3);
-    compare_almost_equal(var1, var3);
+    expect_equal_pcs(res1.pcs, res3.pcs);
+    expect_equal_vectors(res1.variance_explained, res3.variance_explained);
     EXPECT_FLOAT_EQ(res1.total_variance, res3.total_variance);
 
     auto res4 = runner.run(sparse_column.get());
-    std::vector<double> pcs4(eigen2vector(res4.pcs));
-    std::vector<double> var4(eigen2vector(res4.variance_explained));
-    compare_almost_equal(pcs1, pcs4);
-    compare_almost_equal(var1, var4);
+    expect_equal_pcs(res1.pcs, res4.pcs);
+    expect_equal_vectors(res1.variance_explained, res4.variance_explained);
     EXPECT_FLOAT_EQ(res1.total_variance, res4.total_variance);
 }
 
-TEST_F(RunPCATester, SubsetTest) {
+TEST_P(RunPCATester, SubsetTest) {
+    assemble(GetParam());
+
     std::vector<int> subset(dense_row->nrow());
     std::vector<double> buffer(dense_row->ncol());
     std::vector<double> submatrix;
@@ -72,20 +76,54 @@ TEST_F(RunPCATester, SubsetTest) {
     }
 
     scran::RunPCA runner;
-    runner.set_rank(4);
+    runner.set_scale(scale).set_rank(rank);
 
     auto out = runner.run(dense_row.get(), subset.data());
-    std::vector<double> opcs(eigen2vector(out.pcs));
-    std::vector<double> ovar(eigen2vector(out.variance_explained));
-    EXPECT_EQ(ovar.size(), 4);
+    EXPECT_EQ(out.variance_explained.size(), rank);
 
     // Manually subsetting.
     auto mat = std::shared_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double, int>(sub_nrows, dense_row->ncol(), std::move(submatrix)));
     auto ref = runner.run(mat.get());
-    std::vector<double> rpcs(eigen2vector(ref.pcs));
-    std::vector<double> rvar(eigen2vector(ref.variance_explained));
 
-    compare_almost_equal(opcs, rpcs);
-    compare_almost_equal(ovar, rvar);
+    expect_equal_pcs(ref.pcs, out.pcs);
+    expect_equal_vectors(ref.variance_explained, out.variance_explained);
     EXPECT_FLOAT_EQ(out.total_variance, ref.total_variance);
 }
+
+TEST_P(RunPCATester, ZeroVariance) {
+    assemble(GetParam());
+
+    auto copy = sparse_matrix;
+    std::fill(copy.begin(), copy.begin() + sparse_ncol, 0);
+    tatami::DenseRowMatrix<double> has_zero(sparse_nrow, sparse_ncol, copy);
+
+    std::vector<double> removed(copy.begin() + sparse_ncol, copy.end());
+    tatami::DenseRowMatrix<double> leftovers(sparse_nrow - 1, sparse_ncol, removed);
+
+    scran::RunPCA runner;
+    runner.set_scale(scale).set_rank(rank);
+    
+    auto ref = runner.run(&leftovers);
+    auto out = runner.run(&has_zero);
+
+    expect_equal_pcs(ref.pcs, out.pcs, 1e-6); // dunno why it needs a higher tolerance, but whatever.
+    expect_equal_vectors(ref.variance_explained, out.variance_explained);
+    EXPECT_FLOAT_EQ(out.total_variance, ref.total_variance);
+
+    // Same behavior with sparse representation.
+    auto sparse_zero = tatami::convert_to_sparse(&has_zero, true);
+    auto spout = runner.run(sparse_zero.get());
+
+    expect_equal_pcs(spout.pcs, out.pcs);
+    expect_equal_vectors(spout.variance_explained, out.variance_explained);
+    EXPECT_FLOAT_EQ(spout.total_variance, out.total_variance);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    RunPCA,
+    RunPCATester,
+    ::testing::Combine(
+        ::testing::Values(false, true), // to scale or not to scale?
+        ::testing::Values(2, 3, 4) // number of PCs to obtain
+    )
+);
