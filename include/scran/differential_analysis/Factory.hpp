@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <limits>
+#include <utility>
 
 #include "../feature_selection/blocked_variances.hpp"
 #include "cohens_d.hpp"
@@ -15,24 +16,34 @@ namespace differential_analysis {
 
 /******* Base class for factories and workers ********/
 
-template<typename Effect, typename Level, typename Stat>
+template<typename Stat, typename Level>
 struct Base {
-    Base(std::vector<Stat*>& m, std::vector<Stat*>& d, std::vector<Effect*>& e, const Level* l, const std::vector<int>& ls, int ng, int nb, double t) : 
-        means(m), detected(d), effects(e), levels(l), level_size(ls), ngroups(ng), nblocks(nb), threshold(t) {}
+    Base(std::vector<Stat*> m, std::vector<Stat*> d, std::vector<Stat*> e, const Level* l, const std::vector<int>* ls, int ng, int nb, double t) : 
+        means(std::move(m)), detected(std::move(d)), effects(std::move(e)), levels(l), level_size_ptr(ls), ngroups(ng), nblocks(nb), threshold(t) {}
 
-    Effect* cohen() {
+public:
+    Stat* cohen() {
         return effects[0];
     }
 
-    Effect* auc() {
+    Stat* auc() {
         return effects[1];
     }
-    
-    std::vector<Stat*>& means, detected;
-    std::vector<Effect*>& effects;
+
+    size_t nlevels () const {
+        return level_size_ptr->size();
+    }
+
+    const std::vector<int>& level_size () const {
+        return *level_size_ptr;
+    }
+   
+public:
+    std::vector<Stat*> means, detected;
+    std::vector<Stat*> effects;
 
     const Level* levels;
-    const std::vector<int>& level_size;
+    const std::vector<int>* level_size_ptr;
 
     int ngroups, nblocks;
     double threshold;
@@ -40,44 +51,43 @@ struct Base {
 
 /******* Factory with running support, when AUCs are not desired ********/
 
-template<typename Effect, typename Level, typename Stat> 
+template<typename Stat, typename Level> 
 struct BidimensionalFactory {
 public:
-    BidimensionalFactory(size_t nr, size_t nc, std::vector<Stat*>& m, std::vector<Stat*>& d, std::vector<Effect*>& e, const Level* l, const std::vector<int>& ls, int ng, int nb, double t) : 
-        NR(nr), NC(nc), details(m, d, e, l, ls, ng, nb, t) {}
-
-    static constexpr bool supports_sparse = true;
-    static constexpr bool supports_running = true;
+    BidimensionalFactory(size_t nr, size_t nc, std::vector<Stat*> m, std::vector<Stat*> d, std::vector<Stat*> e, const Level* l, const std::vector<int>* ls, int ng, int nb, double t) : 
+        NR(nr), NC(nc), details(std::move(m), std::move(d), std::move(e), l, ls, ng, nb, t) {}
 
 protected:
     size_t NR, NC;
-    Base<Effect, Level, Stat> details;
+    Base<Stat, Level> details;
 
 public:
     struct ByRow { 
-        ByRow(size_t nr, Base<Effect, Level, Stat>& d) : NR(nr), 
-            tmp_means(d.level_size.size()), tmp_vars(d.level_size.size()), tmp_nzeros(d.level_size.size()), 
+        ByRow(size_t nr, Base<Stat, Level> d) : NR(nr), 
+            tmp_means(d.nlevels()), 
+            tmp_vars(d.nlevels()), 
+            tmp_nzeros(d.nlevels()),
             buffer(d.ngroups * d.ngroups),
-            details(d) {}
+            details(std::move(d)) {}
 
         void transfer(size_t i) {
             // Transferring the computed means.
-            for (size_t l = 0; l < details.level_size.size(); ++l) {
+            for (size_t l = 0; l < details.nlevels(); ++l) {
                 details.means[l][i] = tmp_means[l];
             }
 
             // Computing and transferring the proportion detected.
-            for (size_t l = 0; l < details.level_size.size(); ++l) {
+            for (size_t l = 0; l < details.nlevels(); ++l) {
                 auto& ndetected = details.detected[l][i];
-                if (details.level_size[l]) {
-                    ndetected = tmp_nzeros[l] / details.level_size[l];
+                if (details.level_size()[l]) {
+                    ndetected = tmp_nzeros[l] / details.level_size()[l];
                 } else {
                     ndetected = std::numeric_limits<double>::quiet_NaN();
                 }
             }
 
             if (details.cohen()) {
-                compute_pairwise_cohens_d(tmp_means.data(), tmp_vars.data(), details.level_size, details.ngroups, details.nblocks, 
+                compute_pairwise_cohens_d(tmp_means.data(), tmp_vars.data(), details.level_size(), details.ngroups, details.nblocks, 
                     details.cohen() + i * details.ngroups * details.ngroups, details.threshold);
             }
         }
@@ -86,16 +96,16 @@ public:
         size_t NR;
         std::vector<double> tmp_means, tmp_vars, tmp_nzeros, buffer;
     public:
-        Base<Effect, Level, Stat> details;
+        Base<Stat, Level> details;
     };
 
 public:
     struct DenseByRow : public ByRow {
-        DenseByRow(size_t nr, size_t nc, Base<Effect, Level, Stat>& d) : NC(nc), ByRow(nr, d) {}
+        DenseByRow(size_t nr, size_t nc, Base<Stat, Level> d) : NC(nc), ByRow(nr, std::move(d)) {}
 
         template<typename T>
         void compute(size_t i, const T* ptr, T* buffer) {
-            feature_selection::blocked_variance_with_mean<true>(ptr, NC, this->details.levels, this->details.level_size, this->tmp_means, this->tmp_vars);
+            feature_selection::blocked_variance_with_mean<true>(ptr, NC, this->details.levels, this->details.level_size(), this->tmp_means, this->tmp_vars);
 
             std::fill(this->tmp_nzeros.begin(), this->tmp_nzeros.end(), 0);
             for (size_t j = 0; j < NC; ++j) {
@@ -114,11 +124,11 @@ public:
 
 public:
     struct SparseByRow : public ByRow {
-        SparseByRow(size_t nr, Base<Effect, Level, Stat>& d) : ByRow(nr, d) {}
+        SparseByRow(size_t nr, Base<Stat, Level> d) : ByRow(nr, std::move(d)) {}
 
         template<class SparseRange, typename T, typename IDX>
         void compute(size_t i, SparseRange&& range, T* xbuffer, IDX* ibuffer) {
-            feature_selection::blocked_variance_with_mean<true>(range, this->details.levels, this->details.level_size, this->tmp_means, this->tmp_vars, this->tmp_nzeros);
+            feature_selection::blocked_variance_with_mean<true>(range, this->details.levels, this->details.level_size(), this->tmp_means, this->tmp_vars, this->tmp_nzeros);
             this->transfer(i);
         }
     };
@@ -129,15 +139,15 @@ public:
 
 private:
     struct ByCol {
-        ByCol(size_t nr, Base<Effect, Level, Stat>& d) : NR(nr), tmp_vars(nr * d.level_size.size()), counts(d.level_size.size()), details(d) {}
+        ByCol(size_t nr, Base<Stat, Level> d) : NR(nr), tmp_vars(nr * d.nlevels()), counts(d.nlevels()), details(std::move(d)) {}
 
         void finalize () { 
             // Dividing to obtain the proportion of detected cells per group.
-            for (size_t b = 0; b < details.level_size.size(); ++b) {
+            for (size_t b = 0; b < details.nlevels(); ++b) {
                 auto start = details.detected[b];
-                if (details.level_size[b]) {
+                if (details.level_size()[b]) {
                     for (size_t r = 0; r < NR; ++r) {
-                        start[r] /= details.level_size[b];
+                        start[r] /= details.level_size()[b];
                     }
                 } else {
                     std::fill(start, start + NR, std::numeric_limits<double>::quiet_NaN());
@@ -147,7 +157,7 @@ private:
             // Finalizing Cohen's d. We transfer values to a temporary buffer
             // for cache efficiency upon repeated accesses in pairwise calculations.
             if (details.cohen()) {
-                std::vector<double> tmp_means(details.level_size.size()), tmp_vars_single(details.level_size.size());
+                std::vector<double> tmp_means(details.nlevels()), tmp_vars_single(details.nlevels());
                 auto estart = details.cohen();
                 int shift = (details.ngroups) * (details.ngroups);
                 for (size_t i = 0; i < NR; ++i, estart += shift) {
@@ -157,7 +167,7 @@ private:
                     for (size_t l = 0; l < tmp_vars_single.size(); ++l) {
                         tmp_vars_single[l] = tmp_vars[i + l * NR];
                     }
-                    compute_pairwise_cohens_d(tmp_means.data(), tmp_vars_single.data(), details.level_size, details.ngroups, details.nblocks, estart, details.threshold);
+                    compute_pairwise_cohens_d(tmp_means.data(), tmp_vars_single.data(), details.level_size(), details.ngroups, details.nblocks, estart, details.threshold);
                 }
             }
         }
@@ -167,12 +177,12 @@ private:
         std::vector<int> counts;
         int counter = 0;
     public:
-        Base<Effect, Level, Stat> details;
+        Base<Stat, Level> details;
     };
 
 public:
     struct DenseByCol : public ByCol {
-        DenseByCol(size_t nr, Base<Effect, Level, Stat>& d) : ByCol(nr, d) {}
+        DenseByCol(size_t nr, Base<Stat, Level> d) : ByCol(nr, std::move(d)) {}
 
         template<typename T>
         void add(const T* ptr, T* buffer) {
@@ -188,7 +198,7 @@ public:
         }
 
         void finish() {
-            for (size_t b = 0; b < this->details.level_size.size(); ++b) {
+            for (size_t b = 0; b < this->details.nlevels(); ++b) {
                 tatami::stats::variances::finish_running(this->NR, this->details.means[b], this->tmp_vars.data() + b * this->NR, this->counts[b]);
             }
             this->finalize();
@@ -199,9 +209,25 @@ public:
         return DenseByCol(this->NR, this->details);
     }
 
+    DenseByCol dense_running(size_t start, size_t end) {
+        auto copy = this->details;
+
+        for (auto& m : copy.means) {
+            m += start;
+        }
+        for (auto& d : copy.detected) {
+            d += start;
+        }
+        for (auto& e : copy.effects) {
+            e += start * copy.ngroups * copy.ngroups;
+        }
+
+        return DenseByCol(end - start, std::move(copy));
+    }
+
 public:
     struct SparseByCol : public ByCol {
-        SparseByCol(size_t nr, Base<Effect, Level, Stat>& d) : ByCol(nr, d) {}
+        SparseByCol(size_t nr, Base<Stat, Level>& d) : ByCol(nr, std::move(d)) {}
 
         template<class SparseRange, typename T, typename IDX>
         void add(SparseRange&& range, T* xbuffer, IDX* ibuffer) {
@@ -211,7 +237,7 @@ public:
         }
 
         void finish() {
-            for (size_t b = 0; b < this->details.level_size.size(); ++b) {
+            for (size_t b = 0; b < this->details.nlevels(); ++b) {
                 auto offset = b * this->NR; 
                 tatami::stats::variances::finish_running(this->NR, this->details.means[b], this->tmp_vars.data() + b * this->NR, this->details.detected[b], this->counts[b]);
             }
@@ -222,24 +248,37 @@ public:
     SparseByCol sparse_running() {
         return SparseByCol(this->NR, this->details);
     }
+
+    SparseByCol sparse_running(size_t start, size_t end) {
+        auto copy = this->details;
+
+        for (auto& m : copy.means) {
+            m += start;
+        }
+        for (auto& d : copy.detected) {
+            d += start;
+        }
+        for (auto& e : copy.effects) {
+            e += start * copy.ngroups * copy.ngroups;
+        }
+
+        return DenseByCol(end - start, std::move(copy));
+    }
 };
 
 /******* Per-row factory when the AUC is desired ********/
 
-template<typename Effect, typename Level, typename Stat, typename Group, typename Block> 
+template<typename Stat, typename Level, typename Group, typename Block> 
 struct PerRowFactory {
 public:
-    PerRowFactory(size_t nr, size_t nc, std::vector<Stat*>& m, std::vector<Stat*>& d, std::vector<Effect*>& e, const Level* l, const std::vector<int>& ls, 
+    PerRowFactory(size_t nr, size_t nc, std::vector<Stat*> m, std::vector<Stat*> d, std::vector<Stat*> e, const Level* l, const std::vector<int>* ls, 
         const Group* g, int ng, const Block* b, int nb, double t) : 
-        NC(nc), group(g), block(b), factory(nr, nc, m, d, e, l, ls, ng, nb, t) {}
-
-    static constexpr bool supports_sparse = true;
-    static constexpr bool supports_running = false;
+        NC(nc), group(g), block(b), factory(nr, nc, std::move(m), std::move(d), std::move(e), l, ls, ng, nb, t) {}
 private:
     size_t NC;
     const Group* group;
     const Block* block;
-    BidimensionalFactory<Effect, Level, Stat> factory;
+    BidimensionalFactory<Stat, Level> factory;
 
 public:
     template<class Component>
@@ -255,7 +294,7 @@ public:
             const auto& ngroups = component.details.ngroups;
             const auto& nblocks = component.details.nblocks;
 
-            auto lsIt = component.details.level_size.begin();
+            auto lsIt = component.details.level_size().begin();
             for (size_t g = 0; g < ngroups; ++g) {
                 for (size_t b = 0; b < nblocks; ++b, ++lsIt) {
                     totals[b][g] = *lsIt;

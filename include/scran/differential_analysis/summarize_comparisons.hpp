@@ -10,7 +10,14 @@ namespace scran {
 
 namespace differential_analysis {
 
-static constexpr int n_summaries = 5; // min, mean, median, max, min-rank.
+enum summary {
+    MIN,
+    MEAN,
+    MEDIAN,
+    MAX,
+    MIN_RANK,
+    n_summaries 
+};
 
 template<class IT>
 double median (IT start, size_t n) {
@@ -49,7 +56,7 @@ void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vecto
             }
 
             if (restart == ngroups) {
-                for (size_t i = 0; i < 4; ++i) {
+                for (size_t i = 0; i < MIN_RANK; ++i) {
                     if (output[i][l]) {
                         output[i][l][gene] = std::numeric_limits<double>::quiet_NaN();
                     }
@@ -57,20 +64,20 @@ void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vecto
             } else {
                 int ncomps = ngroups - restart;
                 if (ncomps > 1) {
-                    if (output[0][l]) {
-                        output[0][l][gene] = *std::min_element(start + restart, start + ngroups);
+                    if (output[MIN][l]) {
+                        output[MIN][l][gene] = *std::min_element(start + restart, start + ngroups);
                     }
-                    if (output[1][l]) {
-                        output[1][l][gene] = std::accumulate(start + restart, start + ngroups, 0.0) / ncomps; // Mean
+                    if (output[MEAN][l]) {
+                        output[MEAN][l][gene] = std::accumulate(start + restart, start + ngroups, 0.0) / ncomps; // Mean
                     }
-                    if (output[2][l]) {
-                        output[2][l][gene] = median(start + restart, ncomps); // Median 
+                    if (output[MEDIAN][l]) {
+                        output[MEDIAN][l][gene] = median(start + restart, ncomps); // Median 
                     }
-                    if (output[3][l]) {
-                        output[3][l][gene] = *std::max_element(start + restart, start + ngroups); // Maximum
+                    if (output[MAX][l]) {
+                        output[MAX][l][gene] = *std::max_element(start + restart, start + ngroups); // Maximum
                     }
                 } else {
-                    for (size_t i = 0; i < 4; ++i) {
+                    for (size_t i = 0; i < MIN_RANK; ++i) {
                         if (output[i][l]) {
                             output[i][l][gene] = start[restart]; 
                         }
