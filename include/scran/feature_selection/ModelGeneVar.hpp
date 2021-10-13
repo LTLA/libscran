@@ -110,11 +110,11 @@ public:
             for (size_t j = 0; j < NC; ++j, ++copy) {
                 ++block_size[*copy];
             }
-            feature_selection::BlockedVarianceFactory<true, Stat, B, decltype(block_size)> fact(NR, NC, means, variances, block, block_size);
+            feature_selection::BlockedVarianceFactory<true, Stat, B, decltype(block_size)> fact(NR, NC, means, variances, block, &block_size);
             tatami::apply<0>(p, fact);
         } else {
             block_size[0] = NC;
-            feature_selection::BlockedVarianceFactory<false, Stat, B, decltype(block_size)> fact(NR, NC, means, variances, block, block_size);
+            feature_selection::BlockedVarianceFactory<false, Stat, B, decltype(block_size)> fact(NR, NC, means, variances, block, &block_size);
             tatami::apply<0>(p, fact);
         }
 
