@@ -236,7 +236,7 @@ public:
             m += start;
         }
 
-        return SparseByCol(NR, std::move(mymean), std::move(myvar), this->block, this->block_size_ptr);
+        return SparseByCol(end - start, std::move(mymean), std::move(myvar), this->block, this->block_size_ptr);
     }
 };
 
