@@ -309,7 +309,7 @@ $(function() {
 <div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>            m += start;</div>
 <div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>        }</div>
 <div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span> </div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        <span class="keywordflow">return</span> SparseByCol(NR, std::move(mymean), std::move(myvar), this-&gt;block, this-&gt;block_size_ptr);</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        <span class="keywordflow">return</span> SparseByCol(end - start, std::move(mymean), std::move(myvar), this-&gt;block, this-&gt;block_size_ptr);</div>
 <div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    }</div>
 <div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>};</div>
 <div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
