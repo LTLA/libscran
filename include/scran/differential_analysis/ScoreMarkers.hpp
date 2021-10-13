@@ -249,13 +249,13 @@ private:
             tatami::apply<0>(p, fact);
         }
 
-        std::vector<std::pair<Stat, size_t> > buffer(p->nrow());
         if (do_cohen) {
 #ifdef SCRAN_LOGGER
             SCRAN_LOGGER("scran::ScoreMarkers", "Summarizing Cohen's D across comparisons");
 #endif
-            if (cohen[4].size()) {
-                differential_analysis::compute_min_rank(p->nrow(), ngroups, cohens_d.data(), cohen[4], buffer);
+            auto& min_rank_cohen = cohen[scran::differential_analysis::MIN_RANK];
+            if (min_rank_cohen.size()) {
+                differential_analysis::compute_min_rank(p->nrow(), ngroups, cohens_d.data(), min_rank_cohen);
             }
             differential_analysis::summarize_comparisons(p->nrow(), ngroups, cohens_d.data(), cohen); // non-const w.r.t. cohens_d, so done after min-rank calculations.
         }
@@ -263,8 +263,9 @@ private:
 #ifdef SCRAN_LOGGER
             SCRAN_LOGGER("scran::ScoreMarkers", "Summarizing the AUC across comparisons");
 #endif
-            if (auc[4].size()) {
-                differential_analysis::compute_min_rank(p->nrow(), ngroups, wilcox_auc.data(), auc[4], buffer);
+            auto& min_rank_auc = auc[scran::differential_analysis::MIN_RANK];
+            if (min_rank_auc.size()) {
+                differential_analysis::compute_min_rank(p->nrow(), ngroups, wilcox_auc.data(), min_rank_auc);
             }
             differential_analysis::summarize_comparisons(p->nrow(), ngroups, wilcox_auc.data(), auc); // non-const w.r.t. wilcox_auc, so done after min-rank calculations.
         }

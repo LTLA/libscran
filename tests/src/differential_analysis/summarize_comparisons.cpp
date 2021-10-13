@@ -151,7 +151,6 @@ INSTANTIATE_TEST_CASE_P(
 class ComputeMinRankTest : public ::testing::Test {
 protected:
     void configure(int ngenes, int ngroups) {
-        buffer.resize(ngenes);
         output.resize(ngroups * ngenes);
         auto ptr = output.data();
         for (int g = 0; g < ngroups; ++g, ptr += ngenes) {
@@ -159,7 +158,6 @@ protected:
         }
     }
 
-    std::vector<std::pair<double, int> > buffer;
     std::vector<double*> ptrs;
     std::vector<double> output;
 };
@@ -174,7 +172,7 @@ TEST_F(ComputeMinRankTest, Basic) {
     };
 
     configure(ngenes, ngroups);
-    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), ptrs, buffer);
+    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), ptrs);
     for (size_t i = 0; i < ngroups; ++i) {
         compare_vectors(std::vector<double>{4, 3, 2, 1}, ngenes, output.data() + i * ngenes); // reversed, for maximum effect sizes.
     }
@@ -192,7 +190,7 @@ TEST_F(ComputeMinRankTest, LessBasic) {
     for (auto& e : effects) { e *= -1; }
 
     configure(ngenes, ngroups);
-    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), ptrs, buffer);
+    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), ptrs);
     compare_vectors(std::vector<double>{1, 2, 1, 3}, ngenes, output.data());
     compare_vectors(std::vector<double>{2, 3, 1, 1}, ngenes, output.data() + ngenes);
     compare_vectors(std::vector<double>{1, 1, 2, 4}, ngenes, output.data() + ngenes * 2);
