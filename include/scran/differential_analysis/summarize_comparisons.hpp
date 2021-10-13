@@ -57,28 +57,28 @@ void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vecto
 
             if (restart == ngroups) {
                 for (size_t i = 0; i < MIN_RANK; ++i) {
-                    if (output[i][l]) {
+                    if (output[i].size()) {
                         output[i][l][gene] = std::numeric_limits<double>::quiet_NaN();
                     }
                 }
             } else {
                 int ncomps = ngroups - restart;
                 if (ncomps > 1) {
-                    if (output[MIN][l]) {
+                    if (output[MIN].size()) {
                         output[MIN][l][gene] = *std::min_element(start + restart, start + ngroups);
                     }
-                    if (output[MEAN][l]) {
+                    if (output[MEAN].size()) {
                         output[MEAN][l][gene] = std::accumulate(start + restart, start + ngroups, 0.0) / ncomps; // Mean
                     }
-                    if (output[MEDIAN][l]) {
+                    if (output[MEDIAN].size()) {
                         output[MEDIAN][l][gene] = median(start + restart, ncomps); // Median 
                     }
-                    if (output[MAX][l]) {
+                    if (output[MAX].size()) {
                         output[MAX][l][gene] = *std::max_element(start + restart, start + ngroups); // Maximum
                     }
                 } else {
                     for (size_t i = 0; i < MIN_RANK; ++i) {
-                        if (output[i][l]) {
+                        if (output[i].size()) {
                             output[i][l][gene] = start[restart]; 
                         }
                     }
