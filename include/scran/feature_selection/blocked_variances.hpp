@@ -113,7 +113,7 @@ public:
         DenseByRow(size_t nc, std::vector<S*> m, std::vector<S*> v, const B* b, const Bs* bs) : NC(nc), ByRow(std::move(m), std::move(v), b, bs) {}
 
         template<typename T>
-        void compute(size_t i, const T* ptr, T* buffer) {
+        void compute(size_t i, const T* ptr) {
             blocked_variance_with_mean<blocked>(ptr, NC, this->block, *(this->block_size_ptr), this->tmp_means, this->tmp_vars);
             for (size_t b = 0; b < this->tmp_means.size(); ++b) {
                 this->means[b][i] = this->tmp_means[b];
@@ -133,7 +133,7 @@ public:
         SparseByRow(std::vector<S*> m, std::vector<S*> v, const B* b, const Bs* bs) : ByRow(std::move(m), std::move(v), b, bs), tmp_nzero(bs->size()) {}
 
         template<class SparseRange, typename T, typename IDX>
-        void compute(size_t i, SparseRange&& range, T* xbuffer, IDX* ibuffer) {
+        void compute(size_t i, SparseRange&& range) {
             blocked_variance_with_mean<blocked>(range, this->block, *(this->block_size_ptr), this->tmp_means, this->tmp_vars, tmp_nzero);
             for (size_t b = 0; b < this->tmp_means.size(); ++b) {
                 this->means[b][i] = this->tmp_means[b];
@@ -161,7 +161,7 @@ private:
     protected:
         size_t NR;
         std::vector<int> counts;
-        int counter = 0;
+        size_t counter = 0;
     };
 
 public:
@@ -169,7 +169,7 @@ public:
         DenseByCol(size_t nr, std::vector<S*> m, std::vector<S*> v, const B* b, const Bs* bs) : ByCol(nr, std::move(m), std::move(v), b, bs) {}
 
         template<typename T>
-        void add(const T* ptr, T* buffer) {
+        void add(const T* ptr) {
             auto b = get_block<blocked>(this->counter, this->block);
             tatami::stats::variances::compute_running(ptr, this->NR, this->means[b], this->variances[b], this->counts[b]);
             ++(this->counter);
@@ -202,10 +202,15 @@ public:
 
 public:
     struct SparseByCol : public ByCol {
-        SparseByCol(size_t nr, std::vector<S*> m, std::vector<S*> v, const B* b, const Bs* bs) : nonzeros(bs->size(), std::vector<int>(nr)), ByCol(nr, std::move(m), std::move(v), b, bs) {}
+        SparseByCol(size_t nr, size_t s, size_t e, std::vector<S*> m, std::vector<S*> v, const B* b, const Bs* bs) : 
+            start(s), end(e), nonzeros(bs->size(), std::vector<int>(nr)), ByCol(nr, std::move(m), std::move(v), b, bs) 
+        {
+            counter = start;
+            return;
+        }
 
         template<class SparseRange, typename T, typename IDX>
-        void add(SparseRange&& range, T* xbuffer, IDX* ibuffer) {
+        void add(SparseRange&& range) {
             auto b = get_block<blocked>(this->counter, this->block);
             tatami::stats::variances::compute_running(range, this->means[b], this->variances[b], nonzeros[b].data(), this->counts[b]);
             ++(this->counter);
@@ -213,30 +218,21 @@ public:
 
         void finish() {
             for (size_t b = 0; b < this->means.size(); ++b) {
-                tatami::stats::variances::finish_running(this->NR, this->means[b], this->variances[b], nonzeros[b].data(), this->counts[b]);
+                tatami::stats::variances::finish_running(end - start, this->means[b] + start, this->variances[b] + start, nonzeros[b].data() + start, this->counts[b]);
             }
         }
 
     private:
         std::vector<std::vector<int> > nonzeros;
+        size_t start, end;
     };
 
     SparseByCol sparse_running() {
-        return SparseByCol(NR, this->means, this->variances, this->block, this->block_size_ptr);
+        return SparseByCol(NR, 0, NR, this->means, this->variances, this->block, this->block_size_ptr);
     }
 
     SparseByCol sparse_running(size_t start, size_t end) {
-        auto mymean = this->means;
-        for (auto& m : mymean) {
-            m += start;
-        }
-
-        auto myvar = this->variances;
-        for (auto& m : myvar) {
-            m += start;
-        }
-
-        return SparseByCol(end - start, std::move(mymean), std::move(myvar), this->block, this->block_size_ptr);
+        return SparseByCol(NR, start, end, this->means, this->variances, this->block, this->block_size_ptr);
     }
 };
 
