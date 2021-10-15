@@ -126,7 +126,7 @@ public:
 public:
     struct SparseByRow : public Common<S, B, Bs> {
         SparseByRow(std::vector<S*> m, std::vector<S*> v, const B* b, const Bs* bs) : 
-            tmp_means(bs->size()), tmp_vars(bs->size()), Common<S, B, Bs>(std::move(m), std::move(v), b, bs) {}
+            tmp_means(bs->size()), tmp_vars(bs->size()), tmp_nzero(bs->size()), Common<S, B, Bs>(std::move(m), std::move(v), b, bs) {}
 
         template<class SparseRange> 
         void compute(size_t i, SparseRange&& range) {
@@ -143,10 +143,6 @@ public:
 
     SparseByRow sparse_direct() {
         return SparseByRow(this->means, this->variances, this->block, this->block_size_ptr);
-    }
-
-private:
-    static void clean_output_vectors(size_t start, size_t end, std::vector<S*>& means, std::vector<S*>& variances) {
     }
 
 public:
