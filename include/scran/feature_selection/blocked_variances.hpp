@@ -101,16 +101,10 @@ public:
 private:
     size_t NR, NC;
 
-private:
-    struct ByRow : Common<S, B, Bs> {
-        ByRow(std::vector<S*> m, std::vector<S*> v, const B* b, const Bs* bs) : Common<S, B, Bs>(std::move(m), std::move(v), b, bs), tmp_means(bs->size()), tmp_vars(bs->size()) {}
-    protected:
-        std::vector<double> tmp_means, tmp_vars;
-    };
-
 public:
-    struct DenseByRow : public ByRow {
-        DenseByRow(size_t nc, std::vector<S*> m, std::vector<S*> v, const B* b, const Bs* bs) : NC(nc), ByRow(std::move(m), std::move(v), b, bs) {}
+    struct DenseByRow : public Common<S, B, Bs> {
+        DenseByRow(size_t nc, std::vector<S*> m, std::vector<S*> v, const B* b, const Bs* bs) : 
+            NC(nc), tmp_means(bs->size()), tmp_vars(bs->size()), Common<S, B, Bs>(std::move(m), std::move(v), b, bs) {}
 
         template<typename T>
         void compute(size_t i, const T* ptr) {
@@ -121,6 +115,7 @@ public:
             }
         }
     private:
+        std::vector<double> tmp_means, tmp_vars;
         size_t NC;
     };
 
@@ -129,10 +124,11 @@ public:
     }
 
 public:
-    struct SparseByRow : public ByRow {
-        SparseByRow(std::vector<S*> m, std::vector<S*> v, const B* b, const Bs* bs) : ByRow(std::move(m), std::move(v), b, bs), tmp_nzero(bs->size()) {}
+    struct SparseByRow : public Common<S, B, Bs> {
+        SparseByRow(std::vector<S*> m, std::vector<S*> v, const B* b, const Bs* bs) : 
+            tmp_means(bs->size()), tmp_vars(bs->size()), Common<S, B, Bs>(std::move(m), std::move(v), b, bs) {}
 
-        template<class SparseRange, typename T, typename IDX>
+        template<class SparseRange> 
         void compute(size_t i, SparseRange&& range) {
             blocked_variance_with_mean<blocked>(range, this->block, *(this->block_size_ptr), this->tmp_means, this->tmp_vars, tmp_nzero);
             for (size_t b = 0; b < this->tmp_means.size(); ++b) {
@@ -141,6 +137,7 @@ public:
             }
         }
     private:
+        std::vector<double> tmp_means, tmp_vars;
         std::vector<int> tmp_nzero;
     };
 
@@ -149,41 +146,44 @@ public:
     }
 
 private:
-    struct ByCol : public Common<S, B, Bs> {
-        ByCol(size_t nr, std::vector<S*> m, std::vector<S*> v, const B* b, const Bs* bs) : NR(nr), counts(bs->size()), Common<S, B, Bs>(std::move(m), std::move(v), b, bs) {
-            for (auto& mptr : this->means) {
-                std::fill(mptr, mptr + nr, 0);
-            }
-            for (auto& vptr : this->variances) {
-                std::fill(vptr, vptr + nr, 0);
-            }
-        }
-    protected:
-        size_t NR;
-        std::vector<int> counts;
-        size_t counter = 0;
-    };
+    static void clean_output_vectors(size_t start, size_t end, std::vector<S*>& means, std::vector<S*>& variances) {
+    }
 
 public:
-    struct DenseByCol : public ByCol {
-        DenseByCol(size_t nr, std::vector<S*> m, std::vector<S*> v, const B* b, const Bs* bs) : ByCol(nr, std::move(m), std::move(v), b, bs) {}
+    struct DenseByCol : public Common<S, B, Bs> {
+        DenseByCol(size_t s, size_t e, std::vector<S*> m, std::vector<S*> v, const B* b, const Bs* bs) : 
+            counter(s), num(e - s), counts(bs->size()), Common<S, B, Bs>(std::move(m), std::move(v), b, bs) 
+        {
+            // Remember, pointers are already shifted for us.
+            for (auto& mptr : this->means) {
+                std::fill(mptr, mptr + num, 0);
+            }
+            for (auto& vptr : this->variances) {
+                std::fill(vptr, vptr + num, 0);
+            }
+            return;
+        }
 
         template<typename T>
         void add(const T* ptr) {
-            auto b = get_block<blocked>(this->counter, this->block);
-            tatami::stats::variances::compute_running(ptr, this->NR, this->means[b], this->variances[b], this->counts[b]);
-            ++(this->counter);
+            auto b = get_block<blocked>(counter, this->block);
+            tatami::stats::variances::compute_running(ptr, num, this->means[b], this->variances[b], this->counts[b]);
+            ++counter;
         }
 
         void finish() {
             for (size_t b = 0; b < this->means.size(); ++b) {
-                tatami::stats::variances::finish_running(this->NR, this->means[b], this->variances[b], this->counts[b]);
+                tatami::stats::variances::finish_running(num, this->means[b], this->variances[b], this->counts[b]);
             }
         }
+    private:
+        size_t counter;
+        size_t num;
+        std::vector<int> counts;
     };
 
     DenseByCol dense_running() {
-        return DenseByCol(this->NR, this->means, this->variances, this->block, this->block_size_ptr);
+        return DenseByCol(0, this->NR, this->means, this->variances, this->block, this->block_size_ptr);
     }
 
     DenseByCol dense_running(size_t start, size_t end) {
@@ -197,23 +197,30 @@ public:
             m += start;
         }
 
-        return DenseByCol(end - start, std::move(mymean), std::move(myvar), this->block, this->block_size_ptr);
+        return DenseByCol(start, end, std::move(mymean), std::move(myvar), this->block, this->block_size_ptr);
     }
 
 public:
-    struct SparseByCol : public ByCol {
+    struct SparseByCol : public Common<S, B, Bs> {
         SparseByCol(size_t nr, size_t s, size_t e, std::vector<S*> m, std::vector<S*> v, const B* b, const Bs* bs) : 
-            start(s), end(e), nonzeros(bs->size(), std::vector<int>(nr)), ByCol(nr, std::move(m), std::move(v), b, bs) 
+            start(s), end(e), counter(s), nonzeros(bs->size(), std::vector<int>(nr)), counts(bs->size()),
+            Common<S, B, Bs>(std::move(m), std::move(v), b, bs) 
         {
-            counter = start;
+            // In the sparse case, pointers are NOT shifted.
+            for (auto& mptr : this->means) {
+                std::fill(mptr + start, mptr + end, 0);
+            }
+            for (auto& vptr : this->variances) {
+                std::fill(vptr + start, vptr + end, 0);
+            }
             return;
         }
 
-        template<class SparseRange, typename T, typename IDX>
+        template<class SparseRange>
         void add(SparseRange&& range) {
-            auto b = get_block<blocked>(this->counter, this->block);
+            auto b = get_block<blocked>(counter, this->block);
             tatami::stats::variances::compute_running(range, this->means[b], this->variances[b], nonzeros[b].data(), this->counts[b]);
-            ++(this->counter);
+            ++counter;
         }
 
         void finish() {
@@ -223,8 +230,9 @@ public:
         }
 
     private:
+        size_t start, end, counter;
         std::vector<std::vector<int> > nonzeros;
-        size_t start, end;
+        std::vector<int> counts;
     };
 
     SparseByCol sparse_running() {

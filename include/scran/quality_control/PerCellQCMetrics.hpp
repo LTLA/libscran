@@ -118,7 +118,7 @@ private:
                 }
 
                 for (size_t s = 0; s < this->subsets_ptr->size(); ++s) {
-                    const auto& sub = *(this->subsets_ptr)[s];
+                    const auto& sub = (*(this->subsets_ptr))[s];
                     auto& prop = this->subset_proportions[s][c];
                     for (size_t r = 0; r < NR; ++r) {
                         prop += sub[r] * ptr[r];
@@ -151,7 +151,7 @@ private:
                 }
 
                 for (size_t s = 0; s < this->subsets_ptr->size(); ++s) {
-                    const auto& sub = *(this->subsets_ptr)[s];
+                    const auto& sub = (*(this->subsets_ptr))[s];
                     auto& prop = this->subset_proportions[s][c];
                     for (size_t i = 0; i < range.number; ++i) {
                         prop += sub[range.index[i]] * range.value[i];
@@ -172,7 +172,8 @@ private:
 
     public:
         struct DenseRunning : public Common<SUB, S, D, PROP> {
-            DenseRunning(size_t start, size_t end, const std::vector<SUB>* subs, S* s, D* d, std::vector<PROP> subp) : counter(start), num(end - start), Common<SUB, S, D, PROP>(subs, s, d, std::move(subp)) {}
+            DenseRunning(size_t s, size_t e, const std::vector<SUB>* subs, S* ss, D* d, std::vector<PROP> subp) : 
+                counter(s), num(e - s), Common<SUB, S, D, PROP>(subs, ss, d, std::move(subp)) {}
 
             template<class T>
             void add (const T* ptr) {
@@ -181,8 +182,9 @@ private:
                     this->detected[c] += static_cast<D>(ptr[c] > 0);
                 }
 
+                const auto& subsets = *(this->subsets_ptr);
                 for (size_t s = 0; s < this->subsets_ptr->size(); ++s) {
-                    if (*(this->subsets)[s][counter]) {
+                    if (subsets[s][counter]) {
                         auto& sub = this->subset_proportions[s];
                         for (size_t c = 0; c < num; ++c) {
                             sub[c] += ptr[c];
@@ -219,13 +221,13 @@ private:
             for (auto& s : subp) {
                 s += start;
             }
-            return DenseRunning(start, end, subs, this->sums + start, this->detected + start, std::move(subp));
+            return DenseRunning(start, end, this->subsets_ptr, this->sums + start, this->detected + start, std::move(subp));
         }
 
     public:
         struct SparseRunning : public Common<SUB, S, D, PROP> {
-            SparseRunning(size_t start, size_t end, std::vector<SUB> subs, S* s, D* d, std::vector<PROP> subp) : 
-                start(s), end(e), counter(s), Common<SUB, S, D, PROP>(std::move(subs), s, d, std::move(subp)) {}
+            SparseRunning(size_t s, size_t e, const std::vector<SUB>* subs, S* ss, D* d, std::vector<PROP> subp) : 
+                start(s), end(e), counter(s), Common<SUB, S, D, PROP>(subs, ss, d, std::move(subp)) {}
 
             template<typename T, typename IDX>
             void add (const tatami::SparseRange<T, IDX> range) {
@@ -234,8 +236,9 @@ private:
                     this->detected[range.index[i]] += static_cast<D>(range.value[i] > 0);
                 }
 
+                const auto& subsets = *(this->subsets_ptr);
                 for (size_t s = 0; s < this->subsets_ptr->size(); ++s) {
-                    if (*(this->subsets_ptr)[s][counter]) {
+                    if (subsets[s][counter]) {
                         for (size_t i = 0; i < range.number; ++i) {
                             this->subset_proportions[s][range.index[i]] += range.value[i];
                         }
