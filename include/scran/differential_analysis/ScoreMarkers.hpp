@@ -212,7 +212,7 @@ private:
 #endif
         if (!do_wilcox) {
             std::vector<double*> effects{cohens_ptr};
-            differential_analysis::BidimensionalFactory fact(p->nrow(), p->ncol(), means, detected, effects, level, level_size, ngroups, nblocks, threshold);
+            differential_analysis::BidimensionalFactory fact(p->nrow(), p->ncol(), means, detected, effects, level, &level_size, ngroups, nblocks, threshold);
             tatami::apply<0>(p, fact);
         } else {
             std::vector<double*> effects{cohens_ptr, wilcox_auc.data()};
@@ -224,7 +224,7 @@ private:
                 block = tmp_blocks.data();
             }
 
-            differential_analysis::PerRowFactory fact(p->nrow(), p->ncol(), means, detected, effects, level, level_size, group, ngroups, block, nblocks, threshold);
+            differential_analysis::PerRowFactory fact(p->nrow(), p->ncol(), means, detected, effects, level, &level_size, group, ngroups, block, nblocks, threshold);
             tatami::apply<0>(p, fact);
         }
 
