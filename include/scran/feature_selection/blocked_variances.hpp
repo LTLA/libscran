@@ -148,7 +148,7 @@ public:
 public:
     struct DenseByCol : public Common<S, B, Bs> {
         DenseByCol(size_t s, size_t e, std::vector<S*> m, std::vector<S*> v, const B* b, const Bs* bs) : 
-            counter(s), num(e - s), counts(bs->size()), Common<S, B, Bs>(std::move(m), std::move(v), b, bs) 
+            num(e - s), counts(bs->size()), Common<S, B, Bs>(std::move(m), std::move(v), b, bs) 
         {
             // Remember, pointers are already shifted for us.
             for (auto& mptr : this->means) {
@@ -173,7 +173,7 @@ public:
             }
         }
     private:
-        size_t counter;
+        size_t counter = 0;
         size_t num;
         std::vector<int> counts;
     };
@@ -199,7 +199,7 @@ public:
 public:
     struct SparseByCol : public Common<S, B, Bs> {
         SparseByCol(size_t nr, size_t s, size_t e, std::vector<S*> m, std::vector<S*> v, const B* b, const Bs* bs) : 
-            start(s), end(e), counter(s), nonzeros(bs->size(), std::vector<int>(nr)), counts(bs->size()),
+            start(s), end(e), nonzeros(bs->size(), std::vector<int>(nr)), counts(bs->size()),
             Common<S, B, Bs>(std::move(m), std::move(v), b, bs) 
         {
             // In the sparse case, pointers are NOT shifted.
@@ -226,7 +226,7 @@ public:
         }
 
     private:
-        size_t start, end, counter;
+        size_t start, end, counter = 0;
         std::vector<std::vector<int> > nonzeros;
         std::vector<int> counts;
     };

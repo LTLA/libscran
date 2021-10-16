@@ -165,7 +165,7 @@ private:
 public:
     struct DenseByCol {
         DenseByCol(size_t start, size_t end, Base<Effect, Level, Stat> d) : 
-            counter(start), num(end - start), 
+            num(end - start), 
             tmp_vars(d.level_size_ptr->size(), std::vector<double>(num)), 
             counts(d.level_size_ptr->size()),
             details(std::move(d)) {}
@@ -190,7 +190,7 @@ public:
             finalize_by_cols(0, num, tmp_vars, details);
         }
     private:
-        size_t counter, num;
+        size_t counter = 0, num;
         std::vector<std::vector<double> > tmp_vars;
         std::vector<int> counts;
         Base<Effect, Level, Stat> details;
@@ -221,7 +221,7 @@ public:
 public:
     struct SparseByCol { 
         SparseByCol(size_t nr, size_t s, size_t e, Base<Effect, Level, Stat> d) : 
-            start(s), end(e), counter(start), 
+            start(s), end(e), 
             tmp_vars(d.level_size_ptr->size(), std::vector<double>(nr)), 
             counts(d.level_size_ptr->size()),
             details(std::move(d)) {}
@@ -244,7 +244,7 @@ public:
             finalize_by_cols(start, end, tmp_vars, details);
         }
     private:
-        size_t start, end, counter;
+        size_t start, end, counter = 0;
         std::vector<std::vector<double> > tmp_vars;
         std::vector<int> counts;
         Base<Effect, Level, Stat> details;

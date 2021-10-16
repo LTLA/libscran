@@ -108,7 +108,7 @@ private:
 
     public:
         struct DenseDirect : public Common<SUB, S, D, PROP> {
-            DenseDirect(size_t nr, const std::vector<SUB>* subs, S* s, D* d, std::vector<PROP>& subp) : NR(nr), Common<SUB, S, D, PROP>(subs, s, d, std::move(subp)) {}
+            DenseDirect(size_t nr, const std::vector<SUB>* subs, S* s, D* d, std::vector<PROP> subp) : NR(nr), Common<SUB, S, D, PROP>(subs, s, d, std::move(subp)) {}
 
             template<typename T>
             void compute(size_t c, const T* ptr) {
@@ -173,7 +173,7 @@ private:
     public:
         struct DenseRunning : public Common<SUB, S, D, PROP> {
             DenseRunning(size_t s, size_t e, const std::vector<SUB>* subs, S* ss, D* d, std::vector<PROP> subp) : 
-                counter(s), num(e - s), Common<SUB, S, D, PROP>(subs, ss, d, std::move(subp)) {}
+                num(e - s), Common<SUB, S, D, PROP>(subs, ss, d, std::move(subp)) {}
 
             template<class T>
             void add (const T* ptr) {
@@ -183,7 +183,7 @@ private:
                 }
 
                 const auto& subsets = *(this->subsets_ptr);
-                for (size_t s = 0; s < this->subsets_ptr->size(); ++s) {
+                for (size_t s = 0; s < subsets.size(); ++s) {
                     if (subsets[s][counter]) {
                         auto& sub = this->subset_proportions[s];
                         for (size_t c = 0; c < num; ++c) {
@@ -208,7 +208,7 @@ private:
                 }
             }
 
-            size_t counter;
+            size_t counter = 0;
             size_t num;
         };
 
@@ -227,7 +227,7 @@ private:
     public:
         struct SparseRunning : public Common<SUB, S, D, PROP> {
             SparseRunning(size_t s, size_t e, const std::vector<SUB>* subs, S* ss, D* d, std::vector<PROP> subp) : 
-                start(s), end(e), counter(s), Common<SUB, S, D, PROP>(subs, ss, d, std::move(subp)) {}
+                start(s), end(e), Common<SUB, S, D, PROP>(subs, ss, d, std::move(subp)) {}
 
             template<typename T, typename IDX>
             void add (const tatami::SparseRange<T, IDX> range) {
@@ -262,7 +262,7 @@ private:
             }
 
             const size_t start, end;
-            size_t counter;
+            size_t counter = 0;
         };
          
         SparseRunning sparse_running() {
