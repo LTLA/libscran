@@ -86,7 +86,6 @@ template<typename Stat, class V>
 void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vector<Stat*>& output, V& buffer) {
     auto shift = ngroups * ngroups;
 
-    #pragma omp parallel for
     for (int g = 0; g < ngroups; ++g) {
         auto target = output[g];
         std::fill(target, target + ngenes, ngenes + 1); 
