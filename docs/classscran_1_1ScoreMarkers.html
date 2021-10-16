@@ -69,6 +69,7 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classscran_1_1ScoreMarkers-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">scran::ScoreMarkers Class Reference</div></div>
@@ -80,6 +81,12 @@ $(function() {
 
 <p><code>#include &lt;<a class="el" href="ScoreMarkers_8hpp_source.html">ScoreMarkers.hpp</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html">Defaults</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default parameter settings.  <a href="structscran_1_1ScoreMarkers_1_1Defaults.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ac59db6795a2cedc31d8e9f1460abb604"><td class="memItemLeft" align="right" valign="top"><a id="ac59db6795a2cedc31d8e9f1460abb604" name="ac59db6795a2cedc31d8e9f1460abb604"></a>
@@ -106,22 +113,22 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9e3ff50a47bb46e1809f093c7d39ef84"><td class="memItemLeft" align="right" valign="top"><a id="a9e3ff50a47bb46e1809f093c7d39ef84" name="a9e3ff50a47bb46e1809f093c7d39ef84"></a>
 <a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>set_summary_rank</b> (bool s=true)</td></tr>
 <tr class="separator:a9e3ff50a47bb46e1809f093c7d39ef84"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3f6596c20cf349535877bb68760c1664"><td class="memTemplParams" colspan="2"><a id="a3f6596c20cf349535877bb68760c1664" name="a3f6596c20cf349535877bb68760c1664"></a>
+<tr class="memitem:a91ced9c24869c3d603d38088c61ffd53"><td class="memTemplParams" colspan="2"><a id="a91ced9c24869c3d603d38088c61ffd53" name="a91ced9c24869c3d603d38088c61ffd53"></a>
 template&lt;class MAT , typename G , typename Stat &gt; </td></tr>
-<tr class="memitem:a3f6596c20cf349535877bb68760c1664"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>run</b> (const MAT *p, const G *group, std::vector&lt; Stat * &gt; means, std::vector&lt; Stat * &gt; detected, std::vector&lt; std::vector&lt; Stat * &gt; &gt; cohen)</td></tr>
-<tr class="separator:a3f6596c20cf349535877bb68760c1664"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a00cab93a1ab861c3574b909593118e53"><td class="memTemplParams" colspan="2"><a id="a00cab93a1ab861c3574b909593118e53" name="a00cab93a1ab861c3574b909593118e53"></a>
+<tr class="memitem:a91ced9c24869c3d603d38088c61ffd53"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>run</b> (const MAT *p, const G *group, std::vector&lt; Stat * &gt; means, std::vector&lt; Stat * &gt; detected, std::vector&lt; std::vector&lt; Stat * &gt; &gt; cohen, std::vector&lt; std::vector&lt; Stat * &gt; &gt; auc)</td></tr>
+<tr class="separator:a91ced9c24869c3d603d38088c61ffd53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a931d9c528464db2205343c72a09990fc"><td class="memTemplParams" colspan="2"><a id="a931d9c528464db2205343c72a09990fc" name="a931d9c528464db2205343c72a09990fc"></a>
 template&lt;class MAT , typename G , typename B , typename Stat &gt; </td></tr>
-<tr class="memitem:a00cab93a1ab861c3574b909593118e53"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>run_blocked</b> (const MAT *p, const G *group, const B *block, std::vector&lt; std::vector&lt; Stat * &gt; &gt; means, std::vector&lt; std::vector&lt; Stat * &gt; &gt; detected, std::vector&lt; std::vector&lt; Stat * &gt; &gt; cohen)</td></tr>
-<tr class="separator:a00cab93a1ab861c3574b909593118e53"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9c9f0977a0823495dc65e30ba38ece87"><td class="memTemplParams" colspan="2"><a id="a9c9f0977a0823495dc65e30ba38ece87" name="a9c9f0977a0823495dc65e30ba38ece87"></a>
-template&lt;class MAT , typename G &gt; </td></tr>
-<tr class="memitem:a9c9f0977a0823495dc65e30ba38ece87"><td class="memTemplItemLeft" align="right" valign="top">Results&#160;</td><td class="memTemplItemRight" valign="bottom"><b>run</b> (const MAT *p, const G *group)</td></tr>
-<tr class="separator:a9c9f0977a0823495dc65e30ba38ece87"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a78206bf58c4f94f4f8bda9d716ac4b25"><td class="memTemplParams" colspan="2"><a id="a78206bf58c4f94f4f8bda9d716ac4b25" name="a78206bf58c4f94f4f8bda9d716ac4b25"></a>
-template&lt;class MAT , typename G , typename B &gt; </td></tr>
-<tr class="memitem:a78206bf58c4f94f4f8bda9d716ac4b25"><td class="memTemplItemLeft" align="right" valign="top">Results&#160;</td><td class="memTemplItemRight" valign="bottom"><b>run_blocked</b> (const MAT *p, const G *group, const B *block)</td></tr>
-<tr class="separator:a78206bf58c4f94f4f8bda9d716ac4b25"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a931d9c528464db2205343c72a09990fc"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>run_blocked</b> (const MAT *p, const G *group, const B *block, std::vector&lt; std::vector&lt; Stat * &gt; &gt; means, std::vector&lt; std::vector&lt; Stat * &gt; &gt; detected, std::vector&lt; std::vector&lt; Stat * &gt; &gt; cohen, std::vector&lt; std::vector&lt; Stat * &gt; &gt; auc)</td></tr>
+<tr class="separator:a931d9c528464db2205343c72a09990fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92c1f66cb31e0fba3440164600c72ede"><td class="memTemplParams" colspan="2"><a id="a92c1f66cb31e0fba3440164600c72ede" name="a92c1f66cb31e0fba3440164600c72ede"></a>
+template&lt;typename Stat  = double, class MAT , typename G &gt; </td></tr>
+<tr class="memitem:a92c1f66cb31e0fba3440164600c72ede"><td class="memTemplItemLeft" align="right" valign="top">Results&lt; Stat &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>run</b> (const MAT *p, const G *group)</td></tr>
+<tr class="separator:a92c1f66cb31e0fba3440164600c72ede"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8995f7687e95134e1728fb7c5183be6"><td class="memTemplParams" colspan="2"><a id="aa8995f7687e95134e1728fb7c5183be6" name="aa8995f7687e95134e1728fb7c5183be6"></a>
+template&lt;typename Stat  = double, class MAT , typename G , typename B &gt; </td></tr>
+<tr class="memitem:aa8995f7687e95134e1728fb7c5183be6"><td class="memTemplItemLeft" align="right" valign="top">Results&lt; Stat &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>run_blocked</b> (const MAT *p, const G *group, const B *block)</td></tr>
+<tr class="separator:aa8995f7687e95134e1728fb7c5183be6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Score each gene as a candidate marker for each group of cells. </p>
