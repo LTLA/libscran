@@ -66,15 +66,36 @@ namespace scran {
  * We report the mean log-expression of all cells in each cluster, as well as the proportion of cells with detectable expression in each cluster.
  */
 class ScoreMarkers {
+public:
+    /**
+     * @brief Default parameter settings.
+     */
+    struct Defaults {
+        static constexpr double threshold = 0;
+
+        static constexpr bool compute_cohen = true;
+
+        static constexpr bool compute_auc = true;
+
+        static constexpr bool summary_min = true;
+
+        static constexpr bool summary_mean = true;
+
+        static constexpr bool summary_median = true;
+
+        static constexpr bool summary_max = true;
+
+        static constexpr bool summary_rank = true;
+    };
 private:
-    double threshold = 0;
-    bool do_cohen = true;
-    bool do_auc = true;
-    bool use_min = true;
-    bool use_mean = true;
-    bool use_median = true;
-    bool use_max = true;
-    bool use_rank = true;
+    double threshold = Defaults::threshold;
+    bool do_cohen = Defaults::compute_cohen;
+    bool do_auc = Defaults::compute_auc;
+    bool use_min = Defaults::summary_min;
+    bool use_mean = Defaults::summary_mean;
+    bool use_median = Defaults::summary_median;
+    bool use_max = Defaults::summary_max;
+    bool use_rank = Defaults::summary_rank;
 
 public:
     ScoreMarkers& set_threshold(double t = 0) {
@@ -122,10 +143,10 @@ public:
     void run(const MAT* p, const G* group, 
         std::vector<Stat*> means, 
         std::vector<Stat*> detected, 
-        std::vector<std::vector<Stat*> > cohen) 
+        std::vector<std::vector<Stat*> > cohen, 
+        std::vector<std::vector<Stat*> > auc) 
     {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
-        decltype(cohen) auc;
         run_internal(p, group, ngroups, means, detected, cohen, auc);
     }        
 
@@ -133,10 +154,10 @@ public:
     void run_blocked(const MAT* p, const G* group, const B* block, 
         std::vector<std::vector<Stat*> > means, 
         std::vector<std::vector<Stat*> > detected, 
-        std::vector<std::vector<Stat*> > cohen)
+        std::vector<std::vector<Stat*> > cohen,
+        std::vector<std::vector<Stat*> > auc) 
     {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
-        decltype(cohen) auc;
         if (block == NULL) {
             run_internal(p, group, ngroups, means[0], detected[0], cohen, auc);
             return;
@@ -211,11 +232,11 @@ private:
         SCRAN_LOGGER("scran::ScoreMarkers", "Performing pairwise comparisons between groups of cells");
 #endif
         if (!do_wilcox) {
-            std::vector<double*> effects{cohens_ptr};
+            std::vector<Stat*> effects{cohens_ptr};
             differential_analysis::BidimensionalFactory fact(p->nrow(), p->ncol(), means, detected, effects, level, &level_size, ngroups, nblocks, threshold);
             tatami::apply<0>(p, fact);
         } else {
-            std::vector<double*> effects{cohens_ptr, wilcox_auc.data()};
+            std::vector<Stat*> effects{cohens_ptr, wilcox_auc.data()};
 
             // Need to remake this, as there's no guarantee that 'blocks' exists.
             std::vector<B> tmp_blocks;
@@ -228,13 +249,13 @@ private:
             tatami::apply<0>(p, fact);
         }
 
-        std::vector<std::pair<double, size_t> > buffer(p->nrow());
         if (do_cohen) {
 #ifdef SCRAN_LOGGER
             SCRAN_LOGGER("scran::ScoreMarkers", "Summarizing Cohen's D across comparisons");
 #endif
-            if (cohen[4].size()) {
-                differential_analysis::compute_min_rank(p->nrow(), ngroups, cohens_d.data(), cohen[4], buffer);
+            auto& min_rank_cohen = cohen[scran::differential_analysis::MIN_RANK];
+            if (min_rank_cohen.size()) {
+                differential_analysis::compute_min_rank(p->nrow(), ngroups, cohens_d.data(), min_rank_cohen);
             }
             differential_analysis::summarize_comparisons(p->nrow(), ngroups, cohens_d.data(), cohen); // non-const w.r.t. cohens_d, so done after min-rank calculations.
         }
@@ -242,8 +263,9 @@ private:
 #ifdef SCRAN_LOGGER
             SCRAN_LOGGER("scran::ScoreMarkers", "Summarizing the AUC across comparisons");
 #endif
-            if (auc[4].size()) {
-                differential_analysis::compute_min_rank(p->nrow(), ngroups, wilcox_auc.data(), auc[4], buffer);
+            auto& min_rank_auc = auc[scran::differential_analysis::MIN_RANK];
+            if (min_rank_auc.size()) {
+                differential_analysis::compute_min_rank(p->nrow(), ngroups, wilcox_auc.data(), min_rank_auc);
             }
             differential_analysis::summarize_comparisons(p->nrow(), ngroups, wilcox_auc.data(), auc); // non-const w.r.t. wilcox_auc, so done after min-rank calculations.
         }
@@ -252,50 +274,63 @@ private:
     }
 
 public:
+    template<typename Stat>
     struct Results {
-        Results(size_t ngenes, int ngroups, int nblocks, bool do_cohen, bool do_auc, bool do_min, bool do_mean, bool do_median, bool do_max, bool do_rank) : 
-            means(ngroups, std::vector<std::vector<double> >(nblocks, std::vector<double>(ngenes))),
-            detected(means)
-        {
-            auto fill = [&](auto& effect) {
+        Results(size_t ngenes, int ngroups, int nblocks, bool do_cohen, bool do_auc, bool do_min, bool do_mean, bool do_median, bool do_max, bool do_rank) { 
+            auto fill_inner = [&](int N, auto& type) {
+                type.reserve(N);
+                for (int n = 0; n < N; ++n) {
+                    type.emplace_back(ngenes);
+                }
+            };
+            
+            means.resize(ngroups);
+            detected.resize(ngroups);
+            for (int g = 0; g < ngroups; ++g) {
+                fill_inner(nblocks, means[g]);
+                fill_inner(nblocks, detected[g]);
+            }
+
+            auto fill_effect = [&](auto& effect) {
                 effect.resize(differential_analysis::n_summaries);
                 if (do_min) {
-                    effect[0].resize(ngroups, std::vector<double>(ngenes));
+                    fill_inner(ngroups, effect[differential_analysis::MIN]);
                 }
                 if (do_mean) {
-                    effect[1].resize(ngroups, std::vector<double>(ngenes));
+                    fill_inner(ngroups, effect[differential_analysis::MEAN]);
                 }
                 if (do_median) {
-                    effect[2].resize(ngroups, std::vector<double>(ngenes));
+                    fill_inner(ngroups, effect[differential_analysis::MEDIAN]);
                 }
                 if (do_max) {
-                    effect[3].resize(ngroups, std::vector<double>(ngenes));
+                    fill_inner(ngroups, effect[differential_analysis::MAX]);
                 }
                 if (do_rank) {
-                    effect[4].resize(ngroups, std::vector<double>(ngenes));
+                    fill_inner(ngroups, effect[differential_analysis::MIN_RANK]);
                 }
                 return;
             };
 
             if (do_cohen) {
-                fill(cohen);
+                fill_effect(cohen);
             }
             if (do_auc) {
-                fill(auc);
+                fill_effect(auc);
             }
             return;
         }
 
-        std::vector<std::vector<std::vector<double> > > cohen;
-        std::vector<std::vector<std::vector<double> > > auc;
-        std::vector<std::vector<std::vector<double> > > means;
-        std::vector<std::vector<std::vector<double> > > detected;
+        typedef std::vector<Stat> Vector;
+        std::vector<std::vector<Vector> > cohen;
+        std::vector<std::vector<Vector> > auc;
+        std::vector<std::vector<Vector> > means;
+        std::vector<std::vector<Vector> > detected;
     };
 
-    template<class MAT, typename G> 
-    Results run(const MAT* p, const G* group) {
+    template<typename Stat = double, class MAT, typename G> 
+    Results<Stat> run(const MAT* p, const G* group) {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
-        Results res(p->nrow(), ngroups, 1, do_cohen, do_auc, use_min, use_mean, use_median, use_max, use_rank); 
+        Results<Stat> res(p->nrow(), ngroups, 1, do_cohen, do_auc, use_min, use_mean, use_median, use_max, use_rank); 
 
         auto mean_ptrs = vector_to_pointers3(res.means);
         auto detect_ptrs = vector_to_pointers3(res.detected);
@@ -306,15 +341,15 @@ public:
         return res;
     }
 
-    template<class MAT, typename G, typename B> 
-    Results run_blocked(const MAT* p, const G* group, const B* block) {
+    template<typename Stat = double, class MAT, typename G, typename B> 
+    Results<Stat> run_blocked(const MAT* p, const G* group, const B* block) {
         if (block == NULL) {
             return run(p, group);
         }
     
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
         auto nblocks = *std::max_element(block, block + p->ncol()) + 1;
-        Results res(p->nrow(), ngroups, nblocks, do_cohen, do_auc, use_min, use_mean, use_median, use_max, use_rank); 
+        Results<Stat> res(p->nrow(), ngroups, nblocks, do_cohen, do_auc, use_min, use_mean, use_median, use_max, use_rank); 
 
         auto mean_ptrs = vector_to_pointers2(res.means);
         auto detect_ptrs = vector_to_pointers2(res.detected);
@@ -326,16 +361,18 @@ public:
     }
 
 private:
-    std::vector<std::vector<double*> > vector_to_pointers2(std::vector<std::vector<std::vector<double> > >& input) {
-        std::vector<std::vector<double*> > ptrs;
+    template<typename Stat>
+    std::vector<std::vector<Stat*> > vector_to_pointers2(std::vector<std::vector<std::vector<Stat> > >& input) {
+        std::vector<std::vector<Stat*> > ptrs;
         for (auto& current : input) {
             ptrs.push_back(vector_to_pointers(current));
         }
         return ptrs;
     }
 
-    std::vector<double*> vector_to_pointers3(std::vector<std::vector<std::vector<double> > >& input) {
-        std::vector<double*> ptrs;
+    template<typename Stat>
+    std::vector<Stat*> vector_to_pointers3(std::vector<std::vector<std::vector<Stat> > >& input) {
+        std::vector<Stat*> ptrs;
         for (auto& current : input) {
             ptrs.push_back(current[0].data()); // first vector from each element.
         }

@@ -15,21 +15,21 @@ namespace differential_analysis {
 
 /******* Base class for factories and workers ********/
 
-template<typename Effect, typename Level, typename Stat>
+template<typename Stat, typename Level>
 struct Base {
-    Base(std::vector<Stat*> m, std::vector<Stat*> d, std::vector<Effect*> e, const Level* l, const std::vector<int>* ls, int ng, int nb, double t) : 
+    Base(std::vector<Stat*> m, std::vector<Stat*> d, std::vector<Stat*> e, const Level* l, const std::vector<int>* ls, int ng, int nb, double t) : 
         means(std::move(m)), detected(std::move(d)), effects(std::move(e)), levels(l), level_size_ptr(ls), ngroups(ng), nblocks(nb), threshold(t) {}
 
-    Effect* cohen() {
+    Stat* cohen() {
         return effects[0];
     }
 
-    Effect* auc() {
+    Stat* auc() {
         return effects[1];
     }
     
     std::vector<Stat*> means, detected;
-    std::vector<Effect*> effects;
+    std::vector<Stat*> effects;
 
     const Level* levels;
     const std::vector<int>* level_size_ptr;
@@ -40,19 +40,19 @@ struct Base {
 
 /******* Factory with running support, when AUCs are not desired ********/
 
-template<typename Effect, typename Level, typename Stat> 
+template<typename Stat, typename Level> 
 struct BidimensionalFactory {
 public:
-    BidimensionalFactory(size_t nr, size_t nc, std::vector<Stat*> m, std::vector<Stat*> d, std::vector<Effect*> e, const Level* l, const std::vector<int>* ls, int ng, int nb, double t) : 
+    BidimensionalFactory(size_t nr, size_t nc, std::vector<Stat*> m, std::vector<Stat*> d, std::vector<Stat*> e, const Level* l, const std::vector<int>* ls, int ng, int nb, double t) : 
         NR(nr), NC(nc), details(std::move(m), std::move(d), std::move(e), l, ls, ng, nb, t) {}
 
 protected:
     size_t NR, NC;
-    Base<Effect, Level, Stat> details;
+    Base<Stat, Level> details;
 
 public:
     struct ByRow { 
-        ByRow(Base<Effect, Level, Stat> d) :
+        ByRow(Base<Stat, Level> d) :
             tmp_means(d.level_size_ptr->size()), 
             tmp_vars(d.level_size_ptr->size()), 
             tmp_nzeros(d.level_size_ptr->size()), 
@@ -86,12 +86,12 @@ public:
     protected:
         std::vector<double> tmp_means, tmp_vars, tmp_nzeros, buffer;
     public:
-        Base<Effect, Level, Stat> details;
+        Base<Stat, Level> details;
     };
 
 public:
     struct DenseByRow : public ByRow {
-        DenseByRow(size_t nc, Base<Effect, Level, Stat> d) : NC(nc), ByRow(std::move(d)) {}
+        DenseByRow(size_t nc, Base<Stat, Level> d) : NC(nc), ByRow(std::move(d)) {}
 
         template<typename T>
         void compute(size_t i, const T* ptr) {
@@ -114,7 +114,7 @@ public:
 
 public:
     struct SparseByRow : public ByRow {
-        SparseByRow(Base<Effect, Level, Stat> d) : ByRow(std::move(d)) {}
+        SparseByRow(Base<Stat, Level> d) : ByRow(std::move(d)) {}
 
         template<class SparseRange>
         void compute(size_t i, SparseRange&& range) {
@@ -128,7 +128,7 @@ public:
     }
 
 private:
-    static void finalize_by_cols(size_t start, size_t end, const std::vector<std::vector<double> >& tmp_vars, Base<Effect, Level, Stat>& details) {
+    static void finalize_by_cols(size_t start, size_t end, const std::vector<std::vector<double> >& tmp_vars, Base<Stat, Level>& details) {
         const auto& level_size = *(details.level_size_ptr);
 
         // Dividing to obtain the proportion of detected cells per group.
@@ -164,7 +164,7 @@ private:
 
 public:
     struct DenseByCol {
-        DenseByCol(size_t start, size_t end, Base<Effect, Level, Stat> d) : 
+        DenseByCol(size_t start, size_t end, Base<Stat, Level> d) : 
             num(end - start), 
             tmp_vars(d.level_size_ptr->size(), std::vector<double>(num)), 
             counts(d.level_size_ptr->size()),
@@ -193,7 +193,7 @@ public:
         size_t counter = 0, num;
         std::vector<std::vector<double> > tmp_vars;
         std::vector<int> counts;
-        Base<Effect, Level, Stat> details;
+        Base<Stat, Level> details;
     };
 
     DenseByCol dense_running() {
@@ -220,7 +220,7 @@ public:
 
 public:
     struct SparseByCol { 
-        SparseByCol(size_t nr, size_t s, size_t e, Base<Effect, Level, Stat> d) : 
+        SparseByCol(size_t nr, size_t s, size_t e, Base<Stat, Level> d) : 
             start(s), end(e), 
             tmp_vars(d.level_size_ptr->size(), std::vector<double>(nr)), 
             counts(d.level_size_ptr->size()),
@@ -247,7 +247,7 @@ public:
         size_t start, end, counter = 0;
         std::vector<std::vector<double> > tmp_vars;
         std::vector<int> counts;
-        Base<Effect, Level, Stat> details;
+        Base<Stat, Level> details;
     };
 
     SparseByCol sparse_running() {
@@ -261,10 +261,10 @@ public:
 
 /******* Per-row factory when the AUC is desired ********/
 
-template<typename Effect, typename Level, typename Stat, typename Group, typename Block> 
+template<typename Stat, typename Level, typename Group, typename Block> 
 struct PerRowFactory {
 public:
-    PerRowFactory(size_t nr, size_t nc, std::vector<Stat*> m, std::vector<Stat*> d, std::vector<Effect*> e, const Level* l, const std::vector<int>* ls, 
+    PerRowFactory(size_t nr, size_t nc, std::vector<Stat*> m, std::vector<Stat*> d, std::vector<Stat*> e, const Level* l, const std::vector<int>* ls, 
         const Group* g, int ng, const Block* b, int nb, double t) : 
         NC(nc), group(g), block(b), 
         factory(nr, nc, std::move(m), std::move(d), std::move(e), l, ls, ng, nb, t) {}
@@ -275,7 +275,7 @@ private:
     size_t NC;
     const Group* group;
     const Block* block;
-    BidimensionalFactory<Effect, Level, Stat> factory;
+    BidimensionalFactory<Stat, Level> factory;
 
 public:
     template<class Component>

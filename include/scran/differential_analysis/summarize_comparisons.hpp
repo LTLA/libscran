@@ -10,7 +10,14 @@ namespace scran {
 
 namespace differential_analysis {
 
-static constexpr int n_summaries = 5; // min, mean, median, max, min-rank.
+enum summary {
+    MIN,
+    MEAN,
+    MEDIAN,
+    MAX,
+    MIN_RANK,
+    n_summaries 
+};
 
 template<class IT>
 double median (IT start, size_t n) {
@@ -49,29 +56,29 @@ void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vecto
             }
 
             if (restart == ngroups) {
-                for (size_t i = 0; i < 4; ++i) {
-                    if (output[i][l]) {
+                for (size_t i = 0; i < MIN_RANK; ++i) {
+                    if (output[i].size()) {
                         output[i][l][gene] = std::numeric_limits<double>::quiet_NaN();
                     }
                 }
             } else {
                 int ncomps = ngroups - restart;
                 if (ncomps > 1) {
-                    if (output[0][l]) {
-                        output[0][l][gene] = *std::min_element(start + restart, start + ngroups);
+                    if (output[MIN].size()) {
+                        output[MIN][l][gene] = *std::min_element(start + restart, start + ngroups);
                     }
-                    if (output[1][l]) {
-                        output[1][l][gene] = std::accumulate(start + restart, start + ngroups, 0.0) / ncomps; // Mean
+                    if (output[MEAN].size()) {
+                        output[MEAN][l][gene] = std::accumulate(start + restart, start + ngroups, 0.0) / ncomps; // Mean
                     }
-                    if (output[2][l]) {
-                        output[2][l][gene] = median(start + restart, ncomps); // Median 
+                    if (output[MEDIAN].size()) {
+                        output[MEDIAN][l][gene] = median(start + restart, ncomps); // Median 
                     }
-                    if (output[3][l]) {
-                        output[3][l][gene] = *std::max_element(start + restart, start + ngroups); // Maximum
+                    if (output[MAX].size()) {
+                        output[MAX][l][gene] = *std::max_element(start + restart, start + ngroups); // Maximum
                     }
                 } else {
-                    for (size_t i = 0; i < 4; ++i) {
-                        if (output[i][l]) {
+                    for (size_t i = 0; i < MIN_RANK; ++i) {
+                        if (output[i].size()) {
                             output[i][l][gene] = start[restart]; 
                         }
                     }
@@ -82,29 +89,35 @@ void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vecto
     return;
 }
 
-template<typename Stat, class V>
-void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vector<Stat*>& output, V& buffer) {
+template<typename Stat>
+void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vector<Stat*>& output) {
     auto shift = ngroups * ngroups;
 
-    for (int g = 0; g < ngroups; ++g) {
-        auto target = output[g];
-        std::fill(target, target + ngenes, ngenes + 1); 
+    #pragma omp parallel
+    {
+        std::vector<std::pair<Stat, int> > buffer(ngenes);
 
-        for (int g2 = 0; g2 < ngroups; ++g2) {
-            if (g == g2) {
-                continue;
-            }
-            auto copy = effects + g * ngroups + g2;
-            for (size_t i = 0; i < ngenes; ++i, copy += shift) {
-                buffer[i].first = -*copy; // negative to sort by decreasing value.
-                buffer[i].second = i;
-            }
-            std::sort(buffer.begin(), buffer.end());
+        #pragma omp for
+        for (int g = 0; g < ngroups; ++g) {
+            auto target = output[g];
+            std::fill(target, target + ngenes, ngenes + 1); 
 
-            double counter = 1;
-            for (const auto& x : buffer) {
-                target[x.second] = std::min(counter, target[x.second]);
-                ++counter;
+            for (int g2 = 0; g2 < ngroups; ++g2) {
+                if (g == g2) {
+                    continue;
+                }
+                auto copy = effects + g * ngroups + g2;
+                for (size_t i = 0; i < ngenes; ++i, copy += shift) {
+                    buffer[i].first = -*copy; // negative to sort by decreasing value.
+                    buffer[i].second = i;
+                }
+                std::sort(buffer.begin(), buffer.end());
+
+                double counter = 1;
+                for (const auto& x : buffer) {
+                    target[x.second] = std::min(counter, target[x.second]);
+                    ++counter;
+                }
             }
         }
     }
