@@ -38,6 +38,18 @@ target_link_libraries(
     scran
 )
 
+set(USE_OPENMP OFF CACHE BOOL "Compile with OpenMP support")
+if (USE_OPENMP)
+    find_package(OpenMP)
+    target_link_libraries(libtest OpenMP::OpenMP_CXX)
+endif()
+
+set(CODE_COVERAGE OFF CACHE BOOL "Enable coverage testing")
+if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(libtest PRIVATE -O0 -g --coverage)
+    target_link_options(libtest PRIVATE --coverage)
+endif()
+
 include(GoogleTest)
 gtest_discover_tests(libtest)
 

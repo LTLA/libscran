@@ -11,11 +11,17 @@ jobs:
       matrix:
         config:
         - {
-            name: "Ubuntu Latest GCC", artifact: "Linux.tar.xz",
-            os: ubuntu-latest
+            name: "Ubuntu Latest GCC, OpenMP enabled", 
+            os: ubuntu-latest,
+            omp: true
           }
         - {
-            name: "macOS Latest Clang", artifact: "macOS.tar.xz",
+            name: "Ubuntu Latest GCC, coverage enabled", 
+            os: ubuntu-latest,
+            cov: true
+          }
+        - {
+            name: "macOS Latest Clang", 
             os: macos-latest
           }
 
@@ -26,10 +32,31 @@ jobs:
       uses: lukka/get-cmake@latest
 
     - name: Configure the build
+      if: ${{ ! matrix.config.cov && ! matrix.config.omp }}
       run: cmake -S . -B build
+
+    - name: Configure the build with coverage
+      if: ${{ matrix.config.cov }}
+      run: cmake -S . -B build -DCODE_COVERAGE=ON
+
+    - name: Configure the build with OpenMP
+      if: ${{ matrix.config.omp }}
+      run: cmake -S . -B build -DUSE_OPENMP=ON
 
     - name: Run the build
       run: cmake --build build
 
     - name: Run the tests
       run: build/tests/libtest
+
+    - name: Generate code coverage
+      if: ${{ matrix.config.cov }}
+      run: |
+        cd build/tests/CMakeFiles/
+        find -type f -name "*.gcno" -execdir gcov -abcfu {} +
+
+    - name: Upload to Codecov
+      if: ${{ matrix.config.cov }}
+      uses: codecov/codecov-action@v2.1.0
+      with:
+        directory: build/tests/CMakeFiles/
