@@ -143,28 +143,12 @@ public:
     template<typename T, typename IDX, typename Block, typename X>
     Results run(const tatami::Matrix<T, IDX>* mat, const Block* block, const X* features) {
         Results output;
-
         if (!features) {
             run(mat, block, output.pcs, output.variance_explained, output.total_variance);
         } else {
-            std::vector<int> subset;
-            subset.reserve(mat->nrow());
-            for (size_t r = 0; r < mat->nrow(); ++r) {
-                if (features[r]) {
-                    subset.push_back(r);
-                }
-            }
-
-            // Using a no-op deleter in a shared pointer to get it to work with
-            // the DelayedSubset. This hacky shared pointer dies once we move
-            // out of this block, and the matrix will continue to exist
-            // outside, so we shouldn't have any problems with lifetimes. 
-            std::shared_ptr<const tatami::Matrix<T, IDX> > ptr(mat, [](const tatami::Matrix<T, IDX>*){});
-
-            auto subsetted = tatami::make_DelayedSubset<0>(std::move(ptr), std::move(subset));
+            auto subsetted = pca_utils::subset_matrix_by_features(mat, features);
             run(subsetted.get(), block, output.pcs, output.variance_explained, output.total_variance);
         }
-
         return output;
     }
 
