@@ -77,6 +77,24 @@ inline void apply_scale(bool scale, double val, size_t n, double* ptr, double& t
     }
 }
 
+template<typename T, typename IDX, typename X>
+std::shared_ptr<const tatami::Matrix<T, IDX> > subset_matrix_by_features(const tatami::Matrix<T, IDX>* mat, const X * features) {
+    std::vector<int> subset;
+    subset.reserve(mat->nrow());
+    for (size_t r = 0; r < mat->nrow(); ++r) {
+        if (features[r]) {
+            subset.push_back(r);
+        }
+    }
+
+    // Using a no-op deleter in a shared pointer to get it to work with the
+    // DelayedSubset without actually taking ownership of 'mat'. This hacky
+    // shared pointer should only be used as long as 'mat' is alive.
+    std::shared_ptr<const tatami::Matrix<T, IDX> > ptr(mat, [](const tatami::Matrix<T, IDX>*){});
+
+    return tatami::make_DelayedSubset<0>(std::move(ptr), std::move(subset));
+}
+
 }
 
 }

@@ -32,4 +32,23 @@ inline void expect_equal_vectors(const Eigen::VectorXd& left, const Eigen::Vecto
     return;
 }
 
+inline std::vector<int> generate_blocks(int nobs, int nblocks) {
+    std::vector<int> blocks(nobs);
+    for (int i = 0; i < nobs; ++i) {
+        blocks[i] = i % nblocks;
+    }
+    return blocks;
+}
+
+inline void compare_almost_equal(const Eigen::MatrixXd& left, const Eigen::MatrixXd& right) {
+    ASSERT_EQ(left.cols(), right.cols());
+    ASSERT_EQ(left.rows(), right.rows());
+    
+    for (size_t c = 0; c < left.cols(); ++c) {
+        for (size_t r = 0; r < left.rows(); ++r) {
+            EXPECT_FLOAT_EQ(left(r, c), right(r, c));
+        }
+    }
+}
+
 #endif
