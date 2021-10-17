@@ -110,21 +110,27 @@ private:
     template<class Matrix>
     void reapply(const size_t nblocks, 
         const Matrix& emat, const Eigen::MatrixXd& center_m, const Eigen::VectorXd& scale_v, 
-        const Eigen::MatrixXd& V, const Eigen::VectorXd& D, 
+        Eigen::MatrixXd V, const Eigen::VectorXd& D, 
         Eigen::MatrixXd& pcs, Eigen::VectorXd& variance_explained)
     {
-        pcs = emat * scale_v.asDiagonal() * V;
-        Eigen::MatrixXd subtractor = center_m * scale_v.asDiagonal() * V;
-        for (int i = 0; i < pcs.cols(); ++i) {
+        for (Eigen::Index i = 0; i < V.cols(); ++i) {
+            for (Eigen::Index j = 0; j < V.rows(); ++j) {
+                V(j, i) /= scale_v[j];
+            }
+        }
+
+        pcs = emat * V;
+        Eigen::MatrixXd subtractor = center_m * V;
+        for (Eigen::Index i = 0; i < pcs.cols(); ++i) {
             double meanval = subtractor(0, i);
-            for (size_t j = 0; j < pcs.rows(); ++j) {
+            for (Eigen::Index j = 0; j < pcs.rows(); ++j) {
                 pcs(j, i) -= meanval;
             }
         }
 
         variance_explained.resize(D.size());
         for (int i = 0; i < D.size(); ++i) {
-            variance_explained[i] = D[i] * D[i] / nblocks;
+            variance_explained[i] = D[i] * D[i];
         }
         return;
     }
@@ -140,7 +146,7 @@ private:
         // Computing weights.
         std::vector<double> weights(NC);
         for (size_t i = 0; i < NC; ++i) {
-            weights[i] = 1/static_cast<double>(block_size[block[i]]);
+            weights[i] = 1/std::sqrt(static_cast<double>(block_size[block[i]]));
         }
 
         Eigen::MatrixXd center_m(nblocks, mat->nrow());
@@ -250,7 +256,6 @@ private:
                     auto b = block[range.index[i]];
                     proxyvar += diff * diff / block_size[b];
                 }
-                proxyvar /= nblocks;
 
                 nnzeros[r] = range.number;
                 values.emplace_back(range.value, range.value + range.number);
@@ -319,9 +324,6 @@ private:
                     scale_v[r] += zero_sum / block_size[b];
                 }
             }
-            for (size_t r = 0; r < NR; ++r) {
-                scale_v[r] /= nblocks;
-            }
 
             pca_utils::set_scale(scale, scale_v, total_var);
             pca_utils::fill_sparse_matrix<false>(A, indices, values, nnzeros);
@@ -369,12 +371,10 @@ private:
             // the weighted sum of squared deltas, which is what PCA actually sees.
             double& proxyvar = scale_v[r];
             proxyvar = 0;
-            auto copy = outIt;
-            for (size_t c = 0; c < NC; ++c, ++copy) {
-                double diff = *copy - grand_mean;
+            for (size_t c = 0; c < NC; ++c) {
+                double diff = outIt[c] - grand_mean;
                 proxyvar += diff * diff / block_size[block[c]];
             }
-            proxyvar /= nblocks;
         }
 
         pca_utils::set_scale(scale, scale_v, total_var);

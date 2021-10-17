@@ -5,6 +5,8 @@
 
 #include "tatami/base/Matrix.hpp"
 #include "tatami/base/DenseMatrix.hpp"
+#include "tatami/base/DelayedBind.hpp"
+#include "tatami/base/DelayedSubset.hpp"
 #include "tatami/utils/convert_to_dense.hpp"
 #include "tatami/utils/convert_to_sparse.hpp"
 
@@ -103,7 +105,7 @@ protected:
     int nblocks;
 };
 
-TEST_P(MultiBatchPCATester, Test) {
+TEST_P(MultiBatchPCATester, Basic) {
     assemble(GetParam());
 
     scran::MultiBatchPCA runner;
@@ -128,6 +130,67 @@ TEST_P(MultiBatchPCATester, Test) {
     expect_equal_pcs(res1.pcs, res4.pcs);
     expect_equal_vectors(res1.variance_explained, res4.variance_explained);
     EXPECT_FLOAT_EQ(res1.total_variance, res4.total_variance);
+}
+
+TEST_P(MultiBatchPCATester, BalancedBlock) {
+    assemble(GetParam());
+    auto block = generate_blocks(dense_row->ncol(), nblocks);
+
+    scran::MultiBatchPCA runner;
+    runner.set_scale(scale).set_rank(rank);
+    auto res1 = runner.run(dense_row.get(), block.data());
+
+    // Checking that we get more-or-less the same results
+    // from the vanilla PCA algorithm in the absence of blocks.
+    scran::RunPCA ref;
+    ref.set_scale(scale).set_rank(rank);
+    auto res2 = ref.run(dense_row.get());
+
+    // Only relative values make sense with the various scaling effects.
+    for (auto& p : res1.variance_explained) { p /= res1.total_variance; }
+    for (auto& p : res2.variance_explained) { p /= res2.total_variance; }
+
+    if (dense_row->ncol() % nblocks == 0) { // balanced blocks.
+        if (scale) { // need to adjust for global differences in scale. 
+            double mult = res1.pcs(0,0) / res2.pcs(0,0);
+            res1.pcs /= mult;
+        }
+        expect_equal_pcs(res1.pcs, res2.pcs);
+        expect_equal_vectors(res1.variance_explained, res2.variance_explained);
+    } else {
+        // check that blocking actually has an effect.
+        EXPECT_TRUE(std::abs(res1.pcs(0,0) - res2.pcs(0,0)) > 1e-8);
+        EXPECT_TRUE(std::abs(res1.variance_explained[0] - res2.variance_explained[0]) > 1e-8);
+    }
+}
+
+TEST_P(MultiBatchPCATester, DuplicatedBlocks) {
+    assemble(GetParam());
+    auto block = generate_blocks(dense_row->ncol(), nblocks);
+
+    scran::MultiBatchPCA runner;
+    runner.set_scale(scale).set_rank(rank);
+    auto res1 = runner.run(dense_row.get(), block.data());
+
+    // Clone the first block.
+    auto block2 = block;
+    std::vector<int> subset;
+    for (size_t b = 0; b < block.size(); ++b) {
+        if (block[b] == 0) {
+            subset.push_back(b);
+            block2.push_back(0);
+        }
+    }
+    EXPECT_TRUE(subset.size() > 0);
+
+    auto subs = tatami::make_DelayedSubset<1>(dense_row, subset);
+    auto com = tatami::make_DelayedBind<1>(std::vector<decltype(subs)>{ dense_row, subs });
+    auto res2 = runner.run(com.get(), block2.data());
+
+    EXPECT_EQ(res2.pcs.rows(), res1.pcs.rows() + subset.size()); 
+    expect_equal_pcs(res1.pcs, res2.pcs.topRows(res1.pcs.rows()));
+    expect_equal_vectors(res1.variance_explained, res2.variance_explained);
+    EXPECT_FLOAT_EQ(res1.total_variance, res2.total_variance);
 }
 
 INSTANTIATE_TEST_SUITE_P(
