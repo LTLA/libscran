@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <stdexcept>
 
 namespace scran {
 
@@ -26,6 +27,24 @@ BlockIndices block_indices(size_t n, SIT p) {
     } else {
         return BlockIndices();
     }
+}
+
+template<typename Block>
+std::vector<int> block_sizes(size_t n, const Block* block) {
+    const Block nblocks = (n ? *std::max_element(block, block + n) + 1 : 1);
+
+    std::vector<int> block_size(nblocks);
+    for (size_t j = 0; j < n; ++j) {
+        ++block_size[block[j]];
+    }
+
+    for (auto b : block_size) {
+        if (b == 0) {
+            throw std::runtime_error("block IDs must be 0-based and consecutive with no empty blocks");
+        }
+    }
+
+    return block_size;
 }
 
 }
