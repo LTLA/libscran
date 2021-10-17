@@ -150,11 +150,29 @@ $(function() {
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    }</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>}</div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>}</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>}</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> IDX, <span class="keyword">typename</span> X&gt;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>std::shared_ptr&lt;const tatami::Matrix&lt;T, IDX&gt; &gt; subset_matrix_by_features(<span class="keyword">const</span> tatami::Matrix&lt;T, IDX&gt;* mat, <span class="keyword">const</span> X * features) {</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    std::vector&lt;int&gt; subset;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    subset.reserve(mat-&gt;nrow());</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> r = 0; r &lt; mat-&gt;nrow(); ++r) {</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        <span class="keywordflow">if</span> (features[r]) {</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>            subset.push_back(r);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        }</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    }</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <span class="comment">// Using a no-op deleter in a shared pointer to get it to work with the</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="comment">// DelayedSubset without actually taking ownership of &#39;mat&#39;. This hacky</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="comment">// shared pointer should only be used as long as &#39;mat&#39; is alive.</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    std::shared_ptr&lt;const tatami::Matrix&lt;T, IDX&gt; &gt; ptr(mat, [](<span class="keyword">const</span> tatami::Matrix&lt;T, IDX&gt;*){});</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keywordflow">return</span> tatami::make_DelayedSubset&lt;0&gt;(std::move(ptr), std::move(subset));</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>}</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>}</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>}</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
