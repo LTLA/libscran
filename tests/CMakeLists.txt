@@ -22,6 +22,7 @@ add_executable(
     src/feature_selection/ChooseHVGs.cpp
     src/dimensionality_reduction/RunPCA.cpp
     src/dimensionality_reduction/BlockedPCA.cpp
+    src/dimensionality_reduction/MultiBatchPCA.cpp
     src/clustering/BuildSNNGraph.cpp
     src/clustering/ClusterSNNGraph.cpp
     src/differential_analysis/summarize_comparisons.cpp
