@@ -59,7 +59,6 @@ inline void set_scale(bool scale, Eigen::VectorXd& scale_v, double& total_var) {
         }
     } else {
         total_var = std::accumulate(scale_v.begin(), scale_v.end(), 0.0);
-        std::fill(scale_v.begin(), scale_v.end(), 1);
     }
 }
 

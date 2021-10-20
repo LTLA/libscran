@@ -25,47 +25,42 @@ TEST(MultiBatchMatrixTest, Test) {
         }
     }
 
-    Eigen::MatrixXd means(1, NC);
+    Eigen::VectorXd means(NC);
     for (size_t j = 0; j < NC; ++j) {
-        means(0, j) = dist(rng);
+        means[j] = dist(rng);
     }
 
-    std::vector<double> weights(NR);
+    Eigen::VectorXd weights(NR);
     for (size_t j = 0; j < NR; ++j) {
-        weights[j] = dist(rng);
-        weights[j] *= weights[j];
+        weights[j] = std::abs(dist(rng)) + 0.1;
     }
 
-    scran::MultiBatchEigenMatrix<false, decltype(thing), double> batched(thing, weights.data(), means);
+    scran::MultiBatchEigenMatrix<decltype(thing)> batched(&thing, &weights, &means);
     auto realized = batched.realize();
 
     // Trying in the normal orientation.
     {
-        size_t NRHS = 2;
-        Eigen::MatrixXd rhs(NC, NRHS);
+        Eigen::VectorXd rhs(NC);
         for (size_t i = 0; i < NC; ++i) {
-            for (size_t j = 0; j < NRHS; ++j) {
-                rhs(i, j) = dist(rng);
-            }
+            rhs[i] = dist(rng);
         }
 
-        Eigen::MatrixXd prod1 = batched * rhs;
-        Eigen::MatrixXd prod2 = realized * rhs;
+        Eigen::VectorXd prod1(NR);
+        batched.multiply(rhs, prod1);
+        Eigen::VectorXd prod2 = realized * rhs;
         compare_almost_equal(prod1, prod2);
     }
 
     // Trying in the transposed orientation.
     {
-        size_t NRHS = 2;
-        Eigen::MatrixXd rhs(NR, NRHS);
+        Eigen::VectorXd rhs(NR);
         for (size_t i = 0; i < NR; ++i) {
-            for (size_t j = 0; j < NRHS; ++j) {
-                rhs(i, j) = dist(rng);
-            }
+            rhs[i] = dist(rng);
         }
 
-        Eigen::MatrixXd tprod1 = batched.adjoint() * rhs;
-        Eigen::MatrixXd tprod2 = realized.adjoint() * rhs;
+        Eigen::VectorXd tprod1(NC);
+        batched.adjoint_multiply(rhs, tprod1);
+        Eigen::VectorXd tprod2 = realized.adjoint() * rhs;
         compare_almost_equal(tprod1, tprod2);
     }
 }

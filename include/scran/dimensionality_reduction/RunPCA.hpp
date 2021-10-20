@@ -29,7 +29,7 @@ private:
 
 public:
     RunPCA& set_rank(int r = Defaults::rank) {
-        rank = r;
+        irb.set_number(r);
         return *this;
     }
 
@@ -41,7 +41,6 @@ public:
 private:
     template<typename T, typename IDX>
     void run(const tatami::Matrix<T, IDX>* mat, Eigen::MatrixXd& pcs, Eigen::VectorXd& variance_explained, double& total_var) {
-        irb.set_number(rank);
 
         if (mat->sparse()) {
             Eigen::VectorXd center_v(mat->nrow()), scale_v(mat->nrow());
@@ -51,8 +50,15 @@ private:
             SCRAN_LOGGER("scran::RunPCA", "Running the IRLBA algorithm");
 #endif
 
-            auto result = irb.run(emat, center_v, scale_v);
-            pca_utils::clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
+            irlba::Centered<decltype(emat)> centered(&emat, &center_v);
+            if (scale) {
+                irlba::Scaled<decltype(centered)> scaled(&centered, &scale_v);
+                auto result = irb.run(scaled);
+                pca_utils::clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
+            } else {
+                auto result = irb.run(centered);
+                pca_utils::clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
+            }
         } else {
             auto emat = create_eigen_matrix_dense(mat, total_var);
 

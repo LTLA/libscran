@@ -16,71 +16,49 @@
 
 namespace scran {
 
-template<bool transposed, class Matrix, typename Weight>
+template<class Matrix>
 struct MultiBatchEigenMatrix {
-    MultiBatchEigenMatrix(const Matrix& m, const Weight* w, const Eigen::MatrixXd& mx) : mat(m), weights(w), means(mx) {}
+    MultiBatchEigenMatrix(const Matrix* m, const Eigen::VectorXd* w, const Eigen::VectorXd* mx) : mat(m), weights(w), means(mx) {}
 
-    auto rows() const { return mat.rows(); }
-    auto cols() const { return mat.cols(); }
+    auto rows() const { return mat->rows(); }
+    auto cols() const { return mat->cols(); }
 
     template<class Right>
-    auto operator*(const Right& rhs) const {
-        if constexpr(!transposed) {
-            Eigen::MatrixXd raw = mat * rhs;
-            Eigen::MatrixXd sub = means * rhs;
-            for (Eigen::Index c = 0; c < raw.cols(); ++c) {
-                auto meanval = sub(0, c);
-                for (Eigen::Index r = 0; r < raw.rows(); ++r) {
-                    auto& curval = raw(r, c); 
-                    curval -= meanval;
-                    curval *= weights[r];
-                }
-            }
-            return raw;
-        } else {
-            Eigen::MatrixXd rhs_copy(rhs);
-            std::vector<double> sums(rhs_copy.cols());
-            for (Eigen::Index c = 0; c < rhs_copy.cols(); ++c) {
-                for (Eigen::Index r = 0; r < rhs_copy.rows(); ++r) {
-                    auto& val = rhs_copy(r, c);
-                    val *= weights[r];
-                    sums[c] += val;
-                }
-            }
-
-            Eigen::MatrixXd output = mat.adjoint() * rhs_copy;
-            for (Eigen::Index c = 0; c < output.cols(); ++c) {
-                for (Eigen::Index r = 0; r < output.rows(); ++r) {
-                    output(r, c) -= means(0, r) * sums[c];
-                }
-            }
-
-            return output;
+    void multiply(const Right& rhs, Eigen::VectorXd& output) const {
+        output.noalias() = *mat * rhs;
+        double sub = means->dot(rhs);
+        for (Eigen::Index i = 0; i < output.size(); ++i) {
+            output[i] -= sub;
+            output[i] *= (*weights)[i];
         }
     }
 
-    MultiBatchEigenMatrix<!transposed, Matrix, Weight> adjoint() const {
-        return MultiBatchEigenMatrix<!transposed, Matrix, Weight>(mat, weights, means);
+    template<class Right>
+    void adjoint_multiply(const Right& rhs, Eigen::VectorXd& output) const {
+        auto combined = weights->cwiseProduct(rhs);
+        output.noalias() = mat->adjoint() * combined;
+        double sum = combined.sum();
+        for (Eigen::Index i = 0; i < output.size(); ++i) {
+            output[i] -= (*means)[i] * sum;
+        }
+        return;
     }
 
     Eigen::MatrixXd realize() const {
-        Eigen::MatrixXd output(mat);
+        Eigen::MatrixXd output(*mat);
         for (Eigen::Index c = 0; c < output.cols(); ++c) {
             for (Eigen::Index r = 0; r < output.rows(); ++r) {
                 auto& val = output(r, c);
-                val -= means(0, c);
-                val *= weights[r];
+                val -= (*means)[c];
+                val *= (*weights)[r];
             }
-        }
-        if constexpr(transposed) {
-            output.adjointInPlace();
         }
         return output;
     }
 private:
-    const Matrix& mat;
-    const Weight* weights;
-    const Eigen::MatrixXd& means;
+    const Matrix* mat;
+    const Eigen::VectorXd* weights;
+    const Eigen::VectorXd* means;
 };
 
 class MultiBatchPCA {
@@ -97,7 +75,7 @@ private:
 
 public:
     MultiBatchPCA& set_rank(int r = Defaults::rank) {
-        rank = r;
+        irb.set_number(r);
         return *this;
     }
 
@@ -108,21 +86,33 @@ public:
 
 private:
     template<class Matrix>
-    void reapply(const size_t nblocks, 
-        const Matrix& emat, const Eigen::MatrixXd& center_m, const Eigen::VectorXd& scale_v, 
-        Eigen::MatrixXd V, const Eigen::VectorXd& D, 
-        Eigen::MatrixXd& pcs, Eigen::VectorXd& variance_explained)
+    void reapply(const Matrix& emat, 
+        const Eigen::VectorXd& center_v, 
+        const Eigen::VectorXd& scale_v, 
+        Eigen::MatrixXd V, 
+        const Eigen::VectorXd& D, 
+        Eigen::MatrixXd& pcs, 
+        Eigen::VectorXd& variance_explained)
     {
         for (Eigen::Index i = 0; i < V.cols(); ++i) {
             for (Eigen::Index j = 0; j < V.rows(); ++j) {
                 V(j, i) /= scale_v[j];
             }
         }
+        reapply(emat, center_v, V, D, pcs, variance_explained);
+    }
 
+    template<class Matrix>
+    void reapply(const Matrix& emat,
+        const Eigen::VectorXd& center_v, 
+        const Eigen::MatrixXd& V, 
+        const Eigen::VectorXd& D, 
+        Eigen::MatrixXd& pcs, 
+        Eigen::VectorXd& variance_explained)
+    {
         pcs = emat * V;
-        Eigen::MatrixXd subtractor = center_m * V;
         for (Eigen::Index i = 0; i < pcs.cols(); ++i) {
-            double meanval = subtractor(0, i);
+            double meanval = center_v.dot(V.col(i));
             for (Eigen::Index j = 0; j < pcs.rows(); ++j) {
                 pcs(j, i) -= meanval;
             }
@@ -135,35 +125,42 @@ private:
         return;
     }
 
+private:
     template<typename T, typename IDX, typename Block>
     void run(const tatami::Matrix<T, IDX>* mat, const Block* block, Eigen::MatrixXd& pcs, Eigen::VectorXd& variance_explained, double& total_var) {
-        irb.set_number(rank);
-
         const size_t NC = mat->ncol();
         const auto& block_size = block_sizes(NC, block); 
         const size_t nblocks = block_size.size();
 
         // Computing weights.
-        std::vector<double> weights(NC);
+        Eigen::VectorXd weights(NC);
         for (size_t i = 0; i < NC; ++i) {
             weights[i] = 1/std::sqrt(static_cast<double>(block_size[block[i]]));
         }
 
-        Eigen::MatrixXd center_m(nblocks, mat->nrow());
+        Eigen::VectorXd center_v(mat->nrow());
         Eigen::VectorXd scale_v(mat->nrow());
 
-        // Dummy vector, the real centering is done in center_m.
-        Eigen::VectorXd center_v(mat->nrow()); 
-        center_v.setZero(); 
+        // Remember, we want to run the PCA on the modified matrix,
+        // but we want to apply the rotation vectors to the original matrix
+        // (after any centering/scaling but without the batch weights).
+        auto executor = [&](const auto& emat) -> void {
+            MultiBatchEigenMatrix<typename std::remove_reference<decltype(emat)>::type> thing(&emat, &weights, &center_v);
+            if (scale) {
+                auto result = irb.run(irlba::Scaled<decltype(thing)>(&thing, &scale_v));
+                reapply(emat, center_v, scale_v, result.V, result.D, pcs, variance_explained);
+            } else {
+                auto result = irb.run(thing);
+                reapply(emat, center_v, result.V, result.D, pcs, variance_explained);
+            }
+        };
 
         if (mat->sparse()) {
-            auto emat = create_eigen_matrix_sparse(mat, center_m, scale_v, block, block_size, total_var);
-            auto result = irb.run(MultiBatchEigenMatrix<false, decltype(emat), double>(emat, weights.data(), center_m), center_v, scale_v);
-            reapply(nblocks, emat, center_m, scale_v, result.V, result.D, pcs, variance_explained);
+            auto emat = create_eigen_matrix_sparse(mat, center_v, scale_v, block, block_size, total_var);
+            executor(emat);
         } else {
-            auto emat = create_eigen_matrix_dense(mat, center_m, scale_v, block, block_size, total_var);
-            auto result = irb.run(MultiBatchEigenMatrix<false, decltype(emat), double>(emat, weights.data(), center_m), center_v, scale_v);
-            reapply(nblocks, emat, center_m, scale_v, result.V, result.D, pcs, variance_explained);
+            auto emat = create_eigen_matrix_dense(mat, center_v, scale_v, block, block_size, total_var);
+            executor(emat);
         }
 
         return;
@@ -198,7 +195,7 @@ public:
 private:
     template<typename T, typename IDX, typename Block> 
     Eigen::SparseMatrix<double> create_eigen_matrix_sparse(const tatami::Matrix<T, IDX>* mat, 
-        Eigen::MatrixXd& mean_v, 
+        Eigen::VectorXd& mean_v, 
         Eigen::VectorXd& scale_v, 
         const Block* block,
         const std::vector<int>& block_size,
@@ -233,7 +230,7 @@ private:
                     ++block_count[b];
                 }
 
-                double& grand_mean = mean_v(0, r);
+                double& grand_mean = mean_v[r];
                 grand_mean = 0;
                 for (size_t b = 0; b < nblocks; ++b) {
                     grand_mean += block_means[b] / block_size[b];
@@ -296,11 +293,11 @@ private:
             for (size_t b = 0; b < nblocks; ++b) {
                 const auto& cur_means = tmp_means[b];
                 for (size_t r = 0; r < NR; ++r) {
-                    mean_v(0, r) += cur_means[r] / block_size[b];
+                    mean_v[r] += cur_means[r] / block_size[b];
                 }
             }
             for (size_t r = 0; r < NR; ++r) {
-                mean_v(0, r) /= nblocks;
+                mean_v[r] /= nblocks;
             }
 
             // Computing the pseudo-variances for each gene.
@@ -312,7 +309,7 @@ private:
 
                 for (size_t i = 0; i < cur_idx.size(); ++i) {
                     auto r = cur_idx[i];
-                    double diff = cur_vals[i] - mean_v(0, r);
+                    double diff = cur_vals[i] - mean_v[r];
                     scale_v[r] += diff * diff / bs;
                 }
             }
@@ -320,7 +317,7 @@ private:
             for (size_t b = 0; b < nblocks; ++b) {
                 const auto& used = tmp_nonzero[b];
                 for (size_t r = 0; r < NR; ++r) {
-                    double zero_sum = mean_v(0, r) * mean_v(0, r) * (block_size[b] - used[r]);
+                    double zero_sum = mean_v[r] * mean_v[r] * (block_size[b] - used[r]);
                     scale_v[r] += zero_sum / block_size[b];
                 }
             }
@@ -337,7 +334,7 @@ private:
     template<typename T, typename IDX, typename Block> 
     Eigen::MatrixXd create_eigen_matrix_dense(
         const tatami::Matrix<T, IDX>* mat, 
-        Eigen::MatrixXd& mean_v, 
+        Eigen::VectorXd& mean_v, 
         Eigen::VectorXd& scale_v, 
         const Block* block,
         const std::vector<int>& block_size,
@@ -360,7 +357,7 @@ private:
             for (size_t c = 0; c < NC; ++c) {
                 mean_buffer[block[c]] += ptr[c];
             }
-            double& grand_mean = mean_v(0, r);
+            double& grand_mean = mean_v[r];
             grand_mean = 0;
             for (size_t b = 0; b < nblocks; ++b) {
                 grand_mean += mean_buffer[b] / block_size[b];

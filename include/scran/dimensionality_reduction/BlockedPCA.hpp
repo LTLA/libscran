@@ -15,60 +15,50 @@
 
 namespace scran {
 
-template<bool transposed, class Matrix, typename Block>
+template<class Matrix, typename Block>
 struct BlockedEigenMatrix {
-    BlockedEigenMatrix(const Matrix& m, const Block* b, const Eigen::MatrixXd& mx) : mat(m), block(b), means(mx) {}
+    BlockedEigenMatrix(const Matrix* m, const Block* b, const Eigen::MatrixXd* mx) : mat(m), block(b), means(mx) {}
 
-    auto rows() const { return mat.rows(); }
-    auto cols() const { return mat.cols(); }
+    auto rows() const { return mat->rows(); }
+    auto cols() const { return mat->cols(); }
 
     template<class Right>
-    auto operator*(const Right& rhs) const {
-        if constexpr(!transposed) {
-            Eigen::MatrixXd raw = mat * rhs;
-            Eigen::MatrixXd sub = means * rhs;
-            for (Eigen::Index c = 0; c < raw.cols(); ++c) {
-                for (Eigen::Index r = 0; r < raw.rows(); ++r) {
-                    raw(r, c) -= sub(block[r], c);
-                }
-            }
-            return raw;
-        } else {
-            Eigen::MatrixXd aggr(means.rows(), rhs.cols());
-            aggr.setZero(means.rows(), rhs.cols());
-
-            for (Eigen::Index c = 0; c < rhs.cols(); ++c) {
-                for (Eigen::Index i = 0; i < rhs.rows(); ++i) {
-                    aggr(block[i], c) += rhs(i, c); 
-                }
-            }
-
-            Eigen::MatrixXd output = mat.adjoint() * rhs;
-            output.noalias() -= means.adjoint() * aggr;
-            return output;
+    void multiply(const Right& rhs, Eigen::VectorXd& output) const {
+        output.noalias() = (*mat) * rhs;
+        Eigen::MatrixXd sub = (*means) * rhs;
+        for (Eigen::Index i = 0; i < output.size(); ++i) {
+            output[i] -= sub(block[i], 0);
         }
+        return;
     }
 
-    BlockedEigenMatrix<!transposed, Matrix, Block> adjoint() const {
-        return BlockedEigenMatrix<!transposed, Matrix, Block>(mat, block, means);
+    template<class Right>
+    void adjoint_multiply(const Right& rhs, Eigen::VectorXd& output) const {
+        output.noalias() = mat->adjoint() * rhs;
+
+        Eigen::VectorXd aggr(means->rows());
+        aggr.setZero();
+        for (Eigen::Index i = 0; i < rhs.size(); ++i) {
+            aggr[block[i]] += rhs[i]; 
+        }
+
+        output.noalias() -= means->adjoint() * aggr;
+        return;
     }
 
     Eigen::MatrixXd realize() const {
-        Eigen::MatrixXd output(mat);
+        Eigen::MatrixXd output(*mat);
         for (Eigen::Index c = 0; c < output.cols(); ++c) {
             for (Eigen::Index r = 0; r < output.rows(); ++r) {
-                output(r, c) -= means(block[r], c);
+                output(r, c) -= (*means)(block[r], c);
             }
-        }
-        if constexpr(transposed) {
-            output.adjointInPlace();
         }
         return output;
     }
 private:
-    const Matrix& mat;
+    const Matrix* mat;
     const Block* block;
-    const Eigen::MatrixXd& means;
+    const Eigen::MatrixXd* means;
 };
 
 class BlockedPCA {
@@ -111,12 +101,15 @@ private:
             Eigen::VectorXd scale_v(mat->nrow());
             auto emat = create_eigen_matrix_sparse(mat, center_m, scale_v, block, block_size, total_var);
 
-            // Dummy vector, the real centering is done in center_m.
-            Eigen::VectorXd center_v(mat->nrow()); 
-            center_v.setZero(); 
-
-            auto result = irb.run(BlockedEigenMatrix<false, decltype(emat), Block>(emat, block, center_m), center_v, scale_v);
-            pca_utils::clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
+            BlockedEigenMatrix<decltype(emat), Block> centered(&emat, block, &center_m);
+            if (scale) {
+                irlba::Scaled<decltype(centered)> scaled(&centered, &scale_v);
+                auto result = irb.run(scaled);
+                pca_utils::clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
+            } else {
+                auto result = irb.run(centered);
+                pca_utils::clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
+            }
         } else {
             auto emat = create_eigen_matrix_dense(mat, block, block_size, total_var);
             auto result = irb.run(emat); // already centered and scaled, if relevant.

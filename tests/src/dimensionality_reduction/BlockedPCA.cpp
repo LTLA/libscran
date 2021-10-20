@@ -31,35 +31,31 @@ TEST(BlockedMatrixTest, Test) {
         }
     }
 
-    scran::BlockedEigenMatrix<false, decltype(thing), int> blocked(thing, block.data(), centers);
+    scran::BlockedEigenMatrix<decltype(thing), int> blocked(&thing, block.data(), &centers);
     auto realized = blocked.realize();
 
     // Trying in the normal orientation.
     {
-        size_t NRHS = 2;
-        Eigen::MatrixXd rhs(NC, NRHS);
+        Eigen::VectorXd rhs(NC);
         for (size_t i = 0; i < NC; ++i) {
-            for (size_t j = 0; j < NRHS; ++j) {
-                rhs(i, j) = dist(rng);
-            }
+            rhs[i] = dist(rng);
         }
 
-        Eigen::MatrixXd prod1 = blocked * rhs;
+        Eigen::VectorXd prod1(NC);
+        blocked.multiply(rhs, prod1);
         Eigen::MatrixXd prod2 = realized * rhs;
         compare_almost_equal(prod1, prod2);
     }
 
     // Trying in the transposed orientation.
     {
-        size_t NRHS = 2;
-        Eigen::MatrixXd rhs(NR, NRHS);
+        Eigen::VectorXd rhs(NR);
         for (size_t i = 0; i < NR; ++i) {
-            for (size_t j = 0; j < NRHS; ++j) {
-                rhs(i, j) = dist(rng);
-            }
+            rhs[i] = dist(rng);
         }
 
-        Eigen::MatrixXd tprod1 = blocked.adjoint() * rhs;
+        Eigen::VectorXd tprod1(NR);
+        blocked.adjoint_multiply(rhs, tprod1);
         Eigen::MatrixXd tprod2 = realized.adjoint() * rhs;
         compare_almost_equal(tprod1, tprod2);
     }
