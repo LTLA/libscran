@@ -287,7 +287,8 @@ public:
      * Each pointer corresponds to a group and is filled with the relevant summary statistic for that group.
      * 
      * If `cohen` is of length 0, Cohen's d is not computed.
-     * If `auc` is of length 0, AUC is not computed.
+     * Similarly, if `auc` is of length 0, AUC is not computed.
+     * (`set_compute_cohen()` and `set_compute_auc()` have no effect here.)
      * If any of the inner vectors are of length 0, the corresponding summary statistic is not computed.
      *
      * @return `means`, `detected`, `cohen` and `auc` are filled with their corresponding statistics on output.
@@ -326,13 +327,14 @@ public:
      * Each pointer corresponds to a group and is filled with the relevant summary statistic for that group.
      * 
      * If `cohen` is of length 0, Cohen's d is not computed.
-     * If `auc` is of length 0, AUC is not computed.
+     * Similarly, if `auc` is of length 0, AUC is not computed.
+     * (`set_compute_cohen()` and `set_compute_auc()` have no effect here.)
      * If any of the inner vectors are of length 0, the corresponding summary statistic is not computed.
      *
      * @return `means`, `detected`, `cohen` and `auc` are filled with their corresponding statistics on output.
      */
-    template<class MAT, typename G, typename B, typename Stat>
-    void run_blocked(const MAT* p, const G* group, const B* block, 
+    template<class Matrix, typename G, typename B, typename Stat>
+    void run_blocked(const Matrix* p, const G* group, const B* block, 
         std::vector<std::vector<Stat*> > means, 
         std::vector<std::vector<Stat*> > detected, 
         std::vector<std::vector<Stat*> > cohen,
