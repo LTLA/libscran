@@ -18,9 +18,9 @@ namespace scran {
 /**
  * @brief Score each gene as a candidate marker for each group of cells.
  *
- * Markers are identified by pairwise comparisons between groups of cells (e.g., clusters, cell types).
- * Given `n` groups, each group has `n - 1` comparisons and thus `n - 1` effect sizes.
- * For each group, scores for each gene are obtained by taking summary statistics - e.g., the minimum, median, mean - of the effect sizes across all of that group's comparisons.
+ * Markers are identified by differential expression analyses between pairs of groups of cells (e.g., clusters, cell types).
+ * Given `n` groups, each group is involved in `n - 1` pairwise comparisons and thus has `n - 1` effect sizes.
+ * For each group, we compute summary statistics - e.g., the minimum, median, mean - of the effect sizes across all of that group's comparisons.
  * Users can then sort by any of these summaries to obtain a ranking of potential marker genes for each group.
  * The choice of effect size and summary statistic determines the characteristics of the resulting marker set.
  *
@@ -28,13 +28,31 @@ namespace scran {
  * Cohen's d is the standardized log-fold change between two groups.
  * This is defined as the difference in the mean log-expression for each group scaled by the average standard deviation across the two groups.
  * (Technically, we should use the pooled variance; however, this introduces some unpleasant asymmetry depending on the variance of the larger group, so we take a simple average instead.)
+ * A positive value indicates that the gene is upregulated in the first gene compared to the second.
  * Cohen's d is analogous to the t-statistic in a two-sample t-test and avoids spuriously large effect sizes from comparisons between highly variable groups.
  * We can also interpret Cohen's d as the number of standard deviations between the two group means.
  *
- * The definitions of these effect sizes are generalized when testing against a non-zero log-fold change threshold:
+ * The area under the curve (AUC) can be interpreted as the probability that a randomly chosen observation in one group is greater than a randomly chosen observation in the other group. 
+ * Values greater than 0.5 indicate that a gene is upregulated in the first group.
+ * The AUC is closely related to the U-statistic used in the Wilcoxon rank sum test. 
+ * The key difference between the AUC and Cohen's d is that the former is less sensitive to the variance within each group, e.g.,
+ * if two distributions exhibit no overlap, the AUC is the same regardless of the variance of each distribution. 
+ * This may or may not be desirable as it improves robustness to outliers but reduces the information available to obtain a highly resolved ranking. 
  *
- * - Cohen's d is redefined as the standardized difference between the observed log-fold change and the specified threshold, analogous to the TREAT method from **limma**.
+ * @section With a log-fold change threshold:
+ * Setting a log-fold change threshold can be helpful as it prioritizes genes with large shifts in expression instead of those with low variances.
+ * Currently, only positive thresholds are supported - this focuses on genes upregulated in the first group compared to the second.
+ * The effect size definitions are generalized when testing against a non-zero log-fold change threshold.
+ *
+ * Cohen's d is redefined as the standardized difference between the observed log-fold change and the specified threshold, analogous to the TREAT method from **limma**.
  * Large positive values are only obtained when the observed log-fold change is significantly greater than the threshold.
+ * For example, if we had a threshold of 2 and we obtained a Cohen's d of 3, this means that the observed log-fold change was 3 standard deviations above 2.
+ * Importantly, a negative Cohen's d cannot be intepreted as downregulation, as the log-fold change may still be positive but less than the threshold.
+ * 
+ * The AUC generalized to the probability of obtaining a random observation in one group that is greater than a random observation plus the threshold in the other group.
+ * For example, if we had a threshold of 2 and we obtained an AUC of 0.8, this means that - 80% of the time - 
+ * the random observation from the first group would be greater than a random observation from the second group by 2 or more.
+ * Again, AUCs below 0.5 cannot be interpreted as downregulation, as it may be caused by a positive log-fold change that is less than the threshold.
  * 
  * @section Summary statistics
  * The choice of summary statistic dictates the interpretation of the ranking.
@@ -43,12 +61,17 @@ namespace scran {
  * - A large mean effect size indicates that the gene is upregulated in X compared to the average of the other groups.
  *   A small value indicates that the gene is downregulated in X instead.
  *   This is a good general-purpose summary statistic for ranking, usually by decreasing size to obtain upregulated markers in X.
- * - A large median effect size indicates that the gene is upregulated in X compared to most (>50\%) other groups.
+ * - A large median effect size indicates that the gene is upregulated in X compared to most (>50%) other groups.
  *   A small value indicates that the gene is downregulated in X instead.
- *   This is also good for ranking, with the advantage of being more robust to outlier effects (but also the disadvantage of being less sensitive to strong effects in a minority of comparisons).
+ *   This is also a good general-purpose summary with the advantage of being more robust to outlier effects 
+ *   (but also the disadvantage of being less sensitive to strong effects in a minority of comparisons).
  * - A large minimum effect size indicates that the gene is upregulated in X compared to all other groups.
  *   A small value indicates that the gene is downregulated in X compared to at least one other group.
- *   This is the most stringent summary as markers will only have extreme values if they are _uniquely_ up/downregulated in X compared to every other group.
+ *   For upregulation, this is the most stringent summary as markers will only have extreme values if they are _uniquely_ upregulated in X compared to every other group.
+ *   However, it may not be effective if X is closely related to any of the groups.
+ * - A large maximum effect size indicates that the gene is upregulated in X compared to at least one other group.
+ *   A small value indicates that the gene is downregulated in X compared to all other groups.
+ *   For downregulation, this is the most stringent summary as markers will only have extreme values if they are _uniquely_ downregulated in X compared to every other group.
  *   However, it may not be effective if X is closely related to any of the groups.
  * - The "minimum rank" (a.k.a. min-rank) is defined by ranking genes based on decreasing effect size _within_ each comparison, and then taking the smallest rank _across_ comparisons.
  *   A minimum rank of 1 means that the gene is the top upregulated gene in at least one comparison to another group.
@@ -57,13 +80,32 @@ namespace scran {
  *
  * The exact definition of "large" and "small" depends on the choice of effect size.
  * For Cohen's d, the value must be positive to be considered "large", and negative to be considered "small".
- * 
- * Additionally, these interpretations change slightly when a log-fold change threshold is supplied.
- * For a positive threshold, only large values can be unambiguously interpreted as upregulation; small values do not have any guaranteed meaning.
- * Conversely, for a negative threshold, only small values can be unambiguously interpreted as downregulation.
+ * For the AUC, a value greater than 0.5 is considered "large" and less than 0.5 is considered "small".
+ * Note that this interpretation is contingent on the log-fold change threshold - for positive thresholds, small values cannot be unambiguously interpreted as downregulation.
+ *
+ * @section Blocked comparisons
+ * In the presence of multiple batches, we can block on the batch of origin for each cell.
+ * Comparisons are only performed between the groups of cells in the same batch (also called "blocking level" below).
+ * The batch-specific effect sizes are then combined into a single aggregate value for calculation of summary statistics.
+ * This strategy avoids most problems related to batch effects as we never directly compare across different blocking levels.
+ *
+ * Specifically, for each gene and each pair of groups, we obtain one effect size per blocking level.
+ * We consolidate these into a single statistic by computing the weighted mean across levels.
+ * The weight for each level is defined as the product of the sizes of the two groups;
+ * this favors contribution from levels with more cells in both groups, where the effect size is presumably more reliable.
+ * (Obviously, levels with no cells in either group will not contribute anything to the weighted mean.)
+ *
+ * If two groups never co-occur in the same blocking level, no effect size will be computed.
+ * We do not attempt to reconcile batch effects in a partially confounded scenario.
+ * As such, this particular pair of groups will not contribute to the calculation of the summary statistics for either group.
  *
  * @section Other statistics
- * We report the mean log-expression of all cells in each cluster, as well as the proportion of cells with detectable expression in each cluster.
+ * We report the mean log-expression of all cells in each group, as well as the proportion of cells with detectable expression in each group.
+ * These statistics are useful for quickly interpreting the differences in expression driving the effect size summaries.
+ *
+ * If blocking is involved, we compute the mean and proportion for each group in each separate blocking level.
+ * This is helpful for detecting differences in expression between batches.
+ * They can also be combined into a single statistic for each group by using the `average_vectors()` or `average_vectors_weighted()` functions.
  */
 class ScoreMarkers {
 public:
@@ -71,20 +113,44 @@ public:
      * @brief Default parameter settings.
      */
     struct Defaults {
+        /**
+         * See `set_threshold()` for details.
+         */
         static constexpr double threshold = 0;
 
+        /**
+         * See `set_compute_cohen()` for details.
+         */
         static constexpr bool compute_cohen = true;
 
+        /**
+         * See `set_compute_auc()` for details.
+         */
         static constexpr bool compute_auc = true;
 
+        /**
+         * See `set_summary_min()` for details.
+         */
         static constexpr bool summary_min = true;
 
+        /**
+         * See `set_summary_mean()` for details.
+         */
         static constexpr bool summary_mean = true;
 
+        /**
+         * See `set_summary_median()` for details.
+         */
         static constexpr bool summary_median = true;
 
+        /**
+         * See `set_summary_max()` for details.
+         */
         static constexpr bool summary_max = true;
 
+        /**
+         * See `set_summary_rank()` for details.
+         */
         static constexpr bool summary_rank = true;
     };
 private:
@@ -98,49 +164,136 @@ private:
     bool use_rank = Defaults::summary_rank;
 
 public:
-    ScoreMarkers& set_threshold(double t = 0) {
+    /**
+     * @param t Threshold on the log-fold change.
+     * This should be non-negative.
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
+    ScoreMarkers& set_threshold(double t = Defaults::threshold) {
         threshold = t;
         return *this;
     }
 
+    /**
+     * @param c Whether to compute Cohen's d.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
     ScoreMarkers& set_compute_cohen(bool c = true) {
         do_cohen = c;
         return *this;
     }
 
-    ScoreMarkers& set_compute_auc(bool c = true) {
-        do_auc = c;
+    /**
+     * @param a Whether to compute AUCs.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
+    ScoreMarkers& set_compute_auc(bool a = true) {
+        do_auc = a;
         return *this;
     }
 
+    /**
+     * @param s Whether to compute the minimum summary statistic.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
     ScoreMarkers& set_summary_min(bool s = true) {
         use_min = s;
         return *this;
     }
 
+    /**
+     * @param s Whether to compute the minimum summary statistic.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
     ScoreMarkers& set_summary_mean(bool s = true) {
         use_mean = s;
         return *this;
     }
 
+    /**
+     * @param s Whether to compute the median summary statistic.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
     ScoreMarkers& set_summary_median(bool s = true) {
         use_median = s;
         return *this;
     }
 
+    /**
+     * @param s Whether to compute the maximum summary statistic.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
     ScoreMarkers& set_summary_max(bool s = true) {
         use_max = s;
         return *this;
     }
 
+    /**
+     * @param s Whether to compute the minimum rank summary statistic.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
     ScoreMarkers& set_summary_rank(bool s = true) {
         use_rank = s;
         return *this;
     }
 
 public:
-    template<class MAT, typename G, typename Stat>
-    void run(const MAT* p, const G* group, 
+    /**
+     * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
+     * @tparam G Integer type for the group assignments.
+     * @tparam Stat Floating-point type to store the statistics.
+     *
+     * @param p Pointer to a **tatami** matrix instance.
+     * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
+     * These should be 0-based and consecutive.
+     * @param[out] means Pointers to arrays of length equal to the number of rows in `p`,
+     * used to store the mean expression of each group.
+     * @param[out] detected Pointers to arrays of length equal to the number of rows in `p`,
+     * used to store the proportion of detected expression in each group.
+     * @param[out] cohen Vector of vector of pointers to arrays of length equal to the number of rows in `p`.
+     * Each inner vector corresponds to a summary statistic for Cohen's d, ordered as in `differential_analysis::summary`.
+     * Each pointer corresponds to a group and is filled with the relevant summary statistic for that group.
+     * @param[out] auc Vector of vector of pointers to arrays of length equal to the number of rows in `p`,
+     * Each inner vector corresponds to a summary statistic for the AUC, ordered as in `differential_analysis::summary`.
+     * Each pointer corresponds to a group and is filled with the relevant summary statistic for that group.
+     * 
+     * If `cohen` is of length 0, Cohen's d is not computed.
+     * If `auc` is of length 0, AUC is not computed.
+     * If any of the inner vectors are of length 0, the corresponding summary statistic is not computed.
+     *
+     * @return `means`, `detected`, `cohen` and `auc` are filled with their corresponding statistics on output.
+     */
+    template<class Matrix, typename G, typename Stat>
+    void run(const Matrix* p, const G* group, 
         std::vector<Stat*> means, 
         std::vector<Stat*> detected, 
         std::vector<std::vector<Stat*> > cohen, 
@@ -150,6 +303,34 @@ public:
         run_internal(p, group, ngroups, means, detected, cohen, auc);
     }        
 
+    /**
+     * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
+     * @tparam G Integer type for the group assignments.
+     * @tparam B Integer type for the block assignments.
+     * @tparam Stat Floating-point type to store the statistics.
+     *
+     * @param p Pointer to a **tatami** matrix instance.
+     * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
+     * These should be 0-based and consecutive.
+     * @param[in] block Pointer to an array of length equal to the number of columns in `p`, containing the blocking factor.
+     * Levels should be 0-based and consecutive.
+     * @param[out] means Vector of vectors of pointers to arrays of length equal to the number of rows in `p`.
+     * Each inner vector corresponds to a group and each pointer therein contains the mean expression in a blocking level.
+     * @param[out] detected Pointers to arrays of length equal to the number of rows in `p`.
+     * Each inner vector corresponds to a group and each pointer therein contains the proportion of detected expression in a blocking level.
+     * @param[out] cohen Vector of vector of pointers to arrays of length equal to the number of rows in `p`.
+     * Each inner vector corresponds to a summary statistic for Cohen's d, ordered as in `differential_analysis::summary`.
+     * Each pointer corresponds to a group and is filled with the relevant summary statistic for that group.
+     * @param[out] auc Vector of vector of pointers to arrays of length equal to the number of rows in `p`,
+     * Each inner vector corresponds to a summary statistic for the AUC, ordered as in `differential_analysis::summary`.
+     * Each pointer corresponds to a group and is filled with the relevant summary statistic for that group.
+     * 
+     * If `cohen` is of length 0, Cohen's d is not computed.
+     * If `auc` is of length 0, AUC is not computed.
+     * If any of the inner vectors are of length 0, the corresponding summary statistic is not computed.
+     *
+     * @return `means`, `detected`, `cohen` and `auc` are filled with their corresponding statistics on output.
+     */
     template<class MAT, typename G, typename B, typename Stat>
     void run_blocked(const MAT* p, const G* group, const B* block, 
         std::vector<std::vector<Stat*> > means, 
@@ -221,9 +402,9 @@ private:
         std::vector<std::vector<Stat*> >& cohen, 
         std::vector<std::vector<Stat*> >& auc)
     {
-        const bool do_cohen = !cohen.empty();
-        std::vector<Stat> cohens_d(do_cohen ? p->nrow() * ngroups * ngroups : 0);
-        Stat* cohens_ptr = do_cohen ? cohens_d.data() : NULL;
+        const bool do_cd = !cohen.empty();
+        std::vector<Stat> cohens_d(do_cd ? p->nrow() * ngroups * ngroups : 0);
+        Stat* cohens_ptr = do_cd ? cohens_d.data() : NULL;
 
         const bool do_wilcox = !auc.empty();
         std::vector<Stat> wilcox_auc(do_wilcox ? p->nrow() * ngroups * ngroups : 0);
@@ -249,7 +430,7 @@ private:
             tatami::apply<0>(p, fact);
         }
 
-        if (do_cohen) {
+        if (do_cd) {
 #ifdef SCRAN_LOGGER
             SCRAN_LOGGER("scran::ScoreMarkers", "Summarizing Cohen's D across comparisons");
 #endif
@@ -274,8 +455,15 @@ private:
     }
 
 public:
+    /** 
+     * @tparam Stat Floating-point type to store the statistics.
+     * @brief Marker effect size summaries and other statistics.
+     */
     template<typename Stat>
     struct Results {
+        /**
+         * @cond
+         */
         Results(size_t ngenes, int ngroups, int nblocks, bool do_cohen, bool do_auc, bool do_min, bool do_mean, bool do_median, bool do_max, bool do_rank) { 
             auto fill_inner = [&](int N, auto& type) {
                 type.reserve(N);
@@ -319,6 +507,9 @@ public:
             }
             return;
         }
+        /**
+         * @endcond
+         */
 
         typedef std::vector<Stat> Vector;
         std::vector<std::vector<Vector> > cohen;
