@@ -84,6 +84,7 @@ public:
 public:
     /**
      * @brief Wrapper around the `igraph_t` class from **igraph**.
+     *
      * The objects therein will not be deep-copied when instances of this class are copied, so use with caution.
      */
     struct Graph {

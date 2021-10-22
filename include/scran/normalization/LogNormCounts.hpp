@@ -12,7 +12,7 @@
 /**
  * @file LogNormCounts.hpp
  *
- * Compute log-normalized expression values.
+ * @brief Compute log-normalized expression values.
  */
 
 namespace scran {

@@ -71,8 +71,8 @@ public:
      * @return `means`, `variances`, `fitted` and `residuals` are filled with the relevant statistics.
      */
     template<class MAT, typename Stat> 
-    void run(const MAT* p, Stat* means, Stat* variances, Stat* fitted, Stat* residuals) {
-        run_blocked(p, static_cast<int*>(NULL), std::vector<Stat*>{means}, std::vector<Stat*>{variances}, std::vector<Stat*>{fitted}, std::vector<Stat*>{residuals});
+    void run(const MAT* mat, Stat* means, Stat* variances, Stat* fitted, Stat* residuals) {
+        run_blocked(mat, static_cast<int*>(NULL), std::vector<Stat*>{means}, std::vector<Stat*>{variances}, std::vector<Stat*>{fitted}, std::vector<Stat*>{residuals});
         return;
     }
 
@@ -103,8 +103,8 @@ public:
      * @return `means`, `variances`, `fitted` and `residuals` are filled with the relevant statistics.
      */
     template<class MAT, typename B, typename Stat>
-    void run_blocked(const MAT* p, const B* block, std::vector<Stat*> means, std::vector<Stat*> variances, std::vector<Stat*> fitted, std::vector<Stat*> residuals) {
-        size_t NR = p->nrow(), NC = p->ncol();
+    void run_blocked(const MAT* mat, const B* block, std::vector<Stat*> means, std::vector<Stat*> variances, std::vector<Stat*> fitted, std::vector<Stat*> residuals) {
+        size_t NR = mat->nrow(), NC = mat->ncol();
         std::vector<int> block_size(means.size());
 
 #ifdef SCRAN_LOGGER
@@ -117,11 +117,11 @@ public:
                 ++block_size[*copy];
             }
             feature_selection::BlockedVarianceFactory<true, Stat, B, decltype(block_size)> fact(NR, NC, means, variances, block, &block_size);
-            tatami::apply<0>(p, fact);
+            tatami::apply<0>(mat, fact);
         } else {
             block_size[0] = NC;
             feature_selection::BlockedVarianceFactory<false, Stat, B, decltype(block_size)> fact(NR, NC, means, variances, block, &block_size);
-            tatami::apply<0>(p, fact);
+            tatami::apply<0>(mat, fact);
         }
 
         // Applying the trend fit to each block.
