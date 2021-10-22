@@ -12,6 +12,12 @@
 #include <vector>
 #include <limits>
 
+/**
+ * @file ModelGeneVar.hpp
+ *
+ * @brief Model the per-gene variance from log-count data.
+ */
+
 namespace scran {
 
 /**

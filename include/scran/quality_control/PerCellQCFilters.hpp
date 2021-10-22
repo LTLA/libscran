@@ -12,7 +12,7 @@
 /**
  * @file PerCellQCFilters.hpp
  *
- * Create filters to identify low-quality cells.
+ * @brief Create filters to identify low-quality cells.
  */
 
 namespace scran {

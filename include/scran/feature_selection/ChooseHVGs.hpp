@@ -9,7 +9,7 @@
 /**
  * @file ChooseHVGs.hpp
  *
- * Choose highly variable genes for downstream analyses.
+ * @brief Choose highly variable genes for downstream analyses.
  */
 
 namespace scran {

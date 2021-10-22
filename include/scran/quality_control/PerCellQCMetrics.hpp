@@ -13,7 +13,7 @@
 /**
  * @file PerCellQCMetrics.hpp
  *
- * Compute typical per-cell quality control metrics.
+ * @brief Compute typical per-cell quality control metrics.
  */
 
 namespace scran {

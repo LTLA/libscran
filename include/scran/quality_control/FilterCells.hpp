@@ -9,7 +9,7 @@
 /**
  * @file FilterCells.hpp
  *
- * Filter out low-quality cells from the count matrix.
+ * @brief Filter out low-quality cells from the count matrix.
  */
 
 namespace scran {

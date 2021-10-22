@@ -12,7 +12,7 @@
 /**
  * @file IsOutlier.hpp
  *
- * Define outliers using a simple MAD-based approach.
+ * @brief Define outliers using a simple MAD-based approach.
  */
 
 namespace scran {
