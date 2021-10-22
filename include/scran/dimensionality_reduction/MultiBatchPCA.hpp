@@ -271,6 +271,8 @@ public:
 
     /**
      * Run the multi-batch PCA on an input gene-by-cell matrix after filtering for genes of interest.
+     * We typically use the set of highly variable genes from `ChooseHVGs`, 
+     * with the aim being to improve computational efficiency and avoid random noise by removing lowly variable genes.
      *
      * @tparam T Floating point type for the data.
      * @tparam IDX Integer type for the indices.
