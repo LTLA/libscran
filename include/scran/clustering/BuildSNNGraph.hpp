@@ -17,9 +17,10 @@ namespace scran {
 /**
  * @brief Build a shared nearest-neighbor graph with cells as nodes.
  *
- * Cells are connected to each other by an edge with weight determined from their shared nearest neighbors.
- * This improves on a simple nearest-neighbor graph by accounting for the similarity in the neighborhoods between two cells, not just their immediate proximity.
+ * In a shared nearest neighbor graph, pairs of cells are connected to each other by an edge with weight determined from their shared nearest neighbors.
  * If two cells are close together but have distinct sets of neighbors, the corresponding edge is downweighted as the two cells are unlikely to be part of the same neighborhood.
+ * In this manner, highly weighted edges will form within highly interconnected neighborhoods where many cells share the same neighbors.
+ * This provides a more sophisticated definition of similarity between cells compared to a simpler (unweighted) nearest neighbor graph that just focuses on immediate proximity.
  *
  * A key parameter in the construction of the graph is the number of nearest neighbors $k$ to consider.
  * Larger values increase the connectivity of the graph and reduce the granularity of any subsequent community detection steps (see `scran::ClusterSNNGraph`) at the cost of speed.
@@ -36,6 +37,8 @@ namespace scran {
  * This is a simpler scheme that is also slightly faster but does not account for the ranking of neighbors within each set.
  * - `JACCARD` defines the weight between two nodes as the Jaccard index of their neighbor sets.
  * This weight can range from zero to 1, and is a monotonic transformation of the weight used by `NUMBER`.
+ *
+ * See the `ClusterSNNGraph` class to perform community detection on the graph returned by `run()`.
  *
  * @see
  * Xu C and Su Z (2015).

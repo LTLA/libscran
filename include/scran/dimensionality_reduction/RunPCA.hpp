@@ -13,26 +13,68 @@
 
 #include "pca_utils.hpp"
 
+/**
+ * @file RunPCA.hpp
+ *
+ * @brief Perform PCA on a gene-by-cell matrix.
+ */
+
 namespace scran {
 
+/**
+ * @brief Perform PCA on a gene-cell matrix.
+ *
+ * Principal components analysis (PCA) is a helpful technique for data compression and denoising.
+ * The idea is that the earlier PCs capture most of the systematic biological variation while the later PCs capture random technical noise.
+ * Thus, we can reduce the size of the data and eliminate noise by only using the earlier PCs for further analyses.
+ * Most practitioners will keep the first 10-50 PCs, though the exact choice is fairly arbitrary.
+ * For speed, we use the [**CppIrlba**](https://github.com/LTLA/CppIrlba) package to perform an approximate PCA.
+ */
 class RunPCA {
 public:
+    /**
+     * @brief Default parameter settings.
+     */
     struct Defaults {
+        /**
+         * See `set_rank()` for more details.
+         */
         static constexpr int rank = 10;
 
+        /**
+         * See `set_scale()` for more details.
+         */
         static constexpr bool scale = false;
     };
 private:
-    int rank = Defaults::rank;
     bool scale = Defaults::scale;
     irlba::Irlba irb;
 
 public:
+    /**
+     * Constructor. 
+     */
+    RunPCA() {
+        irb.set_number(Defaults::rank);
+        return;
+    }
+
+    /**
+     * @param r Number of PCs to compute.
+     * This should be smaller than the smaller dimension of the input matrix.
+     *
+     * @return A reference to this `RunPCA` instance.
+     */
     RunPCA& set_rank(int r = Defaults::rank) {
         irb.set_number(r);
         return *this;
     }
 
+    /**
+     * @param s Should genes be scaled to unit variance?
+     *
+     * @return A reference to this `RunPCA` instance.
+     */
     RunPCA& set_scale(bool s = Defaults::scale) {
         scale = s;
         return *this;
@@ -74,12 +116,41 @@ private:
     }
 
 public:
+    /**
+     * @brief Container for the PCA results.
+     */
     struct Results {
+        /**
+         * Matrix of principal components.
+         * Each row corresponds to a cell while each column corresponds to a PC,
+         * with number of columns determined by `set_rank()`.
+         */
         Eigen::MatrixXd pcs;
+
+        /**
+         * Variance explained by each PC.
+         * Each entry corresponds to a column in `pcs` and is in decreasing order.
+         */
         Eigen::VectorXd variance_explained;
+
+        /**
+         * Total variance of the dataset (possibly after scaling, if `set_scale()` is set to `true`).
+         * This can be used to divide `variance_explained` to obtain the percentage of variance explained.
+         */
         double total_variance = 0;
     };
 
+    /**
+     * Run PCA on an input gene-by-cell matrix.
+     *
+     * @tparam T Floating point type for the data.
+     * @tparam IDX Integer type for the indices.
+     *
+     * @param[in] mat Pointer to the input matrix.
+     * Columns should contain cells while rows should contain genes.
+     *
+     * @return A `Results` object containing the PCs and the variance explained.
+     */
     template<typename T, typename IDX>
     Results run(const tatami::Matrix<T, IDX>* mat) {
         Results output;
@@ -87,6 +158,22 @@ public:
         return output;
     }
 
+    /**
+     * Run PCA on an input gene-by-cell matrix after filtering for genes of interest.
+     * We typically use the set of highly variable genes from `ChooseHVGs`, 
+     * with the aim being to improve computational efficiency and avoid random noise by removing lowly variable genes.
+     *
+     * @tparam T Floating point type for the data.
+     * @tparam IDX Integer type for the indices.
+     * @tparam X Integer type for the feature filter.
+     *
+     * @param[in] mat Pointer to the input matrix.
+     * Columns should contain cells while rows should contain genes.
+     * @param[in] features Pointer to an array of length equal to the number of genes.
+     * Each entry treated as a boolean specifying whether the corresponding genes should be used in the PCA.
+     *
+     * @return A `Results` object containing the PCs and the variance explained.
+     */
     template<typename T, typename IDX, typename X>
     Results run(const tatami::Matrix<T, IDX>* mat, const X* features) {
         Results output;

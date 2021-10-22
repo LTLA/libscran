@@ -13,7 +13,7 @@
 /**
  * @file PerCellQCMetrics.hpp
  *
- * Compute typical per-cell quality control metrics.
+ * @brief Compute typical per-cell quality control metrics.
  */
 
 namespace scran {
@@ -276,7 +276,7 @@ private:
 
 public:
     /**
-     * Compute the QC metrics from an input matrix and return the results.
+     * Compute the QC metrics from an input matrix.
      *
      * @tparam MAT Type of matrix, usually a `tatami::NumericMatrix`.
      * @tparam SUB Pointer to a type interpretable as boolean.

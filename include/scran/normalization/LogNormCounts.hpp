@@ -12,7 +12,7 @@
 /**
  * @file LogNormCounts.hpp
  *
- * Compute log-normalized expression values.
+ * @brief Compute log-normalized expression values.
  */
 
 namespace scran {
@@ -64,7 +64,7 @@ public:
      * Compute log-normalized expression values from an input matrix.
      * To avoid copying the data, this is done in a delayed manner using the `DelayedIsometricOp` class from the **tatami** package.
      *
-     * @tparam MAT `tatami::typed_matrix`, most typically a `tatami::numeric_matrix`.
+     * @tparam MAT A **tatami** matrix class, most typically a `tatami::NumericMatrix`.
      * @tparam V A vector class supporting `size()`, random access via `[`, `begin()`, `end()` and `data()`.
      *
      * @param mat Pointer to an input count matrix, with features in the rows and cells in the columns.
@@ -83,7 +83,7 @@ public:
      * This allows users to easily mimic normalization of different blocks of cells (e.g., from different samples) in the same matrix.
      * In contrast, without blocking, the centering would depend on the size factors in different blocks.
      *
-     * @tparam MAT `tatami::typed_matrix`, most typically a `tatami::numeric_matrix`.
+     * @tparam MAT A **tatami** matrix class, most typically a `tatami::NumericMatrix`.
      * @tparam V A vector class supporting `size()`, random access via `[`, `begin()`, `end()` and `data()`.
      * @tparam B An integer type, to hold the block IDs.
      *

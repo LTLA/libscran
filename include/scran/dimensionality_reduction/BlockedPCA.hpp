@@ -13,8 +13,17 @@
 
 #include "pca_utils.hpp"
 
+/**
+ * @file BlockedPCA.hpp
+ *
+ * @brief Compute PCA after blocking on an uninteresting factor.
+ */
+
 namespace scran {
 
+/**
+ * @cond
+ */
 template<class Matrix, typename Block>
 struct BlockedEigenMatrix {
     BlockedEigenMatrix(const Matrix* m, const Block* b, const Eigen::MatrixXd* mx) : mat(m), block(b), means(mx) {}
@@ -60,25 +69,64 @@ private:
     const Block* block;
     const Eigen::MatrixXd* means;
 };
+/**
+ * @endcond
+ */
 
+/**
+ * @brief Compute PCA after blocking on an uninteresting factor
+ *
+ * A simple batch correction method involves centering the expression of each gene in each batch to remove systematic differences between batches.
+ * The corrected values are then used in PCA to obtain a batch-corrected low-dimensional representation of the dataset.
+ * Unfortunately, naively centering the expression values will discard sparsity and reduce the computational efficiency of the PCA.
+ * To avoid these drawbacks, `BlockedPCA` defers the centering until the matrix multiplication of the IRLBA step.
+ * This yields the same results as the naive approach but is much faster as it can take advantage of efficient sparse operations.
+ */
 class BlockedPCA {
 public:
+    /**
+     * @brief Default parameter settings.
+     */
     struct Defaults {
+        /**
+         * See `set_rank()` for more details.
+         */
         static constexpr int rank = 10;
 
+        /**
+         * See `set_scale()` for more details.
+         */
         static constexpr bool scale = false;
     };
 private:
-    int rank = Defaults::rank;
     bool scale = Defaults::scale;
     irlba::Irlba irb;
 
 public:
+    /**
+     * Constructor. 
+     */
+    BlockedPCA() {
+        irb.set_number(Defaults::rank);
+        return;
+    }
+
+    /**
+     * @param r Number of PCs to compute.
+     * This should be smaller than the smaller dimension of the input matrix.
+     *
+     * @return A reference to this `BlockedPCA` instance.
+     */
     BlockedPCA& set_rank(int r = Defaults::rank) {
-        rank = r;
+        irb.set_number(r);
         return *this;
     }
 
+    /**
+     * @param s Should genes be scaled to unit variance?
+     *
+     * @return A reference to this `BlockedPCA` instance.
+     */
     BlockedPCA& set_scale(bool s = Defaults::scale) {
         scale = s;
         return *this;
@@ -87,8 +135,6 @@ public:
 private:
     template<typename T, typename IDX, typename Block>
     void run(const tatami::Matrix<T, IDX>* mat, const Block* block, Eigen::MatrixXd& pcs, Eigen::VectorXd& variance_explained, double& total_var) {
-        irb.set_number(rank);
-
         const size_t NC = mat->ncol();
         const int nblocks = (NC ? *std::max_element(block, block + NC) + 1 : 1);
         std::vector<int> block_size(nblocks);
@@ -120,12 +166,45 @@ private:
     }
 
 public:
+    /**
+     * @brief Container for the PCA results.
+     */
     struct Results {
+        /**
+         * Matrix of principal components.
+         * Each row corresponds to a cell while each column corresponds to a PC,
+         * with number of columns determined by `set_rank()`.
+         */
         Eigen::MatrixXd pcs;
+
+        /**
+         * Variance explained by each PC.
+         * Each entry corresponds to a column in `pcs` and is in decreasing order.
+         */
         Eigen::VectorXd variance_explained;
+
+        /**
+         * Total variance of the dataset (possibly after scaling, if `set_scale()` is set to `true`).
+         * This can be used to divide `variance_explained` to obtain the percentage of variance explained.
+         */
         double total_variance = 0;
     };
 
+    /**
+     * Run the blocked PCA on an input gene-by-cell matrix.
+     *
+     * @tparam T Floating point type for the data.
+     * @tparam IDX Integer type for the indices.
+     * @tparam Block Integer type for the blocking factor.
+     *
+     * @param[in] mat Pointer to the input matrix.
+     * Columns should contain cells while rows should contain genes.
+     * @param[in] block Pointer to an array of length equal to the number of cells.
+     * This should contain the blocking factor as 0-based block assignments 
+     * (i.e., for `n` blocks, block identities should run from 0 to `n-1` with at least one entry for each block.)
+     *
+     * @return A `Results` object containing the PCs and the variance explained.
+     */
     template<typename T, typename IDX, typename Block>
     Results run(const tatami::Matrix<T, IDX>* mat, const Block* block) {
         Results output;
@@ -133,6 +212,26 @@ public:
         return output;
     }
 
+    /**
+     * Run the blocked PCA on an input gene-by-cell matrix after filtering for genes of interest.
+     * We typically use the set of highly variable genes from `ChooseHVGs`, 
+     * with the aim being to improve computational efficiency and avoid random noise by removing lowly variable genes.
+     *
+     * @tparam T Floating point type for the data.
+     * @tparam IDX Integer type for the indices.
+     * @tparam Block Integer type for the blocking factor.
+     * @tparam X Integer type for the feature filter.
+     *
+     * @param[in] mat Pointer to the input matrix.
+     * Columns should contain cells while rows should contain genes.
+     * @param[in] block Pointer to an array of length equal to the number of cells.
+     * This should contain the blocking factor as 0-based block assignments 
+     * (i.e., for `n` blocks, block identities should run from 0 to `n-1` with at least one entry for each block.)
+     * @param[in] features Pointer to an array of length equal to the number of genes.
+     * Each entry treated as a boolean specifying whether the corresponding genes should be used in the PCA.
+     *
+     * @return A `Results` object containing the PCs and the variance explained.
+     */
     template<typename T, typename IDX, typename Block, typename X>
     Results run(const tatami::Matrix<T, IDX>* mat, const Block* block, const X* features) {
         Results output;
