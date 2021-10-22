@@ -104,11 +104,18 @@ public:
         static constexpr bool scale = false;
     };
 private:
-    int rank = Defaults::rank;
     bool scale = Defaults::scale;
     irlba::Irlba irb;
 
 public:
+    /**
+     * Constructor.
+     */
+    MultiBatchPCA() {
+        irb.set_number(Defaults::rank);
+        return;
+    }
+
     /**
      * @param r Number of PCs to compute.
      * This should be smaller than the smaller dimension of the input matrix.
