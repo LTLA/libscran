@@ -268,6 +268,8 @@ public:
 
 public:
     /**
+     * Score potential marker genes by computing summary statistics across pairwise comparisons between groups.
+     *
      * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
      * @tparam G Integer type for the group assignments.
      * @tparam Stat Floating-point type to store the statistics.
@@ -305,6 +307,8 @@ public:
     }        
 
     /**
+     * Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.
+     *
      * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
      * @tparam G Integer type for the group assignments.
      * @tparam B Integer type for the block assignments.
@@ -547,6 +551,8 @@ public:
     };
 
     /**
+     * Score potential marker genes by computing summary statistics across pairwise comparisons between groups. 
+     *
      * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
      * @tparam G Integer type for the group assignments.
      * @tparam Stat Floating-point type to store the statistics.
@@ -573,6 +579,8 @@ public:
     }
 
     /**
+     * Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.
+     *
      * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
      * @tparam G Integer type for the group assignments.
      * @tparam B Integer type for the block assignments.
