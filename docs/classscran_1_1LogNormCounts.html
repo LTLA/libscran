@@ -135,7 +135,7 @@ template&lt;class MAT , class V &gt; </div>
 <p >Compute log-normalized expression values from an input matrix. To avoid copying the data, this is done in a delayed manner using the <code>DelayedIsometricOp</code> class from the <b>tatami</b> package.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">MAT</td><td><code>tatami::typed_matrix</code>, most typically a <code>tatami::numeric_matrix</code>. </td></tr>
+    <tr><td class="paramname">MAT</td><td>A <b>tatami</b> matrix class, most typically a <code>tatami::NumericMatrix</code>. </td></tr>
     <tr><td class="paramname">V</td><td>A vector class supporting <code>size()</code>, random access via <code>[</code>, <code>begin()</code>, <code>end()</code> and <code>data()</code>.</td></tr>
   </table>
   </dd>
@@ -195,7 +195,7 @@ template&lt;class MAT , class V , typename B &gt; </div>
 <p >Compute log-normalized expression values from an input matrix with blocking. Specifically, centering of size factors is performed within each block. This allows users to easily mimic normalization of different blocks of cells (e.g., from different samples) in the same matrix. In contrast, without blocking, the centering would depend on the size factors in different blocks.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">MAT</td><td><code>tatami::typed_matrix</code>, most typically a <code>tatami::numeric_matrix</code>. </td></tr>
+    <tr><td class="paramname">MAT</td><td>A <b>tatami</b> matrix class, most typically a <code>tatami::NumericMatrix</code>. </td></tr>
     <tr><td class="paramname">V</td><td>A vector class supporting <code>size()</code>, random access via <code>[</code>, <code>begin()</code>, <code>end()</code> and <code>data()</code>. </td></tr>
     <tr><td class="paramname">B</td><td>An integer type, to hold the block IDs.</td></tr>
   </table>

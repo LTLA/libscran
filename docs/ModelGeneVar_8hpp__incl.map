@@ -1,0 +1,12 @@
+<map id="scran/feature_selection/ModelGeneVar.hpp" name="scran/feature_selection/ModelGeneVar.hpp">
+<area shape="rect" id="node1" title="Model the per&#45;gene variance from log&#45;count data." alt="" coords="487,5,645,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,102,159,129"/>
+<area shape="rect" id="node3" title=" " alt="" coords="183,102,333,129"/>
+<area shape="rect" id="node4" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="357,95,471,136"/>
+<area shape="rect" id="node5" title=" " alt="" coords="479,184,538,211"/>
+<area shape="rect" id="node6" title=" " alt="" coords="546,102,701,129"/>
+<area shape="rect" id="node7" href="$FitTrendVar_8hpp.html" title="Fit a mean&#45;variance trend to log&#45;count data." alt="" coords="725,102,839,129"/>
+<area shape="rect" id="node8" title=" " alt="" coords="839,184,914,211"/>
+<area shape="rect" id="node10" title=" " alt="" coords="914,102,967,129"/>
+<area shape="rect" id="node9" title=" " alt="" coords="565,184,815,211"/>
+</map>

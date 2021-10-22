@@ -93,12 +93,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3b8d8f0630719ce95ff45c84ac475599"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac8785b5e665a1bb2bcd69f2d0d8ab9e3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ModelGeneVar.html">ModelGeneVar</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVar.html#ac8785b5e665a1bb2bcd69f2d0d8ab9e3">set_span</a> (double s)</td></tr>
 <tr class="separator:ac8785b5e665a1bb2bcd69f2d0d8ab9e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a454302d79a9a6d0c5373cc0307881217"><td class="memTemplParams" colspan="2">template&lt;class MAT , typename Stat &gt; </td></tr>
-<tr class="memitem:a454302d79a9a6d0c5373cc0307881217"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVar.html#a454302d79a9a6d0c5373cc0307881217">run</a> (const MAT *p, Stat *means, Stat *variances, Stat *fitted, Stat *residuals)</td></tr>
-<tr class="separator:a454302d79a9a6d0c5373cc0307881217"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0fd7ca1a9e90eaca4e57d3eff16d83ef"><td class="memTemplParams" colspan="2">template&lt;class MAT , typename B , typename Stat &gt; </td></tr>
-<tr class="memitem:a0fd7ca1a9e90eaca4e57d3eff16d83ef"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVar.html#a0fd7ca1a9e90eaca4e57d3eff16d83ef">run_blocked</a> (const MAT *p, const B *block, std::vector&lt; Stat * &gt; means, std::vector&lt; Stat * &gt; variances, std::vector&lt; Stat * &gt; fitted, std::vector&lt; Stat * &gt; residuals)</td></tr>
-<tr class="separator:a0fd7ca1a9e90eaca4e57d3eff16d83ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1175b286f29951889b512ed332dd36bf"><td class="memTemplParams" colspan="2">template&lt;class MAT , typename Stat &gt; </td></tr>
+<tr class="memitem:a1175b286f29951889b512ed332dd36bf"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVar.html#a1175b286f29951889b512ed332dd36bf">run</a> (const MAT *mat, Stat *means, Stat *variances, Stat *fitted, Stat *residuals)</td></tr>
+<tr class="separator:a1175b286f29951889b512ed332dd36bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65187021f94e03ad35cd2d4f0bc2da40"><td class="memTemplParams" colspan="2">template&lt;class MAT , typename B , typename Stat &gt; </td></tr>
+<tr class="memitem:a65187021f94e03ad35cd2d4f0bc2da40"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVar.html#a65187021f94e03ad35cd2d4f0bc2da40">run_blocked</a> (const MAT *mat, const B *block, std::vector&lt; Stat * &gt; means, std::vector&lt; Stat * &gt; variances, std::vector&lt; Stat * &gt; fitted, std::vector&lt; Stat * &gt; residuals)</td></tr>
+<tr class="separator:a65187021f94e03ad35cd2d4f0bc2da40"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1d8a630903211ebf660d71077d4fa7d5"><td class="memTemplParams" colspan="2">template&lt;class MAT &gt; </td></tr>
 <tr class="memitem:a1d8a630903211ebf660d71077d4fa7d5"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1ModelGeneVar_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVar.html#a1d8a630903211ebf660d71077d4fa7d5">run</a> (const MAT *mat)</td></tr>
 <tr class="separator:a1d8a630903211ebf660d71077d4fa7d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -152,8 +152,8 @@ template&lt;class MAT &gt; </div>
 
 </div>
 </div>
-<a id="a454302d79a9a6d0c5373cc0307881217" name="a454302d79a9a6d0c5373cc0307881217"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a454302d79a9a6d0c5373cc0307881217">&#9670;&nbsp;</a></span>run() <span class="overload">[2/2]</span></h2>
+<a id="a1175b286f29951889b512ed332dd36bf" name="a1175b286f29951889b512ed332dd36bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1175b286f29951889b512ed332dd36bf">&#9670;&nbsp;</a></span>run() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -167,7 +167,7 @@ template&lt;class MAT , typename Stat &gt; </div>
           <td class="memname">void scran::ModelGeneVar::run </td>
           <td>(</td>
           <td class="paramtype">const MAT *&#160;</td>
-          <td class="paramname"><em>p</em>, </td>
+          <td class="paramname"><em>mat</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -262,7 +262,7 @@ template&lt;class MAT , typename B &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Compute and model the per-feature variances from a log-expression matrix with blocking, see <code><a class="el" href="classscran_1_1ModelGeneVar.html#a0fd7ca1a9e90eaca4e57d3eff16d83ef">run_blocked()</a></code> for details.</p>
+<p >Compute and model the per-feature variances from a log-expression matrix with blocking, see <code><a class="el" href="classscran_1_1ModelGeneVar.html#a65187021f94e03ad35cd2d4f0bc2da40">run_blocked()</a></code> for details.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">MAT</td><td>Type of matrix, usually a <code>tatami::NumericMatrix</code>. </td></tr>
@@ -273,7 +273,7 @@ template&lt;class MAT , typename B &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Pointer to a feature-by-cells <b>tatami</b> matrix containing log-expression values. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1ModelGeneVar.html#a0fd7ca1a9e90eaca4e57d3eff16d83ef">run_blocked()</a></code> for details.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1ModelGeneVar.html#a65187021f94e03ad35cd2d4f0bc2da40">run_blocked()</a></code> for details.</td></tr>
   </table>
   </dd>
 </dl>
@@ -281,8 +281,8 @@ template&lt;class MAT , typename B &gt; </div>
 
 </div>
 </div>
-<a id="a0fd7ca1a9e90eaca4e57d3eff16d83ef" name="a0fd7ca1a9e90eaca4e57d3eff16d83ef"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0fd7ca1a9e90eaca4e57d3eff16d83ef">&#9670;&nbsp;</a></span>run_blocked() <span class="overload">[2/2]</span></h2>
+<a id="a65187021f94e03ad35cd2d4f0bc2da40" name="a65187021f94e03ad35cd2d4f0bc2da40"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65187021f94e03ad35cd2d4f0bc2da40">&#9670;&nbsp;</a></span>run_blocked() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -296,7 +296,7 @@ template&lt;class MAT , typename B , typename Stat &gt; </div>
           <td class="memname">void scran::ModelGeneVar::run_blocked </td>
           <td>(</td>
           <td class="paramtype">const MAT *&#160;</td>
-          <td class="paramname"><em>p</em>, </td>
+          <td class="paramname"><em>mat</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>

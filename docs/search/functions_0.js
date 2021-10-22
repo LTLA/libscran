@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['build_0',['build',['../classscran_1_1ClusterSNNGraph.html#a613d3b3cd5c6ab31848f8c0e2084ca89',1,'scran::ClusterSNNGraph::build(size_t ndims, size_t ncells, const double *mat) const'],['../classscran_1_1ClusterSNNGraph.html#aa777f85140bac6998e060838adf6c6bf',1,'scran::ClusterSNNGraph::build(const Algorithm *search) const'],['../classscran_1_1ClusterSNNGraph.html#a86208b4b339d88e3a93ef9ead03ef2bb',1,'scran::ClusterSNNGraph::build(size_t ncells, const std::deque&lt; BuildSNNGraph::WeightedEdge &gt; &amp;store) const']]]
+  ['average_5fvectors_0',['average_vectors',['../average__vectors_8hpp.html#a1ad83ffd5170468e5c4ec082605f79e7',1,'scran::average_vectors(size_t n, std::vector&lt; Stat * &gt; in, Output *out)'],['../average__vectors_8hpp.html#a824f746e361b0d57b2bb756fd7713827',1,'scran::average_vectors(size_t n, std::vector&lt; Stat * &gt; in)']]],
+  ['average_5fvectors_5fweighted_1',['average_vectors_weighted',['../average__vectors_8hpp.html#a0f0c8d5308d416b2d1f516691ee362ef',1,'scran::average_vectors_weighted(size_t n, std::vector&lt; Stat * &gt; in, const Weight *w, Output *out)'],['../average__vectors_8hpp.html#a945a1f18683033b5eed71bdd748f1c72',1,'scran::average_vectors_weighted(size_t n, std::vector&lt; Stat * &gt; in, const Weight *w)']]]
 ];

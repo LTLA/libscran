@@ -1,10 +1,9 @@
 <map id="scran/quality_control/IsOutlier.hpp" name="scran/quality_control/IsOutlier.hpp">
-<area shape="rect" id="node1" title=" " alt="" coords="220,5,361,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,169,64,196"/>
-<area shape="rect" id="node3" title=" " alt="" coords="296,95,349,121"/>
-<area shape="rect" id="node4" title=" " alt="" coords="373,95,432,121"/>
-<area shape="rect" id="node5" title=" " alt="" coords="212,169,287,196"/>
-<area shape="rect" id="node6" title=" " alt="" coords="456,95,517,121"/>
-<area shape="rect" id="node7" href="$block__indices_8hpp_source.html" title=" " alt="" coords="59,95,221,121"/>
-<area shape="rect" id="node8" title=" " alt="" coords="101,169,179,196"/>
+<area shape="rect" id="node1" title="Define outliers using a simple MAD&#45;based approach." alt="" coords="169,5,311,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,95,64,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="88,95,141,121"/>
+<area shape="rect" id="node4" title=" " alt="" coords="165,95,224,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="248,95,323,121"/>
+<area shape="rect" id="node6" title=" " alt="" coords="347,95,408,121"/>
+<area shape="rect" id="node7" title=" " alt="" coords="432,95,595,121"/>
 </map>

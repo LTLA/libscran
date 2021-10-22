@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['thresholds_0',['thresholds',['../structscran_1_1IsOutlier_1_1Results.html#ab76c89d333a817bf7881d4eb2ba737bb',1,'scran::IsOutlier::Results::thresholds()'],['../structscran_1_1PerCellQCFilters_1_1Results.html#ad3ab33eeb778199dc2c698d429099063',1,'scran::PerCellQCFilters::Results::thresholds()']]],
-  ['top_1',['top',['../structscran_1_1ChooseHVGs_1_1Defaults.html#ab47b622404c5eb3ed1835518e4164bf1',1,'scran::ChooseHVGs::Defaults']]]
+  ['rank_0',['rank',['../structscran_1_1BlockedPCA_1_1Defaults.html#a3f57557595e7081283a7ab177b7c8058',1,'scran::BlockedPCA::Defaults::rank()'],['../structscran_1_1MultiBatchPCA_1_1Defaults.html#a18765eb3b028fdfc01dee3382b35be81',1,'scran::MultiBatchPCA::Defaults::rank()'],['../structscran_1_1RunPCA_1_1Defaults.html#aef3a3b0bc2ac4b8f703389030c10de25',1,'scran::RunPCA::Defaults::rank()']]],
+  ['residuals_1',['residuals',['../structscran_1_1FitTrendVar_1_1Results.html#a3f2d7d595a07195ddb89319fa941a832',1,'scran::FitTrendVar::Results::residuals()'],['../structscran_1_1ModelGeneVar_1_1Results.html#a943930ea88c62c5bd5828d279d6d1a50',1,'scran::ModelGeneVar::Results::residuals()']]]
 ];

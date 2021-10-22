@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['filtercells_2ehpp_0',['FilterCells.hpp',['../FilterCells_8hpp.html',1,'']]],
-  ['fittrendvar_2ehpp_1',['FitTrendVar.hpp',['../FitTrendVar_8hpp.html',1,'']]]
+  ['choosehvgs_2ehpp_0',['ChooseHVGs.hpp',['../ChooseHVGs_8hpp.html',1,'']]],
+  ['clusterkmeans_2ehpp_1',['ClusterKmeans.hpp',['../ClusterKmeans_8hpp.html',1,'']]],
+  ['clustersnngraph_2ehpp_2',['ClusterSNNGraph.hpp',['../ClusterSNNGraph_8hpp.html',1,'']]]
 ];
