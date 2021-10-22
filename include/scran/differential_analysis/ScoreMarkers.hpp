@@ -24,7 +24,7 @@ namespace scran {
  * Users can then sort by any of these summaries to obtain a ranking of potential marker genes for each group.
  * The choice of effect size and summary statistic determines the characteristics of the resulting marker set.
  *
- * @section Effect sizes
+ * @section effect-sizes Effect sizes
  * Cohen's d is the standardized log-fold change between two groups.
  * This is defined as the difference in the mean log-expression for each group scaled by the average standard deviation across the two groups.
  * (Technically, we should use the pooled variance; however, this introduces some unpleasant asymmetry depending on the variance of the larger group, so we take a simple average instead.)
@@ -39,7 +39,7 @@ namespace scran {
  * if two distributions exhibit no overlap, the AUC is the same regardless of the variance of each distribution. 
  * This may or may not be desirable as it improves robustness to outliers but reduces the information available to obtain a highly resolved ranking. 
  *
- * @section With a log-fold change threshold:
+ * @section lfc-threshold With a log-fold change threshold
  * Setting a log-fold change threshold can be helpful as it prioritizes genes with large shifts in expression instead of those with low variances.
  * Currently, only positive thresholds are supported - this focuses on genes upregulated in the first group compared to the second.
  * The effect size definitions are generalized when testing against a non-zero log-fold change threshold.
@@ -54,7 +54,7 @@ namespace scran {
  * the random observation from the first group would be greater than a random observation from the second group by 2 or more.
  * Again, AUCs below 0.5 cannot be interpreted as downregulation, as it may be caused by a positive log-fold change that is less than the threshold.
  * 
- * @section Summary statistics
+ * @section summary Summary statistics
  * The choice of summary statistic dictates the interpretation of the ranking.
  * Given a group X:
  * 
@@ -83,7 +83,7 @@ namespace scran {
  * For the AUC, a value greater than 0.5 is considered "large" and less than 0.5 is considered "small".
  * Note that this interpretation is contingent on the log-fold change threshold - for positive thresholds, small values cannot be unambiguously interpreted as downregulation.
  *
- * @section Blocked comparisons
+ * @section blocked Blocked comparisons
  * In the presence of multiple batches, we can block on the batch of origin for each cell.
  * Comparisons are only performed between the groups of cells in the same batch (also called "blocking level" below).
  * The batch-specific effect sizes are then combined into a single aggregate value for calculation of summary statistics.
@@ -99,7 +99,7 @@ namespace scran {
  * We do not attempt to reconcile batch effects in a partially confounded scenario.
  * As such, this particular pair of groups will not contribute to the calculation of the summary statistics for either group.
  *
- * @section Other statistics
+ * @section other Other statistics
  * We report the mean log-expression of all cells in each group, as well as the proportion of cells with detectable expression in each group.
  * These statistics are useful for quickly interpreting the differences in expression driving the effect size summaries.
  *
@@ -513,13 +513,51 @@ public:
          * @endcond
          */
 
-        typedef std::vector<Stat> Vector;
-        std::vector<std::vector<Vector> > cohen;
-        std::vector<std::vector<Vector> > auc;
-        std::vector<std::vector<Vector> > means;
-        std::vector<std::vector<Vector> > detected;
+        /**
+         * Summary statistics for Cohen's d.
+         * Elements of the outer vector corresponds to the different summary statistics (see `differential_analysis::summary`);
+         * elements of the middle vector correspond to the different groups;
+         * and elements of the inner vector correspond to individual genes.
+         */
+        std::vector<std::vector<std::vector<Stat> > > cohen;
+
+        /**
+         * Summary statistics for the AUC.
+         * Elements of the outer vector corresponds to the different summary statistics (see `differential_analysis::summary`);
+         * elements of the middle vector correspond to the different groups;
+         * and elements of the inner vector correspond to individual genes.
+         */
+        std::vector<std::vector<std::vector<Stat> > > auc;
+
+        /**
+         * Mean expression in each group.
+         * Elements of the outer vector corresponds to the different groups;
+         * elements of the middle vector correspond to the different blocking levels (this is of length 1 for `run()`);
+         * and elements of the inner vector correspond to individual genes.
+         */
+        std::vector<std::vector<std::vector<Stat> > > means;
+
+        /**
+         * Proportion of detected expression in each group.
+         * Elements of the outer vector corresponds to the different groups;
+         * elements of the middle vector correspond to the different blocking levels (this is of length 1 for `run()`);
+         * and elements of the inner vector correspond to individual genes.
+         */
+        std::vector<std::vector<std::vector<Stat> > > detected;
     };
 
+    /**
+     * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
+     * @tparam G Integer type for the group assignments.
+     * @tparam Stat Floating-point type to store the statistics.
+     *
+     * @param p Pointer to a **tatami** matrix instance.
+     * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
+     * These should be 0-based and consecutive.
+     *
+     * @return A `Results` object containing the summary statistics and the other per-group statistics.
+     * Whether particular statistics are computed depends on the configuration from `set_compute_cohen()` and related setters.
+     */
     template<typename Stat = double, class MAT, typename G> 
     Results<Stat> run(const MAT* p, const G* group) {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
@@ -534,6 +572,21 @@ public:
         return res;
     }
 
+    /**
+     * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
+     * @tparam G Integer type for the group assignments.
+     * @tparam B Integer type for the block assignments.
+     * @tparam Stat Floating-point type to store the statistics.
+     *
+     * @param p Pointer to a **tatami** matrix instance.
+     * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
+     * These should be 0-based and consecutive.
+     * @param[in] block Pointer to an array of length equal to the number of columns in `p`, containing the blocking factor.
+     * Levels should be 0-based and consecutive.
+     *
+     * @return A `Results` object containing the summary statistics and the other per-group statistics.
+     * Whether particular statistics are computed depends on the configuration from `set_compute_cohen()` and related setters.
+     */
     template<typename Stat = double, class MAT, typename G, typename B> 
     Results<Stat> run_blocked(const MAT* p, const G* group, const B* block) {
         if (block == NULL) {
