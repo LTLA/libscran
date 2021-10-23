@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 #include "knncolle/knncolle.hpp"
 
