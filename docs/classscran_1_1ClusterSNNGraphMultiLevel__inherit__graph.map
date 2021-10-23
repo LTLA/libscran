@@ -1,0 +1,4 @@
+<map id="scran::ClusterSNNGraphMultiLevel" name="scran::ClusterSNNGraphMultiLevel">
+<area shape="rect" id="node1" title="Multi&#45;level clustering on a shared nearest&#45;neighbor graph." alt="" coords="5,80,199,121"/>
+<area shape="rect" id="node2" href="$classscran_1_1ClusterSNNGraph.html" title="Virtual class for clustering on a shared nearest&#45;neighbor graph." alt="" coords="19,5,185,32"/>
+</map>

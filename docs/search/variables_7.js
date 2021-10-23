@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['neighbors_0',['neighbors',['../structscran_1_1BuildSNNGraph_1_1Defaults.html#a6a376b256377055e23a96c3d9eb96365',1,'scran::BuildSNNGraph::Defaults']]]
+  ['lower_0',['lower',['../structscran_1_1IsOutlier_1_1Thresholds.html#adeb1415ad8f8ac50c661059789a90dbb',1,'scran::IsOutlier::Thresholds']]]
 ];

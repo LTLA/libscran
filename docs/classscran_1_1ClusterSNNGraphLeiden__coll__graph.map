@@ -1,0 +1,5 @@
+<map id="scran::ClusterSNNGraphLeiden" name="scran::ClusterSNNGraphLeiden">
+<area shape="rect" id="node1" title="Leiden clustering on a shared nearest&#45;neighbor graph." alt="" coords="5,171,209,197"/>
+<area shape="rect" id="node2" href="$classscran_1_1ClusterSNNGraph.html" title="Virtual class for clustering on a shared nearest&#45;neighbor graph." alt="" coords="25,95,190,121"/>
+<area shape="rect" id="node3" href="$classscran_1_1BuildSNNGraph.html" title="Build a shared nearest&#45;neighbor graph with cells as nodes." alt="" coords="31,5,184,32"/>
+</map>
