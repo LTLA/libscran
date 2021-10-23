@@ -35,7 +35,7 @@ public:
          */
         static constexpr int seed = 42;
     };
-private:
+protected:
     BuildSNNGraph builder;
 
     int seed = Defaults::seed;
@@ -358,8 +358,11 @@ public:
          * See `set_steps()` for more details.
          * The default is based on the example in the **igraph** documentation.
          */
-        static constexpr double steps = 4;
+        static constexpr int steps = 4;
     };
+
+private:
+    int steps = Defaults::steps;
 
 public:
     /**
@@ -367,7 +370,7 @@ public:
      *
      * @return A reference to this `ClusterSNNGraphWalktrap` object.
      */
-    ClusterSNNGraphWalktrap& set_resolution(double s = Defaults::steps) {
+    ClusterSNNGraphWalktrap& set_resolution(int s = Defaults::steps) {
         steps = s;
         return *this;
     }
@@ -474,7 +477,7 @@ public:
         SCRAN_LOGGER("scran::ClusterSNNGraph", "Performing walktrap community detection");
 #endif
         Results output;
-        output.status = igraph_community_walktrap(&graph_info.graph, &graph_info.weights, &merges, &modularity, &membership);
+        output.status = igraph_community_walktrap(&graph_info.graph, &graph_info.weights, steps, &merges, &modularity, &membership);
 
         if (!output.status) {
             size_t nmods = igraph_vector_size(&modularity);
@@ -483,7 +486,7 @@ public:
                 output.modularity[i] = VECTOR(modularity)[i];
             }
 
-            size_t nmerges = igraph_matrix_nrow(&memberships);
+            size_t nmerges = igraph_matrix_nrow(&merges);
             output.merges.resize(nmerges);
             for (size_t i = 0; i < nmerges; ++i) {
                 output.merges[i].first = MATRIX(merges, i, 0);
@@ -491,7 +494,7 @@ public:
             }
 
             size_t ncells = igraph_vcount(&graph_info.graph);
-            output.membership.resize(nmods);
+            output.membership.resize(ncells);
             for (size_t i = 0; i < ncells; ++i) {
                 output.membership[i] = VECTOR(membership)[i];
             }
@@ -714,7 +717,7 @@ public:
 
         if (!output.status) {
             size_t ncells = igraph_vcount(&graph_info.graph);
-            output.membership.resize(nmods);
+            output.membership.resize(ncells);
             for (size_t i = 0; i < ncells; ++i) {
                 output.membership[i] = VECTOR(membership)[i];
             }

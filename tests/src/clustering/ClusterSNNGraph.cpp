@@ -36,9 +36,10 @@ TEST_P(ClusterSNNGraphMultiLevelTest, Basic) {
     int k = std::get<2>(param);
     double res = std::get<3>(param);
     
-    scran::ClusterSNNGraph cluster;
+    scran::ClusterSNNGraphMultiLevel cluster;
     cluster.set_neighbors(k);
-    auto output = cluster.run_multilevel(ndim, nobs, data.data(), res);
+    cluster.set_resolution(res);
+    auto output = cluster.run(ndim, nobs, data.data());
 
     EXPECT_EQ(output.membership.size(), output.modularity.size());
     EXPECT_TRUE(output.max >= 0 && output.max < output.membership.size());
@@ -88,8 +89,9 @@ protected:
 };
 
 TEST_F(ClusterSNNGraphSanityTest, Basic) {
-    scran::ClusterSNNGraph cluster;
-    auto output = cluster.run_multilevel(ndim, nobs, data.data(), 0.5);
+    scran::ClusterSNNGraphMultiLevel cluster;
+    cluster.set_resolution(0.5);
+    auto output = cluster.run(ndim, nobs, data.data());
 
     const auto& clustering = output.membership[output.max];
 
