@@ -1,4 +1,5 @@
 <map id="scran/quality_control/PerCellQCMetrics.hpp" name="scran/quality_control/PerCellQCMetrics.hpp">
-<area shape="rect" id="node1" title="Compute typical per&#45;cell quality control metrics." alt="" coords="5,5,160,47"/>
-<area shape="rect" id="node2" href="$PerCellQCFilters_8hpp.html" title="Create filters to identify low&#45;quality cells." alt="" coords="9,95,156,136"/>
+<area shape="rect" id="node1" title="Compute typical per&#45;cell quality control metrics." alt="" coords="56,5,211,47"/>
+<area shape="rect" id="node2" href="$PerCellQCFilters_8hpp.html" title="Create filters to identify low&#45;quality cells." alt="" coords="5,95,152,136"/>
+<area shape="rect" id="node3" href="$scran_8hpp_source.html" title=" " alt="" coords="76,184,191,211"/>
 </map>

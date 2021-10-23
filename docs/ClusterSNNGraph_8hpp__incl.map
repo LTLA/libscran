@@ -1,8 +1,9 @@
 <map id="scran/clustering/ClusterSNNGraph.hpp" name="scran/clustering/ClusterSNNGraph.hpp">
-<area shape="rect" id="node1" title="Identify clusters of cells from a shared nearest&#45;neighbor graph." alt="" coords="135,5,294,47"/>
-<area shape="rect" id="node2" href="$BuildSNNGraph_8hpp.html" title="Build a shared nearest&#45;neighbor graph on the cells." alt="" coords="92,95,231,121"/>
+<area shape="rect" id="node1" title="Identify clusters of cells from a shared nearest&#45;neighbor graph." alt="" coords="81,5,239,47"/>
+<area shape="rect" id="node2" href="$BuildSNNGraph_8hpp.html" title="Build a shared nearest&#45;neighbor graph on the cells." alt="" coords="144,95,283,121"/>
 <area shape="rect" id="node3" title=" " alt="" coords="5,169,64,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="259,169,333,196"/>
-<area shape="rect" id="node6" title=" " alt="" coords="305,95,372,121"/>
-<area shape="rect" id="node5" title=" " alt="" coords="88,169,235,196"/>
+<area shape="rect" id="node4" title=" " alt="" coords="88,169,163,196"/>
+<area shape="rect" id="node7" title=" " alt="" coords="307,95,373,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="187,169,255,196"/>
+<area shape="rect" id="node6" title=" " alt="" coords="280,169,427,196"/>
 </map>
