@@ -19,67 +19,14 @@
 namespace scran {
 
 /**
- * @brief Cluster cells by community detection on a shared nearest-neighbor graph.
+ * @brief Virtual class for clustering on a shared nearest-neighbor graph.
  *
- * We use the [**igraph**](https://igraph.org/) library to perform community detection on the graph constructed by `scran::BuildSNNGraph()`.
- * This yields a clustering on the cells that can be used for further characterization of subpopulations.
+ * This is a virtual class that takes the graph constructed by `scran::BuildSNNGraph()` and prepares it for use in the [**igraph**](https://igraph.org/) library.
+ * Concrete subclasses should apply specific community detection algorithms to obtain a clustering on the cells. 
  */
 class ClusterSNNGraph {
-public:
-    /**
-     * @brief Default parameter settings.
-     */
-    struct Defaults {
-        /**
-         * See `set_seed()` for more details.
-         */
-        static constexpr int seed = 42;
-    };
-private:
+protected:
     BuildSNNGraph builder;
-
-    int seed = Defaults::seed;
-
-public:
-    /**
-     * Set the number of neighbors to the default, see `BuildSNNGraph::set_neighbors()`.
-     *
-     * @return A reference to this `ClusterSNNGraph` object.
-     */
-    ClusterSNNGraph& set_neighbors(int k = BuildSNNGraph::Defaults::neighbors) {
-        builder.set_neighbors(k);
-        return *this;
-    }
-
-    /**
-     * Set the approximate algorithm flag to the default, see `BuildSNNGraph::set_approximate()`.
-     *
-     * @return A reference to this `ClusterSNNGraph` object.
-     */
-    ClusterSNNGraph& set_approximate(bool a = BuildSNNGraph::Defaults::approximate) {
-        builder.set_approximate(a);
-        return *this;
-    }
-
-    /**
-     * @param s Weighting scheme to use, see `BuildSNNGraph::set_weighting_scheme()`.
-     *
-     * @return A reference to this `ClusterSNNGraph` object.
-     */
-    ClusterSNNGraph& set_weighting_scheme(BuildSNNGraph::Scheme s = BuildSNNGraph::Defaults::weighting_scheme) {
-        builder.set_weighting_scheme(s);
-        return *this;
-    }
-
-    /**
-     * @param s Seed for the default **igraph** random number generator.
-     * 
-     * @return A reference to this `ClusterSNNGraph` object.
-     */
-    ClusterSNNGraph& set_seed(int s = Defaults::seed) {
-        seed = s;
-        return *this;
-    }
 
 public:
     /**
@@ -170,6 +117,86 @@ public:
 
         return output;
     }
+};
+
+/**
+ * @brief Multi-level clustering on a shared nearest-neighbor graph.
+ *
+ * This applies multi-level (i.e., "Louvain") clustering on a shared nearest neighbor graph.
+ * See [here](https://igraph.org/c/doc/igraph-Community.html#igraph_community_multilevel) for more details on the multi-level algorithm. 
+ */
+class ClusterSNNGraphMultiLevel : public ClusterSNNGraph {
+public:
+    /**
+     * @brief Default parameter settings.
+     */
+    struct Defaults {
+        /**
+         * See `set_resolution()` for more details.
+         */
+        static constexpr double resolution = 1;
+
+        /**
+         * See `set_seed()` for more details.
+         */
+        static constexpr int seed = 42;
+    };
+
+private:
+    double resolution = Defaults::resolution;
+    int seed = Defaults::seed;
+
+public:
+    /**
+     * @param k Number of neighbors, see `BuildSNNGraph::set_neighbors()`.
+     *
+     * @return A reference to this `ClusterSNNGraphMultiLevel` object.
+     */
+    ClusterSNNGraphMultiLevel& set_neighbors(int k = BuildSNNGraph::Defaults::neighbors) {
+        builder.set_neighbors(k);
+        return *this;
+    }
+
+    /**
+     * @param a Whether to use a approximate nearest neighbor search, see `BuildSNNGraph::set_approximate()`.
+     *
+     * @return A reference to this `ClusterSNNGraph` object.
+     */
+    ClusterSNNGraphMultiLevel& set_approximate(bool a = BuildSNNGraph::Defaults::approximate) {
+        builder.set_approximate(a);
+        return *this;
+    }
+
+    /**
+     * @param s Weighting scheme to use, see `BuildSNNGraph::set_weighting_scheme()`.
+     *
+     * @return A reference to this `ClusterSNNGraphMultiLevel` object.
+     */
+    ClusterSNNGraphMultiLevel& set_weighting_scheme(BuildSNNGraph::Scheme s = BuildSNNGraph::Defaults::weighting_scheme) {
+        builder.set_weighting_scheme(s);
+        return *this;
+    }
+
+    /**
+     * @param s Seed for the default **igraph** random number generator.
+     * 
+     * @return A reference to this `ClusterSNNGraphMultiLevel` object.
+     */
+    ClusterSNNGraphMultiLevel& set_seed(int s = Defaults::seed) {
+        seed = s;
+        return *this;
+    }
+
+    /**
+     * @param r Resolution of the clustering, must be non-negative.
+     * Lower values favor fewer, larger communities; higher values favor more, smaller communities.
+     *
+     * @return A reference to this `ClusterSNNGraphMultiLevel` object.
+     */
+    ClusterSNNGraphMultiLevel& set_resolution(double r = Defaults::resolution) {
+        resolution = r;
+        return *this;
+    }
 
 public:
     /**
@@ -178,7 +205,7 @@ public:
      * A separate set of clustering results are reported for each level.
      * The level providing the highest modularity is also reported; the clustering at this level is usually a good default choice.
      */
-    struct MultiLevelResult {
+    struct Results {
         /** 
          * Output status.
          * A value of zero indicates that the algorithm completed successfully.
@@ -206,21 +233,18 @@ public:
 
     /**
      * Run the multi-level community detection algorithm on a shared nearest-neighbor graph constructed from an expression matrix.
-     * See [here](https://igraph.org/c/doc/igraph-Community.html#igraph_community_multilevel) for more details. 
      *
      * @param ndims Number of dimensions.
      * @param ncells Number of cells.
      * @param mat Pointer to an array of expression values or a low-dimensional representation thereof.
      * Rows should be dimensions while columns should be cells.
      * Data should be stored in column-major format.
-     * @param resolution Resolution of the clustering, must be non-negative.
-     * Lower values favor fewer, larger communities; higher values favor more, smaller communities.
      *
-     * @return A `MultiLevelResult` object containing the clustering results for all cells.
+     * @return A `Results` object containing the clustering results for all cells.
      */
-    MultiLevelResult run_multilevel(size_t ndims, size_t ncells, const double* mat, double resolution = 1) {
+    Results run(size_t ndims, size_t ncells, const double* mat) {
         auto graph_info = build(ndims, ncells, mat);
-        auto output = run_multilevel(graph_info, resolution);
+        auto output = run(graph_info);
         graph_info.destroy();
         return output;
     }
@@ -231,15 +255,13 @@ public:
      * @tparam Algorithm Any instance of a `knncolle::Base` subclass.
      *
      * @param search Pointer to a `knncolle::Base` instance to use for the nearest-neighbor search.
-     * @param resolution Resolution of the clustering, must be non-negative.
-     * Lower values favor fewer, larger communities; higher values favor more, smaller communities.
      *
-     * @return A `MultiLevelResult` object containing the clustering results for all cells.
+     * @return A `Results` object containing the clustering results for all cells.
      */
     template<class Algorithm>
-    MultiLevelResult run_multilevel(const Algorithm* search, double resolution = 1) {
+    Results run(const Algorithm* search) {
         auto graph_info = build(search);
-        auto output = run_multilevel(graph_info, resolution);
+        auto output = run(graph_info);
         graph_info.destroy();
         return output;
     }
@@ -249,14 +271,12 @@ public:
      *
      * @param ncells Number of cells.
      * @param store A `deque` of edges, usually generated by a previous call to `BuildSNNGraph::run()`.
-     * @param resolution Resolution of the clustering, must be non-negative.
-     * Lower values favor fewer, larger communities; higher values favor more, smaller communities.
      *
-     * @return A `MultiLevelResult` object containing the clustering results for all cells.
+     * @return A `Results` object containing the clustering results for all cells.
      */
-    MultiLevelResult run_multilevel(size_t ncells, const std::deque<BuildSNNGraph::WeightedEdge>& store, double resolution = 1) {
+    Results run(size_t ncells, const std::deque<BuildSNNGraph::WeightedEdge>& store) {
         auto graph_info = build(ncells, store);
-        auto output = run_multilevel(graph_info, resolution);
+        auto output = run(graph_info);
         graph_info.destroy();
         return output;
     }
@@ -265,11 +285,10 @@ public:
      * Run the multi-level community detection algorithm on a pre-constructed shared nearest-neighbor graph as a `Graph` object.
      *
      * @param graph_info An existing `Graph` object, e.g., constructed by `build()`.
-     * @param resolution Resolution of the clustering, see `run_multilevel()` for details.
      *
-     * @return A `MultiLevelResult` object containing the clustering results for all cells.
+     * @return A `Results` object containing the clustering results for all cells.
      */
-    MultiLevelResult run_multilevel(const Graph& graph_info, double resolution = 1) {
+    Results run(const Graph& graph_info) {
         igraph_vector_t membership, modularity;
         igraph_matrix_t memberships;
 
@@ -283,7 +302,7 @@ public:
 #ifdef SCRAN_LOGGER
         SCRAN_LOGGER("scran::ClusterSNNGraph", "Performing multilevel community detection");
 #endif
-        MultiLevelResult output;
+        Results output;
         output.status = igraph_community_multilevel(&graph_info.graph, &graph_info.weights, resolution, &membership, &memberships, &modularity);
 
         if (!output.status) {
@@ -311,6 +330,486 @@ public:
         igraph_vector_destroy(&modularity);
         igraph_vector_destroy(&membership);
         igraph_matrix_destroy(&memberships);
+
+        return output;
+    }
+};
+
+/**
+ * @brief Walktrap clustering on a shared nearest-neighbor graph.
+ *
+ * This applies Walktrap clustering on a shared nearest neighbor graph.
+ * See [here](https://igraph.org/c/doc/igraph-Community.html#igraph_community_walktrap) for more details on the Walktrap algorithm. 
+ */
+class ClusterSNNGraphWalktrap : public ClusterSNNGraph {
+public:
+    /**
+     * @brief Default parameter settings.
+     */
+    struct Defaults {
+        /**
+         * See `set_steps()` for more details.
+         * The default is based on the example in the **igraph** documentation.
+         */
+        static constexpr int steps = 4;
+
+        /**
+         * See `set_seed()` for more details.
+         */
+        static constexpr int seed = 42;
+    };
+
+private:
+    int steps = Defaults::steps;
+    int seed = Defaults::seed;
+
+public:
+    /**
+     * @param k Number of neighbors, see `BuildSNNGraph::set_neighbors()`.
+     *
+     * @return A reference to this `ClusterSNNGraphWalktrap` object.
+     */
+    ClusterSNNGraphWalktrap& set_neighbors(int k = BuildSNNGraph::Defaults::neighbors) {
+        builder.set_neighbors(k);
+        return *this;
+    }
+
+    /**
+     * @param a Whether to use a approximate nearest neighbor search, see `BuildSNNGraph::set_approximate()`.
+     *
+     * @return A reference to this `ClusterSNNGraph` object.
+     */
+    ClusterSNNGraphWalktrap& set_approximate(bool a = BuildSNNGraph::Defaults::approximate) {
+        builder.set_approximate(a);
+        return *this;
+    }
+
+    /**
+     * @param s Weighting scheme to use, see `BuildSNNGraph::set_weighting_scheme()`.
+     *
+     * @return A reference to this `ClusterSNNGraphWalktrap` object.
+     */
+    ClusterSNNGraphWalktrap& set_weighting_scheme(BuildSNNGraph::Scheme s = BuildSNNGraph::Defaults::weighting_scheme) {
+        builder.set_weighting_scheme(s);
+        return *this;
+    }
+
+    /**
+     * @param s Seed for the default **igraph** random number generator.
+     * 
+     * @return A reference to this `ClusterSNNGraphWalktrap` object.
+     */
+    ClusterSNNGraphWalktrap& set_seed(int s = Defaults::seed) {
+        seed = s;
+        return *this;
+    }
+
+    /**
+     * @param s Number of steps of the random walk.
+     *
+     * @return A reference to this `ClusterSNNGraphWalktrap` object.
+     */
+    ClusterSNNGraphWalktrap& set_resolution(int s = Defaults::steps) {
+        steps = s;
+        return *this;
+    }
+
+public:
+    /**
+     * @brief Result of the **igraph** Walktrap community detection algorithm.
+     */
+    struct Results {
+        /** 
+         * Output status.
+         * A value of zero indicates that the algorithm completed successfully.
+         */
+        int status;
+        
+        /**
+         * Vector of length equal to the number of cells, containing 0-indexed cluster identities.
+         */
+        std::vector<int> membership;
+
+        /**
+         * Vector of length equal to the number of merge steps, containing the identities of the two clusters being merged.
+         * Note that cluster IDs here are not the same as those in `membership`.
+         */
+        std::vector<std::pair<int, int> > merges;
+
+        /**
+         * Vector of length equal to `merges` plus 1, containing the modularity score before and after each merge step.
+         * The maximum value is the modularity corresponding to the clustering in `membership`.
+         */
+        std::vector<double> modularity;
+    };
+
+    /**
+     * Run the Walktrap community detection algorithm on a shared nearest-neighbor graph constructed from an expression matrix.
+     *
+     * @param ndims Number of dimensions.
+     * @param ncells Number of cells.
+     * @param mat Pointer to an array of expression values or a low-dimensional representation thereof.
+     * Rows should be dimensions while columns should be cells.
+     * Data should be stored in column-major format.
+     *
+     * @return A `Results` object containing the clustering results for all cells.
+     */
+    Results run(size_t ndims, size_t ncells, const double* mat) {
+        auto graph_info = build(ndims, ncells, mat);
+        auto output = run(graph_info);
+        graph_info.destroy();
+        return output;
+    }
+
+    /**
+     * Run the Walktrap community detection algorithm on a shared nearest-neighbor graph constructed from `knncolle::Base` object.
+     *
+     * @tparam Algorithm Any instance of a `knncolle::Base` subclass.
+     *
+     * @param search Pointer to a `knncolle::Base` instance to use for the nearest-neighbor search.
+     *
+     * @return A `Results` object containing the clustering results for all cells.
+     */
+    template<class Algorithm>
+    Results run(const Algorithm* search) {
+        auto graph_info = build(search);
+        auto output = run(graph_info);
+        graph_info.destroy();
+        return output;
+    }
+
+    /**
+     * Run the Walktrap community detection algorithm on a shared nearest-neighbor graph constructed from `knncolle::Base` object.
+     *
+     * @param ncells Number of cells.
+     * @param store A `deque` of edges, usually generated by a previous call to `BuildSNNGraph::run()`.
+     *
+     * @return A `Results` object containing the clustering results for all cells.
+     */
+    Results run(size_t ncells, const std::deque<BuildSNNGraph::WeightedEdge>& store) {
+        auto graph_info = build(ncells, store);
+        auto output = run(graph_info);
+        graph_info.destroy();
+        return output;
+    }
+
+    /**
+     * Run the Walktrap community detection algorithm on a pre-constructed shared nearest-neighbor graph as a `Graph` object.
+     *
+     * @param graph_info An existing `Graph` object, e.g., constructed by `build()`.
+     *
+     * @return A `Results` object containing the clustering results for all cells.
+     */
+    Results run(const Graph& graph_info) {
+        igraph_matrix_t merges;
+        igraph_vector_t modularity;
+        igraph_vector_t membership;
+
+        igraph_vector_init(&modularity, 0);
+        igraph_vector_init(&membership, 0);
+        igraph_matrix_init(&merges, 0, 0);
+
+        // I just can't be bothered to do anything fancier here, so this is what we've got.
+        igraph_rng_seed(igraph_rng_default(), seed);
+
+#ifdef SCRAN_LOGGER
+        SCRAN_LOGGER("scran::ClusterSNNGraph", "Performing walktrap community detection");
+#endif
+        Results output;
+        output.status = igraph_community_walktrap(&graph_info.graph, &graph_info.weights, steps, &merges, &modularity, &membership);
+
+        if (!output.status) {
+            size_t nmods = igraph_vector_size(&modularity);
+            output.modularity.resize(nmods);
+            for (size_t i = 0; i < nmods; ++i) {
+                output.modularity[i] = VECTOR(modularity)[i];
+            }
+
+            size_t nmerges = igraph_matrix_nrow(&merges);
+            output.merges.resize(nmerges);
+            for (size_t i = 0; i < nmerges; ++i) {
+                output.merges[i].first = MATRIX(merges, i, 0);
+                output.merges[i].second = MATRIX(merges, i, 1);
+            }
+
+            size_t ncells = igraph_vcount(&graph_info.graph);
+            output.membership.resize(ncells);
+            for (size_t i = 0; i < ncells; ++i) {
+                output.membership[i] = VECTOR(membership)[i];
+            }
+        }
+
+        igraph_vector_destroy(&modularity);
+        igraph_vector_destroy(&membership);
+        igraph_matrix_destroy(&merges);
+
+        return output;
+    }
+};
+
+/**
+ * @brief Leiden clustering on a shared nearest-neighbor graph.
+ *
+ * This applies Leiden clustering on a shared nearest neighbor graph.
+ * See [here](https://igraph.org/c/doc/igraph-Community.html#igraph_community_leiden) for more details on the Leiden algorithm. 
+ */
+class ClusterSNNGraphLeiden : public ClusterSNNGraph {
+public:
+    /**
+     * @brief Default parameter settings.
+     */
+    struct Defaults {
+        /**
+         * See `set_resolution()` for more details.
+         * The default is based on the example in the **igraph** documentation.
+         */
+        static constexpr double resolution = 0.05;
+
+        /**
+         * See `set_beta()` for more details.
+         * The default is based on the example in the **igraph** documentation.
+         */
+        static constexpr double beta = 0.01;
+
+        /**
+         * See `set_iterations()` for more details.
+         * The default is based on the examples in the [corresponding paper](https://doi.org/10.1038/s41598-019-41695-z).
+         */
+        static constexpr int iterations = 10;
+
+        /**
+         * See `set_modularity()` for more details.
+         */
+        static constexpr bool modularity = false;
+
+        /**
+         * See `set_seed()` for more details.
+         */
+        static constexpr int seed = 42;
+    };
+
+private:
+    double resolution = Defaults::resolution;
+    double beta = Defaults::beta;
+    int iterations = Defaults::iterations;
+    bool modularity = Defaults::modularity;
+    int seed = Defaults::seed;
+
+public:
+    /**
+     * @param k Number of neighbors, see `BuildSNNGraph::set_neighbors()`.
+     *
+     * @return A reference to this `ClusterSNNGraphLeiden` object.
+     */
+    ClusterSNNGraphLeiden& set_neighbors(int k = BuildSNNGraph::Defaults::neighbors) {
+        builder.set_neighbors(k);
+        return *this;
+    }
+
+    /**
+     * @param a Whether to use a approximate nearest neighbor search, see `BuildSNNGraph::set_approximate()`.
+     *
+     * @return A reference to this `ClusterSNNGraph` object.
+     */
+    ClusterSNNGraphLeiden& set_approximate(bool a = BuildSNNGraph::Defaults::approximate) {
+        builder.set_approximate(a);
+        return *this;
+    }
+
+    /**
+     * @param s Weighting scheme to use, see `BuildSNNGraph::set_weighting_scheme()`.
+     *
+     * @return A reference to this `ClusterSNNGraphLeiden` object.
+     */
+    ClusterSNNGraphLeiden& set_weighting_scheme(BuildSNNGraph::Scheme s = BuildSNNGraph::Defaults::weighting_scheme) {
+        builder.set_weighting_scheme(s);
+        return *this;
+    }
+
+    /**
+     * @param s Seed for the default **igraph** random number generator.
+     * 
+     * @return A reference to this `ClusterSNNGraphLeiden` object.
+     */
+    ClusterSNNGraphLeiden& set_seed(int s = Defaults::seed) {
+        seed = s;
+        return *this;
+    }
+
+     /**
+     * @param r Resolution of the clustering.
+     * Larger values result in more fine-grained communities.
+     *
+     * @return A reference to this `ClusterSNNGraphLeiden` object.
+     */
+    ClusterSNNGraphLeiden& set_resolution(double r = Defaults::resolution) {
+        resolution = r;
+        return *this;
+    }
+
+    /**
+     * @param b Level of randomness used during refinement.
+     *
+     * @return A reference to this `ClusterSNNGraphLeiden` object.
+     */
+    ClusterSNNGraphLeiden& set_beta(double b = Defaults::beta) {
+        beta = b;
+        return *this;
+    }
+
+    /**
+     * @param i Number of iterations of the Leiden algorithm.
+     * More iterations can improve separation at the cost of computational time.
+     *
+     * @return A reference to this `ClusterSNNGraphLeiden` object.
+     */
+    ClusterSNNGraphLeiden& set_iterations(double i = Defaults::iterations) {
+        iterations = i;
+        return *this;
+    }
+
+    /**
+     * @param m Whether to optimize the modularity instead of the Constant Potts Model.
+     *
+     * The modularity is closely related to the Constant Potts Model, but the magnitude of the resolution is different.
+     * If this is set, we suggest increasing the resolution to something close to what is used by `ClusterSNNGraphMultiLevel`. 
+     *
+     * @return A reference to this `ClusterSNNGraphLeiden` object.
+     */
+    ClusterSNNGraphLeiden& set_modularity(double m = Defaults::modularity) {
+        modularity = m;
+        return *this;
+    }
+
+public:
+    /**
+     * @brief Result of the **igraph** leiden community detection algorithm.
+     */
+    struct Results {
+        /** 
+         * Output status.
+         * A value of zero indicates that the algorithm completed successfully.
+         */
+        int status;
+        
+        /**
+         * Vector of length equal to the number of cells, containing 0-indexed cluster identities.
+         */
+        std::vector<int> membership;
+
+        /**
+         * Quality of the clustering, closely related to the modularity.
+         */
+        double quality;
+    };
+
+    /**
+     * Run the Leiden community detection algorithm on a shared nearest-neighbor graph constructed from an expression matrix.
+     *
+     * @param ndims Number of dimensions.
+     * @param ncells Number of cells.
+     * @param mat Pointer to an array of expression values or a low-dimensional representation thereof.
+     * Rows should be dimensions while columns should be cells.
+     * Data should be stored in column-major format.
+     *
+     * @return A `Results` object containing the clustering results for all cells.
+     */
+    Results run(size_t ndims, size_t ncells, const double* mat) {
+        auto graph_info = build(ndims, ncells, mat);
+        auto output = run(graph_info);
+        graph_info.destroy();
+        return output;
+    }
+
+    /**
+     * Run the Leiden community detection algorithm on a shared nearest-neighbor graph constructed from `knncolle::Base` object.
+     *
+     * @tparam Algorithm Any instance of a `knncolle::Base` subclass.
+     *
+     * @param search Pointer to a `knncolle::Base` instance to use for the nearest-neighbor search.
+     *
+     * @return A `Results` object containing the clustering results for all cells.
+     */
+    template<class Algorithm>
+    Results run(const Algorithm* search) {
+        auto graph_info = build(search);
+        auto output = run(graph_info);
+        graph_info.destroy();
+        return output;
+    }
+
+    /**
+     * Run the Leiden community detection algorithm on a shared nearest-neighbor graph constructed from `knncolle::Base` object.
+     *
+     * @param ncells Number of cells.
+     * @param store A `deque` of edges, usually generated by a previous call to `BuildSNNGraph::run()`.
+     *
+     * @return A `Results` object containing the clustering results for all cells.
+     */
+    Results run(size_t ncells, const std::deque<BuildSNNGraph::WeightedEdge>& store) {
+        auto graph_info = build(ncells, store);
+        auto output = run(graph_info);
+        graph_info.destroy();
+        return output;
+    }
+
+    /**
+     * Run the Leiden community detection algorithm on a pre-constructed shared nearest-neighbor graph as a `Graph` object.
+     *
+     * @param graph_info An existing `Graph` object, e.g., constructed by `build()`.
+     *
+     * @return A `Results` object containing the clustering results for all cells.
+     */
+    Results run(const Graph& graph_info) {
+        igraph_vector_t membership;
+        igraph_integer_t nb_clusters;
+        igraph_real_t quality;
+
+        igraph_vector_init(&membership, 0);
+
+        // I just can't be bothered to do anything fancier here, so this is what we've got.
+        igraph_rng_seed(igraph_rng_default(), seed);
+        Results output;
+
+        if (!modularity) {
+            for (int i = 0; i < iterations; ++i) {
+                output.status = igraph_community_leiden(&graph_info.graph, &graph_info.weights, NULL, resolution, beta, 0, &membership, &nb_clusters, &quality);
+                if (output.status) {
+                    break;
+                }
+            }
+        } else {
+            // Based on https://igraph.org/c/doc/igraph-Community.html#igraph_community_leiden.
+            igraph_vector_t degree;
+            igraph_vector_init(&degree, igraph_vcount(&graph_info.graph));
+            igraph_degree(&graph_info.graph, &degree, igraph_vss_all(), IGRAPH_ALL, 1);
+
+            // We divide the resolution by 2 * m rather than fixing resolution
+            // = 1 as in the documented example. This ensures that we can
+            // still respond to changes in resolution, though users will probably
+            // need to bump up the resolution to a larger value to compensate.
+            double mod_resolution = resolution / (2 * igraph_ecount(&graph_info.graph));
+            
+            for (int i = 0; i < iterations; ++i) {
+                output.status = igraph_community_leiden(&graph_info.graph, &graph_info.weights, &degree, mod_resolution, beta, 0, &membership, &nb_clusters, &quality);
+                if (output.status) {
+                    break;
+                }
+            }
+
+            igraph_vector_destroy(&degree);
+        }
+
+        if (!output.status) {
+            size_t ncells = igraph_vcount(&graph_info.graph);
+            output.membership.resize(ncells);
+            for (size_t i = 0; i < ncells; ++i) {
+                output.membership[i] = VECTOR(membership)[i];
+            }
+            output.quality = quality;
+        }
+
+        igraph_vector_destroy(&membership);
 
         return output;
     }
