@@ -437,8 +437,8 @@ public:
         std::vector<std::pair<int, int> > merges;
 
         /**
-         * Vector of length equal to `merges`, containing the modularity score at each merge step.
-         * The last value represents the score at the modularity defined by `membership`.
+         * Vector of length equal to `merges` plus 1, containing the modularity score before and after each merge step.
+         * The maximum value is the modularity corresponding to the clustering in `membership`.
          */
         std::vector<double> modularity;
     };
