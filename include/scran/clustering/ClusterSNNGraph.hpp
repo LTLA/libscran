@@ -22,64 +22,11 @@ namespace scran {
  * @brief Virtual class for clustering on a shared nearest-neighbor graph.
  *
  * This is a virtual class that takes the graph constructed by `scran::BuildSNNGraph()` and prepares it for use in the [**igraph**](https://igraph.org/) library.
- * Concrete subclasses can apply specific community detection algorithms to obtain a clustering on the cells. 
+ * Concrete subclasses should apply specific community detection algorithms to obtain a clustering on the cells. 
  */
 class ClusterSNNGraph {
-public:
-    /**
-     * @brief Default parameter settings.
-     */
-    struct Defaults {
-        /**
-         * See `set_seed()` for more details.
-         */
-        static constexpr int seed = 42;
-    };
 protected:
     BuildSNNGraph builder;
-
-    int seed = Defaults::seed;
-
-public:
-    /**
-     * Set the number of neighbors to the default, see `BuildSNNGraph::set_neighbors()`.
-     *
-     * @return A reference to this `ClusterSNNGraph` object.
-     */
-    ClusterSNNGraph& set_neighbors(int k = BuildSNNGraph::Defaults::neighbors) {
-        builder.set_neighbors(k);
-        return *this;
-    }
-
-    /**
-     * Set the approximate algorithm flag to the default, see `BuildSNNGraph::set_approximate()`.
-     *
-     * @return A reference to this `ClusterSNNGraph` object.
-     */
-    ClusterSNNGraph& set_approximate(bool a = BuildSNNGraph::Defaults::approximate) {
-        builder.set_approximate(a);
-        return *this;
-    }
-
-    /**
-     * @param s Weighting scheme to use, see `BuildSNNGraph::set_weighting_scheme()`.
-     *
-     * @return A reference to this `ClusterSNNGraph` object.
-     */
-    ClusterSNNGraph& set_weighting_scheme(BuildSNNGraph::Scheme s = BuildSNNGraph::Defaults::weighting_scheme) {
-        builder.set_weighting_scheme(s);
-        return *this;
-    }
-
-    /**
-     * @param s Seed for the default **igraph** random number generator.
-     * 
-     * @return A reference to this `ClusterSNNGraph` object.
-     */
-    ClusterSNNGraph& set_seed(int s = Defaults::seed) {
-        seed = s;
-        return *this;
-    }
 
 public:
     /**
@@ -188,19 +135,65 @@ public:
          * See `set_resolution()` for more details.
          */
         static constexpr double resolution = 1;
+
+        /**
+         * See `set_seed()` for more details.
+         */
+        static constexpr int seed = 42;
     };
 
 private:
     double resolution = Defaults::resolution;
+    int seed = Defaults::seed;
 
 public:
+    /**
+     * @param k Number of neighbors, see `BuildSNNGraph::set_neighbors()`.
+     *
+     * @return A reference to this `ClusterSNNGraphMultiLevel` object.
+     */
+    ClusterSNNGraphMultiLevel& set_neighbors(int k = BuildSNNGraph::Defaults::neighbors) {
+        builder.set_neighbors(k);
+        return *this;
+    }
+
+    /**
+     * @param a Whether to use a approximate nearest neighbor search, see `BuildSNNGraph::set_approximate()`.
+     *
+     * @return A reference to this `ClusterSNNGraph` object.
+     */
+    ClusterSNNGraphMultiLevel& set_approximate(bool a = BuildSNNGraph::Defaults::approximate) {
+        builder.set_approximate(a);
+        return *this;
+    }
+
+    /**
+     * @param s Weighting scheme to use, see `BuildSNNGraph::set_weighting_scheme()`.
+     *
+     * @return A reference to this `ClusterSNNGraphMultiLevel` object.
+     */
+    ClusterSNNGraphMultiLevel& set_weighting_scheme(BuildSNNGraph::Scheme s = BuildSNNGraph::Defaults::weighting_scheme) {
+        builder.set_weighting_scheme(s);
+        return *this;
+    }
+
+    /**
+     * @param s Seed for the default **igraph** random number generator.
+     * 
+     * @return A reference to this `ClusterSNNGraphMultiLevel` object.
+     */
+    ClusterSNNGraphMultiLevel& set_seed(int s = Defaults::seed) {
+        seed = s;
+        return *this;
+    }
+
     /**
      * @param r Resolution of the clustering, must be non-negative.
      * Lower values favor fewer, larger communities; higher values favor more, smaller communities.
      *
      * @return A reference to this `ClusterSNNGraphMultiLevel` object.
      */
-    ClusterSNNGraphMultiLevel& set_resolution(double r = 1) {
+    ClusterSNNGraphMultiLevel& set_resolution(double r = Defaults::resolution) {
         resolution = r;
         return *this;
     }
@@ -359,12 +352,58 @@ public:
          * The default is based on the example in the **igraph** documentation.
          */
         static constexpr int steps = 4;
+
+        /**
+         * See `set_seed()` for more details.
+         */
+        static constexpr int seed = 42;
     };
 
 private:
     int steps = Defaults::steps;
+    int seed = Defaults::seed;
 
 public:
+    /**
+     * @param k Number of neighbors, see `BuildSNNGraph::set_neighbors()`.
+     *
+     * @return A reference to this `ClusterSNNGraphWalktrap` object.
+     */
+    ClusterSNNGraphWalktrap& set_neighbors(int k = BuildSNNGraph::Defaults::neighbors) {
+        builder.set_neighbors(k);
+        return *this;
+    }
+
+    /**
+     * @param a Whether to use a approximate nearest neighbor search, see `BuildSNNGraph::set_approximate()`.
+     *
+     * @return A reference to this `ClusterSNNGraph` object.
+     */
+    ClusterSNNGraphWalktrap& set_approximate(bool a = BuildSNNGraph::Defaults::approximate) {
+        builder.set_approximate(a);
+        return *this;
+    }
+
+    /**
+     * @param s Weighting scheme to use, see `BuildSNNGraph::set_weighting_scheme()`.
+     *
+     * @return A reference to this `ClusterSNNGraphWalktrap` object.
+     */
+    ClusterSNNGraphWalktrap& set_weighting_scheme(BuildSNNGraph::Scheme s = BuildSNNGraph::Defaults::weighting_scheme) {
+        builder.set_weighting_scheme(s);
+        return *this;
+    }
+
+    /**
+     * @param s Seed for the default **igraph** random number generator.
+     * 
+     * @return A reference to this `ClusterSNNGraphWalktrap` object.
+     */
+    ClusterSNNGraphWalktrap& set_seed(int s = Defaults::seed) {
+        seed = s;
+        return *this;
+    }
+
     /**
      * @param s Number of steps of the random walk.
      *
@@ -542,6 +581,11 @@ public:
          * See `set_modularity()` for more details.
          */
         static constexpr bool modularity = false;
+
+        /**
+         * See `set_seed()` for more details.
+         */
+        static constexpr int seed = 42;
     };
 
 private:
@@ -549,8 +593,49 @@ private:
     double beta = Defaults::beta;
     int iterations = Defaults::iterations;
     bool modularity = Defaults::modularity;
+    int seed = Defaults::seed;
 
 public:
+    /**
+     * @param k Number of neighbors, see `BuildSNNGraph::set_neighbors()`.
+     *
+     * @return A reference to this `ClusterSNNGraphLeiden` object.
+     */
+    ClusterSNNGraphLeiden& set_neighbors(int k = BuildSNNGraph::Defaults::neighbors) {
+        builder.set_neighbors(k);
+        return *this;
+    }
+
+    /**
+     * @param a Whether to use a approximate nearest neighbor search, see `BuildSNNGraph::set_approximate()`.
+     *
+     * @return A reference to this `ClusterSNNGraph` object.
+     */
+    ClusterSNNGraphLeiden& set_approximate(bool a = BuildSNNGraph::Defaults::approximate) {
+        builder.set_approximate(a);
+        return *this;
+    }
+
+    /**
+     * @param s Weighting scheme to use, see `BuildSNNGraph::set_weighting_scheme()`.
+     *
+     * @return A reference to this `ClusterSNNGraphLeiden` object.
+     */
+    ClusterSNNGraphLeiden& set_weighting_scheme(BuildSNNGraph::Scheme s = BuildSNNGraph::Defaults::weighting_scheme) {
+        builder.set_weighting_scheme(s);
+        return *this;
+    }
+
+    /**
+     * @param s Seed for the default **igraph** random number generator.
+     * 
+     * @return A reference to this `ClusterSNNGraphLeiden` object.
+     */
+    ClusterSNNGraphLeiden& set_seed(int s = Defaults::seed) {
+        seed = s;
+        return *this;
+    }
+
      /**
      * @param r Resolution of the clustering.
      * Larger values result in more fine-grained communities.
