@@ -16,7 +16,7 @@ namespace scran {
  * This is mostly for the sake of having a consistent naming scheme - 
  * see the [**kmeans** documentation](https://ltla.github.io/CppKmeans/) for specifics.
  */
-typedef kmeans::Kmeans ClusterKmeans;
+typedef kmeans::Kmeans<> ClusterKmeans;
 
 }
 
