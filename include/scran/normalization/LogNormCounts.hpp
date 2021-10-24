@@ -6,6 +6,7 @@
 #include <numeric>
 
 #include "tatami/base/DelayedIsometricOp.hpp"
+#include "tatami/stats/sums.hpp"
 
 #include "../utils/block_indices.hpp"
 

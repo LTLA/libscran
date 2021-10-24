@@ -17,6 +17,7 @@
 #include "quality_control/PerCellQCFilters.hpp"
 #include "quality_control/PerCellQCMetrics.hpp"
 #include "utils/average_vectors.hpp"
+#include "utils/subset_vector.hpp"
 #include "utils/vector_to_pointers.hpp"
 
 #endif
