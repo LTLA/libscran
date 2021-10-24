@@ -161,6 +161,41 @@ public:
         }
     }
 
+public:
+    /**
+     * Compute log-normalized expression values from an input matrix.
+     * Size factors are defined as the sum of the total counts for each cell. 
+     *
+     * @tparam MAT A **tatami** matrix class, most typically a `tatami::NumericMatrix`.
+     *
+     * @param mat Pointer to an input count matrix, with features in the rows and cells in the columns.
+     *
+     * @return A pointer to a matrix of log-transformed and normalized values.
+     */
+    template<class MAT>
+    std::shared_ptr<MAT> run(std::shared_ptr<MAT> mat) {
+        auto size_factors = tatami::column_sums(mat.get());
+        return run_blocked(std::move(mat), std::move(size_factors), static_cast<int*>(NULL));
+    }
+
+    /**
+     * Compute log-normalized expression values from an input matrix with blocking, see `run_blocked()` for details.
+     * Size factors are defined as the sum of the total counts for each cell. 
+     *
+     * @tparam MAT A **tatami** matrix class, most typically a `tatami::NumericMatrix`.
+     * @tparam B An integer type, to hold the block IDs.
+     *
+     * @param mat Pointer to an input count matrix, with features in the rows and cells in the columns.
+     * @param[in] block Pointer to an array of block identifiers, see `run_blocked()` for details.
+     *
+     * @return A pointer to a matrix of log-transformed and normalized values.
+     */
+    template<class MAT, typename B>
+    std::shared_ptr<MAT> run_blocked(std::shared_ptr<MAT> mat, const B* block) {
+        auto size_factors = tatami::column_sums(mat.get());
+        return run_blocked(mat, std::move(size_factors), block);
+    }
+
 private:
     double pseudo_count = 1;
     bool center = true;

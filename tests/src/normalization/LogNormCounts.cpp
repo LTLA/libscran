@@ -21,7 +21,7 @@ protected:
     std::vector<double> sf;
 };
 
-TEST_F(LogNormCountsTester, SimpleTest) {
+TEST_F(LogNormCountsTester, Simple) {
     scran::LogNormCounts lnc;
     auto lognormed = lnc.run(mat, sf);
 
@@ -43,7 +43,7 @@ TEST_F(LogNormCountsTester, SimpleTest) {
     }
 }
 
-TEST_F(LogNormCountsTester, AnotherPseudoTest) {
+TEST_F(LogNormCountsTester, AnotherPseudo) {
     scran::LogNormCounts lnc;
     auto lognormed = lnc.set_pseudo_count(1.5).run(mat, sf);
 
@@ -65,7 +65,7 @@ TEST_F(LogNormCountsTester, AnotherPseudoTest) {
     }
 }
 
-TEST_F(LogNormCountsTester, BlockTest) {
+TEST_F(LogNormCountsTester, Block) {
     std::vector<int> block(mat->ncol());
     std::vector<double> blocked_sf(3), blocked_num(3);
     for (size_t i = 0; i < block.size(); ++i) { 
@@ -96,7 +96,33 @@ TEST_F(LogNormCountsTester, BlockTest) {
     }
 }
 
-TEST_F(LogNormCountsTester, ErrorTest) {
+TEST_F(LogNormCountsTester, SelfCompute) {
+    scran::LogNormCounts lnc;
+    auto lognormed = lnc.run(mat);
+    auto ref = lnc.run(mat, sf);
+
+    for (size_t i = 0; i < mat->ncol(); ++i) {
+        auto out1 = lognormed->column(i);
+        auto out2 = ref->column(i);
+        EXPECT_EQ(out1, out2);
+    }
+
+    // Creating blocks.
+    std::vector<int> block(mat->ncol());
+    for (size_t i = 0; i < block.size(); ++i) { 
+        block[i] = i % 3;
+    }
+    auto lognormed2 = lnc.run_blocked(mat, block.data());
+    auto ref2 = lnc.run_blocked(mat, sf, block.data());
+
+    for (size_t i = 0; i < mat->ncol(); ++i) {
+        auto out1 = lognormed2->column(i);
+        auto out2 = ref2->column(i);
+        EXPECT_EQ(out1, out2);
+    }
+}
+
+TEST_F(LogNormCountsTester, Error) {
     scran::LogNormCounts lnc;
     auto sf2 = sf;
     sf2.resize(sf.size() - 1);
