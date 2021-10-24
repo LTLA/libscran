@@ -92,13 +92,61 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aff48e505ebe0a03af3b0f70b8a6ca018"><td class="memTemplParams" colspan="2">template&lt;class MAT , class V , typename B &gt; </td></tr>
 <tr class="memitem:aff48e505ebe0a03af3b0f70b8a6ca018"><td class="memTemplItemLeft" align="right" valign="top">std::shared_ptr&lt; MAT &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#aff48e505ebe0a03af3b0f70b8a6ca018">run_blocked</a> (std::shared_ptr&lt; MAT &gt; mat, V size_factors, const B *block)</td></tr>
 <tr class="separator:aff48e505ebe0a03af3b0f70b8a6ca018"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62393f9c6c70246aba4e90499afd29da"><td class="memTemplParams" colspan="2">template&lt;class MAT &gt; </td></tr>
+<tr class="memitem:a62393f9c6c70246aba4e90499afd29da"><td class="memTemplItemLeft" align="right" valign="top">std::shared_ptr&lt; MAT &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#a62393f9c6c70246aba4e90499afd29da">run</a> (std::shared_ptr&lt; MAT &gt; mat)</td></tr>
+<tr class="separator:a62393f9c6c70246aba4e90499afd29da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7824fe66b3414475e0af74329b9f623a"><td class="memTemplParams" colspan="2">template&lt;class MAT , typename B &gt; </td></tr>
+<tr class="memitem:a7824fe66b3414475e0af74329b9f623a"><td class="memTemplItemLeft" align="right" valign="top">std::shared_ptr&lt; MAT &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#a7824fe66b3414475e0af74329b9f623a">run_blocked</a> (std::shared_ptr&lt; MAT &gt; mat, const B *block)</td></tr>
+<tr class="separator:a7824fe66b3414475e0af74329b9f623a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Compute log-normalized expression values. </p>
 <p >Given a count matrix and a set of size factors, compute log-transformed normalized expression values. Each cell's counts are divided by the cell's size factor, to account for differences in capture efficiency and sequencing depth across cells. The normalized values are then log-transformed so that downstream analyses focus on the relative rather than absolute differences in expression; this process also provides some measure of variance stabilization. These operations are done in a delayed manner using the <code>DelayedIsometricOp</code> class from the <b>tatami</b> library. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a62393f9c6c70246aba4e90499afd29da" name="a62393f9c6c70246aba4e90499afd29da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62393f9c6c70246aba4e90499afd29da">&#9670;&nbsp;</a></span>run() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class MAT &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::shared_ptr&lt; MAT &gt; scran::LogNormCounts::run </td>
+          <td>(</td>
+          <td class="paramtype">std::shared_ptr&lt; MAT &gt;&#160;</td>
+          <td class="paramname"><em>mat</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Compute log-normalized expression values from an input matrix. Size factors are defined as the sum of the total counts for each cell.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">MAT</td><td>A <b>tatami</b> matrix class, most typically a <code>tatami::NumericMatrix</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">mat</td><td>Pointer to an input count matrix, with features in the rows and cells in the columns.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A pointer to a matrix of log-transformed and normalized values. </dd></dl>
+
+</div>
+</div>
 <a id="adff2220b45c6931d41883290524f4aca" name="adff2220b45c6931d41883290524f4aca"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adff2220b45c6931d41883290524f4aca">&#9670;&nbsp;</a></span>run()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#adff2220b45c6931d41883290524f4aca">&#9670;&nbsp;</a></span>run() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -151,8 +199,62 @@ template&lt;class MAT , class V &gt; </div>
 
 </div>
 </div>
+<a id="a7824fe66b3414475e0af74329b9f623a" name="a7824fe66b3414475e0af74329b9f623a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7824fe66b3414475e0af74329b9f623a">&#9670;&nbsp;</a></span>run_blocked() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class MAT , typename B &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::shared_ptr&lt; MAT &gt; scran::LogNormCounts::run_blocked </td>
+          <td>(</td>
+          <td class="paramtype">std::shared_ptr&lt; MAT &gt;&#160;</td>
+          <td class="paramname"><em>mat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const B *&#160;</td>
+          <td class="paramname"><em>block</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Compute log-normalized expression values from an input matrix with blocking, see <code><a class="el" href="classscran_1_1LogNormCounts.html#aff48e505ebe0a03af3b0f70b8a6ca018">run_blocked()</a></code> for details. Size factors are defined as the sum of the total counts for each cell.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">MAT</td><td>A <b>tatami</b> matrix class, most typically a <code>tatami::NumericMatrix</code>. </td></tr>
+    <tr><td class="paramname">B</td><td>An integer type, to hold the block IDs.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Pointer to an input count matrix, with features in the rows and cells in the columns. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1LogNormCounts.html#aff48e505ebe0a03af3b0f70b8a6ca018">run_blocked()</a></code> for details.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A pointer to a matrix of log-transformed and normalized values. </dd></dl>
+
+</div>
+</div>
 <a id="aff48e505ebe0a03af3b0f70b8a6ca018" name="aff48e505ebe0a03af3b0f70b8a6ca018"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aff48e505ebe0a03af3b0f70b8a6ca018">&#9670;&nbsp;</a></span>run_blocked()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aff48e505ebe0a03af3b0f70b8a6ca018">&#9670;&nbsp;</a></span>run_blocked() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">

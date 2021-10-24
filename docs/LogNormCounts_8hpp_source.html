@@ -167,16 +167,31 @@ $(function() {
 <div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>        }</div>
 <div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    }</div>
 <div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    <span class="keywordtype">double</span> pseudo_count = 1;</div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    <span class="keywordtype">bool</span> center = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>};</div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span> </div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>};</div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span> </div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    <span class="keyword">template</span>&lt;<span class="keyword">class</span> MAT&gt;</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno"><a class="line" href="classscran_1_1LogNormCounts.html#a62393f9c6c70246aba4e90499afd29da">  176</a></span>    std::shared_ptr&lt;MAT&gt; <a class="code hl_function" href="classscran_1_1LogNormCounts.html#a62393f9c6c70246aba4e90499afd29da">run</a>(std::shared_ptr&lt;MAT&gt; mat) {</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>        <span class="keyword">auto</span> size_factors = tatami::column_sums(mat.get());</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="classscran_1_1LogNormCounts.html#aff48e505ebe0a03af3b0f70b8a6ca018">run_blocked</a>(std::move(mat), std::move(size_factors), <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span>*<span class="keyword">&gt;</span>(NULL));</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    }</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span> </div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>    <span class="keyword">template</span>&lt;<span class="keyword">class</span> MAT, <span class="keyword">typename</span> B&gt;</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno"><a class="line" href="classscran_1_1LogNormCounts.html#a7824fe66b3414475e0af74329b9f623a">  194</a></span>    std::shared_ptr&lt;MAT&gt; <a class="code hl_function" href="classscran_1_1LogNormCounts.html#a7824fe66b3414475e0af74329b9f623a">run_blocked</a>(std::shared_ptr&lt;MAT&gt; mat, <span class="keyword">const</span> B* block) {</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        <span class="keyword">auto</span> size_factors = tatami::column_sums(mat.get());</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>        <span class="keywordflow">return</span> <a class="code hl_function" href="classscran_1_1LogNormCounts.html#aff48e505ebe0a03af3b0f70b8a6ca018">run_blocked</a>(mat, std::move(size_factors), block);</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>    }</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span> </div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>    <span class="keywordtype">double</span> pseudo_count = 1;</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    <span class="keywordtype">bool</span> center = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>};</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span> </div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>};</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span> </div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aclassscran_1_1LogNormCounts_html"><div class="ttname"><a href="classscran_1_1LogNormCounts.html">scran::LogNormCounts</a></div><div class="ttdoc">Compute log-normalized expression values.</div><div class="ttdef"><b>Definition:</b> LogNormCounts.hpp:29</div></div>
 <div class="ttc" id="aclassscran_1_1LogNormCounts_html_a111900f1d964419c8004ab40a0920e81"><div class="ttname"><a href="classscran_1_1LogNormCounts.html#a111900f1d964419c8004ab40a0920e81">scran::LogNormCounts::set_center</a></div><div class="ttdeci">LogNormCounts &amp; set_center(bool c=true)</div><div class="ttdef"><b>Definition:</b> LogNormCounts.hpp:57</div></div>
+<div class="ttc" id="aclassscran_1_1LogNormCounts_html_a62393f9c6c70246aba4e90499afd29da"><div class="ttname"><a href="classscran_1_1LogNormCounts.html#a62393f9c6c70246aba4e90499afd29da">scran::LogNormCounts::run</a></div><div class="ttdeci">std::shared_ptr&lt; MAT &gt; run(std::shared_ptr&lt; MAT &gt; mat)</div><div class="ttdef"><b>Definition:</b> LogNormCounts.hpp:176</div></div>
+<div class="ttc" id="aclassscran_1_1LogNormCounts_html_a7824fe66b3414475e0af74329b9f623a"><div class="ttname"><a href="classscran_1_1LogNormCounts.html#a7824fe66b3414475e0af74329b9f623a">scran::LogNormCounts::run_blocked</a></div><div class="ttdeci">std::shared_ptr&lt; MAT &gt; run_blocked(std::shared_ptr&lt; MAT &gt; mat, const B *block)</div><div class="ttdef"><b>Definition:</b> LogNormCounts.hpp:194</div></div>
 <div class="ttc" id="aclassscran_1_1LogNormCounts_html_adff2220b45c6931d41883290524f4aca"><div class="ttname"><a href="classscran_1_1LogNormCounts.html#adff2220b45c6931d41883290524f4aca">scran::LogNormCounts::run</a></div><div class="ttdeci">std::shared_ptr&lt; MAT &gt; run(std::shared_ptr&lt; MAT &gt; mat, V size_factors)</div><div class="ttdef"><b>Definition:</b> LogNormCounts.hpp:76</div></div>
 <div class="ttc" id="aclassscran_1_1LogNormCounts_html_ae486329099ba6ee9f563267803a37163"><div class="ttname"><a href="classscran_1_1LogNormCounts.html#ae486329099ba6ee9f563267803a37163">scran::LogNormCounts::set_pseudo_count</a></div><div class="ttdeci">LogNormCounts &amp; set_pseudo_count(double p=1)</div><div class="ttdef"><b>Definition:</b> LogNormCounts.hpp:39</div></div>
 <div class="ttc" id="aclassscran_1_1LogNormCounts_html_aff48e505ebe0a03af3b0f70b8a6ca018"><div class="ttname"><a href="classscran_1_1LogNormCounts.html#aff48e505ebe0a03af3b0f70b8a6ca018">scran::LogNormCounts::run_blocked</a></div><div class="ttdeci">std::shared_ptr&lt; MAT &gt; run_blocked(std::shared_ptr&lt; MAT &gt; mat, V size_factors, const B *block)</div><div class="ttdef"><b>Definition:</b> LogNormCounts.hpp:100</div></div>
