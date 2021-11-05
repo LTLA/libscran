@@ -346,7 +346,12 @@ public:
     {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
         if (block == NULL) {
-            run_internal(p, group, ngroups, means[0], detected[0], cohen, auc);
+            std::vector<Stat*> means2(ngroups), detected2(ngroups);
+            for (size_t g = 0; g < ngroups; ++g) {
+                means2[g] = means[g][0];
+                detected2[g] = detected[g][0];
+            }
+            run_internal(p, group, ngroups, means2, detected2, cohen, auc);
             return;
         }
     
