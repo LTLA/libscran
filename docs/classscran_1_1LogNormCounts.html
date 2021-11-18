@@ -86,6 +86,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ae486329099ba6ee9f563267803a37163"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a111900f1d964419c8004ab40a0920e81"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#a111900f1d964419c8004ab40a0920e81">set_center</a> (bool c=true)</td></tr>
 <tr class="separator:a111900f1d964419c8004ab40a0920e81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37c8c824927e9404598628d479338544"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#a37c8c824927e9404598628d479338544">set_block_mode</a> (<a class="el" href="classscran_1_1CenterSizeFactors.html#a511d8d0b9259cd5e3595edb8b8573189">CenterSizeFactors::BlockMode</a> b=<a class="el" href="structscran_1_1CenterSizeFactors_1_1Defaults.html#a1b72abdcaa1fcd1bc846418e0480c2b6">CenterSizeFactors::Defaults::block_mode</a>)</td></tr>
+<tr class="separator:a37c8c824927e9404598628d479338544"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adff2220b45c6931d41883290524f4aca"><td class="memTemplParams" colspan="2">template&lt;class MAT , class V &gt; </td></tr>
 <tr class="memitem:adff2220b45c6931d41883290524f4aca"><td class="memTemplItemLeft" align="right" valign="top">std::shared_ptr&lt; MAT &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#adff2220b45c6931d41883290524f4aca">run</a> (std::shared_ptr&lt; MAT &gt; mat, V size_factors)</td></tr>
 <tr class="separator:adff2220b45c6931d41883290524f4aca"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -294,7 +296,7 @@ template&lt;class MAT , class V , typename B &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Compute log-normalized expression values from an input matrix with blocking. Specifically, centering of size factors is performed within each block. This allows users to easily mimic normalization of different blocks of cells (e.g., from different samples) in the same matrix. In contrast, without blocking, the centering would depend on the size factors in different blocks.</p>
+<p >Compute log-normalized expression values from an input matrix with blocking. Specifically, centering of size factors is performed within each block. This allows users to easily mimic normalization of different blocks of cells (e.g., from different samples) in the same matrix.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">MAT</td><td>A <b>tatami</b> matrix class, most typically a <code>tatami::NumericMatrix</code>. </td></tr>
@@ -312,6 +314,39 @@ template&lt;class MAT , class V , typename B &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A pointer to a matrix of log-transformed and normalized values. </dd></dl>
+
+</div>
+</div>
+<a id="a37c8c824927e9404598628d479338544" name="a37c8c824927e9404598628d479338544"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a37c8c824927e9404598628d479338544">&#9670;&nbsp;</a></span>set_block_mode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp; scran::LogNormCounts::set_block_mode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classscran_1_1CenterSizeFactors.html#a511d8d0b9259cd5e3595edb8b8573189">CenterSizeFactors::BlockMode</a>&#160;</td>
+          <td class="paramname"><em>b</em> = <code><a class="el" href="structscran_1_1CenterSizeFactors_1_1Defaults.html#a1b72abdcaa1fcd1bc846418e0480c2b6">CenterSizeFactors::Defaults::block_mode</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">b</td><td>Blocking mode, see <code><a class="el" href="classscran_1_1CenterSizeFactors.html#ac8edc812cc10eb1439d21c7d78570650">CenterSizeFactors::set_block_mode()</a></code> for details.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1LogNormCounts.html" title="Compute log-normalized expression values.">LogNormCounts</a></code> object. </dd></dl>
 
 </div>
 </div>

@@ -1,9 +1,11 @@
 <map id="scran/normalization/LogNormCounts.hpp" name="scran/normalization/LogNormCounts.hpp">
-<area shape="rect" id="node1" title="Compute log&#45;normalized expression values." alt="" coords="226,5,371,47"/>
+<area shape="rect" id="node1" title="Compute log&#45;normalized expression values." alt="" coords="305,5,450,47"/>
 <area shape="rect" id="node2" title=" " alt="" coords="5,102,80,129"/>
 <area shape="rect" id="node3" title=" " alt="" coords="104,102,163,129"/>
 <area shape="rect" id="node4" title=" " alt="" coords="187,102,255,129"/>
 <area shape="rect" id="node5" title=" " alt="" coords="280,95,475,136"/>
 <area shape="rect" id="node6" title=" " alt="" coords="499,102,650,129"/>
-<area shape="rect" id="node7" title=" " alt="" coords="675,102,837,129"/>
+<area shape="rect" id="node7" href="$CenterSizeFactors_8hpp.html" title="Center size factors prior to normalization." alt="" coords="674,102,827,129"/>
+<area shape="rect" id="node9" title=" " alt="" coords="784,184,947,211"/>
+<area shape="rect" id="node8" title=" " alt="" coords="681,184,759,211"/>
 </map>
