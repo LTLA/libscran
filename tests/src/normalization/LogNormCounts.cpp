@@ -79,6 +79,7 @@ TEST_F(LogNormCountsTester, Block) {
     }
 
     scran::LogNormCounts lnc;
+    lnc.set_block_mode(scran::CenterSizeFactors::PER_BLOCK);
     auto lognormed = lnc.run_blocked(mat, sf, block.data());
     std::vector<double> buffer(mat->nrow());
 

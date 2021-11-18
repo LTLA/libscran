@@ -8,6 +8,7 @@
 #include "tatami/base/DelayedIsometricOp.hpp"
 #include "tatami/stats/sums.hpp"
 
+#include "CenterSizeFactors.hpp"
 #include "../utils/block_indices.hpp"
 
 /**
@@ -60,6 +61,16 @@ public:
         return *this;
     }
 
+    /** 
+     * @param b Blocking mode, see `CenterSizeFactors::set_block_mode()` for details.
+     *
+     * @return A reference to this `LogNormCounts` object.
+     */
+    LogNormCounts& set_block_mode(CenterSizeFactors::BlockMode b = CenterSizeFactors::Defaults::block_mode) {
+        centerer.set_block_mode(b);
+        return *this;
+    }
+
 public:
     /**
      * Compute log-normalized expression values from an input matrix.
@@ -82,7 +93,6 @@ public:
      * Compute log-normalized expression values from an input matrix with blocking.
      * Specifically, centering of size factors is performed within each block.
      * This allows users to easily mimic normalization of different blocks of cells (e.g., from different samples) in the same matrix.
-     * In contrast, without blocking, the centering would depend on the size factors in different blocks.
      *
      * @tparam MAT A **tatami** matrix class, most typically a `tatami::NumericMatrix`.
      * @tparam V A vector class supporting `size()`, random access via `[`, `begin()`, `end()` and `data()`.
@@ -110,40 +120,15 @@ public:
 #ifdef SCRAN_LOGGER
             SCRAN_LOGGER("scran::LogNormCounts", "Centering size factors to unity");
 #endif
-
             if (block) {
-                auto by_group = block_indices(mat->ncol(), block);
-                for (const auto& g : by_group) {
-                    if (g.size()) {
-                        double mean = 0;
-                        for (auto i : g) {
-                            mean += size_factors[i];
-                        }
-                        mean /= g.size();
-
-                        if (mean > 0) {
-                            for (auto i : g) {
-                                size_factors[i] /= mean;
-                            }
-                        }
-                    }
-                }
+                centerer.run_blocked(size_factors, block);
             } else {
-                if (size_factors.size()) { // avoid division by zero
-                    double mean = std::accumulate(size_factors.begin(), size_factors.end(), static_cast<double>(0)) / size_factors.size();
-                    if (mean) { // avoid division by zero
-                        for (auto& x : size_factors) {
-                            x /= mean;
-                        }
-                    }
-                }
+                centerer.run(size_factors);
             }
-        }
-
-        for (auto x : size_factors) {
-            if (x <= 0) {
-                throw std::runtime_error("non-positive size factors detected");
-            }
+        } else {
+            // CenterSizeFactors do their own validity checks, 
+            // so we don't need to call it again in that case.
+            CenterSizeFactors::validate(size_factors);
         }
 
 #ifdef SCRAN_LOGGER
@@ -200,6 +185,7 @@ public:
 private:
     double pseudo_count = 1;
     bool center = true;
+    CenterSizeFactors centerer;
 };
 
 };
