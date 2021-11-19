@@ -100,18 +100,18 @@ Public Types</h2></td></tr>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ac8edc812cc10eb1439d21c7d78570650"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1CenterSizeFactors.html">CenterSizeFactors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1CenterSizeFactors.html#ac8edc812cc10eb1439d21c7d78570650">set_block_mode</a> (<a class="el" href="classscran_1_1CenterSizeFactors.html#a511d8d0b9259cd5e3595edb8b8573189">BlockMode</a> b=<a class="el" href="structscran_1_1CenterSizeFactors_1_1Defaults.html#a1b72abdcaa1fcd1bc846418e0480c2b6">Defaults::block_mode</a>)</td></tr>
 <tr class="separator:ac8edc812cc10eb1439d21c7d78570650"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7abb968d440bb3841846bc4e4064c79b"><td class="memTemplParams" colspan="2">template&lt;class V &gt; </td></tr>
-<tr class="memitem:a7abb968d440bb3841846bc4e4064c79b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1CenterSizeFactors.html#a7abb968d440bb3841846bc4e4064c79b">run</a> (V &amp;size_factors)</td></tr>
-<tr class="separator:a7abb968d440bb3841846bc4e4064c79b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a87e5b3ed9266161d1262406574175b37"><td class="memTemplParams" colspan="2">template&lt;class V , typename B &gt; </td></tr>
-<tr class="memitem:a87e5b3ed9266161d1262406574175b37"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1CenterSizeFactors.html#a87e5b3ed9266161d1262406574175b37">run_blocked</a> (V &amp;size_factors, const B *block)</td></tr>
-<tr class="separator:a87e5b3ed9266161d1262406574175b37"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff59ca260f4bc45956d52e7bd2ba34e7"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:aff59ca260f4bc45956d52e7bd2ba34e7"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1CenterSizeFactors.html#aff59ca260f4bc45956d52e7bd2ba34e7">run</a> (size_t n, T *size_factors)</td></tr>
+<tr class="separator:aff59ca260f4bc45956d52e7bd2ba34e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a6a6bdf83ebc261511ea40875632cbe"><td class="memTemplParams" colspan="2">template&lt;typename T , typename B &gt; </td></tr>
+<tr class="memitem:a3a6a6bdf83ebc261511ea40875632cbe"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1CenterSizeFactors.html#a3a6a6bdf83ebc261511ea40875632cbe">run_blocked</a> (size_t n, T *size_factors, const B *block)</td></tr>
+<tr class="separator:a3a6a6bdf83ebc261511ea40875632cbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:aba0e0274980a2abe422b530cd326c3d1"><td class="memTemplParams" colspan="2">template&lt;class V &gt; </td></tr>
-<tr class="memitem:aba0e0274980a2abe422b530cd326c3d1"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1CenterSizeFactors.html#aba0e0274980a2abe422b530cd326c3d1">validate</a> (const V &amp;size_factors)</td></tr>
-<tr class="separator:aba0e0274980a2abe422b530cd326c3d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab0e7c7668245e96c68f086d373a95b4"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:aab0e7c7668245e96c68f086d373a95b4"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1CenterSizeFactors.html#aab0e7c7668245e96c68f086d373a95b4">validate</a> (size_t n, const T *size_factors)</td></tr>
+<tr class="separator:aab0e7c7668245e96c68f086d373a95b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Center size factors prior to scaling normalization. </p>
@@ -133,13 +133,13 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a7abb968d440bb3841846bc4e4064c79b" name="a7abb968d440bb3841846bc4e4064c79b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7abb968d440bb3841846bc4e4064c79b">&#9670;&nbsp;</a></span>run()</h2>
+<a id="aff59ca260f4bc45956d52e7bd2ba34e7" name="aff59ca260f4bc45956d52e7bd2ba34e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff59ca260f4bc45956d52e7bd2ba34e7">&#9670;&nbsp;</a></span>run()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class V &gt; </div>
+template&lt;typename T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -147,9 +147,19 @@ template&lt;class V &gt; </div>
         <tr>
           <td class="memname">void scran::CenterSizeFactors::run </td>
           <td>(</td>
-          <td class="paramtype">V &amp;&#160;</td>
-          <td class="paramname"><em>size_factors</em></td><td>)</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">T *&#160;</td>
+          <td class="paramname"><em>size_factors</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -160,13 +170,14 @@ template&lt;class V &gt; </div>
 </div><div class="memdoc">
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">V</td><td>A vector class supporting <code>size()</code>, random access via <code>[</code>, <code>begin()</code>, <code>end()</code> and <code>data()</code>.</td></tr>
+    <tr><td class="paramname">T</td><td>Floating-point type for the size factors.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">size_factors</td><td>A vector of positive size factors, of length equal to the number of columns in <code>mat</code>.</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of size factors. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">size_factors</td><td>Pointer to an array of positive size factors of length <code>n</code>.</td></tr>
   </table>
   </dd>
 </dl>
@@ -174,13 +185,13 @@ template&lt;class V &gt; </div>
 
 </div>
 </div>
-<a id="a87e5b3ed9266161d1262406574175b37" name="a87e5b3ed9266161d1262406574175b37"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a87e5b3ed9266161d1262406574175b37">&#9670;&nbsp;</a></span>run_blocked()</h2>
+<a id="a3a6a6bdf83ebc261511ea40875632cbe" name="a3a6a6bdf83ebc261511ea40875632cbe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3a6a6bdf83ebc261511ea40875632cbe">&#9670;&nbsp;</a></span>run_blocked()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class V , typename B &gt; </div>
+template&lt;typename T , typename B &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -188,7 +199,13 @@ template&lt;class V , typename B &gt; </div>
         <tr>
           <td class="memname">void scran::CenterSizeFactors::run_blocked </td>
           <td>(</td>
-          <td class="paramtype">V &amp;&#160;</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T *&#160;</td>
           <td class="paramname"><em>size_factors</em>, </td>
         </tr>
         <tr>
@@ -211,15 +228,16 @@ template&lt;class V , typename B &gt; </div>
 </div><div class="memdoc">
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">V</td><td>A vector class supporting <code>size()</code>, random access via <code>[</code>, <code>begin()</code>, <code>end()</code> and <code>data()</code>. </td></tr>
+    <tr><td class="paramname">T</td><td>Floating-point type for the size factors. </td></tr>
     <tr><td class="paramname">B</td><td>An integer type, to hold the block IDs.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">size_factors</td><td>A vector of positive size factors, of length equal to the number of columns in <code>mat</code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of block identifiers. If provided, the array should be of length equal to the length of <code>size_factors</code>. Values should be integer IDs in <img class="formulaInl" alt="$[0, N)$" src="form_0.png"/> where <img class="formulaInl" alt="$N$" src="form_1.png"/> is the number of blocks. This can also be a <code>NULL</code>, in which case all cells are assumed to belong to the same block.</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of size factors. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">size_factors</td><td>Pointer to an array of positive size factors of length 1n1. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of block identifiers. If provided, the array should be of length equal to <code>n</code>. Values should be integer IDs in <img class="formulaInl" alt="$[0, N)$" src="form_0.png"/> where <img class="formulaInl" alt="$N$" src="form_1.png"/> is the number of blocks. This can also be a <code>NULL</code>, in which case all cells are assumed to belong to the same block.</td></tr>
   </table>
   </dd>
 </dl>
@@ -252,23 +270,23 @@ template&lt;class V , typename B &gt; </div>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">b</td><td>Strategy for handling blocks in <code><a class="el" href="classscran_1_1CenterSizeFactors.html#a87e5b3ed9266161d1262406574175b37">run_blocked()</a></code>.</td></tr>
+    <tr><td class="paramname">b</td><td>Strategy for handling blocks in <code><a class="el" href="classscran_1_1CenterSizeFactors.html#a3a6a6bdf83ebc261511ea40875632cbe">run_blocked()</a></code>.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1CenterSizeFactors.html" title="Center size factors prior to scaling normalization.">CenterSizeFactors</a></code> object.</dd></dl>
-<p>With the <code>PER_BLOCK</code> strategy, size factors are scaled separately for each block so that they have a mean of 1 within each block. The scaled size factors are identical to those obtained by separate invocations of <code><a class="el" href="classscran_1_1CenterSizeFactors.html#a7abb968d440bb3841846bc4e4064c79b">CenterSizeFactors::run()</a></code> on the size factors for each block. This can be desirable to ensure consistency with independent analyses of each block - otherwise, the centering would depend on the size factors across all blocks.</p>
+<p>With the <code>PER_BLOCK</code> strategy, size factors are scaled separately for each block so that they have a mean of 1 within each block. The scaled size factors are identical to those obtained by separate invocations of <code><a class="el" href="classscran_1_1CenterSizeFactors.html#aff59ca260f4bc45956d52e7bd2ba34e7">CenterSizeFactors::run()</a></code> on the size factors for each block. This can be desirable to ensure consistency with independent analyses of each block - otherwise, the centering would depend on the size factors across all blocks.</p>
 <p >With the <code>LOWEST</code> strategy, we compute the mean size factor for each block and we divide all size factors by the minimum mean. In effect, we downscale all blocks to match the coverage of the lowest-coverage block. This is useful for datasets with highly heterogeneous coverage of different blocks as it avoids egregious upscaling of low-coverage blocks. (By contrast, downscaling is always safe as it simply discards information across all blocks by shrinking log-fold changes towards zero at low expression.) </p>
 
 </div>
 </div>
-<a id="aba0e0274980a2abe422b530cd326c3d1" name="aba0e0274980a2abe422b530cd326c3d1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aba0e0274980a2abe422b530cd326c3d1">&#9670;&nbsp;</a></span>validate()</h2>
+<a id="aab0e7c7668245e96c68f086d373a95b4" name="aab0e7c7668245e96c68f086d373a95b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab0e7c7668245e96c68f086d373a95b4">&#9670;&nbsp;</a></span>validate()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class V &gt; </div>
+template&lt;typename T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -276,9 +294,19 @@ template&lt;class V &gt; </div>
         <tr>
           <td class="memname">static void scran::CenterSizeFactors::validate </td>
           <td>(</td>
-          <td class="paramtype">const V &amp;&#160;</td>
-          <td class="paramname"><em>size_factors</em></td><td>)</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const T *&#160;</td>
+          <td class="paramname"><em>size_factors</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -290,12 +318,14 @@ template&lt;class V &gt; </div>
 <p >Validate size factors by checking that they are all positive.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">V</td><td>A vector class supporting <code>size()</code>, random access via <code>[</code>, <code>begin()</code>, <code>end()</code> and <code>data()</code>.</td></tr>
+    <tr><td class="paramname">T</td><td>Floating-point type for the size factors.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of size factors. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">size_factors</td><td>Pointer to an array of positive size factors of length <code>n</code>.</td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size_factors</td><td>A vector of positive size factors, of length equal to the number of columns in <code>mat</code>.</td></tr>
   </table>
   </dd>
