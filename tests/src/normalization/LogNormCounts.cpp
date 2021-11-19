@@ -16,6 +16,14 @@ protected:
         mat = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
         sf = tatami::column_sums(mat.get());
     }
+    
+    std::vector<int> create_block(size_t n) {
+        std::vector<int> output(n);
+        for (size_t i = 0; i < n; ++i) { 
+            output[i] = i % 3;
+        }
+        return output;
+    }
 protected:
     std::shared_ptr<tatami::NumericMatrix> mat;
     std::vector<double> sf;
@@ -26,18 +34,14 @@ TEST_F(LogNormCountsTester, Simple) {
     auto lognormed = lnc.run(mat, sf);
 
     // Reference calculation.
-    double mean_sf = std::accumulate(sf.begin(), sf.end(), 0.0)/sf.size();
-    std::vector<double> buffer(mat->nrow());
+    scran::CenterSizeFactors cen;
+    cen.run(sf.size(), sf.data());
 
     for (size_t i = 0; i < mat->ncol(); ++i) {
-        auto ptr = lognormed->column(i, buffer.data());
-        std::vector<double> output(ptr, ptr + mat->nrow());
-
-        auto ptr2 = mat->column(i, buffer.data());
-        std::vector<double> output2(ptr2, ptr2 + mat->nrow());
-
+        auto output = lognormed->column(i);
+        auto output2 = mat->column(i);
         for (auto& o : output2) {
-            o = std::log1p(o/(sf[i]/mean_sf))/std::log(2);
+            o = std::log1p(o/sf[i])/std::log(2);
         }
         EXPECT_EQ(output, output2);
     }
@@ -48,50 +52,53 @@ TEST_F(LogNormCountsTester, AnotherPseudo) {
     auto lognormed = lnc.set_pseudo_count(1.5).run(mat, sf);
 
     // Reference calculation.
-    double mean_sf = std::accumulate(sf.begin(), sf.end(), 0.0)/sf.size();
-    std::vector<double> buffer(mat->nrow());
+    scran::CenterSizeFactors cen;
+    cen.run(sf.size(), sf.data());
 
     for (size_t i = 0; i < mat->ncol(); ++i) {
-        auto ptr = lognormed->column(i, buffer.data());
-        std::vector<double> output(ptr, ptr + mat->nrow());
-
-        auto ptr2 = mat->column(i, buffer.data());
-        std::vector<double> output2(ptr2, ptr2 + mat->nrow());
-
+        auto output = lognormed->column(i);
+        auto output2 = mat->column(i);
         for (auto& o : output2) {
-            o = std::log(o/(sf[i]/mean_sf) + 1.5)/std::log(2);
+            o = std::log(o/sf[i] + 1.5)/std::log(2);
         }
         EXPECT_EQ(output, output2);
     }
 }
 
 TEST_F(LogNormCountsTester, Block) {
-    std::vector<int> block(mat->ncol());
-    std::vector<double> blocked_sf(3), blocked_num(3);
-    for (size_t i = 0; i < block.size(); ++i) { 
-        auto index = i % 3;
-        block[i] = index;
-        blocked_sf[index] += sf[i];
-        ++blocked_num[index];
-    }
-    for (size_t i = 0; i < 3; ++i) {
-        blocked_sf[i] /= blocked_num[i];
-    }
+    // Assigning them to three blocks.
+    std::vector<int> block = create_block(mat->ncol());
 
     scran::LogNormCounts lnc;
     lnc.set_block_mode(scran::CenterSizeFactors::PER_BLOCK);
     auto lognormed = lnc.run_blocked(mat, sf, block.data());
-    std::vector<double> buffer(mat->nrow());
+
+    // Comparing to a reference.
+    scran::CenterSizeFactors cen;
+    cen.set_block_mode(scran::CenterSizeFactors::PER_BLOCK);
+    cen.run_blocked(sf.size(), sf.data(), block.data());
 
     for (size_t i = 0; i < mat->ncol(); ++i) {
-        auto ptr = lognormed->column(i, buffer.data());
-        std::vector<double> output(ptr, ptr + mat->nrow());
-
-        auto ptr2 = mat->column(i, buffer.data());
-        std::vector<double> output2(ptr2, ptr2 + mat->nrow());
-
+        auto output = lognormed->column(i);
+        auto output2 = mat->column(i);
         for (auto& o : output2) {
-            o = std::log1p(o/(sf[i]/blocked_sf[i%3]))/std::log(2);
+            o = std::log1p(o/sf[i])/std::log(2);
+        }
+        EXPECT_EQ(output, output2);
+    }
+}
+
+TEST_F(LogNormCountsTester, NoCenter) {
+    scran::LogNormCounts lnc;
+    lnc.set_center(false);
+    auto lognormed = lnc.run(mat, sf);
+
+    // Reference calculation.
+    for (size_t i = 0; i < mat->ncol(); ++i) {
+        auto output = lognormed->column(i);
+        auto output2 = mat->column(i);
+        for (auto& o : output2) {
+            o = std::log1p(o/sf[i])/std::log(2);
         }
         EXPECT_EQ(output, output2);
     }
@@ -109,10 +116,7 @@ TEST_F(LogNormCountsTester, SelfCompute) {
     }
 
     // Creating blocks.
-    std::vector<int> block(mat->ncol());
-    for (size_t i = 0; i < block.size(); ++i) { 
-        block[i] = i % 3;
-    }
+    std::vector<int> block = create_block(mat->ncol());
     auto lognormed2 = lnc.run_blocked(mat, block.data());
     auto ref2 = lnc.run_blocked(mat, sf, block.data());
 

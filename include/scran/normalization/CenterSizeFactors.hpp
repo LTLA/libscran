@@ -2,7 +2,8 @@
 #define SCRAN_CENTER_SIZE_FACTORS_HPP
 
 #include <stdexcept>
-#include "../utils/block_indices.hpp"
+#include <vector>
+#include <algorithm>
 
 /**
  * @file CenterSizeFactors.hpp
@@ -42,16 +43,19 @@ public:
     /**
      * Validate size factors by checking that they are all positive.
      *
-     * @tparam V A vector class supporting `size()`, random access via `[`, `begin()`, `end()` and `data()`.
+     * @tparam T Floating-point type for the size factors.
+     *
+     * @param n Number of size factors.
+     * @param[in,out] size_factors Pointer to an array of positive size factors of length `n`.
      *
      * @param[in] size_factors A vector of positive size factors, of length equal to the number of columns in `mat`.
      *
      * @return An error is raised if a negative or zero size factor is detected.
      */
-    template<class V>
-    static void validate(const V& size_factors) {
-        for (auto x : size_factors) {
-            if (x <= 0) {
+    template<typename T>
+    static void validate(size_t n, const T* size_factors) {
+        for (size_t i = 0; i < n; ++i) {
+            if (size_factors[i] <= 0) {
                 throw std::runtime_error("non-positive size factors detected");
             }
         }
@@ -79,77 +83,68 @@ public:
 
 public:
     /**
-     * @tparam V A vector class supporting `size()`, random access via `[`, `begin()`, `end()` and `data()`.
+     * @tparam T Floating-point type for the size factors.
      *
-     * @param[in,out] size_factors A vector of positive size factors, of length equal to the number of columns in `mat`.
+     * @param n Number of size factors.
+     * @param[in,out] size_factors Pointer to an array of positive size factors of length `n`.
      *
      * @return Entries in `size_factors` are scaled so that their mean is equal to 1.
      */
-    template<class V>
-    void run(V& size_factors) {
-        if (size_factors.size()) { // avoid division by zero
-            validate(size_factors);
-            double mean = std::accumulate(size_factors.begin(), size_factors.end(), static_cast<double>(0)) / size_factors.size();
+    template<typename T>
+    void run(size_t n, T* size_factors) {
+        if (n) { // avoid division by zero
+            validate(n, size_factors);
+            double mean = std::accumulate(size_factors, size_factors + n, static_cast<double>(0)) / n;
 
             if (mean) { // avoid division by zero
-                for (auto& x : size_factors) {
-                    x /= mean;
+                for (size_t i = 0; i < n; ++i){
+                    size_factors[i] /= mean;
                 }
             }
         }
     }
 
     /**
-     * @tparam V A vector class supporting `size()`, random access via `[`, `begin()`, `end()` and `data()`.
+     * @tparam T Floating-point type for the size factors.
      * @tparam B An integer type, to hold the block IDs.
      *
-     * @param size_factors A vector of positive size factors, of length equal to the number of columns in `mat`.
+     * @param n Number of size factors.
+     * @param[in,out] size_factors Pointer to an array of positive size factors of length 1n1.
      * @param[in] block Pointer to an array of block identifiers.
-     * If provided, the array should be of length equal to the length of `size_factors`.
+     * If provided, the array should be of length equal to `n`.
      * Values should be integer IDs in \f$[0, N)\f$ where \f$N\f$ is the number of blocks.
      * This can also be a `NULL`, in which case all cells are assumed to belong to the same block.
      *
      * @return Entries in `size_factors` are scaled according to the mode defined by `set_block_mode()`.
      */
-    template<class V, typename B>
-    void run_blocked(V& size_factors, const B* block) {
+    template<typename T, typename B>
+    void run_blocked(size_t n, T* size_factors, const B* block) {
         if (block == NULL) {
-            run(size_factors);
+            run(n, size_factors);
             return;
-        }
+        } else if (n) {
+            validate(n, size_factors);
 
-        validate(size_factors);
-        auto by_group = block_indices(size_factors.size(), block);
-        std::vector<double> group_mean(by_group.size());
+            size_t ngroups = *std::max_element(block, block + n) + 1;
+            std::vector<double> group_mean(ngroups);
+            std::vector<double> group_num(ngroups);
 
-        for (size_t g = 0; g < by_group.size(); ++g) {
-            const auto& current = by_group[g];
-            if (current.size()) {
-                double& mean = group_mean[g];
-                for (auto i : current) {
-                    mean += size_factors[i];
-                }
-                mean /= current.size();
+            for (size_t i = 0; i < n; ++i) {
+                group_mean[block[i]] += size_factors[i];
+                ++group_num[block[i]];
             }
-        }
-
-        if (block_mode == PER_BLOCK) {
-            for (size_t g = 0; g < by_group.size(); ++g) {
-                const auto& mean = group_mean[g];
-                if (mean > 0) {
-                    const auto& current = by_group[g];
-                    for (auto i : current) {
-                        size_factors[i] /= mean;
-                    }
-                }
+            for (size_t g = 0; g < ngroups; ++g) {
+                group_mean[g] /= group_num[g];
             }
-        } else if (block_mode == LOWEST) {
-            if (group_mean.size()) {
+
+            if (block_mode == PER_BLOCK) {
+                for (size_t i = 0; i < n; ++i) {
+                    size_factors[i] /= group_mean[block[i]];
+                }
+            } else if (block_mode == LOWEST) {
                 double min = *std::min_element(group_mean.begin(), group_mean.end());
-                if (min) {
-                    for (auto& x : size_factors) {
-                        x /= min;
-                    }
+                for (size_t i = 0; i < n; ++i) {
+                    size_factors[i] /= min;
                 }
             }
         }

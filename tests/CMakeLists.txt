@@ -17,6 +17,7 @@ add_executable(
     src/quality_control/IsOutlier.cpp
     src/quality_control/FilterCells.cpp
     src/normalization/LogNormCounts.cpp
+    src/normalization/CenterSizeFactors.cpp
     src/feature_selection/ModelGeneVar.cpp
     src/feature_selection/FitTrendVar.cpp
     src/feature_selection/ChooseHVGs.cpp

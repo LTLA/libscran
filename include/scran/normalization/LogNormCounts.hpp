@@ -120,15 +120,12 @@ public:
 #ifdef SCRAN_LOGGER
             SCRAN_LOGGER("scran::LogNormCounts", "Centering size factors to unity");
 #endif
-            if (block) {
-                centerer.run_blocked(size_factors, block);
-            } else {
-                centerer.run(size_factors);
-            }
+            // Falls back to centerer.run() if block=NULL.
+            centerer.run_blocked(size_factors.size(), size_factors.data(), block);
         } else {
             // CenterSizeFactors do their own validity checks, 
             // so we don't need to call it again in that case.
-            CenterSizeFactors::validate(size_factors);
+            CenterSizeFactors::validate(size_factors.size(), size_factors.data());
         }
 
 #ifdef SCRAN_LOGGER
