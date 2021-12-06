@@ -111,6 +111,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae6e5da96dc7242bca506c1c09be27cd1"><td class="memTemplParams" colspan="2">template&lt;class Algorithm &gt; </td></tr>
 <tr class="memitem:ae6e5da96dc7242bca506c1c09be27cd1"><td class="memTemplItemLeft" align="right" valign="top">std::deque&lt; <a class="el" href="classscran_1_1BuildSNNGraph.html#af27e18b11231af9605b34495eb710d4e">WeightedEdge</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1BuildSNNGraph.html#ae6e5da96dc7242bca506c1c09be27cd1">run</a> (const Algorithm *search) const</td></tr>
 <tr class="separator:ae6e5da96dc7242bca506c1c09be27cd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92ec5e1ed989d14e77156512f44ca63f"><td class="memItemLeft" align="right" valign="top">std::deque&lt; <a class="el" href="classscran_1_1BuildSNNGraph.html#af27e18b11231af9605b34495eb710d4e">WeightedEdge</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1BuildSNNGraph.html#a92ec5e1ed989d14e77156512f44ca63f">run</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;indices) const</td></tr>
+<tr class="separator:a92ec5e1ed989d14e77156512f44ca63f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Build a shared nearest-neighbor graph with cells as nodes. </p>
@@ -158,7 +160,7 @@ Public Member Functions</h2></td></tr>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="ae6e5da96dc7242bca506c1c09be27cd1" name="ae6e5da96dc7242bca506c1c09be27cd1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae6e5da96dc7242bca506c1c09be27cd1">&#9670;&nbsp;</a></span>run() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6e5da96dc7242bca506c1c09be27cd1">&#9670;&nbsp;</a></span>run() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -194,12 +196,45 @@ template&lt;class Algorithm &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code>deque</code> containing all the edges of the graph as <code>WeightedEdge</code>s. In each <code>WeightedEdge</code>, the first index is guaranteed to be larger than the second index, so as to avoid unnecessary duplicates. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code>deque</code> identical to that returned by the other <code><a class="el" href="classscran_1_1BuildSNNGraph.html#a6f2a0276125b2f8426afecb32cd7080e">run()</a></code> methods. </dd></dl>
+
+</div>
+</div>
+<a id="a92ec5e1ed989d14e77156512f44ca63f" name="a92ec5e1ed989d14e77156512f44ca63f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92ec5e1ed989d14e77156512f44ca63f">&#9670;&nbsp;</a></span>run() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::deque&lt; <a class="el" href="classscran_1_1BuildSNNGraph.html#af27e18b11231af9605b34495eb710d4e">WeightedEdge</a> &gt; scran::BuildSNNGraph::run </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>indices</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">indices</td><td>Vector of indices of the neighbors for each cell, sorted by increasing distance.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code>deque</code> identical to that returned by the other <code><a class="el" href="classscran_1_1BuildSNNGraph.html#a6f2a0276125b2f8426afecb32cd7080e">run()</a></code> methods. </dd></dl>
 
 </div>
 </div>
 <a id="a6f2a0276125b2f8426afecb32cd7080e" name="a6f2a0276125b2f8426afecb32cd7080e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6f2a0276125b2f8426afecb32cd7080e">&#9670;&nbsp;</a></span>run() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f2a0276125b2f8426afecb32cd7080e">&#9670;&nbsp;</a></span>run() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
