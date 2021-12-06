@@ -139,8 +139,7 @@ public:
      *
      * @param search Pointer to a `knncolle::Base` instance to use for the nearest-neighbor search.
      *
-     * @return A `deque` containing all the edges of the graph as `WeightedEdge`s.
-     * In each `WeightedEdge`, the first index is guaranteed to be larger than the second index, so as to avoid unnecessary duplicates.
+     * @return A `deque` identical to that returned by the other `run()` methods.
      */
     template<class Algorithm>
     std::deque<WeightedEdge> run(const Algorithm* search) const {
@@ -159,6 +158,17 @@ public:
                 current.push_back(x.first);
             }
         }
+
+        return run(indices);
+    }
+
+    /**
+     * @param indices Vector of indices of the neighbors for each cell, sorted by increasing distance.
+     *
+     * @return A `deque` identical to that returned by the other `run()` methods.
+     */
+    std::deque<WeightedEdge> run(const std::vector<std::vector<int> >& indices) const {
+        size_t ncells = indices.size();
 
         // Not parallel-frendly, so we don't construct this with the neighbor search
         std::vector<std::vector<std::pair<int, size_t> > > hosts(ncells);
