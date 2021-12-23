@@ -129,6 +129,17 @@ public:
         static constexpr bool compute_auc = true;
 
         /**
+         * See `set_compute_lfc()` for details.
+         */
+        static constexpr bool compute_lfc = true;
+
+        /**
+         * See `set_compute_delta_detected()` for details.
+         */
+        static constexpr bool compute_delta_detected = true;
+
+
+        /**
          * See `set_summary_min()` for details.
          */
         static constexpr bool summary_min = true;
@@ -155,8 +166,12 @@ public:
     };
 private:
     double threshold = Defaults::threshold;
+
     bool do_cohen = Defaults::compute_cohen;
     bool do_auc = Defaults::compute_auc;
+    bool do_lfc = Defaults::compute_lfc;
+    bool do_delta_detected = Defaults::compute_delta_detected;
+
     bool use_min = Defaults::summary_min;
     bool use_mean = Defaults::summary_mean;
     bool use_median = Defaults::summary_median;
@@ -496,7 +511,20 @@ public:
         /**
          * @cond
          */
-        Results(size_t ngenes, int ngroups, int nblocks, bool do_cohen, bool do_auc, bool do_min, bool do_mean, bool do_median, bool do_max, bool do_rank) { 
+        Results(
+            size_t ngenes, 
+            int ngroups, 
+            int nblocks, 
+            bool do_cohen, 
+            bool do_auc, 
+            bool do_lfc, 
+            bool do_delta_detected, 
+            bool do_min, 
+            bool do_mean, 
+            bool do_median, 
+            bool do_max, 
+            bool do_rank) 
+        { 
             auto fill_inner = [&](int N, auto& type) {
                 type.reserve(N);
                 for (int n = 0; n < N; ++n) {
@@ -537,6 +565,12 @@ public:
             if (do_auc) {
                 fill_effect(auc);
             }
+            if (do_lfc) {
+                fill_effect(lfc);
+            }
+            if (do_delta_detected) {
+                fill_effect(delta_detected);
+            }
             return;
         }
         /**
@@ -545,7 +579,7 @@ public:
 
         /**
          * Summary statistics for Cohen's d.
-         * Elements of the outer vector corresponds to the different summary statistics (see `differential_analysis::summary`);
+         * Elements of the outer vector correspond to the different summary statistics (see `differential_analysis::summary`);
          * elements of the middle vector correspond to the different groups;
          * and elements of the inner vector correspond to individual genes.
          */
@@ -553,7 +587,7 @@ public:
 
         /**
          * Summary statistics for the AUC.
-         * Elements of the outer vector corresponds to the different summary statistics (see `differential_analysis::summary`);
+         * Elements of the outer vector correspond to the different summary statistics (see `differential_analysis::summary`);
          * elements of the middle vector correspond to the different groups;
          * and elements of the inner vector correspond to individual genes.
          */
@@ -561,7 +595,7 @@ public:
 
         /**
          * Summary statistics for the log-fold change.
-         * Elements of the outer vector corresponds to the different summary statistics (see `differential_analysis::summary`);
+         * Elements of the outer vector correspond to the different summary statistics (see `differential_analysis::summary`);
          * elements of the middle vector correspond to the different groups;
          * and elements of the inner vector correspond to individual genes.
          */
@@ -569,7 +603,7 @@ public:
 
         /**
          * Summary statistics for the delta in the detected proportions.
-         * Elements of the outer vector corresponds to the different summary statistics (see `differential_analysis::summary`);
+         * Elements of the outer vector correspond to the different summary statistics (see `differential_analysis::summary`);
          * elements of the middle vector correspond to the different groups;
          * and elements of the inner vector correspond to individual genes.
          */
@@ -609,7 +643,7 @@ public:
     template<typename Stat = double, class MAT, typename G> 
     Results<Stat> run(const MAT* p, const G* group) {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
-        Results<Stat> res(p->nrow(), ngroups, 1, do_cohen, do_auc, use_min, use_mean, use_median, use_max, use_rank); 
+        Results<Stat> res(p->nrow(), ngroups, 1, do_cohen, do_auc, do_lfc, do_delta_detected, use_min, use_mean, use_median, use_max, use_rank); 
 
         auto mean_ptrs = vector_to_pointers3(res.means);
         auto detect_ptrs = vector_to_pointers3(res.detected);
@@ -648,7 +682,7 @@ public:
     
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
         auto nblocks = *std::max_element(block, block + p->ncol()) + 1;
-        Results<Stat> res(p->nrow(), ngroups, nblocks, do_cohen, do_auc, use_min, use_mean, use_median, use_max, use_rank); 
+        Results<Stat> res(p->nrow(), ngroups, nblocks, do_cohen, do_auc, do_lfc, do_delta_detected, use_min, use_mean, use_median, use_max, use_rank); 
 
         auto mean_ptrs = vector_to_pointers2(res.means);
         auto detect_ptrs = vector_to_pointers2(res.detected);

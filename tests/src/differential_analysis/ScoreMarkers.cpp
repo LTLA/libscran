@@ -88,16 +88,13 @@ TEST_P(ScoreMarkersTest, Effects) {
     chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
     auto res = chd.run(dense_row.get(), groupings.data());
 
-    size_t ngenes = dense_row->nrow();
-    for (int l = 0; l < ngroups; ++l) {
-        size_t ngenes = dense_row->nrow();
-
+    auto basic_check = [](size_t ngenes, size_t group, auto& effects) -> void {
         for (size_t g = 0; g < ngenes; ++g) {
-            double curmin = res.cohen[0][l][g];
-            double curmean = res.cohen[1][l][g];
-            double curmed = res.cohen[2][l][g];
-            double curmax = res.cohen[3][l][g];
-            double currank = res.cohen[4][l][g];
+            double curmin = effects[scran::differential_analysis::MIN][group][g];
+            double curmean = effects[scran::differential_analysis::MEAN][group][g];
+            double curmed = effects[scran::differential_analysis::MEDIAN][group][g];
+            double curmax = effects[scran::differential_analysis::MAX][group][g];
+            double currank = effects[scran::differential_analysis::MIN_RANK][group][g];
 
             EXPECT_TRUE(curmin <= curmean);
             EXPECT_TRUE(curmin <= curmed);
@@ -114,31 +111,28 @@ TEST_P(ScoreMarkersTest, Effects) {
             EXPECT_TRUE(currank >= 1);
             EXPECT_TRUE(currank <= ngenes);
         }
+    };
+
+    size_t ngenes = dense_row->nrow();
+    for (int l = 0; l < ngroups; ++l) {
+        basic_check(ngenes, l, res.cohen);
+        basic_check(ngenes, l, res.lfc);
+
+        basic_check(ngenes, l, res.delta_detected);
+        for (size_t g = 0; g < ngenes; ++g) {
+            double curmin = res.delta_detected[scran::differential_analysis::MIN][l][g];
+            double curmax = res.delta_detected[scran::differential_analysis::MAX][l][g];
+            EXPECT_TRUE(curmin >= -1);
+            EXPECT_TRUE(curmax <= 1);
+        }
 
         if (do_auc) {
+            basic_check(ngenes, l, res.auc);
             for (size_t g = 0; g < ngenes; ++g) {
-                double curmin = res.auc[0][l][g];
-                double curmean = res.auc[1][l][g];
-                double curmed = res.auc[2][l][g];
-                double curmax = res.auc[3][l][g];
-                double currank = res.auc[4][l][g];
-
+                double curmin = res.auc[scran::differential_analysis::MIN][l][g];
+                double curmax = res.auc[scran::differential_analysis::MAX][l][g];
                 EXPECT_TRUE(curmin >= 0);
-                EXPECT_TRUE(curmin <= curmean);
-                EXPECT_TRUE(curmin <= curmed);
-                EXPECT_TRUE(curmax >= curmean);
-                EXPECT_TRUE(curmax >= curmed);
                 EXPECT_TRUE(curmax <= 1);
-
-                if (curmed > curmin) {
-                    EXPECT_TRUE(curmean > curmin);
-                }
-                if (curmed < curmax) {
-                    EXPECT_TRUE(curmean < curmax);
-                }
-
-                EXPECT_TRUE(currank >= 1);
-                EXPECT_TRUE(currank <= ngenes);
             }
         }
     }
@@ -148,8 +142,13 @@ TEST_P(ScoreMarkersTest, Effects) {
         // can change the ranks by a small amount when effects are tied.
         for (int s = 0; s < 4; ++s) {
             EXPECT_EQ(res.cohen[s].size(), other.cohen[s].size());
+            EXPECT_EQ(res.lfc[s].size(), other.lfc[s].size());
+            EXPECT_EQ(res.delta_detected[s].size(), other.delta_detected[s].size());
+
             for (int l = 0; l < ngroups; ++l) {
                 compare_almost_equal(res.cohen[s][l], other.cohen[s][l]);
+                compare_almost_equal(res.lfc[s][l], other.lfc[s][l]);
+                compare_almost_equal(res.delta_detected[s][l], other.delta_detected[s][l]);
             }
         }
     };
@@ -204,18 +203,24 @@ TEST_P(ScoreMarkersTest, Self) {
     chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
     auto res = chd.run(combined.get(), groupings.data());
 
-    // All AUCs should be 0.5, all Cohen's should be 0.
+    // All AUCs should be 0.5, all Cohen/LFC/delta-d's should be 0.
     size_t ngenes = dense_row->nrow();
     for (int l = 0; l < 2; ++l) {
         for (size_t g = 0; g < ngenes; ++g) {
             if (do_auc) {
-                EXPECT_EQ(res.auc[0][l][g], 0.5);
-                EXPECT_EQ(res.auc[3][l][g], 0.5);
+                EXPECT_EQ(res.auc[scran::differential_analysis::MIN][l][g], 0.5);
+                EXPECT_EQ(res.auc[scran::differential_analysis::MAX][l][g], 0.5);
             }
 
             // Handle some numerical imprecision...
-            EXPECT_TRUE(std::abs(res.cohen[0][l][g]) < 1e-10);
-            EXPECT_TRUE(std::abs(res.cohen[3][l][g]) < 1e-10);
+            EXPECT_TRUE(std::abs(res.cohen[scran::differential_analysis::MIN][l][g]) < 1e-10);
+            EXPECT_TRUE(std::abs(res.cohen[scran::differential_analysis::MAX][l][g]) < 1e-10);
+
+            EXPECT_TRUE(std::abs(res.lfc[scran::differential_analysis::MIN][l][g]) < 1e-10);
+            EXPECT_TRUE(std::abs(res.lfc[scran::differential_analysis::MAX][l][g]) < 1e-10);
+
+            EXPECT_TRUE(std::abs(res.delta_detected[scran::differential_analysis::MIN][l][g]) < 1e-10);
+            EXPECT_TRUE(std::abs(res.delta_detected[scran::differential_analysis::MAX][l][g]) < 1e-10);
         }
     }
 }
@@ -231,14 +236,15 @@ TEST_P(ScoreMarkersTest, Thresholds) {
     auto out = chd.set_threshold(1).run(dense_row.get(), groupings.data());
 
     bool some_diff = false;
-    for (int s = 0; s < 4; ++s) {
+    for (int s = 0; s <= scran::differential_analysis::MAX; ++s) {
         for (int l = 0; l < ngroups; ++l) {
             for (size_t g = 0; g < dense_row->nrow(); ++g) {
                 EXPECT_TRUE(ref.cohen[s][l][g] > out.cohen[s][l][g]);
 
                 if (do_auc) {
-                    // '>' is not guaranteed due to imprecision with ranks
                     some_diff |= (ref.auc[s][l][g] > out.auc[s][l][g]);
+
+                    // '>' is not guaranteed due to imprecision with ranks... but (see below).
                     EXPECT_TRUE(ref.auc[s][l][g] >= out.auc[s][l][g]); 
                 }
             }
@@ -246,7 +252,7 @@ TEST_P(ScoreMarkersTest, Thresholds) {
     }
 
     if (do_auc) {
-        EXPECT_TRUE(some_diff); // but at least one is '>', hopefully.
+        EXPECT_TRUE(some_diff); // (from above)... at least one is '>', hopefully.
     }
 }
 
@@ -268,32 +274,32 @@ TEST_P(ScoreMarkersTest, Missing) {
     size_t ngenes = dense_row->nrow();
     for (size_t g = 0; g < ngenes; ++g) {
         if (do_auc) {
-            EXPECT_TRUE(std::isnan(lost.auc[0][0][g]));
-            EXPECT_TRUE(std::isnan(lost.auc[1][0][g]));
-            EXPECT_TRUE(std::isnan(lost.auc[2][0][g]));
-            EXPECT_TRUE(std::isnan(lost.auc[3][0][g]));
+            for (int s = 0; s <= scran::differential_analysis::MAX; ++s) {
+                EXPECT_TRUE(std::isnan(lost.auc[s][0][g]));
+            }
         }
 
-        EXPECT_TRUE(std::isnan(lost.cohen[0][0][g]));
-        EXPECT_TRUE(std::isnan(lost.cohen[1][0][g]));
-        EXPECT_TRUE(std::isnan(lost.cohen[2][0][g]));
-        EXPECT_TRUE(std::isnan(lost.cohen[3][0][g]));
+        for (int s = 0; s <= scran::differential_analysis::MAX; ++s) {
+            EXPECT_TRUE(std::isnan(lost.cohen[s][0][g]));
+            EXPECT_TRUE(std::isnan(lost.lfc[s][0][g]));
+            EXPECT_TRUE(std::isnan(lost.delta_detected[s][0][g]));
+        }
     }
 
     // Other metrics should be the same as usual.
     for (int l = 0; l < ngroups; ++l) {
         for (size_t g = 0; g < ngenes; ++g) {
             if (do_auc) {
-                EXPECT_EQ(ref.auc[0][l][g], lost.auc[0][l+1][g]);
-                EXPECT_EQ(ref.auc[1][l][g], lost.auc[1][l+1][g]);
-                EXPECT_EQ(ref.auc[2][l][g], lost.auc[2][l+1][g]);
-                EXPECT_EQ(ref.auc[3][l][g], lost.auc[3][l+1][g]);
+                for (int s = 0; s <= scran::differential_analysis::MAX; ++s) {
+                    EXPECT_EQ(ref.auc[s][l][g], lost.auc[s][l+1][g]);
+                }
             }
 
-            EXPECT_EQ(ref.cohen[0][l][g], lost.cohen[0][l+1][g]);
-            EXPECT_EQ(ref.cohen[1][l][g], lost.cohen[1][l+1][g]);
-            EXPECT_EQ(ref.cohen[2][l][g], lost.cohen[2][l+1][g]);
-            EXPECT_EQ(ref.cohen[3][l][g], lost.cohen[3][l+1][g]);
+            for (int s = 0; s <= scran::differential_analysis::MAX; ++s) {
+                EXPECT_EQ(ref.cohen[s][l][g], lost.cohen[s][l+1][g]);
+                EXPECT_EQ(ref.lfc[s][l][g], lost.lfc[s][l+1][g]);
+                EXPECT_EQ(ref.delta_detected[s][l][g], lost.delta_detected[s][l+1][g]);
+            }
         }
     }
 }
@@ -322,10 +328,16 @@ TEST_P(ScoreMarkersTest, Blocked) {
     if (NC % ngroups == 0) {
         // Everything should be equal to those in each batch, if the number of cells is a multiple
         // of the number of groups (and thus the `grouping` vector is perfectly recycled).
-        for (int s = 0; s < 4; ++s) {
+        for (int s = 0; s <= scran::differential_analysis::MAX; ++s) {
             for (int l = 0; l < ngroups; ++l) {
                 compare_almost_equal(comres.cohen[s][l], res1.cohen[s][l]);
                 compare_almost_equal(comres.cohen[s][l], res2.cohen[s][l]);
+
+                compare_almost_equal(comres.lfc[s][l], res1.lfc[s][l]);
+                compare_almost_equal(comres.lfc[s][l], res2.lfc[s][l]);
+
+                compare_almost_equal(comres.delta_detected[s][l], res1.delta_detected[s][l]);
+                compare_almost_equal(comres.delta_detected[s][l], res2.delta_detected[s][l]);
 
                 if (do_auc) {
                     compare_almost_equal(comres.auc[s][l], res1.auc[s][l]);
@@ -344,9 +356,11 @@ TEST_P(ScoreMarkersTest, Blocked) {
 
     // Again, checking consistency across representations.
     auto compare = [&](const auto& other) -> void {
-        for (int s = 0; s < 4; ++s) {
+        for (int s = 0; s <= scran::differential_analysis::MAX; ++s) {
             for (int l = 0; l < ngroups; ++l) {
                 compare_almost_equal(comres.cohen[s][l], other.cohen[s][l]);
+                compare_almost_equal(comres.lfc[s][l], other.lfc[s][l]);
+                compare_almost_equal(comres.delta_detected[s][l], other.delta_detected[s][l]);
             }
         }
     };
@@ -365,7 +379,7 @@ TEST_P(ScoreMarkersTest, Blocked) {
 
     if (do_auc) {
         auto compare_auc = [&](const auto& other) -> void {
-            for (int s = 0; s < 4; ++s) {
+            for (int s = 0; s <= scran::differential_analysis::MAX; ++s) {
                 for (int l = 0; l < ngroups; ++l) {
                     compare_almost_equal(comres.auc[s][l], other.auc[s][l]);
                 }
