@@ -13,7 +13,7 @@ void compute_pairwise_delta_detected (const Count* detected, const Ls& level_siz
     for (int g1 = 0; g1 < ngroups; ++g1) {
         for (int g2 = 0; g2 < g1; ++g2) {
             double total_weight = 0;
-            double& total_d1 = output[g1 * ngroups + g2];
+            Stat& total_d1 = output[g1 * ngroups + g2];
             total_d1 = 0;
 
             for (int b = 0; b < nblocks; ++b) {
@@ -36,13 +36,13 @@ void compute_pairwise_delta_detected (const Count* detected, const Ls& level_siz
                 total_d1 += (static_cast<double>(left_detected)/left_size - static_cast<double>(right_detected)/right_size) * weight;
             }
 
-            double& total_d2 = output[g2 * ngroups + g1];
+            Stat& total_d2 = output[g2 * ngroups + g1];
             if (total_weight) {
                 total_d1 /= total_weight;
                 total_d2 = -total_d1;
             } else {
-                total_d1 = std::numeric_limits<double>::quiet_NaN();
-                total_d2 = std::numeric_limits<double>::quiet_NaN();
+                total_d1 = std::numeric_limits<Stat>::quiet_NaN();
+                total_d2 = std::numeric_limits<Stat>::quiet_NaN();
             }
         }
     }
