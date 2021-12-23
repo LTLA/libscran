@@ -284,9 +284,9 @@ public:
      * @param[out] cohen Vector of vector of pointers to arrays of length equal to the number of rows in `p`.
      * Each inner vector corresponds to a summary statistic for Cohen's d, ordered as in `differential_analysis::summary`.
      * Each pointer corresponds to a group and is filled with the relevant summary statistic for that group.
-     * @param[out] auc Vector of vector of pointers to arrays of length equal to the number of rows in `p`,
-     * Each inner vector corresponds to a summary statistic for the AUC, ordered as in `differential_analysis::summary`.
-     * Each pointer corresponds to a group and is filled with the relevant summary statistic for that group.
+     * @param[out] auc Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the AUC.
+     * @param[out] lfc Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the log-fold change instead of Cohen's d.
+     * @param[out] delta_detected Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the delta in the detected proportions.
      * 
      * If `cohen` is of length 0, Cohen's d is not computed.
      * Similarly, if `auc` is of length 0, AUC is not computed.
@@ -300,10 +300,12 @@ public:
         std::vector<Stat*> means, 
         std::vector<Stat*> detected, 
         std::vector<std::vector<Stat*> > cohen, 
-        std::vector<std::vector<Stat*> > auc) 
+        std::vector<std::vector<Stat*> > auc,
+        std::vector<std::vector<Stat*> > lfc,
+        std::vector<std::vector<Stat*> > delta_detected) 
     {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
-        run_internal(p, group, ngroups, means, detected, cohen, auc);
+        run_internal(p, group, ngroups, means, detected, cohen, auc, lfc, delta_detected);
     }        
 
     /**
@@ -326,9 +328,9 @@ public:
      * @param[out] cohen Vector of vector of pointers to arrays of length equal to the number of rows in `p`.
      * Each inner vector corresponds to a summary statistic for Cohen's d, ordered as in `differential_analysis::summary`.
      * Each pointer corresponds to a group and is filled with the relevant summary statistic for that group.
-     * @param[out] auc Vector of vector of pointers to arrays of length equal to the number of rows in `p`,
-     * Each inner vector corresponds to a summary statistic for the AUC, ordered as in `differential_analysis::summary`.
-     * Each pointer corresponds to a group and is filled with the relevant summary statistic for that group.
+     * @param[out] auc Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the AUC.
+     * @param[out] lfc Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the log-fold change instead of Cohen's d.
+     * @param[out] delta_detected Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the delta in the detected proportions.
      * 
      * If `cohen` is of length 0, Cohen's d is not computed.
      * Similarly, if `auc` is of length 0, AUC is not computed.
@@ -342,7 +344,9 @@ public:
         std::vector<std::vector<Stat*> > means, 
         std::vector<std::vector<Stat*> > detected, 
         std::vector<std::vector<Stat*> > cohen,
-        std::vector<std::vector<Stat*> > auc) 
+        std::vector<std::vector<Stat*> > auc,
+        std::vector<std::vector<Stat*> > lfc,
+        std::vector<std::vector<Stat*> > delta_detected) 
     {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
         if (block == NULL) {
@@ -356,7 +360,7 @@ public:
         }
     
         auto nblocks = *std::max_element(block, block + p->ncol()) + 1;
-        run_blocked_internal(p, group, block, ngroups, nblocks, means, detected, cohen, auc);
+        run_blocked_internal(p, group, block, ngroups, nblocks, means, detected, cohen, auc, lfc, delta_detected);
         return;
     }
 
@@ -366,13 +370,15 @@ private:
         std::vector<Stat*>& means, 
         std::vector<Stat*>& detected, 
         std::vector<std::vector<Stat*> >& cohen, 
-        std::vector<std::vector<Stat*> >& auc) 
+        std::vector<std::vector<Stat*> >& auc,
+        std::vector<std::vector<Stat*> >& lfc,
+        std::vector<std::vector<Stat*> >& delta_detected) 
     {
         std::vector<int> group_size(ngroups);
         for (size_t i = 0; i < p->ncol(); ++i) {
             ++(group_size[group[i]]);
         }
-        core(p, group, group_size, group, ngroups, static_cast<const int*>(NULL), 1, means, detected, cohen, auc);
+        core(p, group, group_size, group, ngroups, static_cast<const int*>(NULL), 1, means, detected, cohen, auc, lfc, delta_detected);
     }
 
     template<class MAT, typename G, typename B, typename Stat>
@@ -380,7 +386,9 @@ private:
         std::vector<std::vector<Stat*> >& means, 
         std::vector<std::vector<Stat*> >& detected, 
         std::vector<std::vector<Stat*> >& cohen, 
-        std::vector<std::vector<Stat*> >& auc) 
+        std::vector<std::vector<Stat*> >& auc,
+        std::vector<std::vector<Stat*> >& lfc,
+        std::vector<std::vector<Stat*> >& delta_detected) 
     {
         int ncombos = ngroups * nblocks;
         std::vector<int> combos(p->ncol());
@@ -400,7 +408,7 @@ private:
             }
         }
 
-        core(p, combos.data(), combo_size, group, ngroups, block, nblocks, means2, detected2, cohen, auc);
+        core(p, combos.data(), combo_size, group, ngroups, block, nblocks, means2, detected2, cohen, auc, lfc, delta_detected);
     }
 
     template<class MAT, typename L, class Ls, typename G, typename B, typename Stat>
@@ -411,25 +419,38 @@ private:
         std::vector<Stat*>& means, 
         std::vector<Stat*>& detected, 
         std::vector<std::vector<Stat*> >& cohen, 
-        std::vector<std::vector<Stat*> >& auc)
+        std::vector<std::vector<Stat*> >& auc,
+        std::vector<std::vector<Stat*> >& lfc,
+        std::vector<std::vector<Stat*> >& delta_detected) 
     {
-        const bool do_cd = !cohen.empty();
-        std::vector<Stat> cohens_d(do_cd ? p->nrow() * ngroups * ngroups : 0);
-        Stat* cohens_ptr = do_cd ? cohens_d.data() : NULL;
+        size_t buffer_size = p->nrow() * ngroups * ngroups;
 
-        const bool do_wilcox = !auc.empty();
-        std::vector<Stat> wilcox_auc(do_wilcox ? p->nrow() * ngroups * ngroups : 0);
+        const bool do_cohen = !cohen.empty();
+        std::vector<Stat> cohen_buffer(do_cohen ?  buffer_size : 0);
+        Stat* cohen_ptr = do_cohen ? cohen_buffer.data() : NULL;
+
+        const bool do_auc = !auc.empty();
+        std::vector<Stat> auc_buffer(do_auc ? buffer_size : 0);
+        Stat* auc_ptr = do_auc ? auc_buffer.data() : NULL;
+
+        const bool do_lfc = !lfc.empty();
+        std::vector<Stat> lfc_buffer(do_lfc ? buffer_size : 0);
+        Stat* lfc_ptr = do_lfc ? lfc_buffer.data() : NULL;
+
+        const bool do_delta = !delta_detected.empty();
+        std::vector<Stat> delta_buffer(do_delta ? buffer_size : 0);
+        Stat* delta_ptr = do_delta ? delta_buffer.data() : NULL;
+
+        std::vector<Stat*> effects { cohen_ptr, auc_ptr, lfc_ptr, delta_ptr };
 
 #ifdef SCRAN_LOGGER
         SCRAN_LOGGER("scran::ScoreMarkers", "Performing pairwise comparisons between groups of cells");
 #endif
-        if (!do_wilcox) {
-            std::vector<Stat*> effects{cohens_ptr};
+        if (!do_auc) {
             differential_analysis::BidimensionalFactory fact(p->nrow(), p->ncol(), means, detected, effects, level, &level_size, ngroups, nblocks, threshold);
             tatami::apply<0>(p, fact);
-        } else {
-            std::vector<Stat*> effects{cohens_ptr, wilcox_auc.data()};
 
+        } else {
             // Need to remake this, as there's no guarantee that 'blocks' exists.
             std::vector<B> tmp_blocks;
             if (!block) {
@@ -441,25 +462,25 @@ private:
             tatami::apply<0>(p, fact);
         }
 
-        if (do_cd) {
-#ifdef SCRAN_LOGGER
-            SCRAN_LOGGER("scran::ScoreMarkers", "Summarizing Cohen's D across comparisons");
-#endif
-            auto& min_rank_cohen = cohen[scran::differential_analysis::MIN_RANK];
-            if (min_rank_cohen.size()) {
-                differential_analysis::compute_min_rank(p->nrow(), ngroups, cohens_d.data(), min_rank_cohen);
+        auto summarize = [&](Stat* ptr, std::vector<std::vector<Stat*> >& output) -> void {
+            auto& min_rank = output[scran::differential_analysis::MIN_RANK];
+            if (min_rank.size()) {
+                differential_analysis::compute_min_rank(p->nrow(), ngroups, ptr, min_rank);
             }
-            differential_analysis::summarize_comparisons(p->nrow(), ngroups, cohens_d.data(), cohen); // non-const w.r.t. cohens_d, so done after min-rank calculations.
+            differential_analysis::summarize_comparisons(p->nrow(), ngroups, ptr, output); // non-const w.r.t. ptr's values, so this is done after min-rank calculations.
+        };
+
+        if (do_cohen) {
+            summarize(cohen_ptr, cohen);
         }
-        if (do_wilcox) {
-#ifdef SCRAN_LOGGER
-            SCRAN_LOGGER("scran::ScoreMarkers", "Summarizing the AUC across comparisons");
-#endif
-            auto& min_rank_auc = auc[scran::differential_analysis::MIN_RANK];
-            if (min_rank_auc.size()) {
-                differential_analysis::compute_min_rank(p->nrow(), ngroups, wilcox_auc.data(), min_rank_auc);
-            }
-            differential_analysis::summarize_comparisons(p->nrow(), ngroups, wilcox_auc.data(), auc); // non-const w.r.t. wilcox_auc, so done after min-rank calculations.
+        if (do_auc) {
+            summarize(auc_ptr, auc);
+        }
+        if (do_lfc) {
+            summarize(lfc_ptr, lfc);
+        }
+        if (do_delta) {
+            summarize(delta_ptr, delta_detected);
         }
 
         return;
@@ -539,6 +560,22 @@ public:
         std::vector<std::vector<std::vector<Stat> > > auc;
 
         /**
+         * Summary statistics for the log-fold change.
+         * Elements of the outer vector corresponds to the different summary statistics (see `differential_analysis::summary`);
+         * elements of the middle vector correspond to the different groups;
+         * and elements of the inner vector correspond to individual genes.
+         */
+        std::vector<std::vector<std::vector<Stat> > > lfc;
+
+        /**
+         * Summary statistics for the delta in the detected proportions.
+         * Elements of the outer vector corresponds to the different summary statistics (see `differential_analysis::summary`);
+         * elements of the middle vector correspond to the different groups;
+         * and elements of the inner vector correspond to individual genes.
+         */
+        std::vector<std::vector<std::vector<Stat> > > delta_detected;
+
+        /**
          * Mean expression in each group.
          * Elements of the outer vector corresponds to the different groups;
          * elements of the middle vector correspond to the different blocking levels (this is of length 1 for `run()`);
@@ -579,7 +616,10 @@ public:
 
         auto cohen_ptrs = vector_to_pointers2(res.cohen);
         auto auc_ptrs = vector_to_pointers2(res.auc);
-        run_internal(p, group, ngroups, mean_ptrs, detect_ptrs, cohen_ptrs, auc_ptrs);
+        auto lfc_ptrs = vector_to_pointers2(res.lfc);
+        auto delta_ptrs = vector_to_pointers2(res.delta_detected);
+
+        run_internal(p, group, ngroups, mean_ptrs, detect_ptrs, cohen_ptrs, auc_ptrs, lfc_ptrs, delta_ptrs);
         return res;
     }
 
@@ -612,10 +652,13 @@ public:
 
         auto mean_ptrs = vector_to_pointers2(res.means);
         auto detect_ptrs = vector_to_pointers2(res.detected);
+
         auto cohen_ptrs = vector_to_pointers2(res.cohen);
         auto auc_ptrs = vector_to_pointers2(res.auc);
-        run_blocked_internal(p, group, block, ngroups, nblocks, mean_ptrs, detect_ptrs, cohen_ptrs, auc_ptrs);
+        auto lfc_ptrs = vector_to_pointers2(res.lfc);
+        auto delta_ptrs = vector_to_pointers2(res.delta_detected);
 
+        run_blocked_internal(p, group, block, ngroups, nblocks, mean_ptrs, detect_ptrs, cohen_ptrs, auc_ptrs, lfc_ptrs, delta_ptrs);
         return res;
     }
 
