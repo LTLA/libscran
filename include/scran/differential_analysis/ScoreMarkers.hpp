@@ -7,6 +7,8 @@
 #include "tatami/stats/apply.hpp"
 #include "../utils/vector_to_pointers.hpp"
 
+#include <array>
+
 /**
  * @file ScoreMarkers.hpp
  *
@@ -25,6 +27,14 @@ namespace scran {
  * The choice of effect size and summary statistic determines the characteristics of the resulting marker set.
  *
  * @section effect-sizes Effect sizes
+ * The log-fold change (LFC) is the difference in the mean log-expression between groups.
+ * This is fairly straightforward to interpret - as log-fold change of +1 corresponds to a two-fold upregulation in the first group compared to the second.
+ * For this interpretation, we assume that the input matrix contains log-transformed normalized expression values.
+ *
+ * The delta-detected is the difference in the proportion of cells with detected expression between groups.
+ * This lies between 1 and -1, with the extremes occurring when a gene is silent in one group and detected in all cells of the other group.
+ * For this interpretation, we assume that the input matrix contains non-negative expression values, where a value of zero corresponds to lack of detectable expression.
+ *
  * Cohen's d is the standardized log-fold change between two groups.
  * This is defined as the difference in the mean log-expression for each group scaled by the average standard deviation across the two groups.
  * (Technically, we should use the pooled variance; however, this introduces some unpleasant asymmetry depending on the variance of the larger group, so we take a simple average instead.)
@@ -79,9 +89,9 @@ namespace scran {
  *   Applying a threshold on the minimum rank is useful for obtaining a set of genes that, in combination, are guaranteed to distinguish X from every other group.
  *
  * The exact definition of "large" and "small" depends on the choice of effect size.
- * For Cohen's d, the value must be positive to be considered "large", and negative to be considered "small".
+ * For Cohen's d, LFC and delta-detected, the value must be positive to be considered "large", and negative to be considered "small".
  * For the AUC, a value greater than 0.5 is considered "large" and less than 0.5 is considered "small".
- * Note that this interpretation is contingent on the log-fold change threshold - for positive thresholds, small values cannot be unambiguously interpreted as downregulation.
+ * Note that this interpretation is contingent on the log-fold change threshold - for positive thresholds, small effects cannot be unambiguously interpreted as downregulation.
  *
  * @section blocked Blocked comparisons
  * In the presence of multiple batches, we can block on the batch of origin for each cell.
@@ -110,58 +120,49 @@ namespace scran {
 class ScoreMarkers {
 public:
     /**
+     * Array type indicating whether each summary statistic should be computed.
+     * Each entry corresponds to a summary statistic enumerated in `differential_analysis::summary`.
+     */
+    typedef std::array<bool, differential_analysis::n_summaries> ComputeSummaries;
+
+    /**
      * @brief Default parameter settings.
      */
     struct Defaults {
         /**
+         * Specify that all summary statistics should be computed for a particular effect size.
+         */
+        static constexpr ComputeSummaries compute_all_summaries() {
+            ComputeSummaries output { 0 };
+            for (int i = 0; i < differential_analysis::n_summaries; ++i) {
+                output[i] = true;
+            }
+            return output;
+        }
+
+        /**
+         * Specify that no summary statistics should be computed for a particular effect size.
+         */
+        static constexpr ComputeSummaries compute_no_summaries() {
+            ComputeSummaries output { 0 };
+            for (int i = 0; i < differential_analysis::n_summaries; ++i) {
+                output[i] = false;
+            }
+            return output;
+        }
+
+        /**
          * See `set_threshold()` for details.
          */
         static constexpr double threshold = 0;
-
-        /**
-         * See `set_compute_cohen()` for details.
-         */
-        static constexpr bool compute_cohen = true;
-
-        /**
-         * See `set_compute_auc()` for details.
-         */
-        static constexpr bool compute_auc = true;
-
-        /**
-         * See `set_summary_min()` for details.
-         */
-        static constexpr bool summary_min = true;
-
-        /**
-         * See `set_summary_mean()` for details.
-         */
-        static constexpr bool summary_mean = true;
-
-        /**
-         * See `set_summary_median()` for details.
-         */
-        static constexpr bool summary_median = true;
-
-        /**
-         * See `set_summary_max()` for details.
-         */
-        static constexpr bool summary_max = true;
-
-        /**
-         * See `set_summary_rank()` for details.
-         */
-        static constexpr bool summary_rank = true;
     };
 private:
     double threshold = Defaults::threshold;
-    bool do_cohen = Defaults::compute_cohen;
-    bool do_auc = Defaults::compute_auc;
-    bool use_min = Defaults::summary_min;
-    bool use_mean = Defaults::summary_mean;
-    bool use_median = Defaults::summary_median;
-    bool use_max = Defaults::summary_max;
-    bool use_rank = Defaults::summary_rank;
+
+    ComputeSummaries do_cohen = Defaults::compute_all_summaries();
+    ComputeSummaries do_auc = Defaults::compute_all_summaries();
+    ComputeSummaries do_lfc = Defaults::compute_all_summaries();
+    ComputeSummaries do_delta_detected = Defaults::compute_all_summaries();
 
 public:
     /**
@@ -176,93 +177,264 @@ public:
     }
 
     /**
-     * @param c Whether to compute Cohen's d.
+     * @param c Which summary statistics to compute for Cohen's d.
      *
      * This only has an effect for `run()` methods that return `Results`.
      * Otherwise, we make this decision based on the validity of the input pointers. 
      *
      * @return A reference to this `ScoreMarkers` object.
      */
-    ScoreMarkers& set_compute_cohen(bool c = true) {
-        do_cohen = c;
+    ScoreMarkers& set_compute_cohen(ComputeSummaries s = Defaults::compute_all_summaries()) {
+        do_cohen = s;
         return *this;
     }
 
     /**
-     * @param a Whether to compute AUCs.
+     * @param s Whether to compute Cohen's d at all.
+     *
+     * This is an alias for `set_compute_cohen()` where `c = true` is equivalent to `s = Defaults::compute_all_summaries()`
+     * and `c = false` is equivalent to `s = Defaults::compute_no_summaries()`.
      *
      * This only has an effect for `run()` methods that return `Results`.
      * Otherwise, we make this decision based on the validity of the input pointers. 
      *
      * @return A reference to this `ScoreMarkers` object.
      */
-    ScoreMarkers& set_compute_auc(bool a = true) {
-        do_auc = a;
+    ScoreMarkers& set_compute_cohen(bool c) {
+        std::fill(do_cohen.begin(), do_cohen.end(), c);
         return *this;
     }
 
     /**
-     * @param s Whether to compute the minimum summary statistic.
+     * @param s A summary statistic of interest.
+     * @param c Whether to compute the summary statistic `s` for Cohen's d.
      *
      * This only has an effect for `run()` methods that return `Results`.
      * Otherwise, we make this decision based on the validity of the input pointers. 
      *
      * @return A reference to this `ScoreMarkers` object.
      */
-    ScoreMarkers& set_summary_min(bool s = true) {
-        use_min = s;
+    ScoreMarkers& set_compute_cohen(differential_analysis::summary s, bool c) {
+        do_cohen[s] = c;
         return *this;
     }
 
     /**
-     * @param s Whether to compute the minimum summary statistic.
+     * @param c Which summary statistics to compute for the AUC.
      *
      * This only has an effect for `run()` methods that return `Results`.
      * Otherwise, we make this decision based on the validity of the input pointers. 
      *
      * @return A reference to this `ScoreMarkers` object.
      */
-    ScoreMarkers& set_summary_mean(bool s = true) {
-        use_mean = s;
+    ScoreMarkers& set_compute_auc(ComputeSummaries s = Defaults::compute_all_summaries()) {
+        do_auc = s;
         return *this;
     }
 
     /**
-     * @param s Whether to compute the median summary statistic.
+     * @param s Whether to compute the AUC at all.
+     *
+     * This is an alias for `set_compute_auc()` where `c = true` is equivalent to `s = Defaults::compute_all_summaries()`
+     * and `c = false` is equivalent to `s = Defaults::compute_no_summaries()`.
      *
      * This only has an effect for `run()` methods that return `Results`.
      * Otherwise, we make this decision based on the validity of the input pointers. 
      *
      * @return A reference to this `ScoreMarkers` object.
      */
-    ScoreMarkers& set_summary_median(bool s = true) {
-        use_median = s;
+    ScoreMarkers& set_compute_auc(bool c) {
+        std::fill(do_auc.begin(), do_auc.end(), c);
         return *this;
     }
 
     /**
-     * @param s Whether to compute the maximum summary statistic.
+     * @param s A summary statistic of interest.
+     * @param c Whether to compute the summary statistic `s` for the AUC.
      *
      * This only has an effect for `run()` methods that return `Results`.
      * Otherwise, we make this decision based on the validity of the input pointers. 
      *
      * @return A reference to this `ScoreMarkers` object.
      */
-    ScoreMarkers& set_summary_max(bool s = true) {
-        use_max = s;
+    ScoreMarkers& set_compute_auc(differential_analysis::summary s, bool c) {
+        do_auc[s] = c;
         return *this;
     }
 
     /**
-     * @param s Whether to compute the minimum rank summary statistic.
+     * @param c Which summary statistics to compute for the LFC.
      *
      * This only has an effect for `run()` methods that return `Results`.
      * Otherwise, we make this decision based on the validity of the input pointers. 
      *
      * @return A reference to this `ScoreMarkers` object.
      */
-    ScoreMarkers& set_summary_rank(bool s = true) {
-        use_rank = s;
+    ScoreMarkers& set_compute_lfc(ComputeSummaries s = Defaults::compute_all_summaries()) {
+        do_lfc = s;
+        return *this;
+    }
+
+    /**
+     * @param s Whether to compute the LFC at all.
+     *
+     * This is an alias for `set_compute_lfc()` where `c = true` is equivalent to `s = Defaults::compute_all_summaries()`
+     * and `c = false` is equivalent to `s = Defaults::compute_no_summaries()`.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
+    ScoreMarkers& set_compute_lfc(bool c) {
+        std::fill(do_lfc.begin(), do_lfc.end(), c);
+        return *this;
+    }
+
+    /**
+     * @param s A summary statistic of interest.
+     * @param c Whether to compute the summary statistic `s` for the LFC.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
+    ScoreMarkers& set_compute_lfc(differential_analysis::summary s, bool c) {
+        do_lfc[s] = c;
+        return *this;
+    }
+
+    /**
+     * @param c Which summary statistics to compute for the delta detected.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
+    ScoreMarkers& set_compute_delta_detected(ComputeSummaries s = Defaults::compute_all_summaries()) {
+        do_delta_detected = s;
+        return *this;
+    }
+
+    /**
+     * @param s Whether to compute the delta detected at all.
+     *
+     * This is an alias for `set_compute_delta_detected()` where `c = true` is equivalent to `s = Defaults::compute_all_summaries()`
+     * and `c = false` is equivalent to `s = Defaults::compute_no_summaries()`.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
+    ScoreMarkers& set_compute_delta_detected(bool c) {
+        std::fill(do_delta_detected.begin(), do_delta_detected.end(), c);
+        return *this;
+    }
+
+    /**
+     * @param s A summary statistic of interest.
+     * @param c Whether to compute the summary statistic `s` for the delta detected.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
+    ScoreMarkers& set_compute_delta_detected(differential_analysis::summary s, bool c) {
+        do_delta_detected[s] = c;
+        return *this;
+    }
+
+private:
+    void set_everyone(differential_analysis::summary s, bool c) {
+        do_cohen[s] = c;
+        do_auc[s] = c;
+        do_lfc[s] = c;
+        do_delta_detected[s] = c;
+        return;
+    }
+
+public:
+    /**
+     * @param s Whether to compute the minimum summary statistic for any effect size.
+     *
+     * This overrides any previous settings for the minimum from the effect-size-specific setters, e.g., `set_compute_cohen()`.
+     * However, it can also be overridden by later calls to those setters.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
+    ScoreMarkers& set_summary_min(bool s) {
+        set_everyone(differential_analysis::MIN, s);
+        return *this;
+    }
+
+    /**
+     * @param s Whether to compute the mean summary statistic for any effect size.
+     *
+     * This overrides any previous settings for the mean from the effect-size-specific setters, e.g., `set_compute_cohen()`.
+     * However, it can also be overridden by later calls to those setters.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
+    ScoreMarkers& set_summary_mean(bool s) {
+        set_everyone(differential_analysis::MEAN, s);
+        return *this;
+    }
+
+    /**
+     * @param s Whether to compute the median summary statistic for any effect size.
+     *
+     * This overrides any previous settings for the median from the effect-size-specific setters, e.g., `set_compute_cohen()`.
+     * However, it can also be overridden by later calls to those setters.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
+    ScoreMarkers& set_summary_median(bool s) {
+        set_everyone(differential_analysis::MEDIAN, s);
+        return *this;
+    }
+
+    /**
+     * @param s Whether to compute the maximum summary statistic for any effect size.
+     *
+     * This overrides any previous settings for the maximum from the effect-size-specific setters, e.g., `set_compute_cohen()`.
+     * However, it can also be overridden by later calls to those setters.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
+    ScoreMarkers& set_summary_max(bool s) {
+        set_everyone(differential_analysis::MAX, s);
+        return *this;
+    }
+
+    /**
+     * @param s Whether to compute the minimum rank summary statistic for any effect size.
+     *
+     * This overrides any previous settings for the minimum rank from the effect-size-specific setters, e.g., `set_compute_cohen()`.
+     * However, it can also be overridden by later calls to those setters.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
+    ScoreMarkers& set_summary_min_rank(bool s) {
+        set_everyone(differential_analysis::MIN_RANK, s);
         return *this;
     }
 
@@ -284,14 +456,14 @@ public:
      * @param[out] cohen Vector of vector of pointers to arrays of length equal to the number of rows in `p`.
      * Each inner vector corresponds to a summary statistic for Cohen's d, ordered as in `differential_analysis::summary`.
      * Each pointer corresponds to a group and is filled with the relevant summary statistic for that group.
-     * @param[out] auc Vector of vector of pointers to arrays of length equal to the number of rows in `p`,
-     * Each inner vector corresponds to a summary statistic for the AUC, ordered as in `differential_analysis::summary`.
-     * Each pointer corresponds to a group and is filled with the relevant summary statistic for that group.
+     * @param[out] auc Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the AUC.
+     * @param[out] lfc Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the log-fold change instead of Cohen's d.
+     * @param[out] delta_detected Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the delta in the detected proportions.
      * 
      * If `cohen` is of length 0, Cohen's d is not computed.
-     * Similarly, if `auc` is of length 0, AUC is not computed.
-     * (`set_compute_cohen()` and `set_compute_auc()` have no effect here.)
      * If any of the inner vectors are of length 0, the corresponding summary statistic is not computed.
+     * The same applies to `auc`, `lfc` and `delta_detected`.
+     * (`set_compute_cohen()` and related functions have no effect here.)
      *
      * @return `means`, `detected`, `cohen` and `auc` are filled with their corresponding statistics on output.
      */
@@ -300,10 +472,12 @@ public:
         std::vector<Stat*> means, 
         std::vector<Stat*> detected, 
         std::vector<std::vector<Stat*> > cohen, 
-        std::vector<std::vector<Stat*> > auc) 
+        std::vector<std::vector<Stat*> > auc,
+        std::vector<std::vector<Stat*> > lfc,
+        std::vector<std::vector<Stat*> > delta_detected) 
     {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
-        run_internal(p, group, ngroups, means, detected, cohen, auc);
+        run_internal(p, group, ngroups, means, detected, cohen, auc, lfc, delta_detected);
     }        
 
     /**
@@ -326,14 +500,14 @@ public:
      * @param[out] cohen Vector of vector of pointers to arrays of length equal to the number of rows in `p`.
      * Each inner vector corresponds to a summary statistic for Cohen's d, ordered as in `differential_analysis::summary`.
      * Each pointer corresponds to a group and is filled with the relevant summary statistic for that group.
-     * @param[out] auc Vector of vector of pointers to arrays of length equal to the number of rows in `p`,
-     * Each inner vector corresponds to a summary statistic for the AUC, ordered as in `differential_analysis::summary`.
-     * Each pointer corresponds to a group and is filled with the relevant summary statistic for that group.
+     * @param[out] auc Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the AUC.
+     * @param[out] lfc Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the log-fold change instead of Cohen's d.
+     * @param[out] delta_detected Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the delta in the detected proportions.
      * 
      * If `cohen` is of length 0, Cohen's d is not computed.
-     * Similarly, if `auc` is of length 0, AUC is not computed.
-     * (`set_compute_cohen()` and `set_compute_auc()` have no effect here.)
      * If any of the inner vectors are of length 0, the corresponding summary statistic is not computed.
+     * The same applies to `auc`, `lfc` and `delta_detected`.
+     * (`set_compute_cohen()` and related functions have no effect here.)
      *
      * @return `means`, `detected`, `cohen` and `auc` are filled with their corresponding statistics on output.
      */
@@ -342,7 +516,9 @@ public:
         std::vector<std::vector<Stat*> > means, 
         std::vector<std::vector<Stat*> > detected, 
         std::vector<std::vector<Stat*> > cohen,
-        std::vector<std::vector<Stat*> > auc) 
+        std::vector<std::vector<Stat*> > auc,
+        std::vector<std::vector<Stat*> > lfc,
+        std::vector<std::vector<Stat*> > delta_detected) 
     {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
         if (block == NULL) {
@@ -356,7 +532,7 @@ public:
         }
     
         auto nblocks = *std::max_element(block, block + p->ncol()) + 1;
-        run_blocked_internal(p, group, block, ngroups, nblocks, means, detected, cohen, auc);
+        run_blocked_internal(p, group, block, ngroups, nblocks, means, detected, cohen, auc, lfc, delta_detected);
         return;
     }
 
@@ -366,13 +542,15 @@ private:
         std::vector<Stat*>& means, 
         std::vector<Stat*>& detected, 
         std::vector<std::vector<Stat*> >& cohen, 
-        std::vector<std::vector<Stat*> >& auc) 
+        std::vector<std::vector<Stat*> >& auc,
+        std::vector<std::vector<Stat*> >& lfc,
+        std::vector<std::vector<Stat*> >& delta_detected) 
     {
         std::vector<int> group_size(ngroups);
         for (size_t i = 0; i < p->ncol(); ++i) {
             ++(group_size[group[i]]);
         }
-        core(p, group, group_size, group, ngroups, static_cast<const int*>(NULL), 1, means, detected, cohen, auc);
+        core(p, group, group_size, group, ngroups, static_cast<const int*>(NULL), 1, means, detected, cohen, auc, lfc, delta_detected);
     }
 
     template<class MAT, typename G, typename B, typename Stat>
@@ -380,7 +558,9 @@ private:
         std::vector<std::vector<Stat*> >& means, 
         std::vector<std::vector<Stat*> >& detected, 
         std::vector<std::vector<Stat*> >& cohen, 
-        std::vector<std::vector<Stat*> >& auc) 
+        std::vector<std::vector<Stat*> >& auc,
+        std::vector<std::vector<Stat*> >& lfc,
+        std::vector<std::vector<Stat*> >& delta_detected) 
     {
         int ncombos = ngroups * nblocks;
         std::vector<int> combos(p->ncol());
@@ -400,7 +580,7 @@ private:
             }
         }
 
-        core(p, combos.data(), combo_size, group, ngroups, block, nblocks, means2, detected2, cohen, auc);
+        core(p, combos.data(), combo_size, group, ngroups, block, nblocks, means2, detected2, cohen, auc, lfc, delta_detected);
     }
 
     template<class MAT, typename L, class Ls, typename G, typename B, typename Stat>
@@ -411,25 +591,38 @@ private:
         std::vector<Stat*>& means, 
         std::vector<Stat*>& detected, 
         std::vector<std::vector<Stat*> >& cohen, 
-        std::vector<std::vector<Stat*> >& auc)
+        std::vector<std::vector<Stat*> >& auc,
+        std::vector<std::vector<Stat*> >& lfc,
+        std::vector<std::vector<Stat*> >& delta_detected) 
     {
-        const bool do_cd = !cohen.empty();
-        std::vector<Stat> cohens_d(do_cd ? p->nrow() * ngroups * ngroups : 0);
-        Stat* cohens_ptr = do_cd ? cohens_d.data() : NULL;
+        size_t buffer_size = p->nrow() * ngroups * ngroups;
 
-        const bool do_wilcox = !auc.empty();
-        std::vector<Stat> wilcox_auc(do_wilcox ? p->nrow() * ngroups * ngroups : 0);
+        const bool do_cohen = !cohen.empty();
+        std::vector<Stat> cohen_buffer(do_cohen ?  buffer_size : 0);
+        Stat* cohen_ptr = do_cohen ? cohen_buffer.data() : NULL;
+
+        const bool do_auc = !auc.empty();
+        std::vector<Stat> auc_buffer(do_auc ? buffer_size : 0);
+        Stat* auc_ptr = do_auc ? auc_buffer.data() : NULL;
+
+        const bool do_lfc = !lfc.empty();
+        std::vector<Stat> lfc_buffer(do_lfc ? buffer_size : 0);
+        Stat* lfc_ptr = do_lfc ? lfc_buffer.data() : NULL;
+
+        const bool do_delta = !delta_detected.empty();
+        std::vector<Stat> delta_buffer(do_delta ? buffer_size : 0);
+        Stat* delta_ptr = do_delta ? delta_buffer.data() : NULL;
+
+        std::vector<Stat*> effects { cohen_ptr, auc_ptr, lfc_ptr, delta_ptr };
 
 #ifdef SCRAN_LOGGER
         SCRAN_LOGGER("scran::ScoreMarkers", "Performing pairwise comparisons between groups of cells");
 #endif
-        if (!do_wilcox) {
-            std::vector<Stat*> effects{cohens_ptr};
+        if (!do_auc) {
             differential_analysis::BidimensionalFactory fact(p->nrow(), p->ncol(), means, detected, effects, level, &level_size, ngroups, nblocks, threshold);
             tatami::apply<0>(p, fact);
-        } else {
-            std::vector<Stat*> effects{cohens_ptr, wilcox_auc.data()};
 
+        } else {
             // Need to remake this, as there's no guarantee that 'blocks' exists.
             std::vector<B> tmp_blocks;
             if (!block) {
@@ -441,25 +634,25 @@ private:
             tatami::apply<0>(p, fact);
         }
 
-        if (do_cd) {
-#ifdef SCRAN_LOGGER
-            SCRAN_LOGGER("scran::ScoreMarkers", "Summarizing Cohen's D across comparisons");
-#endif
-            auto& min_rank_cohen = cohen[scran::differential_analysis::MIN_RANK];
-            if (min_rank_cohen.size()) {
-                differential_analysis::compute_min_rank(p->nrow(), ngroups, cohens_d.data(), min_rank_cohen);
+        auto summarize = [&](Stat* ptr, std::vector<std::vector<Stat*> >& output) -> void {
+            auto& min_rank = output[scran::differential_analysis::MIN_RANK];
+            if (min_rank.size()) {
+                differential_analysis::compute_min_rank(p->nrow(), ngroups, ptr, min_rank);
             }
-            differential_analysis::summarize_comparisons(p->nrow(), ngroups, cohens_d.data(), cohen); // non-const w.r.t. cohens_d, so done after min-rank calculations.
+            differential_analysis::summarize_comparisons(p->nrow(), ngroups, ptr, output); // non-const w.r.t. ptr's values, so this is done after min-rank calculations.
+        };
+
+        if (do_cohen) {
+            summarize(cohen_ptr, cohen);
         }
-        if (do_wilcox) {
-#ifdef SCRAN_LOGGER
-            SCRAN_LOGGER("scran::ScoreMarkers", "Summarizing the AUC across comparisons");
-#endif
-            auto& min_rank_auc = auc[scran::differential_analysis::MIN_RANK];
-            if (min_rank_auc.size()) {
-                differential_analysis::compute_min_rank(p->nrow(), ngroups, wilcox_auc.data(), min_rank_auc);
-            }
-            differential_analysis::summarize_comparisons(p->nrow(), ngroups, wilcox_auc.data(), auc); // non-const w.r.t. wilcox_auc, so done after min-rank calculations.
+        if (do_auc) {
+            summarize(auc_ptr, auc);
+        }
+        if (do_lfc) {
+            summarize(lfc_ptr, lfc);
+        }
+        if (do_delta) {
+            summarize(delta_ptr, delta_detected);
         }
 
         return;
@@ -475,7 +668,15 @@ public:
         /**
          * @cond
          */
-        Results(size_t ngenes, int ngroups, int nblocks, bool do_cohen, bool do_auc, bool do_min, bool do_mean, bool do_median, bool do_max, bool do_rank) { 
+        Results(
+            size_t ngenes, 
+            int ngroups, 
+            int nblocks, 
+            const ComputeSummaries& do_cohen, 
+            const ComputeSummaries& do_auc, 
+            const ComputeSummaries& do_lfc, 
+            const ComputeSummaries& do_delta_detected)
+        { 
             auto fill_inner = [&](int N, auto& type) {
                 type.reserve(N);
                 for (int n = 0; n < N; ++n) {
@@ -490,32 +691,40 @@ public:
                 fill_inner(nblocks, detected[g]);
             }
 
-            auto fill_effect = [&](auto& effect) {
-                effect.resize(differential_analysis::n_summaries);
-                if (do_min) {
-                    fill_inner(ngroups, effect[differential_analysis::MIN]);
+            auto fill_effect = [&](const ComputeSummaries& do_this, auto& effect) {
+                bool has_any = false;
+                for (size_t i = 0; i < do_this.size(); ++i) {
+                    if (do_this[i]) {
+                        has_any = true;
+                        break;
+                    }
                 }
-                if (do_mean) {
-                    fill_inner(ngroups, effect[differential_analysis::MEAN]);
-                }
-                if (do_median) {
-                    fill_inner(ngroups, effect[differential_analysis::MEDIAN]);
-                }
-                if (do_max) {
-                    fill_inner(ngroups, effect[differential_analysis::MAX]);
-                }
-                if (do_rank) {
-                    fill_inner(ngroups, effect[differential_analysis::MIN_RANK]);
+
+                if (has_any) {
+                    effect.resize(differential_analysis::n_summaries);
+                    if (do_this[differential_analysis::MIN]) {
+                        fill_inner(ngroups, effect[differential_analysis::MIN]);
+                    }
+                    if (do_this[differential_analysis::MEAN]) {
+                        fill_inner(ngroups, effect[differential_analysis::MEAN]);
+                    }
+                    if (do_this[differential_analysis::MEDIAN]) {
+                        fill_inner(ngroups, effect[differential_analysis::MEDIAN]);
+                    }
+                    if (do_this[differential_analysis::MAX]) {
+                        fill_inner(ngroups, effect[differential_analysis::MAX]);
+                    }
+                    if (do_this[differential_analysis::MIN_RANK]) {
+                        fill_inner(ngroups, effect[differential_analysis::MIN_RANK]);
+                    }
                 }
                 return;
             };
 
-            if (do_cohen) {
-                fill_effect(cohen);
-            }
-            if (do_auc) {
-                fill_effect(auc);
-            }
+            fill_effect(do_cohen, cohen);
+            fill_effect(do_auc, auc);
+            fill_effect(do_lfc, lfc);
+            fill_effect(do_delta_detected, delta_detected);
             return;
         }
         /**
@@ -524,7 +733,7 @@ public:
 
         /**
          * Summary statistics for Cohen's d.
-         * Elements of the outer vector corresponds to the different summary statistics (see `differential_analysis::summary`);
+         * Elements of the outer vector correspond to the different summary statistics (see `differential_analysis::summary`);
          * elements of the middle vector correspond to the different groups;
          * and elements of the inner vector correspond to individual genes.
          */
@@ -532,11 +741,27 @@ public:
 
         /**
          * Summary statistics for the AUC.
-         * Elements of the outer vector corresponds to the different summary statistics (see `differential_analysis::summary`);
+         * Elements of the outer vector correspond to the different summary statistics (see `differential_analysis::summary`);
          * elements of the middle vector correspond to the different groups;
          * and elements of the inner vector correspond to individual genes.
          */
         std::vector<std::vector<std::vector<Stat> > > auc;
+
+        /**
+         * Summary statistics for the log-fold change.
+         * Elements of the outer vector correspond to the different summary statistics (see `differential_analysis::summary`);
+         * elements of the middle vector correspond to the different groups;
+         * and elements of the inner vector correspond to individual genes.
+         */
+        std::vector<std::vector<std::vector<Stat> > > lfc;
+
+        /**
+         * Summary statistics for the delta in the detected proportions.
+         * Elements of the outer vector correspond to the different summary statistics (see `differential_analysis::summary`);
+         * elements of the middle vector correspond to the different groups;
+         * and elements of the inner vector correspond to individual genes.
+         */
+        std::vector<std::vector<std::vector<Stat> > > delta_detected;
 
         /**
          * Mean expression in each group.
@@ -572,14 +797,17 @@ public:
     template<typename Stat = double, class MAT, typename G> 
     Results<Stat> run(const MAT* p, const G* group) {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
-        Results<Stat> res(p->nrow(), ngroups, 1, do_cohen, do_auc, use_min, use_mean, use_median, use_max, use_rank); 
+        Results<Stat> res(p->nrow(), ngroups, 1, do_cohen, do_auc, do_lfc, do_delta_detected); 
 
         auto mean_ptrs = vector_to_pointers3(res.means);
         auto detect_ptrs = vector_to_pointers3(res.detected);
 
         auto cohen_ptrs = vector_to_pointers2(res.cohen);
         auto auc_ptrs = vector_to_pointers2(res.auc);
-        run_internal(p, group, ngroups, mean_ptrs, detect_ptrs, cohen_ptrs, auc_ptrs);
+        auto lfc_ptrs = vector_to_pointers2(res.lfc);
+        auto delta_ptrs = vector_to_pointers2(res.delta_detected);
+
+        run_internal(p, group, ngroups, mean_ptrs, detect_ptrs, cohen_ptrs, auc_ptrs, lfc_ptrs, delta_ptrs);
         return res;
     }
 
@@ -608,14 +836,17 @@ public:
     
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
         auto nblocks = *std::max_element(block, block + p->ncol()) + 1;
-        Results<Stat> res(p->nrow(), ngroups, nblocks, do_cohen, do_auc, use_min, use_mean, use_median, use_max, use_rank); 
+        Results<Stat> res(p->nrow(), ngroups, nblocks, do_cohen, do_auc, do_lfc, do_delta_detected); 
 
         auto mean_ptrs = vector_to_pointers2(res.means);
         auto detect_ptrs = vector_to_pointers2(res.detected);
+
         auto cohen_ptrs = vector_to_pointers2(res.cohen);
         auto auc_ptrs = vector_to_pointers2(res.auc);
-        run_blocked_internal(p, group, block, ngroups, nblocks, mean_ptrs, detect_ptrs, cohen_ptrs, auc_ptrs);
+        auto lfc_ptrs = vector_to_pointers2(res.lfc);
+        auto delta_ptrs = vector_to_pointers2(res.delta_detected);
 
+        run_blocked_internal(p, group, block, ngroups, nblocks, mean_ptrs, detect_ptrs, cohen_ptrs, auc_ptrs, lfc_ptrs, delta_ptrs);
         return res;
     }
 

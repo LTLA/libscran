@@ -29,6 +29,8 @@ add_executable(
     src/differential_analysis/summarize_comparisons.cpp
     src/differential_analysis/auc.cpp
     src/differential_analysis/cohens_d.cpp
+    src/differential_analysis/lfc.cpp
+    src/differential_analysis/delta_detected.cpp
     src/differential_analysis/ScoreMarkers.cpp
     src/utils/average_vectors.cpp
     src/utils/subset_vector.cpp

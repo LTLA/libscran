@@ -8,6 +8,8 @@
 #include "../feature_selection/blocked_variances.hpp"
 #include "cohens_d.hpp"
 #include "auc.hpp"
+#include "lfc.hpp"
+#include "delta_detected.hpp"
 
 namespace scran {
 
@@ -26,6 +28,14 @@ struct Base {
 
     Stat* auc() {
         return effects[1];
+    }
+
+    Stat* lfc() {
+        return effects[2];
+    }
+
+    Stat* delta_detected() {
+        return effects[3];
     }
     
     std::vector<Stat*> means, detected;
@@ -77,9 +87,21 @@ public:
                 }
             }
 
-            if (details.cohen()) {
-                compute_pairwise_cohens_d(tmp_means.data(), tmp_vars.data(), level_size, details.ngroups, details.nblocks, 
-                    details.cohen() + i * details.ngroups * details.ngroups, details.threshold);
+            // Computing the various effect sizes.
+            size_t offset = i * details.ngroups * details.ngroups;
+            auto cohen_ptr = details.cohen();
+            if (cohen_ptr) {
+                compute_pairwise_cohens_d(tmp_means.data(), tmp_vars.data(), level_size, details.ngroups, details.nblocks, cohen_ptr + offset, details.threshold);
+            }
+
+            auto lfc_ptr = details.lfc();
+            if (lfc_ptr) {
+                compute_pairwise_lfc(tmp_means.data(), level_size, details.ngroups, details.nblocks, lfc_ptr + offset);
+            }
+
+            auto dd_ptr = details.delta_detected();
+            if (dd_ptr) {
+                compute_pairwise_delta_detected(tmp_nzeros.data(), level_size, details.ngroups, details.nblocks, dd_ptr + offset);
             }
         }
 
@@ -130,6 +152,21 @@ public:
 private:
     static void finalize_by_cols(size_t start, size_t end, const std::vector<std::vector<double> >& tmp_vars, Base<Stat, Level>& details) {
         const auto& level_size = *(details.level_size_ptr);
+        size_t shift = (details.ngroups) * (details.ngroups);
+        size_t offset = shift * start;
+
+        auto dd_ptr = details.delta_detected();
+        if (dd_ptr) {
+            std::vector<int> tmp_detected(level_size.size());
+            dd_ptr += offset;
+            for (size_t i = start; i < end; ++i) {
+                for (size_t l = 0; l < tmp_detected.size(); ++l) {
+                    tmp_detected[l] = details.detected[l][i];
+                }
+                compute_pairwise_delta_detected(tmp_detected.data(), level_size, details.ngroups, details.nblocks, dd_ptr);
+                dd_ptr += shift;
+            } 
+        }
 
         // Dividing to obtain the proportion of detected cells per group.
         for (size_t b = 0; b < level_size.size(); ++b) {
@@ -143,21 +180,34 @@ private:
             }
         }
 
-        // Finalizing Cohen's d. We transfer values to a temporary buffer
-        // for cache efficiency upon repeated accesses in pairwise calculations.
-        if (details.cohen()) {
+        // We transfer values to a temporary buffer for cache efficiency upon
+        // repeated accesses in pairwise calculations.
+        auto cohen_ptr = details.cohen();
+        auto lfc_ptr = details.lfc();
+        if (cohen_ptr || lfc_ptr) {
             std::vector<double> tmp_means(level_size.size()), tmp_vars_single(level_size.size());
-            int shift = (details.ngroups) * (details.ngroups);
-            auto estart = details.cohen() + shift * start;
+            if (cohen_ptr) {
+                cohen_ptr += offset;
+            }
+            if (lfc_ptr) {
+                lfc_ptr += offset;
+            }
 
-            for (size_t i = start; i < end; ++i, estart += shift) {
+            for (size_t i = start; i < end; ++i) {
                 for (size_t l = 0; l < tmp_means.size(); ++l) {
                     tmp_means[l] = details.means[l][i];
                 }
-                for (size_t l = 0; l < tmp_vars_single.size(); ++l) {
-                    tmp_vars_single[l] = tmp_vars[l][i];
+                if (cohen_ptr) {
+                    for (size_t l = 0; l < tmp_vars_single.size(); ++l) {
+                        tmp_vars_single[l] = tmp_vars[l][i];
+                    }
+                    compute_pairwise_cohens_d(tmp_means.data(), tmp_vars_single.data(), level_size, details.ngroups, details.nblocks, cohen_ptr, details.threshold);
+                    cohen_ptr += shift;
                 }
-                compute_pairwise_cohens_d(tmp_means.data(), tmp_vars_single.data(), level_size, details.ngroups, details.nblocks, estart, details.threshold);
+                if (lfc_ptr) {
+                    compute_pairwise_lfc(tmp_means.data(), level_size, details.ngroups, details.nblocks, lfc_ptr);
+                    lfc_ptr += shift;
+                }
             }
         }
     };

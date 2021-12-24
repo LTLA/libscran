@@ -106,7 +106,7 @@ TEST(CohensD, BlockedMissing) {
     std::vector<double> output(ngroups * ngroups);
     scran::differential_analysis::compute_pairwise_cohens_d(means.data(), variances.data(), group_sizes, ngroups, nblocks, output.data());
 
-    // Effectively excising the first group.
+    // Effectively excising the first block.
     std::vector<double> output2(ngroups * ngroups);
 
     std::vector<int> subgroup_sizes;
