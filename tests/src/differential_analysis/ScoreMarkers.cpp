@@ -426,3 +426,41 @@ TEST(ScoreMarkersTest, MinRank) {
         EXPECT_EQ(res.cohen[4][2][i], i + 1);  // third column
     }
 }
+
+TEST(ScoreMarkersTest, Options) {
+    scran::ScoreMarkers chd;
+
+    chd.set_compute_cohen(false);
+    chd.set_compute_cohen(true);
+    chd.set_compute_cohen(scran::ScoreMarkers::Defaults::compute_no_summaries());
+    chd.set_compute_cohen(scran::ScoreMarkers::Defaults::compute_all_summaries());
+    chd.set_compute_cohen(scran::differential_analysis::MIN, true);
+    chd.set_compute_cohen(scran::differential_analysis::MIN, false);
+
+    chd.set_compute_auc(false);
+    chd.set_compute_auc(true);
+    chd.set_compute_auc(scran::ScoreMarkers::Defaults::compute_no_summaries());
+    chd.set_compute_auc(scran::ScoreMarkers::Defaults::compute_all_summaries());
+    chd.set_compute_auc(scran::differential_analysis::MIN, true);
+    chd.set_compute_auc(scran::differential_analysis::MIN, false);
+
+    chd.set_compute_lfc(false);
+    chd.set_compute_lfc(true);
+    chd.set_compute_lfc(scran::ScoreMarkers::Defaults::compute_no_summaries());
+    chd.set_compute_lfc(scran::ScoreMarkers::Defaults::compute_all_summaries());
+    chd.set_compute_lfc(scran::differential_analysis::MIN, true);
+    chd.set_compute_lfc(scran::differential_analysis::MIN, false);
+
+    chd.set_compute_delta_detected(false);
+    chd.set_compute_delta_detected(true);
+    chd.set_compute_delta_detected(scran::ScoreMarkers::Defaults::compute_no_summaries());
+    chd.set_compute_delta_detected(scran::ScoreMarkers::Defaults::compute_all_summaries());
+    chd.set_compute_delta_detected(scran::differential_analysis::MIN, true);
+    chd.set_compute_delta_detected(scran::differential_analysis::MIN, false);
+
+    chd.set_summary_min(false);
+    chd.set_summary_mean(false);
+    chd.set_summary_median(false);
+    chd.set_summary_max(false);
+    chd.set_summary_min_rank(false);
+}

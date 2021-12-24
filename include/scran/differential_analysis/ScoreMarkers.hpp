@@ -433,7 +433,7 @@ public:
      *
      * @return A reference to this `ScoreMarkers` object.
      */
-    ScoreMarkers& set_summary_rank(bool s) {
+    ScoreMarkers& set_summary_min_rank(bool s) {
         set_everyone(differential_analysis::MIN_RANK, s);
         return *this;
     }
