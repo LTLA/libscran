@@ -12,6 +12,7 @@ var searchData=
   ['clustersnngraphmultilevel_9',['ClusterSNNGraphMultiLevel',['../classscran_1_1ClusterSNNGraphMultiLevel.html',1,'scran']]],
   ['clustersnngraphwalktrap_10',['ClusterSNNGraphWalktrap',['../classscran_1_1ClusterSNNGraphWalktrap.html',1,'scran']]],
   ['cohen_11',['cohen',['../structscran_1_1ScoreMarkers_1_1Results.html#aea2491f627de9c217b86ad888429e99d',1,'scran::ScoreMarkers::Results']]],
-  ['compute_5fauc_12',['compute_auc',['../structscran_1_1ScoreMarkers_1_1Defaults.html#aa2c336ebc43e60006f42ab304c737c70',1,'scran::ScoreMarkers::Defaults']]],
-  ['compute_5fcohen_13',['compute_cohen',['../structscran_1_1ScoreMarkers_1_1Defaults.html#a22bb87719b3c487e4b3400987ab865bd',1,'scran::ScoreMarkers::Defaults']]]
+  ['compute_5fall_5fsummaries_12',['compute_all_summaries',['../structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09',1,'scran::ScoreMarkers::Defaults']]],
+  ['compute_5fno_5fsummaries_13',['compute_no_summaries',['../structscran_1_1ScoreMarkers_1_1Defaults.html#a2ce7d34d04baed541e958ac5deebfb36',1,'scran::ScoreMarkers::Defaults']]],
+  ['computesummaries_14',['ComputeSummaries',['../classscran_1_1ScoreMarkers.html#a836ea0c31fa496f274943e79035314b5',1,'scran::ScoreMarkers']]]
 ];

@@ -86,6 +86,10 @@ Public Attributes</h2></td></tr>
 <tr class="separator:aea2491f627de9c217b86ad888429e99d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20c97e99ae435f1de0ecbc71fab5dd55"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; std::vector&lt; Stat &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html#a20c97e99ae435f1de0ecbc71fab5dd55">auc</a></td></tr>
 <tr class="separator:a20c97e99ae435f1de0ecbc71fab5dd55"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c947320cbcc9733cc5ad0a895382f61"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; std::vector&lt; Stat &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html#a8c947320cbcc9733cc5ad0a895382f61">lfc</a></td></tr>
+<tr class="separator:a8c947320cbcc9733cc5ad0a895382f61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15eb73f1db3191cb3ca4351ca980f1bd"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; std::vector&lt; Stat &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html#a15eb73f1db3191cb3ca4351ca980f1bd">delta_detected</a></td></tr>
+<tr class="separator:a15eb73f1db3191cb3ca4351ca980f1bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb23c7cf180478f30280747c6e49900c"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; std::vector&lt; Stat &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html#acb23c7cf180478f30280747c6e49900c">means</a></td></tr>
 <tr class="separator:acb23c7cf180478f30280747c6e49900c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a27e9301dce534f3980eaaed3601b7b"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; std::vector&lt; Stat &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html#a1a27e9301dce534f3980eaaed3601b7b">detected</a></td></tr>
@@ -114,7 +118,7 @@ template&lt;typename Stat &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Summary statistics for the AUC. Elements of the outer vector corresponds to the different summary statistics (see <code>differential_analysis::summary</code>); elements of the middle vector correspond to the different groups; and elements of the inner vector correspond to individual genes. </p>
+<p >Summary statistics for the AUC. Elements of the outer vector correspond to the different summary statistics (see <code>differential_analysis::summary</code>); elements of the middle vector correspond to the different groups; and elements of the inner vector correspond to individual genes. </p>
 
 </div>
 </div>
@@ -131,7 +135,24 @@ template&lt;typename Stat &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Summary statistics for Cohen's d. Elements of the outer vector corresponds to the different summary statistics (see <code>differential_analysis::summary</code>); elements of the middle vector correspond to the different groups; and elements of the inner vector correspond to individual genes. </p>
+<p >Summary statistics for Cohen's d. Elements of the outer vector correspond to the different summary statistics (see <code>differential_analysis::summary</code>); elements of the middle vector correspond to the different groups; and elements of the inner vector correspond to individual genes. </p>
+
+</div>
+</div>
+<a id="a15eb73f1db3191cb3ca4351ca980f1bd" name="a15eb73f1db3191cb3ca4351ca980f1bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15eb73f1db3191cb3ca4351ca980f1bd">&#9670;&nbsp;</a></span>delta_detected</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Stat &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::vector&lt;std::vector&lt;Stat&gt; &gt; &gt; <a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html">scran::ScoreMarkers::Results</a>&lt; Stat &gt;::delta_detected</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Summary statistics for the delta in the detected proportions. Elements of the outer vector correspond to the different summary statistics (see <code>differential_analysis::summary</code>); elements of the middle vector correspond to the different groups; and elements of the inner vector correspond to individual genes. </p>
 
 </div>
 </div>
@@ -148,7 +169,24 @@ template&lt;typename Stat &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Proportion of detected expression in each group. Elements of the outer vector corresponds to the different groups; elements of the middle vector correspond to the different blocking levels (this is of length 1 for <code><a class="el" href="classscran_1_1ScoreMarkers.html#ac71881196dc553107876b8a13e447508">run()</a></code>); and elements of the inner vector correspond to individual genes. </p>
+<p >Proportion of detected expression in each group. Elements of the outer vector corresponds to the different groups; elements of the middle vector correspond to the different blocking levels (this is of length 1 for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code>); and elements of the inner vector correspond to individual genes. </p>
+
+</div>
+</div>
+<a id="a8c947320cbcc9733cc5ad0a895382f61" name="a8c947320cbcc9733cc5ad0a895382f61"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c947320cbcc9733cc5ad0a895382f61">&#9670;&nbsp;</a></span>lfc</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Stat &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::vector&lt;std::vector&lt;Stat&gt; &gt; &gt; <a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html">scran::ScoreMarkers::Results</a>&lt; Stat &gt;::lfc</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Summary statistics for the log-fold change. Elements of the outer vector correspond to the different summary statistics (see <code>differential_analysis::summary</code>); elements of the middle vector correspond to the different groups; and elements of the inner vector correspond to individual genes. </p>
 
 </div>
 </div>
@@ -165,7 +203,7 @@ template&lt;typename Stat &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Mean expression in each group. Elements of the outer vector corresponds to the different groups; elements of the middle vector correspond to the different blocking levels (this is of length 1 for <code><a class="el" href="classscran_1_1ScoreMarkers.html#ac71881196dc553107876b8a13e447508">run()</a></code>); and elements of the inner vector correspond to individual genes. </p>
+<p >Mean expression in each group. Elements of the outer vector corresponds to the different groups; elements of the middle vector correspond to the different blocking levels (this is of length 1 for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code>); and elements of the inner vector correspond to individual genes. </p>
 
 </div>
 </div>

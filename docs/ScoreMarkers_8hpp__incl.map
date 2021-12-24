@@ -1,8 +1,9 @@
 <map id="scran/differential_analysis/ScoreMarkers.hpp" name="scran/differential_analysis/ScoreMarkers.hpp">
-<area shape="rect" id="node1" title="Compute marker scores for each gene in each group of cells." alt="" coords="219,5,404,47"/>
+<area shape="rect" id="node1" title="Compute marker scores for each gene in each group of cells." alt="" coords="316,5,501,47"/>
 <area shape="rect" id="node2" title=" " alt="" coords="5,102,95,129"/>
 <area shape="rect" id="node3" title=" " alt="" coords="119,102,309,129"/>
 <area shape="rect" id="node4" title=" " alt="" coords="334,102,483,129"/>
 <area shape="rect" id="node5" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="507,95,622,136"/>
+<area shape="rect" id="node7" title=" " alt="" coords="646,102,697,129"/>
 <area shape="rect" id="node6" title=" " alt="" coords="535,184,594,211"/>
 </map>

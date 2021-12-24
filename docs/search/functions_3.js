@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['multibatchpca_0',['MultiBatchPCA',['../classscran_1_1MultiBatchPCA.html#ac716dce1667004428b54e1d3d709aac1',1,'scran::MultiBatchPCA']]]
+  ['destroy_0',['destroy',['../structscran_1_1ClusterSNNGraph_1_1Graph.html#a0d7cf0747ed7bff0c4e810dcbd77ebdb',1,'scran::ClusterSNNGraph::Graph']]]
 ];
