@@ -527,7 +527,7 @@ public:
                 means2[g] = means[g][0];
                 detected2[g] = detected[g][0];
             }
-            run_internal(p, group, ngroups, means2, detected2, cohen, auc);
+            run_internal(p, group, ngroups, means2, detected2, cohen, auc, lfc, delta_detected);
             return;
         }
     
