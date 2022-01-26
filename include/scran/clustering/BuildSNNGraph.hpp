@@ -150,14 +150,22 @@ public:
         size_t ncells = search->nobs();
         std::vector<std::vector<int> > indices(ncells);
 
+#ifndef SCRAN_CUSTOM_PARALLEL
         #pragma omp parallel for
         for (size_t i = 0; i < ncells; ++i) {
+#else
+        SCRAN_CUSTOM_PARALLEL(ncells, [&](size_t start, size_t end) -> void {
+        for (size_t i = start; i < end; ++i) {
+#endif
             auto neighbors = search->find_nearest_neighbors(i, num_neighbors);
             auto& current = indices[i];
             for (auto x : neighbors) {
                 current.push_back(x.first);
             }
         }
+#ifdef SCRAN_CUSTOM_PARALLEL
+        });
+#endif
 
         return run(indices);
     }

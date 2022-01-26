@@ -35,8 +35,14 @@ double median (IT start, size_t n) {
 
 template<typename Stat>
 void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vector<std::vector<Stat*> >& output) {
+#ifndef SCRAN_CUSTOM_PARALLEL
     #pragma omp parallel for 
     for (size_t gene = 0; gene < ngenes; ++gene) {
+#else
+    SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
+    for (size_t gene = start; gene < end; ++gene) {
+#endif
+
         auto base = effects + gene * ngroups * ngroups;
         for (int l = 0; l < ngroups; ++l) {
             auto start = base + l * ngroups;
@@ -86,6 +92,10 @@ void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vecto
             }
         }
     }
+#ifdef SCRAN_CUSTOM_PARALLEL            
+    });
+#endif
+
     return;
 }
 
@@ -93,12 +103,17 @@ template<typename Stat>
 void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vector<Stat*>& output) {
     auto shift = ngroups * ngroups;
 
+#ifndef SCRAN_CUSTOM_PARALLEL
     #pragma omp parallel
     {
         std::vector<std::pair<Stat, int> > buffer(ngenes);
-
         #pragma omp for
         for (int g = 0; g < ngroups; ++g) {
+#else
+    SCRAN_CUSTOM_PARALLEL(ngroups, [&](size_t start, size_t end) -> void {
+        std::vector<std::pair<Stat, int> > buffer(ngenes);
+        for (int g = start; g < end; ++g) {        
+#endif
             auto target = output[g];
             std::fill(target, target + ngenes, ngenes + 1); 
 
@@ -120,7 +135,11 @@ void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vect
                 }
             }
         }
+#ifndef SCRAN_CUSTOM_PARALLEL
     }
+#else
+    });
+#endif
 }
 
 }

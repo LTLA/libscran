@@ -1,5 +1,9 @@
 #include <gtest/gtest.h>
 
+#ifdef TEST_SCRAN_CUSTOM_PARALLEL
+#include "../utils/custom_parallel.h"
+#endif
+
 #include "scran/clustering/BuildSNNGraph.hpp"
 
 #include <random>

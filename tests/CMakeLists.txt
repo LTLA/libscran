@@ -55,7 +55,21 @@ if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_link_options(libtest PRIVATE --coverage)
 endif()
 
+# Check that the custom parallelization schemes are properly set up.
+add_executable(
+    custom_parallel
+    src/clustering/BuildSNNGraph.cpp
+    src/differential_analysis/summarize_comparisons.cpp
+)
+
+set_target_properties(custom_parallel PROPERTIES COMPILE_DEFINITIONS "TEST_SCRAN_CUSTOM_PARALLEL")
+
+target_link_libraries(
+    custom_parallel
+    gtest_main
+    scran
+)
+
 include(GoogleTest)
 gtest_discover_tests(libtest)
-
-add_test(NAME scran_tests COMMAND libtest)
+gtest_discover_tests(custom_parallel)
