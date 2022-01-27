@@ -88,7 +88,7 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default parameter settings.  <a href="structscran_1_1ScoreMarkers_1_1Defaults.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html">Results</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Marker effect size summaries and other statistics.  <a href="structscran_1_1ScoreMarkers_1_1Results.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a> of the marker scoring.  <a href="structscran_1_1ScoreMarkers_1_1Results.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
@@ -249,7 +249,7 @@ template&lt;typename Stat  = double, class MAT , typename G &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code> object containing the summary statistics and the other per-group statistics. Whether particular statistics are computed depends on the configuration from <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code> and related setters. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code> object containing the summary statistics and the other per-group statistics. Whether particular statistics are computed depends on the configuration from <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code> and related setters. </dd></dl>
 
 </div>
 </div>
@@ -410,7 +410,7 @@ template&lt;typename Stat  = double, class MAT , typename G , typename B &gt; </
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code> object containing the summary statistics and the other per-group statistics. Whether particular statistics are computed depends on the configuration from <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code> and related setters. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code> object containing the summary statistics and the other per-group statistics. Whether particular statistics are computed depends on the configuration from <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code> and related setters. </dd></dl>
 
 </div>
 </div>
@@ -550,7 +550,7 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </dd>
 </dl>
 <p>This is an alias for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a79b4328dcdd409b2c7156410a9cf1b93">set_compute_auc()</a></code> where <code>c = true</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries()</a></code> and <code>c = false</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a2ce7d34d04baed541e958ac5deebfb36">Defaults::compute_no_summaries()</a></code>.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
@@ -584,7 +584,7 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </table>
   </dd>
 </dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
@@ -629,7 +629,7 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </table>
   </dd>
 </dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
@@ -664,7 +664,7 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </dd>
 </dl>
 <p>This is an alias for <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code> where <code>c = true</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries()</a></code> and <code>c = false</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a2ce7d34d04baed541e958ac5deebfb36">Defaults::compute_no_summaries()</a></code>.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
@@ -698,7 +698,7 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </table>
   </dd>
 </dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
@@ -743,7 +743,7 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </table>
   </dd>
 </dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
@@ -778,7 +778,7 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </dd>
 </dl>
 <p>This is an alias for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a1220483b8d4b740ead9bca8c70fa2362">set_compute_delta_detected()</a></code> where <code>c = true</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries()</a></code> and <code>c = false</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a2ce7d34d04baed541e958ac5deebfb36">Defaults::compute_no_summaries()</a></code>.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
@@ -812,7 +812,7 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </table>
   </dd>
 </dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
@@ -857,7 +857,7 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </table>
   </dd>
 </dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
@@ -892,7 +892,7 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </dd>
 </dl>
 <p>This is an alias for <code><a class="el" href="classscran_1_1ScoreMarkers.html#aa8f0dfe45359d007ef9ae492d7e5571c">set_compute_lfc()</a></code> where <code>c = true</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries()</a></code> and <code>c = false</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a2ce7d34d04baed541e958ac5deebfb36">Defaults::compute_no_summaries()</a></code>.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
@@ -926,7 +926,7 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </table>
   </dd>
 </dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
@@ -971,7 +971,7 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </table>
   </dd>
 </dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
@@ -1006,7 +1006,7 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </dd>
 </dl>
 <p>This overrides any previous settings for the maximum from the effect-size-specific setters, e.g., <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code>. However, it can also be overridden by later calls to those setters.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
@@ -1041,7 +1041,7 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </dd>
 </dl>
 <p>This overrides any previous settings for the mean from the effect-size-specific setters, e.g., <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code>. However, it can also be overridden by later calls to those setters.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
@@ -1076,7 +1076,7 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </dd>
 </dl>
 <p>This overrides any previous settings for the median from the effect-size-specific setters, e.g., <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code>. However, it can also be overridden by later calls to those setters.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
@@ -1111,7 +1111,7 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </dd>
 </dl>
 <p>This overrides any previous settings for the minimum from the effect-size-specific setters, e.g., <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code>. However, it can also be overridden by later calls to those setters.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
@@ -1146,7 +1146,7 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </dd>
 </dl>
 <p>This overrides any previous settings for the minimum rank from the effect-size-specific setters, e.g., <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code>. However, it can also be overridden by later calls to those setters.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Marker effect size summaries and other statistics.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
