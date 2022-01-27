@@ -118,6 +118,8 @@ private:
 public:
     /**
      * @brief Container for the PCA results.
+     *
+     * Instances should be constructed by the `RunPCA::run()` methods.
      */
     struct Results {
         /**

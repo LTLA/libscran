@@ -34,13 +34,20 @@ class PerCellQCMetrics {
 public:
     /**
      * @brief Result store for QC metric calculations.
+     * 
+     * Meaningful instances of this object should generally be constructed by calling the `PerCellQCMetrics::run()` methods.
+     * Empty instances can be default-constructed as placeholders.
      */
     struct Results {
         /**
-         * @param ncells Number of cells, i.e., the number of columns in the input matrix.
-         * @param nsubsets Number of feature subsets of interest.
+         * @cond
          */
+        Results() {}
+
         Results(size_t ncells, size_t nsubsets) : sums(ncells), detected(ncells), subset_proportions(nsubsets, std::vector<double>(ncells)) {}
+        /**
+         * @endcond
+         */
 
         /**
          * Sum of counts for each cell.

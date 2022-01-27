@@ -144,16 +144,23 @@ public:
 public:
     /**
      * @brief Results of the variance modelling.
+     *
+     * Meaningful instances of this object should generally be constructed by calling the `ModelGeneVar::run()` methods.
+     * Empty instances can be default-constructed as placeholders.
      */
     struct Results {
         /**
-         * @param ngenes Number of genes.
-         * @param nblocks Number of blocks.
+         * @cond
          */
+        Results() {}
+
         Results(size_t ngenes, int nblocks) : means(nblocks, std::vector<double>(ngenes)),
                                               variances(nblocks, std::vector<double>(ngenes)),
                                               fitted(nblocks, std::vector<double>(ngenes)),
                                               residuals(nblocks, std::vector<double>(ngenes)) {}
+        /**
+         * @endcond
+         */
 
         /**
          * Vector of length equal to the number of blocks, where each internal vector is of length equal to the number of genes.

@@ -202,6 +202,7 @@ public:
     /**
      * @brief Result of the **igraph** multi-level community detection algorithm.
      *
+     * Instances should be constructed using the `ClusterSNNGraphMultiLevel::run()` methods.
      * A separate set of clustering results are reported for each level.
      * The level providing the highest modularity is also reported; the clustering at this level is usually a good default choice.
      */
@@ -417,6 +418,8 @@ public:
 public:
     /**
      * @brief Result of the **igraph** Walktrap community detection algorithm.
+     * 
+     * Instances should be constructed using the `ClusterSNNGraphWalktrap::run()` methods.
      */
     struct Results {
         /** 
@@ -684,6 +687,8 @@ public:
 public:
     /**
      * @brief Result of the **igraph** leiden community detection algorithm.
+     *
+     * Instances should be constructed using the `ClusterSNNGraphLeiden::run()` methods.
      */
     struct Results {
         /** 

@@ -250,17 +250,24 @@ public:
     /**
      * @brief Results of the QC filtering.
      *
+     * Meaningful instances of this object should generally be constructed by calling the `PerCellQCFilters::run()` methods.
+     * Empty instances can be default-constructed as placeholders.
+     * 
      * @tparam X Boolean type to indicate whether a cell should be discarded.
      */
     template<typename X = uint8_t>
     struct Results {
         /**
-         * @param ncells Number of cells.
-         * @param nsubsets Number of feature subsets.
+         * @cond
          */
+        Results() {}
+
         Results(size_t ncells, int nsubsets) : filter_by_sums(ncells), filter_by_detected(ncells), 
                                                filter_by_subset_proportions(nsubsets, std::vector<X>(ncells)),
                                                overall_filter(ncells) {}
+        /**
+         * @endcond
+         */
 
         /**
          * Vector of length equal to the number of cells.

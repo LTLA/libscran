@@ -78,12 +78,20 @@ public:
 public:
     /**
      * @brief Thresholds to define outliers on each metric.
+     *
+     * Meaningful instances of this object should generally be constructed by calling the `IsOutlier::run()` methods.
+     * Empty instances can be default-constructed as placeholders.
      */
     struct Thresholds {
         /**
-         * @param nblocks Number of blocks, see `set_blocks(const V& p)`.
+         * @cond
          */
+        Thresholds() {}
+
         Thresholds(int nblocks=1) : lower(nblocks), upper(nblocks) {}
+        /**
+         * @endcond
+         */
 
         /**
          * Vector of length equal to the number of blocks.

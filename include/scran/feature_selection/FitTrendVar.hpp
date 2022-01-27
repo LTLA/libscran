@@ -147,12 +147,20 @@ public:
 public:
     /**
      * @brief Results of the trend fit.
+     *
+     * Meaningful instances of this object should generally be constructed by calling the `FitTrendVar::run()` methods.
+     * Empty instances can be default-constructed as placeholders.
      */
     struct Results {
         /**
-         * @param n Number of features.
+         * @cond
          */
+        Results() {}
+
         Results(size_t n) : fitted(n), residuals(n) {}
+        /**
+         * @endcond
+         */
 
         /**
          * Vector of length equal to the number of features, containing fitted values from the trend.

@@ -660,14 +660,21 @@ private:
 
 public:
     /** 
+     * @brief Results of the marker scoring.
+     * 
      * @tparam Stat Floating-point type to store the statistics.
      * @brief Marker effect size summaries and other statistics.
+     *
+     * Meaningful instances of this object should generally be constructed by calling the `ScoreMarkers::run()` methods.
+     * Empty instances can be default-constructed as placeholders.
      */
     template<typename Stat>
     struct Results {
         /**
          * @cond
          */
+        Results() {}
+
         Results(
             size_t ngenes, 
             int ngroups, 

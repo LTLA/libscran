@@ -168,6 +168,8 @@ private:
 public:
     /**
      * @brief Container for the PCA results.
+     *
+     * Instances should be constructed by the `BlockedPCA::run()` methods.
      */
     struct Results {
         /**
