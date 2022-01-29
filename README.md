@@ -30,9 +30,9 @@ auto filtered = scran::FilterCells().run(mat, qc_filters.overall_filter.data());
 auto size_factors = scran::subset_vector<false>(qc_res.sums, qc_filters.overall_filter.data());
 auto normalized = scran::LogNormCounts().run(filtered, std::move(size_factors));
 
-// Identifying highly variable genes.
+// Identifying highly variable genes from the residuals from the first (and only) batch.
 auto var_res = scran::ModelGeneVar().run(normalized.get());
-auto keep = scran::ChooseHVGs().run(var_res.residuals.size(), var_res.residuals.data());
+auto keep = scran::ChooseHVGs().run(var_res.residuals[0].size(), var_res.residuals[0].data());
 
 // Performing a PCA on the HVGs. We transpose the output so cells are columns again.
 int npcs = 20;

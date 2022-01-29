@@ -22,7 +22,7 @@ int main(int argc, char * argv[]) {
 
     // Identifying highly variable genes.
     auto var_res = scran::ModelGeneVar().run(normalized.get());
-    auto keep = scran::ChooseHVGs().run(var_res.residuals.size(), var_res.residuals.data());
+    auto keep = scran::ChooseHVGs().run(var_res.residuals[0].size(), var_res.residuals[0].data());
 
     // Performing a PCA on the HVGs.
     int npcs = 20;
