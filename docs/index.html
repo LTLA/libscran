@@ -86,9 +86,9 @@ $(function() {
 <div class="line"><span class="keyword">auto</span> size_factors = scran::subset_vector&lt;false&gt;(qc_res.sums, qc_filters.overall_filter.data());</div>
 <div class="line"><span class="keyword">auto</span> normalized = <a class="code hl_class" href="classscran_1_1LogNormCounts.html">scran::LogNormCounts</a>().<a class="code hl_function" href="classscran_1_1LogNormCounts.html#adff2220b45c6931d41883290524f4aca">run</a>(filtered, std::move(size_factors));</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">// Identifying highly variable genes.</span></div>
+<div class="line"><span class="comment">// Identifying highly variable genes from the residuals from the first (and only) batch.</span></div>
 <div class="line"><span class="keyword">auto</span> var_res = <a class="code hl_class" href="classscran_1_1ModelGeneVar.html">scran::ModelGeneVar</a>().<a class="code hl_function" href="classscran_1_1ModelGeneVar.html#a1175b286f29951889b512ed332dd36bf">run</a>(normalized.get());</div>
-<div class="line"><span class="keyword">auto</span> keep = <a class="code hl_class" href="classscran_1_1ChooseHVGs.html">scran::ChooseHVGs</a>().<a class="code hl_function" href="classscran_1_1ChooseHVGs.html#a8485437ec27c1b9d167fd00b38dad235">run</a>(var_res.residuals.size(), var_res.residuals.data());</div>
+<div class="line"><span class="keyword">auto</span> keep = <a class="code hl_class" href="classscran_1_1ChooseHVGs.html">scran::ChooseHVGs</a>().<a class="code hl_function" href="classscran_1_1ChooseHVGs.html#a8485437ec27c1b9d167fd00b38dad235">run</a>(var_res.residuals[0].size(), var_res.residuals[0].data());</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Performing a PCA on the HVGs. We transpose the output so cells are columns again.</span></div>
 <div class="line"><span class="keywordtype">int</span> npcs = 20;</div>
