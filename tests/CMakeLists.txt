@@ -32,6 +32,7 @@ add_executable(
     src/differential_analysis/lfc.cpp
     src/differential_analysis/delta_detected.cpp
     src/differential_analysis/ScoreMarkers.cpp
+    src/aggregation/AggregateAcrossCells.cpp
     src/utils/average_vectors.cpp
     src/utils/subset_vector.cpp
     src/data/data_sparse.cpp
