@@ -139,7 +139,7 @@ public:
         SparseByRow(Base<Stat, Level> d) : ByRow(std::move(d)) {}
 
         template<class SparseRange>
-        void compute(size_t i, SparseRange&& range) {
+        void compute(size_t i, const SparseRange& range) {
             feature_selection::blocked_variance_with_mean<true>(range, this->details.levels, *(this->details.level_size_ptr), this->tmp_means, this->tmp_vars, this->tmp_nzeros);
             this->transfer(i);
         }
@@ -277,7 +277,7 @@ public:
             details(std::move(d)) {}
 
         template<class SparseRange>
-        void add(SparseRange&& range) {
+        void add(const SparseRange& range) {
             auto b = details.levels[counter];
             tatami::stats::variances::compute_running(range, details.means[b], tmp_vars[b].data(), details.detected[b], counts[b]);
             ++counter;
@@ -448,7 +448,7 @@ public:
         SparseByRow(const Group* g, const Block* b, Component c) : ByRow<Component>(g, b, std::move(c)) {}
 
         template<class SparseRange>
-        void compute(size_t i, SparseRange&& range) {
+        void compute(size_t i, const SparseRange& range) {
             for (size_t b = 0; b < this->component.details.nblocks; ++b) {
                 std::copy(this->totals[b].begin(), this->totals[b].end(), this->num_zeros[b].begin());
             }

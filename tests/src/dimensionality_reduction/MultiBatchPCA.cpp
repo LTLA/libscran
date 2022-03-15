@@ -71,9 +71,9 @@ protected:
 
     void SetUp() {
         dense_row = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
-        dense_column = tatami::convert_to_dense(dense_row.get(), false);
-        sparse_row = tatami::convert_to_sparse(dense_row.get(), true);
-        sparse_column = tatami::convert_to_sparse(dense_row.get(), false);
+        dense_column = tatami::convert_to_dense(dense_row.get(), 1);
+        sparse_row = tatami::convert_to_sparse(dense_row.get(), 0);
+        sparse_column = tatami::convert_to_sparse(dense_row.get(), 1);
     }
 
     template<class Param>

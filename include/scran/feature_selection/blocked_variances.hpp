@@ -62,7 +62,7 @@ void blocked_variance_with_mean(const T* ptr, size_t NC, const B* block, Bs& blo
 }
 
 template<bool blocked, class SparseRange, typename B, class Bs, class Tmpd, class Tmpi> 
-void blocked_variance_with_mean(SparseRange&& range, const B* block, Bs& block_size, Tmpd& tmp_means, Tmpd& tmp_vars, Tmpi& tmp_nzero) {
+void blocked_variance_with_mean(const SparseRange& range, const B* block, Bs& block_size, Tmpd& tmp_means, Tmpd& tmp_vars, Tmpi& tmp_nzero) {
     std::fill(tmp_means.begin(), tmp_means.end(), 0);
     std::fill(tmp_vars.begin(), tmp_vars.end(), 0);
     std::fill(tmp_nzero.begin(), tmp_nzero.end(), 0);
@@ -129,7 +129,7 @@ public:
             tmp_means(bs->size()), tmp_vars(bs->size()), tmp_nzero(bs->size()), Common<S, B, Bs>(std::move(m), std::move(v), b, bs) {}
 
         template<class SparseRange> 
-        void compute(size_t i, SparseRange&& range) {
+        void compute(size_t i, const SparseRange& range) {
             blocked_variance_with_mean<blocked>(range, this->block, *(this->block_size_ptr), this->tmp_means, this->tmp_vars, tmp_nzero);
             for (size_t b = 0; b < this->tmp_means.size(); ++b) {
                 this->means[b][i] = this->tmp_means[b];
@@ -213,7 +213,7 @@ public:
         }
 
         template<class SparseRange>
-        void add(SparseRange&& range) {
+        void add(const SparseRange& range) {
             auto b = get_block<blocked>(counter, this->block);
             tatami::stats::variances::compute_running(range, this->means[b], this->variances[b], nonzeros[b].data(), this->counts[b]);
             ++counter;

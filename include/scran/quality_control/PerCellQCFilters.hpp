@@ -191,8 +191,8 @@ public:
     }
 
 private:
-    template<class FUNCTION, typename S, typename D, typename PPTR, typename X>
-    Thresholds run_internal(FUNCTION&& fun, size_t ncells, const S* sums, const D* detected, std::vector<PPTR> subset_proportions,
+    template<class Function, typename S, typename D, typename PPTR, typename X>
+    Thresholds run_internal(const Function& fun, size_t ncells, const S* sums, const D* detected, std::vector<PPTR> subset_proportions,
                             X* filter_by_sums, X* filter_by_detected, std::vector<X*> filter_by_subset_proportions, X* overall_filter)
     {
         Thresholds output;
