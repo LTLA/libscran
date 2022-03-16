@@ -1,6 +1,7 @@
 #ifndef SCRAN_SCRAN_HPP
 #define SCRAN_SCRAN_HPP
 
+#include "aggregation/AggregateAcrossCells.hpp"
 #include "clustering/BuildSNNGraph.hpp"
 #include "clustering/ClusterKmeans.hpp"
 #include "clustering/ClusterSNNGraph.hpp"
