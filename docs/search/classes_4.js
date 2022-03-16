@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['graph_0',['Graph',['../structscran_1_1ClusterSNNGraph_1_1Graph.html',1,'scran::ClusterSNNGraph']]]
+  ['filtercells_0',['FilterCells',['../classscran_1_1FilterCells.html',1,'scran']]],
+  ['fittrendvar_1',['FitTrendVar',['../classscran_1_1FitTrendVar.html',1,'scran']]]
 ];

@@ -1,4 +1,10 @@
 var searchData=
 [
-  ['defaults_0',['Defaults',['../structscran_1_1BlockedPCA_1_1Defaults.html',1,'scran::BlockedPCA::Defaults'],['../structscran_1_1BuildSNNGraph_1_1Defaults.html',1,'scran::BuildSNNGraph::Defaults'],['../structscran_1_1CenterSizeFactors_1_1Defaults.html',1,'scran::CenterSizeFactors::Defaults'],['../structscran_1_1ChooseHVGs_1_1Defaults.html',1,'scran::ChooseHVGs::Defaults'],['../structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html',1,'scran::ClusterSNNGraphLeiden::Defaults'],['../structscran_1_1ClusterSNNGraphMultiLevel_1_1Defaults.html',1,'scran::ClusterSNNGraphMultiLevel::Defaults'],['../structscran_1_1ClusterSNNGraphWalktrap_1_1Defaults.html',1,'scran::ClusterSNNGraphWalktrap::Defaults'],['../structscran_1_1MultiBatchPCA_1_1Defaults.html',1,'scran::MultiBatchPCA::Defaults'],['../structscran_1_1RunPCA_1_1Defaults.html',1,'scran::RunPCA::Defaults'],['../structscran_1_1ScoreMarkers_1_1Defaults.html',1,'scran::ScoreMarkers::Defaults']]]
+  ['centersizefactors_0',['CenterSizeFactors',['../classscran_1_1CenterSizeFactors.html',1,'scran']]],
+  ['choosehvgs_1',['ChooseHVGs',['../classscran_1_1ChooseHVGs.html',1,'scran']]],
+  ['clustersnngraph_2',['ClusterSNNGraph',['../classscran_1_1ClusterSNNGraph.html',1,'scran']]],
+  ['clustersnngraphleiden_3',['ClusterSNNGraphLeiden',['../classscran_1_1ClusterSNNGraphLeiden.html',1,'scran']]],
+  ['clustersnngraphmultilevel_4',['ClusterSNNGraphMultiLevel',['../classscran_1_1ClusterSNNGraphMultiLevel.html',1,'scran']]],
+  ['clustersnngraphwalktrap_5',['ClusterSNNGraphWalktrap',['../classscran_1_1ClusterSNNGraphWalktrap.html',1,'scran']]],
+  ['combinations_6',['Combinations',['../structscran_1_1AggregateAcrossCells_1_1Combinations.html',1,'scran::AggregateAcrossCells']]]
 ];
