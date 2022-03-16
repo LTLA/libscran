@@ -10,6 +10,14 @@
 #include <map>
 #include <random>
 
+std::vector<int> create_groupings(size_t n, int ngroups) {
+    std::vector<int> groupings(n);
+    for (size_t g = 0; g < groupings.size(); ++g) {
+        groupings[g] = g % ngroups;
+    }
+    return groupings;
+}
+
 class AggregateAcrossCellsTest : public ::testing::TestWithParam<int> {
 protected:
     std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
@@ -19,14 +27,6 @@ protected:
         dense_column = tatami::convert_to_dense(dense_row.get(), 1);
         sparse_row = tatami::convert_to_sparse(dense_row.get(), 0);
         sparse_column = tatami::convert_to_sparse(dense_row.get(), 1);
-    }
-
-    std::vector<int> create_groupings(size_t n, int ngroups) {
-        std::vector<int> groupings(n);
-        for (size_t g = 0; g < groupings.size(); ++g) {
-            groupings[g] = g % ngroups;
-        }
-        return groupings;
     }
 };
 
@@ -78,6 +78,27 @@ INSTANTIATE_TEST_CASE_P(
     AggregateAcrossCellsTest,
     ::testing::Values(2, 3, 4, 5) // number of clusters
 );
+
+TEST(AggregateAcrossCells, Skipping) {
+    auto input = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
+    auto grouping = create_groupings(input->ncol(), 2);
+
+    scran::AggregateAcrossCells runner;
+    auto ref = runner.run(input.get(), grouping.data());
+    EXPECT_EQ(ref.sums.size(), 2);
+    EXPECT_EQ(ref.detected.size(), 2);
+
+    // Skipping works correctly when we don't want to compute things.
+    runner.set_compute_sums(false);
+    auto partial = runner.run(input.get(), grouping.data());
+    EXPECT_EQ(partial.sums.size(), 0);
+    EXPECT_EQ(partial.detected.size(), 2);
+    
+    runner.set_compute_detected(false);
+    auto skipped = runner.run(input.get(), grouping.data());
+    EXPECT_EQ(skipped.sums.size(), 0);
+    EXPECT_EQ(skipped.detected.size(), 0);
+}
 
 TEST(CombineFactors, Simple) {
     // Simple sorted case.
