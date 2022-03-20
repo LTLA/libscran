@@ -77,15 +77,15 @@ void average_vectors(size_t n, std::vector<Stat*> in, Output* out) {
 /**
  * Average parallel elements across multiple arrays.
  *
- * @tparam Stat Type of the input statistic, typically floating point.
  * @tparam Output Floating-point output type.
+ * @tparam Stat Type of the input statistic, typically floating point.
  *
  * @param n Length of each array.
  * @param[in] in Vector of pointers to input arrays of length `n`.
  *
  * @return A vector of length `n` is returned, containing the average of all arrays in `in`.
  */
-template<typename Stat, typename Output = Stat>
+template<typename Output = double, typename Stat>
 std::vector<Output> average_vectors(size_t n, std::vector<Stat*> in) {
     std::vector<Output> out(n);
     average_vectors(n, std::move(in), out.data());
@@ -116,9 +116,9 @@ void average_vectors_weighted(size_t n, std::vector<Stat*> in, const Weight* w, 
 /**
  * Compute a weighted average of parallel elements across multiple arrays.
  *
+ * @tparam Output Floating-point output type.
  * @tparam Stat Type of the input statistic, typically floating point.
  * @tparam Weight Type of the weight, typically floating point.
- * @tparam Output Floating-point output type.
  *
  * @param n Length of each array.
  * @param[in] in Vector of pointers to input arrays of the same length.
@@ -126,7 +126,7 @@ void average_vectors_weighted(size_t n, std::vector<Stat*> in, const Weight* w, 
  *
  * @return A vector is returned containing with the average of all arrays in `in`.
  */
-template<typename Stat, typename Weight, typename Output = Stat>
+template<typename Output = double, typename Stat, typename Weight>
 std::vector<Output> average_vectors_weighted(size_t n, std::vector<Stat*> in, const Weight* w) {
     std::vector<Output> out(n);
     average_vectors_weighted(n, std::move(in), w, out.data());
