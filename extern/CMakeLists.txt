@@ -5,7 +5,7 @@ include(FetchContent)
 FetchContent_Declare(
   tatami
   GIT_REPOSITORY https://github.com/LTLA/tatami
-  GIT_TAG 93c48b7fbd7b6e6a782e3e0cd575481d43f968d8
+  GIT_TAG 66ae95df7262cf65aab869c500ea7954018abd11
 )
 
 FetchContent_MakeAvailable(tatami)
@@ -36,7 +36,7 @@ FetchContent_MakeAvailable(kmeans)
 FetchContent_Declare(
   knncolle 
   GIT_REPOSITORY https://github.com/LTLA/knncolle
-  GIT_TAG 184f5e982d9d2fd0e7cc865a05eae72b2439b2a2
+  GIT_TAG be41b6ef97bd522d651455755efd353abc0c40b2
 )
 
 FetchContent_MakeAvailable(knncolle)
