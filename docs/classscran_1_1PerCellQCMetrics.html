@@ -83,6 +83,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Defaults.html">Defaults</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default parameter settings.  <a href="structscran_1_1PerCellQCMetrics_1_1Defaults.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html">Results</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result store for QC metric calculations.  <a href="structscran_1_1PerCellQCMetrics_1_1Results.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -92,6 +95,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aedc028b2d8df9b5b28623599e060796e"><td class="memTemplParams" colspan="2">template&lt;class MAT , typename SUB  = const uint8_t*&gt; </td></tr>
 <tr class="memitem:aedc028b2d8df9b5b28623599e060796e"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCMetrics.html#aedc028b2d8df9b5b28623599e060796e">run</a> (const MAT *mat, std::vector&lt; SUB &gt; subsets)</td></tr>
 <tr class="separator:aedc028b2d8df9b5b28623599e060796e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5091f3a99f8cdc514418b9114eef54ac"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1PerCellQCMetrics.html">PerCellQCMetrics</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCMetrics.html#a5091f3a99f8cdc514418b9114eef54ac">set_subset_totals</a> (bool t=<a class="el" href="structscran_1_1PerCellQCMetrics_1_1Defaults.html#af294a581e32ae84f17e4d6740beee20b">Defaults::subset_totals</a>)</td></tr>
+<tr class="separator:a5091f3a99f8cdc514418b9114eef54ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7e27cdd2ca385d6735015a337214af5c"><td class="memTemplParams" colspan="2">template&lt;class MAT , typename SUB  = const uint8_t*, typename S , typename D , typename PROP &gt; </td></tr>
 <tr class="memitem:a7e27cdd2ca385d6735015a337214af5c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCMetrics.html#a7e27cdd2ca385d6735015a337214af5c">run</a> (const MAT *mat, const std::vector&lt; SUB &gt; &amp;subsets, S *sums, D *detected, std::vector&lt; PROP &gt; subset_proportions)</td></tr>
 <tr class="separator:a7e27cdd2ca385d6735015a337214af5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -100,9 +105,9 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p >Compute typical per-cell quality control metrics. </p>
 <p >Given a feature-by-cell count matrix, this class computes several QC metrics:</p>
 <ul>
-<li>The total sum for each cell quantifies the efficiency of library preparation and sequencing.</li>
-<li>The number of detected features also quantifies the library preparation efficiency, but with a greater focus on capturing the transcriptional complexity.</li>
-<li>The interpretation of the subset proportions depend on the subsets. In the most common case of mitochondrial transcripts, higher proportions indicate cell damage. Spike-in proportions can be interpreted in a similar manner. </li>
+<li>The total sum for each cell, which represents the efficiency of library preparation and sequencing. Low totals indicate that the library was not successfully captured.</li>
+<li>The number of detected features. This also quantifies the library preparation efficiency, but with a greater focus on capturing the transcriptional complexity.</li>
+<li>The proportion of counts in pre-defined feature subsets. The exact interpretation depends on the nature of the subset - in the most common case of mitochondrial transcripts, higher proportions indicate cell damage. Spike-in proportions can be interpreted in a similar manner. </li>
 </ul>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a7e27cdd2ca385d6735015a337214af5c" name="a7e27cdd2ca385d6735015a337214af5c"></a>
@@ -233,7 +238,41 @@ template&lt;class MAT , typename SUB  = const uint8_t*&gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html" title="Result store for QC metric calculations.">PerCellQCMetrics::Results</a></code> object containing the QC metrics. Subset proportions are returned depending on the subsets defined at construction or by <code>set_subsets()</code>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html" title="Result store for QC metric calculations.">PerCellQCMetrics::Results</a></code> object containing the QC metrics. Subset proportions are returned depending on the <code>subsets</code>. </dd></dl>
+
+</div>
+</div>
+<a id="a5091f3a99f8cdc514418b9114eef54ac" name="a5091f3a99f8cdc514418b9114eef54ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5091f3a99f8cdc514418b9114eef54ac">&#9670;&nbsp;</a></span>set_subset_totals()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1PerCellQCMetrics.html">PerCellQCMetrics</a> &amp; scran::PerCellQCMetrics::set_subset_totals </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>t</em> = <code><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Defaults.html#af294a581e32ae84f17e4d6740beee20b">Defaults::subset_totals</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">t</td><td>Whether to compute the total count for each subset rather than the proportion.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PerCellQCMetrics.html" title="Compute typical per-cell quality control metrics.">PerCellQCMetrics</a></code> object.</dd></dl>
+<p>Note that the total subset count will still be stored in the <code>subset_proportions</code> vectors or arrays in <code><a class="el" href="classscran_1_1PerCellQCMetrics.html#aedc028b2d8df9b5b28623599e060796e">run()</a></code>; the only difference is that the division by the total count for each cell is omitted. </p>
 
 </div>
 </div>
