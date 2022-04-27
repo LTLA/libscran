@@ -85,6 +85,31 @@ TEST_F(PerCellQCMetricsTester, OneSubset) {
     EXPECT_EQ(refprop, res4.subset_proportions[0]);
 }
 
+TEST_F(PerCellQCMetricsTester, SubsetTotals) {
+    std::vector<size_t> keep_i = { 0, 5, 7, 8, 9, 10, 16, 17 };
+    auto keep_s = to_filter(keep_i);
+    std::vector<const int*> subs(1, keep_s.data());
+
+    qc1.set_subset_totals(true);
+    auto res = qc1.run(dense_row.get(), subs);
+
+    auto ref = tatami::make_DelayedSubset<0>(dense_row, keep_i);
+    auto refprop = tatami::column_sums(ref.get());
+    EXPECT_EQ(refprop, res.subset_proportions[0]);
+
+    qc2.set_subset_totals(true);
+    auto res2 = qc2.run(dense_column.get(), subs);
+    EXPECT_EQ(refprop, res2.subset_proportions[0]);
+
+    qc3.set_subset_totals(true);
+    auto res3 = qc3.run(sparse_row.get(), subs);
+    EXPECT_EQ(refprop, res3.subset_proportions[0]);
+
+    qc4.set_subset_totals(true);
+    auto res4 = qc4.run(sparse_column.get(), subs);
+    EXPECT_EQ(refprop, res4.subset_proportions[0]);
+}
+
 TEST_F(PerCellQCMetricsTester, TwoSubsets) {
     std::vector<size_t> keep_i1 = { 0, 5, 7, 8, 9, 10, 16, 17 };
     std::vector<size_t> keep_i2 = { 1, 8, 2, 6, 11, 5, 19, 17 };

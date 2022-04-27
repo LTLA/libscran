@@ -23,11 +23,13 @@ namespace scran {
  *
  * Given a feature-by-cell count matrix, this class computes several QC metrics:
  * 
- * - The total sum for each cell quantifies the efficiency of library preparation and sequencing.
- * - The number of detected features also quantifies the library preparation efficiency,
- *   but with a greater focus on capturing the transcriptional complexity.
- * - The interpretation of the subset proportions depend on the subsets.
- *   In the most common case of mitochondrial transcripts, higher proportions indicate cell damage.
+ * - The total sum for each cell, which represents the efficiency of library preparation and sequencing.
+ *   Low totals indicate that the library was not successfully captured.
+ * - The number of detected features.
+ *   This also quantifies the library preparation efficiency, but with a greater focus on capturing the transcriptional complexity.
+ * - The proportion of counts in pre-defined feature subsets.
+ *   The exact interpretation depends on the nature of the subset -
+ *   in the most common case of mitochondrial transcripts, higher proportions indicate cell damage.
  *   Spike-in proportions can be interpreted in a similar manner.
  */
 class PerCellQCMetrics {
@@ -78,8 +80,7 @@ public:
      * Users can pass `{}` if no subsets are to be used. 
      *
      * @return A `PerCellQCMetrics::Results` object containing the QC metrics.
-     * Subset proportions are returned depending on the subsets defined at construction or by `set_subsets()`.
-     *
+     * Subset proportions are returned depending on the `subsets`.
      */
     template<class MAT, typename SUB = const uint8_t*>
     Results run(const MAT* mat, std::vector<SUB> subsets) {
@@ -88,22 +89,79 @@ public:
         return output;
     }
 
+public:
+    /**
+     * @brief Default parameter settings.
+     */
+    struct Defaults {
+        /**
+         * See `set_subset_totals()` for more details.
+         */
+        static constexpr bool subset_totals = false;
+    };
+
+    /**
+     * @param t Whether to compute the total count for each subset rather than the proportion.
+     *
+     * @return A reference to this `PerCellQCMetrics` object.
+     *
+     * Note that the total subset count will still be stored in the `subset_proportions` vectors or arrays in `run()`;
+     * the only difference is that the division by the total count for each cell is omitted.
+     */
+    PerCellQCMetrics& set_subset_totals(bool t = Defaults::subset_totals) {
+        subset_totals = t;
+        return *this;
+    }
+
+private:
+    bool subset_totals = Defaults::subset_totals;
+
 private:
     template<typename SUB, typename S, typename D, typename PROP>
     struct Common {
-        Common(const std::vector<SUB>* subs, S* su, D* de, std::vector<PROP> subp) : subsets_ptr(subs), sums(su), detected(de), subset_proportions(std::move(subp)) {}
+        Common(const std::vector<SUB>* subs, S* su, D* de, std::vector<PROP> subp, bool t) : 
+            subsets_ptr(subs), sums(su), detected(de), subset_proportions(std::move(subp)), subset_totals(t) {}
 
         const std::vector<SUB>* subsets_ptr;
         S* sums;
         D* detected;
         std::vector<PROP> subset_proportions;
+        bool subset_totals;
+
+    public:
+        template<typename P>
+        void divide_subset_direct(size_t c, double& prop) {
+            if (!subset_totals) {
+                if (sums[c]) {
+                    prop /= sums[c];
+                } else {
+                    prop = std::numeric_limits<P>::quiet_NaN();
+                }
+            }
+        }
+
+        template<typename P>
+        void divide_subset_running(size_t start, size_t end) {
+            if (!subset_totals) {
+                for (size_t s = 0; s < subsets_ptr->size(); ++s) {
+                    for (size_t c = start; c < end; ++c) {
+                        auto& prop = subset_proportions[s][c];
+                        if (sums[c]) {
+                            prop /= sums[c];
+                        } else {
+                            prop = std::numeric_limits<P>::quiet_NaN();
+                        }
+                    }
+                }
+            }
+        }
     };
 
     template<typename SUB, typename S, typename D, typename PROP>
     struct Factory : public Common<SUB, S, D, PROP> {
         typedef typename std::remove_reference<decltype(*std::declval<PROP>())>::type P;
-        
-        Factory(size_t nr, size_t nc, const std::vector<SUB>* subs, S* s, D* d, std::vector<PROP> subp) : NR(nr), NC(nc), Common<SUB, S, D, PROP>(subs, s, d, std::move(subp)) {
+
+        Factory(size_t nr, size_t nc, const std::vector<SUB>* subs, S* s, D* d, std::vector<PROP> subp, bool t) : NR(nr), NC(nc), Common<SUB, S, D, PROP>(subs, s, d, std::move(subp), t) {
             std::fill(this->sums, this->sums + nc, static_cast<S>(0));
             std::fill(this->detected, this->detected + nc, static_cast<D>(0));
             for (size_t s = 0; s < this->subsets_ptr->size(); ++s) {
@@ -115,7 +173,7 @@ private:
 
     public:
         struct DenseDirect : public Common<SUB, S, D, PROP> {
-            DenseDirect(size_t nr, const std::vector<SUB>* subs, S* s, D* d, std::vector<PROP> subp) : NR(nr), Common<SUB, S, D, PROP>(subs, s, d, std::move(subp)) {}
+            DenseDirect(size_t nr, const std::vector<SUB>* subs, S* s, D* d, std::vector<PROP> subp, bool t) : NR(nr), Common<SUB, S, D, PROP>(subs, s, d, std::move(subp), t) {}
 
             template<typename T>
             void compute(size_t c, const T* ptr) {
@@ -130,12 +188,7 @@ private:
                     for (size_t r = 0; r < NR; ++r) {
                         prop += sub[r] * ptr[r];
                     }
-
-                    if (this->sums[c]) {
-                        prop /= this->sums[c];
-                    } else {
-                        prop = std::numeric_limits<P>::quiet_NaN();
-                    }
+                    this->template divide_subset_direct<P>(c, prop); 
                 }
             }
 
@@ -143,12 +196,12 @@ private:
         };
 
         DenseDirect dense_direct() {
-            return DenseDirect(NR, this->subsets_ptr, this->sums, this->detected, this->subset_proportions);
+            return DenseDirect(NR, this->subsets_ptr, this->sums, this->detected, this->subset_proportions, this->subset_totals);
         }
 
     public:
         struct SparseDirect : public Common<SUB, S, D, PROP> {
-            SparseDirect(const std::vector<SUB>* subs, S* s, D* d, std::vector<PROP> subp) : Common<SUB, S, D, PROP>(subs, s, d, std::move(subp)) {}
+            SparseDirect(const std::vector<SUB>* subs, S* s, D* d, std::vector<PROP> subp, bool t) : Common<SUB, S, D, PROP>(subs, s, d, std::move(subp), t) {}
 
             template<typename T, typename IDX>
             void compute(size_t c, const tatami::SparseRange<T, IDX>& range) {
@@ -163,24 +216,19 @@ private:
                     for (size_t i = 0; i < range.number; ++i) {
                         prop += sub[range.index[i]] * range.value[i];
                     }
-
-                    if (this->sums[c]) {
-                        prop /= this->sums[c];
-                    } else {
-                        prop = std::numeric_limits<P>::quiet_NaN();
-                    }
+                    this->template divide_subset_direct<P>(c, prop); 
                 }
             }
         };
         
         SparseDirect sparse_direct() {
-            return SparseDirect(this->subsets_ptr, this->sums, this->detected, this->subset_proportions);
+            return SparseDirect(this->subsets_ptr, this->sums, this->detected, this->subset_proportions,  this->subset_totals);
         }
 
     public:
         struct DenseRunning : public Common<SUB, S, D, PROP> {
-            DenseRunning(size_t s, size_t e, const std::vector<SUB>* subs, S* ss, D* d, std::vector<PROP> subp) : 
-                num(e - s), Common<SUB, S, D, PROP>(subs, ss, d, std::move(subp)) {}
+            DenseRunning(size_t s, size_t e, const std::vector<SUB>* subs, S* ss, D* d, std::vector<PROP> subp, bool t) : 
+                num(e - s), Common<SUB, S, D, PROP>(subs, ss, d, std::move(subp), t) {}
 
             template<class T>
             void add (const T* ptr) {
@@ -203,16 +251,7 @@ private:
             }
 
             void finish() {
-                for (size_t s = 0; s < this->subsets_ptr->size(); ++s) {
-                    for (size_t c = 0; c < num; ++c) {
-                        auto& prop = this->subset_proportions[s][c];
-                        if (this->sums[c]) {
-                            prop /= this->sums[c];
-                        } else {
-                            prop = std::numeric_limits<P>::quiet_NaN();
-                        }
-                    }
-                }
+                this->template divide_subset_running<P>(0, num);
             }
 
             size_t counter = 0;
@@ -220,7 +259,7 @@ private:
         };
 
         DenseRunning dense_running() {
-            return DenseRunning(0, NC, this->subsets_ptr, this->sums, this->detected, this->subset_proportions);
+            return DenseRunning(0, NC, this->subsets_ptr, this->sums, this->detected, this->subset_proportions, this->subset_totals);
         }
 
         DenseRunning dense_running(size_t start, size_t end) {
@@ -228,13 +267,13 @@ private:
             for (auto& s : subp) {
                 s += start;
             }
-            return DenseRunning(start, end, this->subsets_ptr, this->sums + start, this->detected + start, std::move(subp));
+            return DenseRunning(start, end, this->subsets_ptr, this->sums + start, this->detected + start, std::move(subp), this->subset_totals);
         }
 
     public:
         struct SparseRunning : public Common<SUB, S, D, PROP> {
-            SparseRunning(size_t s, size_t e, const std::vector<SUB>* subs, S* ss, D* d, std::vector<PROP> subp) : 
-                start(s), end(e), Common<SUB, S, D, PROP>(subs, ss, d, std::move(subp)) {}
+            SparseRunning(size_t s, size_t e, const std::vector<SUB>* subs, S* ss, D* d, std::vector<PROP> subp, bool t) : 
+                start(s), end(e), Common<SUB, S, D, PROP>(subs, ss, d, std::move(subp), t) {}
 
             template<typename T, typename IDX>
             void add (const tatami::SparseRange<T, IDX> range) {
@@ -256,16 +295,7 @@ private:
             }
 
             void finish() {
-                for (size_t s = 0; s < this->subsets_ptr->size(); ++s) {
-                    for (size_t c = start; c < end; ++c) {
-                        auto& prop = this->subset_proportions[s][c];
-                        if (this->sums[c]) {
-                            prop /= this->sums[c];
-                        } else {
-                            prop = std::numeric_limits<P>::quiet_NaN();
-                        }
-                    }
-                }
+                this->template divide_subset_running<P>(start, end);
             }
 
             const size_t start, end;
@@ -273,11 +303,11 @@ private:
         };
          
         SparseRunning sparse_running() {
-            return SparseRunning(0, NC, this->subsets_ptr, this->sums, this->detected, this->subset_proportions);
+            return SparseRunning(0, NC, this->subsets_ptr, this->sums, this->detected, this->subset_proportions, this->subset_totals);
         }
 
         SparseRunning sparse_running(size_t start, size_t end) {
-            return SparseRunning(start, end, this->subsets_ptr, this->sums, this->detected, this->subset_proportions);
+            return SparseRunning(start, end, this->subsets_ptr, this->sums, this->detected, this->subset_proportions, this->subset_totals);
         }
     };
 
@@ -314,7 +344,7 @@ public:
         SCRAN_LOGGER("scran::PerCellQCMetrics", "Computing quality control metrics for each cell");
 #endif
 
-        Factory fact(nr, nc, &subsets, sums, detected, subset_proportions);
+        Factory fact(nr, nc, &subsets, sums, detected, subset_proportions, subset_totals);
         tatami::apply<1>(mat, fact);
         return;
     }
