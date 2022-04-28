@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <limits>
+#include "tatami/stats/medians.hpp"
+#include "tatami/stats/sums.hpp"
 
 /**
  * @file MedianSizeFactors.hpp
@@ -83,54 +85,41 @@ private:
 private:
     template<typename T, typename Ref, typename Out>
     struct Factory {
-        Factory(size_t nr, size_t nc, const Ref* ref_, Out* fac) : NR(nr), sums(nc), factors(fac), ref(ref_) {}
+        Factory(size_t nr, size_t nc, const Ref* ref_, Out* fac) : NR(nr), sums(nc), ref(ref_), factors(fac) {}
         size_t NR;
         std::vector<T> sums;
-        Output* output;
         const Ref* ref;
+        Out* factors;
     public:
         struct DenseDirect {
-            DenseDirect(size_t nr, T* s, const Ref* ref_, Out* fac) : NR(nr), sums(s), factors(f), ref(ref_), factors(fac), buffer(NR) {}
+            DenseDirect(size_t nr, T* s, const Ref* ref_, Out* fac) : NR(nr), sums(s), ref(ref_), factors(fac), buffer(NR) {}
 
             void compute(size_t c, const T* ptr) {
                 sums[c] = std::accumulate(ptr, ptr + NR, static_cast<T>(0));
 
                 size_t sofar = 0;
                 for (size_t i = 0; i < NR; ++i) {
-                    if (ref[i] == 0 && input[i] == 0) {
+                    if (ref[i] == 0 && ptr[i] == 0) {
                         continue;
                     }
-                    
+
                     if (ref[i] == 0) {
-                        buffer[sofar] = std::numeric_limits<T>::infinity;
+                        buffer[sofar] = std::numeric_limits<T>::infinity();
                     } else {
-                        buffer[sofar] = input[i] / ref[i];
+                        buffer[sofar] = ptr[i] / ref[i];
                     }
+
                     ++sofar;
                 }
 
-                auto& fac = factors[c];
-                if (!sofar) {
-                    fac = std::numeric_limits<T>::quiet_NaN();
-                } else {
-                    size_t half = sofar/2;
-                    auto intput = buffer.begin();
-                    std::nth_element(input, input + half, input + sofar);
-
-                    if (n % 2 == 1) {
-                        fac = input[half];
-                    } else {
-                        fac = input[half];
-                        std::nth_element(input, input + half - 1, input + half);
-                        fac = (fac + input[half - 1]) / 2.0;
-                    }
-                }
+                // TODO: convince tatami maintainers to document this.
+                factors[c] = tatami::stats::compute_median<Out>(buffer.data(), sofar);
             }
 
             size_t NR;
             T* sums;
-            Out* factors;
             const Ref* ref;
+            Out* factors;
             std::vector<Out> buffer;
         };
 
@@ -157,14 +146,14 @@ public:
      *
      * @return `output` is filled with the size factors for each cell in `mat`.
      */
-    template<typename Matrix, typename Ref, typename Out>
+    template<typename T, typename IDX, typename Ref, typename Out>
     void run(const tatami::Matrix<T, IDX>* mat, const Ref* ref, Out* output) const {
         size_t NR = mat->nrow(), NC = mat->ncol();
-        Factory<T, Ref> fact(NR, NC, ref, output);
+        Factory<T, Ref, Out> fact(NR, NC, ref, output);
         tatami::apply<1>(mat, fact);
 
         // Mild squeezing towards library size-derived factors.
-        if (prior_count && && NR && NC) {
+        if (prior_count && NR && NC) {
             const auto& sums = fact.sums;
             double mean = std::accumulate(sums.begin(), sums.end(), static_cast<T>(0));
             mean /= NC;
@@ -198,8 +187,8 @@ public:
      * @return `output` is filled with the size factors for each cell in `mat`.
      */
     template<typename T, typename IDX, typename Out>
-    void run(const tatami::Matrix<T, IDX>* mat, Out* output) const {
-        auto ref = column_sums(mat);
+    void run_with_mean(const tatami::Matrix<T, IDX>* mat, Out* output) const {
+        auto ref = tatami::row_sums(mat);
         if (ref.size()) {
             double NC = mat->ncol();
             for (auto& r : ref) {
@@ -211,10 +200,10 @@ public:
     }
 
 public:
-    template<typename Output>
+    template<typename Out>
     struct Result {
         Result(size_t NC) : factors(NC) {}
-        std::vector<Output> factors;
+        std::vector<Out> factors;
     };
 
     /**
@@ -231,9 +220,9 @@ public:
      *
      * @return A `Result` containing the size factors for each cell in `mat`.
      */
-    template<typename T, typename IDX, typename Ref>
-    Result run(const tatami::Matrix<T, IDX>* mat, const Ref* ref) const {
-        Result output(mat->ncol());
+    template<typename Out = double, typename T, typename IDX, typename Ref>
+    Result<Out> run(const tatami::Matrix<T, IDX>* mat, const Ref* ref) const {
+        Result<Out> output(mat->ncol());
         run(mat, ref, output.factors.data());
         return output;
     }
@@ -249,10 +238,10 @@ public:
      *
      * @return A `Result` containing the size factors for each cell in `mat`.
      */
-    template<typename T, typename IDX>
-    Result run(const tatami::Matrix<T, IDX>* mat) const {
-        Result output(mat->ncol());
-        run(mat, output.factors.data());
+    template<typename Out = double, typename T, typename IDX>
+    Result<Out> run_with_mean(const tatami::Matrix<T, IDX>* mat) const {
+        Result<Out> output(mat->ncol());
+        run_with_mean(mat, output.factors.data());
         return output;
     }
 };
