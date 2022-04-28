@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['modelgenevar_0',['ModelGeneVar',['../classscran_1_1ModelGeneVar.html',1,'scran']]],
-  ['multibatchpca_1',['MultiBatchPCA',['../classscran_1_1MultiBatchPCA.html',1,'scran']]]
+  ['mediansizefactors_0',['MedianSizeFactors',['../classscran_1_1MedianSizeFactors.html',1,'scran']]],
+  ['modelgenevar_1',['ModelGeneVar',['../classscran_1_1ModelGeneVar.html',1,'scran']]],
+  ['multibatchpca_2',['MultiBatchPCA',['../classscran_1_1MultiBatchPCA.html',1,'scran']]]
 ];
