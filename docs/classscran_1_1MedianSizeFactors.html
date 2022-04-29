@@ -86,6 +86,9 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1MedianSizeFactors_1_1Defaults.html">Defaults</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default parameter settings.  <a href="structscran_1_1MedianSizeFactors_1_1Defaults.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html">Results</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result of the size factor calculation.  <a href="structscran_1_1MedianSizeFactors_1_1Results.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -99,12 +102,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a1fad66012a50b1ad4eec6bc954c3c14b"><td class="memTemplParams" colspan="2">template&lt;typename T , typename IDX , typename Out &gt; </td></tr>
 <tr class="memitem:a1fad66012a50b1ad4eec6bc954c3c14b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1MedianSizeFactors.html#a1fad66012a50b1ad4eec6bc954c3c14b">run_with_mean</a> (const tatami::Matrix&lt; T, IDX &gt; *mat, Out *output) const</td></tr>
 <tr class="separator:a1fad66012a50b1ad4eec6bc954c3c14b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7149dfbb120d361e95bc0562027eb7fe"><td class="memTemplParams" colspan="2">template&lt;typename Out  = double, typename T , typename IDX , typename Ref &gt; </td></tr>
-<tr class="memitem:a7149dfbb120d361e95bc0562027eb7fe"><td class="memTemplItemLeft" align="right" valign="top">Result&lt; Out &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1MedianSizeFactors.html#a7149dfbb120d361e95bc0562027eb7fe">run</a> (const tatami::Matrix&lt; T, IDX &gt; *mat, const Ref *ref) const</td></tr>
-<tr class="separator:a7149dfbb120d361e95bc0562027eb7fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a35cae99c5f7b7a4ccb407f76e121b14d"><td class="memTemplParams" colspan="2">template&lt;typename Out  = double, typename T , typename IDX &gt; </td></tr>
-<tr class="memitem:a35cae99c5f7b7a4ccb407f76e121b14d"><td class="memTemplItemLeft" align="right" valign="top">Result&lt; Out &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1MedianSizeFactors.html#a35cae99c5f7b7a4ccb407f76e121b14d">run_with_mean</a> (const tatami::Matrix&lt; T, IDX &gt; *mat) const</td></tr>
-<tr class="separator:a35cae99c5f7b7a4ccb407f76e121b14d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07388a3bbfdbc6a023b6479b2012c6df"><td class="memTemplParams" colspan="2">template&lt;typename Out  = double, typename T , typename IDX , typename Ref &gt; </td></tr>
+<tr class="memitem:a07388a3bbfdbc6a023b6479b2012c6df"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html">Results</a>&lt; Out &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1MedianSizeFactors.html#a07388a3bbfdbc6a023b6479b2012c6df">run</a> (const tatami::Matrix&lt; T, IDX &gt; *mat, const Ref *ref) const</td></tr>
+<tr class="separator:a07388a3bbfdbc6a023b6479b2012c6df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ae3787cccfaf98bba4d473856582893"><td class="memTemplParams" colspan="2">template&lt;typename Out  = double, typename T , typename IDX &gt; </td></tr>
+<tr class="memitem:a1ae3787cccfaf98bba4d473856582893"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html">Results</a>&lt; Out &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1MedianSizeFactors.html#a1ae3787cccfaf98bba4d473856582893">run_with_mean</a> (const tatami::Matrix&lt; T, IDX &gt; *mat) const</td></tr>
+<tr class="separator:a1ae3787cccfaf98bba4d473856582893"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Compute median-based size factors to handle composition bias. </p>
@@ -115,8 +118,8 @@ Public Member Functions</h2></td></tr>
 </ul>
 <p >In practice, this tends to work poorly for actual single-cell data due to its sparsity. Nonetheless, we provide it here because it can be helpful for removing composition biases between clusters. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a7149dfbb120d361e95bc0562027eb7fe" name="a7149dfbb120d361e95bc0562027eb7fe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7149dfbb120d361e95bc0562027eb7fe">&#9670;&nbsp;</a></span>run() <span class="overload">[1/2]</span></h2>
+<a id="a07388a3bbfdbc6a023b6479b2012c6df" name="a07388a3bbfdbc6a023b6479b2012c6df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07388a3bbfdbc6a023b6479b2012c6df">&#9670;&nbsp;</a></span>run() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -127,7 +130,7 @@ template&lt;typename Out  = double, typename T , typename IDX , typename Ref &gt
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Result&lt; Out &gt; scran::MedianSizeFactors::run </td>
+          <td class="memname"><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html">Results</a>&lt; Out &gt; scran::MedianSizeFactors::run </td>
           <td>(</td>
           <td class="paramtype">const tatami::Matrix&lt; T, IDX &gt; *&#160;</td>
           <td class="paramname"><em>mat</em>, </td>
@@ -153,6 +156,7 @@ template&lt;typename Out  = double, typename T , typename IDX , typename Ref &gt
 <p >Compute per-cell size factors against a user-supplied reference profile.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
+    <tr><td class="paramname">Out</td><td>Numeric type for the size factors. </td></tr>
     <tr><td class="paramname">T</td><td>Numeric data type of the input matrix. </td></tr>
     <tr><td class="paramname">IDX</td><td>Integer index type of the input matrix. </td></tr>
     <tr><td class="paramname">Ref</td><td>Numeric data type of the reference profile.</td></tr>
@@ -166,7 +170,7 @@ template&lt;typename Out  = double, typename T , typename IDX , typename Ref &gt
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code>Result</code> containing the size factors for each cell in <code>mat</code>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html" title="Result of the size factor calculation.">Results</a></code> containing the size factors for each cell in <code>mat</code>. </dd></dl>
 
 </div>
 </div>
@@ -233,8 +237,8 @@ template&lt;typename T , typename IDX , typename Ref , typename Out &gt; </div>
 
 </div>
 </div>
-<a id="a35cae99c5f7b7a4ccb407f76e121b14d" name="a35cae99c5f7b7a4ccb407f76e121b14d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a35cae99c5f7b7a4ccb407f76e121b14d">&#9670;&nbsp;</a></span>run_with_mean() <span class="overload">[1/2]</span></h2>
+<a id="a1ae3787cccfaf98bba4d473856582893" name="a1ae3787cccfaf98bba4d473856582893"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ae3787cccfaf98bba4d473856582893">&#9670;&nbsp;</a></span>run_with_mean() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -245,7 +249,7 @@ template&lt;typename Out  = double, typename T , typename IDX &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Result&lt; Out &gt; scran::MedianSizeFactors::run_with_mean </td>
+          <td class="memname"><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html">Results</a>&lt; Out &gt; scran::MedianSizeFactors::run_with_mean </td>
           <td>(</td>
           <td class="paramtype">const tatami::Matrix&lt; T, IDX &gt; *&#160;</td>
           <td class="paramname"><em>mat</em></td><td>)</td>
@@ -261,6 +265,7 @@ template&lt;typename Out  = double, typename T , typename IDX &gt; </div>
 <p >Compute per-cell size factors against an average pseudo-sample constructed from the row means of the input matrix.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
+    <tr><td class="paramname">Out</td><td>Numeric type for the size factors. </td></tr>
     <tr><td class="paramname">T</td><td>Numeric data type of the input matrix. </td></tr>
     <tr><td class="paramname">IDX</td><td>Integer index type of the input matrix.</td></tr>
   </table>
@@ -272,7 +277,7 @@ template&lt;typename Out  = double, typename T , typename IDX &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code>Result</code> containing the size factors for each cell in <code>mat</code>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html" title="Result of the size factor calculation.">Results</a></code> containing the size factors for each cell in <code>mat</code>. </dd></dl>
 
 </div>
 </div>
