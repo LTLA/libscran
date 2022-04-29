@@ -5,6 +5,7 @@
 #include <limits>
 #include "tatami/stats/medians.hpp"
 #include "tatami/stats/sums.hpp"
+#include "CenterSizeFactors.hpp"
 
 /**
  * @file MedianSizeFactors.hpp
@@ -51,6 +52,8 @@ public:
      * This is usually desirable for interpretation of relative values.
      * 
      * @return A reference to this `MedianSizeFactors` object.
+     *
+     * For more control over centering, this can be set to `false` and the resulting size factors can be passed to `CenterSizeFactors`.
      */
     MedianSizeFactors& set_center(bool c = Defaults::center) {
         center = c;
@@ -167,6 +170,12 @@ public:
                     output[i] /= 1.0 + scaling; // adjusting for the addition, as if we were dealing with a library size.
                 }
             }
+        }
+
+        // Throwing in some centering.
+        if (center) {
+            CenterSizeFactors centerer;
+            centerer.run(NC, output);
         }
 
         return;

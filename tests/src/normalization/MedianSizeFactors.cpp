@@ -23,7 +23,7 @@ protected:
         auto cIt = contents.begin() + NR;
         for (size_t c = 1; c < NC; ++c, cIt += NR) {
             double& mult = multiplier[c];
-            mult = static_cast<double>(rng() % 100)/10;
+            mult = static_cast<double>(rng() % 100 + 1)/10;
             for (size_t r = 0; r < NR; ++r) {
                 *(cIt + r) = contents[r] * mult;
             }
@@ -39,22 +39,21 @@ TEST_F(MedianSizeFactorsTester, EqualToLibSize) {
     std::vector<double> multiplier(NC);
     initialize(contents, multiplier, 421);
 
-    std::unique_ptr<tatami::NumericMatrix> mat(new tatami::DenseColumnMatrix<double>(NR, NC, std::move(contents)));
+    std::unique_ptr<tatami::NumericMatrix> mat(new tatami::DenseColumnMatrix<double>(NR, NC, contents));
     scran::MedianSizeFactors med;
     auto res = med.run_with_mean(mat.get());
 
     double ratio;
-    bool okay = true;
+    int failures = 0;
     for (size_t i = 0; i < NC; ++i) {
         double r = multiplier[i] / res.factors[i];
         if (i == 0) {
             ratio = r;
-        } else if (std::abs(1 - r/ratio) > 0.00000001) {
-            okay = false;            
-            break;
+        } else {
+            failures += (std::abs(1 - r/ratio) > 0.00000001);
         }
     }
-    EXPECT_TRUE(okay);
+    EXPECT_TRUE(failures == 0);
 }
 
 TEST_F(MedianSizeFactorsTester, Magnitude) {
@@ -62,19 +61,25 @@ TEST_F(MedianSizeFactorsTester, Magnitude) {
     std::vector<double> multiplier(NC);
     initialize(contents, multiplier, 422);
 
-    std::unique_ptr<tatami::NumericMatrix> mat(new tatami::DenseColumnMatrix<double>(NR, NC, std::move(contents)));
+    std::unique_ptr<tatami::NumericMatrix> mat(new tatami::DenseColumnMatrix<double>(NR, NC, contents));
+
+    // Without centering.
     scran::MedianSizeFactors med;
+    med.set_center(false);
     auto res = med.run(mat.get(), contents.data());
 
-    bool okay = true;
+    int failures = 0;
     for (size_t i = 0; i < NC; ++i) {
         double r = multiplier[i] / res.factors[i];
-        if (std::abs(1 - r) > 0.00000001) {
-            okay = false;            
-            break;
-        }
+        failures += (std::abs(1 - r) > 0.00000001);
     }
-    EXPECT_TRUE(okay);
+    EXPECT_TRUE(failures == 0);
+
+    // Plus centering.
+    med.set_center(true);
+    auto res2 = med.run(mat.get(), contents.data());
+    double mean = std::accumulate(res2.factors.begin(), res2.factors.end(), 0.0) / res2.factors.size();
+    EXPECT_FLOAT_EQ(mean, 1);
 }
 
 TEST_F(MedianSizeFactorsTester, PriorCount) {
@@ -82,23 +87,21 @@ TEST_F(MedianSizeFactorsTester, PriorCount) {
     std::vector<double> multiplier(NC);
     initialize(contents, multiplier, 423);
 
-    std::unique_ptr<tatami::NumericMatrix> mat(new tatami::DenseColumnMatrix<double>(NR, NC, std::move(contents)));
+    std::unique_ptr<tatami::NumericMatrix> mat(new tatami::DenseColumnMatrix<double>(NR, NC, contents));
     scran::MedianSizeFactors med;
+    med.set_center(false);
 
     // Very low. Well, zero.
     {
         med.set_prior_count(0);
         auto res = med.run(mat.get(), contents.data());
 
-        bool okay = true;
+        int failures = 0;
         for (size_t i = 0; i < NC; ++i) {
             double r = multiplier[i] / res.factors[i];
-            if (std::abs(1 - r) > 0.00000001) {
-                okay = false;            
-                break;
-            }
+            failures += (std::abs(1 - r) > 0.00000001);
         }
-        EXPECT_TRUE(okay);
+        EXPECT_TRUE(failures == 0);
     }
 
     // Very high.
@@ -106,15 +109,12 @@ TEST_F(MedianSizeFactorsTester, PriorCount) {
         med.set_prior_count(10000);
         auto res = med.run(mat.get(), contents.data());
 
-        bool okay = true;
+        int failures = 0;
         for (size_t i = 0; i < NC; ++i) {
             double r = multiplier[i] / res.factors[i];
-            if (std::abs(1 - r) > 0.00000001) {
-                okay = false;            
-                break;
-            }
+            failures += (std::abs(1 - r) > 0.00000001);
         }
-        EXPECT_TRUE(okay);
+        EXPECT_TRUE(failures == 0);
     }
 }
 
@@ -132,46 +132,67 @@ TEST_F(MedianSizeFactorsTester, Actual) {
         }
     }
 
-    std::unique_ptr<tatami::NumericMatrix> mat(new tatami::DenseColumnMatrix<double>(NR, NC, std::move(contents)));
+    std::unique_ptr<tatami::NumericMatrix> mat(new tatami::DenseColumnMatrix<double>(NR, NC, contents));
 
     scran::MedianSizeFactors med;
+    med.set_center(false);
     auto res = med.run(mat.get(), contents.data());
     EXPECT_FLOAT_EQ(res.factors[0], 1);
 
-    // Expect decent similarity, but not identity.
+    // Expect decent similarity, but not identity, to the library sizes.
     {
-        bool okay = true, all_equal = true;
+        int failures = 0;
+        bool all_equal = true;
         for (size_t i = 0; i < NC; ++i) {
             double expected = multiplier[i] / multiplier[0];
 
             // Should be close, but not equal.
-            if (std::abs(1 - expected / res.factors[i]) > 0.01) {
-                okay = false;            
-                break;
-            } else if (std::abs(1 - expected / res.factors[i]) > 0.00000001) {
+            failures += (std::abs(1 - expected / res.factors[i]) > 0.01);
+            if (std::abs(1 - expected / res.factors[i]) > 0.00000001) {
                 all_equal = false;
             }
         }
-        EXPECT_TRUE(okay);
+        EXPECT_TRUE(failures == 0);
         EXPECT_FALSE(all_equal);
     }
 
     // Expect different results.
-    med.set_prior_count(100);
+    med.set_prior_count(1000000);
     auto res2 = med.run(mat.get(), contents.data());
     EXPECT_FLOAT_EQ(res2.factors[0], 1);
 
     {
-        bool all_equal = true;
+        int failures = 0;
         for (size_t i = 0; i < NC; ++i) {
             double ratio = res2.factors[i] / res.factors[i];
-            if (std::abs(1 - ratio) > 0.00000001) {
-                all_equal = false;
-                break;
-            }
+            failures += (std::abs(1 - ratio) > 0.0001);
         }
-        EXPECT_FALSE(all_equal);
+        EXPECT_TRUE(failures > 0);
     }
+}
+
+TEST_F(MedianSizeFactorsTester, CompositionBias) {
+    std::vector<double> contents(NR * NC);
+    std::vector<double> multiplier(NC);
+    initialize(contents, multiplier, 423);
+
+    // Adding some huge composition bias to every other sample.
+    for (size_t i = 1; i < NC; ++i) {
+        contents[i * NR + (i - 1) % NR] = 100000 * i;
+    }
+
+    std::unique_ptr<tatami::NumericMatrix> mat(new tatami::DenseColumnMatrix<double>(NR, NC, contents));
+
+    scran::MedianSizeFactors med;
+    med.set_center(false).set_prior_count(0); // for a simpler comparison of equality.
+    auto res = med.run(mat.get(), contents.data());
+
+    int failures = 0;
+    for (size_t i = 0; i < NC; ++i) {
+        double r = multiplier[i] / res.factors[i];
+        failures += (std::abs(1 - r) > 0.00000001);
+    }
+    EXPECT_TRUE(failures == 0);
 }
 
 TEST_F(MedianSizeFactorsTester, ZeroHandling) {
@@ -200,7 +221,7 @@ TEST_F(MedianSizeFactorsTester, ZeroHandling) {
         ref[r] = rng() % 100 + 1; 
     }
 
-    std::unique_ptr<tatami::NumericMatrix> zmat(new tatami::DenseColumnMatrix<double>(NR, NC, std::move(zcontents)));
+    std::unique_ptr<tatami::NumericMatrix> zmat(new tatami::DenseColumnMatrix<double>(NR, NC, zcontents));
     std::unique_ptr<tatami::NumericMatrix> fmat(new tatami::DenseColumnMatrix<double>(NR + 1, NC, fcontents));
    
     // Factors should be the same as if the last all-zero
