@@ -209,15 +209,32 @@ public:
     }
 
 public:
+    /**
+     * @brief Result of the size factor calculation.
+     *
+     * @tparam Out Numeric type for the size factors.
+     */
     template<typename Out>
-    struct Result {
-        Result(size_t NC) : factors(NC) {}
+    struct Results {
+        /**
+         * @cond
+         */
+        Results(size_t NC) : factors(NC) {}
+        /**
+         * @endcond
+         */
+
+        /**
+         * Vector of length equal to the number of cells,
+         * containing the size factor for each cell.
+         */
         std::vector<Out> factors;
     };
 
     /**
      * Compute per-cell size factors against a user-supplied reference profile.
      *
+     * @tparam Out Numeric type for the size factors.
      * @tparam T Numeric data type of the input matrix.
      * @tparam IDX Integer index type of the input matrix.
      * @tparam Ref Numeric data type of the reference profile.
@@ -227,11 +244,11 @@ public:
      * @param[in] ref Pointer to an array containing the reference expression profile to normalize against.
      * This should be of length equal to the number of rows in `mat` and should contain non-negative values.
      *
-     * @return A `Result` containing the size factors for each cell in `mat`.
+     * @return A `Results` containing the size factors for each cell in `mat`.
      */
     template<typename Out = double, typename T, typename IDX, typename Ref>
-    Result<Out> run(const tatami::Matrix<T, IDX>* mat, const Ref* ref) const {
-        Result<Out> output(mat->ncol());
+    Results<Out> run(const tatami::Matrix<T, IDX>* mat, const Ref* ref) const {
+        Results<Out> output(mat->ncol());
         run(mat, ref, output.factors.data());
         return output;
     }
@@ -239,17 +256,18 @@ public:
     /**
      * Compute per-cell size factors against an average pseudo-sample constructed from the row means of the input matrix.
      *
+     * @tparam Out Numeric type for the size factors.
      * @tparam T Numeric data type of the input matrix.
      * @tparam IDX Integer index type of the input matrix.
      *
      * @param mat Matrix containing non-negative expression data, usually counts.
      * Rows should be genes and columns should be cells.
      *
-     * @return A `Result` containing the size factors for each cell in `mat`.
+     * @return A `Results` containing the size factors for each cell in `mat`.
      */
     template<typename Out = double, typename T, typename IDX>
-    Result<Out> run_with_mean(const tatami::Matrix<T, IDX>* mat) const {
-        Result<Out> output(mat->ncol());
+    Results<Out> run_with_mean(const tatami::Matrix<T, IDX>* mat) const {
+        Results<Out> output(mat->ncol());
         run_with_mean(mat, output.factors.data());
         return output;
     }

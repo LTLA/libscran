@@ -23,7 +23,7 @@ protected:
         auto cIt = contents.begin() + NR;
         for (size_t c = 1; c < NC; ++c, cIt += NR) {
             double& mult = multiplier[c];
-            mult = static_cast<double>(rng() % 100 + 1)/10;
+            mult = static_cast<double>(rng() % 100 + 1)/10; // force it to be positive with the +1.
             for (size_t r = 0; r < NR; ++r) {
                 *(cIt + r) = contents[r] * mult;
             }
@@ -43,6 +43,7 @@ TEST_F(MedianSizeFactorsTester, EqualToLibSize) {
     scran::MedianSizeFactors med;
     auto res = med.run_with_mean(mat.get());
 
+    // All factors should be proportional to the library size if all profiles are scaled versions of each other.
     double ratio;
     int failures = 0;
     for (size_t i = 0; i < NC; ++i) {
@@ -63,7 +64,8 @@ TEST_F(MedianSizeFactorsTester, Magnitude) {
 
     std::unique_ptr<tatami::NumericMatrix> mat(new tatami::DenseColumnMatrix<double>(NR, NC, contents));
 
-    // Without centering.
+    // Without centering, we should just get the multipliers back, given that
+    // we're normalizing against the first profile (which has a multiplier of 1).
     scran::MedianSizeFactors med;
     med.set_center(false);
     auto res = med.run(mat.get(), contents.data());
@@ -75,7 +77,7 @@ TEST_F(MedianSizeFactorsTester, Magnitude) {
     }
     EXPECT_TRUE(failures == 0);
 
-    // Plus centering.
+    // Plus centering, the mean should now be 1.
     med.set_center(true);
     auto res2 = med.run(mat.get(), contents.data());
     double mean = std::accumulate(res2.factors.begin(), res2.factors.end(), 0.0) / res2.factors.size();
@@ -91,7 +93,7 @@ TEST_F(MedianSizeFactorsTester, PriorCount) {
     scran::MedianSizeFactors med;
     med.set_center(false);
 
-    // Very low. Well, zero.
+    // Prior count of zero should just give back the multipliers.
     {
         med.set_prior_count(0);
         auto res = med.run(mat.get(), contents.data());
@@ -104,7 +106,8 @@ TEST_F(MedianSizeFactorsTester, PriorCount) {
         EXPECT_TRUE(failures == 0);
     }
 
-    // Very high.
+    // Very high prior count should still give back the multipliers,
+    // given that the only difference is the library size.
     {
         med.set_prior_count(10000);
         auto res = med.run(mat.get(), contents.data());
@@ -176,7 +179,8 @@ TEST_F(MedianSizeFactorsTester, CompositionBias) {
     std::vector<double> multiplier(NC);
     initialize(contents, multiplier, 423);
 
-    // Adding some huge composition bias to every other sample.
+    // Introduce some huge DE to make some composition bias to every other sample.
+    // We add it to a different gene in each sample to make life a bit interesting.
     for (size_t i = 1; i < NC; ++i) {
         contents[i * NR + (i - 1) % NR] = 100000 * i;
     }
@@ -187,6 +191,7 @@ TEST_F(MedianSizeFactorsTester, CompositionBias) {
     med.set_center(false).set_prior_count(0); // for a simpler comparison of equality.
     auto res = med.run(mat.get(), contents.data());
 
+    // We expect to get back the multipliers as the DE is ignored.
     int failures = 0;
     for (size_t i = 0; i < NC; ++i) {
         double r = multiplier[i] / res.factors[i];
@@ -204,9 +209,9 @@ TEST_F(MedianSizeFactorsTester, ZeroHandling) {
         auto cIt = fcontents.begin();
         auto zIt = zcontents.begin();
         for (size_t c = 0; c < NC; ++c) {
-            double mult = static_cast<double>(rng() % 100)/10;
+            double mult = static_cast<double>(rng() % 100 + 1)/10; // +1 to force non-zero multipliers.
             for (size_t r = 0; r < NR; ++r, ++cIt, ++zIt) {
-                *cIt = mult * (rng() % 100) + 1; // everything is non-zero....
+                *cIt = mult * (rng() % 100) + 1; // everything is non-zero here, to avoid accidental undefined values...
                 *zIt = *cIt;
             }
             ++cIt; // except for the last row, which is all-zero.
