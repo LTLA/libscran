@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['center_0',['center',['../structscran_1_1MedianSizeFactors_1_1Defaults.html#af747d883c33f4793ce28b9aade2d2ad6',1,'scran::MedianSizeFactors::Defaults']]],
+  ['center_0',['center',['../structscran_1_1MedianSizeFactors_1_1Defaults.html#af747d883c33f4793ce28b9aade2d2ad6',1,'scran::MedianSizeFactors::Defaults::center()'],['../structscran_1_1GroupedSizeFactors_1_1Defaults.html#acbe5c154e3b67420a1f2ef84ef304310',1,'scran::GroupedSizeFactors::Defaults::center()']]],
   ['centersizefactors_1',['CenterSizeFactors',['../classscran_1_1CenterSizeFactors.html',1,'scran']]],
   ['centersizefactors_2ehpp_2',['CenterSizeFactors.hpp',['../CenterSizeFactors_8hpp.html',1,'']]],
   ['choosehvgs_3',['ChooseHVGs',['../classscran_1_1ChooseHVGs.html',1,'scran']]],
@@ -14,7 +14,7 @@ var searchData=
   ['clustersnngraphwalktrap_11',['ClusterSNNGraphWalktrap',['../classscran_1_1ClusterSNNGraphWalktrap.html',1,'scran']]],
   ['cohen_12',['cohen',['../structscran_1_1ScoreMarkers_1_1Results.html#aea2491f627de9c217b86ad888429e99d',1,'scran::ScoreMarkers::Results']]],
   ['combinations_13',['Combinations',['../structscran_1_1AggregateAcrossCells_1_1Combinations.html',1,'scran::AggregateAcrossCells']]],
-  ['combine_5ffactors_14',['combine_factors',['../classscran_1_1AggregateAcrossCells.html#a78bfad996edef3a958377c50dabdeff4',1,'scran::AggregateAcrossCells::combine_factors(size_t n, std::vector&lt; const Factor * &gt; factors, Combined *combined)'],['../classscran_1_1AggregateAcrossCells.html#ae36a7bc1ed0d40aa179c3a486a15c0ea',1,'scran::AggregateAcrossCells::combine_factors(size_t n, std::vector&lt; const Factor * &gt; factors)']]],
+  ['combine_5ffactors_14',['combine_factors',['../classscran_1_1AggregateAcrossCells.html#ae36a7bc1ed0d40aa179c3a486a15c0ea',1,'scran::AggregateAcrossCells::combine_factors(size_t n, std::vector&lt; const Factor * &gt; factors)'],['../classscran_1_1AggregateAcrossCells.html#a78bfad996edef3a958377c50dabdeff4',1,'scran::AggregateAcrossCells::combine_factors(size_t n, std::vector&lt; const Factor * &gt; factors, Combined *combined)']]],
   ['compute_5fall_5fsummaries_15',['compute_all_summaries',['../structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09',1,'scran::ScoreMarkers::Defaults']]],
   ['compute_5fdetected_16',['compute_detected',['../structscran_1_1AggregateAcrossCells_1_1Defaults.html#a75c5c2a8222c372e3d6f419b3e1f8ffe',1,'scran::AggregateAcrossCells::Defaults']]],
   ['compute_5fno_5fsummaries_17',['compute_no_summaries',['../structscran_1_1ScoreMarkers_1_1Defaults.html#a2ce7d34d04baed541e958ac5deebfb36',1,'scran::ScoreMarkers::Defaults']]],

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['isoutlier_2ehpp_0',['IsOutlier.hpp',['../IsOutlier_8hpp.html',1,'']]]
+  ['groupedsizefactors_2ehpp_0',['GroupedSizeFactors.hpp',['../GroupedSizeFactors_8hpp.html',1,'']]]
 ];

@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['runpca_2ehpp_0',['RunPCA.hpp',['../RunPCA_8hpp.html',1,'']]]
+  ['percellqcfilters_2ehpp_0',['PerCellQCFilters.hpp',['../PerCellQCFilters_8hpp.html',1,'']]],
+  ['percellqcmetrics_2ehpp_1',['PerCellQCMetrics.hpp',['../PerCellQCMetrics_8hpp.html',1,'']]]
 ];
