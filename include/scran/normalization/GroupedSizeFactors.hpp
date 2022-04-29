@@ -118,6 +118,7 @@ public:
             }
             if (current > best) {
                 ref = i;
+                best = current;
             }
         }
 
@@ -181,7 +182,7 @@ public:
      */
     template<typename Out = double, typename T, typename IDX, typename Group>
     Results<Out> run(const tatami::Matrix<T, IDX>* mat, const Group* group) {
-        Result<Out> output(mat->ncol());
+        Results<Out> output(mat->ncol());
         run(mat, group, output.factors.data());
         return output;
     }
