@@ -2,10 +2,11 @@
 #define SCRAN_CLUSTERED_SIZE_FACTORS_HPP
 
 #include "MedianSizeFactors.hpp"
+#include "LogNormCounts.hpp"
 #include "../aggregation/AggregateAcrossCells.hpp"
 #include "../dimensionality_reduction/RunPCA.hpp"
 
-#include "tatami/DenseMatrix.hpp"
+#include "tatami/base/DenseMatrix.hpp"
 #include "tatami/ext/ArrayView.hpp"
 #include "tatami/stats/sums.hpp"
 
@@ -48,16 +49,16 @@ public:
 
         {
             LogNormCounts logger;
-            auto logged = logger.run(std::shared_ptr<const tatami::Matrix<T, IDX>(&mat, [](const tatami::Matrix<T,IDX>*){}), sums);
+            auto logged = logger.run(std::shared_ptr<const tatami::Matrix<T, IDX> >(&mat, [](const tatami::Matrix<T,IDX>*){}), aggcolsums);
 
             RunPCA pca;
-            auto pres = pca.set_number(1).run(logged);
+            auto pres = pca.set_rank(1).run(logged);
 
-            auto middle = std::accumulate(res.pcs.begin(), res.pcs.end(), 0) / NC;
+            auto middle = std::accumulate(pres.pcs.begin(), pres.pcs.end(), 0) / NC;
             double closest_diff;
 
             for (size_t i = 0; i < NC; ++i) {
-                double absdiff = std::abs(res.pcs[i] - middle);
+                double absdiff = std::abs(pres.pcs[i] - middle);
                 if (i == 0 || absdiff < closest_diff) {
                     closest_diff = absdiff;
                     closest = i;
@@ -67,7 +68,7 @@ public:
 
         // Computing median-based size factors.
         MedianSizeFactors med;
-        auto mres = med.run(&aggmat, ref);
+        auto mres = med.run(&aggmat, combined.data() + closest * NR);
 
         // Propagating to each cell via library size-based normalization.
         auto colsums = tatami::column_sums(mat);
