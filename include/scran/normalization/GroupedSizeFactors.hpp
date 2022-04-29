@@ -153,7 +153,7 @@ public:
         /**
          * @cond
          */
-        Result(size_t NC) : factors(NC) {}
+        Results(size_t NC) : factors(NC) {}
         /**
          * @endcond
          */
