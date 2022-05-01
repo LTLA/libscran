@@ -52,7 +52,7 @@ public:
      * @param c Whether to center the size factors to have a mean of unity.
      * This is usually desirable for interpretation of relative values.
      * 
-     * @return A reference to this `MedianSizeFactors` object.
+     * @return A reference to this `GroupedSizeFactors` object.
      *
      * For more control over centering, this can be set to `false` and the resulting size factors can be passed to `CenterSizeFactors`.
      */
@@ -61,12 +61,25 @@ public:
         return *this;
     }
 
+    /**
+     * @param p Prior count for the library size shrinkage, see `MedianSizeFactors::set_prior_count()` for details.
+     *
+     * @return A reference to this `GroupedSizeFactors` object.
+     */
+    GroupedSizeFactors& set_prior_count(double p = MedianSizeFactors::Defaults::prior_count) {
+        prior_count = p;
+        return *this;
+    }
+
 private:
     bool center = Defaults::center;
+    double prior_count = MedianSizeFactors::Defaults::prior_count;
 
 public:
     /**
      * Compute per-cell size factors based on user-supplied groupings.
+     * The reference group is automatically determined from the pseudo-cell with the highest sum of root-counts;
+     * this favors higher-coverage libraries with decent transcriptome complexity.
      *
      * @tparam T Numeric data type of the input matrix.
      * @tparam IDX Integer index type of the input matrix.
@@ -84,6 +97,36 @@ public:
      */
     template<typename T, typename IDX, typename Group, typename Out>
     void run(const tatami::Matrix<T, IDX>* mat, const Group* group, Out* output) {
+        run_internal(mat, group, false, output);
+    }
+
+    /**
+     * Compute per-cell size factors based on user-supplied groupings and a user-specified reference group.
+     *
+     * @tparam T Numeric data type of the input matrix.
+     * @tparam IDX Integer index type of the input matrix.
+     * @tparam Group Integer type for the groupings.
+     * @tparam Out Numeric data type of the output vector.
+     *
+     * @param mat Matrix containing non-negative expression data, usually counts.
+     * Rows should be genes and columns should be cells.
+     * @param[in] group Pointer to an array of group identifiers, of length equal to the number of columns in `mat`.
+     * Values should be integers in \f$[0, N)\f$ where \f$N\f$ is the total number of groups.
+     * @param reference Identifier of the group to use as the reference.
+     * This should be an integer in \f$[0, N)\f$.
+     * @param[out] output Pointer to an array to use to store the output size factors.
+     * This should be of length equal to the number of columns in `mat`.
+     *
+     * @return `output` is filled with the size factors for all cells in `mat`.
+     */
+    template<typename T, typename IDX, typename Group, typename Out>
+    void run(const tatami::Matrix<T, IDX>* mat, const Group* group, size_t reference, Out* output) {
+        run_internal(mat, group, reference, output);
+    }
+
+private:
+    template<typename T, typename IDX, typename Group, typename Ref, typename Out>
+    void run_internal(const tatami::Matrix<T, IDX>* mat, const Group* group, Ref reference, Out* output) {
         size_t NR = mat->nrow(), NC = mat->ncol();
         if (!NC) {
             return;
@@ -101,31 +144,37 @@ public:
             aggregator.run(mat, group, std::move(sums), std::vector<int*>());
         }
 
-        // Choosing one of them to be the reference. Here, we borrow some logic
-        // from edgeR and use the one with the largest sum of square roots,
-        // which provides a compromise between transcriptome coverage and
-        // complexity. The root ensures that we don't pick a sample that just
-        // has very high expression in a small subset of genes, while still
-        // remaining responsive to the overall coverage level.
         size_t ref = 0;
-        double best = 0;
+        if constexpr(std::is_same<Ref, size_t>::value) {
+            ref = reference;
+        } else {
+            // Choosing one of them to be the reference. Here, we borrow some logic
+            // from edgeR and use the one with the largest sum of square roots,
+            // which provides a compromise between transcriptome coverage and
+            // complexity. The root ensures that we don't pick a sample that just
+            // has very high expression in a small subset of genes, while still
+            // remaining responsive to the overall coverage level.
+            double best = 0;
 
-        for (size_t i = 0; i < ngroups; ++i) {
-            auto start = combined.data() + i * NR;
-            double current = 0;
-            for (size_t j = 0; j < NR; ++j) {
-                current += std::sqrt(start[j]);
-            }
-            if (current > best) {
-                ref = i;
-                best = current;
+            for (size_t i = 0; i < ngroups; ++i) {
+                auto start = combined.data() + i * NR;
+                double current = 0;
+                for (size_t j = 0; j < NR; ++j) {
+                    current += std::sqrt(start[j]);
+                }
+                if (current > best) {
+                    ref = i;
+                    best = current;
+                }
             }
         }
 
-        // Computing median-based size factors.
+        // Computing median-based size factors. No need to center
+        // here as we'll be recentering afterwards anyway.
         tatami::ArrayView view(combined.data(), combined.size());
         tatami::DenseColumnMatrix<T, IDX, decltype(view)> aggmat(NR, ngroups, std::move(view));
         MedianSizeFactors med;
+        med.set_center(false).set_prior_count(prior_count);
         auto mres = med.run(&aggmat, combined.data() + ref * NR);
 
         // Propagating to each cell via library size-based normalization.
@@ -168,6 +217,7 @@ public:
 
     /**
      * Compute per-cell size factors based on user-supplied groupings.
+     * The reference sample is automatically chosen, see `run()` for details.
      *
      * @tparam T Numeric data type of the input matrix.
      * @tparam IDX Integer index type of the input matrix.
@@ -184,6 +234,29 @@ public:
     Results<Out> run(const tatami::Matrix<T, IDX>* mat, const Group* group) {
         Results<Out> output(mat->ncol());
         run(mat, group, output.factors.data());
+        return output;
+    }
+
+    /**
+     * Compute per-cell size factors based on user-supplied groupings and a user-specified grouping.
+     *
+     * @tparam T Numeric data type of the input matrix.
+     * @tparam IDX Integer index type of the input matrix.
+     * @tparam Group Integer type for the groupings.
+     *
+     * @param mat Matrix containing non-negative expression data, usually counts.
+     * Rows should be genes and columns should be cells.
+     * @param[in] group Pointer to an array of group identifiers, of length equal to the number of columns in `mat`.
+     * Values should be integers in \f$[0, N)\f$ where \f$N\f$ is the total number of groups.
+     * @param reference Identifier of the group to use as the reference.
+     * This should be an integer in \f$[0, N)\f$.
+     *
+     * @return A `Results` object is returned containing the size factors.
+     */
+    template<typename Out = double, typename T, typename IDX, typename Group>
+    Results<Out> run(const tatami::Matrix<T, IDX>* mat, const Group* group, size_t reference) {
+        Results<Out> output(mat->ncol());
+        run(mat, group, reference, output.factors.data());
         return output;
     }
 };

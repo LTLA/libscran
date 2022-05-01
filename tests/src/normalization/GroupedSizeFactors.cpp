@@ -126,3 +126,35 @@ TEST(GroupedSizeFactors, ByGroupComposition) {
         }
     }
 }
+
+TEST(GroupedSizeFactors, Reference) {
+    size_t NR = 100, NC = 10;
+    size_t ngroups = 3;
+
+    std::vector<double> contents(NR * NC);
+    std::vector<int> groups(NC);
+    {
+        std::mt19937_64 rng(1004);
+        auto cIt = contents.begin();
+        for (size_t c = 0; c < NC; ++c) {
+            groups[c] = c % ngroups;
+            for (size_t r = 0; r < NR; ++r, ++cIt) {
+                *cIt = (r * 100 + rng() % 100); // increasing gene abundance.
+            }
+        }
+    }
+    tatami::DenseColumnMatrix<double> mat(NR, NC, contents);
+
+    scran::GroupedSizeFactors grouper;
+    auto res0 = grouper.run(&mat, groups.data(), 0);
+    auto res1 = grouper.run(&mat, groups.data(), 1);
+
+    bool is_diff = false;
+    for (size_t j = 0; j < ngroups; ++j) {
+        if (std::abs(1 - res0.factors[j] / res1.factors[j]) > 0.0001) {
+            is_diff = true;
+        }
+    }
+    EXPECT_TRUE(is_diff);
+}
+
