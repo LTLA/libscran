@@ -94,12 +94,20 @@ Classes</h2></td></tr>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a907245f06f970a65c5a7c1a4a96af0fc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1GroupedSizeFactors.html">GroupedSizeFactors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1GroupedSizeFactors.html#a907245f06f970a65c5a7c1a4a96af0fc">set_center</a> (bool c=<a class="el" href="structscran_1_1GroupedSizeFactors_1_1Defaults.html#acbe5c154e3b67420a1f2ef84ef304310">Defaults::center</a>)</td></tr>
 <tr class="separator:a907245f06f970a65c5a7c1a4a96af0fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec88f173e14eb0df8dcc8e1e9d6db1c0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1GroupedSizeFactors.html">GroupedSizeFactors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1GroupedSizeFactors.html#aec88f173e14eb0df8dcc8e1e9d6db1c0">set_prior_count</a> (double p=<a class="el" href="structscran_1_1MedianSizeFactors_1_1Defaults.html#a909251588d34d41237a64df1dd85552c">MedianSizeFactors::Defaults::prior_count</a>)</td></tr>
+<tr class="separator:aec88f173e14eb0df8dcc8e1e9d6db1c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0d4fdd8307e4d1a40709742eac394b76"><td class="memTemplParams" colspan="2">template&lt;typename T , typename IDX , typename Group , typename Out &gt; </td></tr>
 <tr class="memitem:a0d4fdd8307e4d1a40709742eac394b76"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1GroupedSizeFactors.html#a0d4fdd8307e4d1a40709742eac394b76">run</a> (const tatami::Matrix&lt; T, IDX &gt; *mat, const Group *group, Out *output)</td></tr>
 <tr class="separator:a0d4fdd8307e4d1a40709742eac394b76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5f569a4f09462039c1287c9a1fbb77e"><td class="memTemplParams" colspan="2">template&lt;typename T , typename IDX , typename Group , typename Out &gt; </td></tr>
+<tr class="memitem:aa5f569a4f09462039c1287c9a1fbb77e"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1GroupedSizeFactors.html#aa5f569a4f09462039c1287c9a1fbb77e">run</a> (const tatami::Matrix&lt; T, IDX &gt; *mat, const Group *group, size_t reference, Out *output)</td></tr>
+<tr class="separator:aa5f569a4f09462039c1287c9a1fbb77e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d64a2f29004bdb73bf03a93a4007ad9"><td class="memTemplParams" colspan="2">template&lt;typename Out  = double, typename T , typename IDX , typename Group &gt; </td></tr>
 <tr class="memitem:a3d64a2f29004bdb73bf03a93a4007ad9"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1GroupedSizeFactors_1_1Results.html">Results</a>&lt; Out &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1GroupedSizeFactors.html#a3d64a2f29004bdb73bf03a93a4007ad9">run</a> (const tatami::Matrix&lt; T, IDX &gt; *mat, const Group *group)</td></tr>
 <tr class="separator:a3d64a2f29004bdb73bf03a93a4007ad9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab71abc85dd222296ee1402069c04168a"><td class="memTemplParams" colspan="2">template&lt;typename Out  = double, typename T , typename IDX , typename Group &gt; </td></tr>
+<tr class="memitem:ab71abc85dd222296ee1402069c04168a"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1GroupedSizeFactors_1_1Results.html">Results</a>&lt; Out &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1GroupedSizeFactors.html#ab71abc85dd222296ee1402069c04168a">run</a> (const tatami::Matrix&lt; T, IDX &gt; *mat, const Group *group, size_t reference)</td></tr>
+<tr class="separator:ab71abc85dd222296ee1402069c04168a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Compute grouped size factors to handle composition bias. </p>
@@ -108,7 +116,7 @@ Public Member Functions</h2></td></tr>
 <dl class="section see"><dt>See also</dt><dd>Lun ATL, Bach K and Marioni JC (2016). Pooling across cells to normalize single-cell RNA sequencing data with many zero counts. <em>Genome Biol.</em> 17:75 </dd></dl>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a3d64a2f29004bdb73bf03a93a4007ad9" name="a3d64a2f29004bdb73bf03a93a4007ad9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3d64a2f29004bdb73bf03a93a4007ad9">&#9670;&nbsp;</a></span>run() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d64a2f29004bdb73bf03a93a4007ad9">&#9670;&nbsp;</a></span>run() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -142,7 +150,7 @@ template&lt;typename Out  = double, typename T , typename IDX , typename Group &
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Compute per-cell size factors based on user-supplied groupings.</p>
+<p >Compute per-cell size factors based on user-supplied groupings. The reference sample is automatically chosen, see <code><a class="el" href="classscran_1_1GroupedSizeFactors.html#a0d4fdd8307e4d1a40709742eac394b76">run()</a></code> for details.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>Numeric data type of the input matrix. </td></tr>
@@ -163,7 +171,7 @@ template&lt;typename Out  = double, typename T , typename IDX , typename Group &
 </div>
 </div>
 <a id="a0d4fdd8307e4d1a40709742eac394b76" name="a0d4fdd8307e4d1a40709742eac394b76"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0d4fdd8307e4d1a40709742eac394b76">&#9670;&nbsp;</a></span>run() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d4fdd8307e4d1a40709742eac394b76">&#9670;&nbsp;</a></span>run() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -203,7 +211,7 @@ template&lt;typename T , typename IDX , typename Group , typename Out &gt; </div
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Compute per-cell size factors based on user-supplied groupings.</p>
+<p >Compute per-cell size factors based on user-supplied groupings. The reference group is automatically determined from the pseudo-cell with the highest sum of root-counts; this favors higher-coverage libraries with decent transcriptome complexity.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>Numeric data type of the input matrix. </td></tr>
@@ -217,6 +225,138 @@ template&lt;typename T , typename IDX , typename Group , typename Out &gt; </div
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes and columns should be cells. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of group identifiers, of length equal to the number of columns in <code>mat</code>. Values should be integers in <img class="formulaInl" alt="$[0, N)$" src="form_0.png"/> where <img class="formulaInl" alt="$N$" src="form_1.png"/> is the total number of groups. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array to use to store the output size factors. This should be of length equal to the number of columns in <code>mat</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><code>output</code> is filled with the size factors for all cells in <code>mat</code>. </dd></dl>
+
+</div>
+</div>
+<a id="ab71abc85dd222296ee1402069c04168a" name="ab71abc85dd222296ee1402069c04168a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab71abc85dd222296ee1402069c04168a">&#9670;&nbsp;</a></span>run() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Out  = double, typename T , typename IDX , typename Group &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structscran_1_1GroupedSizeFactors_1_1Results.html">Results</a>&lt; Out &gt; scran::GroupedSizeFactors::run </td>
+          <td>(</td>
+          <td class="paramtype">const tatami::Matrix&lt; T, IDX &gt; *&#160;</td>
+          <td class="paramname"><em>mat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Group *&#160;</td>
+          <td class="paramname"><em>group</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>reference</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Compute per-cell size factors based on user-supplied groupings and a user-specified grouping.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>Numeric data type of the input matrix. </td></tr>
+    <tr><td class="paramname">IDX</td><td>Integer index type of the input matrix. </td></tr>
+    <tr><td class="paramname">Group</td><td>Integer type for the groupings.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes and columns should be cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of group identifiers, of length equal to the number of columns in <code>mat</code>. Values should be integers in <img class="formulaInl" alt="$[0, N)$" src="form_0.png"/> where <img class="formulaInl" alt="$N$" src="form_1.png"/> is the total number of groups. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">reference</td><td>Identifier of the group to use as the reference. This should be an integer in <img class="formulaInl" alt="$[0, N)$" src="form_0.png"/>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1GroupedSizeFactors_1_1Results.html" title="Result of the size factor calculations.">Results</a></code> object is returned containing the size factors. </dd></dl>
+
+</div>
+</div>
+<a id="aa5f569a4f09462039c1287c9a1fbb77e" name="aa5f569a4f09462039c1287c9a1fbb77e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5f569a4f09462039c1287c9a1fbb77e">&#9670;&nbsp;</a></span>run() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , typename IDX , typename Group , typename Out &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void scran::GroupedSizeFactors::run </td>
+          <td>(</td>
+          <td class="paramtype">const tatami::Matrix&lt; T, IDX &gt; *&#160;</td>
+          <td class="paramname"><em>mat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Group *&#160;</td>
+          <td class="paramname"><em>group</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>reference</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Out *&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Compute per-cell size factors based on user-supplied groupings and a user-specified reference group.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>Numeric data type of the input matrix. </td></tr>
+    <tr><td class="paramname">IDX</td><td>Integer index type of the input matrix. </td></tr>
+    <tr><td class="paramname">Group</td><td>Integer type for the groupings. </td></tr>
+    <tr><td class="paramname">Out</td><td>Numeric data type of the output vector.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes and columns should be cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of group identifiers, of length equal to the number of columns in <code>mat</code>. Values should be integers in <img class="formulaInl" alt="$[0, N)$" src="form_0.png"/> where <img class="formulaInl" alt="$N$" src="form_1.png"/> is the total number of groups. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">reference</td><td>Identifier of the group to use as the reference. This should be an integer in <img class="formulaInl" alt="$[0, N)$" src="form_0.png"/>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array to use to store the output size factors. This should be of length equal to the number of columns in <code>mat</code>.</td></tr>
   </table>
   </dd>
@@ -254,8 +394,41 @@ template&lt;typename T , typename IDX , typename Group , typename Out &gt; </div
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1MedianSizeFactors.html" title="Compute median-based size factors to handle composition bias.">MedianSizeFactors</a></code> object.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1GroupedSizeFactors.html" title="Compute grouped size factors to handle composition bias.">GroupedSizeFactors</a></code> object.</dd></dl>
 <p>For more control over centering, this can be set to <code>false</code> and the resulting size factors can be passed to <code><a class="el" href="classscran_1_1CenterSizeFactors.html" title="Center size factors prior to scaling normalization.">CenterSizeFactors</a></code>. </p>
+
+</div>
+</div>
+<a id="aec88f173e14eb0df8dcc8e1e9d6db1c0" name="aec88f173e14eb0df8dcc8e1e9d6db1c0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec88f173e14eb0df8dcc8e1e9d6db1c0">&#9670;&nbsp;</a></span>set_prior_count()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1GroupedSizeFactors.html">GroupedSizeFactors</a> &amp; scran::GroupedSizeFactors::set_prior_count </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>p</em> = <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Defaults.html#a909251588d34d41237a64df1dd85552c">MedianSizeFactors::Defaults::prior_count</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">p</td><td>Prior count for the library size shrinkage, see <code><a class="el" href="classscran_1_1MedianSizeFactors.html#a5507419988ca1925e8f60bdc99436e51">MedianSizeFactors::set_prior_count()</a></code> for details.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1GroupedSizeFactors.html" title="Compute grouped size factors to handle composition bias.">GroupedSizeFactors</a></code> object. </dd></dl>
 
 </div>
 </div>
