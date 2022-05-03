@@ -29,14 +29,14 @@ FetchContent_MakeAvailable(irlba)
 FetchContent_Declare(
   kmeans 
   GIT_REPOSITORY https://github.com/LTLA/CppKmeans
-  GIT_TAG 5c5dd42d1293f0c684c3b241be3001a143ad351b
+  GIT_TAG 4397a8d576cf0b657fd9012c049e05727c45796d
 )
 FetchContent_MakeAvailable(kmeans)
 
 FetchContent_Declare(
   knncolle 
   GIT_REPOSITORY https://github.com/LTLA/knncolle
-  GIT_TAG be41b6ef97bd522d651455755efd353abc0c40b2
+  GIT_TAG c5a1776ebf10641d9bf8715e89cb2d965b06e899
 )
 
 FetchContent_MakeAvailable(knncolle)
