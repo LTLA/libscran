@@ -3,17 +3,20 @@
 #include <vector>
 #include <random>
 
-std::vector<double> simulate_dense_array(int ndim, size_t nobs, int seed) {
-    std::normal_distribution<> dist;
-    std::mt19937_64 rng(seed);
-    std::vector<double> vec(nobs * ndim);
-    for (auto& v : vec) {
-        v = dist(rng);
+class ScaleByNeighborsTest : public ::testing::Test {
+protected:
+    std::vector<double> simulate_dense_array(int ndim, size_t nobs, int seed) {
+        std::normal_distribution<> dist;
+        std::mt19937_64 rng(seed);
+        std::vector<double> vec(nobs * ndim);
+        for (auto& v : vec) {
+            v = dist(rng);
+        }
+        return vec;
     }
-    return vec;
-}
+};
 
-TEST(ScaleByNeighbors, Basic) {
+TEST_F(ScaleByNeighborsTest, Basic) {
     size_t nobs = 1234;
     int ndim = 5;
     auto first = simulate_dense_array(ndim, nobs, 1000);
@@ -33,7 +36,7 @@ TEST(ScaleByNeighbors, Basic) {
     EXPECT_EQ(out, out2);
 }
 
-TEST(ScaleByNeighbors, DifferentlyDimensioned) {
+TEST_F(ScaleByNeighborsTest, DifferentlyDimensioned) {
     size_t nobs = 1234;
     int ndim = 5;
     auto first = simulate_dense_array(ndim, nobs, 1000);
@@ -54,7 +57,7 @@ TEST(ScaleByNeighbors, DifferentlyDimensioned) {
     EXPECT_FLOAT_EQ(out, 1 / std::sqrt(2));
 }
 
-TEST(ScaleByNeighbors, Zeros) {
+TEST_F(ScaleByNeighborsTest, Zeros) {
     size_t nobs = 1234;
     int ndim = 5;
     auto first = simulate_dense_array(ndim, nobs, 1000);
