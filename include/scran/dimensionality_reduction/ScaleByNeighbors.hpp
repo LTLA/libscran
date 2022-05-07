@@ -115,24 +115,6 @@ private:
         rmsd = std::sqrt(rmsd);
         return std::make_pair(med, rmsd);
     }
-
-    template<class Search>
-    double run_internal(const Search* search1, const Search* search2) const {
-        auto ref_scale = median_distance_to_neighbors(search1);
-        auto target_scale = median_distance_to_neighbors(search2);
-        if (target_scale.first == 0 || ref_scale.first == 0) {
-            if (target_scale.second == 0) {
-                return std::numeric_limits<double>::infinity();
-            } else if (ref_scale.second == 0) {
-                return 0;
-            } else {
-                return ref_scale.second / target_scale.second; 
-            }
-        } else {
-            return ref_scale.first / target_scale.first;
-        }
-    }
-
 public:
     /**
      * @param ncells Number of cells in both embeddings.
@@ -148,7 +130,7 @@ public:
     double run(size_t ncells, int nref, const double* ref, int ntarget, const double* target) const {
         auto search1 = build_index(nref, ncells, ref);
         auto search2 = build_index(ntarget, ncells, target);
-        return run_internal(search1.get(), search2.get());
+        return run(search1.get(), search2.get());
     }
 
     /**
@@ -171,12 +153,11 @@ public:
 
         auto ref_scale = median_distance_to_neighbors(ref);
         auto target_scale = median_distance_to_neighbors(target);
-
         if (target_scale.first == 0 || ref_scale.first == 0) {
-            if (ref_scale.second == 0) {
-                return 0;
-            } else if (target_scale.second == 0) {
+            if (target_scale.second == 0) {
                 return std::numeric_limits<double>::infinity();
+            } else if (ref_scale.second == 0) {
+                return 0;
             } else {
                 return ref_scale.second / target_scale.second; 
             }
