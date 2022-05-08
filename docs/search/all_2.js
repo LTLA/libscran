@@ -14,11 +14,13 @@ var searchData=
   ['clustersnngraphwalktrap_11',['ClusterSNNGraphWalktrap',['../classscran_1_1ClusterSNNGraphWalktrap.html',1,'scran']]],
   ['cohen_12',['cohen',['../structscran_1_1ScoreMarkers_1_1Results.html#aea2491f627de9c217b86ad888429e99d',1,'scran::ScoreMarkers::Results']]],
   ['combinations_13',['Combinations',['../structscran_1_1AggregateAcrossCells_1_1Combinations.html',1,'scran::AggregateAcrossCells']]],
-  ['combine_5ffactors_14',['combine_factors',['../classscran_1_1AggregateAcrossCells.html#ae36a7bc1ed0d40aa179c3a486a15c0ea',1,'scran::AggregateAcrossCells::combine_factors(size_t n, std::vector&lt; const Factor * &gt; factors)'],['../classscran_1_1AggregateAcrossCells.html#a78bfad996edef3a958377c50dabdeff4',1,'scran::AggregateAcrossCells::combine_factors(size_t n, std::vector&lt; const Factor * &gt; factors, Combined *combined)']]],
+  ['combine_5ffactors_14',['combine_factors',['../classscran_1_1AggregateAcrossCells.html#a78bfad996edef3a958377c50dabdeff4',1,'scran::AggregateAcrossCells::combine_factors(size_t n, std::vector&lt; const Factor * &gt; factors, Combined *combined)'],['../classscran_1_1AggregateAcrossCells.html#ae36a7bc1ed0d40aa179c3a486a15c0ea',1,'scran::AggregateAcrossCells::combine_factors(size_t n, std::vector&lt; const Factor * &gt; factors)']]],
   ['compute_5fall_5fsummaries_15',['compute_all_summaries',['../structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09',1,'scran::ScoreMarkers::Defaults']]],
   ['compute_5fdetected_16',['compute_detected',['../structscran_1_1AggregateAcrossCells_1_1Defaults.html#a75c5c2a8222c372e3d6f419b3e1f8ffe',1,'scran::AggregateAcrossCells::Defaults']]],
-  ['compute_5fno_5fsummaries_17',['compute_no_summaries',['../structscran_1_1ScoreMarkers_1_1Defaults.html#a2ce7d34d04baed541e958ac5deebfb36',1,'scran::ScoreMarkers::Defaults']]],
-  ['compute_5fsums_18',['compute_sums',['../structscran_1_1AggregateAcrossCells_1_1Defaults.html#a4299b3f74f68fc088d4b2bacf77c5fee',1,'scran::AggregateAcrossCells::Defaults']]],
-  ['computesummaries_19',['ComputeSummaries',['../classscran_1_1ScoreMarkers.html#a836ea0c31fa496f274943e79035314b5',1,'scran::ScoreMarkers']]],
-  ['counts_20',['counts',['../structscran_1_1AggregateAcrossCells_1_1Combinations.html#aff25c122a815de09258f468ab4c03d70',1,'scran::AggregateAcrossCells::Combinations']]]
+  ['compute_5fdistance_17',['compute_distance',['../classscran_1_1ScaleByNeighbors.html#a61fd690cbc88b65016cef7fe4616a085',1,'scran::ScaleByNeighbors::compute_distance(int ndim, size_t ncells, const double *data) const'],['../classscran_1_1ScaleByNeighbors.html#a787ad5a20e61bd9ac930242840f72448',1,'scran::ScaleByNeighbors::compute_distance(const Search *search) const']]],
+  ['compute_5fno_5fsummaries_18',['compute_no_summaries',['../structscran_1_1ScoreMarkers_1_1Defaults.html#a2ce7d34d04baed541e958ac5deebfb36',1,'scran::ScoreMarkers::Defaults']]],
+  ['compute_5fscale_19',['compute_scale',['../classscran_1_1ScaleByNeighbors.html#acf1452d108cbd76ed4fd31e96a86bc7d',1,'scran::ScaleByNeighbors']]],
+  ['compute_5fsums_20',['compute_sums',['../structscran_1_1AggregateAcrossCells_1_1Defaults.html#a4299b3f74f68fc088d4b2bacf77c5fee',1,'scran::AggregateAcrossCells::Defaults']]],
+  ['computesummaries_21',['ComputeSummaries',['../classscran_1_1ScoreMarkers.html#a836ea0c31fa496f274943e79035314b5',1,'scran::ScoreMarkers']]],
+  ['counts_22',['counts',['../structscran_1_1AggregateAcrossCells_1_1Combinations.html#aff25c122a815de09258f468ab4c03d70',1,'scran::AggregateAcrossCells::Combinations']]]
 ];

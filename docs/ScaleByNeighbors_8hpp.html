@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.3"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>scran: scran/dimensionality_reduction Directory Reference</title>
+<title>scran: scran/dimensionality_reduction/ScaleByNeighbors.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -68,35 +68,47 @@ $(function() {
 </div>
 </div><!-- top -->
 <div class="header">
-  <div class="headertitle"><div class="title">dimensionality_reduction Directory Reference</div></div>
+  <div class="summary">
+<a href="#nested-classes">Classes</a>  </div>
+  <div class="headertitle"><div class="title">ScaleByNeighbors.hpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="dynheader">
-Directory dependency graph for dimensionality_reduction:</div>
+
+<p>Scale multi-modal embeddings based on their relative variance.  
+<a href="#details">More...</a></p>
+<div class="textblock"><code>#include &lt;vector&gt;</code><br />
+<code>#include &lt;cmath&gt;</code><br />
+<code>#include &lt;memory&gt;</code><br />
+<code>#include &quot;knncolle/knncolle.hpp&quot;</code><br />
+<code>#include &quot;tatami/stats/medians.hpp&quot;</code><br />
+</div><div class="textblock"><div class="dynheader">
+Include dependency graph for ScaleByNeighbors.hpp:</div>
 <div class="dyncontent">
-<div class="center"><img src="dir_6c11624c6c89844001e5465ee4c99700_dep.png" border="0" usemap="#adir__6c11624c6c89844001e5465ee4c99700__dep" alt="scran/dimensionality_reduction"/></div>
-<map name="adir__6c11624c6c89844001e5465ee4c99700__dep" id="adir__6c11624c6c89844001e5465ee4c99700__dep">
-<area shape="rect" href="dir_6c11624c6c89844001e5465ee4c99700.html" title="dimensionality_reduction" alt="" coords="27,52,191,100"/>
-<area shape="rect" href="dir_bdabb9492db2368b3caf0f4c1df6a160.html" title="scran" alt="" coords="16,16,203,111"/>
+<div class="center"><img src="ScaleByNeighbors_8hpp__incl.png" border="0" usemap="#ascran_2dimensionality__reduction_2ScaleByNeighbors_8hpp" alt=""/></div>
+<map name="ascran_2dimensionality__reduction_2ScaleByNeighbors_8hpp" id="ascran_2dimensionality__reduction_2ScaleByNeighbors_8hpp">
+<area shape="rect" title="Scale multi&#45;modal embeddings based on their relative variance." alt="" coords="97,5,314,47"/>
+<area shape="rect" title=" " alt="" coords="5,95,64,121"/>
+<area shape="rect" title=" " alt="" coords="88,95,147,121"/>
+<area shape="rect" title=" " alt="" coords="171,95,239,121"/>
+<area shape="rect" title=" " alt="" coords="264,95,411,121"/>
+<area shape="rect" title=" " alt="" coords="435,95,603,121"/>
 </map>
 </div>
+</div>
+<p><a href="ScaleByNeighbors_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="files" name="files"></a>
-Files</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="BlockedPCA_8hpp.html">BlockedPCA.hpp</a> <a href="BlockedPCA_8hpp_source.html">[code]</a></td></tr>
-<tr class="memdesc:BlockedPCA_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute PCA after blocking on an uninteresting factor. <br /></td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ScaleByNeighbors.html">scran::ScaleByNeighbors</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale multi-modal embeddings to adjust for differences in variance.  <a href="classscran_1_1ScaleByNeighbors.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="MultiBatchPCA_8hpp.html">MultiBatchPCA.hpp</a> <a href="MultiBatchPCA_8hpp_source.html">[code]</a></td></tr>
-<tr class="memdesc:MultiBatchPCA_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute PCA after adjusting for differences between batch sizes. <br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="RunPCA_8hpp.html">RunPCA.hpp</a> <a href="RunPCA_8hpp_source.html">[code]</a></td></tr>
-<tr class="memdesc:RunPCA_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform PCA on a gene-by-cell matrix. <br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">file &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="ScaleByNeighbors_8hpp.html">ScaleByNeighbors.hpp</a> <a href="ScaleByNeighbors_8hpp_source.html">[code]</a></td></tr>
-<tr class="memdesc:ScaleByNeighbors_8hpp"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scale multi-modal embeddings based on their relative variance. <br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ScaleByNeighbors_1_1Defaults.html">scran::ScaleByNeighbors::Defaults</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default parameter settings.  <a href="structscran_1_1ScaleByNeighbors_1_1Defaults.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p >Scale multi-modal embeddings based on their relative variance. </p>
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.3
