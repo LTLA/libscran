@@ -5,7 +5,7 @@
 
 class ScaleByNeighborsTest : public ::testing::Test {
 protected:
-    std::vector<double> simulate_dense_array(int ndim, size_t nobs, int seed) {
+    std::vector<double> simulate_dense_array(int ndim, size_t nobs, int seed) const {
         std::normal_distribution<> dist;
         std::mt19937_64 rng(seed);
         std::vector<double> vec(nobs * ndim);
@@ -13,6 +13,12 @@ protected:
             v = dist(rng);
         }
         return vec;
+    }
+
+    double run(const scran::ScaleByNeighbors& runner, size_t nobs, int ndim1, const double* ptr1, int ndim2, const double* ptr2) const {
+        auto scale1 = runner.compute_distance(ndim1, nobs, ptr1);
+        auto scale2 = runner.compute_distance(ndim2, nobs, ptr2);
+        return runner.compute_scale(scale1, scale2);
     }
 };
 
@@ -26,14 +32,13 @@ TEST_F(ScaleByNeighborsTest, Basic) {
     }
 
     scran::ScaleByNeighbors runner;
-    auto out = runner.run(nobs, ndim, first.data(), ndim, second.data());
+    auto out = run(runner, nobs, ndim, first.data(), ndim, second.data());
     EXPECT_FLOAT_EQ(out, 0.5);
 
-    // Also works for index input.
-    knncolle::VpTreeEuclidean<> s1(ndim, nobs, first.data());
-    knncolle::VpTreeEuclidean<> s2(ndim, nobs, second.data());
-    auto out2 = runner.run(&s1, &s2);
-    EXPECT_EQ(out, out2);
+    // Works for other options.
+    runner.set_neighbors(10).set_approximate(false);
+    out = run(runner, nobs, ndim, first.data(), ndim, second.data());
+    EXPECT_FLOAT_EQ(out, 0.5);
 }
 
 TEST_F(ScaleByNeighborsTest, DifferentlyDimensioned) {
@@ -53,7 +58,7 @@ TEST_F(ScaleByNeighborsTest, DifferentlyDimensioned) {
     }
 
     scran::ScaleByNeighbors runner;
-    auto out = runner.run(nobs, ndim, first.data(), ndim * 2, second.data());
+    auto out = run(runner, nobs, ndim, first.data(), ndim * 2, second.data());
     EXPECT_FLOAT_EQ(out, 1 / std::sqrt(2));
 }
 
@@ -69,7 +74,7 @@ TEST_F(ScaleByNeighborsTest, Zeros) {
     {
         std::vector<double> second(ndim * nobs);
         second[0] = 1;
-        auto out = runner.run(nobs, ndim, first.data(), ndim, second.data());
+        auto out = run(runner, nobs, ndim, first.data(), ndim, second.data());
         EXPECT_FALSE(std::isinf(out));
         EXPECT_TRUE(out > 0);
     }
@@ -77,10 +82,10 @@ TEST_F(ScaleByNeighborsTest, Zeros) {
     // Falls back to the edge cases.
     {
         std::vector<double> second(ndim * nobs);
-        auto out = runner.run(nobs, ndim, first.data(), ndim, second.data());
+        auto out = run(runner, nobs, ndim, first.data(), ndim, second.data());
         EXPECT_TRUE(std::isinf(out));
 
-        auto out2 = runner.run(nobs, ndim, second.data(), ndim, first.data());
+        auto out2 = run(runner, nobs, ndim, second.data(), ndim, first.data());
         EXPECT_EQ(out2, 0);
     }
 }

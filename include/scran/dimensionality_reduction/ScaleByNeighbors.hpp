@@ -78,18 +78,37 @@ private:
     int num_neighbors = Defaults::neighbors;
     bool approximate = Defaults::approximate;
 
-    std::unique_ptr<knncolle::Base<> > build_index(int ndim, size_t nobs, const double* data) const {
+public:
+    /**
+     * @param ndim Number of dimensions in the embedding.
+     * @param ncells Number of cells in the embedding.
+     * @param[in] data Pointer to an array containing the embedding matrix.
+     * This should be stored in column-major layout where each row is a dimension and each column is a cell.
+     *
+     * @return Pair containing the median distance to the $k$-th nearest neighbor (first)
+     * and the root-mean-squared distance across all cells (second).
+     * These values can be used in `compute_scale()`.
+     */
+    std::pair<double, double> compute_distance(int ndim, size_t ncells, const double* data) const {
         std::unique_ptr<knncolle::Base<> > ptr;
         if (!approximate) {
-            ptr.reset(new knncolle::VpTreeEuclidean<>(ndim, nobs, data));
+            ptr.reset(new knncolle::VpTreeEuclidean<>(ndim, ncells, data));
         } else {
-            ptr.reset(new knncolle::AnnoyEuclidean<>(ndim, nobs, data));
+            ptr.reset(new knncolle::AnnoyEuclidean<>(ndim, ncells, data));
         }
-        return ptr;
+        return compute_distance(ptr.get());
     }
 
+    /**
+     * @tparam Search Search index class, typically a `knncolle::Base` subclass.
+     * @param search Search index for the embedding.
+     *
+     * @return Pair containing the median distance to the $k$-th nearest neighbor (first)
+     * and the root-mean-squared distance across all cells (second).
+     * These values can be used in `compute_scale()`.
+     */
     template<class Search>
-    std::pair<double, double> median_distance_to_neighbors(const Search* search) const {
+    std::pair<double, double> compute_distance(const Search* search) const {
         size_t nobs = search->nobs();
         std::vector<double> dist(nobs);
 
@@ -115,54 +134,32 @@ private:
         rmsd = std::sqrt(rmsd);
         return std::make_pair(med, rmsd);
     }
+
 public:
     /**
-     * @param ncells Number of cells in both embeddings.
-     * @param nref Number of dimensions in the reference embedding.
-     * @param[in] ref Pointer to an array containing the reference embedding matrix.
-     * This should be stored in column-major layout where each row is a dimension and each column is a cell.
-     * @param ntarget Number of dimensions in the target embedding.
-     * @param[in] target Pointer to an array containing the target embedding matrix.
-     * This should be stored in column-major layout where each row is a dimension and each column is a cell.
+     * @param ref Output of `compute_scale()` for the reference embedding.
+     * The first value contains the median distance while the second value contains the RMSD.
+     * @param target Output of `compute_scale()` for the target embedding.
      *
-     * @return The scaling factor to be applied to the target embedding, see the other `run()` method for details.
-     */
-    double run(size_t ncells, int nref, const double* ref, int ntarget, const double* target) const {
-        auto search1 = build_index(nref, ncells, ref);
-        auto search2 = build_index(ntarget, ncells, target);
-        return run(search1.get(), search2.get());
-    }
-
-    /**
-     * @tparam Search Search index class, typically a `knncolle::Base` subclass.
-     * @param ref Search index for the reference embedding.
-     * @param target Search index for the target embedding.
-     *
-     * @return The scaling factor to be applied to the target embedding.
+     * @return A scaling factor to apply to the target embedding.
+     * Scaling all values in the target matrix by the factor will equalize the magnitude of the noise to that of the reference embedding.
      *
      * If either of the median distances is zero, this function automatically switches to the root-mean-square-distance to the $k$-th neighbor.
      * The scaling factor is then defined as the ratio of the RMSDs between embeddings.
      * If the reference RMSDs is zero, this function will return zero;
      * if the target RMSD is zero, this function will return positive infinity.
      */
-    template<class Search>
-    double run(const Search* ref, const Search* target) const {
-        if (ref->nobs() != target->nobs()) {
-            throw std::runtime_error("number of observations must be the same for both search indices");
-        }
-
-        auto ref_scale = median_distance_to_neighbors(ref);
-        auto target_scale = median_distance_to_neighbors(target);
-        if (target_scale.first == 0 || ref_scale.first == 0) {
-            if (target_scale.second == 0) {
+    double compute_scale(const std::pair<double, double>& ref, const std::pair<double, double>& target) const {
+        if (target.first == 0 || ref.first == 0) {
+            if (target.second == 0) {
                 return std::numeric_limits<double>::infinity();
-            } else if (ref_scale.second == 0) {
+            } else if (ref.second == 0) {
                 return 0;
             } else {
-                return ref_scale.second / target_scale.second; 
+                return ref.second / target.second; 
             }
         } else {
-            return ref_scale.first / target_scale.first;
+            return ref.first / target.first;
         }
     }
 };
