@@ -98,6 +98,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aaab4ee71a29b1ac787a1a135719217d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ead45b90f2330baa950279a62262912"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1BlockedPCA.html">BlockedPCA</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1BlockedPCA.html#a8ead45b90f2330baa950279a62262912">set_scale</a> (bool s=<a class="el" href="structscran_1_1BlockedPCA_1_1Defaults.html#a07e46e180a76384576741323a456e2bf">Defaults::scale</a>)</td></tr>
 <tr class="separator:a8ead45b90f2330baa950279a62262912"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72c4787d4bf3345a269fa6a00e1aaa6c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1BlockedPCA.html">BlockedPCA</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1BlockedPCA.html#a72c4787d4bf3345a269fa6a00e1aaa6c">set_transpose</a> (bool t=<a class="el" href="structscran_1_1BlockedPCA_1_1Defaults.html#ad1782b5c77f985c57e8aa85ffd555a48">Defaults::transpose</a>)</td></tr>
+<tr class="separator:a72c4787d4bf3345a269fa6a00e1aaa6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8396dc61b0ed5cca27c816c66b7fe76d"><td class="memTemplParams" colspan="2">template&lt;typename T , typename IDX , typename Block &gt; </td></tr>
 <tr class="memitem:a8396dc61b0ed5cca27c816c66b7fe76d"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1BlockedPCA_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1BlockedPCA.html#a8396dc61b0ed5cca27c816c66b7fe76d">run</a> (const tatami::Matrix&lt; T, IDX &gt; *mat, const Block *block)</td></tr>
 <tr class="separator:a8396dc61b0ed5cca27c816c66b7fe76d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -313,6 +315,39 @@ template&lt;typename T , typename IDX , typename Block , typename X &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">s</td><td>Should genes be scaled to unit variance?</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1BlockedPCA.html" title="Compute PCA after blocking on an uninteresting factor.">BlockedPCA</a></code> instance. </dd></dl>
+
+</div>
+</div>
+<a id="a72c4787d4bf3345a269fa6a00e1aaa6c" name="a72c4787d4bf3345a269fa6a00e1aaa6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72c4787d4bf3345a269fa6a00e1aaa6c">&#9670;&nbsp;</a></span>set_transpose()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1BlockedPCA.html">BlockedPCA</a> &amp; scran::BlockedPCA::set_transpose </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>t</em> = <code><a class="el" href="structscran_1_1BlockedPCA_1_1Defaults.html#ad1782b5c77f985c57e8aa85ffd555a48">Defaults::transpose</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">t</td><td>Should the PC matrix be transposed on output? If <code>true</code>, the output PC matrix is column-major with cells in the columns, which is compatible with downstream <b>libscran</b> steps.</td></tr>
   </table>
   </dd>
 </dl>

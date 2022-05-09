@@ -98,6 +98,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a736079c03235fca4ec6bfd7b99b0f565"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6d39126e34713d4cb843d24b8969708b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1RunPCA.html">RunPCA</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1RunPCA.html#a6d39126e34713d4cb843d24b8969708b">set_scale</a> (bool s=<a class="el" href="structscran_1_1RunPCA_1_1Defaults.html#a4c119fb26b242f1c70eeb51d94de81ab">Defaults::scale</a>)</td></tr>
 <tr class="separator:a6d39126e34713d4cb843d24b8969708b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6cb07ef5a77b9255320ec477c70d4f4c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1RunPCA.html">RunPCA</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1RunPCA.html#a6cb07ef5a77b9255320ec477c70d4f4c">set_transpose</a> (bool t=<a class="el" href="structscran_1_1RunPCA_1_1Defaults.html#a67085e4eaa6e0010aea2962ce37c5ac0">Defaults::transpose</a>)</td></tr>
+<tr class="separator:a6cb07ef5a77b9255320ec477c70d4f4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a87d55a4b94ce72dbb84caa60b8e74ba3"><td class="memTemplParams" colspan="2">template&lt;typename T , typename IDX &gt; </td></tr>
 <tr class="memitem:a87d55a4b94ce72dbb84caa60b8e74ba3"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1RunPCA_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1RunPCA.html#a87d55a4b94ce72dbb84caa60b8e74ba3">run</a> (const tatami::Matrix&lt; T, IDX &gt; *mat)</td></tr>
 <tr class="separator:a87d55a4b94ce72dbb84caa60b8e74ba3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -293,6 +295,39 @@ template&lt;typename T , typename IDX , typename X &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">s</td><td>Should genes be scaled to unit variance?</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1RunPCA.html" title="Perform PCA on a gene-cell matrix.">RunPCA</a></code> instance. </dd></dl>
+
+</div>
+</div>
+<a id="a6cb07ef5a77b9255320ec477c70d4f4c" name="a6cb07ef5a77b9255320ec477c70d4f4c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6cb07ef5a77b9255320ec477c70d4f4c">&#9670;&nbsp;</a></span>set_transpose()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1RunPCA.html">RunPCA</a> &amp; scran::RunPCA::set_transpose </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>t</em> = <code><a class="el" href="structscran_1_1RunPCA_1_1Defaults.html#a67085e4eaa6e0010aea2962ce37c5ac0">Defaults::transpose</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">t</td><td>Should the PC matrix be transposed on output? If <code>true</code>, the output matrix is column-major with cells in the columns, which is compatible with downstream <b>libscran</b> steps.</td></tr>
   </table>
   </dd>
 </dl>

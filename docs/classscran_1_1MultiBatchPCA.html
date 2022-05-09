@@ -98,6 +98,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3fab16457dd9c84958aa1dd6ebe0e6a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a02322d62adbbc20b939e3d92955ea5a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1MultiBatchPCA.html">MultiBatchPCA</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MultiBatchPCA.html#a02322d62adbbc20b939e3d92955ea5a8">set_scale</a> (bool s=<a class="el" href="structscran_1_1MultiBatchPCA_1_1Defaults.html#a43aa3d969a64c30668e24e3a7c50f85d">Defaults::scale</a>)</td></tr>
 <tr class="separator:a02322d62adbbc20b939e3d92955ea5a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5fd616e11c2b1c1df2cbb3823cccb5ad"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1MultiBatchPCA.html">MultiBatchPCA</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MultiBatchPCA.html#a5fd616e11c2b1c1df2cbb3823cccb5ad">set_transpose</a> (bool t=<a class="el" href="structscran_1_1MultiBatchPCA_1_1Defaults.html#a85eded32ff723184c35bd4a019b12e19">Defaults::transpose</a>)</td></tr>
+<tr class="separator:a5fd616e11c2b1c1df2cbb3823cccb5ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afa617d03f64f5d5c3051104e959c1aea"><td class="memTemplParams" colspan="2">template&lt;typename T , typename IDX , typename Batch &gt; </td></tr>
 <tr class="memitem:afa617d03f64f5d5c3051104e959c1aea"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1MultiBatchPCA_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1MultiBatchPCA.html#afa617d03f64f5d5c3051104e959c1aea">run</a> (const tatami::Matrix&lt; T, IDX &gt; *mat, const Batch *batch)</td></tr>
 <tr class="separator:afa617d03f64f5d5c3051104e959c1aea"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -315,6 +317,39 @@ template&lt;typename T , typename IDX , typename Batch , typename X &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">s</td><td>Should genes be scaled to unit variance?</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1MultiBatchPCA.html" title="Compute PCA after adjusting for differences between batch sizes.">MultiBatchPCA</a></code> instance. </dd></dl>
+
+</div>
+</div>
+<a id="a5fd616e11c2b1c1df2cbb3823cccb5ad" name="a5fd616e11c2b1c1df2cbb3823cccb5ad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5fd616e11c2b1c1df2cbb3823cccb5ad">&#9670;&nbsp;</a></span>set_transpose()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1MultiBatchPCA.html">MultiBatchPCA</a> &amp; scran::MultiBatchPCA::set_transpose </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>t</em> = <code><a class="el" href="structscran_1_1MultiBatchPCA_1_1Defaults.html#a85eded32ff723184c35bd4a019b12e19">Defaults::transpose</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">t</td><td>Should the PC matrix be transposed on output? If <code>true</code>, the output matrix is column-major with cells in the columns, which is compatible with downstream <b>libscran</b> steps.</td></tr>
   </table>
   </dd>
 </dl>
