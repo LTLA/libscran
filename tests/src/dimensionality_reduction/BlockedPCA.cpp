@@ -94,6 +94,8 @@ TEST_P(BlockedPCATester, Test) {
 
     // Checking that we get more-or-less the same results. 
     auto res1 = runner.run(dense_row.get(), block.data());
+    EXPECT_EQ(res1.pcs.rows(), rank);
+    EXPECT_EQ(res1.pcs.cols(), dense_row->ncol());
     EXPECT_EQ(res1.variance_explained.size(), rank);
 
     auto res2 = runner.run(dense_column.get(), block.data());

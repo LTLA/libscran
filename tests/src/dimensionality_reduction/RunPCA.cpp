@@ -40,6 +40,8 @@ TEST_P(RunPCATester, Test) {
     // Checking that we get more-or-less the same results. 
     auto res1 = runner.run(dense_row.get());
     EXPECT_EQ(res1.variance_explained.size(), rank);
+    EXPECT_EQ(res1.pcs.rows(), rank);
+    EXPECT_EQ(res1.pcs.cols(), dense_row->ncol());
 
     auto res2 = runner.run(dense_column.get());
     expect_equal_pcs(res1.pcs, res2.pcs);

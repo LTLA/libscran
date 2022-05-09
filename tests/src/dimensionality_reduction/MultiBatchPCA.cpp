@@ -110,6 +110,8 @@ TEST_P(MultiBatchPCATester, Basic) {
     // Checking that we get more-or-less the same results.
     auto res1 = runner.run(dense_row.get(), block.data());
     EXPECT_EQ(res1.variance_explained.size(), rank);
+    EXPECT_EQ(res1.pcs.rows(), rank);
+    EXPECT_EQ(res1.pcs.cols(), dense_row->ncol());
 
     auto res2 = runner.run(dense_column.get(), block.data());
     expect_equal_pcs(res1.pcs, res2.pcs);
@@ -182,8 +184,8 @@ TEST_P(MultiBatchPCATester, DuplicatedBlocks) {
     auto com = tatami::make_DelayedBind<1>(std::vector<decltype(subs)>{ dense_row, subs });
     auto res2 = runner.run(com.get(), block2.data());
 
-    EXPECT_EQ(res2.pcs.rows(), res1.pcs.rows() + subset.size()); 
-    expect_equal_pcs(res1.pcs, res2.pcs.topRows(res1.pcs.rows()));
+    EXPECT_EQ(res2.pcs.cols(), res1.pcs.cols() + subset.size()); 
+    expect_equal_pcs(res1.pcs, res2.pcs.leftCols(res1.pcs.cols()));
     expect_equal_vectors(res1.variance_explained, res2.variance_explained);
     EXPECT_FLOAT_EQ(res1.total_variance, res2.total_variance);
 }
