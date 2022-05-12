@@ -25,16 +25,20 @@ namespace scran {
  *
  * - Low numbers of detected features, which indicates that library preparation or sequencing depth was suboptimal.
  *   Even in ADT data, we should expect to detect many features in a cell due to ambient contamination.
- * - Large total counts in the isotype control (IgG) subsets.
+ * - High total counts in the isotype control (IgG) subsets.
  *   The IgG antibodies should not bind to anything, so high coverage is indicative of non-specific binding or antibody conjugates.
  *   
- * Outliers are defined on each metric by counting the number of MADs from the median value across all cells.
+ * We define a threshold on each metric based on a certain number of MADs from the median.
  * This assumes that most cells in the experiment are of high (or at least acceptable) quality;
- * any anomalies are indicative of low-quality cells that should be filtered out.
+ * any outliers are indicative of low-quality cells that should be filtered out.
  * See the `IsOutlier` class for implementation details.
  *
  * For the total counts and number of detected features, the outliers are defined after log-transformation of the metrics.
  * This improves resolution at low values and ensures that the defined threshold is not negative.
+ *
+ * For the number of detected features, we supplement the MAD-based threshold with a minimum drop.
+ * Cells are only considered to be low quality if the difference in the number of detected features from the median is greater than a certain percentage.
+ * By default, the number must drop by at least 10%; this avoids overly aggressive filtering when the MAD is too low or zero.
  */
 class PerCellAdtQcFilters {
 public:
@@ -48,19 +52,20 @@ public:
         static constexpr double nmads = 3;
 
         /**
-         * See `set_min_detected_prop()` for details.
+         * See `set_min_detected_drop()` for details.
          */
-        static constexpr double min_detected_prop = 0.5;
+        static constexpr double min_detected_drop = 0.1;
     };
 
 private:
     double detected_nmads = Defaults::nmads;
     double subset_nmads = Defaults::nmads;
-    double min_detected_prop = Defaults::min_detected_prop;
+    double min_detected_drop = Defaults::min_detected_drop;
 
 public:
     /**
      * @param n Number of MADs from the median, to define the threshold for outliers.
+     * This should be non-negative.
      *
      * @return A reference to this `PerCellAdtQcFilters` object. 
      */
@@ -72,6 +77,7 @@ public:
 
     /**
      * @param n Number of MADs from the median, to define the threshold for outliers in the number of detected features.
+     * This should be non-negative.
      *
      * @return A reference to this `PerCellAdtQcFilters` object. 
      */
@@ -82,6 +88,7 @@ public:
 
     /**
      * @param n Number of MADs from the median, to define the threshold for outliers in the total count for each subset.
+     * This should be non-negative.
      *
      * @return A reference to this `PerCellAdtQcFilters` object. 
      */
@@ -91,12 +98,13 @@ public:
     }
 
     /**
-     * @param n Number of MADs from the median, to define the threshold for outliers.
+     * @param n Minimum drop in the number of detected features from the median, in order to consider a cell to be of low quality.
+     * This should lie in $[0, 1)$.
      *
      * @return A reference to this `PerCellAdtQcFilters` object. 
      */
-    PerCellAdtQcFilters& set_min_detected_prop(double m = Defaults::min_detected_prop) {
-        min_detected_prop = m;        
+    PerCellAdtQcFilters& set_min_detected_drop(double m = Defaults::min_detected_drop) {
+        min_detected_drop = m;        
         return *this;
     }
 
@@ -128,18 +136,18 @@ public:
      * Identify low-quality cells based on QC metrics computed from the ADT count data, typically using the `PerCellAdtQcMetrics` class. 
      * 
      * @tparam D Integer type, used for the number of detected features.
-     * @tparam PPTR Pointer to a floating point type, for the subset proportions.
+     * @tparam PPTR Pointer to a floating point type, for the subset totals.
      * @tparam X Boolean type to indicate whether a cell should be discarded.
      *
      * @param ncells Number of cells.
      * @param[in] detected Pointer to an array of length equal to `ncells`, containing the number of detected features for each cell.
      * @param[in] subset_totals Vector of pointers of length equal to the number of feature subsets.
-     * Each pointer corresponds to a feature subset and should point to an array of length equal to `ncells`, containing the proportion of counts in that subset for each cell.
+     * Each pointer corresponds to a feature subset and should point to an array of length equal to `ncells`, containing the total count in that subset for each cell.
      * @param[out] filter_by_detected Pointer to an output array of length equal to `ncells`,
      * indicating whether a cell should be filtered out due to a low number of detected features.
      * @param[out] filter_by_subset_totals Vector of pointers of length equal to the number of feature subsets.
      * Each pointer corresponds to a feature subset and should point to an array of length equal to `ncells`, 
-     * indicating whether a cell should be filtered out due to a high proportion of counts for that subset.
+     * indicating whether a cell should be filtered out due to a high total count for that subset.
      * @param[out] overall_filter Pointer to an output array of length equal to `ncells`,
      * indicating whether a cell should be filtered out for any reason.
      *
@@ -149,8 +157,8 @@ public:
     Thresholds run(size_t ncells, const D* detected, std::vector<PPTR> subset_totals,
                    X* filter_by_detected, std::vector<X*> filter_by_subset_totals, X* overall_filter)
     const {
-        auto fun = [](IsOutlier& outliers, size_t n, auto metric, auto output) -> auto {
-            return outliers.run(n, metric, output);
+        auto fun = [](const IsOutlier& outliers, size_t n, auto metric, auto output, auto& buffer) -> auto {
+            return outliers.run(n, metric, output, buffer);
         };
         return run_internal(fun,
                             ncells, 
@@ -169,7 +177,7 @@ public:
      *
      * @tparam B Pointer to an integer type, to hold the block IDs.
      * @tparam D Integer type, used for the number of detected features.
-     * @tparam PPTR Pointer to a floating point type, for the subset proportions.
+     * @tparam PPTR Pointer to a floating point type, for the subset totals.
      * @tparam X Boolean type to indicate whether a cell should be discarded.
      *
      * @param ncells Number of cells.
@@ -179,12 +187,12 @@ public:
      * This can also be `NULL`, in which case all cells are assumed to belong to the same block.
      * @param[in] detected Pointer to an array of length equal to `ncells`, containing the number of detected features for each cell.
      * @param[in] subset_totals Vector of pointers of length equal to the number of feature subsets.
-     * Each pointer corresponds to a feature subset and should point to an array of length equal to `ncells`, containing the proportion of counts in that subset for each cell.
+     * Each pointer corresponds to a feature subset and should point to an array of length equal to `ncells`, containing the total counts in that subset for each cell.
      * @param[out] filter_by_detected Pointer to an output array of length equal to `ncells`,
      * indicating whether a cell should be filtered out due to a low number of detected features.
      * @param[out] filter_by_subset_totals Vector of pointers of length equal to the number of feature subsets.
      * Each pointer corresponds to a feature subset and should point to an array of length equal to `ncells`, 
-     * indicating whether a cell should be filtered out due to a high proportion of counts for that subset.
+     * indicating whether a cell should be filtered out due to a high total count for that subset.
      * @param[out] overall_filter Pointer to an output array of length equal to `ncells`,
      * indicating whether a cell should be filtered out for any reason.
      *
@@ -203,8 +211,8 @@ public:
                        overall_filter);
         } else {
             auto by_block = block_indices(ncells, block);
-            auto fun = [&](IsOutlier& outliers, size_t n, auto metric, auto output) -> auto {
-                return outliers.run_blocked(n, by_block, metric, output);
+            auto fun = [&](const IsOutlier& outliers, size_t n, auto metric, auto output, auto& buffer) -> auto {
+                return outliers.run_blocked(n, by_block, metric, output, buffer);
             };
 
             return run_internal(fun,
@@ -223,13 +231,20 @@ private:
                             X* filter_by_detected, std::vector<X*> filter_by_subset_totals, X* overall_filter)
     const {
         Thresholds output;
+        std::vector<double> buffer(ncells);
 
         // Filtering to remove outliers on the log-detected number.
         {
             IsOutlier outliers;
             outliers.set_nmads(detected_nmads).set_lower(true).set_upper(false).set_log(true);
+            if (min_detected_drop > 0) {
+                if (min_detected_drop >= 1) {
+                    throw std::runtime_error("minimum drop in the detected features should lie in [0, 1)");
+                }
+                outliers.set_min_diff(-std::log(1 - min_detected_drop));
+            }
 
-            auto res = fun(outliers, ncells, detected, filter_by_detected);
+            auto res = fun(outliers, ncells, detected, filter_by_detected, buffer);
             output.detected = res.lower;
             for (size_t i = 0; i < ncells; ++i) {
                 overall_filter[i] |= filter_by_detected[i];
@@ -249,7 +264,7 @@ private:
 
             for (size_t s = 0; s < subset_totals.size(); ++s) {
                 auto dump = filter_by_subset_totals[s];
-                auto res = fun(outliers, ncells, subset_totals[s], dump);
+                auto res = fun(outliers, ncells, subset_totals[s], dump, buffer);
                 output.subset_totals[s] = res.upper;
 
                 for (size_t i = 0; i < ncells; ++i) {
@@ -293,7 +308,7 @@ public:
         /**
          * Vector of length equal to the number of feature subsets.
          * Each inner vector corresponds to a feature subset and is of length equal to the number of cells.
-         * Entries are set to 1 if the subset proportion in the corresponding cell is a small outlier (indicating that the cell should be considered as low-quality).
+         * Entries are set to 1 if the subset total in the corresponding cell is a small outlier (indicating that the cell should be considered as low-quality).
          */
         std::vector<std::vector<X> > filter_by_subset_totals;
 
@@ -315,12 +330,12 @@ public:
      *
      * @tparam X Boolean type to indicate whether a cell should be discarded.
      * @tparam D Type of the number of detected features.
-     * @tparam PPTR Type of the pointer to the subset proportions.
+     * @tparam PPTR Type of the pointer to the subset totals.
      *
      * @param ncells Number of cells.
      * @param[in] detected Pointer to an array of length equal to `ncells`, containing the number of detected features for each cell.
      * @param[in] subset_totals Vector of pointers of length equal to the number of feature subsets.
-     * Each pointer corresponds to a feature subset and should point to an array of length equal to `ncells`, containing the proportion of counts in that subset for each cell.
+     * Each pointer corresponds to a feature subset and should point to an array of length equal to `ncells`, containing the total counts in that subset for each cell.
      *
      * @return A `Results` object indicating whether a cell should be filtered out for each reason.
      */
@@ -342,13 +357,13 @@ public:
      * @tparam X Boolean type to indicate whether a cell should be discarded.
      * @tparam B Pointer to an integer type, to hold the block IDs.
      * @tparam D Type of the number of detected features.
-     * @tparam PPTR Type of the pointer to the subset proportions.
+     * @tparam PPTR Type of the pointer to the subset totals.
      *
      * @param ncells Number of cells.
      * @param[in] block Optional pointer to an array of block identifiers, see `run_blocked()` for details.
      * @param[in] detected Pointer to an array of length equal to `ncells`, containing the number of detected features for each cell.
      * @param[in] subset_totals Vector of pointers of length equal to the number of feature subsets.
-     * Each pointer corresponds to a feature subset and should point to an array of length equal to `ncells`, containing the proportion of counts in that subset for each cell.
+     * Each pointer corresponds to a feature subset and should point to an array of length equal to `ncells`, containing the total count in that subset for each cell.
      *
      * @return A `Results` object indicating whether a cell should be filtered out for each reason.
      */

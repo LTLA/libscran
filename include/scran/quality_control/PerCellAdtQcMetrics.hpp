@@ -77,7 +77,7 @@ public:
      * Subset proportions are returned depending on the `subsets`.
      */
     template<class Matrix, typename SubPtr = const uint8_t*>
-    Results run(const Matrix* mat, std::vector<SubPtr> subsets) {
+    Results run(const Matrix* mat, std::vector<SubPtr> subsets) const {
         Results output(mat->ncol(), subsets.size());
         run(mat, std::move(subsets), output.sums.data(), output.detected.data(), vector_to_pointers(output.subset_totals));
         return output;
@@ -109,7 +109,7 @@ public:
      * @return `sums`, `detected`, and each array in `subset_proportions` is filled with the relevant statistics.
      */
     template<class Matrix, typename SubPtr = const uint8_t*, typename Sum, typename Detected, typename SubTotal>
-    void run(const Matrix* mat, const std::vector<SubPtr>& subsets, Sum* sums, Detected* detected, std::vector<SubTotal*> subset_totals) {
+    void run(const Matrix* mat, const std::vector<SubPtr>& subsets, Sum* sums, Detected* detected, std::vector<SubTotal*> subset_totals) const {
         PerCellQCMetrics runner;
         runner.set_subset_totals(true);
         runner.run(mat, subsets, sums, detected, std::move(subset_totals));
