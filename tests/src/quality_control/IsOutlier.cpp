@@ -120,6 +120,28 @@ TEST(IsOutlier, LogTests) {
     EXPECT_TRUE(std::isinf(lower[0]) && lower[0] < 0);
 }
 
+TEST(IsOutlier, MinDiff) {
+    scran::IsOutlier is;
+    auto ref = is.set_nmads(0.5).run(even_values.size(), even_values.data());
+    auto md = is.set_min_diff(1).run(even_values.size(), even_values.data());
+
+    // You get different results.
+    auto lower = md.thresholds.lower;
+    EXPECT_EQ(lower.size(), 1);
+    EXPECT_FLOAT_EQ(lower[0], -0.4227306);
+    EXPECT_NE(lower[0], ref.thresholds.lower[0]);
+
+    auto upper = md.thresholds.upper;
+    EXPECT_EQ(upper.size(), 1);
+    EXPECT_FLOAT_EQ(upper[0], 1.577269);
+    EXPECT_NE(upper[0], ref.thresholds.upper[0]);
+
+    // Same results if the minimum difference is small enough.
+    auto md2 = is.set_min_diff(0.001).run(even_values.size(), even_values.data());
+    EXPECT_EQ(md2.thresholds.lower[0], ref.thresholds.lower[0]);
+    EXPECT_EQ(md2.thresholds.upper[0], ref.thresholds.upper[0]);
+}
+
 TEST(IsOutlier, BlockTests) {
     std::vector<int> block = {
         0, 1, 2, 3, 
