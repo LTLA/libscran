@@ -9,6 +9,7 @@
 #include "tatami/stats/sums.hpp"
 
 #include "scran/quality_control/PerCellQCMetrics.hpp"
+#include "scran/quality_control/PerCellAdtQcMetrics.hpp"
 
 #include <cmath>
 
@@ -108,6 +109,11 @@ TEST_F(PerCellQCMetricsTester, SubsetTotals) {
     qc4.set_subset_totals(true);
     auto res4 = qc4.run(sparse_column.get(), subs);
     EXPECT_EQ(refprop, res4.subset_proportions[0]);
+
+    // Default for the ADT class.
+    scran::PerCellAdtQcMetrics qc_adt;
+    auto adt_res = qc_adt.run(dense_row.get(), subs);
+    EXPECT_EQ(refprop, adt_res.subset_totals[0]);
 }
 
 TEST_F(PerCellQCMetricsTester, TwoSubsets) {
