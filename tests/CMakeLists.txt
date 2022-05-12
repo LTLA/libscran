@@ -27,6 +27,7 @@ add_executable(
     src/dimensionality_reduction/RunPCA.cpp
     src/dimensionality_reduction/BlockedPCA.cpp
     src/dimensionality_reduction/MultiBatchPCA.cpp
+    src/dimensionality_reduction/ScaleByNeighbors.cpp
     src/clustering/BuildSNNGraph.cpp
     src/clustering/ClusterSNNGraph.cpp
     src/differential_analysis/summarize_comparisons.cpp

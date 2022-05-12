@@ -38,16 +38,17 @@ namespace scran {
 class PerCellQCFilters {
 public:
     /**
-     * Set the number of MADs from the median to define the threshold for outliers.
-     *
-     * @param n Number of MADs. 
+     * @param n Number of MADs to use to define outliers, see `IsOutlier` for details.
      *
      * @return A reference to this `PerCellQCFilters` object. 
      */
-    PerCellQCFilters& set_nmads(double n = 3) {
-        outliers.set_nmads(n);
+    PerCellQCFilters& set_nmads(double n = IsOutlier::Defaults::nmads) {
+        nmads = n;
         return *this;
     }
+
+private:
+    double nmads = IsOutlier::Defaults::nmads;
 
 public:
     /**
@@ -113,8 +114,8 @@ public:
     Thresholds run(size_t ncells, const S* sums, const D* detected, std::vector<PPTR> subset_proportions,
                    X* filter_by_sums, X* filter_by_detected, std::vector<X*> filter_by_subset_proportions, X* overall_filter)
     {
-        auto fun = [&](size_t n, auto metric, auto output) -> auto {
-            return outliers.run(n, metric, output);
+        auto fun = [](IsOutlier& outliers, size_t n, auto metric, auto output, auto& buffer) -> auto {
+            return outliers.run(n, metric, output, buffer);
         };
         return run_internal(fun,
                             ncells, 
@@ -174,8 +175,8 @@ public:
                        overall_filter);
         } else {
             auto by_block = block_indices(ncells, block);
-            auto fun = [&](size_t n, auto metric, auto output) -> auto {
-                return outliers.run_blocked(n, by_block, metric, output);
+            auto fun = [&](IsOutlier& outliers, size_t n, auto metric, auto output, auto& buffer) -> auto {
+                return outliers.run_blocked(n, by_block, metric, output, buffer);
             };
 
             return run_internal(fun,
@@ -196,24 +197,22 @@ private:
                             X* filter_by_sums, X* filter_by_detected, std::vector<X*> filter_by_subset_proportions, X* overall_filter)
     {
         Thresholds output;
-        outliers.set_lower(true).set_upper(false).set_log(true);
+        std::vector<double> buffer(ncells);
 
         // Filtering to remove outliers on the log-sum.
         {
-#ifdef SCRAN_LOGGER
-            SCRAN_LOGGER("scran::PerCellQCFilters", "Filtering on the total count per cell");
-#endif
-            auto res = fun(ncells, sums, filter_by_sums);
+            IsOutlier outliers;
+            outliers.set_nmads(nmads).set_upper(false).set_log(true);
+            auto res = fun(outliers, ncells, sums, filter_by_sums, buffer);
             output.sums = res.lower;
             std::copy(filter_by_sums, filter_by_sums + ncells, overall_filter);
         }
 
         // Filtering to remove outliers on the log-detected number.
         {
-#ifdef SCRAN_LOGGER
-            SCRAN_LOGGER("scran::PerCellQCFilters", "Filtering on the number of detected genes");
-#endif
-            auto res = fun(ncells, detected, filter_by_detected);
+            IsOutlier outliers;
+            outliers.set_nmads(nmads).set_upper(false).set_log(true);
+            auto res = fun(outliers, ncells, detected, filter_by_detected, buffer);
             output.detected = res.lower;
             for (size_t i = 0; i < ncells; ++i) {
                 overall_filter[i] |= filter_by_detected[i];
@@ -221,25 +220,24 @@ private:
         }
 
         // Filtering to remove outliers on the subset proportions.
-#ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::PerCellQCFilters", "Filtering on the proportions in control subsets");
-#endif
+        {
+            size_t nsubsets = subset_proportions.size();
+            if (filter_by_subset_proportions.size() != nsubsets) {
+                throw std::runtime_error("mismatching number of input/outputs for subset proportion filters");
+            }
 
-        size_t nsubsets = subset_proportions.size();
-        if (filter_by_subset_proportions.size() != nsubsets) {
-            throw std::runtime_error("mismatching number of input/outputs for subset proportion filters");
-        }
+            IsOutlier outliers;
+            outliers.set_nmads(nmads).set_lower(false);
+            output.subset_proportions.resize(nsubsets);
 
-        outliers.set_upper(true).set_lower(false).set_log(false);
-        output.subset_proportions.resize(nsubsets);
+            for (size_t s = 0; s < subset_proportions.size(); ++s) {
+                auto dump = filter_by_subset_proportions[s];
+                auto res = fun(outliers, ncells, subset_proportions[s], dump, buffer);
+                output.subset_proportions[s] = res.upper;
 
-        for (size_t s = 0; s < subset_proportions.size(); ++s) {
-            auto dump = filter_by_subset_proportions[s];
-            auto res = fun(ncells, subset_proportions[s], dump);
-            output.subset_proportions[s] = res.upper;
-
-            for (size_t i = 0; i < ncells; ++i) {
-                overall_filter[i] |= dump[i];
+                for (size_t i = 0; i < ncells; ++i) {
+                    overall_filter[i] |= dump[i];
+                }
             }
         }
 
@@ -396,10 +394,6 @@ public:
     Results<X> run_blocked(const R& metrics, const B* block) {
         return run_blocked(metrics.sums.size(), block, metrics.sums.data(), metrics.detected.data(), vector_to_pointers(metrics.subset_proportions));
     }
-
-
-private:
-    IsOutlier outliers;
 };
 
 }

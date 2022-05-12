@@ -12,14 +12,14 @@ inline void expect_equal_pcs(const Eigen::MatrixXd& left, const Eigen::MatrixXd&
     ASSERT_EQ(left.cols(), right.cols());
     ASSERT_EQ(left.rows(), right.rows());
 
-    for (size_t i = 0; i < left.cols(); ++i) {
-        for (size_t j = 0; j < left.rows(); ++j) {
-            EXPECT_TRUE(same_same(std::abs(left(j, i)), std::abs(right(j, i)), tol));
+    for (size_t i = 0; i < left.rows(); ++i) {
+        for (size_t j = 0; j < left.cols(); ++j) {
+            EXPECT_TRUE(same_same(std::abs(left(i, j)), std::abs(right(i, j)), tol));
         }
 
         // PCs should average to zero.
-        EXPECT_TRUE(std::abs(left.col(i).sum()) < tol);
-        EXPECT_TRUE(std::abs(right.col(i).sum()) < tol);
+        EXPECT_TRUE(std::abs(left.row(i).sum()) < tol);
+        EXPECT_TRUE(std::abs(right.row(i).sum()) < tol);
     }
     return;
 }

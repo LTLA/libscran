@@ -97,9 +97,15 @@ public:
          * See `set_scale()` for more details.
          */
         static constexpr bool scale = false;
+
+        /**
+         * See `set_transpose()` for more details.
+         */
+        static constexpr bool transpose = true;
     };
 private:
     bool scale = Defaults::scale;
+    bool transpose = Defaults::transpose;
     irlba::Irlba irb;
 
 public:
@@ -129,6 +135,17 @@ public:
      */
     BlockedPCA& set_scale(bool s = Defaults::scale) {
         scale = s;
+        return *this;
+    }
+
+    /**
+     * @param t Should the PC matrix be transposed on output?
+     * If `true`, the output PC matrix is column-major with cells in the columns, which is compatible with downstream **libscran** steps.
+     * 
+     * @return A reference to this `BlockedPCA` instance.
+     */
+    BlockedPCA& set_transpose(bool t = Defaults::transpose) {
+        transpose = t;
         return *this;
     }
 
@@ -162,6 +179,10 @@ private:
             pca_utils::clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
         }
 
+        if (transpose) {
+            pcs.adjointInPlace();
+        }
+
         return;
     }
 
@@ -174,8 +195,9 @@ public:
     struct Results {
         /**
          * Matrix of principal components.
-         * Each row corresponds to a cell while each column corresponds to a PC,
-         * with number of columns determined by `set_rank()`.
+         * By default, each row corresponds to a PC while each column corresponds to a cell in the input matrix.
+         * If `set_transpose()` is set to `false`, rows are cells instead.
+         * The number of PCs is determined by `set_rank()`.
          */
         Eigen::MatrixXd pcs;
 
