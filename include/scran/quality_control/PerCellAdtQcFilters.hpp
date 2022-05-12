@@ -26,10 +26,10 @@ namespace scran {
  * - Low numbers of detected features.
  *   Even though ADTs are commonly applied in situations where few features are expressed, we still expect detectable coverage of most features due to ambient contamination.
  *   The absence of detectable coverage indicates that library preparation or sequencing depth was suboptimal.
- * - Large counts in the isotype control (IgG) subsets.
- *   This 
+ * - Large total counts in the isotype control (IgG) subsets.
+ *   The IgG antibodies should not bind to anything, so high coverage suggests that non-specific binding is a problem.
+ *   This is most notable from antibody conjugates.
  *   
- *
  * Outliers are defined on each metric by counting the number of MADs from the median value across all cells.
  * This assumes that most cells in the experiment are of high (or at least acceptable) quality;
  * any anomalies are indicative of low-quality cells that should be filtered out.
