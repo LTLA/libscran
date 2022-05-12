@@ -1,0 +1,11 @@
+<map id="scran/quality_control/PerCellAdtQcMetrics.hpp" name="scran/quality_control/PerCellAdtQcMetrics.hpp">
+<area shape="rect" id="node1" title="Compute per&#45;cell quality control metrics from an ADT count matrix." alt="" coords="149,5,321,47"/>
+<area shape="rect" id="node2" href="$PerCellQCMetrics_8hpp.html" title="Compute typical per&#45;cell quality control metrics." alt="" coords="160,95,311,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="315,259,374,285"/>
+<area shape="rect" id="node4" title=" " alt="" coords="29,177,103,203"/>
+<area shape="rect" id="node5" title=" " alt="" coords="127,177,181,203"/>
+<area shape="rect" id="node6" title=" " alt="" coords="205,177,266,203"/>
+<area shape="rect" id="node7" title=" " alt="" coords="291,177,444,203"/>
+<area shape="rect" id="node8" title=" " alt="" coords="469,177,618,203"/>
+<area shape="rect" id="node9" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="642,169,757,211"/>
+</map>
