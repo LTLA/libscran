@@ -92,8 +92,8 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a6b088044950f2e3082f94723af678d9f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1PerCellQCFilters.html">PerCellQCFilters</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#a6b088044950f2e3082f94723af678d9f">set_nmads</a> (double n=3)</td></tr>
-<tr class="separator:a6b088044950f2e3082f94723af678d9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5aefa5d9c27f5f84081a6a89ab2a7f40"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1PerCellQCFilters.html">PerCellQCFilters</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#a5aefa5d9c27f5f84081a6a89ab2a7f40">set_nmads</a> (double n=IsOutlier::Defaults::nmads)</td></tr>
+<tr class="separator:a5aefa5d9c27f5f84081a6a89ab2a7f40"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01c8cd43b53e8e2469d3ed4116ac4eec"><td class="memTemplParams" colspan="2">template&lt;typename S , typename D , typename PPTR , typename X &gt; </td></tr>
 <tr class="memitem:a01c8cd43b53e8e2469d3ed4116ac4eec"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Thresholds.html">Thresholds</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#a01c8cd43b53e8e2469d3ed4116ac4eec">run</a> (size_t ncells, const S *sums, const D *detected, std::vector&lt; PPTR &gt; subset_proportions, X *filter_by_sums, X *filter_by_detected, std::vector&lt; X * &gt; filter_by_subset_proportions, X *overall_filter)</td></tr>
 <tr class="separator:a01c8cd43b53e8e2469d3ed4116ac4eec"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -574,8 +574,8 @@ template&lt;typename B , typename S , typename D , typename PPTR , typename X &g
 
 </div>
 </div>
-<a id="a6b088044950f2e3082f94723af678d9f" name="a6b088044950f2e3082f94723af678d9f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6b088044950f2e3082f94723af678d9f">&#9670;&nbsp;</a></span>set_nmads()</h2>
+<a id="a5aefa5d9c27f5f84081a6a89ab2a7f40" name="a5aefa5d9c27f5f84081a6a89ab2a7f40"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5aefa5d9c27f5f84081a6a89ab2a7f40">&#9670;&nbsp;</a></span>set_nmads()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -587,7 +587,7 @@ template&lt;typename B , typename S , typename D , typename PPTR , typename X &g
           <td class="memname"><a class="el" href="classscran_1_1PerCellQCFilters.html">PerCellQCFilters</a> &amp; scran::PerCellQCFilters::set_nmads </td>
           <td>(</td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>n</em> = <code>3</code></td><td>)</td>
+          <td class="paramname"><em>n</em> = <code>IsOutlier::Defaults::nmads</code></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -597,10 +597,9 @@ template&lt;typename B , typename S , typename D , typename PPTR , typename X &g
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Set the number of MADs from the median to define the threshold for outliers.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">n</td><td>Number of MADs.</td></tr>
+    <tr><td class="paramname">n</td><td>Number of MADs to use to define outliers, see <code><a class="el" href="classscran_1_1IsOutlier.html" title="Define outlier values based on MADs.">IsOutlier</a></code> for details.</td></tr>
   </table>
   </dd>
 </dl>

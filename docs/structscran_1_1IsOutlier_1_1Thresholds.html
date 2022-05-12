@@ -89,7 +89,7 @@ Public Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p ><a class="el" href="structscran_1_1IsOutlier_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a> to define outliers on each metric. </p>
-<p >Meaningful instances of this object should generally be constructed by calling the <code><a class="el" href="classscran_1_1IsOutlier.html#ad94a76bb036c611475a67dbe1f08de73">IsOutlier::run()</a></code> methods. Empty instances can be default-constructed as placeholders. </p>
+<p >Meaningful instances of this object should generally be constructed by calling the <code><a class="el" href="classscran_1_1IsOutlier.html#a928419be57c283eb6c0ded74bc83ea8c">IsOutlier::run()</a></code> methods. Empty instances can be default-constructed as placeholders. </p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="adeb1415ad8f8ac50c661059789a90dbb" name="adeb1415ad8f8ac50c661059789a90dbb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#adeb1415ad8f8ac50c661059789a90dbb">&#9670;&nbsp;</a></span>lower</h2>
@@ -103,8 +103,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p >Vector of length equal to the number of blocks. Each value contains the lower threshold used to define outliers (i.e., all values below this threshold are considered outliers).</p>
-<p >If <code><a class="el" href="classscran_1_1IsOutlier.html#a28371b8930df2c3a686b788ab362143c">set_lower()</a></code> was set to <code>false</code>, all values are set to negative infinity.</p>
-<p >Note that these thresholds are always reported on the original scale, regardless of <code><a class="el" href="classscran_1_1IsOutlier.html#a9c3fedc844b839e8314d39d85dd067d1">set_log()</a></code>. Any log-transformation used during outlier identification is reversed when reporting the thresholds. </p>
+<p >If <code><a class="el" href="classscran_1_1IsOutlier.html#a4820a444ea5163cf372fed6750b1efa4">set_lower()</a></code> was set to <code>false</code>, all values are set to negative infinity.</p>
+<p >Note that these thresholds are always reported on the original scale, regardless of <code><a class="el" href="classscran_1_1IsOutlier.html#a7371b016c0d3992565f5edfa31e3f97f">set_log()</a></code>. Any log-transformation used during outlier identification is reversed when reporting the thresholds. </p>
 
 </div>
 </div>
@@ -120,8 +120,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p >Vector of length equal to the number of blocks. Each value contains the upper threshold used to define outliers (i.e., all values above this threshold are considered outliers).</p>
-<p >If <code><a class="el" href="classscran_1_1IsOutlier.html#a6408b82e53db56f5ed2c57ddf752180b">set_upper()</a></code> was set to <code>false</code>, all values are set to positive infinity.</p>
-<p >Note that these thresholds are always reported on the original scale, regardless of <code><a class="el" href="classscran_1_1IsOutlier.html#a9c3fedc844b839e8314d39d85dd067d1">set_log()</a></code>. Any log-transformation used during outlier identification is reversed when reporting the thresholds. </p>
+<p >If <code><a class="el" href="classscran_1_1IsOutlier.html#a46cbf0b42fe87fdddb340a70d8822ef5">set_upper()</a></code> was set to <code>false</code>, all values are set to positive infinity.</p>
+<p >Note that these thresholds are always reported on the original scale, regardless of <code><a class="el" href="classscran_1_1IsOutlier.html#a7371b016c0d3992565f5edfa31e3f97f">set_log()</a></code>. Any log-transformation used during outlier identification is reversed when reporting the thresholds. </p>
 
 </div>
 </div>
