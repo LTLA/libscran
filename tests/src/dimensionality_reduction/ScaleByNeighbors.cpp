@@ -18,7 +18,7 @@ protected:
     double run(const scran::ScaleByNeighbors& runner, size_t nobs, int ndim1, const double* ptr1, int ndim2, const double* ptr2) const {
         auto scale1 = runner.compute_distance(ndim1, nobs, ptr1);
         auto scale2 = runner.compute_distance(ndim2, nobs, ptr2);
-        return runner.compute_scale(scale1, scale2);
+        return scran::ScaleByNeighbors::compute_scale(scale1, scale2);
     }
 };
 
@@ -87,5 +87,75 @@ TEST_F(ScaleByNeighborsTest, Zeros) {
 
         auto out2 = run(runner, nobs, ndim, second.data(), ndim, first.data());
         EXPECT_EQ(out2, 0);
+    }
+}
+
+TEST_F(ScaleByNeighborsTest, ComputeDistances) {
+    {
+        std::vector<std::pair<double, double> > distances{ {3, 3}, { 2, 2 }, { 1, 1 } };
+        auto output = scran::ScaleByNeighbors::compute_scale(distances);
+        std::vector<double> expected { 1, 1.5, 3 };
+        EXPECT_EQ(output, expected);
+    }
+
+    // Skips the first.
+    {
+        std::vector<std::pair<double, double> > distances{ { 0, 0 }, { 10, 10 }, { 1, 1 } };
+        auto output = scran::ScaleByNeighbors::compute_scale(distances);
+        EXPECT_TRUE(std::isinf(output[0]));
+        EXPECT_EQ(output[1], 1);
+        EXPECT_EQ(output[2], 10);
+    }
+
+    // Skips all of them.
+    {
+        std::vector<std::pair<double, double> > distances(3);
+        auto output = scran::ScaleByNeighbors::compute_scale(distances);
+        std::vector<double> expected(3);
+        EXPECT_EQ(output, expected);
+
+    }
+}
+
+TEST_F(ScaleByNeighborsTest, CombineEmbeddings) {
+    size_t nobs = 123;
+    auto first = simulate_dense_array(20, nobs, 1000);
+    auto second = simulate_dense_array(5, nobs, 2000);
+
+    {
+        std::vector<double> output(25 * nobs);
+        scran::ScaleByNeighbors::combine_scaled_embeddings({ 20, 5 }, nobs, std::vector<const double*>{ first.data(), second.data() }, { 0.5, 1.2 }, output.data());
+
+        // Interleaving is done correctly.
+        EXPECT_EQ(output[0], first[0] * 0.5);
+        EXPECT_EQ(output[19], first[19] * 0.5);
+        EXPECT_EQ(output[25], first[20] * 0.5);
+        EXPECT_EQ(output[25 * (nobs - 1)], first[20 * (nobs - 1)] * 0.5);
+        EXPECT_EQ(output[25 * (nobs - 1) + 19], first[20 * nobs - 1] * 0.5);
+
+        EXPECT_EQ(output[20], second[0] * 1.2);
+        EXPECT_EQ(output[24], second[4] * 1.2);
+        EXPECT_EQ(output[45], second[5] * 1.2);
+        EXPECT_EQ(output[25 * (nobs - 1) + 20], second[5 * (nobs - 1)] * 1.2);
+        EXPECT_EQ(output[25 * nobs - 1], second[5 * nobs - 1] * 1.2);
+    }
+
+    // Handles the infinite special case.
+    {
+        std::vector<double> output(25 * nobs);
+        scran::ScaleByNeighbors::combine_scaled_embeddings({ 20, 5 }, nobs, std::vector<const double*>{ first.data(), second.data() }, { 0.5, std::numeric_limits<double>::infinity() }, output.data());
+
+        // Interleaving is done correctly.
+        EXPECT_EQ(output[0], first[0] * 0.5);
+        EXPECT_EQ(output[19], first[19] * 0.5);
+        EXPECT_EQ(output[25], first[20] * 0.5);
+        EXPECT_EQ(output[25 * (nobs - 1)], first[20 * (nobs - 1)] * 0.5);
+        EXPECT_EQ(output[25 * (nobs - 1) + 19], first[20 * nobs - 1] * 0.5);
+
+        EXPECT_EQ(output[20], 0);
+        EXPECT_EQ(output[24], 0);
+        EXPECT_EQ(output[45], 0);
+        EXPECT_EQ(output[25 * (nobs - 1) + 20], 0);
+        EXPECT_EQ(output[25 * nobs - 1], 0);
     }
 }

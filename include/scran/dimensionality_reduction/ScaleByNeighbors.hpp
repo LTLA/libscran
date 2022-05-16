@@ -137,9 +137,47 @@ public:
 
 public:
     /**
-     * @param ref Output of `compute_scale()` for the reference embedding.
+     * Compute the scaling factors for a group of embeddings, given the neighbor distances computed by `compute_distance()`.
+     * This aims to scale each embedding so that the within-population variances are equal across embeddings.
+     * The "reference" embedding is defined as the first embedding with a non-zero RMSD; 
+     * other than this requirement, the exact choice of reference has no actual impact on the relative values of the scaling factors.
+     *
+     * @param distances Vector of distances for embeddings, as computed by `compute_scale()` on each embedding.
+     *
+     * @return Vector of scaling factors of length equal to that of `distances`, to be applied to each embedding.
+     */
+    static std::vector<double> compute_scale(const std::vector<std::pair<double, double> >& distances) {
+        std::vector<double> output(distances.size());
+
+        // Use the first entry with a non-zero RMSD as the reference.
+        bool found_ref = false;
+        size_t ref = 0;
+        for (size_t e = 0; e < distances.size(); ++e) {
+            if (distances[e].second) {
+                found_ref = true;
+                ref = e;
+                break;
+            }
+        }
+
+        // If all of them have a zero RMSD, then all scalings are zero, because it doesn't matter.
+        if (found_ref) {
+            const auto& dref = distances[ref];
+            for (size_t e = 0; e < distances.size(); ++e) {
+                output[e] = (e == ref ? 1 : compute_scale(dref, distances[e]));
+            }
+        }
+
+        return output;
+    }
+
+    /**
+     * Compute the scaling factor to be applied to a target embedding relative to a reference.
+     * This aims to scale the target so that the within-population variance is equal to that of the reference.
+     *
+     * @param ref Output of `compute_distance()` for the reference embedding.
      * The first value contains the median distance while the second value contains the RMSD.
-     * @param target Output of `compute_scale()` for the target embedding.
+     * @param target Output of `compute_distance()` for the target embedding.
      *
      * @return A scaling factor to apply to the target embedding.
      * Scaling all values in the target matrix by the factor will equalize the magnitude of the noise to that of the reference embedding.
@@ -149,7 +187,7 @@ public:
      * If the reference RMSDs is zero, this function will return zero;
      * if the target RMSD is zero, this function will return positive infinity.
      */
-    double compute_scale(const std::pair<double, double>& ref, const std::pair<double, double>& target) const {
+    static double compute_scale(const std::pair<double, double>& ref, const std::pair<double, double>& target) {
         if (target.first == 0 || ref.first == 0) {
             if (target.second == 0) {
                 return std::numeric_limits<double>::infinity();
@@ -160,6 +198,59 @@ public:
             }
         } else {
             return ref.first / target.first;
+        }
+    }
+
+    /**
+     * Combine multiple embeddings into a single embedding matrix, possibly after scaling each embedding.
+     * This is done row-wise, i.e., the coordinates are concatenated across embeddings for each column.
+     * 
+     * @tparam Embed Pointer type to the input embeddings.
+     * 
+     * @param ndims Vector containing the number of dimensions in each embedding.
+     * @param ncells Number of cells in each embedding.
+     * @param embeddings Vector of pointers of length equal to that of `ndims`.
+     * Each pointer refers to an array containing an embedding matrix, which should be in column-major format with dimensions in rows and cells in columns.
+     * The number of rows should be equal to the corresponding element in `ndims` and the number of columns should be equal to `ncells`.
+     * @param scaling Scaling to apply to each embedding, usually from `compute_scale()`.
+     * This should be of length equal to that of `ndims`.
+     * @param output Pointer to the output array.
+     * This should be of length equal to the product of `ncells` and the sum of `ndims`.
+     *
+     * @return `output` is filled with the combined embeddings in column-major format.
+     * Each row corresponds to a dimension while each column corresponds to a cell.
+     */
+    template<typename Embed>
+    static void combine_scaled_embeddings(const std::vector<int>& ndims, size_t ncells, const std::vector<Embed>& embeddings, const std::vector<double>& scaling, double* output) {
+        size_t nembed = ndims.size();
+        if (embeddings.size() != nembed || scaling.size() != nembed) {
+            throw std::runtime_error("'ndims', 'embeddings' and 'scale' should have the same length");
+        }
+
+        int ntotal = std::accumulate(ndims.begin(), ndims.end(), 0);
+        size_t offset = 0;
+
+        for (size_t e = 0; e < nembed; ++e) {
+            size_t curdim = ndims[e];
+            auto inptr = embeddings[e];
+            auto outptr = output + offset;
+            auto s = scaling[e];
+
+            if (std::isinf(s)) {
+                // If the scaling factor is infinite, it implies that the current
+                // embedding is all-zero, so we just fill with zeros, and move on.
+                for (size_t c = 0; c < ncells; ++c, inptr += curdim, outptr += ntotal) {
+                    std::fill(outptr, outptr + curdim, 0);
+                }
+            } else {
+                for (size_t c = 0; c < ncells; ++c, inptr += curdim, outptr += ntotal) {
+                    for (size_t d = 0; d < curdim; ++d) {
+                        outptr[d] = inptr[d] * s;
+                    }
+                }
+            }
+
+            offset += curdim;
         }
     }
 };
