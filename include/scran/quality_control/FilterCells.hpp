@@ -59,17 +59,19 @@ public:
      */
     template<class MAT, typename IDX = int, typename X = uint8_t>
     std::shared_ptr<MAT> run(std::shared_ptr<MAT> mat, const X* filter) {
-#ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::FilterCells", "Filtering out low-quality cells");
-#endif
-
         size_t NC = mat->ncol();
-        auto num = std::accumulate(filter, filter + NC, static_cast<IDX>(0));
+
+        // Don't use accumulate: we want to defend against non-0/1 values in 'filter'.
+        IDX num = 0;
+        for (size_t i = 0; i < NC; ++i) {
+            num += (filter[i] != 0);
+        }
+
         std::vector<IDX> retained(retain ? num : (NC - num));
         auto rIt = retained.begin();
 
-        for (IDX i = 0; i < NC; ++i) {
-            if (retain == static_cast<bool>(filter[i])) {
+        for (size_t i = 0; i < NC; ++i) {
+            if (retain == (filter[i] != 0)) {
                 *rIt = i;
                 ++rIt;
             }
