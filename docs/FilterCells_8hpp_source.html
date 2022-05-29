@@ -96,32 +96,34 @@ $(function() {
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="keyword">public</span>:</div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keyword">template</span>&lt;<span class="keyword">class</span> MAT, <span class="keyword">typename</span> IDX = <span class="keywordtype">int</span>, <span class="keyword">typename</span> X = u<span class="keywordtype">int</span>8_t&gt;</div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="classscran_1_1FilterCells.html#a5dd2a40d99238d32c20bd069dff7faff">   61</a></span>    std::shared_ptr&lt;MAT&gt; <a class="code hl_function" href="classscran_1_1FilterCells.html#a5dd2a40d99238d32c20bd069dff7faff">run</a>(std::shared_ptr&lt;MAT&gt; mat, <span class="keyword">const</span> X* filter) {</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">#ifdef SCRAN_LOGGER</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        SCRAN_LOGGER(<span class="stringliteral">&quot;scran::FilterCells&quot;</span>, <span class="stringliteral">&quot;Filtering out low-quality cells&quot;</span>);</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="keywordtype">size_t</span> NC = mat-&gt;ncol();</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <span class="keyword">auto</span> num = std::accumulate(filter, filter + NC, <span class="keyword">static_cast&lt;</span>IDX<span class="keyword">&gt;</span>(0));</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        std::vector&lt;IDX&gt; retained(retain ? num : (NC - num));</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <span class="keyword">auto</span> rIt = retained.begin();</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        <span class="keywordflow">for</span> (IDX i = 0; i &lt; NC; ++i) {</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>            <span class="keywordflow">if</span> (retain == <span class="keyword">static_cast&lt;</span><span class="keywordtype">bool</span><span class="keyword">&gt;</span>(filter[i])) {</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>                *rIt = i;</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>                ++rIt;</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>            }</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        }</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    </div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        <span class="keywordflow">return</span> tatami::make_DelayedSubset&lt;1&gt;(mat, retained);</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    }</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="keyword">private</span>:  </div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    <span class="keywordtype">bool</span> retain = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>};</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>}</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        <span class="keywordtype">size_t</span> NC = mat-&gt;ncol();</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        <span class="comment">// Don&#39;t use accumulate: we want to defend against non-0/1 values in &#39;filter&#39;.</span></div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        IDX num = 0;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; NC; ++i) {</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>            num += (filter[i] != 0);</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        }</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        std::vector&lt;IDX&gt; retained(retain ? num : (NC - num));</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>        <span class="keyword">auto</span> rIt = retained.begin();</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; NC; ++i) {</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>            <span class="keywordflow">if</span> (retain == (filter[i] != 0)) {</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>                *rIt = i;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>                ++rIt;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>            }</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        }</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        <span class="keywordflow">return</span> tatami::make_DelayedSubset&lt;1&gt;(mat, retained);</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    }</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span><span class="keyword">private</span>:  </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="keywordtype">bool</span> retain = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>};</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>}</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aclassscran_1_1FilterCells_html"><div class="ttname"><a href="classscran_1_1FilterCells.html">scran::FilterCells</a></div><div class="ttdoc">Filter out low-quality cells.</div><div class="ttdef"><b>Definition:</b> FilterCells.hpp:23</div></div>
 <div class="ttc" id="aclassscran_1_1FilterCells_html_a42e3cbc0cf07393f5e6d3f992d369bf2"><div class="ttname"><a href="classscran_1_1FilterCells.html#a42e3cbc0cf07393f5e6d3f992d369bf2">scran::FilterCells::set_discard</a></div><div class="ttdeci">FilterCells &amp; set_discard()</div><div class="ttdef"><b>Definition:</b> FilterCells.hpp:40</div></div>
 <div class="ttc" id="aclassscran_1_1FilterCells_html_a5dd2a40d99238d32c20bd069dff7faff"><div class="ttname"><a href="classscran_1_1FilterCells.html#a5dd2a40d99238d32c20bd069dff7faff">scran::FilterCells::run</a></div><div class="ttdeci">std::shared_ptr&lt; MAT &gt; run(std::shared_ptr&lt; MAT &gt; mat, const X *filter)</div><div class="ttdef"><b>Definition:</b> FilterCells.hpp:61</div></div>
