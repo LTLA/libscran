@@ -25,6 +25,23 @@ inline void clean_up(size_t NC, const Eigen::MatrixXd& U, const Eigen::VectorXd&
     return;
 }
 
+inline void clean_up(size_t NC, Eigen::MatrixXd& U, Eigen::VectorXd& D) {
+    auto uIt = U.data();
+    auto dIt = D.data();
+    for (int i = 0, iend = U.cols(); i < iend; ++i, ++dIt) {
+        for (int j = 0, jend = U.rows(); j < jend; ++j, ++uIt) {
+            (*uIt) *= (*dIt);
+        }
+    }
+
+    for (auto& d : D) {
+        d = d * d / static_cast<double>(NC - 1);
+    }
+
+    return;
+}
+
+
 template<bool byrow, class SparseMat>
 void fill_sparse_matrix(SparseMat& A, 
     const std::vector<std::vector<int> >& indices, 
