@@ -99,36 +99,24 @@ public:
 
 private:
     template<typename T, typename IDX>
-    void run(const tatami::Matrix<T, IDX>* mat, Eigen::MatrixXd& pcs, Eigen::VectorXd& variance_explained, double& total_var) {
-
+    void run(const tatami::Matrix<T, IDX>* mat, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) {
         if (mat->sparse()) {
             Eigen::VectorXd center_v(mat->nrow()), scale_v(mat->nrow());
             auto emat = create_eigen_matrix_sparse(mat, center_v, scale_v, total_var);
 
-#ifdef SCRAN_LOGGER
-            SCRAN_LOGGER("scran::RunPCA", "Running the IRLBA algorithm");
-#endif
-
             irlba::Centered<decltype(emat)> centered(&emat, &center_v);
             if (scale) {
                 irlba::Scaled<decltype(centered)> scaled(&centered, &scale_v);
-                auto result = irb.run(scaled);
-                pca_utils::clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
+                irb.run(scaled, pcs, rotation, variance_explained);
             } else {
-                auto result = irb.run(centered);
-                pca_utils::clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
+                irb.run(centered, pcs, rotation, variance_explained);
             }
         } else {
             auto emat = create_eigen_matrix_dense(mat, total_var);
-
-#ifdef SCRAN_LOGGER
-            SCRAN_LOGGER("scran::RunPCA", "Running the IRLBA algorithm");
-#endif
-
-            auto result = irb.run(emat); // already centered and scaled, if relevant.
-            pca_utils::clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
+            irb.run(emat, pcs, rotation, variance_explained); // already centered and scaled, if relevant.
         }
 
+        pca_utils::clean_up(mat->ncol(), pcs, variance_explained);
         if (transpose) {
             pcs.adjointInPlace();
         }
@@ -162,6 +150,14 @@ public:
          * This can be used to divide `variance_explained` to obtain the percentage of variance explained.
          */
         double total_variance = 0;
+
+        /**
+         * Rotation matrix.
+         * Each row corresponds to a feature while each column corresponds to a PC.
+         * The number of PCs is determined by `set_rank()`.
+         * If feature filtering was performed, the number of rows is equal to the number of features remaining after filtering.
+         */
+        Eigen::MatrixXd rotation;
     };
 
     /**
@@ -178,7 +174,7 @@ public:
     template<typename T, typename IDX>
     Results run(const tatami::Matrix<T, IDX>* mat) {
         Results output;
-        run(mat, output.pcs, output.variance_explained, output.total_variance);
+        run(mat, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         return output;
     }
 
@@ -203,13 +199,13 @@ public:
         Results output;
 
         if (!features) {
-            run(mat, output.pcs, output.variance_explained, output.total_variance);
+            run(mat, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         } else {
 #ifdef SCRAN_LOGGER
             SCRAN_LOGGER("RunPCA", "Subsetting to features of interest");
 #endif
             auto subsetted = pca_utils::subset_matrix_by_features(mat, features);
-            run(subsetted.get(), output.pcs, output.variance_explained, output.total_variance);
+            run(subsetted.get(), output.pcs, output.rotation, output.variance_explained, output.total_variance);
         }
 
         return output;

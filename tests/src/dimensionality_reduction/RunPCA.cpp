@@ -57,6 +57,31 @@ TEST_P(RunPCATester, Test) {
     expect_equal_pcs(res1.pcs, res4.pcs);
     expect_equal_vectors(res1.variance_explained, res4.variance_explained);
     EXPECT_FLOAT_EQ(res1.total_variance, res4.total_variance);
+
+    // Checking that we scaled the PCs correctly.
+    size_t NC = dense_row->ncol();
+    for (int r = 0; r < rank; ++r) {
+        auto ptr = res1.pcs.data() + r;
+
+        double mean = 0;
+        for (size_t c = 0; c < NC; ++c, ptr += rank) {
+            mean += *ptr;            
+        }
+        mean /= NC;
+        EXPECT_TRUE(std::abs(mean) < 0.00000001);
+
+        double var = 0;
+        ptr = res1.pcs.data() + r;
+        for (size_t c = 0; c < NC; ++c, ptr += rank) {
+            var += (*ptr - mean) * (*ptr - mean);
+        }
+        var /= NC - 1;
+
+        EXPECT_FLOAT_EQ(var, res1.variance_explained[r]);
+    }
+
+    EXPECT_EQ(res1.rotation.rows(), dense_row->nrow());
+    EXPECT_EQ(res1.rotation.cols(), rank);
 }
 
 TEST_P(RunPCATester, SubsetTest) {
@@ -82,6 +107,8 @@ TEST_P(RunPCATester, SubsetTest) {
 
     auto out = runner.run(dense_row.get(), subset.data());
     EXPECT_EQ(out.variance_explained.size(), rank);
+    EXPECT_EQ(out.rotation.rows(), sub_nrows);
+    EXPECT_EQ(out.rotation.cols(), rank);
 
     // Manually subsetting.
     auto mat = std::shared_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double, int>(sub_nrows, dense_row->ncol(), std::move(submatrix)));
