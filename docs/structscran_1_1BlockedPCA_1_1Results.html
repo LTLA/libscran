@@ -88,6 +88,8 @@ Public Attributes</h2></td></tr>
 <tr class="separator:a8fee09e9dd0e7e80728bb06be4a2912a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4c45e08e1628cb735ce20addab7aed65"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1BlockedPCA_1_1Results.html#a4c45e08e1628cb735ce20addab7aed65">total_variance</a> = 0</td></tr>
 <tr class="separator:a4c45e08e1628cb735ce20addab7aed65"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af833551b79e055463cc3b21cbf85fa20"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1BlockedPCA_1_1Results.html#af833551b79e055463cc3b21cbf85fa20">rotation</a></td></tr>
+<tr class="separator:af833551b79e055463cc3b21cbf85fa20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Container for the PCA results. </p>
@@ -105,6 +107,21 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p >Matrix of principal components. By default, each row corresponds to a PC while each column corresponds to a cell in the input matrix. If <code><a class="el" href="classscran_1_1BlockedPCA.html#a72c4787d4bf3345a269fa6a00e1aaa6c">set_transpose()</a></code> is set to <code>false</code>, rows are cells instead. The number of PCs is determined by <code><a class="el" href="classscran_1_1BlockedPCA.html#aaab4ee71a29b1ac787a1a135719217d4">set_rank()</a></code>. </p>
+
+</div>
+</div>
+<a id="af833551b79e055463cc3b21cbf85fa20" name="af833551b79e055463cc3b21cbf85fa20"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af833551b79e055463cc3b21cbf85fa20">&#9670;&nbsp;</a></span>rotation</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::MatrixXd scran::BlockedPCA::Results::rotation</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Rotation matrix. Each row corresponds to a feature while each column corresponds to a PC. The number of PCs is determined by <code><a class="el" href="classscran_1_1BlockedPCA.html#aaab4ee71a29b1ac787a1a135719217d4">set_rank()</a></code>. If feature filtering was performed, the number of rows is equal to the number of features remaining after filtering. </p>
 
 </div>
 </div>
