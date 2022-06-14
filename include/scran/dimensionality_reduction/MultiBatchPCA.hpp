@@ -159,45 +159,52 @@ private:
     void reapply(const Matrix& emat, 
         const Eigen::VectorXd& center_v, 
         const Eigen::VectorXd& scale_v, 
-        Eigen::MatrixXd V, 
-        const Eigen::VectorXd& D, 
         Eigen::MatrixXd& pcs, 
+        Eigen::MatrixXd& rotation,
         Eigen::VectorXd& variance_explained)
     {
-        for (Eigen::Index i = 0; i < V.cols(); ++i) {
-            for (Eigen::Index j = 0; j < V.rows(); ++j) {
-                V(j, i) /= scale_v[j];
+        // Dividing by the scaling factor to mimic the division of 'emat'
+        // by the scaling factor (after centering).
+        auto rIt = rotation.data();
+        for (size_t i = 0, iend = rotation.cols(); i < iend; ++i) {
+            auto sIt = scale_v.data();
+            for (size_t j = 0, jend = rotation.rows(); j < jend; ++j, ++rIt, ++sIt) {
+                (*rIt) /= *sIt;
             }
         }
-        reapply(emat, center_v, V, D, pcs, variance_explained);
+
+        reapply(emat, center_v, pcs, rotation, variance_explained);
     }
 
     template<class Matrix>
     void reapply(const Matrix& emat,
         const Eigen::VectorXd& center_v, 
-        const Eigen::MatrixXd& V, 
-        const Eigen::VectorXd& D, 
         Eigen::MatrixXd& pcs, 
+        const Eigen::MatrixXd& rotation,
         Eigen::VectorXd& variance_explained)
     {
-        pcs = emat * V;
-        for (Eigen::Index i = 0; i < pcs.cols(); ++i) {
-            double meanval = center_v.dot(V.col(i));
-            for (Eigen::Index j = 0; j < pcs.rows(); ++j) {
-                pcs(j, i) -= meanval;
+        pcs = emat * rotation;
+
+        // Effective centering because I don't want to modify 'emat'.
+        auto pIt = pcs.data();
+        for (size_t i = 0, iend = pcs.cols(); i < iend; ++i) {
+            double meanval = center_v.dot(rotation.col(i));
+            for (size_t j = 0, jend = pcs.rows(); j < jend; ++j, ++pIt) {
+                *pIt -= meanval;
             }
         }
 
-        variance_explained.resize(D.size());
-        for (int i = 0; i < D.size(); ++i) {
-            variance_explained[i] = D[i] * D[i];
+        // Variance is a somewhat murky concept with weights, so we just square
+        // it and assume that only the relative value matters.
+        for (auto& d : variance_explained) {
+            d = d * d;
         }
         return;
     }
 
 private:
     template<typename T, typename IDX, typename Batch>
-    void run(const tatami::Matrix<T, IDX>* mat, const Batch* batch, Eigen::MatrixXd& pcs, Eigen::VectorXd& variance_explained, double& total_var) {
+    void run(const tatami::Matrix<T, IDX>* mat, const Batch* batch, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) {
         const size_t NC = mat->ncol();
         const auto& batch_size = block_sizes(NC, batch); 
         const size_t nbatchs = batch_size.size();
@@ -217,11 +224,11 @@ private:
         auto executor = [&](const auto& emat) -> void {
             MultiBatchEigenMatrix<typename std::remove_reference<decltype(emat)>::type> thing(&emat, &weights, &center_v);
             if (scale) {
-                auto result = irb.run(irlba::Scaled<decltype(thing)>(&thing, &scale_v));
-                reapply(emat, center_v, scale_v, result.V, result.D, pcs, variance_explained);
+                irb.run(irlba::Scaled<decltype(thing)>(&thing, &scale_v), pcs, rotation, variance_explained);
+                reapply(emat, center_v, scale_v, pcs, rotation, variance_explained);
             } else {
-                auto result = irb.run(thing);
-                reapply(emat, center_v, result.V, result.D, pcs, variance_explained);
+                irb.run(thing, pcs, rotation, variance_explained);
+                reapply(emat, center_v, pcs, rotation, variance_explained);
             }
         };
 
@@ -269,6 +276,14 @@ public:
          * This can be used to divide `variance_explained` to obtain the percentage of variance explained.
          */
         double total_variance = 0;
+
+        /**
+         * Rotation matrix.
+         * Each row corresponds to a feature while each column corresponds to a PC.
+         * The number of PCs is determined by `set_rank()`.
+         * If feature filtering was performed, the number of rows is equal to the number of features remaining after filtering.
+         */
+        Eigen::MatrixXd rotation;
     };
 
     /**
@@ -289,7 +304,7 @@ public:
     template<typename T, typename IDX, typename Batch>
     Results run(const tatami::Matrix<T, IDX>* mat, const Batch* batch) {
         Results output;
-        run(mat, batch, output.pcs, output.variance_explained, output.total_variance);
+        run(mat, batch, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         return output;
     }
 
@@ -317,10 +332,10 @@ public:
     Results run(const tatami::Matrix<T, IDX>* mat, const Batch* batch, const X* features) {
         Results output;
         if (!features) {
-            run(mat, batch, output.pcs, output.variance_explained, output.total_variance);
+            run(mat, batch, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         } else {
             auto subsetted = pca_utils::subset_matrix_by_features(mat, features);
-            run(subsetted.get(), batch, output.pcs, output.variance_explained, output.total_variance);
+            run(subsetted.get(), batch, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         }
         return output;
     }

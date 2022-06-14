@@ -151,7 +151,7 @@ public:
 
 private:
     template<typename T, typename IDX, typename Block>
-    void run(const tatami::Matrix<T, IDX>* mat, const Block* block, Eigen::MatrixXd& pcs, Eigen::VectorXd& variance_explained, double& total_var) {
+    void run(const tatami::Matrix<T, IDX>* mat, const Block* block, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) {
         const size_t NC = mat->ncol();
         const int nblocks = (NC ? *std::max_element(block, block + NC) + 1 : 1);
         std::vector<int> block_size(nblocks);
@@ -167,18 +167,16 @@ private:
             BlockedEigenMatrix<decltype(emat), Block> centered(&emat, block, &center_m);
             if (scale) {
                 irlba::Scaled<decltype(centered)> scaled(&centered, &scale_v);
-                auto result = irb.run(scaled);
-                pca_utils::clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
+                irb.run(scaled, pcs, rotation, variance_explained);
             } else {
-                auto result = irb.run(centered);
-                pca_utils::clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
+                irb.run(centered, pcs, rotation, variance_explained);
             }
         } else {
             auto emat = create_eigen_matrix_dense(mat, block, block_size, total_var);
-            auto result = irb.run(emat); // already centered and scaled, if relevant.
-            pca_utils::clean_up(mat->ncol(), result.U, result.D, pcs, variance_explained);
+            irb.run(emat, pcs, rotation, variance_explained); // already centered and scaled, if relevant.
         }
 
+        pca_utils::clean_up(mat->ncol(), pcs, variance_explained);
         if (transpose) {
             pcs.adjointInPlace();
         }
@@ -212,6 +210,14 @@ public:
          * This can be used to divide `variance_explained` to obtain the percentage of variance explained.
          */
         double total_variance = 0;
+
+        /**
+         * Rotation matrix.
+         * Each row corresponds to a feature while each column corresponds to a PC.
+         * The number of PCs is determined by `set_rank()`.
+         * If feature filtering was performed, the number of rows is equal to the number of features remaining after filtering.
+         */
+        Eigen::MatrixXd rotation;
     };
 
     /**
@@ -232,7 +238,7 @@ public:
     template<typename T, typename IDX, typename Block>
     Results run(const tatami::Matrix<T, IDX>* mat, const Block* block) {
         Results output;
-        run(mat, block, output.pcs, output.variance_explained, output.total_variance);
+        run(mat, block, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         return output;
     }
 
@@ -260,10 +266,10 @@ public:
     Results run(const tatami::Matrix<T, IDX>* mat, const Block* block, const X* features) {
         Results output;
         if (!features) {
-            run(mat, block, output.pcs, output.variance_explained, output.total_variance);
+            run(mat, block, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         } else {
             auto subsetted = pca_utils::subset_matrix_by_features(mat, features);
-            run(subsetted.get(), block, output.pcs, output.variance_explained, output.total_variance);
+            run(subsetted.get(), block, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         }
         return output;
     }
