@@ -5,7 +5,7 @@ include(FetchContent)
 FetchContent_Declare(
   tatami
   GIT_REPOSITORY https://github.com/LTLA/tatami
-  GIT_TAG 69339622de87e406b6a6dca0c5ffd22daae42f67
+  GIT_TAG 2b97a572e4d399de6e7e8615119b8a9ea09c9802
 )
 
 FetchContent_MakeAvailable(tatami)
@@ -21,7 +21,7 @@ FetchContent_MakeAvailable(WeightedLowess)
 FetchContent_Declare(
   irlba 
   GIT_REPOSITORY https://github.com/LTLA/CppIrlba
-  GIT_TAG dbfd00a637fa683c67e98e26d446866a9a3564c7
+  GIT_TAG 123d0180332e377adc72c207366008086efc67ed
 )
 
 FetchContent_MakeAvailable(irlba)
