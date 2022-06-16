@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['weightededge_0',['WeightedEdge',['../classscran_1_1BuildSNNGraph.html#af27e18b11231af9605b34495eb710d4e',1,'scran::BuildSNNGraph']]]
+  ['percellqcfilters_0',['PerCellQCFilters',['../PerCellRnaQcFilters_8hpp.html#a74f384a146e68973735bb5f772edd68e',1,'scran']]]
 ];

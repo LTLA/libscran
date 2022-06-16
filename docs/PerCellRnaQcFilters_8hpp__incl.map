@@ -1,9 +1,9 @@
-<map id="scran/quality_control/PerCellQCFilters.hpp" name="scran/quality_control/PerCellQCFilters.hpp">
-<area shape="rect" id="node1" title="Create filters to identify low&#45;quality cells." alt="" coords="414,5,561,47"/>
+<map id="scran/quality_control/PerCellRnaQcFilters.hpp" name="scran/quality_control/PerCellRnaQcFilters.hpp">
+<area shape="rect" id="node1" title="Create filters to identify low&#45;quality cells from RNA metrics." alt="" coords="394,5,562,47"/>
 <area shape="rect" id="node2" title=" " alt="" coords="280,259,338,285"/>
 <area shape="rect" id="node3" title=" " alt="" coords="570,177,632,203"/>
 <area shape="rect" id="node4" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="29,169,144,211"/>
-<area shape="rect" id="node5" href="$PerCellQCMetrics_8hpp.html" title="Compute typical per&#45;cell quality control metrics." alt="" coords="412,95,563,121"/>
+<area shape="rect" id="node5" href="$PerCellRnaQcMetrics_8hpp_source.html" title=" " alt="" coords="393,95,564,121"/>
 <area shape="rect" id="node10" href="$IsOutlier_8hpp.html" title="Define outliers using a simple MAD&#45;based approach." alt="" coords="723,95,818,121"/>
 <area shape="rect" id="node6" title=" " alt="" coords="733,177,808,203"/>
 <area shape="rect" id="node7" title=" " alt="" coords="656,177,709,203"/>

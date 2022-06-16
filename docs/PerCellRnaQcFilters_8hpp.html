@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.4"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>scran: scran/quality_control/PerCellQCFilters.hpp File Reference</title>
+<title>scran: scran/quality_control/PerCellRnaQcFilters.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -69,28 +69,29 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#nested-classes">Classes</a>  </div>
-  <div class="headertitle"><div class="title">PerCellQCFilters.hpp File Reference</div></div>
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#typedef-members">Typedefs</a>  </div>
+  <div class="headertitle"><div class="title">PerCellRnaQcFilters.hpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>Create filters to identify low-quality cells.  
+<p>Create filters to identify low-quality cells from RNA metrics.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;vector&gt;</code><br />
 <code>#include &lt;cstdint&gt;</code><br />
 <code>#include &quot;<a class="el" href="vector__to__pointers_8hpp_source.html">../utils/vector_to_pointers.hpp</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="PerCellQCMetrics_8hpp_source.html">PerCellQCMetrics.hpp</a>&quot;</code><br />
+<code>#include &quot;PerCellRnaQcMetrics.hpp&quot;</code><br />
 <code>#include &quot;<a class="el" href="IsOutlier_8hpp_source.html">IsOutlier.hpp</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
-Include dependency graph for PerCellQCFilters.hpp:</div>
+Include dependency graph for PerCellRnaQcFilters.hpp:</div>
 <div class="dyncontent">
-<div class="center"><img src="PerCellQCFilters_8hpp__incl.png" border="0" usemap="#ascran_2quality__control_2PerCellQCFilters_8hpp" alt=""/></div>
-<map name="ascran_2quality__control_2PerCellQCFilters_8hpp" id="ascran_2quality__control_2PerCellQCFilters_8hpp">
-<area shape="rect" title="Create filters to identify low&#45;quality cells." alt="" coords="414,5,561,47"/>
+<div class="center"><img src="PerCellRnaQcFilters_8hpp__incl.png" border="0" usemap="#ascran_2quality__control_2PerCellRnaQcFilters_8hpp" alt=""/></div>
+<map name="ascran_2quality__control_2PerCellRnaQcFilters_8hpp" id="ascran_2quality__control_2PerCellRnaQcFilters_8hpp">
+<area shape="rect" title="Create filters to identify low&#45;quality cells from RNA metrics." alt="" coords="394,5,562,47"/>
 <area shape="rect" title=" " alt="" coords="280,259,338,285"/>
 <area shape="rect" title=" " alt="" coords="570,177,632,203"/>
 <area shape="rect" href="vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="29,169,144,211"/>
-<area shape="rect" href="PerCellQCMetrics_8hpp.html" title="Compute typical per&#45;cell quality control metrics." alt="" coords="412,95,563,121"/>
+<area shape="rect" href="PerCellRnaQcMetrics_8hpp_source.html" title=" " alt="" coords="393,95,564,121"/>
 <area shape="rect" href="IsOutlier_8hpp.html" title="Define outliers using a simple MAD&#45;based approach." alt="" coords="723,95,818,121"/>
 <area shape="rect" title=" " alt="" coords="733,177,808,203"/>
 <area shape="rect" title=" " alt="" coords="656,177,709,203"/>
@@ -103,30 +104,51 @@ Include dependency graph for PerCellQCFilters.hpp:</div>
 </div><div class="textblock"><div class="dynheader">
 This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
-<div class="center"><img src="PerCellQCFilters_8hpp__dep__incl.png" border="0" usemap="#ascran_2quality__control_2PerCellQCFilters_8hppdep" alt=""/></div>
-<map name="ascran_2quality__control_2PerCellQCFilters_8hppdep" id="ascran_2quality__control_2PerCellQCFilters_8hppdep">
-<area shape="rect" title="Create filters to identify low&#45;quality cells." alt="" coords="5,5,152,47"/>
-<area shape="rect" href="scran_8hpp_source.html" title=" " alt="" coords="21,95,136,121"/>
+<div class="center"><img src="PerCellRnaQcFilters_8hpp__dep__incl.png" border="0" usemap="#ascran_2quality__control_2PerCellRnaQcFilters_8hppdep" alt=""/></div>
+<map name="ascran_2quality__control_2PerCellRnaQcFilters_8hppdep" id="ascran_2quality__control_2PerCellRnaQcFilters_8hppdep">
+<area shape="rect" title="Create filters to identify low&#45;quality cells from RNA metrics." alt="" coords="5,5,173,47"/>
+<area shape="rect" href="scran_8hpp_source.html" title=" " alt="" coords="32,95,147,121"/>
 </map>
 </div>
 </div>
-<p><a href="PerCellQCFilters_8hpp_source.html">Go to the source code of this file.</a></p>
+<p><a href="PerCellRnaQcFilters_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html">scran::PerCellQCFilters</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create filters to identify low-quality cells.  <a href="classscran_1_1PerCellQCFilters.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcFilters.html">scran::PerCellRnaQcFilters</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create filters to identify low-quality cells from RNA-derived metrics.  <a href="classscran_1_1PerCellRnaQcFilters.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Thresholds.html">scran::PerCellQCFilters::Thresholds</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a> to define outliers on each metric.  <a href="structscran_1_1PerCellQCFilters_1_1Thresholds.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Thresholds.html">scran::PerCellRnaQcFilters::Thresholds</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a> to define outliers on each metric.  <a href="structscran_1_1PerCellRnaQcFilters_1_1Thresholds.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">scran::PerCellQCFilters::Results&lt; X &gt;</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html" title="Results of the QC filtering.">Results</a> of the QC filtering.  <a href="structscran_1_1PerCellQCFilters_1_1Results.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Results.html">scran::PerCellRnaQcFilters::Results&lt; X &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Results.html" title="Results of the QC filtering.">Results</a> of the QC filtering.  <a href="structscran_1_1PerCellRnaQcFilters_1_1Results.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:a74f384a146e68973735bb5f772edd68e"><td class="memItemLeft" align="right" valign="top">typedef PerCellRnaQcFilters&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="PerCellRnaQcFilters_8hpp.html#a74f384a146e68973735bb5f772edd68e">scran::PerCellQCFilters</a></td></tr>
+<tr class="separator:a74f384a146e68973735bb5f772edd68e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p >Create filters to identify low-quality cells. </p>
-</div></div><!-- contents -->
+<div class="textblock"><p >Create filters to identify low-quality cells from RNA metrics. </p>
+</div><h2 class="groupheader">Typedef Documentation</h2>
+<a id="a74f384a146e68973735bb5f772edd68e" name="a74f384a146e68973735bb5f772edd68e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a74f384a146e68973735bb5f772edd68e">&#9670;&nbsp;</a></span>PerCellQCFilters</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef PerCellRnaQcFilters <a class="el" href="PerCellRnaQcFilters_8hpp.html#a74f384a146e68973735bb5f772edd68e">scran::PerCellQCFilters</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >An alias for <code>PerCellRnaQcFilters</code>, provided for back-compatibility. </p>
+
+</div>
+</div>
+</div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.4

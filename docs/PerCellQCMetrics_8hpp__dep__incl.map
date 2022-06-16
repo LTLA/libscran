@@ -1,7 +1,0 @@
-<map id="scran/quality_control/PerCellQCMetrics.hpp" name="scran/quality_control/PerCellQCMetrics.hpp">
-<area shape="rect" id="node1" title="Compute typical per&#45;cell quality control metrics." alt="" coords="198,5,353,47"/>
-<area shape="rect" id="node2" href="$PerCellAdtQcMetrics_8hpp.html" title="Compute per&#45;cell quality control metrics from an ADT count matrix." alt="" coords="5,95,177,136"/>
-<area shape="rect" id="node4" href="$PerCellQCFilters_8hpp.html" title="Create filters to identify low&#45;quality cells." alt="" coords="202,95,349,136"/>
-<area shape="rect" id="node5" href="$scran_8hpp_source.html" title=" " alt="" coords="273,191,387,218"/>
-<area shape="rect" id="node3" href="$PerCellAdtQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from ADT data." alt="" coords="9,184,174,225"/>
-</map>

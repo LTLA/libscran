@@ -124,7 +124,7 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Create filters to identify low-quality cells from ADT data. </p>
-<p >In antibody-derived tag (ADT) count matrices, the QC filtering decisions are slightly different than those for RNA count matrices (see <code><a class="el" href="classscran_1_1PerCellQCFilters.html" title="Create filters to identify low-quality cells.">PerCellQCFilters</a></code> for the latter). Here, low-quality cells are defined as those with:</p>
+<p >In antibody-derived tag (ADT) count matrices, the QC filtering decisions are slightly different than those for RNA count matrices (see <code><a class="el" href="classscran_1_1PerCellAdtQcFilters.html" title="Create filters to identify low-quality cells from ADT data.">PerCellAdtQcFilters</a></code> for the latter). Here, low-quality cells are defined as those with:</p>
 <ul>
 <li>Low numbers of detected features, which indicates that library preparation or sequencing depth was suboptimal. Even in ADT data, we should expect to detect many features in a cell due to ambient contamination.</li>
 <li>High total counts in the isotype control (IgG) subsets. The IgG antibodies should not bind to anything, so high coverage is indicative of non-specific binding or antibody conjugates.</li>

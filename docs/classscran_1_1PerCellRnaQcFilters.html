@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.4"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>scran: scran::PerCellQCFilters Class Reference</title>
+<title>scran: scran::PerCellRnaQcFilters Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -64,58 +64,58 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><b>scran</b></li><li class="navelem"><a class="el" href="classscran_1_1PerCellQCFilters.html">PerCellQCFilters</a></li>  </ul>
+<li class="navelem"><b>scran</b></li><li class="navelem"><a class="el" href="classscran_1_1PerCellRnaQcFilters.html">PerCellRnaQcFilters</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="classscran_1_1PerCellQCFilters-members.html">List of all members</a>  </div>
-  <div class="headertitle"><div class="title">scran::PerCellQCFilters Class Reference</div></div>
+<a href="classscran_1_1PerCellRnaQcFilters-members.html">List of all members</a>  </div>
+  <div class="headertitle"><div class="title">scran::PerCellRnaQcFilters Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>Create filters to identify low-quality cells.  
- <a href="classscran_1_1PerCellQCFilters.html#details">More...</a></p>
+<p>Create filters to identify low-quality cells from RNA-derived metrics.  
+ <a href="classscran_1_1PerCellRnaQcFilters.html#details">More...</a></p>
 
-<p><code>#include &lt;<a class="el" href="PerCellQCFilters_8hpp_source.html">PerCellQCFilters.hpp</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="PerCellRnaQcFilters_8hpp_source.html">PerCellRnaQcFilters.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html" title="Results of the QC filtering.">Results</a> of the QC filtering.  <a href="structscran_1_1PerCellQCFilters_1_1Results.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Results.html">Results</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Results.html" title="Results of the QC filtering.">Results</a> of the QC filtering.  <a href="structscran_1_1PerCellRnaQcFilters_1_1Results.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Thresholds.html">Thresholds</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a> to define outliers on each metric.  <a href="structscran_1_1PerCellQCFilters_1_1Thresholds.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Thresholds.html">Thresholds</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a> to define outliers on each metric.  <a href="structscran_1_1PerCellRnaQcFilters_1_1Thresholds.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a5aefa5d9c27f5f84081a6a89ab2a7f40"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1PerCellQCFilters.html">PerCellQCFilters</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#a5aefa5d9c27f5f84081a6a89ab2a7f40">set_nmads</a> (double n=IsOutlier::Defaults::nmads)</td></tr>
-<tr class="separator:a5aefa5d9c27f5f84081a6a89ab2a7f40"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a01c8cd43b53e8e2469d3ed4116ac4eec"><td class="memTemplParams" colspan="2">template&lt;typename S , typename D , typename PPTR , typename X &gt; </td></tr>
-<tr class="memitem:a01c8cd43b53e8e2469d3ed4116ac4eec"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Thresholds.html">Thresholds</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#a01c8cd43b53e8e2469d3ed4116ac4eec">run</a> (size_t ncells, const S *sums, const D *detected, std::vector&lt; PPTR &gt; subset_proportions, X *filter_by_sums, X *filter_by_detected, std::vector&lt; X * &gt; filter_by_subset_proportions, X *overall_filter)</td></tr>
-<tr class="separator:a01c8cd43b53e8e2469d3ed4116ac4eec"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a66f168b6493245a64d710d7ef92ed83c"><td class="memTemplParams" colspan="2">template&lt;typename B , typename S , typename D , typename PPTR , typename X &gt; </td></tr>
-<tr class="memitem:a66f168b6493245a64d710d7ef92ed83c"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Thresholds.html">Thresholds</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#a66f168b6493245a64d710d7ef92ed83c">run_blocked</a> (size_t ncells, const B *block, const S *sums, const D *detected, std::vector&lt; PPTR &gt; subset_proportions, X *filter_by_sums, X *filter_by_detected, std::vector&lt; X * &gt; filter_by_subset_proportions, X *overall_filter)</td></tr>
-<tr class="separator:a66f168b6493245a64d710d7ef92ed83c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1e054031ea7a780433450de2dcbb2dec"><td class="memTemplParams" colspan="2">template&lt;typename X  = uint8_t, typename S , typename D , typename PPTR &gt; </td></tr>
-<tr class="memitem:a1e054031ea7a780433450de2dcbb2dec"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a>&lt; X &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#a1e054031ea7a780433450de2dcbb2dec">run</a> (size_t ncells, const S *sums, const D *detected, std::vector&lt; PPTR &gt; subset_proportions)</td></tr>
-<tr class="separator:a1e054031ea7a780433450de2dcbb2dec"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a09874cae63a2c7dbe0234bd1903954c2"><td class="memTemplParams" colspan="2">template&lt;typename X  = uint8_t, typename B , typename S , typename D , typename PPTR &gt; </td></tr>
-<tr class="memitem:a09874cae63a2c7dbe0234bd1903954c2"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a>&lt; X &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#a09874cae63a2c7dbe0234bd1903954c2">run_blocked</a> (size_t ncells, const B *block, const S *sums, const D *detected, std::vector&lt; PPTR &gt; subset_proportions)</td></tr>
-<tr class="separator:a09874cae63a2c7dbe0234bd1903954c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a63416b8908cd1d40fc81c176947c7ac1"><td class="memTemplParams" colspan="2">template&lt;typename X  = uint8_t, class R &gt; </td></tr>
-<tr class="memitem:a63416b8908cd1d40fc81c176947c7ac1"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a>&lt; X &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#a63416b8908cd1d40fc81c176947c7ac1">run</a> (const R &amp;metrics)</td></tr>
-<tr class="separator:a63416b8908cd1d40fc81c176947c7ac1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae56f060cf7592e87805f9e21330cb42a"><td class="memTemplParams" colspan="2">template&lt;typename X  = uint8_t, class R , typename B &gt; </td></tr>
-<tr class="memitem:ae56f060cf7592e87805f9e21330cb42a"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a>&lt; X &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellQCFilters.html#ae56f060cf7592e87805f9e21330cb42a">run_blocked</a> (const R &amp;metrics, const B *block)</td></tr>
-<tr class="separator:ae56f060cf7592e87805f9e21330cb42a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d275232cee14a38fab73acebb7ad7a6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1PerCellRnaQcFilters.html">PerCellRnaQcFilters</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcFilters.html#a3d275232cee14a38fab73acebb7ad7a6">set_nmads</a> (double n=IsOutlier::Defaults::nmads)</td></tr>
+<tr class="separator:a3d275232cee14a38fab73acebb7ad7a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b8252800909a00562168f2221ebd6f9"><td class="memTemplParams" colspan="2">template&lt;typename S , typename D , typename PPTR , typename X &gt; </td></tr>
+<tr class="memitem:a3b8252800909a00562168f2221ebd6f9"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Thresholds.html">Thresholds</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcFilters.html#a3b8252800909a00562168f2221ebd6f9">run</a> (size_t ncells, const S *sums, const D *detected, std::vector&lt; PPTR &gt; subset_proportions, X *filter_by_sums, X *filter_by_detected, std::vector&lt; X * &gt; filter_by_subset_proportions, X *overall_filter)</td></tr>
+<tr class="separator:a3b8252800909a00562168f2221ebd6f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70d1c722a21e42b5fe8edf6e953dbb88"><td class="memTemplParams" colspan="2">template&lt;typename B , typename S , typename D , typename PPTR , typename X &gt; </td></tr>
+<tr class="memitem:a70d1c722a21e42b5fe8edf6e953dbb88"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Thresholds.html">Thresholds</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcFilters.html#a70d1c722a21e42b5fe8edf6e953dbb88">run_blocked</a> (size_t ncells, const B *block, const S *sums, const D *detected, std::vector&lt; PPTR &gt; subset_proportions, X *filter_by_sums, X *filter_by_detected, std::vector&lt; X * &gt; filter_by_subset_proportions, X *overall_filter)</td></tr>
+<tr class="separator:a70d1c722a21e42b5fe8edf6e953dbb88"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef1651639ca9e5195463f2d653937294"><td class="memTemplParams" colspan="2">template&lt;typename X  = uint8_t, typename S , typename D , typename PPTR &gt; </td></tr>
+<tr class="memitem:aef1651639ca9e5195463f2d653937294"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Results.html">Results</a>&lt; X &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcFilters.html#aef1651639ca9e5195463f2d653937294">run</a> (size_t ncells, const S *sums, const D *detected, std::vector&lt; PPTR &gt; subset_proportions)</td></tr>
+<tr class="separator:aef1651639ca9e5195463f2d653937294"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34b3a48af4106c52d04600dedf1c143b"><td class="memTemplParams" colspan="2">template&lt;typename X  = uint8_t, typename B , typename S , typename D , typename PPTR &gt; </td></tr>
+<tr class="memitem:a34b3a48af4106c52d04600dedf1c143b"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Results.html">Results</a>&lt; X &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcFilters.html#a34b3a48af4106c52d04600dedf1c143b">run_blocked</a> (size_t ncells, const B *block, const S *sums, const D *detected, std::vector&lt; PPTR &gt; subset_proportions)</td></tr>
+<tr class="separator:a34b3a48af4106c52d04600dedf1c143b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e6f61aa7416961793f27321614cbdeb"><td class="memTemplParams" colspan="2">template&lt;typename X  = uint8_t, class R &gt; </td></tr>
+<tr class="memitem:a7e6f61aa7416961793f27321614cbdeb"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Results.html">Results</a>&lt; X &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcFilters.html#a7e6f61aa7416961793f27321614cbdeb">run</a> (const R &amp;metrics)</td></tr>
+<tr class="separator:a7e6f61aa7416961793f27321614cbdeb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26a4a4fcd7018e408b98864fd0ed1434"><td class="memTemplParams" colspan="2">template&lt;typename X  = uint8_t, class R , typename B &gt; </td></tr>
+<tr class="memitem:a26a4a4fcd7018e408b98864fd0ed1434"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Results.html">Results</a>&lt; X &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcFilters.html#a26a4a4fcd7018e408b98864fd0ed1434">run_blocked</a> (const R &amp;metrics, const B *block)</td></tr>
+<tr class="separator:a26a4a4fcd7018e408b98864fd0ed1434"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p >Create filters to identify low-quality cells. </p>
-<p >Use an outlier-based approach on common QC metrics (see the <code><a class="el" href="classscran_1_1PerCellQCMetrics.html" title="Compute typical per-cell quality control metrics.">PerCellQCMetrics</a></code> class) to identify low-quality cells. Specifically, low-quality cells are defined as those with:</p>
+<div class="textblock"><p >Create filters to identify low-quality cells from RNA-derived metrics. </p>
+<p >Use an outlier-based approach on common QC metrics on the RNA data (see the <code><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html" title="Compute typical per-cell quality control metrics from an RNA count matrix.">PerCellRnaQcMetrics</a></code> class) to identify low-quality cells. Specifically, low-quality cells are defined as those with:</p>
 <ul>
 <li>Low total counts, indicating that library preparation or sequencing depth was suboptimal.</li>
 <li>Low numbers of detected features, a slightly different flavor of the above reasoning.</li>
@@ -124,8 +124,8 @@ Public Member Functions</h2></td></tr>
 <p >Outliers are defined on each metric by counting the number of MADs from the median value across all cells. This assumes that most cells in the experiment are of high (or at least acceptable) quality; any anomalies are indicative of low-quality cells that should be filtered out. See the <code><a class="el" href="classscran_1_1IsOutlier.html" title="Define outlier values based on MADs.">IsOutlier</a></code> class for implementation details.</p>
 <p >For the total counts and number of detected features, the outliers are defined after log-transformation of the metrics. This improves resolution at low values and ensures that the defined threshold is not negative. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a63416b8908cd1d40fc81c176947c7ac1" name="a63416b8908cd1d40fc81c176947c7ac1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a63416b8908cd1d40fc81c176947c7ac1">&#9670;&nbsp;</a></span>run() <span class="overload">[1/3]</span></h2>
+<a id="a7e6f61aa7416961793f27321614cbdeb" name="a7e6f61aa7416961793f27321614cbdeb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e6f61aa7416961793f27321614cbdeb">&#9670;&nbsp;</a></span>run() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -136,7 +136,7 @@ template&lt;typename X  = uint8_t, class R &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a>&lt; X &gt; scran::PerCellQCFilters::run </td>
+          <td class="memname"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Results.html">Results</a>&lt; X &gt; scran::PerCellRnaQcFilters::run </td>
           <td>(</td>
           <td class="paramtype">const R &amp;&#160;</td>
           <td class="paramname"><em>metrics</em></td><td>)</td>
@@ -149,26 +149,26 @@ template&lt;typename X  = uint8_t, class R &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Identify low-quality cells from QC metrics, see <code><a class="el" href="classscran_1_1PerCellQCFilters.html#a01c8cd43b53e8e2469d3ed4116ac4eec">run()</a></code> for details.</p>
+<p >Identify low-quality cells from QC metrics, see <code><a class="el" href="classscran_1_1PerCellRnaQcFilters.html#a3b8252800909a00562168f2221ebd6f9">run()</a></code> for details.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">X</td><td>Boolean type to indicate whether a cell should be discarded. </td></tr>
-    <tr><td class="paramname">R</td><td>Class that holds the QC metrics, typically a <code><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html" title="Result store for QC metric calculations.">PerCellQCMetrics::Results</a></code>.</td></tr>
+    <tr><td class="paramname">R</td><td>Class that holds the QC metrics, typically a <code><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html" title="Result store for QC metric calculations.">PerCellRnaQcMetrics::Results</a></code>.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">metrics</td><td>Precomputed QC metrics, typically generated by <code><a class="el" href="classscran_1_1PerCellQCMetrics.html#aedc028b2d8df9b5b28623599e060796e">PerCellQCMetrics::run</a></code>.</td></tr>
+    <tr><td class="paramname">metrics</td><td>Precomputed QC metrics, typically generated by <code><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html#ac3e8492a8ff2bf2cb983fbe729c1156b">PerCellRnaQcMetrics::run</a></code>.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html" title="Results of the QC filtering.">Results</a></code> object indicating whether a cell should be filtered out for each reason. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Results.html" title="Results of the QC filtering.">Results</a></code> object indicating whether a cell should be filtered out for each reason. </dd></dl>
 
 </div>
 </div>
-<a id="a1e054031ea7a780433450de2dcbb2dec" name="a1e054031ea7a780433450de2dcbb2dec"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1e054031ea7a780433450de2dcbb2dec">&#9670;&nbsp;</a></span>run() <span class="overload">[2/3]</span></h2>
+<a id="aef1651639ca9e5195463f2d653937294" name="aef1651639ca9e5195463f2d653937294"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aef1651639ca9e5195463f2d653937294">&#9670;&nbsp;</a></span>run() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -179,7 +179,7 @@ template&lt;typename X  = uint8_t, typename S , typename D , typename PPTR &gt; 
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a>&lt; X &gt; scran::PerCellQCFilters::run </td>
+          <td class="memname"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Results.html">Results</a>&lt; X &gt; scran::PerCellRnaQcFilters::run </td>
           <td>(</td>
           <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>ncells</em>, </td>
@@ -214,7 +214,7 @@ template&lt;typename X  = uint8_t, typename S , typename D , typename PPTR &gt; 
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Identify low-quality cells from QC metrics, see <code><a class="el" href="classscran_1_1PerCellQCFilters.html#a01c8cd43b53e8e2469d3ed4116ac4eec">run()</a></code>.</p>
+<p >Identify low-quality cells from QC metrics, see <code><a class="el" href="classscran_1_1PerCellRnaQcFilters.html#a3b8252800909a00562168f2221ebd6f9">run()</a></code>.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">X</td><td>Boolean type to indicate whether a cell should be discarded. </td></tr>
@@ -233,12 +233,12 @@ template&lt;typename X  = uint8_t, typename S , typename D , typename PPTR &gt; 
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html" title="Results of the QC filtering.">Results</a></code> object indicating whether a cell should be filtered out for each reason. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Results.html" title="Results of the QC filtering.">Results</a></code> object indicating whether a cell should be filtered out for each reason. </dd></dl>
 
 </div>
 </div>
-<a id="a01c8cd43b53e8e2469d3ed4116ac4eec" name="a01c8cd43b53e8e2469d3ed4116ac4eec"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a01c8cd43b53e8e2469d3ed4116ac4eec">&#9670;&nbsp;</a></span>run() <span class="overload">[3/3]</span></h2>
+<a id="a3b8252800909a00562168f2221ebd6f9" name="a3b8252800909a00562168f2221ebd6f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b8252800909a00562168f2221ebd6f9">&#9670;&nbsp;</a></span>run() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -249,7 +249,7 @@ template&lt;typename S , typename D , typename PPTR , typename X &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Thresholds.html">Thresholds</a> scran::PerCellQCFilters::run </td>
+          <td class="memname"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Thresholds.html">Thresholds</a> scran::PerCellRnaQcFilters::run </td>
           <td>(</td>
           <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>ncells</em>, </td>
@@ -308,7 +308,7 @@ template&lt;typename S , typename D , typename PPTR , typename X &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Identify low-quality cells as those that have outlier values for QC metrics. This uses QC metrics that are typically computed by the <code><a class="el" href="classscran_1_1PerCellQCMetrics.html" title="Compute typical per-cell quality control metrics.">PerCellQCMetrics</a></code> class.</p>
+<p >Identify low-quality cells as those that have outlier values for QC metrics. This uses QC metrics that are typically computed by the <code><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html" title="Compute typical per-cell quality control metrics from an RNA count matrix.">PerCellRnaQcMetrics</a></code> class.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">S</td><td>Floating point type, used for the sum. </td></tr>
@@ -331,12 +331,12 @@ template&lt;typename S , typename D , typename PPTR , typename X &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellQCFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object defining the thresholds for each QC metric. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object defining the thresholds for each QC metric. </dd></dl>
 
 </div>
 </div>
-<a id="ae56f060cf7592e87805f9e21330cb42a" name="ae56f060cf7592e87805f9e21330cb42a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae56f060cf7592e87805f9e21330cb42a">&#9670;&nbsp;</a></span>run_blocked() <span class="overload">[1/3]</span></h2>
+<a id="a26a4a4fcd7018e408b98864fd0ed1434" name="a26a4a4fcd7018e408b98864fd0ed1434"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26a4a4fcd7018e408b98864fd0ed1434">&#9670;&nbsp;</a></span>run_blocked() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -347,7 +347,7 @@ template&lt;typename X  = uint8_t, class R , typename B &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a>&lt; X &gt; scran::PerCellQCFilters::run_blocked </td>
+          <td class="memname"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Results.html">Results</a>&lt; X &gt; scran::PerCellRnaQcFilters::run_blocked </td>
           <td>(</td>
           <td class="paramtype">const R &amp;&#160;</td>
           <td class="paramname"><em>metrics</em>, </td>
@@ -370,28 +370,28 @@ template&lt;typename X  = uint8_t, class R , typename B &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Identify low-quality cells from QC metrics with blocking, see <code><a class="el" href="classscran_1_1PerCellQCFilters.html#a66f168b6493245a64d710d7ef92ed83c">run_blocked()</a></code> for details.</p>
+<p >Identify low-quality cells from QC metrics with blocking, see <code><a class="el" href="classscran_1_1PerCellRnaQcFilters.html#a70d1c722a21e42b5fe8edf6e953dbb88">run_blocked()</a></code> for details.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">X</td><td>Boolean type to indicate whether a cell should be discarded. </td></tr>
-    <tr><td class="paramname">R</td><td>Class that holds the QC metrics, typically a <code><a class="el" href="structscran_1_1PerCellQCMetrics_1_1Results.html" title="Result store for QC metric calculations.">PerCellQCMetrics::Results</a></code>. </td></tr>
+    <tr><td class="paramname">R</td><td>Class that holds the QC metrics, typically a <code><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html" title="Result store for QC metric calculations.">PerCellRnaQcMetrics::Results</a></code>. </td></tr>
     <tr><td class="paramname">B</td><td>Integer type, to hold the block IDs.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">metrics</td><td>Precomputed QC metrics, typically generated by <code><a class="el" href="classscran_1_1PerCellQCMetrics.html#aedc028b2d8df9b5b28623599e060796e">PerCellQCMetrics::run</a></code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Optional pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1PerCellQCFilters.html#a66f168b6493245a64d710d7ef92ed83c">run_blocked()</a></code> for details.</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">metrics</td><td>Precomputed QC metrics, typically generated by <code><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html#ac3e8492a8ff2bf2cb983fbe729c1156b">PerCellRnaQcMetrics::run</a></code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Optional pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1PerCellRnaQcFilters.html#a70d1c722a21e42b5fe8edf6e953dbb88">run_blocked()</a></code> for details.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html" title="Results of the QC filtering.">Results</a></code> object indicating whether a cell should be filtered out for each reason. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Results.html" title="Results of the QC filtering.">Results</a></code> object indicating whether a cell should be filtered out for each reason. </dd></dl>
 
 </div>
 </div>
-<a id="a09874cae63a2c7dbe0234bd1903954c2" name="a09874cae63a2c7dbe0234bd1903954c2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a09874cae63a2c7dbe0234bd1903954c2">&#9670;&nbsp;</a></span>run_blocked() <span class="overload">[2/3]</span></h2>
+<a id="a34b3a48af4106c52d04600dedf1c143b" name="a34b3a48af4106c52d04600dedf1c143b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34b3a48af4106c52d04600dedf1c143b">&#9670;&nbsp;</a></span>run_blocked() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -402,7 +402,7 @@ template&lt;typename X  = uint8_t, typename B , typename S , typename D , typena
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html">Results</a>&lt; X &gt; scran::PerCellQCFilters::run_blocked </td>
+          <td class="memname"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Results.html">Results</a>&lt; X &gt; scran::PerCellRnaQcFilters::run_blocked </td>
           <td>(</td>
           <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>ncells</em>, </td>
@@ -443,7 +443,7 @@ template&lt;typename X  = uint8_t, typename B , typename S , typename D , typena
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Identify low-quality cells from QC metrics with blocking, see <code><a class="el" href="classscran_1_1PerCellQCFilters.html#a66f168b6493245a64d710d7ef92ed83c">run_blocked()</a></code>.</p>
+<p >Identify low-quality cells from QC metrics with blocking, see <code><a class="el" href="classscran_1_1PerCellRnaQcFilters.html#a70d1c722a21e42b5fe8edf6e953dbb88">run_blocked()</a></code>.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">X</td><td>Boolean type to indicate whether a cell should be discarded. </td></tr>
@@ -457,19 +457,19 @@ template&lt;typename X  = uint8_t, typename B , typename S , typename D , typena
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">ncells</td><td>Number of cells. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Optional pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1PerCellQCFilters.html#a66f168b6493245a64d710d7ef92ed83c">run_blocked()</a></code> for details. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Optional pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1PerCellRnaQcFilters.html#a70d1c722a21e42b5fe8edf6e953dbb88">run_blocked()</a></code> for details. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">sums</td><td>Pointer to an array of length equal to <code>ncells</code>, containing the per-cell sums. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">detected</td><td>Pointer to an array of length equal to <code>ncells</code>, containing the number of detected features for each cell. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">subset_proportions</td><td>Vector of pointers of length equal to the number of feature subsets. Each pointer corresponds to a feature subset and should point to an array of length equal to <code>ncells</code>, containing the proportion of counts in that subset for each cell.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellQCFilters_1_1Results.html" title="Results of the QC filtering.">Results</a></code> object indicating whether a cell should be filtered out for each reason. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Results.html" title="Results of the QC filtering.">Results</a></code> object indicating whether a cell should be filtered out for each reason. </dd></dl>
 
 </div>
 </div>
-<a id="a66f168b6493245a64d710d7ef92ed83c" name="a66f168b6493245a64d710d7ef92ed83c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a66f168b6493245a64d710d7ef92ed83c">&#9670;&nbsp;</a></span>run_blocked() <span class="overload">[3/3]</span></h2>
+<a id="a70d1c722a21e42b5fe8edf6e953dbb88" name="a70d1c722a21e42b5fe8edf6e953dbb88"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a70d1c722a21e42b5fe8edf6e953dbb88">&#9670;&nbsp;</a></span>run_blocked() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -480,7 +480,7 @@ template&lt;typename B , typename S , typename D , typename PPTR , typename X &g
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structscran_1_1PerCellQCFilters_1_1Thresholds.html">Thresholds</a> scran::PerCellQCFilters::run_blocked </td>
+          <td class="memname"><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Thresholds.html">Thresholds</a> scran::PerCellRnaQcFilters::run_blocked </td>
           <td>(</td>
           <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>ncells</em>, </td>
@@ -570,12 +570,12 @@ template&lt;typename B , typename S , typename D , typename PPTR , typename X &g
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellQCFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object defining the thresholds for each QC metric in each block. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellRnaQcFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object defining the thresholds for each QC metric in each block. </dd></dl>
 
 </div>
 </div>
-<a id="a5aefa5d9c27f5f84081a6a89ab2a7f40" name="a5aefa5d9c27f5f84081a6a89ab2a7f40"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5aefa5d9c27f5f84081a6a89ab2a7f40">&#9670;&nbsp;</a></span>set_nmads()</h2>
+<a id="a3d275232cee14a38fab73acebb7ad7a6" name="a3d275232cee14a38fab73acebb7ad7a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d275232cee14a38fab73acebb7ad7a6">&#9670;&nbsp;</a></span>set_nmads()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -584,7 +584,7 @@ template&lt;typename B , typename S , typename D , typename PPTR , typename X &g
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1PerCellQCFilters.html">PerCellQCFilters</a> &amp; scran::PerCellQCFilters::set_nmads </td>
+          <td class="memname"><a class="el" href="classscran_1_1PerCellRnaQcFilters.html">PerCellRnaQcFilters</a> &amp; scran::PerCellRnaQcFilters::set_nmads </td>
           <td>(</td>
           <td class="paramtype">double&#160;</td>
           <td class="paramname"><em>n</em> = <code>IsOutlier::Defaults::nmads</code></td><td>)</td>
@@ -603,12 +603,12 @@ template&lt;typename B , typename S , typename D , typename PPTR , typename X &g
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PerCellQCFilters.html" title="Create filters to identify low-quality cells.">PerCellQCFilters</a></code> object. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PerCellRnaQcFilters.html" title="Create filters to identify low-quality cells from RNA-derived metrics.">PerCellRnaQcFilters</a></code> object. </dd></dl>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>scran/quality_control/<a class="el" href="PerCellQCFilters_8hpp_source.html">PerCellQCFilters.hpp</a></li>
+<li>scran/quality_control/<a class="el" href="PerCellRnaQcFilters_8hpp_source.html">PerCellRnaQcFilters.hpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
