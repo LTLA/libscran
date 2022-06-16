@@ -17,7 +17,8 @@ namespace scran {
 /**
  * @brief Filter out low-quality cells.
  *
- * This class removes low-quality cells from the input matrix by subsetting on the columns, typically using the filters defined in `PerCellQCFilters`.
+ * This class removes low-quality cells from the input matrix by subsetting on the columns, 
+ * typically using the filters defined in `PerCellRnaQcFilters` and/or `PerCellAdtQcFilters`.
  * It is effectively a wrapper around the `tatami::make_DelayedSubset` function.
  */
 class FilterCells {

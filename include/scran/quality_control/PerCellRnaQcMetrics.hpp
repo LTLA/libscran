@@ -11,17 +11,17 @@
 #include "../utils/vector_to_pointers.hpp"
 
 /**
- * @file PerCellQCMetrics.hpp
+ * @file PerCellRNAQcMetrics.hpp
  *
- * @brief Compute typical per-cell quality control metrics.
+ * @brief Compute typical per-cell quality control metrics from an RNA count matrix.
  */
 
 namespace scran {
 
 /**
- * @brief Compute typical per-cell quality control metrics.
+ * @brief Compute typical per-cell quality control metrics from an RNA count matrix.
  *
- * Given a feature-by-cell count matrix, this class computes several QC metrics:
+ * Given a feature-by-cell RNA count matrix, this class computes several QC metrics:
  * 
  * - The total sum for each cell, which represents the efficiency of library preparation and sequencing.
  *   Low totals indicate that the library was not successfully captured.
@@ -29,15 +29,16 @@ namespace scran {
  *   This also quantifies the library preparation efficiency, but with a greater focus on capturing the transcriptional complexity.
  * - The proportion of counts in pre-defined feature subsets.
  *   The exact interpretation depends on the nature of the subset -
- *   in the most common case of mitochondrial transcripts, higher proportions indicate cell damage.
+ *   most commonly, one subset will contain all genes on the mitochondrial chromosome,
+ *   where higher proportions indicate cell damage due to loss of cytoplasmic transcripts.
  *   Spike-in proportions can be interpreted in a similar manner.
  */
-class PerCellQCMetrics {
+class PerCellRnaQcMetrics {
 public:
     /**
      * @brief Result store for QC metric calculations.
      * 
-     * Meaningful instances of this object should generally be constructed by calling the `PerCellQCMetrics::run()` methods.
+     * Meaningful instances of this object should generally be constructed by calling the `PerCellRnaQcMetrics::run()` methods.
      * Empty instances can be default-constructed as placeholders.
      */
     struct Results {
@@ -79,7 +80,7 @@ public:
      * Each array represents a feature subset and indicating whether each feature in `mat` belongs to that subset.
      * Users can pass `{}` if no subsets are to be used. 
      *
-     * @return A `PerCellQCMetrics::Results` object containing the QC metrics.
+     * @return A `PerCellRnaQcMetrics::Results` object containing the QC metrics.
      * Subset proportions are returned depending on the `subsets`.
      */
     template<class MAT, typename SUB = const uint8_t*>
@@ -103,12 +104,12 @@ public:
     /**
      * @param t Whether to compute the total count for each subset rather than the proportion.
      *
-     * @return A reference to this `PerCellQCMetrics` object.
+     * @return A reference to this `PerCellRnaQcMetrics` object.
      *
      * Note that the total subset count will still be stored in the `subset_proportions` vectors or arrays in `run()`;
      * the only difference is that the division by the total count for each cell is omitted.
      */
-    PerCellQCMetrics& set_subset_totals(bool t = Defaults::subset_totals) {
+    PerCellRnaQcMetrics& set_subset_totals(bool t = Defaults::subset_totals) {
         subset_totals = t;
         return *this;
     }
@@ -341,7 +342,7 @@ public:
         size_t nr = mat->nrow(), nc = mat->ncol();
 
 #ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::PerCellQCMetrics", "Computing quality control metrics for each cell");
+        SCRAN_LOGGER("scran::PerCellRnaQcMetrics", "Computing quality control metrics for each cell");
 #endif
 
         Factory fact(nr, nc, &subsets, sums, detected, subset_proportions, subset_totals);
@@ -349,6 +350,11 @@ public:
         return;
     }
 };
+
+/**
+ * An alias for `PerCellRnaQcMetrics`, provided for back-compatibility.
+ */
+typedef PerCellRnaQcMetrics PerCellQCMetrics;
 
 }
 

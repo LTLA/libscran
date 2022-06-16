@@ -4,13 +4,13 @@
 #include "../utils/compare_vectors.h"
 
 #include "tatami/base/DenseMatrix.hpp"
-#include "scran/quality_control/PerCellQCMetrics.hpp"
-#include "scran/quality_control/PerCellQCFilters.hpp"
+#include "scran/quality_control/PerCellRnaQcMetrics.hpp"
+#include "scran/quality_control/PerCellRnaQcFilters.hpp"
 
 #include <cmath>
 #include <numeric>
 
-class PerCellQCFiltersTester : public ::testing::Test {
+class PerCellRnaQcFiltersTester : public ::testing::Test {
 protected:
     void SetUp() {
         mat = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
@@ -27,14 +27,14 @@ protected:
     }
 protected:
     std::shared_ptr<tatami::NumericMatrix> mat;
-    scran::PerCellQCMetrics qc;
+    scran::PerCellRnaQcMetrics qc;
 };
 
-TEST_F(PerCellQCFiltersTester, NoSubset) {
+TEST_F(PerCellRnaQcFiltersTester, NoSubset) {
     auto qcres = qc.run(mat.get(), {});
 
     // Default NMADs works correctly.
-    scran::PerCellQCFilters filters;
+    scran::PerCellRnaQcFilters filters;
     auto res = filters.run(qcres);
 
     scran::IsOutlier ref;
@@ -73,12 +73,12 @@ TEST_F(PerCellQCFiltersTester, NoSubset) {
 
 std::vector<int> keep_i = { 0, 1, 2, 3, 11, 12, 13, 14 };
 
-TEST_F(PerCellQCFiltersTester, OneSubset) {
+TEST_F(PerCellRnaQcFiltersTester, OneSubset) {
     std::vector<uint8_t> keep_s(mat->nrow());
     for (auto i : keep_i) { keep_s[i] = 1; }
     auto qcres = qc.run(mat.get(), std::vector<const uint8_t*>(1, keep_s.data()));
 
-    scran::PerCellQCFilters filters;
+    scran::PerCellRnaQcFilters filters;
     auto res = filters.set_nmads(1).run(qcres);
 
     scran::IsOutlier ref;
@@ -91,14 +91,14 @@ TEST_F(PerCellQCFiltersTester, OneSubset) {
     EXPECT_EQ(refres.thresholds.upper, res.thresholds.subset_proportions[0]);
 }
 
-TEST_F(PerCellQCFiltersTester, Blocking) {
+TEST_F(PerCellRnaQcFiltersTester, Blocking) {
     std::vector<uint8_t> keep_s(mat->nrow());
     for (auto i : keep_i) { keep_s[i] = 1; }
     auto qcres = qc.run(mat.get(), std::vector<const uint8_t*>(1, keep_s.data()));
 
     std::vector<int> block(mat->ncol());
     for (size_t i = 0; i < block.size(); ++i) { block[i] = i % 5; }
-    scran::PerCellQCFilters filters;
+    scran::PerCellRnaQcFilters filters;
     auto res = filters.set_nmads(1).run_blocked(qcres, block.data());
 
     scran::IsOutlier ref;
@@ -124,12 +124,12 @@ TEST_F(PerCellQCFiltersTester, Blocking) {
     }
 }
 
-TEST_F(PerCellQCFiltersTester, Overall) {
+TEST_F(PerCellRnaQcFiltersTester, Overall) {
     std::vector<uint8_t> keep_s(mat->nrow());
     for (auto i : keep_i) { keep_s[i] = 1; }
     auto qcres = qc.run(mat.get(), std::vector<const uint8_t*>(1, keep_s.data()));
 
-    scran::PerCellQCFilters filters;
+    scran::PerCellRnaQcFilters filters;
     auto res = filters.run(qcres);
 
     std::vector<uint8_t> vec(mat->ncol());

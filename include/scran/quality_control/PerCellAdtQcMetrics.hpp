@@ -1,7 +1,7 @@
 #ifndef SCRAN_PER_CELL_ADT_QC_METRICS_HPP
 #define SCRAN_PER_CELL_ADT_QC_METRICS_HPP
 
-#include "PerCellQCMetrics.hpp"
+#include "PerCellRnaQcMetrics.hpp"
 
 /**
  * @file PerCellAdtQcMetrics.hpp
@@ -31,7 +31,7 @@ public:
     /**
      * @brief Result store for QC metric calculations.
      * 
-     * Meaningful instances of this object should generally be constructed by calling the `PerCellQCMetrics::run()` methods.
+     * Meaningful instances of this object should generally be constructed by calling the `PerCellAdtQcMetrics::run()` methods.
      * Empty instances can be default-constructed as placeholders.
      */
     struct Results {
@@ -110,7 +110,7 @@ public:
      */
     template<class Matrix, typename SubPtr = const uint8_t*, typename Sum, typename Detected, typename SubTotal>
     void run(const Matrix* mat, const std::vector<SubPtr>& subsets, Sum* sums, Detected* detected, std::vector<SubTotal*> subset_totals) const {
-        PerCellQCMetrics runner;
+        PerCellRnaQcMetrics runner;
         runner.set_subset_totals(true);
         runner.run(mat, subsets, sums, detected, std::move(subset_totals));
         return;

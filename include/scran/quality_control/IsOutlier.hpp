@@ -242,7 +242,7 @@ public:
     /**
      * Identify outliers in an array of observations with blocking.
      * Outlier detection is performed separately within each block of observations, as if `run()` was called on each subset of observations with the same ID in `block`.
-     * This is occasionally useful when dealing with multi-batch datasets, see `PerCellQCFilters::run()` for an example.
+     * This is occasionally useful when dealing with multi-batch datasets, see `PerCellRnaQcFilters::run()` for an example.
      *
      * @tparam B Integer type, containing the block IDs.
      * @tparam T Type of observation, numeric.

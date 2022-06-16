@@ -13,10 +13,14 @@
 #include "feature_selection/FitTrendVar.hpp"
 #include "feature_selection/ModelGeneVar.hpp"
 #include "normalization/LogNormCounts.hpp"
+
 #include "quality_control/FilterCells.hpp"
 #include "quality_control/IsOutlier.hpp"
-#include "quality_control/PerCellQCFilters.hpp"
-#include "quality_control/PerCellQCMetrics.hpp"
+#include "quality_control/PerCellRnaQcFilters.hpp"
+#include "quality_control/PerCellRnaQcMetrics.hpp"
+#include "quality_control/PerCellAdtQcFilters.hpp"
+#include "quality_control/PerCellAdtQcMetrics.hpp"
+
 #include "utils/average_vectors.hpp"
 #include "utils/subset_vector.hpp"
 #include "utils/vector_to_pointers.hpp"

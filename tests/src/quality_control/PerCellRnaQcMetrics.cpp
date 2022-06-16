@@ -8,12 +8,12 @@
 #include "tatami/utils/convert_to_sparse.hpp"
 #include "tatami/stats/sums.hpp"
 
-#include "scran/quality_control/PerCellQCMetrics.hpp"
+#include "scran/quality_control/PerCellRnaQcMetrics.hpp"
 #include "scran/quality_control/PerCellAdtQcMetrics.hpp"
 
 #include <cmath>
 
-class PerCellQCMetricsTester : public ::testing::Test {
+class PerCellRnaQcMetricsTester : public ::testing::Test {
 protected:
     void SetUp() {
         dense_row = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
@@ -23,7 +23,7 @@ protected:
     }
 protected:
     std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
-    scran::PerCellQCMetrics qc1, qc2, qc3, qc4;
+    scran::PerCellRnaQcMetrics qc1, qc2, qc3, qc4;
 
     std::vector<int> to_filter (const std::vector<size_t>& indices) {
         std::vector<int> keep_s(dense_row->nrow());
@@ -32,7 +32,7 @@ protected:
     }
 };
 
-TEST_F(PerCellQCMetricsTester, NoSubset) {
+TEST_F(PerCellRnaQcMetricsTester, NoSubset) {
     auto res = qc1.run(dense_row.get(), {});
     EXPECT_EQ(res.sums, tatami::column_sums(dense_row.get()));
 
@@ -59,7 +59,7 @@ TEST_F(PerCellQCMetricsTester, NoSubset) {
     EXPECT_EQ(res.detected, res4.detected);
 }
 
-TEST_F(PerCellQCMetricsTester, OneSubset) {
+TEST_F(PerCellRnaQcMetricsTester, OneSubset) {
     std::vector<size_t> keep_i = { 0, 5, 7, 8, 9, 10, 16, 17 };
     auto keep_s = to_filter(keep_i);
     std::vector<const int*> subs(1, keep_s.data());
@@ -86,7 +86,7 @@ TEST_F(PerCellQCMetricsTester, OneSubset) {
     EXPECT_EQ(refprop, res4.subset_proportions[0]);
 }
 
-TEST_F(PerCellQCMetricsTester, SubsetTotals) {
+TEST_F(PerCellRnaQcMetricsTester, SubsetTotals) {
     std::vector<size_t> keep_i = { 0, 5, 7, 8, 9, 10, 16, 17 };
     auto keep_s = to_filter(keep_i);
     std::vector<const int*> subs(1, keep_s.data());
@@ -116,7 +116,7 @@ TEST_F(PerCellQCMetricsTester, SubsetTotals) {
     EXPECT_EQ(refprop, adt_res.subset_totals[0]);
 }
 
-TEST_F(PerCellQCMetricsTester, TwoSubsets) {
+TEST_F(PerCellRnaQcMetricsTester, TwoSubsets) {
     std::vector<size_t> keep_i1 = { 0, 5, 7, 8, 9, 10, 16, 17 };
     std::vector<size_t> keep_i2 = { 1, 8, 2, 6, 11, 5, 19, 17 };
     auto keep_s1 = to_filter(keep_i1), keep_s2 = to_filter(keep_i2);
@@ -158,7 +158,7 @@ TEST_F(PerCellQCMetricsTester, TwoSubsets) {
     EXPECT_EQ(refprop2, res4.subset_proportions[1]);
 }
 
-TEST_F(PerCellQCMetricsTester, NASubsets) {
+TEST_F(PerCellRnaQcMetricsTester, NASubsets) {
     std::vector<size_t> keep_i = { 0, 5, 7, 8, 9, 10, 16, 17 };
     auto keep_s = to_filter(keep_i);
 
@@ -166,7 +166,7 @@ TEST_F(PerCellQCMetricsTester, NASubsets) {
     auto dense_zero = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseColumnMatrix<double>(20, 5, std::move(nothing)));
 
     std::vector<const int*> subs = { keep_s.data() };
-    scran::PerCellQCMetrics QC;
+    scran::PerCellRnaQcMetrics QC;
     auto res = QC.run(dense_zero.get(), subs);
 
     EXPECT_EQ(res.sums, std::vector<double>(dense_zero->ncol()));

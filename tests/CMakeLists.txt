@@ -12,11 +12,13 @@ enable_testing()
 
 add_executable(
     libtest 
-    src/quality_control/PerCellQCMetrics.cpp
-    src/quality_control/PerCellQCFilters.cpp
+
+    src/quality_control/PerCellRnaQcMetrics.cpp
+    src/quality_control/PerCellRnaQcFilters.cpp
     src/quality_control/PerCellAdtQcFilters.cpp
     src/quality_control/IsOutlier.cpp
     src/quality_control/FilterCells.cpp
+
     src/normalization/LogNormCounts.cpp
     src/normalization/CenterSizeFactors.cpp
     src/normalization/MedianSizeFactors.cpp

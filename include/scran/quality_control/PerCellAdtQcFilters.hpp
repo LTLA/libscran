@@ -20,7 +20,7 @@ namespace scran {
 /**
  * @brief Create filters to identify low-quality cells from ADT data.
  *
- * In antibody-derived tag (ADT) count matrices, the QC filtering decisions are slightly different than those for RNA count matrices (see `PerCellQCFilters` for the latter).
+ * In antibody-derived tag (ADT) count matrices, the QC filtering decisions are slightly different than those for RNA count matrices (see `PerCellAdtQcFilters` for the latter).
  * Here, low-quality cells are defined as those with:
  *
  * - Low numbers of detected features, which indicates that library preparation or sequencing depth was suboptimal.

@@ -22,8 +22,8 @@ The example below demonstrates how to use **libscran** to run a standard analysi
 auto mat = tatami::MatrixMarket::load_sparse_matrix(path);
 
 // Filtering out low-quality cells. 
-auto qc_res = scran::PerCellQCMetrics().run(mat.get(), { /* mito subset definitions go here */ });
-auto qc_filters = scran::PerCellQCFilters().run(qc_res);
+auto qc_res = scran::PerCellRnaQcMetrics().run(mat.get(), { /* mito subset definitions go here */ });
+auto qc_filters = scran::PerCellRnaQcFilters().run(qc_res);
 auto filtered = scran::FilterCells().run(mat, qc_filters.overall_filter.data());
 
 // Computing log-normalized expression values, re-using the total count from the QC step.
