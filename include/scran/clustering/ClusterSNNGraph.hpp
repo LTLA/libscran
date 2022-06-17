@@ -410,7 +410,7 @@ public:
      *
      * @return A reference to this `ClusterSNNGraphWalktrap` object.
      */
-    ClusterSNNGraphWalktrap& set_resolution(int s = Defaults::steps) {
+    ClusterSNNGraphWalktrap& set_steps(int s = Defaults::steps) {
         steps = s;
         return *this;
     }

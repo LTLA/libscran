@@ -106,10 +106,10 @@ TEST_P(ClusterSNNGraphWalktrapTest, Basic) {
     auto param = GetParam();
     assemble(param);
     int k = std::get<2>(param);
-    double res = std::get<3>(param);
+    double steps = std::get<3>(param);
     
     scran::ClusterSNNGraphWalktrap cluster;
-    cluster.set_neighbors(k).set_resolution(res);
+    cluster.set_neighbors(k).set_steps(steps);
     auto output = cluster.run(ndim, nobs, data.data());
 
     EXPECT_EQ(output.membership.size(), nobs);
