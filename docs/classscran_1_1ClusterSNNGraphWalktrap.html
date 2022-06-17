@@ -119,8 +119,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a0441f23a53b117e1b3f874055e238b20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afb44998eb606e936bc5cfe289f269961"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ClusterSNNGraphWalktrap.html">ClusterSNNGraphWalktrap</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ClusterSNNGraphWalktrap.html#afb44998eb606e936bc5cfe289f269961">set_seed</a> (int s=<a class="el" href="structscran_1_1ClusterSNNGraphWalktrap_1_1Defaults.html#a87c5c1dab09f0a36f14900fd5ad5ddf9">Defaults::seed</a>)</td></tr>
 <tr class="separator:afb44998eb606e936bc5cfe289f269961"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a726f2e2d6e3ad4d7bde13413260bedad"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ClusterSNNGraphWalktrap.html">ClusterSNNGraphWalktrap</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ClusterSNNGraphWalktrap.html#a726f2e2d6e3ad4d7bde13413260bedad">set_resolution</a> (int s=<a class="el" href="structscran_1_1ClusterSNNGraphWalktrap_1_1Defaults.html#aefa5e58e12dcef4517fec00389e99a7a">Defaults::steps</a>)</td></tr>
-<tr class="separator:a726f2e2d6e3ad4d7bde13413260bedad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb4706b65f7909d49cd52922cd1f91af"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ClusterSNNGraphWalktrap.html">ClusterSNNGraphWalktrap</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ClusterSNNGraphWalktrap.html#abb4706b65f7909d49cd52922cd1f91af">set_steps</a> (int s=<a class="el" href="structscran_1_1ClusterSNNGraphWalktrap_1_1Defaults.html#aefa5e58e12dcef4517fec00389e99a7a">Defaults::steps</a>)</td></tr>
+<tr class="separator:abb4706b65f7909d49cd52922cd1f91af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b1afacb2e82afac65a279026baaec42"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1ClusterSNNGraphWalktrap_1_1Results.html">Results</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ClusterSNNGraphWalktrap.html#a3b1afacb2e82afac65a279026baaec42">run</a> (size_t ndims, size_t ncells, const double *mat)</td></tr>
 <tr class="separator:a3b1afacb2e82afac65a279026baaec42"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23049836aca344ba1402b0ee17019056"><td class="memTemplParams" colspan="2">template&lt;class Algorithm &gt; </td></tr>
@@ -389,39 +389,6 @@ template&lt;class Algorithm &gt; </div>
 
 </div>
 </div>
-<a id="a726f2e2d6e3ad4d7bde13413260bedad" name="a726f2e2d6e3ad4d7bde13413260bedad"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a726f2e2d6e3ad4d7bde13413260bedad">&#9670;&nbsp;</a></span>set_resolution()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ClusterSNNGraphWalktrap.html">ClusterSNNGraphWalktrap</a> &amp; scran::ClusterSNNGraphWalktrap::set_resolution </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1ClusterSNNGraphWalktrap_1_1Defaults.html#aefa5e58e12dcef4517fec00389e99a7a">Defaults::steps</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>Number of steps of the random walk.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ClusterSNNGraphWalktrap.html" title="Walktrap clustering on a shared nearest-neighbor graph.">ClusterSNNGraphWalktrap</a></code> object. </dd></dl>
-
-</div>
-</div>
 <a id="afb44998eb606e936bc5cfe289f269961" name="afb44998eb606e936bc5cfe289f269961"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afb44998eb606e936bc5cfe289f269961">&#9670;&nbsp;</a></span>set_seed()</h2>
 
@@ -448,6 +415,39 @@ template&lt;class Algorithm &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">s</td><td>Seed for the default <b>igraph</b> random number generator.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ClusterSNNGraphWalktrap.html" title="Walktrap clustering on a shared nearest-neighbor graph.">ClusterSNNGraphWalktrap</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="abb4706b65f7909d49cd52922cd1f91af" name="abb4706b65f7909d49cd52922cd1f91af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb4706b65f7909d49cd52922cd1f91af">&#9670;&nbsp;</a></span>set_steps()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ClusterSNNGraphWalktrap.html">ClusterSNNGraphWalktrap</a> &amp; scran::ClusterSNNGraphWalktrap::set_steps </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1ClusterSNNGraphWalktrap_1_1Defaults.html#aefa5e58e12dcef4517fec00389e99a7a">Defaults::steps</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>Number of steps of the random walk.</td></tr>
   </table>
   </dd>
 </dl>
