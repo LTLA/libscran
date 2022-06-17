@@ -6,41 +6,45 @@
 #include <cmath>
 #include <map>
 
-template<class PARAM>
-class ClusterSNNGraphTestCore : public ::testing::TestWithParam<PARAM> {
+class ClusterSNNGraphTestCore {
 protected:
     size_t nobs, ndim;
     std::vector<double> data;
 
-    void assemble(const PARAM& param) {
-        std::mt19937_64 rng(42);
+    void assemble(int nd, int no, int nclusters, double scale, int seed) {
+        std::mt19937_64 rng(seed);
         std::normal_distribution distr;
 
-        ndim = std::get<0>(param);
-        nobs = std::get<1>(param);
+        ndim = nd;
+        nobs = no;
         data.resize(nobs * ndim);
+
+        // Creating gaussian populations with a shift.
+        size_t counter = 0;
         for (auto& d : data) {
-            d = distr(rng);
+            d = distr(rng) + (counter % nclusters) * scale;
+            ++counter;
         }
+    }
+
+    void assemble(int seed) {
+        assemble(7, 505, 4, 1, seed); // arbitrary parameters.
     }
 };
 
 /*************************************************************
  *************************************************************/
 
-using ClusterSNNGraphMultiLevelTest = ClusterSNNGraphTestCore<std::tuple<int, int, int, double> >;
+class ClusterSNNGraphMultiLevelTest : public ClusterSNNGraphTestCore, public ::testing::Test {};
 
-TEST_P(ClusterSNNGraphMultiLevelTest, Basic) {
-    auto param = GetParam();
-    assemble(param);
-    int k = std::get<2>(param);
-    double res = std::get<3>(param);
-    
+TEST_F(ClusterSNNGraphMultiLevelTest, Basic) {
+    assemble(42);
+
     scran::ClusterSNNGraphMultiLevel cluster;
-    cluster.set_neighbors(k).set_resolution(res);
     auto output = cluster.run(ndim, nobs, data.data());
 
     EXPECT_EQ(output.membership.size(), output.modularity.size());
+    EXPECT_TRUE(output.membership.size() > 1);
     EXPECT_TRUE(output.max >= 0 && output.max < output.membership.size());
 
     double max_mod = output.modularity[output.max];
@@ -51,103 +55,193 @@ TEST_P(ClusterSNNGraphMultiLevelTest, Basic) {
     for (const auto& mem : output.membership) {
         EXPECT_EQ(mem.size(), nobs);
     }
+
+    // Actually generates multiple clusters.
+    bool has_multiple = false;
+    for (const auto& mem : output.membership) {
+        if (*std::max_element(mem.begin(), mem.end()) > 0) {
+            has_multiple = true;
+        }
+    }
+    EXPECT_TRUE(has_multiple);
 }
 
-INSTANTIATE_TEST_CASE_P(
-    ClusterSNNGraph,
-    ClusterSNNGraphMultiLevelTest,
-    ::testing::Combine(
-        ::testing::Values(20), // number of dimensions
-        ::testing::Values(200), // number of observations
-        ::testing::Values(3, 5, 7), // number of neighbors
-        ::testing::Values(0.1, 0.5, 1) // resolution 
-    )
-);
+TEST_F(ClusterSNNGraphMultiLevelTest, Parameters) {
+    assemble(43);
+
+    scran::ClusterSNNGraphMultiLevel cluster;
+    auto ref = cluster.run(ndim, nobs, data.data());
+
+    {
+        cluster.set_neighbors(5);
+        auto out = cluster.run(ndim, nobs, data.data());
+        cluster.set_neighbors();
+        EXPECT_NE(ref.membership[ref.max], out.membership[out.max]);
+    }
+
+    {
+        cluster.set_resolution(2);
+        auto out = cluster.run(ndim, nobs, data.data());
+        cluster.set_resolution();
+        EXPECT_NE(ref.membership[ref.max], out.membership[out.max]);
+    }
+}
+
+TEST_F(ClusterSNNGraphMultiLevelTest, Seeding) {
+    assemble(43);
+
+    // We need to drop the number of neighbors to get more ambiguity so
+    // that the seed has an effect.
+    scran::ClusterSNNGraphMultiLevel cluster;
+    cluster.set_neighbors(5);
+
+    // Using the same seed... 
+    auto ref1 = cluster.run(ndim, nobs, data.data());
+    auto ref2 = cluster.run(ndim, nobs, data.data());
+    EXPECT_EQ(ref1.modularity, ref2.modularity);
+    EXPECT_EQ(ref1.membership, ref2.membership);
+
+    // Using a different seed...
+    cluster.set_seed(1000000);
+    auto output2 = cluster.run(ndim, nobs, data.data());
+    EXPECT_NE(ref1.membership[ref1.max], output2.membership[output2.max]);
+}
 
 /*************************************************************
  *************************************************************/
 
-using ClusterSNNGraphLeidenTest = ClusterSNNGraphTestCore<std::tuple<int, int, int, double, bool> >;
+class ClusterSNNGraphLeidenTest : public ClusterSNNGraphTestCore, public ::testing::Test {};
 
-TEST_P(ClusterSNNGraphLeidenTest, Basic) {
-    auto param = GetParam();
-    assemble(param);
-    int k = std::get<2>(param);
-    double res = std::get<3>(param);
-    bool mod = std::get<4>(param);
-    
+TEST_F(ClusterSNNGraphLeidenTest, Basic) {
+    assemble(66);
+
     scran::ClusterSNNGraphLeiden cluster;
-    cluster.set_neighbors(k).set_modularity(mod);
-    cluster.set_resolution(mod ? res * 10 : res); // ramping up scale of resolution when optimizing modularity.
     auto output = cluster.run(ndim, nobs, data.data());
 
     EXPECT_EQ(output.membership.size(), nobs);
+    EXPECT_TRUE(*std::max_element(output.membership.begin(), output.membership.end()) > 0); // at least two clusters
     EXPECT_TRUE(output.quality > 0);
 }
 
-INSTANTIATE_TEST_CASE_P(
-    ClusterSNNGraph,
-    ClusterSNNGraphLeidenTest,
-    ::testing::Combine(
-        ::testing::Values(20), // number of dimensions
-        ::testing::Values(200), // number of observations
-        ::testing::Values(3, 5, 7), // number of neighbors
-        ::testing::Values(0.05, 0.1), // resolution 
-        ::testing::Values(false, true) // whether to use modularity
-    )
-);
+TEST_F(ClusterSNNGraphLeidenTest, Parameters) {
+    assemble(67);
+
+    scran::ClusterSNNGraphLeiden cluster;
+    auto ref = cluster.run(ndim, nobs, data.data());
+
+    {
+        cluster.set_neighbors(5);
+        auto output = cluster.run(ndim, nobs, data.data());
+        EXPECT_NE(ref.membership, output.membership);
+        cluster.set_neighbors();
+    }
+
+    {
+        cluster.set_resolution(2);
+        auto output2 = cluster.run(ndim, nobs, data.data());
+        EXPECT_NE(ref.membership, output2.membership);
+        cluster.set_resolution();
+    }
+
+    {
+        cluster.set_modularity(true);
+        auto output2 = cluster.run(ndim, nobs, data.data());
+        EXPECT_NE(ref.membership, output2.membership);
+        cluster.set_modularity();
+    }
+
+    // Need to drop this lower so that there's more ambiguity,
+    // such that the differences in the parameters may manifest.
+    {
+        cluster.set_neighbors(5);
+        auto fine_ref = cluster.run(ndim, nobs, data.data());
+
+        {
+            cluster.set_iterations(10);
+            auto output2 = cluster.run(ndim, nobs, data.data());
+            EXPECT_NE(fine_ref.membership, output2.membership);
+            cluster.set_iterations();
+        }
+
+        {
+            cluster.set_beta(0.5);
+            auto output2 = cluster.run(ndim, nobs, data.data());
+            EXPECT_NE(fine_ref.membership, output2.membership);
+            cluster.set_iterations();
+        }
+    }
+}
+
+TEST_F(ClusterSNNGraphLeidenTest, Seeding) {
+    assemble(67);
+    scran::ClusterSNNGraphLeiden cluster;
+    cluster.set_neighbors(5);
+
+    // Using the same seed... 
+    auto ref1 = cluster.run(ndim, nobs, data.data());
+    auto ref2 = cluster.run(ndim, nobs, data.data());
+    EXPECT_EQ(ref1.membership, ref2.membership);
+
+    // Using a different seed...
+    cluster.set_seed(1000000);
+    auto output2 = cluster.run(ndim, nobs, data.data());
+    EXPECT_NE(ref1.membership, output2.membership);
+}
 
 /*************************************************************
  *************************************************************/
 
-using ClusterSNNGraphWalktrapTest = ClusterSNNGraphTestCore<std::tuple<int, int, int, double> >;
+class ClusterSNNGraphWalktrapTest : public ClusterSNNGraphTestCore, public ::testing::Test {};
 
-TEST_P(ClusterSNNGraphWalktrapTest, Basic) {
-    auto param = GetParam();
-    assemble(param);
-    int k = std::get<2>(param);
-    double steps = std::get<3>(param);
-    
+TEST_F(ClusterSNNGraphWalktrapTest, Basic) {
+    assemble(72);
+
     scran::ClusterSNNGraphWalktrap cluster;
-    cluster.set_neighbors(k).set_steps(steps);
     auto output = cluster.run(ndim, nobs, data.data());
 
     EXPECT_EQ(output.membership.size(), nobs);
     EXPECT_TRUE(output.merges.size() > 0);
     EXPECT_EQ(output.merges.size() + 1, output.modularity.size());
+    EXPECT_TRUE(*std::max_element(output.membership.begin(), output.membership.end()) > 0); // at least two clusters
 }
 
-INSTANTIATE_TEST_CASE_P(
-    ClusterSNNGraph,
-    ClusterSNNGraphWalktrapTest,
-    ::testing::Combine(
-        ::testing::Values(20), // number of dimensions
-        ::testing::Values(200), // number of observations
-        ::testing::Values(3, 5, 7), // number of neighbors
-        ::testing::Values(3, 4) // steps
-    )
-);
+TEST_F(ClusterSNNGraphWalktrapTest, Parameters) {
+    assemble(73);
+
+    scran::ClusterSNNGraphWalktrap cluster;
+    auto ref = cluster.run(ndim, nobs, data.data());
+
+    {
+        cluster.set_steps(8);
+        auto output2 = cluster.run(ndim, nobs, data.data());
+        EXPECT_NE(ref.membership, output2.membership);
+        cluster.set_steps();
+    }
+
+    // Make sure it's reproducible for a range of steps.
+    std::vector<int> steps{3, 5, 8};
+    for (auto s : steps) {
+        cluster.set_steps(s);
+        auto ref1 = cluster.run(ndim, nobs, data.data());
+        auto ref2 = cluster.run(ndim, nobs, data.data());
+        EXPECT_EQ(ref1.membership, ref2.membership);
+    }
+}
 
 /*************************************************************
  *************************************************************/
 
-class ClusterSNNGraphSanityTest : public ::testing::Test {
+class ClusterSNNGraphSanityTest : public ClusterSNNGraphTestCore, public ::testing::Test {
 protected:
-    size_t nobs = 100, ndim = 5, nclusters =4;
-    std::vector<double> data;
+    int nclusters =4;
 
     void SetUp() {
-        std::mt19937_64 rng(420);
-        std::normal_distribution distr;
-        data.resize(nobs * ndim);
+        nobs = 100;
+        ndim = 5;
 
         // Creating 4 gaussian populations of the same size,
         // separated by 10 units in each dimension.
-        size_t counter = 0;
-        for (auto& d : data) {
-            d = distr(rng) + (counter % nclusters) * 10;
-            ++counter;
-        }
+        assemble(ndim, nobs, nclusters, /* scale = */ 10, /* seed = */ 1234567);
     }
 
     void validate(const std::vector<int>& clustering) {
@@ -178,7 +272,7 @@ TEST_F(ClusterSNNGraphSanityTest, MultiLevel) {
 
 TEST_F(ClusterSNNGraphSanityTest, Leiden) {
     scran::ClusterSNNGraphLeiden cluster;
-    cluster.set_resolution(0.01);
+    cluster.set_resolution(0.5);
     auto output = cluster.run(ndim, nobs, data.data());
     validate(output.membership);
 }
