@@ -28,6 +28,29 @@ class ClusterSNNGraph {
 protected:
     BuildSNNGraph builder;
 
+    struct IgraphRNGScope {
+        IgraphRNGScope(int seed) : previous(igraph_rng_default()) {
+            if (igraph_rng_init(&rng, &igraph_rngtype_mt19937)) {
+                throw std::runtime_error("failed to initialize an instance of igraph's RNG");
+            }
+
+            if (igraph_rng_seed(&rng, seed)) {
+                igraph_rng_destroy(&rng);
+                throw std::runtime_error("failed to set the seed on igraph's RNG");
+            }
+
+            igraph_rng_set_default(&rng);
+        }
+
+        ~IgraphRNGScope() {
+            igraph_rng_set_default(previous);
+            igraph_rng_destroy(&rng);
+        }
+
+        igraph_rng_t* previous;
+        igraph_rng_t rng;
+    };
+
 public:
     /**
      * @brief Wrapper around the `igraph_t` class from **igraph**.
@@ -297,12 +320,8 @@ public:
         igraph_vector_init(&membership, 0);
         igraph_matrix_init(&memberships, 0, 0);
 
-        // I just can't be bothered to do anything fancier here, so this is what we've got.
-        igraph_rng_seed(igraph_rng_default(), seed);
+        IgraphRNGScope rngs(seed);
 
-#ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::ClusterSNNGraph", "Performing multilevel community detection");
-#endif
         Results output;
         output.status = igraph_community_multilevel(&graph_info.graph, &graph_info.weights, resolution, &membership, &memberships, &modularity);
 
@@ -353,16 +372,10 @@ public:
          * The default is based on the example in the **igraph** documentation.
          */
         static constexpr int steps = 4;
-
-        /**
-         * See `set_seed()` for more details.
-         */
-        static constexpr int seed = 42;
     };
 
 private:
     int steps = Defaults::steps;
-    int seed = Defaults::seed;
 
 public:
     /**
@@ -392,16 +405,6 @@ public:
      */
     ClusterSNNGraphWalktrap& set_weighting_scheme(BuildSNNGraph::Scheme s = BuildSNNGraph::Defaults::weighting_scheme) {
         builder.set_weighting_scheme(s);
-        return *this;
-    }
-
-    /**
-     * @param s Seed for the default **igraph** random number generator.
-     * 
-     * @return A reference to this `ClusterSNNGraphWalktrap` object.
-     */
-    ClusterSNNGraphWalktrap& set_seed(int s = Defaults::seed) {
-        seed = s;
         return *this;
     }
 
@@ -511,9 +514,6 @@ public:
         igraph_vector_init(&modularity, 0);
         igraph_vector_init(&membership, 0);
         igraph_matrix_init(&merges, 0, 0);
-
-        // I just can't be bothered to do anything fancier here, so this is what we've got.
-        igraph_rng_seed(igraph_rng_default(), seed);
 
 #ifdef SCRAN_LOGGER
         SCRAN_LOGGER("scran::ClusterSNNGraph", "Performing walktrap community detection");
@@ -772,8 +772,8 @@ public:
 
         igraph_vector_init(&membership, 0);
 
-        // I just can't be bothered to do anything fancier here, so this is what we've got.
-        igraph_rng_seed(igraph_rng_default(), seed);
+        IgraphRNGScope rngs(seed);
+
         Results output;
 
         if (!modularity) {
