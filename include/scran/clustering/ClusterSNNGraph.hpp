@@ -564,24 +564,25 @@ public:
     struct Defaults {
         /**
          * See `set_resolution()` for more details.
-         * The default is based on the example in the **igraph** documentation.
+         * The default is based on `?cluster_leiden` in the **igraph** R package.
          */
-        static constexpr double resolution = 0.05;
+        static constexpr double resolution = 1;
 
         /**
          * See `set_beta()` for more details.
-         * The default is based on the example in the **igraph** documentation.
+         * The default is based on `?cluster_leiden` in the **igraph** R package.
          */
         static constexpr double beta = 0.01;
 
         /**
          * See `set_iterations()` for more details.
-         * The default is based on the examples in the [corresponding paper](https://doi.org/10.1038/s41598-019-41695-z).
+         * The default is based on `?cluster_leiden` in the **igraph** R package.
          */
-        static constexpr int iterations = 10;
+        static constexpr int iterations = 2;
 
         /**
          * See `set_modularity()` for more details.
+         * The default is based on `?cluster_leiden` in the **igraph** R package.
          */
         static constexpr bool modularity = false;
 
@@ -675,7 +676,6 @@ public:
      * @param m Whether to optimize the modularity instead of the Constant Potts Model.
      *
      * The modularity is closely related to the Constant Potts Model, but the magnitude of the resolution is different.
-     * If this is set, we suggest increasing the resolution to something close to what is used by `ClusterSNNGraphMultiLevel`. 
      *
      * @return A reference to this `ClusterSNNGraphLeiden` object.
      */
@@ -778,7 +778,7 @@ public:
 
         if (!modularity) {
             for (int i = 0; i < iterations; ++i) {
-                output.status = igraph_community_leiden(&graph_info.graph, &graph_info.weights, NULL, resolution, beta, 0, &membership, &nb_clusters, &quality);
+                output.status = igraph_community_leiden(&graph_info.graph, &graph_info.weights, NULL, resolution, beta, (i > 0), &membership, &nb_clusters, &quality);
                 if (output.status) {
                     break;
                 }
@@ -789,14 +789,12 @@ public:
             igraph_vector_init(&degree, igraph_vcount(&graph_info.graph));
             igraph_degree(&graph_info.graph, &degree, igraph_vss_all(), IGRAPH_ALL, 1);
 
-            // We divide the resolution by 2 * m rather than fixing resolution
-            // = 1 as in the documented example. This ensures that we can
-            // still respond to changes in resolution, though users will probably
-            // need to bump up the resolution to a larger value to compensate.
+            // This assumes that resolution = 1 in the example in the C documentation. 
+            // igraph::cluster_leiden in the R package does the same thing.
             double mod_resolution = resolution / (2 * igraph_ecount(&graph_info.graph));
             
             for (int i = 0; i < iterations; ++i) {
-                output.status = igraph_community_leiden(&graph_info.graph, &graph_info.weights, &degree, mod_resolution, beta, 0, &membership, &nb_clusters, &quality);
+                output.status = igraph_community_leiden(&graph_info.graph, &graph_info.weights, &degree, mod_resolution, beta, (i > 0), &membership, &nb_clusters, &quality);
                 if (output.status) {
                     break;
                 }
