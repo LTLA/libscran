@@ -82,11 +82,11 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr class="memitem:a235d41d736b35e40d0162d3eff856361"><td class="memItemLeft" align="right" valign="top">static constexpr double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#a235d41d736b35e40d0162d3eff856361">resolution</a> = 0.05</td></tr>
+<tr class="memitem:a235d41d736b35e40d0162d3eff856361"><td class="memItemLeft" align="right" valign="top">static constexpr double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#a235d41d736b35e40d0162d3eff856361">resolution</a> = 1</td></tr>
 <tr class="separator:a235d41d736b35e40d0162d3eff856361"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90a2dca1eed5d37c6b12da18e9f0d9e8"><td class="memItemLeft" align="right" valign="top">static constexpr double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#a90a2dca1eed5d37c6b12da18e9f0d9e8">beta</a> = 0.01</td></tr>
 <tr class="separator:a90a2dca1eed5d37c6b12da18e9f0d9e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adec09fa56454245d43af1561d1d4a8ea"><td class="memItemLeft" align="right" valign="top">static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#adec09fa56454245d43af1561d1d4a8ea">iterations</a> = 10</td></tr>
+<tr class="memitem:adec09fa56454245d43af1561d1d4a8ea"><td class="memItemLeft" align="right" valign="top">static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#adec09fa56454245d43af1561d1d4a8ea">iterations</a> = 2</td></tr>
 <tr class="separator:adec09fa56454245d43af1561d1d4a8ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac1bf98a6de928de8b786643942768deb"><td class="memItemLeft" align="right" valign="top">static constexpr bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#ac1bf98a6de928de8b786643942768deb">modularity</a> = false</td></tr>
 <tr class="separator:ac1bf98a6de928de8b786643942768deb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -115,7 +115,7 @@ Static Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >See <code><a class="el" href="classscran_1_1ClusterSNNGraphLeiden.html#adc9b19074330bf011296746130ae27a5">set_beta()</a></code> for more details. The default is based on the example in the <b>igraph</b> documentation. </p>
+<p >See <code><a class="el" href="classscran_1_1ClusterSNNGraphLeiden.html#adc9b19074330bf011296746130ae27a5">set_beta()</a></code> for more details. The default is based on <code>?cluster_leiden</code> in the <b>igraph</b> R package. </p>
 
 </div>
 </div>
@@ -129,7 +129,7 @@ Static Public Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">constexpr int scran::ClusterSNNGraphLeiden::Defaults::iterations = 10</td>
+          <td class="memname">constexpr int scran::ClusterSNNGraphLeiden::Defaults::iterations = 2</td>
         </tr>
       </table>
   </td>
@@ -138,7 +138,7 @@ Static Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >See <code><a class="el" href="classscran_1_1ClusterSNNGraphLeiden.html#a4dddb1b05e1890b9c90406743f7479e5">set_iterations()</a></code> for more details. The default is based on the examples in the <a href="https://doi.org/10.1038/s41598-019-41695-z">corresponding paper</a>. </p>
+<p >See <code><a class="el" href="classscran_1_1ClusterSNNGraphLeiden.html#a4dddb1b05e1890b9c90406743f7479e5">set_iterations()</a></code> for more details. The default is based on <code>?cluster_leiden</code> in the <b>igraph</b> R package. </p>
 
 </div>
 </div>
@@ -161,7 +161,7 @@ Static Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >See <code><a class="el" href="classscran_1_1ClusterSNNGraphLeiden.html#a116eb8563e21881387bc57a8ef3e5629">set_modularity()</a></code> for more details. </p>
+<p >See <code><a class="el" href="classscran_1_1ClusterSNNGraphLeiden.html#a116eb8563e21881387bc57a8ef3e5629">set_modularity()</a></code> for more details. The default is based on <code>?cluster_leiden</code> in the <b>igraph</b> R package. </p>
 
 </div>
 </div>
@@ -175,7 +175,7 @@ Static Public Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">constexpr double scran::ClusterSNNGraphLeiden::Defaults::resolution = 0.05</td>
+          <td class="memname">constexpr double scran::ClusterSNNGraphLeiden::Defaults::resolution = 1</td>
         </tr>
       </table>
   </td>
@@ -184,7 +184,7 @@ Static Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >See <code><a class="el" href="classscran_1_1ClusterSNNGraphLeiden.html#a620418116cb13d7d020f0e5eb1f8c011">set_resolution()</a></code> for more details. The default is based on the example in the <b>igraph</b> documentation. </p>
+<p >See <code><a class="el" href="classscran_1_1ClusterSNNGraphLeiden.html#a620418116cb13d7d020f0e5eb1f8c011">set_resolution()</a></code> for more details. The default is based on <code>?cluster_leiden</code> in the <b>igraph</b> R package. </p>
 
 </div>
 </div>
