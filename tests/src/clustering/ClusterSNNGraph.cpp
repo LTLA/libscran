@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "scran/clustering/ClusterSNNGraph.hpp"
+#include "aarand/aarand.hpp"
 
 #include <random>
 #include <cmath>
@@ -13,7 +14,6 @@ protected:
 
     void assemble(int nd, int no, int nclusters, double scale, int seed) {
         std::mt19937_64 rng(seed);
-        std::normal_distribution distr;
 
         ndim = nd;
         nobs = no;
@@ -22,7 +22,7 @@ protected:
         // Creating gaussian populations with a shift.
         size_t counter = 0;
         for (auto& d : data) {
-            d = distr(rng) + (counter % nclusters) * scale;
+            d = aarand::standard_normal(rng).first + (counter % nclusters) * scale;
             ++counter;
         }
     }
@@ -102,7 +102,7 @@ TEST_F(ClusterSNNGraphMultiLevelTest, Seeding) {
     EXPECT_EQ(ref1.membership, ref2.membership);
 
     // Using a different seed...
-    cluster.set_seed(1000000);
+    cluster.set_seed(100);
     auto output2 = cluster.run(ndim, nobs, data.data());
     EXPECT_NE(ref1.membership[ref1.max], output2.membership[output2.max]);
 }
