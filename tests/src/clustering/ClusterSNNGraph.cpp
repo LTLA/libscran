@@ -88,7 +88,7 @@ TEST_F(ClusterSNNGraphMultiLevelTest, Parameters) {
 }
 
 TEST_F(ClusterSNNGraphMultiLevelTest, Seeding) {
-    assemble(43);
+    assemble(44);
 
     // We need to drop the number of neighbors to get more ambiguity so
     // that the seed has an effect.
@@ -105,6 +105,54 @@ TEST_F(ClusterSNNGraphMultiLevelTest, Seeding) {
     cluster.set_seed(100);
     auto output2 = cluster.run(ndim, nobs, data.data());
     EXPECT_NE(ref1.membership[ref1.max], output2.membership[output2.max]);
+}
+
+TEST_F(ClusterSNNGraphMultiLevelTest, GraphChecks) {
+    assemble(45);
+
+    // Checking we can build from an existing index.
+    scran::ClusterSNNGraphMultiLevel cluster;
+    cluster.set_neighbors(5);
+    knncolle::VpTreeEuclidean<int, double> vpindex(ndim, nobs, data.data());
+    auto g = cluster.build(&vpindex);
+
+    // Checking that the graph is valid and all that.
+    EXPECT_EQ(igraph_vcount(g.get_graph()), nobs);
+    EXPECT_EQ(igraph_vector_size(g.get_weights()), igraph_ecount(g.get_graph()));
+
+    // Trying copy construction to get some coverage.
+    {
+        scran::ClusterSNNGraph::Graph g2(g);
+        EXPECT_EQ(igraph_vcount(g2.get_graph()), nobs);
+    }
+
+    // Trying copy assignment to get some coverage.
+    {
+        auto g2 = g;
+        EXPECT_EQ(igraph_vcount(g2.get_graph()), nobs);
+
+        auto g3 = cluster.build(ndim, nobs - 1, data.data());
+        EXPECT_EQ(igraph_vcount(g3.get_graph()), nobs - 1);
+        g3 = g2;
+        EXPECT_EQ(igraph_vcount(g3.get_graph()), nobs);
+
+        g3 = g3; // self-assign is a no-op.
+        EXPECT_EQ(igraph_vcount(g3.get_graph()), nobs);
+    }
+
+    // Trying move assignment to get some coverage.
+    {
+        auto g2 = std::move(g);
+        EXPECT_EQ(igraph_vcount(g2.get_graph()), nobs);
+
+        auto g3 = cluster.build(ndim, nobs - 1, data.data());
+        EXPECT_EQ(igraph_vcount(g3.get_graph()), nobs - 1);
+        g3 = std::move(g2);
+        EXPECT_EQ(igraph_vcount(g3.get_graph()), nobs);
+
+        g3 = std::move(g3); // self-move is a no-op.
+        EXPECT_EQ(igraph_vcount(g3.get_graph()), nobs);
+    }
 }
 
 /*************************************************************

@@ -26,6 +26,9 @@ namespace scran {
  */
 class ClusterSNNGraph {
 protected:
+    /**
+     * @cond
+     */
     BuildSNNGraph builder;
 
     struct IgraphRNGScope {
@@ -42,14 +45,174 @@ protected:
             igraph_rng_set_default(&rng);
         }
 
+        // Just deleting the methods here, because the RNGScope
+        // is strictly internal and we don't do any of these.
+        IgraphRNGScope(const IgraphRNGScope& other) = delete;
+        IgraphRNGScope& operator=(const IgraphRNGScope& other) = delete;
+        IgraphRNGScope(IgraphRNGScope&& other) = delete;
+        IgraphRNGScope& operator=(IgraphRNGScope&& other) = delete;
+
         ~IgraphRNGScope() {
-            igraph_rng_set_default(previous);
-            igraph_rng_destroy(&rng);
+            if (active) {
+                igraph_rng_set_default(previous);
+                igraph_rng_destroy(&rng);
+            }
         }
 
         igraph_rng_t* previous;
         igraph_rng_t rng;
+        bool active = true;
     };
+
+    struct IgraphVector {
+    private:
+        static void try_init(igraph_vector_t& vector, size_t size) {
+            if (igraph_vector_init(&vector, size)) {
+                throw std::runtime_error("failed to initialize igraph vector of size " + std::to_string(size));
+            }
+        }
+
+        static void try_copy(igraph_vector_t& dest, const igraph_vector_t& source, bool source_active) {
+            if (source_active) {
+                auto size = igraph_vector_size(&source);
+                try_init(dest, size);
+                if (igraph_vector_copy(&dest, &source)) {
+                    throw std::runtime_error("failed to copy igraph vector of size " + std::to_string(size));
+                }
+            }
+        }
+
+        static void try_destroy(igraph_vector_t& vector, bool active) {
+            if (active) {
+                igraph_vector_destroy(&vector);
+            }
+        }
+
+    public:
+        IgraphVector(size_t size = 0) {
+            try_init(vector, size);
+        }
+
+        IgraphVector(const IgraphVector& other) : active(other.active) {
+            try_copy(vector, other.vector, other.active);
+        }
+        
+        IgraphVector& operator=(const IgraphVector& other) {
+            if (this != &other) {
+                try_destroy(vector, active);
+                try_copy(vector, other.vector, other.active);
+                active = other.active;
+            }
+            return *this;
+        }
+
+        // See https://docs.microsoft.com/en-us/cpp/cpp/move-constructors-and-move-assignment-operators-cpp?view=msvc-170
+        IgraphVector(IgraphVector&& other) : vector(std::move(other.vector)), active(other.active) {
+            other.active = false;
+        }
+
+        IgraphVector& operator=(IgraphVector&& other) {
+            if (this != &other) {
+                try_destroy(vector, active);
+                vector = std::move(other.vector);
+                active = other.active;
+                other.active = false;
+            }
+            return *this;
+        }
+
+        ~IgraphVector() {
+            try_destroy(vector, active);
+        }
+
+        igraph_vector_t vector;
+        bool active = true;
+    };
+
+    struct IgraphMatrix {
+        IgraphMatrix(size_t nrows = 0, size_t ncols = 0) {
+            if (igraph_matrix_init(&matrix, nrows, ncols)) {
+                throw std::runtime_error("failed to initialize igraph " + std::to_string(nrows) + "x" + std::to_string(ncols) + " matrix");
+            }
+        }
+
+        // Just deleting the methods here, because the Matrix
+        // is strictly internal and we don't do any of these.
+        IgraphMatrix(const IgraphMatrix& other) = delete;
+        IgraphMatrix& operator=(const IgraphMatrix& other) = delete;
+        IgraphMatrix(IgraphMatrix&& other) = delete;
+        IgraphMatrix& operator=(IgraphMatrix&& other) = delete;
+
+        ~IgraphMatrix() {
+            if (active) {
+                igraph_matrix_destroy(&matrix);
+            }
+        }
+
+        igraph_matrix_t matrix;
+        bool active = true;
+    };
+
+    struct IgraphGraph {
+    private:
+        static void try_copy(igraph_t& dest, const igraph_t& source, bool source_active) {
+            if (source_active) {
+                if (igraph_copy(&dest, &source)) {
+                    throw std::runtime_error("failed to copy igraph's graph");
+                }
+            }
+        }
+
+        static void try_destroy(igraph_t& graph, bool active) {
+            if (active) {
+                igraph_destroy(&graph);
+            }
+        }
+
+    public:
+        IgraphGraph(const IgraphVector& edges, size_t nvertices, bool directed) { 
+            if (igraph_create(&graph, &edges.vector, nvertices, directed)) {
+                throw std::runtime_error("failed to initialize igraph's graph object"); 
+            }
+        }
+
+        IgraphGraph(const IgraphGraph& other) : active(other.active) {
+            try_copy(graph, other.graph, other.active);
+        }
+
+        IgraphGraph& operator=(const IgraphGraph& other) {
+            if (this != &other) {
+                try_destroy(graph, active);
+                try_copy(graph, other.graph, other.active);
+                active = other.active;
+            }
+            return *this;
+        }
+
+        IgraphGraph(IgraphGraph&& other) : graph(std::move(other.graph)), active(other.active) {
+            other.active = false;
+        }
+
+        IgraphGraph& operator=(IgraphGraph&& other) {
+            if (this != &other) {
+                try_destroy(graph, active);
+                graph = std::move(other.graph);
+                active = other.active;
+                other.active = false;
+            }
+            return *this;
+        }
+
+        ~IgraphGraph() {
+            try_destroy(graph, active);
+        }
+
+        igraph_t graph;
+        bool active = true;
+    };
+    /**
+     * @endcond
+     */
 
 public:
     /**
@@ -59,22 +222,70 @@ public:
      */
     struct Graph {
         /**
-         * Representation of an **igraph** graph.
+         * @cond
          */
-        igraph_t graph;
+    private:
+        IgraphGraph graph;
+
+        IgraphVector weights;
+        /**
+         * @endcond
+         */
+    public:
+        /**
+         * @cond
+         */
+        Graph(IgraphGraph g, IgraphVector w) : graph(std::move(g)), weights(std::move(w)) {}
+        /**
+         * @endcond
+         */
 
         /**
-         * An **igraph** vector to be used to hold the weights.
+         * @name Get the graph.
+         *
+         * @return Pointer to an **igraph** graph.
+         * Nodes are cells with edges being formed between its nearest neighbors.
+         *
+         * Users should not pass this pointer to `igraph_destroy`; the `Graph` destructor will handle the freeing.
          */
-        igraph_vector_t weights;
-
-        /**
-         * A convenient method to release the memory allocated in `graph` and `weights`.
+        //@{
+        /** 
+         * Non-`const` overload.
          */
-        void destroy() {
-            igraph_destroy(&graph);
-            igraph_vector_destroy(&weights);
+        igraph_t* get_graph() {
+            return &graph.graph;
         }
+
+        /** 
+         * `const` overload.
+         */
+        const igraph_t* get_graph() const {
+            return &graph.graph;
+        }
+        //@}
+
+        /**
+         * @name Get the weights.
+         *  
+         * @return Pointer to an **igraph** vector containing the weights for each edge in the graph.
+         *
+         * Users should not pass this pointer to `igraph_vector_destroy`; the `Graph` destructor will handle the freeing.
+         */
+        //@{
+        /** 
+         * Non-`const` overload.
+         */
+         igraph_vector_t* get_weights() {
+            return &weights.vector;
+        }
+
+        /** 
+         * `const` overload.
+         */
+         const igraph_vector_t* get_weights() const {
+            return &weights.vector;
+        }
+        //@}
     };
 
     /**
@@ -117,28 +328,22 @@ public:
      * @return A `Graph` object containing an **igraph** graph with weights.
      */
     Graph build(size_t ncells, const std::deque<BuildSNNGraph::WeightedEdge>& store) const {
-#ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::ClusterSNNGraph", "Filling the graph object");
-#endif
-        Graph output;
-        igraph_vector_t edges;
-        igraph_vector_init(&edges, store.size() * 2);
+        IgraphVector edge_holder(store.size() * 2);
+        auto& edges = edge_holder.vector;
 
-        igraph_vector_t& weights = output.weights;
-        igraph_vector_init(&weights, store.size());
+        IgraphVector weight_holder(store.size());
+        auto& weights = weight_holder.vector;
 
         size_t counter = 0;
-        for (size_t i = 0; i < store.size(); ++i, counter += 2) { // not entirely sure it's safe to use std::copy here.
+        for (size_t i = 0, end = store.size(); i < end; ++i, counter += 2) { 
             const auto& edge = store[i];
             VECTOR(edges)[counter] = std::get<0>(edge);
             VECTOR(edges)[counter + 1] = std::get<1>(edge);
             VECTOR(weights)[i] = std::get<2>(edge);
         }
 
-        igraph_create(&(output.graph), &edges, ncells, 0); 
-        igraph_vector_destroy(&edges);
-
-        return output;
+        IgraphGraph graph(edge_holder, ncells, /* directed = */ false);
+        return Graph(std::move(graph), std::move(weight_holder));
     }
 };
 
@@ -269,7 +474,6 @@ public:
     Results run(size_t ndims, size_t ncells, const double* mat) {
         auto graph_info = build(ndims, ncells, mat);
         auto output = run(graph_info);
-        graph_info.destroy();
         return output;
     }
 
@@ -286,7 +490,6 @@ public:
     Results run(const Algorithm* search) {
         auto graph_info = build(search);
         auto output = run(graph_info);
-        graph_info.destroy();
         return output;
     }
 
@@ -301,7 +504,6 @@ public:
     Results run(size_t ncells, const std::deque<BuildSNNGraph::WeightedEdge>& store) {
         auto graph_info = build(ncells, store);
         auto output = run(graph_info);
-        graph_info.destroy();
         return output;
     }
 
@@ -313,17 +515,16 @@ public:
      * @return A `Results` object containing the clustering results for all cells.
      */
     Results run(const Graph& graph_info) {
-        igraph_vector_t membership, modularity;
-        igraph_matrix_t memberships;
-
-        igraph_vector_init(&modularity, 0);
-        igraph_vector_init(&membership, 0);
-        igraph_matrix_init(&memberships, 0, 0);
-
+        IgraphVector membership_holder, modularity_holder;
+        IgraphMatrix memberships_holder;
         IgraphRNGScope rngs(seed);
 
+        auto& modularity = modularity_holder.vector;
+        auto& membership = membership_holder.vector;
+        auto& memberships = memberships_holder.matrix;
+
         Results output;
-        output.status = igraph_community_multilevel(&graph_info.graph, &graph_info.weights, resolution, &membership, &memberships, &modularity);
+        output.status = igraph_community_multilevel(graph_info.get_graph(), graph_info.get_weights(), resolution, &membership, &memberships, &modularity);
 
         if (!output.status) {
             output.max = igraph_vector_which_max(&modularity);
@@ -334,7 +535,7 @@ public:
                 output.modularity[i] = VECTOR(modularity)[i];
             }
 
-            size_t ncells = igraph_vcount(&graph_info.graph);
+            size_t ncells = igraph_vcount(graph_info.get_graph());
             size_t nlevels = igraph_matrix_nrow(&memberships);
             output.membership.resize(nlevels);
             
@@ -346,10 +547,6 @@ public:
                 }
             }
         }
-
-        igraph_vector_destroy(&modularity);
-        igraph_vector_destroy(&membership);
-        igraph_matrix_destroy(&memberships);
 
         return output;
     }
@@ -463,7 +660,6 @@ public:
     Results run(size_t ndims, size_t ncells, const double* mat) {
         auto graph_info = build(ndims, ncells, mat);
         auto output = run(graph_info);
-        graph_info.destroy();
         return output;
     }
 
@@ -480,7 +676,6 @@ public:
     Results run(const Algorithm* search) {
         auto graph_info = build(search);
         auto output = run(graph_info);
-        graph_info.destroy();
         return output;
     }
 
@@ -495,7 +690,6 @@ public:
     Results run(size_t ncells, const std::deque<BuildSNNGraph::WeightedEdge>& store) {
         auto graph_info = build(ncells, store);
         auto output = run(graph_info);
-        graph_info.destroy();
         return output;
     }
 
@@ -507,19 +701,15 @@ public:
      * @return A `Results` object containing the clustering results for all cells.
      */
     Results run(const Graph& graph_info) {
-        igraph_matrix_t merges;
-        igraph_vector_t modularity;
-        igraph_vector_t membership;
+        IgraphMatrix merges_holder;
+        IgraphVector modularity_holder, membership_holder;
 
-        igraph_vector_init(&modularity, 0);
-        igraph_vector_init(&membership, 0);
-        igraph_matrix_init(&merges, 0, 0);
+        auto& modularity = modularity_holder.vector;
+        auto& membership = membership_holder.vector;
+        auto& merges = merges_holder.matrix;
 
-#ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::ClusterSNNGraph", "Performing walktrap community detection");
-#endif
         Results output;
-        output.status = igraph_community_walktrap(&graph_info.graph, &graph_info.weights, steps, &merges, &modularity, &membership);
+        output.status = igraph_community_walktrap(graph_info.get_graph(), graph_info.get_weights(), steps, &merges, &modularity, &membership);
 
         if (!output.status) {
             size_t nmods = igraph_vector_size(&modularity);
@@ -535,16 +725,12 @@ public:
                 output.merges[i].second = MATRIX(merges, i, 1);
             }
 
-            size_t ncells = igraph_vcount(&graph_info.graph);
+            size_t ncells = igraph_vcount(graph_info.get_graph());
             output.membership.resize(ncells);
             for (size_t i = 0; i < ncells; ++i) {
                 output.membership[i] = VECTOR(membership)[i];
             }
         }
-
-        igraph_vector_destroy(&modularity);
-        igraph_vector_destroy(&membership);
-        igraph_matrix_destroy(&merges);
 
         return output;
     }
@@ -722,7 +908,6 @@ public:
     Results run(size_t ndims, size_t ncells, const double* mat) {
         auto graph_info = build(ndims, ncells, mat);
         auto output = run(graph_info);
-        graph_info.destroy();
         return output;
     }
 
@@ -739,7 +924,6 @@ public:
     Results run(const Algorithm* search) {
         auto graph_info = build(search);
         auto output = run(graph_info);
-        graph_info.destroy();
         return output;
     }
 
@@ -754,7 +938,6 @@ public:
     Results run(size_t ncells, const std::deque<BuildSNNGraph::WeightedEdge>& store) {
         auto graph_info = build(ncells, store);
         auto output = run(graph_info);
-        graph_info.destroy();
         return output;
     }
 
@@ -766,53 +949,47 @@ public:
      * @return A `Results` object containing the clustering results for all cells.
      */
     Results run(const Graph& graph_info) {
-        igraph_vector_t membership;
+        IgraphVector membership_holder;
+        auto& membership = membership_holder.vector;
         igraph_integer_t nb_clusters;
         igraph_real_t quality;
 
-        igraph_vector_init(&membership, 0);
-
         IgraphRNGScope rngs(seed);
-
         Results output;
 
         if (!modularity) {
             for (int i = 0; i < iterations; ++i) {
-                output.status = igraph_community_leiden(&graph_info.graph, &graph_info.weights, NULL, resolution, beta, (i > 0), &membership, &nb_clusters, &quality);
+                output.status = igraph_community_leiden(graph_info.get_graph(), graph_info.get_weights(), NULL, resolution, beta, (i > 0), &membership, &nb_clusters, &quality);
                 if (output.status) {
                     break;
                 }
             }
         } else {
             // Based on https://igraph.org/c/doc/igraph-Community.html#igraph_community_leiden.
-            igraph_vector_t degree;
-            igraph_vector_init(&degree, igraph_vcount(&graph_info.graph));
-            igraph_degree(&graph_info.graph, &degree, igraph_vss_all(), IGRAPH_ALL, 1);
+            IgraphVector degree_holder(igraph_vcount(graph_info.get_graph()));
+            auto& degree = degree_holder.vector;
+            igraph_degree(graph_info.get_graph(), &degree, igraph_vss_all(), IGRAPH_ALL, 1);
 
             // This assumes that resolution = 1 in the example in the C documentation. 
             // igraph::cluster_leiden in the R package does the same thing.
-            double mod_resolution = resolution / (2 * igraph_ecount(&graph_info.graph));
+            double mod_resolution = resolution / (2 * igraph_ecount(graph_info.get_graph()));
             
             for (int i = 0; i < iterations; ++i) {
-                output.status = igraph_community_leiden(&graph_info.graph, &graph_info.weights, &degree, mod_resolution, beta, (i > 0), &membership, &nb_clusters, &quality);
+                output.status = igraph_community_leiden(graph_info.get_graph(), graph_info.get_weights(), &degree, mod_resolution, beta, (i > 0), &membership, &nb_clusters, &quality);
                 if (output.status) {
                     break;
                 }
             }
-
-            igraph_vector_destroy(&degree);
         }
 
         if (!output.status) {
-            size_t ncells = igraph_vcount(&graph_info.graph);
+            size_t ncells = igraph_vcount(graph_info.get_graph());
             output.membership.resize(ncells);
             for (size_t i = 0; i < ncells; ++i) {
                 output.membership[i] = VECTOR(membership)[i];
             }
             output.quality = quality;
         }
-
-        igraph_vector_destroy(&membership);
 
         return output;
     }
