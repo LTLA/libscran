@@ -26,7 +26,7 @@ jobs:
           }
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
 
     - name: Get latest CMake
       uses: lukka/get-cmake@latest
@@ -47,7 +47,9 @@ jobs:
       run: cmake --build build
 
     - name: Run the tests
-      run: build/tests/libtest
+      run: |
+        cd build
+        ctest
 
     - name: Generate code coverage
       if: ${{ matrix.config.cov }}
