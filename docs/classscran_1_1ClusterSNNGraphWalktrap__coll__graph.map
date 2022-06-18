@@ -1,5 +1,4 @@
 <map id="scran::ClusterSNNGraphWalktrap" name="scran::ClusterSNNGraphWalktrap">
-<area shape="rect" id="node1" title="Walktrap clustering on a shared nearest&#45;neighbor graph." alt="" coords="5,171,221,197"/>
-<area shape="rect" id="node2" href="$classscran_1_1ClusterSNNGraph.html" title="Virtual class for clustering on a shared nearest&#45;neighbor graph." alt="" coords="31,95,196,121"/>
-<area shape="rect" id="node3" href="$classscran_1_1BuildSNNGraph.html" title="Build a shared nearest&#45;neighbor graph with cells as nodes." alt="" coords="37,5,190,32"/>
+<area shape="rect" id="node1" title="Walktrap clustering on a shared nearest&#45;neighbor graph." alt="" coords="5,80,221,107"/>
+<area shape="rect" id="node2" href="$classscran_1_1ClusterSNNGraph.html" title="Virtual class for clustering on a shared nearest&#45;neighbor graph." alt="" coords="31,5,196,32"/>
 </map>

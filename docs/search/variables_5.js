@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['graph_0',['graph',['../structscran_1_1ClusterSNNGraph_1_1Graph.html#a705ba30639aae97157d20e468294efe2',1,'scran::ClusterSNNGraph::Graph']]]
+  ['iterations_0',['iterations',['../structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#adec09fa56454245d43af1561d1d4a8ea',1,'scran::ClusterSNNGraphLeiden::Defaults']]]
 ];

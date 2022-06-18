@@ -69,8 +69,6 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="structscran_1_1ClusterSNNGraph_1_1Graph-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">scran::ClusterSNNGraph::Graph Struct Reference</div></div>
 </div><!--header-->
@@ -83,22 +81,29 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a0d7cf0747ed7bff0c4e810dcbd77ebdb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ClusterSNNGraph_1_1Graph.html#a0d7cf0747ed7bff0c4e810dcbd77ebdb">destroy</a> ()</td></tr>
-<tr class="separator:a0d7cf0747ed7bff0c4e810dcbd77ebdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
-<tr class="memitem:a705ba30639aae97157d20e468294efe2"><td class="memItemLeft" align="right" valign="top">igraph_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ClusterSNNGraph_1_1Graph.html#a705ba30639aae97157d20e468294efe2">graph</a></td></tr>
-<tr class="separator:a705ba30639aae97157d20e468294efe2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1c0c132d946cf3883956168bea6f30f2"><td class="memItemLeft" align="right" valign="top">igraph_vector_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ClusterSNNGraph_1_1Graph.html#a1c0c132d946cf3883956168bea6f30f2">weights</a></td></tr>
-<tr class="separator:a1c0c132d946cf3883956168bea6f30f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Get the graph.</div></td></tr>
+<tr><td colspan="2"><div class="groupText"><dl class="section return"><dt>Returns</dt><dd>Pointer to an <b>igraph</b> graph. Nodes are cells with edges being formed between its nearest neighbors.</dd></dl>
+<p>Users should not pass this pointer to <code>igraph_destroy</code>; the <code><a class="el" href="structscran_1_1ClusterSNNGraph_1_1Graph.html" title="Wrapper around the igraph_t class from igraph.">Graph</a></code> destructor will handle the freeing. </p>
+</div></td></tr>
+<tr class="memitem:aac6bb1bbb6aba5fb6c24f3c649d2ddfd"><td class="memItemLeft" align="right" valign="top">igraph_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ClusterSNNGraph_1_1Graph.html#aac6bb1bbb6aba5fb6c24f3c649d2ddfd">get_graph</a> ()</td></tr>
+<tr class="separator:aac6bb1bbb6aba5fb6c24f3c649d2ddfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae92c8d58d46c4d74538553c3e0c55f4"><td class="memItemLeft" align="right" valign="top">const igraph_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ClusterSNNGraph_1_1Graph.html#aae92c8d58d46c4d74538553c3e0c55f4">get_graph</a> () const</td></tr>
+<tr class="separator:aae92c8d58d46c4d74538553c3e0c55f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Get the weights.</div></td></tr>
+<tr><td colspan="2"><div class="groupText"><dl class="section return"><dt>Returns</dt><dd>Pointer to an <b>igraph</b> vector containing the weights for each edge in the graph.</dd></dl>
+<p>Users should not pass this pointer to <code>igraph_vector_destroy</code>; the <code><a class="el" href="structscran_1_1ClusterSNNGraph_1_1Graph.html" title="Wrapper around the igraph_t class from igraph.">Graph</a></code> destructor will handle the freeing. </p>
+</div></td></tr>
+<tr class="memitem:aa5e582e5a27a1c1b575f9352ccb368d6"><td class="memItemLeft" align="right" valign="top">igraph_vector_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ClusterSNNGraph_1_1Graph.html#aa5e582e5a27a1c1b575f9352ccb368d6">get_weights</a> ()</td></tr>
+<tr class="separator:aa5e582e5a27a1c1b575f9352ccb368d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc11774a39df41723d5e26b17c07d15c"><td class="memItemLeft" align="right" valign="top">const igraph_vector_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ClusterSNNGraph_1_1Graph.html#abc11774a39df41723d5e26b17c07d15c">get_weights</a> () const</td></tr>
+<tr class="separator:abc11774a39df41723d5e26b17c07d15c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Wrapper around the <code>igraph_t</code> class from <b>igraph</b>. </p>
 <p >The objects therein will not be deep-copied when instances of this class are copied, so use with caution. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a0d7cf0747ed7bff0c4e810dcbd77ebdb" name="a0d7cf0747ed7bff0c4e810dcbd77ebdb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0d7cf0747ed7bff0c4e810dcbd77ebdb">&#9670;&nbsp;</a></span>destroy()</h2>
+<a id="aac6bb1bbb6aba5fb6c24f3c649d2ddfd" name="aac6bb1bbb6aba5fb6c24f3c649d2ddfd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aac6bb1bbb6aba5fb6c24f3c649d2ddfd">&#9670;&nbsp;</a></span>get_graph() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -107,7 +112,7 @@ Public Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void scran::ClusterSNNGraph::Graph::destroy </td>
+          <td class="memname">igraph_t * scran::ClusterSNNGraph::Graph::get_graph </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -119,38 +124,85 @@ Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >A convenient method to release the memory allocated in <code>graph</code> and <code>weights</code>. </p>
+<p >Non-<code>const</code> overload. </p>
 
 </div>
 </div>
-<h2 class="groupheader">Member Data Documentation</h2>
-<a id="a705ba30639aae97157d20e468294efe2" name="a705ba30639aae97157d20e468294efe2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a705ba30639aae97157d20e468294efe2">&#9670;&nbsp;</a></span>graph</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">igraph_t scran::ClusterSNNGraph::Graph::graph</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Representation of an <b>igraph</b> graph. </p>
-
-</div>
-</div>
-<a id="a1c0c132d946cf3883956168bea6f30f2" name="a1c0c132d946cf3883956168bea6f30f2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1c0c132d946cf3883956168bea6f30f2">&#9670;&nbsp;</a></span>weights</h2>
+<a id="aae92c8d58d46c4d74538553c3e0c55f4" name="aae92c8d58d46c4d74538553c3e0c55f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae92c8d58d46c4d74538553c3e0c55f4">&#9670;&nbsp;</a></span>get_graph() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">igraph_vector_t scran::ClusterSNNGraph::Graph::weights</td>
+          <td class="memname">const igraph_t * scran::ClusterSNNGraph::Graph::get_graph </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p >An <b>igraph</b> vector to be used to hold the weights. </p>
+<p ><code>const</code> overload. </p>
+
+</div>
+</div>
+<a id="aa5e582e5a27a1c1b575f9352ccb368d6" name="aa5e582e5a27a1c1b575f9352ccb368d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5e582e5a27a1c1b575f9352ccb368d6">&#9670;&nbsp;</a></span>get_weights() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">igraph_vector_t * scran::ClusterSNNGraph::Graph::get_weights </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Non-<code>const</code> overload. </p>
+
+</div>
+</div>
+<a id="abc11774a39df41723d5e26b17c07d15c" name="abc11774a39df41723d5e26b17c07d15c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc11774a39df41723d5e26b17c07d15c">&#9670;&nbsp;</a></span>get_weights() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const igraph_vector_t * scran::ClusterSNNGraph::Graph::get_weights </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p ><code>const</code> overload. </p>
 
 </div>
 </div>

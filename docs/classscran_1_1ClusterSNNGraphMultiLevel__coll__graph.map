@@ -1,5 +1,4 @@
 <map id="scran::ClusterSNNGraphMultiLevel" name="scran::ClusterSNNGraphMultiLevel">
-<area shape="rect" id="node1" title="Multi&#45;level clustering on a shared nearest&#45;neighbor graph." alt="" coords="5,171,199,212"/>
-<area shape="rect" id="node2" href="$classscran_1_1ClusterSNNGraph.html" title="Virtual class for clustering on a shared nearest&#45;neighbor graph." alt="" coords="19,95,185,121"/>
-<area shape="rect" id="node3" href="$classscran_1_1BuildSNNGraph.html" title="Build a shared nearest&#45;neighbor graph with cells as nodes." alt="" coords="25,5,179,32"/>
+<area shape="rect" id="node1" title="Multi&#45;level clustering on a shared nearest&#45;neighbor graph." alt="" coords="5,80,199,121"/>
+<area shape="rect" id="node2" href="$classscran_1_1ClusterSNNGraph.html" title="Virtual class for clustering on a shared nearest&#45;neighbor graph." alt="" coords="19,5,185,32"/>
 </map>
