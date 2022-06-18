@@ -118,40 +118,48 @@ TEST_F(ClusterSNNGraphMultiLevelTest, GraphChecks) {
 
     // Checking that the graph is valid and all that.
     EXPECT_EQ(igraph_vcount(g.get_graph()), nobs);
-    EXPECT_EQ(igraph_vector_size(g.get_weights()), igraph_ecount(g.get_graph()));
+    auto nedges = igraph_ecount(g.get_graph());
+    EXPECT_EQ(igraph_vector_size(g.get_weights()), nedges);
 
     // Trying copy construction to get some coverage.
     {
         scran::ClusterSNNGraph::Graph g2(g);
         EXPECT_EQ(igraph_vcount(g2.get_graph()), nobs);
+        EXPECT_EQ(igraph_vector_size(g2.get_weights()), nedges);
     }
 
     // Trying copy assignment to get some coverage.
     {
         auto g2 = g;
         EXPECT_EQ(igraph_vcount(g2.get_graph()), nobs);
+        EXPECT_EQ(igraph_vector_size(g2.get_weights()), nedges);
 
         auto g3 = cluster.build(ndim, nobs - 1, data.data());
         EXPECT_EQ(igraph_vcount(g3.get_graph()), nobs - 1);
         g3 = g2;
         EXPECT_EQ(igraph_vcount(g3.get_graph()), nobs);
+        EXPECT_EQ(igraph_vector_size(g3.get_weights()), nedges);
 
         g3 = g3; // self-assign is a no-op.
         EXPECT_EQ(igraph_vcount(g3.get_graph()), nobs);
+        EXPECT_EQ(igraph_vector_size(g3.get_weights()), nedges);
     }
 
     // Trying move assignment to get some coverage.
     {
         auto g2 = std::move(g);
         EXPECT_EQ(igraph_vcount(g2.get_graph()), nobs);
+        EXPECT_EQ(igraph_vector_size(g2.get_weights()), nedges);
 
         auto g3 = cluster.build(ndim, nobs - 1, data.data());
         EXPECT_EQ(igraph_vcount(g3.get_graph()), nobs - 1);
         g3 = std::move(g2);
         EXPECT_EQ(igraph_vcount(g3.get_graph()), nobs);
+        EXPECT_EQ(igraph_vector_size(g3.get_weights()), nedges);
 
         g3 = std::move(g3); // self-move is a no-op.
         EXPECT_EQ(igraph_vcount(g3.get_graph()), nobs);
+        EXPECT_EQ(igraph_vector_size(g3.get_weights()), nedges);
     }
 }
 

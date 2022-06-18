@@ -66,18 +66,10 @@ protected:
 
     struct IgraphVector {
     private:
-        static void try_init(igraph_vector_t& vector, size_t size) {
-            if (igraph_vector_init(&vector, size)) {
-                throw std::runtime_error("failed to initialize igraph vector of size " + std::to_string(size));
-            }
-        }
-
         static void try_copy(igraph_vector_t& dest, const igraph_vector_t& source, bool source_active) {
             if (source_active) {
-                auto size = igraph_vector_size(&source);
-                try_init(dest, size);
                 if (igraph_vector_copy(&dest, &source)) {
-                    throw std::runtime_error("failed to copy igraph vector of size " + std::to_string(size));
+                    throw std::runtime_error("failed to copy igraph vector of size " + std::to_string(igraph_vector_size(&source)));
                 }
             }
         }
@@ -90,7 +82,9 @@ protected:
 
     public:
         IgraphVector(size_t size = 0) {
-            try_init(vector, size);
+            if (igraph_vector_init(&vector, size)) {
+                throw std::runtime_error("failed to initialize igraph vector of size " + std::to_string(size));
+            }
         }
 
         IgraphVector(const IgraphVector& other) : active(other.active) {
