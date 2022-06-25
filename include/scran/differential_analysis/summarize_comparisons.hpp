@@ -121,12 +121,17 @@ void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vect
                 if (g == g2) {
                     continue;
                 }
+
                 auto copy = effects + g * ngroups + g2;
+                auto bIt = buffer.begin();
                 for (size_t i = 0; i < ngenes; ++i, copy += shift) {
-                    buffer[i].first = -*copy; // negative to sort by decreasing value.
-                    buffer[i].second = i;
+                    if (!std::isnan(*copy)) {
+                        bIt->first = -*copy; // negative to sort by decreasing value.
+                        bIt->second = i;
+                        ++bIt;
+                    }
                 }
-                std::sort(buffer.begin(), buffer.end());
+                std::sort(buffer.begin(), bIt);
 
                 double counter = 1;
                 for (const auto& x : buffer) {

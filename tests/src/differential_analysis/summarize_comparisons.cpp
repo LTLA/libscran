@@ -199,3 +199,30 @@ TEST_F(ComputeMinRankTest, LessBasic) {
     compare_vectors(std::vector<double>{2, 3, 1, 1}, ngenes, output.data() + ngenes);
     compare_vectors(std::vector<double>{1, 1, 2, 4}, ngenes, output.data() + ngenes * 2);
 }
+
+TEST_F(ComputeMinRankTest, Missing) {
+    size_t ngenes = 4, ngroups = 3;
+    auto n = std::numeric_limits<double>::quiet_NaN();
+    std::vector<double> effects { 
+        0, 1, 2, 3, 0, 3, 1, n, 0,
+        0, n, 4, 2, 0, 2, 2, n, 0,
+        0, 3, 3, n, 0, 4, 3, n, 0,
+        0, 4, 1, 1, 0, n, 4, n, 0
+     /* 1  1  1  2  2  2  3  3  3 => comparisons for each group */
+    };
+    for (auto& e : effects) { e *= -1; }
+
+    /* Implicitly, the ranks become:
+        0, 1, 2, 3, 0, 2, 1, n, 0,
+        0, X, 4, 2, 0, 1, 2, n, 0,
+        0, 2, 3, n, 0, 3, 3, n, 0,
+        0, 3, 1, 1, 0, X, 4, n, 0
+     * afte we remove the NA and promote all subsequent entries.
+     */
+
+    configure(ngenes, ngroups);
+    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), ptrs);
+    compare_vectors(std::vector<double>{1, 4, 2, 1}, ngenes, output.data());
+    compare_vectors(std::vector<double>{2, 1, 3, 1}, ngenes, output.data() + ngenes);
+    compare_vectors(std::vector<double>{1, 2, 3, 4}, ngenes, output.data() + ngenes * 2);
+}
