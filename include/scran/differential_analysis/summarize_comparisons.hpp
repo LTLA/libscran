@@ -134,8 +134,8 @@ void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vect
                 std::sort(buffer.begin(), bIt);
 
                 double counter = 1;
-                for (const auto& x : buffer) {
-                    target[x.second] = std::min(counter, target[x.second]);
+                for (auto bcopy = buffer.begin(); bcopy != bIt; ++bcopy) {
+                    target[bcopy->second] = std::min(counter, target[bcopy->second]);
                     ++counter;
                 }
             }

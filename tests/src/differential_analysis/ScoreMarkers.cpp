@@ -2,6 +2,7 @@
 
 #include "tatami/base/Matrix.hpp"
 #include "tatami/base/DelayedBind.hpp"
+#include "tatami/base/DelayedSubset.hpp"
 #include "tatami/utils/convert_to_dense.hpp"
 #include "tatami/utils/convert_to_sparse.hpp"
 #include "scran/differential_analysis/ScoreMarkers.hpp"
@@ -283,6 +284,13 @@ TEST_P(ScoreMarkersTest, Missing) {
             EXPECT_TRUE(std::isnan(lost.cohen[s][0][g]));
             EXPECT_TRUE(std::isnan(lost.lfc[s][0][g]));
             EXPECT_TRUE(std::isnan(lost.delta_detected[s][0][g]));
+
+        }
+
+        // Minimum rank is set to the number of genes + 1.
+        EXPECT_EQ(lost.cohen[scran::differential_analysis::MIN_RANK][0][g], dense_row->nrow() + 1);
+        if (do_auc) {
+            EXPECT_EQ(lost.auc[scran::differential_analysis::MIN_RANK][0][g], dense_row->nrow() + 1);
         }
     }
 
@@ -391,6 +399,68 @@ TEST_P(ScoreMarkersTest, Blocked) {
     }
 }
 
+TEST_P(ScoreMarkersTest, BlockConfounded) {
+    auto NC = dense_row->ncol();
+    auto ngroups = std::get<0>(GetParam());
+    std::vector<int> groupings = create_groupings(NC, ngroups);
+
+    // Block is fully confounded with one group.
+    std::vector<int> blocks(NC);
+    for (size_t c = 0; c < NC; ++c) {
+        blocks[c] = groupings[c] == 0;
+    }
+
+    scran::ScoreMarkers chd;
+    bool do_auc = std::get<1>(GetParam());
+    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
+    auto comres = chd.run_blocked(dense_row.get(), groupings.data(), blocks.data());
+
+    // Excluding the group and running on the remaining samples.
+    std::vector<int> subgroups;
+    std::vector<int> keep;
+    for (size_t c = 0; c < NC; ++c) {
+        auto g = groupings[c];
+        if (g != 0) {
+            subgroups.push_back(g);
+            keep.push_back(c);
+        }
+    }
+
+    auto sub = tatami::make_DelayedSubset<1>(dense_row, std::move(keep));
+    auto ref = chd.run(sub.get(), subgroups.data()); 
+    
+    // Expect all but the first group to give the same results.
+    int ngenes = dense_row->nrow();
+    for (int l = 0; l < (ngroups == 2 ? 2 : 1); ++l) {
+        for (int s = 0; s < scran::differential_analysis::MIN_RANK; ++s) {
+            for (int g = 0; g < ngenes; ++g) {
+                EXPECT_TRUE(std::isnan(comres.cohen[s][l][g]));
+                EXPECT_TRUE(std::isnan(comres.lfc[s][l][g]));
+                EXPECT_TRUE(std::isnan(comres.delta_detected[s][l][g]));
+                if (do_auc) {
+                    EXPECT_TRUE(std::isnan(comres.auc[s][l][g]));
+                }
+            }
+        }
+        for (int g = 0; g < ngenes; ++g) {
+            EXPECT_EQ(comres.cohen[scran::differential_analysis::MIN_RANK][l][g], ngenes + 1);
+        }
+    }
+
+    if (ngroups > 2) {
+        for (int l = 1; l < ngroups; ++l) {
+            for (int s = 0; s < scran::differential_analysis::n_summaries; ++s) {
+                EXPECT_EQ(ref.cohen[s][l], comres.cohen[s][l]);
+                EXPECT_EQ(ref.lfc[s][l], comres.lfc[s][l]);
+                EXPECT_EQ(ref.delta_detected[s][l], comres.delta_detected[s][l]);
+                if (do_auc) {
+                    EXPECT_EQ(ref.auc[s][l], comres.auc[s][l]);
+                }
+            }
+        }
+    }
+}
+ 
 INSTANTIATE_TEST_CASE_P(
     ScoreMarkers,
     ScoreMarkersTest,
