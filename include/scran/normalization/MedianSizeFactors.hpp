@@ -155,7 +155,51 @@ public:
         Factory<T, Ref, Out> fact(NR, NC, ref, output);
         tatami::apply<1>(mat, fact);
 
-        // Mild squeezing towards library size-derived factors.
+        /* Mild squeezing towards library size-derived factors. Basically,
+         * we're adding a scaled version of the reference profile to each
+         * column, before normalizing against the reference profile. Given gene
+         * i and cell j:
+         *
+         *   ratio_{ij} = (y_{ij} + ref_i * extra_j) / ref_i
+         *              = (y_{ij} / ref_i) + extra_j
+         *
+         * which means that:
+         *
+         *   median(ratio_{ij}) = median(y_{ij} / ref_i) + extra_j
+         *
+         * This allows us to avoid the actual addition, as we can compute the
+         * unshrunken size factor first and then add the j-specific scaling
+         * later. This is important as otherwise we'd need to make two passes
+         * over the matrix; once to get the mean library size to compute
+         * extra_j, and then again to compute the shrunken factors.
+         *
+         * Incidentally, extra_j is defined as:
+         *
+         *   extra_j = p * t_j / T / R
+         *
+         * where p is the constant prior count, t_j is the library size for j,
+         * T is the mean library size across all j, and R is the library size
+         * for the reference profile.  Basically, p * ref_i / R is how we
+         * "spread out" the prior count across all genes based on their
+         * relative abundance in the reference profile, while t_j / T
+         * represents the library size factor that we are shrinking towards.
+         *
+         * The addition of S_j means that the shrunken size factor is slightly
+         * too big to normalize against the reference. Assume that the
+         * unshrunken size factor captures the true scaling x_j for j against
+         * the reference, in which case the shrunken size factor would be:
+         *
+         *   shrunk_j = median(ratio_{ij}) = x_j + extra_j
+         * 
+         * To get shrunk_j = x_j, we need to divide it by:
+         *
+         *   (x_j + extra_j) / x_j = 1 + (extra_j / x_j)
+         * 
+         * As an approximation, we assume x_j =~ t_j / R, i.e., library size
+         * normalization against the reference. This allows us to simplify to:
+         *
+         *   1 + (p / T)
+         */
         if (prior_count && NR && NC) {
             const auto& sums = fact.sums;
             double mean = std::accumulate(sums.begin(), sums.end(), static_cast<T>(0));
@@ -167,7 +211,7 @@ public:
                 double scaling = prior_count / mean;
                 for (size_t i = 0; i < NC; ++i) {
                     output[i] += sums[i] * scaling / reftotal;
-                    output[i] /= 1.0 + scaling; // adjusting for the addition, as if we were dealing with a library size.
+                    output[i] /= 1.0 + scaling; 
                 }
             }
         }
