@@ -30,6 +30,33 @@ namespace scran {
  */
 class LogNormCounts {
 public:
+    /**
+     * @brief Default parameter settings.
+     */
+    struct Defaults {
+        /**
+         * See `set_pseudo_count()` for more details.
+         */
+        static constexpr double pseudo_count = 1;
+
+        /**
+         * See `set_center()` for more details.
+         */
+        static constexpr bool center = true;
+
+        /**
+         * Set `set_handle_zeros()` for more details.
+         */
+        static constexpr bool handle_zeros = false;
+    };
+
+private:
+    double pseudo_count = Defaults::pseudo_count;
+    bool center = Defaults::center;
+    bool handle_zeros = Defaults::handle_zeros;
+    CenterSizeFactors centerer;
+
+public:
     /** 
      * Set the pseudo-count for the log-transformation.
      * This avoids problems with undefined values at zero counts.
@@ -38,7 +65,7 @@ public:
      *
      * @return A reference to this `LogNormCounts` object.
      */
-    LogNormCounts& set_pseudo_count (double p = 1) {
+    LogNormCounts& set_pseudo_count (double p = Defaults::pseudo_count) {
         pseudo_count = p;
         return *this;
     }
@@ -56,7 +83,7 @@ public:
      *
      * @return A reference to this `LogNormCounts` object.
      */
-    LogNormCounts& set_center(bool c = true) {
+    LogNormCounts& set_center(bool c = Defaults::center) {
         center = c;
         return *this;
     }
@@ -82,7 +109,7 @@ public:
      *
      * @return A reference to this `LogNormCounts` object.
      */
-    LogNormCounts& set_handle_zeros(bool z = false) {
+    LogNormCounts& set_handle_zeros(bool z = Defaults::handle_zeros) {
         handle_zeros = z;
         return *this;
     }
@@ -134,9 +161,6 @@ public:
 
         bool has_zero = false;
         if (center) {
-#ifdef SCRAN_LOGGER
-            SCRAN_LOGGER("scran::LogNormCounts", "Centering size factors to unity");
-#endif
             // Falls back to centerer.run() if block=NULL.
             has_zero = centerer.run_blocked(size_factors.size(), size_factors.data(), block);
         } else {
@@ -169,14 +193,8 @@ public:
             }
         }
 
-#ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::LogNormCounts", "Dividing each cell by its size factor");
-#endif
         auto div = tatami::make_DelayedIsometricOp(mat, tatami::make_DelayedDivideVectorHelper<true, 1>(std::move(size_factors)));
 
-#ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::LogNormCounts", "Applying the log-transformation");
-#endif
         if (pseudo_count == 1) {
             return tatami::make_DelayedIsometricOp(div, tatami::DelayedLog1pHelper(2.0));
         } else {
@@ -219,12 +237,6 @@ public:
         auto size_factors = tatami::column_sums(mat.get());
         return run_blocked(mat, std::move(size_factors), block);
     }
-
-private:
-    double pseudo_count = 1;
-    bool center = true;
-    bool handle_zeros = false;
-    CenterSizeFactors centerer;
 };
 
 };
