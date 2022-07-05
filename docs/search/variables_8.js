@@ -1,5 +1,9 @@
 var searchData=
 [
-  ['neighbors_0',['neighbors',['../structscran_1_1BuildSNNGraph_1_1Defaults.html#a6a376b256377055e23a96c3d9eb96365',1,'scran::BuildSNNGraph::Defaults::neighbors()'],['../structscran_1_1ScaleByNeighbors_1_1Defaults.html#ac329e6e26484712b7d8fbbb46d47ae8d',1,'scran::ScaleByNeighbors::Defaults::neighbors()']]],
-  ['nmads_1',['nmads',['../structscran_1_1PerCellAdtQcFilters_1_1Defaults.html#aaa64ec4b75ea7d041100630fc9a06092',1,'scran::PerCellAdtQcFilters::Defaults']]]
+  ['max_0',['max',['../structscran_1_1ClusterSNNGraphMultiLevel_1_1Results.html#a569e235d05befc66022b27cf329c1b2d',1,'scran::ClusterSNNGraphMultiLevel::Results']]],
+  ['means_1',['means',['../structscran_1_1ScoreMarkers_1_1Results.html#acb23c7cf180478f30280747c6e49900c',1,'scran::ScoreMarkers::Results::means()'],['../structscran_1_1ModelGeneVar_1_1Results.html#a30c93b46a06b60773cfe1cbb895c4f32',1,'scran::ModelGeneVar::Results::means()']]],
+  ['membership_2',['membership',['../structscran_1_1ClusterSNNGraphMultiLevel_1_1Results.html#a27434f77a03c488270b68c08e5105e80',1,'scran::ClusterSNNGraphMultiLevel::Results::membership()'],['../structscran_1_1ClusterSNNGraphWalktrap_1_1Results.html#aa14b1d5ff2045c1513039697e5320d0f',1,'scran::ClusterSNNGraphWalktrap::Results::membership()'],['../structscran_1_1ClusterSNNGraphLeiden_1_1Results.html#a2a59465810969c36e6a084f5cac31675',1,'scran::ClusterSNNGraphLeiden::Results::membership()']]],
+  ['merges_3',['merges',['../structscran_1_1ClusterSNNGraphWalktrap_1_1Results.html#aa6ef7c62f9f348d3e26592956c467e50',1,'scran::ClusterSNNGraphWalktrap::Results']]],
+  ['min_5fdetected_5fdrop_4',['min_detected_drop',['../structscran_1_1PerCellAdtQcFilters_1_1Defaults.html#aa229e997491d3190175097269e3d98d1',1,'scran::PerCellAdtQcFilters::Defaults']]],
+  ['modularity_5',['modularity',['../structscran_1_1ClusterSNNGraphMultiLevel_1_1Results.html#ad24f154bae449495590393bdb2ff59fc',1,'scran::ClusterSNNGraphMultiLevel::Results::modularity()'],['../structscran_1_1ClusterSNNGraphWalktrap_1_1Results.html#a54659717e5be3972357d5fd4680894d9',1,'scran::ClusterSNNGraphWalktrap::Results::modularity()'],['../structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#ac1bf98a6de928de8b786643942768deb',1,'scran::ClusterSNNGraphLeiden::Defaults::modularity()']]]
 ];

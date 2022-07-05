@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['center_0',['center',['../structscran_1_1GroupedSizeFactors_1_1Defaults.html#acbe5c154e3b67420a1f2ef84ef304310',1,'scran::GroupedSizeFactors::Defaults::center()'],['../structscran_1_1MedianSizeFactors_1_1Defaults.html#af747d883c33f4793ce28b9aade2d2ad6',1,'scran::MedianSizeFactors::Defaults::center()']]],
+  ['center_0',['center',['../structscran_1_1GroupedSizeFactors_1_1Defaults.html#acbe5c154e3b67420a1f2ef84ef304310',1,'scran::GroupedSizeFactors::Defaults::center()'],['../structscran_1_1LogNormCounts_1_1Defaults.html#aeb75e212cc28f620391082fc735e7341',1,'scran::LogNormCounts::Defaults::center()'],['../structscran_1_1MedianSizeFactors_1_1Defaults.html#af747d883c33f4793ce28b9aade2d2ad6',1,'scran::MedianSizeFactors::Defaults::center()']]],
   ['cohen_1',['cohen',['../structscran_1_1ScoreMarkers_1_1Results.html#aea2491f627de9c217b86ad888429e99d',1,'scran::ScoreMarkers::Results']]],
   ['compute_5fdetected_2',['compute_detected',['../structscran_1_1AggregateAcrossCells_1_1Defaults.html#a75c5c2a8222c372e3d6f419b3e1f8ffe',1,'scran::AggregateAcrossCells::Defaults']]],
   ['compute_5fsums_3',['compute_sums',['../structscran_1_1AggregateAcrossCells_1_1Defaults.html#a4299b3f74f68fc088d4b2bacf77c5fee',1,'scran::AggregateAcrossCells::Defaults']]],
