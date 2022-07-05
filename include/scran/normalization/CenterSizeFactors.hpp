@@ -41,24 +41,28 @@ private:
 
 public:
     /**
-     * Validate size factors by checking that they are all positive.
+     * Validate size factors by checking that they are all non-zero.
+     * We also check whether any size factors are zero, which may be handled separately by callers. 
      *
      * @tparam T Floating-point type for the size factors.
      *
      * @param n Number of size factors.
-     * @param[in,out] size_factors Pointer to an array of positive size factors of length `n`.
+     * @param[in] size_factors Pointer to an array of non-negative size factors of length `n`.
      *
-     * @param[in] size_factors A vector of positive size factors, of length equal to the number of columns in `mat`.
-     *
-     * @return An error is raised if a negative or zero size factor is detected.
+     * @return Whether a size factor of zero was detected.
+     * An error is raised if a negative size factor is detected.
      */
     template<typename T>
-    static void validate(size_t n, const T* size_factors) {
+    static bool validate(size_t n, const T* size_factors) {
+        bool is_zero = false;
         for (size_t i = 0; i < n; ++i) {
-            if (size_factors[i] <= 0) {
-                throw std::runtime_error("non-positive size factors detected");
+             if (size_factors[i] < 0) {
+                throw std::runtime_error("negative size factors detected");
+            } else if (!is_zero && size_factors[i] == 0) {
+                is_zero = true;
             }
         }
+        return is_zero;
     }
 
 public:
@@ -89,11 +93,14 @@ public:
      * @param[in,out] size_factors Pointer to an array of positive size factors of length `n`.
      *
      * @return Entries in `size_factors` are scaled so that their mean is equal to 1.
+     * A boolean is returned indicating whether size factors of zero were detected.
      */
     template<typename T>
-    void run(size_t n, T* size_factors) {
+    bool run(size_t n, T* size_factors) {
+        bool has_zero = false;
+
         if (n) { // avoid division by zero
-            validate(n, size_factors);
+            has_zero = validate(n, size_factors);
             double mean = std::accumulate(size_factors, size_factors + n, static_cast<double>(0)) / n;
 
             if (mean) { // avoid division by zero
@@ -102,6 +109,8 @@ public:
                 }
             }
         }
+
+        return has_zero;
     }
 
     /**
@@ -116,14 +125,17 @@ public:
      * This can also be a `NULL`, in which case all cells are assumed to belong to the same block.
      *
      * @return Entries in `size_factors` are scaled according to the mode defined by `set_block_mode()`.
+     * A boolean is returned indicating whether size factors of zero were detected.
      */
     template<typename T, typename B>
-    void run_blocked(size_t n, T* size_factors, const B* block) {
+    bool run_blocked(size_t n, T* size_factors, const B* block) {
         if (block == NULL) {
-            run(n, size_factors);
-            return;
-        } else if (n) {
-            validate(n, size_factors);
+            return run(n, size_factors);
+        } 
+        
+        bool has_zero = false;
+        if (n) {
+            has_zero = validate(n, size_factors);
 
             size_t ngroups = *std::max_element(block, block + n) + 1;
             std::vector<double> group_mean(ngroups);
@@ -148,6 +160,8 @@ public:
                 }
             }
         }
+
+        return has_zero;
     }
 };
 

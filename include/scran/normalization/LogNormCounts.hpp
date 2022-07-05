@@ -71,6 +71,22 @@ public:
         return *this;
     }
 
+    /**
+     * Specify whether to handle zero size factors. 
+     * If false, size factors of zero will raise an error;
+     * otherwise, they will be automatically set to the smallest non-zero size factor after centering.
+     * Setting this to `true` is useful when all-zero cells are present, as this ensures that they are all-zero in the normalized matrix 
+     * (rather than undefined values due to division by zero).
+     *
+     * @param s Whether to accept positive size factors only.
+     *
+     * @return A reference to this `LogNormCounts` object.
+     */
+    LogNormCounts& set_handle_zeros(bool z = false) {
+        handle_zeros = z;
+        return *this;
+    }
+
 public:
     /**
      * Compute log-normalized expression values from an input matrix.
@@ -116,16 +132,41 @@ public:
             throw std::runtime_error("number of size factors and columns are not equal");
         }
 
+        bool has_zero = false;
         if (center) {
 #ifdef SCRAN_LOGGER
             SCRAN_LOGGER("scran::LogNormCounts", "Centering size factors to unity");
 #endif
             // Falls back to centerer.run() if block=NULL.
-            centerer.run_blocked(size_factors.size(), size_factors.data(), block);
+            has_zero = centerer.run_blocked(size_factors.size(), size_factors.data(), block);
         } else {
             // CenterSizeFactors do their own validity checks, 
             // so we don't need to call it again in that case.
-            CenterSizeFactors::validate(size_factors.size(), size_factors.data());
+            has_zero = CenterSizeFactors::validate(size_factors.size(), size_factors.data());
+        }
+
+        if (has_zero) {
+            if (!handle_zeros) {
+                throw std::runtime_error("all size factors should be positive");
+            } else if (size_factors.size()) {
+                // Replacing them with the smallest non-zero size factor, or 1.
+                auto smallest = std::numeric_limits<double>::infinity();
+                for (auto s : size_factors) {
+                    if (s && smallest > s) {
+                        smallest = s;
+                    }
+                }
+
+                if (std::isinf(smallest)) {
+                    smallest = 1;
+                }
+
+                for (auto& s : size_factors) {
+                    if (s == 0) {
+                        s = smallest;
+                    }
+                }
+            }
         }
 
 #ifdef SCRAN_LOGGER
@@ -182,6 +223,7 @@ public:
 private:
     double pseudo_count = 1;
     bool center = true;
+    bool handle_zeros = false;
     CenterSizeFactors centerer;
 };
 

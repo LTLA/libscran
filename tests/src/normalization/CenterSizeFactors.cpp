@@ -45,7 +45,8 @@ protected:
 
 TEST_F(CenterSizeFactorsTester, Simple) {
     scran::CenterSizeFactors cen;
-    cen.run(sf.size(), sf.data());
+    EXPECT_FALSE(cen.run(sf.size(), sf.data()));
+
     double middle = std::accumulate(sf.begin(), sf.end(), 0.0) / sf.size();
     EXPECT_FLOAT_EQ(middle, 1);
 }
@@ -85,14 +86,25 @@ TEST_F(CenterSizeFactorsTester, BlockCenter) {
 }
 
 TEST_F(CenterSizeFactorsTester, Error) {
+    std::vector<double> empty(mat->ncol(), 1);
+    EXPECT_FALSE(scran::CenterSizeFactors::validate(empty.size(), empty.data()));
+
+    empty[0] = 0;
+    EXPECT_TRUE(scran::CenterSizeFactors::validate(empty.size(), empty.data()));
+
     scran::CenterSizeFactors cen;
-    std::vector<double> empty(mat->ncol());
+    std::fill(empty.begin(), empty.end(), 0);
+    auto copy = empty;
+    EXPECT_TRUE(cen.run(empty.size(), copy.data()));
+    EXPECT_EQ(copy, empty); // avoids division by zero.
+
+    empty[0] = -1;
     EXPECT_ANY_THROW({
         try {
             cen.run(empty.size(), empty.data());
         } catch (std::exception& e) {
             std::string msg = e.what();
-            EXPECT_TRUE(msg.find("non-positive") != std::string::npos);
+            EXPECT_TRUE(msg.find("negative") != std::string::npos);
             throw;
         }
     });

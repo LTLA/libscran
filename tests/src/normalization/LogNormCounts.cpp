@@ -136,3 +136,42 @@ TEST_F(LogNormCountsTester, Error) {
     std::vector<double> empty(mat->ncol());
     EXPECT_ANY_THROW(lnc.run(mat, empty));
 }
+
+TEST_F(LogNormCountsTester, NonStrict) {
+    scran::LogNormCounts lnc;
+    lnc.set_handle_zeros(true);
+    std::vector<double> empty(mat->ncol());
+
+    // No division, effectively; all zeroes set to 1.
+    {
+        auto lognormed = lnc.run(mat, empty);
+        for (size_t i = 0; i < mat->ncol(); ++i) {
+            auto output = lognormed->column(i);
+            auto output2 = mat->column(i);
+            for (auto& o : output2) {
+                o = std::log1p(o)/std::log(2);
+            }
+            EXPECT_EQ(output, output2);
+        }
+    }
+
+    // Uses 0.5, which is the smallest non-zero.
+    empty[0] = 0.5;
+    empty[1] = 1;
+    double center = 1.5 / empty.size();
+
+    {
+        auto lognormed = lnc.run(mat, empty);
+        for (size_t i = 0; i < mat->ncol(); ++i) {
+            auto output = lognormed->column(i);
+            auto output2 = mat->column(i);
+
+            auto sf = (i <= 1 ? empty[i] : 0.5) / center;
+            for (auto& o : output2) {
+                o = std::log1p(o/sf)/std::log(2);
+            }
+            EXPECT_EQ(output, output2);
+        }
+    }
+}
+
