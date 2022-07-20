@@ -29,6 +29,29 @@ namespace scran {
 class PerCellAdtQcMetrics {
 public:
     /**
+     * @brief Default parameters for aggregation.
+     */
+    struct Defaults {
+        /**
+         * See `set_num_threads()`.
+         */
+        static constexpr int num_threads = 1;
+    };
+
+    /**
+     * @param n Number of threads to use. 
+     * @return A reference to this `PerCellAdtQcMetrics` object.
+     */
+    PerCellAdtQcMetrics& set_num_threads(int n = Defaults::num_threads) {
+        num_threads = n;
+        return *this;
+    }
+
+private:
+    int num_threads = Defaults::num_threads;
+
+public:
+    /**
      * @brief Result store for QC metric calculations.
      * 
      * Meaningful instances of this object should generally be constructed by calling the `PerCellAdtQcMetrics::run()` methods.
@@ -111,7 +134,7 @@ public:
     template<class Matrix, typename SubPtr = const uint8_t*, typename Sum, typename Detected, typename SubTotal>
     void run(const Matrix* mat, const std::vector<SubPtr>& subsets, Sum* sums, Detected* detected, std::vector<SubTotal*> subset_totals) const {
         PerCellRnaQcMetrics runner;
-        runner.set_subset_totals(true);
+        runner.set_subset_totals(true).set_num_threads(num_threads);
         runner.run(mat, subsets, sums, detected, std::move(subset_totals));
         return;
     }

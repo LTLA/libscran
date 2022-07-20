@@ -99,6 +99,11 @@ public:
          * See `set_subset_totals()` for more details.
          */
         static constexpr bool subset_totals = false;
+
+        /**
+         * See `set_num_threads()`.
+         */
+        static constexpr int num_threads = 1;
     };
 
     /**
@@ -114,8 +119,18 @@ public:
         return *this;
     }
 
+    /**
+     * @param n Number of threads to use. 
+     * @return A reference to this `PerCellRnaQcMetrics` object.
+     */
+    PerCellRnaQcMetrics& set_num_threads(int n = Defaults::num_threads) {
+        num_threads = n;
+        return *this;
+    }
+
 private:
     bool subset_totals = Defaults::subset_totals;
+    int num_threads = Defaults::num_threads;
 
 private:
     template<typename SUB, typename S, typename D, typename PROP>
@@ -346,7 +361,7 @@ public:
 #endif
 
         Factory fact(nr, nc, &subsets, sums, detected, subset_proportions, subset_totals);
-        tatami::apply<1>(mat, fact);
+        tatami::apply<1>(mat, fact, num_threads);
         return;
     }
 };

@@ -71,11 +71,17 @@ public:
          * See `set_approximate()` for details.
          */
         static constexpr bool approximate = false;
+
+        /**
+         * See `set_num_threads()`.
+         */
+        static constexpr int num_threads = 1;
     };
 private:
     int num_neighbors = Defaults::neighbors;
     Scheme weight_scheme = Defaults::weighting_scheme;
     bool approximate = Defaults::approximate;
+    int nthreads = Defaults::num_threads;
 
 public:
     /** 
@@ -105,6 +111,15 @@ public:
      */
     BuildSNNGraph& set_weighting_scheme(Scheme w = Defaults::weighting_scheme) {
         weight_scheme = w;
+        return *this;
+    }
+
+    /**
+     * @param n Number of threads to use. 
+     * @return A reference to this `BuildSNNGraph` object.
+     */
+    BuildSNNGraph& set_num_threads(int n = Defaults::num_threads) {
+        nthreads = n;
         return *this;
     }
 
@@ -151,7 +166,7 @@ public:
         std::vector<std::vector<int> > indices(ncells);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
-        #pragma omp parallel for
+        #pragma omp parallel for num_threads(nthreads)
         for (size_t i = 0; i < ncells; ++i) {
 #else
         SCRAN_CUSTOM_PARALLEL(ncells, [&](size_t start, size_t end) -> void {
@@ -164,7 +179,7 @@ public:
             }
         }
 #ifdef SCRAN_CUSTOM_PARALLEL
-        });
+        }, nthreads);
 #endif
 
         return run(indices);

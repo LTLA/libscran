@@ -48,6 +48,11 @@ public:
          * See `set_approximate()` for more details.
          */
         static constexpr bool approximate = false;
+
+        /**
+         * See `set_num_threads()`.
+         */
+        static constexpr int num_threads = 1;
     };
 
     /**
@@ -74,9 +79,19 @@ public:
         return *this;
     }
 
+    /**
+     * @param n Number of threads to use. 
+     * @return A reference to this `ScaleByNeighbors` object.
+     */
+    ScaleByNeighbors& set_num_threads(int n = Defaults::num_threads) {
+        nthreads = n;
+        return *this;
+    }
+
 private:
     int num_neighbors = Defaults::neighbors;
     bool approximate = Defaults::approximate;
+    int nthreads = Defaults::num_threads;
 
 public:
     /**
@@ -113,7 +128,7 @@ public:
         std::vector<double> dist(nobs);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
-        #pragma omp parallel for
+        #pragma omp parallel for num_threads(nthreads)
         for (size_t i = 0; i < nobs; ++i) {
 #else
         SCRAN_CUSTOM_PARALLEL(nobs, [&](size_t start, size_t end) -> void {

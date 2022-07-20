@@ -34,9 +34,9 @@ double median (IT start, size_t n) {
 }
 
 template<typename Stat>
-void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vector<std::vector<Stat*> >& output) {
+void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vector<std::vector<Stat*> >& output, int threads) {
 #ifndef SCRAN_CUSTOM_PARALLEL
-    #pragma omp parallel for 
+    #pragma omp parallel for num_threads(threads)
     for (size_t gene = 0; gene < ngenes; ++gene) {
 #else
     SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
@@ -93,18 +93,18 @@ void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vecto
         }
     }
 #ifdef SCRAN_CUSTOM_PARALLEL            
-    });
+    }, threads);
 #endif
 
     return;
 }
 
 template<typename Stat>
-void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vector<Stat*>& output) {
+void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vector<Stat*>& output, int threads) {
     auto shift = ngroups * ngroups;
 
 #ifndef SCRAN_CUSTOM_PARALLEL
-    #pragma omp parallel
+    #pragma omp parallel num_threads(threads)
     {
         std::vector<std::pair<Stat, int> > buffer(ngenes);
         #pragma omp for
@@ -143,7 +143,7 @@ void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vect
 #ifndef SCRAN_CUSTOM_PARALLEL
     }
 #else
-    });
+    }, threads);
 #endif
 }
 

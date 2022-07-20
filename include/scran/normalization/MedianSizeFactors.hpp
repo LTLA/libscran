@@ -45,6 +45,11 @@ public:
          * See `set_prior_count()` for more details.
          */
         static constexpr double prior_count = 10;
+
+        /**
+         * See `set_num_threads()`.
+         */
+        static constexpr int num_threads = 1;
     };
 
     /**
@@ -81,9 +86,19 @@ public:
         return *this;
     }
 
+    /**
+     * @param n Number of threads to use. 
+     * @return A reference to this `MedianSizeFactors` object.
+     */
+    MedianSizeFactors& set_num_threads(int n = Defaults::num_threads) {
+        num_threads = n;
+        return *this;
+    }
+
 private:
     bool center = Defaults::center;
     double prior_count = Defaults::prior_count;
+    int num_threads = Defaults::num_threads;
 
 private:
     template<typename T, typename Ref, typename Out>
@@ -153,7 +168,7 @@ public:
     void run(const tatami::Matrix<T, IDX>* mat, const Ref* ref, Out* output) const {
         size_t NR = mat->nrow(), NC = mat->ncol();
         Factory<T, Ref, Out> fact(NR, NC, ref, output);
-        tatami::apply<1>(mat, fact);
+        tatami::apply<1>(mat, fact, num_threads);
 
         /* Mild squeezing towards library size-derived factors. Basically,
          * we're adding a scaled version of the reference profile to each

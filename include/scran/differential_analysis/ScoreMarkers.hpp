@@ -155,6 +155,11 @@ public:
          * See `set_threshold()` for details.
          */
         static constexpr double threshold = 0;
+
+        /**
+         * See `set_num_threads()`.
+         */
+        static constexpr int num_threads = 1;
     };
 private:
     double threshold = Defaults::threshold;
@@ -163,6 +168,8 @@ private:
     ComputeSummaries do_auc = Defaults::compute_all_summaries();
     ComputeSummaries do_lfc = Defaults::compute_all_summaries();
     ComputeSummaries do_delta_detected = Defaults::compute_all_summaries();
+
+    int num_threads = Defaults::num_threads;
 
 public:
     /**
@@ -345,6 +352,15 @@ public:
      */
     ScoreMarkers& set_compute_delta_detected(differential_analysis::summary s, bool c) {
         do_delta_detected[s] = c;
+        return *this;
+    }
+
+    /**
+     * @param n Number of threads to use. 
+     * @return A reference to this `ScoreMarkers` object.
+     */
+    ScoreMarkers& set_num_threads(int n = Defaults::num_threads) {
+        num_threads = n;
         return *this;
     }
 
@@ -620,7 +636,7 @@ private:
 #endif
         if (!do_auc) {
             differential_analysis::BidimensionalFactory fact(p->nrow(), p->ncol(), means, detected, effects, level, &level_size, ngroups, nblocks, threshold);
-            tatami::apply<0>(p, fact);
+            tatami::apply<0>(p, fact, num_threads);
 
         } else {
             // Need to remake this, as there's no guarantee that 'blocks' exists.
@@ -631,15 +647,15 @@ private:
             }
 
             differential_analysis::PerRowFactory fact(p->nrow(), p->ncol(), means, detected, effects, level, &level_size, group, ngroups, block, nblocks, threshold);
-            tatami::apply<0>(p, fact);
+            tatami::apply<0>(p, fact, num_threads);
         }
 
         auto summarize = [&](Stat* ptr, std::vector<std::vector<Stat*> >& output) -> void {
             auto& min_rank = output[scran::differential_analysis::MIN_RANK];
             if (min_rank.size()) {
-                differential_analysis::compute_min_rank(p->nrow(), ngroups, ptr, min_rank);
+                differential_analysis::compute_min_rank(p->nrow(), ngroups, ptr, min_rank, num_threads);
             }
-            differential_analysis::summarize_comparisons(p->nrow(), ngroups, ptr, output); // non-const w.r.t. ptr's values, so this is done after min-rank calculations.
+            differential_analysis::summarize_comparisons(p->nrow(), ngroups, ptr, output, num_threads); // non-const w.r.t. ptr's values, so this is done after min-rank calculations.
         };
 
         if (do_cohen) {

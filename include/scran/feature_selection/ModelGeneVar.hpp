@@ -31,6 +31,16 @@ namespace scran {
  */
 class ModelGeneVar {
 public:
+    /**
+     * @brief Default parameters for variance modelling.
+     */
+    struct Defaults {
+        /**
+         * See `set_num_threads()`.
+         */
+        static constexpr int num_threads = 1;
+    };
+
     /** 
      * Use the default span for the LOWESS smoother, see https://ltla.github.io/CppWeightedLowess for details.
      *
@@ -53,7 +63,14 @@ public:
         return *this;
     }
 
-private:
+    /**
+     * @param n Number of threads to use. 
+     * @return A reference to this `ModelGeneVar` object.
+     */
+    ModelGeneVar& set_num_threads(int n = Defaults::num_threads) {
+        num_threads = n;
+        return *this;
+    }
 
 public:
     /** 
@@ -117,11 +134,11 @@ public:
                 ++block_size[*copy];
             }
             feature_selection::BlockedVarianceFactory<true, Stat, B, decltype(block_size)> fact(NR, NC, means, variances, block, &block_size);
-            tatami::apply<0>(mat, fact);
+            tatami::apply<0>(mat, fact, num_threads);
         } else {
             block_size[0] = NC;
             feature_selection::BlockedVarianceFactory<false, Stat, B, decltype(block_size)> fact(NR, NC, means, variances, block, &block_size);
-            tatami::apply<0>(mat, fact);
+            tatami::apply<0>(mat, fact, num_threads);
         }
 
         // Applying the trend fit to each block.
@@ -235,10 +252,10 @@ public:
         run_blocked(mat, block, std::move(mean_ptr), std::move(var_ptr), std::move(fit_ptr), std::move(resid_ptr));
         return output;
     }
-
     
 private:
     FitTrendVar fit;
+    int num_threads = Defaults::num_threads;
 };
 
 }
