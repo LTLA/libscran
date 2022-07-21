@@ -125,6 +125,14 @@ TEST(GroupedSizeFactors, ByGroupComposition) {
             EXPECT_FALSE(std::abs(1 - ratio) > 0.001);
         }
     }
+
+    // Same results in parallel.
+    {
+        scran::GroupedSizeFactors grouper2;
+        grouper2.set_num_threads(3);
+        auto res2 = grouper2.run(&mat, groups.data());
+        EXPECT_EQ(res.factors, res2.factors);
+    }
 }
 
 TEST(GroupedSizeFactors, Reference) {
@@ -145,6 +153,7 @@ TEST(GroupedSizeFactors, Reference) {
     }
     tatami::DenseColumnMatrix<double> mat(NR, NC, contents);
 
+    // Make sure we get different results if we change the reference.
     scran::GroupedSizeFactors grouper;
     auto res0 = grouper.run(&mat, groups.data(), 0);
     auto res1 = grouper.run(&mat, groups.data(), 1);

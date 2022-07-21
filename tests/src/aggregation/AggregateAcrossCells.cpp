@@ -18,7 +18,9 @@ std::vector<int> create_groupings(size_t n, int ngroups) {
     return groupings;
 }
 
-class AggregateAcrossCellsTest : public ::testing::TestWithParam<int> {
+/*********************************************/
+
+class AggregateAcrossCellsTest : public ::testing::TestWithParam<std::tuple<int, int> > {
 protected:
     std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
 
@@ -31,27 +33,40 @@ protected:
 };
 
 TEST_P(AggregateAcrossCellsTest, Basics) {
-    auto ngroups = GetParam();
+    auto param = GetParam();
+    auto ngroups = std::get<0>(param);
     std::vector<int> groupings = create_groupings(dense_row->ncol(), ngroups);
 
     scran::AggregateAcrossCells chd;
     auto res = chd.run(dense_row.get(), groupings.data());
 
-    // Running cursory checks on the metrics.
-    size_t ngenes = dense_row->nrow();
-    for (size_t g = 0; g < ngenes; ++g) {
-        std::vector<double> buf(dense_row->ncol());
-        auto ptr = dense_row->row(g, buf.data());
+    auto nthreads = std::get<1>(param);
+    chd.set_num_threads(nthreads);        
 
-        for (int l = 0; l < ngroups; ++l) {
-            double cursum = 0, curdetected = 0;
-            for (int i = l; i < dense_row->ncol(); i += ngroups) { // repeats in a pattern, see create_groupings.
-                cursum += ptr[i];
-                curdetected += (ptr[i] > 0);
+    if (nthreads == 1) {
+        // Running cursory checks on the metrics.
+        size_t ngenes = dense_row->nrow();
+        for (size_t g = 0; g < ngenes; ++g) {
+            std::vector<double> buf(dense_row->ncol());
+            auto ptr = dense_row->row(g, buf.data());
+
+            for (int l = 0; l < ngroups; ++l) {
+                double cursum = 0, curdetected = 0;
+                for (int i = l; i < dense_row->ncol(); i += ngroups) { // repeats in a pattern, see create_groupings.
+                    cursum += ptr[i];
+                    curdetected += (ptr[i] > 0);
+                }
+
+                EXPECT_EQ(cursum, res.sums[l][g]);
+                EXPECT_EQ(curdetected, res.detected[l][g]);
             }
-
-            EXPECT_EQ(cursum, res.sums[l][g]);
-            EXPECT_EQ(curdetected, res.detected[l][g]);
+        }
+    } else {
+        // Comparing to the same call, but parallelized.
+        auto res1 = chd.run(dense_row.get(), groupings.data());
+        for (int l = 0; l < ngroups; ++l) {
+            EXPECT_EQ(res.sums[l], res1.sums[l]);
+            EXPECT_EQ(res.detected[l], res1.detected[l]);
         }
     }
 
@@ -62,7 +77,7 @@ TEST_P(AggregateAcrossCellsTest, Basics) {
             compare_almost_equal(res.detected[l], other.detected[l]);
         }
     };
-
+    
     auto res2 = chd.run(sparse_row.get(), groupings.data());
     compare(res2);
 
@@ -76,8 +91,13 @@ TEST_P(AggregateAcrossCellsTest, Basics) {
 INSTANTIATE_TEST_CASE_P(
     AggregateAcrossCells,
     AggregateAcrossCellsTest,
-    ::testing::Values(2, 3, 4, 5) // number of clusters
+    ::testing::Combine(
+        ::testing::Values(2, 3, 4, 5), // number of clusters
+        ::testing::Values(1, 3) // number of threads
+    )
 );
+
+/*********************************************/
 
 TEST(AggregateAcrossCells, Skipping) {
     auto input = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));

@@ -34,77 +34,80 @@ double median (IT start, size_t n) {
 }
 
 template<typename Stat>
-void summarize_comparisons(size_t ngenes, int ngroups, Stat* effects, std::vector<std::vector<Stat*> >& output) {
+void summarize_comparisons(size_t ngenes, int ngroups, const Stat* effects, std::vector<std::vector<Stat*> >& output, int threads) {
 #ifndef SCRAN_CUSTOM_PARALLEL
-    #pragma omp parallel for 
+    #pragma omp parallel num_threads(threads)
+    {
+    std::vector<double> effect_buffer(ngroups);
+    #pragma omp for
     for (size_t gene = 0; gene < ngenes; ++gene) {
 #else
     SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
+    std::vector<double> effect_buffer(ngroups);
     for (size_t gene = start; gene < end; ++gene) {
 #endif
 
         auto base = effects + gene * ngroups * ngroups;
         for (int l = 0; l < ngroups; ++l) {
-            auto start = base + l * ngroups;
+			auto ebegin = effect_buffer.data();
+		    auto elast = ebegin;	
 
-            // Ignoring the self comparison.
-            int restart = 1;
-            std::swap(start[0], start[l]); 
-
-            // Pruning out NAs.
-            for (int r = restart; r < ngroups; ++r) {
-                if (std::isnan(start[r])) {
-                    if (r != restart) {
-                        std::swap(start[restart], start[r]); 
+            // Ignoring the self comparison and pruning out NaNs.
+            {
+                auto eptr = base + l * ngroups;
+                for (int r = 0; r < ngroups; ++r, ++eptr) {
+                    if (r == l || std::isnan(*eptr)) {
+                        continue;
                     }
-                    ++restart;
+                    *elast = *eptr;
+                    ++elast;
                 }
             }
 
-            if (restart == ngroups) {
+            int ncomps = elast - ebegin;
+            if (ncomps == 0) {
                 for (size_t i = 0; i < MIN_RANK; ++i) {
                     if (output[i].size()) {
                         output[i][l][gene] = std::numeric_limits<double>::quiet_NaN();
                     }
                 }
+            } else if (ncomps == 1) {
+                for (size_t i = 0; i < MIN_RANK; ++i) { 
+                    if (output[i].size()) {
+                        output[i][l][gene] = *ebegin;
+                    }
+                }
             } else {
-                int ncomps = ngroups - restart;
-                if (ncomps > 1) {
-                    if (output[MIN].size()) {
-                        output[MIN][l][gene] = *std::min_element(start + restart, start + ngroups);
-                    }
-                    if (output[MEAN].size()) {
-                        output[MEAN][l][gene] = std::accumulate(start + restart, start + ngroups, 0.0) / ncomps; // Mean
-                    }
-                    if (output[MEDIAN].size()) {
-                        output[MEDIAN][l][gene] = median(start + restart, ncomps); // Median 
-                    }
-                    if (output[MAX].size()) {
-                        output[MAX][l][gene] = *std::max_element(start + restart, start + ngroups); // Maximum
-                    }
-                } else {
-                    for (size_t i = 0; i < MIN_RANK; ++i) {
-                        if (output[i].size()) {
-                            output[i][l][gene] = start[restart]; 
-                        }
-                    }
+                if (output[MIN].size()) {
+                    output[MIN][l][gene] = *std::min_element(ebegin, elast);
+                }
+                if (output[MEAN].size()) {
+                    output[MEAN][l][gene] = std::accumulate(ebegin, elast, 0.0) / ncomps; 
+                }
+                if (output[MEDIAN].size()) {
+                    output[MEDIAN][l][gene] = median(ebegin, ncomps); 
+                }
+                if (output[MAX].size()) {
+                    output[MAX][l][gene] = *std::max_element(ebegin, elast);
                 }
             }
         }
     }
-#ifdef SCRAN_CUSTOM_PARALLEL            
-    });
+#ifndef SCRAN_CUSTOM_PARALLEL            
+	}
+#else
+    }, threads);
 #endif
 
     return;
 }
 
 template<typename Stat>
-void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vector<Stat*>& output) {
+void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vector<Stat*>& output, int threads) {
     auto shift = ngroups * ngroups;
 
 #ifndef SCRAN_CUSTOM_PARALLEL
-    #pragma omp parallel
+    #pragma omp parallel num_threads(threads)
     {
         std::vector<std::pair<Stat, int> > buffer(ngenes);
         #pragma omp for
@@ -143,7 +146,7 @@ void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vect
 #ifndef SCRAN_CUSTOM_PARALLEL
     }
 #else
-    });
+    }, threads);
 #endif
 }
 

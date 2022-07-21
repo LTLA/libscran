@@ -46,6 +46,11 @@ public:
          * See `set_center()` for more details.
          */
         static constexpr bool center = true;
+
+        /**
+         * See `set_num_threads()`.
+         */
+        static constexpr int num_threads = 1;
     };
 
     /**
@@ -71,9 +76,19 @@ public:
         return *this;
     }
 
+    /**
+     * @param n Number of threads to use. 
+     * @return A reference to this `AggregateAcrossCells` object.
+     */
+    GroupedSizeFactors& set_num_threads(int n = Defaults::num_threads) {
+        num_threads = n;
+        return *this;
+    }
+
 private:
     bool center = Defaults::center;
     double prior_count = MedianSizeFactors::Defaults::prior_count;
+    int num_threads = Defaults::num_threads;
 
 public:
     /**
@@ -141,7 +156,7 @@ private:
                 sums[i] = combined.data() + i * NR;
             }
             AggregateAcrossCells aggregator;
-            aggregator.run(mat, group, std::move(sums), std::vector<int*>());
+            aggregator.set_num_threads(num_threads).run(mat, group, std::move(sums), std::vector<int*>());
         }
 
         size_t ref = 0;
@@ -174,12 +189,12 @@ private:
         tatami::ArrayView view(combined.data(), combined.size());
         tatami::DenseColumnMatrix<T, IDX, decltype(view)> aggmat(NR, ngroups, std::move(view));
         MedianSizeFactors med;
-        med.set_center(false).set_prior_count(prior_count);
+        med.set_num_threads(num_threads).set_center(false).set_prior_count(prior_count);
         auto mres = med.run(&aggmat, combined.data() + ref * NR);
 
         // Propagating to each cell via library size-based normalization.
-        auto aggcolsums = tatami::column_sums(&aggmat);
-        auto colsums = tatami::column_sums(mat);
+        auto aggcolsums = tatami::column_sums(&aggmat, num_threads);
+        auto colsums = tatami::column_sums(mat, num_threads);
         for (size_t i = 0; i < NC; ++i) {
             auto curgroup = group[i];
             auto scale = static_cast<double>(colsums[i])/static_cast<double>(aggcolsums[curgroup]);

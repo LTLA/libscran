@@ -177,7 +177,7 @@ public:
     template<typename Data, typename Index, typename Factor, typename Sum, typename Detected>
     void run(const tatami::Matrix<Data, Index>* input, const Factor* factor, std::vector<Sum*> sums, std::vector<Detected*> detected) {
         aggregate_across_cells::BidimensionalFactory fac(input->nrow(), input->ncol(), factor, std::move(sums), std::move(detected));
-        tatami::apply<0>(input, fac);
+        tatami::apply<0>(input, fac, num_threads);
         return;
     } 
 
@@ -195,6 +195,11 @@ public:
          * See `set_compute_detected()`.
          */
         static constexpr bool compute_detected = true;
+
+        /**
+         * See `set_num_threads()`.
+         */
+        static constexpr int num_threads = 1;
     };
 
     /**
@@ -219,9 +224,19 @@ public:
         return *this;
     }
 
+    /**
+     * @param n Number of threads to use. 
+     * @return A reference to this `AggregateAcrossCells` object.
+     */
+    AggregateAcrossCells& set_num_threads(int n = Defaults::num_threads) {
+        num_threads = n;
+        return *this;
+    }
+
 private:
     bool compute_sums = Defaults::compute_sums;
     bool compute_detected = Defaults::compute_detected;
+    int num_threads = Defaults::num_threads;
 
 public:
     /**

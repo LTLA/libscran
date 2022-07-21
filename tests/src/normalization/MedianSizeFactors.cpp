@@ -160,17 +160,26 @@ TEST_F(MedianSizeFactorsTester, Actual) {
     }
 
     // Expect different results.
-    med.set_prior_count(1000000);
-    auto res2 = med.run(mat.get(), contents.data());
-    EXPECT_FLOAT_EQ(res2.factors[0], 1);
-
     {
+        auto med2 = med;
+        med2.set_prior_count(1000000);
+        auto res2 = med2.run(mat.get(), contents.data());
+        EXPECT_FLOAT_EQ(res2.factors[0], 1);
+
         int failures = 0;
         for (size_t i = 0; i < NC; ++i) {
             double ratio = res2.factors[i] / res.factors[i];
             failures += (std::abs(1 - ratio) > 0.0001);
         }
         EXPECT_TRUE(failures > 0);
+    }
+
+    // Same results in parallel.
+    {
+        auto med2 = med;
+        med2.set_num_threads(3);
+        auto res2 = med2.run(mat.get(), contents.data());
+        EXPECT_EQ(res2.factors, res.factors);
     }
 }
 
