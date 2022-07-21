@@ -87,7 +87,7 @@ TEST_P(PerCellRnaQcMetricsTest, OneSubset) {
     int threads = GetParam();
     qcfun.set_num_threads(threads);
 
-    if (threads) {
+    if (threads == 1) {
         auto ref = tatami::make_DelayedSubset<0>(dense_row, keep_i);
         auto refprop = tatami::column_sums(ref.get());
         {
