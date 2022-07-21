@@ -225,7 +225,7 @@ public:
     }
 
     /**
-     * @param n Number of threads to use for aggregation.
+     * @param n Number of threads to use. 
      * @return A reference to this `AggregateAcrossCells` object.
      */
     AggregateAcrossCells& set_num_threads(int n = Defaults::num_threads) {
