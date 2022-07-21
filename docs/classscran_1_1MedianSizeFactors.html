@@ -96,6 +96,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aa819da1b38830a8849bdf4cdd89b1994"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5507419988ca1925e8f60bdc99436e51"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1MedianSizeFactors.html">MedianSizeFactors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MedianSizeFactors.html#a5507419988ca1925e8f60bdc99436e51">set_prior_count</a> (double p=<a class="el" href="structscran_1_1MedianSizeFactors_1_1Defaults.html#a909251588d34d41237a64df1dd85552c">Defaults::prior_count</a>)</td></tr>
 <tr class="separator:a5507419988ca1925e8f60bdc99436e51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8440bf543257fe771a5db35b0e4a9bbf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1MedianSizeFactors.html">MedianSizeFactors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MedianSizeFactors.html#a8440bf543257fe771a5db35b0e4a9bbf">set_num_threads</a> (int n=<a class="el" href="structscran_1_1MedianSizeFactors_1_1Defaults.html#a175bd521275c0babb11e548885761700">Defaults::num_threads</a>)</td></tr>
+<tr class="separator:a8440bf543257fe771a5db35b0e4a9bbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a14cc850dee0fe3462e3986434832fd48"><td class="memTemplParams" colspan="2">template&lt;typename T , typename IDX , typename Ref , typename Out &gt; </td></tr>
 <tr class="memitem:a14cc850dee0fe3462e3986434832fd48"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1MedianSizeFactors.html#a14cc850dee0fe3462e3986434832fd48">run</a> (const tatami::Matrix&lt; T, IDX &gt; *mat, const Ref *ref, Out *output) const</td></tr>
 <tr class="separator:a14cc850dee0fe3462e3986434832fd48"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -367,6 +369,39 @@ template&lt;typename T , typename IDX , typename Out &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1MedianSizeFactors.html" title="Compute median-based size factors to handle composition bias.">MedianSizeFactors</a></code> object.</dd></dl>
 <p>For more control over centering, this can be set to <code>false</code> and the resulting size factors can be passed to <code><a class="el" href="classscran_1_1CenterSizeFactors.html" title="Center size factors prior to scaling normalization.">CenterSizeFactors</a></code>. </p>
+
+</div>
+</div>
+<a id="a8440bf543257fe771a5db35b0e4a9bbf" name="a8440bf543257fe771a5db35b0e4a9bbf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8440bf543257fe771a5db35b0e4a9bbf">&#9670;&nbsp;</a></span>set_num_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1MedianSizeFactors.html">MedianSizeFactors</a> &amp; scran::MedianSizeFactors::set_num_threads </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Defaults.html#a175bd521275c0babb11e548885761700">Defaults::num_threads</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1MedianSizeFactors.html" title="Compute median-based size factors to handle composition bias.">MedianSizeFactors</a></code> object. </dd></dl>
 
 </div>
 </div>

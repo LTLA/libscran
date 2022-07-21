@@ -102,6 +102,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a7d609cbe6bb3be5808fff3909c07a89b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a94bd0c4736135d095ab39077bae8e9c8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1AggregateAcrossCells.html">AggregateAcrossCells</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1AggregateAcrossCells.html#a94bd0c4736135d095ab39077bae8e9c8">set_compute_detected</a> (bool c=<a class="el" href="structscran_1_1AggregateAcrossCells_1_1Defaults.html#a75c5c2a8222c372e3d6f419b3e1f8ffe">Defaults::compute_detected</a>)</td></tr>
 <tr class="separator:a94bd0c4736135d095ab39077bae8e9c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e007b21006c06e0a9c2317cc53b870f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1AggregateAcrossCells.html">AggregateAcrossCells</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1AggregateAcrossCells.html#a9e007b21006c06e0a9c2317cc53b870f">set_num_threads</a> (int n=<a class="el" href="structscran_1_1AggregateAcrossCells_1_1Defaults.html#a160440174e9ab2842b219b6bfa6d4572">Defaults::num_threads</a>)</td></tr>
+<tr class="separator:a9e007b21006c06e0a9c2317cc53b870f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a892fb19e8090f8d92025deb34fc36736"><td class="memTemplParams" colspan="2">template&lt;typename Sum  = double, typename Detected  = int, typename Data , typename Index , typename Factor &gt; </td></tr>
 <tr class="memitem:a892fb19e8090f8d92025deb34fc36736"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1AggregateAcrossCells_1_1Results.html">Results</a>&lt; Sum, Detected &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1AggregateAcrossCells.html#a892fb19e8090f8d92025deb34fc36736">run</a> (const tatami::Matrix&lt; Data, Index &gt; *input, const Factor *factor)</td></tr>
 <tr class="separator:a892fb19e8090f8d92025deb34fc36736"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -430,6 +432,39 @@ template&lt;typename Data , typename Index , typename Factor , typename Sum , ty
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1AggregateAcrossCells.html" title="Aggregate expression values across cells.">AggregateAcrossCells</a></code> object.</dd></dl>
 <p>This function only affects <code><a class="el" href="classscran_1_1AggregateAcrossCells.html#abdc190e40b34a4b8d401b1805a59ab29">run()</a></code> when <code>sums</code> and <code>detected</code> are not supplied as inputs. </p>
+
+</div>
+</div>
+<a id="a9e007b21006c06e0a9c2317cc53b870f" name="a9e007b21006c06e0a9c2317cc53b870f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e007b21006c06e0a9c2317cc53b870f">&#9670;&nbsp;</a></span>set_num_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1AggregateAcrossCells.html">AggregateAcrossCells</a> &amp; scran::AggregateAcrossCells::set_num_threads </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1AggregateAcrossCells_1_1Defaults.html#a160440174e9ab2842b219b6bfa6d4572">Defaults::num_threads</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1AggregateAcrossCells.html" title="Aggregate expression values across cells.">AggregateAcrossCells</a></code> object. </dd></dl>
 
 </div>
 </div>

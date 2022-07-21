@@ -97,6 +97,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ac3e8492a8ff2bf2cb983fbe729c1156b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb8adf0380200ddd7092406a86c42503"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html">PerCellRnaQcMetrics</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html#acb8adf0380200ddd7092406a86c42503">set_subset_totals</a> (bool t=<a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Defaults.html#a2c1541d56f212ed2c6dd13bf47d9b7c6">Defaults::subset_totals</a>)</td></tr>
 <tr class="separator:acb8adf0380200ddd7092406a86c42503"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad691bb338692eabbb3ccf6e45da158cc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html">PerCellRnaQcMetrics</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html#ad691bb338692eabbb3ccf6e45da158cc">set_num_threads</a> (int n=<a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Defaults.html#a31dfc260ad7e703b5998d18ef694217f">Defaults::num_threads</a>)</td></tr>
+<tr class="separator:ad691bb338692eabbb3ccf6e45da158cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0137613402c8c52a9ba523a877256e04"><td class="memTemplParams" colspan="2">template&lt;class MAT , typename SUB  = const uint8_t*, typename S , typename D , typename PROP &gt; </td></tr>
 <tr class="memitem:a0137613402c8c52a9ba523a877256e04"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html#a0137613402c8c52a9ba523a877256e04">run</a> (const MAT *mat, const std::vector&lt; SUB &gt; &amp;subsets, S *sums, D *detected, std::vector&lt; PROP &gt; subset_proportions)</td></tr>
 <tr class="separator:a0137613402c8c52a9ba523a877256e04"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -239,6 +241,39 @@ template&lt;class MAT , typename SUB  = const uint8_t*&gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html" title="Result store for QC metric calculations.">PerCellRnaQcMetrics::Results</a></code> object containing the QC metrics. Subset proportions are returned depending on the <code>subsets</code>. </dd></dl>
+
+</div>
+</div>
+<a id="ad691bb338692eabbb3ccf6e45da158cc" name="ad691bb338692eabbb3ccf6e45da158cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad691bb338692eabbb3ccf6e45da158cc">&#9670;&nbsp;</a></span>set_num_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html">PerCellRnaQcMetrics</a> &amp; scran::PerCellRnaQcMetrics::set_num_threads </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Defaults.html#a31dfc260ad7e703b5998d18ef694217f">Defaults::num_threads</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html" title="Compute typical per-cell quality control metrics from an RNA count matrix.">PerCellRnaQcMetrics</a></code> object. </dd></dl>
 
 </div>
 </div>

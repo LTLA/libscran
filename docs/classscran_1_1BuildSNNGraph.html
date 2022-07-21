@@ -106,6 +106,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ac5085b513afa0e47617833e7279c61cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9b2863dda326ce82c1fba43b7660e05a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1BuildSNNGraph.html">BuildSNNGraph</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1BuildSNNGraph.html#a9b2863dda326ce82c1fba43b7660e05a">set_weighting_scheme</a> (<a class="el" href="classscran_1_1BuildSNNGraph.html#ae7e2167f6c3cf02432a3cdc6e4583e2a">Scheme</a> w=<a class="el" href="structscran_1_1BuildSNNGraph_1_1Defaults.html#a258288cda0e643719d53a834424b56a6">Defaults::weighting_scheme</a>)</td></tr>
 <tr class="separator:a9b2863dda326ce82c1fba43b7660e05a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45fde3074ff964c1105f1ef29d78bad7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1BuildSNNGraph.html">BuildSNNGraph</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1BuildSNNGraph.html#a45fde3074ff964c1105f1ef29d78bad7">set_num_threads</a> (int n=<a class="el" href="structscran_1_1BuildSNNGraph_1_1Defaults.html#a0b0aa250902f24e75b95bdd42a8ccb86">Defaults::num_threads</a>)</td></tr>
+<tr class="separator:a45fde3074ff964c1105f1ef29d78bad7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6f2a0276125b2f8426afecb32cd7080e"><td class="memItemLeft" align="right" valign="top">std::deque&lt; <a class="el" href="classscran_1_1BuildSNNGraph.html#af27e18b11231af9605b34495eb710d4e">WeightedEdge</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1BuildSNNGraph.html#a6f2a0276125b2f8426afecb32cd7080e">run</a> (size_t ndims, size_t ncells, const double *mat) const</td></tr>
 <tr class="separator:a6f2a0276125b2f8426afecb32cd7080e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae6e5da96dc7242bca506c1c09be27cd1"><td class="memTemplParams" colspan="2">template&lt;class Algorithm &gt; </td></tr>
@@ -343,6 +345,39 @@ template&lt;class Algorithm &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">k</td><td>Number of neighbors to use in the nearest neighbor search.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1BuildSNNGraph.html" title="Build a shared nearest-neighbor graph with cells as nodes.">BuildSNNGraph</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a45fde3074ff964c1105f1ef29d78bad7" name="a45fde3074ff964c1105f1ef29d78bad7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45fde3074ff964c1105f1ef29d78bad7">&#9670;&nbsp;</a></span>set_num_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1BuildSNNGraph.html">BuildSNNGraph</a> &amp; scran::BuildSNNGraph::set_num_threads </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1BuildSNNGraph_1_1Defaults.html#a0b0aa250902f24e75b95bdd42a8ccb86">Defaults::num_threads</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
   </table>
   </dd>
 </dl>

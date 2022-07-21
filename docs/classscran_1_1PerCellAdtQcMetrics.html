@@ -83,12 +83,17 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Defaults.html">Defaults</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default parameters for aggregation.  <a href="structscran_1_1PerCellAdtQcMetrics_1_1Defaults.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Results.html">Results</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result store for QC metric calculations.  <a href="structscran_1_1PerCellAdtQcMetrics_1_1Results.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:a9d0f5660312cd0e71935485b594407d7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1PerCellAdtQcMetrics.html">PerCellAdtQcMetrics</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellAdtQcMetrics.html#a9d0f5660312cd0e71935485b594407d7">set_num_threads</a> (int n=<a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Defaults.html#a9e11389f2cbf36e5228f55b61310d939">Defaults::num_threads</a>)</td></tr>
+<tr class="separator:a9d0f5660312cd0e71935485b594407d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a66a311ed31fa3856867ea7918c4b982e"><td class="memTemplParams" colspan="2">template&lt;class Matrix , typename SubPtr  = const uint8_t*&gt; </td></tr>
 <tr class="memitem:a66a311ed31fa3856867ea7918c4b982e"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellAdtQcMetrics.html#a66a311ed31fa3856867ea7918c4b982e">run</a> (const Matrix *mat, std::vector&lt; SubPtr &gt; subsets) const</td></tr>
 <tr class="separator:a66a311ed31fa3856867ea7918c4b982e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -234,6 +239,39 @@ template&lt;class Matrix , typename SubPtr  = const uint8_t*&gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Results.html" title="Result store for QC metric calculations.">PerCellAdtQcMetrics::Results</a></code> object containing the QC metrics. Subset proportions are returned depending on the <code>subsets</code>. </dd></dl>
+
+</div>
+</div>
+<a id="a9d0f5660312cd0e71935485b594407d7" name="a9d0f5660312cd0e71935485b594407d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d0f5660312cd0e71935485b594407d7">&#9670;&nbsp;</a></span>set_num_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1PerCellAdtQcMetrics.html">PerCellAdtQcMetrics</a> &amp; scran::PerCellAdtQcMetrics::set_num_threads </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Defaults.html#a9e11389f2cbf36e5228f55b61310d939">Defaults::num_threads</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PerCellAdtQcMetrics.html" title="Compute per-cell quality control metrics from an ADT count matrix.">PerCellAdtQcMetrics</a></code> object. </dd></dl>
 
 </div>
 </div>

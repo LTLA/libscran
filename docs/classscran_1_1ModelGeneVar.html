@@ -83,6 +83,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ModelGeneVar_1_1Defaults.html">Defaults</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default parameters for variance modelling.  <a href="structscran_1_1ModelGeneVar_1_1Defaults.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ModelGeneVar_1_1Results.html">Results</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structscran_1_1ModelGeneVar_1_1Results.html" title="Results of the variance modelling.">Results</a> of the variance modelling.  <a href="structscran_1_1ModelGeneVar_1_1Results.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -93,6 +96,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3b8d8f0630719ce95ff45c84ac475599"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac8785b5e665a1bb2bcd69f2d0d8ab9e3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ModelGeneVar.html">ModelGeneVar</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVar.html#ac8785b5e665a1bb2bcd69f2d0d8ab9e3">set_span</a> (double s)</td></tr>
 <tr class="separator:ac8785b5e665a1bb2bcd69f2d0d8ab9e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fb3af8f312e745080073bf78089a856"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ModelGeneVar.html">ModelGeneVar</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVar.html#a4fb3af8f312e745080073bf78089a856">set_num_threads</a> (int n=<a class="el" href="structscran_1_1ModelGeneVar_1_1Defaults.html#a9ccac88ed4b0762bd8ea3528724d517f">Defaults::num_threads</a>)</td></tr>
+<tr class="separator:a4fb3af8f312e745080073bf78089a856"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1175b286f29951889b512ed332dd36bf"><td class="memTemplParams" colspan="2">template&lt;class MAT , typename Stat &gt; </td></tr>
 <tr class="memitem:a1175b286f29951889b512ed332dd36bf"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVar.html#a1175b286f29951889b512ed332dd36bf">run</a> (const MAT *mat, Stat *means, Stat *variances, Stat *fitted, Stat *residuals)</td></tr>
 <tr class="separator:a1175b286f29951889b512ed332dd36bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -361,6 +366,39 @@ template&lt;class MAT , typename B , typename Stat &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><code>means</code>, <code>variances</code>, <code>fitted</code> and <code>residuals</code> are filled with the relevant statistics. </dd></dl>
+
+</div>
+</div>
+<a id="a4fb3af8f312e745080073bf78089a856" name="a4fb3af8f312e745080073bf78089a856"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4fb3af8f312e745080073bf78089a856">&#9670;&nbsp;</a></span>set_num_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ModelGeneVar.html">ModelGeneVar</a> &amp; scran::ModelGeneVar::set_num_threads </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1ModelGeneVar_1_1Defaults.html#a9ccac88ed4b0762bd8ea3528724d517f">Defaults::num_threads</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ModelGeneVar.html" title="Compute and model the per-gene variances in log-expression data.">ModelGeneVar</a></code> object. </dd></dl>
 
 </div>
 </div>

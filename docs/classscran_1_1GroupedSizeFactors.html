@@ -96,6 +96,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a907245f06f970a65c5a7c1a4a96af0fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aec88f173e14eb0df8dcc8e1e9d6db1c0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1GroupedSizeFactors.html">GroupedSizeFactors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1GroupedSizeFactors.html#aec88f173e14eb0df8dcc8e1e9d6db1c0">set_prior_count</a> (double p=<a class="el" href="structscran_1_1MedianSizeFactors_1_1Defaults.html#a909251588d34d41237a64df1dd85552c">MedianSizeFactors::Defaults::prior_count</a>)</td></tr>
 <tr class="separator:aec88f173e14eb0df8dcc8e1e9d6db1c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9121d8622080b615083d0d2b53a32f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1GroupedSizeFactors.html">GroupedSizeFactors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1GroupedSizeFactors.html#ab9121d8622080b615083d0d2b53a32f1">set_num_threads</a> (int n=<a class="el" href="structscran_1_1GroupedSizeFactors_1_1Defaults.html#a26a37b3247734472ce814d356243c980">Defaults::num_threads</a>)</td></tr>
+<tr class="separator:ab9121d8622080b615083d0d2b53a32f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0d4fdd8307e4d1a40709742eac394b76"><td class="memTemplParams" colspan="2">template&lt;typename T , typename IDX , typename Group , typename Out &gt; </td></tr>
 <tr class="memitem:a0d4fdd8307e4d1a40709742eac394b76"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1GroupedSizeFactors.html#a0d4fdd8307e4d1a40709742eac394b76">run</a> (const tatami::Matrix&lt; T, IDX &gt; *mat, const Group *group, Out *output)</td></tr>
 <tr class="separator:a0d4fdd8307e4d1a40709742eac394b76"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -396,6 +398,39 @@ template&lt;typename T , typename IDX , typename Group , typename Out &gt; </div
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1GroupedSizeFactors.html" title="Compute grouped size factors to handle composition bias.">GroupedSizeFactors</a></code> object.</dd></dl>
 <p>For more control over centering, this can be set to <code>false</code> and the resulting size factors can be passed to <code><a class="el" href="classscran_1_1CenterSizeFactors.html" title="Center size factors prior to scaling normalization.">CenterSizeFactors</a></code>. </p>
+
+</div>
+</div>
+<a id="ab9121d8622080b615083d0d2b53a32f1" name="ab9121d8622080b615083d0d2b53a32f1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9121d8622080b615083d0d2b53a32f1">&#9670;&nbsp;</a></span>set_num_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1GroupedSizeFactors.html">GroupedSizeFactors</a> &amp; scran::GroupedSizeFactors::set_num_threads </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1GroupedSizeFactors_1_1Defaults.html#a26a37b3247734472ce814d356243c980">Defaults::num_threads</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1AggregateAcrossCells.html" title="Aggregate expression values across cells.">AggregateAcrossCells</a></code> object. </dd></dl>
 
 </div>
 </div>

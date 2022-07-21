@@ -124,6 +124,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a09fba4be4aae73861a38e82727519d4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a519f725507ea407f7fd2a98dfc2f98c2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ScoreMarkers.html#a519f725507ea407f7fd2a98dfc2f98c2">set_compute_delta_detected</a> (differential_analysis::summary s, bool c)</td></tr>
 <tr class="separator:a519f725507ea407f7fd2a98dfc2f98c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1608e184ef29a0d374f969cdc218ac53"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ScoreMarkers.html#a1608e184ef29a0d374f969cdc218ac53">set_num_threads</a> (int n=<a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a5239f3c203cf47a7ca4abd3fda851242">Defaults::num_threads</a>)</td></tr>
+<tr class="separator:a1608e184ef29a0d374f969cdc218ac53"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9da89baba3b8b60aa87530b81ec8fe9e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ScoreMarkers.html#a9da89baba3b8b60aa87530b81ec8fe9e">set_summary_min</a> (bool s)</td></tr>
 <tr class="separator:a9da89baba3b8b60aa87530b81ec8fe9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab83ea5de6bc23dcb6e73a5c97b62babf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ScoreMarkers.html#ab83ea5de6bc23dcb6e73a5c97b62babf">set_summary_mean</a> (bool s)</td></tr>
@@ -972,6 +974,39 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </dd>
 </dl>
 <p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#afbd8272701d34277064610f6ad9dd90b">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a1608e184ef29a0d374f969cdc218ac53" name="a1608e184ef29a0d374f969cdc218ac53"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1608e184ef29a0d374f969cdc218ac53">&#9670;&nbsp;</a></span>set_num_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_num_threads </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a5239f3c203cf47a7ca4abd3fda851242">Defaults::num_threads</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
