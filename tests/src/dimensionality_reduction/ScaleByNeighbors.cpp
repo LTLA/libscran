@@ -3,7 +3,7 @@
 #include <vector>
 #include <random>
 
-class ScaleByNeighborsTest : public ::testing::Test {
+class ScaleByNeighborsTestCore {
 protected:
     std::vector<double> simulate_dense_array(int ndim, size_t nobs, int seed) const {
         std::normal_distribution<> dist;
@@ -22,7 +22,11 @@ protected:
     }
 };
 
-TEST_F(ScaleByNeighborsTest, Basic) {
+/*********************************************/
+
+class ScaleByNeighborsTest : public ::testing::TestWithParam<bool>, public ScaleByNeighborsTestCore {};
+
+TEST_P(ScaleByNeighborsTest, Basic) {
     size_t nobs = 1234;
     int ndim = 5;
     auto first = simulate_dense_array(ndim, nobs, 1000);
@@ -32,6 +36,7 @@ TEST_F(ScaleByNeighborsTest, Basic) {
     }
 
     scran::ScaleByNeighbors runner;
+    runner.set_num_threads(GetParam());
     auto out = run(runner, nobs, ndim, first.data(), ndim, second.data());
     EXPECT_FLOAT_EQ(out, 0.5);
 
@@ -41,7 +46,7 @@ TEST_F(ScaleByNeighborsTest, Basic) {
     EXPECT_FLOAT_EQ(out, 0.5);
 }
 
-TEST_F(ScaleByNeighborsTest, DifferentlyDimensioned) {
+TEST_P(ScaleByNeighborsTest, DifferentlyDimensioned) {
     size_t nobs = 1234;
     int ndim = 5;
     auto first = simulate_dense_array(ndim, nobs, 1000);
@@ -58,17 +63,19 @@ TEST_F(ScaleByNeighborsTest, DifferentlyDimensioned) {
     }
 
     scran::ScaleByNeighbors runner;
+    runner.set_num_threads(GetParam());
     auto out = run(runner, nobs, ndim, first.data(), ndim * 2, second.data());
     EXPECT_FLOAT_EQ(out, 1 / std::sqrt(2));
 }
 
-TEST_F(ScaleByNeighborsTest, Zeros) {
+TEST_P(ScaleByNeighborsTest, Zeros) {
     size_t nobs = 1234;
     int ndim = 5;
     auto first = simulate_dense_array(ndim, nobs, 1000);
     std::vector<double> second(ndim * nobs);
 
     scran::ScaleByNeighbors runner;
+    runner.set_num_threads(GetParam());
 
     // Switches to the RMSD.
     {
@@ -90,7 +97,17 @@ TEST_F(ScaleByNeighborsTest, Zeros) {
     }
 }
 
-TEST_F(ScaleByNeighborsTest, ComputeDistances) {
+INSTANTIATE_TEST_CASE_P(
+    ScaleByNeighbors,
+    ScaleByNeighborsTest,
+    ::testing::Values(1, 3) // number of threads
+);
+
+/*********************************************/
+
+class ScaleByNeighborsUtilsTest : public ::testing::Test, public ScaleByNeighborsTestCore {};
+
+TEST_F(ScaleByNeighborsUtilsTest, ComputeDistances) {
     {
         std::vector<std::pair<double, double> > distances{ {3, 3}, { 2, 2 }, { 1, 1 } };
         auto output = scran::ScaleByNeighbors::compute_scale(distances);
@@ -117,7 +134,7 @@ TEST_F(ScaleByNeighborsTest, ComputeDistances) {
     }
 }
 
-TEST_F(ScaleByNeighborsTest, CombineEmbeddings) {
+TEST_F(ScaleByNeighborsUtilsTest, CombineEmbeddings) {
     size_t nobs = 123;
     auto first = simulate_dense_array(20, nobs, 1000);
     auto second = simulate_dense_array(5, nobs, 2000);

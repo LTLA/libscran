@@ -67,6 +67,7 @@ add_executable(
     custom_parallel
     src/clustering/BuildSNNGraph.cpp
     src/differential_analysis/summarize_comparisons.cpp
+    src/dimensionality_reduction/ScaleByNeighbors.cpp
 )
 
 set_target_properties(custom_parallel PROPERTIES COMPILE_DEFINITIONS "TEST_SCRAN_CUSTOM_PARALLEL")

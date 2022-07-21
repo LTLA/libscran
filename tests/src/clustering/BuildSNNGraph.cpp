@@ -32,7 +32,7 @@ protected:
 /*****************************************
  *****************************************/
 
-class BuildSNNGraphRefTest : public BuildSNNGraphTestCore<std::tuple<int, int, int, scran::BuildSNNGraph::Scheme> > {
+class BuildSNNGraphRefTest : public BuildSNNGraphTestCore<std::tuple<int, int, int, scran::BuildSNNGraph::Scheme, int> > {
 protected:
     std::deque<scran::BuildSNNGraph::WeightedEdge> reference(size_t ndims, size_t ncells, const double* mat, int k, scran::BuildSNNGraph::Scheme scheme) {
         std::deque<scran::BuildSNNGraph::WeightedEdge> output;
@@ -89,9 +89,10 @@ TEST_P(BuildSNNGraphRefTest, Reference) {
     assemble(param);
     int k = std::get<2>(param);
     auto scheme = std::get<3>(param);
+    int nthreads = std::get<4>(param);
     
     scran::BuildSNNGraph builder;
-    builder.set_neighbors(k).set_weighting_scheme(scheme);
+    builder.set_neighbors(k).set_weighting_scheme(scheme).set_num_threads(nthreads);
     auto edges = builder.run(ndim, nobs, data.data());
 
     auto ref = reference(ndim, nobs, data.data(), k, scheme);
@@ -109,7 +110,8 @@ INSTANTIATE_TEST_CASE_P(
         ::testing::Values(10), // number of dimensions
         ::testing::Values(200), // number of observations
         ::testing::Values(2, 5, 10), // number of neighbors
-        ::testing::Values(scran::BuildSNNGraph::RANKED, scran::BuildSNNGraph::NUMBER, scran::BuildSNNGraph::JACCARD) // weighting scheme
+        ::testing::Values(scran::BuildSNNGraph::RANKED, scran::BuildSNNGraph::NUMBER, scran::BuildSNNGraph::JACCARD), // weighting scheme
+        ::testing::Values(1, 3) // number of threads
     )
 );
 
