@@ -29,7 +29,7 @@ FetchContent_MakeAvailable(irlba)
 FetchContent_Declare(
   kmeans 
   GIT_REPOSITORY https://github.com/LTLA/CppKmeans
-  GIT_TAG 4397a8d576cf0b657fd9012c049e05727c45796d
+  GIT_TAG aed1b7ad1c4eddaf80d851fc24fb81333337bf57
 )
 FetchContent_MakeAvailable(kmeans)
 
