@@ -61,7 +61,7 @@ std::vector<double> spawn_simple_values(int ngroups, int ngenes) {
 TEST_P(SummarizeComparisonsTest, Basic) {
     assemble(GetParam());
     auto values = spawn_simple_values(ngroups, ngenes);
-    scran::differential_analysis::summarize_comparisons(ngenes, ngroups, values.data(), ptrs);
+    scran::differential_analysis::summarize_comparisons(ngenes, ngroups, values.data(), ptrs, 1); 
 
     for (int gene = 0; gene < ngenes; ++gene) {
         for (int g = 0; g < ngroups; ++g) {
@@ -79,6 +79,12 @@ TEST_P(SummarizeComparisonsTest, Basic) {
             EXPECT_FLOAT_EQ(ptrs[3][g][gene], g * gene + ngroups - 1 - (g == ngroups - 1));
         }
     }
+
+    // Checking the parallel version for consistency.
+    auto serial = output;
+    std::fill(output.begin(), output.end(), 0);
+    scran::differential_analysis::summarize_comparisons(ngenes, ngroups, values.data(), ptrs, 3); 
+    EXPECT_EQ(serial, output);
 }
 
 std::vector<double> spawn_missing_values(int ngroups, int ngenes, int lost) {
@@ -102,7 +108,7 @@ TEST_P(SummarizeComparisonsTest, Missing) {
 
     for (int lost = 0; lost < ngroups; ++lost) {
         auto values = spawn_missing_values(ngroups, ngenes, lost);
-        scran::differential_analysis::summarize_comparisons(ngenes, ngroups, values.data(), ptrs);
+        scran::differential_analysis::summarize_comparisons(ngenes, ngroups, values.data(), ptrs, 1);
 
         for (int gene = 0; gene < ngenes; ++ gene) {
             for (int g = 0; g < ngroups; ++g) {
@@ -176,10 +182,16 @@ TEST_F(ComputeMinRankTest, Basic) {
     };
 
     configure(ngenes, ngroups);
-    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), ptrs);
+    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), ptrs, 1);
     for (size_t i = 0; i < ngroups; ++i) {
         compare_vectors(std::vector<double>{4, 3, 2, 1}, ngenes, output.data() + i * ngenes); // reversed, for maximum effect sizes.
     }
+
+    // Same result in parallel.
+    auto serial = output;
+    std::fill(output.begin(), output.end(), 0);
+    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), ptrs, 3);
+    EXPECT_EQ(serial, output);
 }
 
 TEST_F(ComputeMinRankTest, LessBasic) {
@@ -194,10 +206,16 @@ TEST_F(ComputeMinRankTest, LessBasic) {
     for (auto& e : effects) { e *= -1; }
 
     configure(ngenes, ngroups);
-    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), ptrs);
+    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), ptrs, 1);
     compare_vectors(std::vector<double>{1, 2, 1, 3}, ngenes, output.data());
     compare_vectors(std::vector<double>{2, 3, 1, 1}, ngenes, output.data() + ngenes);
     compare_vectors(std::vector<double>{1, 1, 2, 4}, ngenes, output.data() + ngenes * 2);
+
+    // Same result in parallel.
+    auto serial = output;
+    std::fill(output.begin(), output.end(), 0);
+    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), ptrs, 3);
+    EXPECT_EQ(serial, output);
 }
 
 TEST_F(ComputeMinRankTest, Missing) {
@@ -221,7 +239,7 @@ TEST_F(ComputeMinRankTest, Missing) {
      */
 
     configure(ngenes, ngroups);
-    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), ptrs);
+    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), ptrs, 1);
     compare_vectors(std::vector<double>{1, 4, 2, 1}, ngenes, output.data());
     compare_vectors(std::vector<double>{2, 1, 3, 1}, ngenes, output.data() + ngenes);
     compare_vectors(std::vector<double>{1, 2, 3, 4}, ngenes, output.data() + ngenes * 2);
