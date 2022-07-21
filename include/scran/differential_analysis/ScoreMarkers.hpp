@@ -655,7 +655,7 @@ private:
             if (min_rank.size()) {
                 differential_analysis::compute_min_rank(p->nrow(), ngroups, ptr, min_rank, num_threads);
             }
-            differential_analysis::summarize_comparisons(p->nrow(), ngroups, ptr, output, num_threads); // non-const w.r.t. ptr's values, so this is done after min-rank calculations.
+            differential_analysis::summarize_comparisons(p->nrow(), ngroups, ptr, output, num_threads); 
         };
 
         if (do_cohen) {
