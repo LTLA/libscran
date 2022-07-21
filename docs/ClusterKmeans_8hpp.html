@@ -117,7 +117,8 @@ Typedefs</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Provides the <code>kmeans::Kmeans</code> class under the <b>scran</b> namespace. This is mostly for the sake of having a consistent naming scheme - see the <a href="https://ltla.github.io/CppKmeans/"><b>kmeans</b> documentation</a> for specifics. </p>
+<p >Provides the <code>kmeans::Kmeans</code> class under the <b>scran</b> namespace. This is mostly for the sake of having a consistent naming scheme - see the <a href="https://ltla.github.io/CppKmeans/"><b>kmeans</b> documentation</a> for specifics.</p>
+<p >Note that applications using a custom parallelization scheme will need to set the <code>KMEANS_CUSTOM_PARALLEL</code> macro; the setting of the <code>SCRAN_CUSTOM_PARALLEL</code> macro will not be propagated automatically. </p>
 
 </div>
 </div>
