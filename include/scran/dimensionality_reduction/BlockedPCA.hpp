@@ -102,21 +102,19 @@ public:
          * See `set_transpose()` for more details.
          */
         static constexpr bool transpose = true;
+
+        /**
+         * See `set_num_threads` for more details.
+         */
+        static constexpr int num_threads = 1;
     };
 private:
     bool scale = Defaults::scale;
     bool transpose = Defaults::transpose;
-    irlba::Irlba irb;
+    int rank = Defaults::rank;
+    int nthreads = Defaults::num_threads;
 
 public:
-    /**
-     * Constructor. 
-     */
-    BlockedPCA() {
-        irb.set_number(Defaults::rank);
-        return;
-    }
-
     /**
      * @param r Number of PCs to compute.
      * This should be smaller than the smaller dimension of the input matrix.
@@ -124,7 +122,7 @@ public:
      * @return A reference to this `BlockedPCA` instance.
      */
     BlockedPCA& set_rank(int r = Defaults::rank) {
-        irb.set_number(r);
+        rank = r;
         return *this;
     }
 
@@ -149,6 +147,15 @@ public:
         return *this;
     }
 
+    /**
+     * @param n Number of threads to use.
+     * @return A reference to this `BlockedPCA` instance.
+     */
+    BlockedPCA& set_num_threads(int n = Defaults::num_threads) {
+        nthreads = n;
+        return *this;
+    }
+
 private:
     template<typename T, typename IDX, typename Block>
     void run(const tatami::Matrix<T, IDX>* mat, const Block* block, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) {
@@ -158,6 +165,10 @@ private:
         for (size_t j = 0; j < NC; ++j) {
             ++block_size[block[j]];
         }
+
+        pca_utils::EigenThreadScope t(nthreads);
+        irlba::Irlba irb;
+        irb.set_number(rank);
 
         if (mat->sparse()) {
             Eigen::MatrixXd center_m(nblocks, mat->nrow());

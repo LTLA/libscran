@@ -50,21 +50,19 @@ public:
          * See `set_transpose()` for more details.
          */
         static constexpr bool transpose = true;
+
+        /**
+         * See `set_num_threads()` for more details.
+         */
+        static constexpr int num_threads = 1;
     };
 private:
     bool scale = Defaults::scale;
     bool transpose = Defaults::transpose;
-    irlba::Irlba irb;
+    int rank = Defaults::rank;
+    int nthreads = Defaults::num_threads;
 
 public:
-    /**
-     * Constructor. 
-     */
-    RunPCA() {
-        irb.set_number(Defaults::rank);
-        return;
-    }
-
     /**
      * @param r Number of PCs to compute.
      * This should be smaller than the smaller dimension of the input matrix.
@@ -72,7 +70,7 @@ public:
      * @return A reference to this `RunPCA` instance.
      */
     RunPCA& set_rank(int r = Defaults::rank) {
-        irb.set_number(r);
+        rank = r;
         return *this;
     }
 
@@ -97,9 +95,22 @@ public:
         return *this;
     }
 
+    /**
+     * @param n Number of threads to use.
+     * @return A reference to this `RunPCA` instance.
+     */
+    RunPCA& set_num_threads(int n = Defaults::num_threads) {
+        nthreads = n;
+        return *this;
+    }
+
 private:
     template<typename T, typename IDX>
     void run(const tatami::Matrix<T, IDX>* mat, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) {
+        pca_utils::EigenThreadScope t(nthreads);
+        irlba::Irlba irb;
+        irb.set_number(rank);
+
         if (mat->sparse()) {
             Eigen::VectorXd center_v(mat->nrow()), scale_v(mat->nrow());
             auto emat = create_eigen_matrix_sparse(mat, center_v, scale_v, total_var);

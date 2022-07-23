@@ -107,21 +107,19 @@ public:
          * See `set_transpose()` for more details.
          */
         static constexpr bool transpose = true;
+
+        /**
+         * See `set_num_threads()` for more details.
+         */
+        static constexpr int num_threads = 1;
     };
 private:
     bool scale = Defaults::scale;
     bool transpose = Defaults::transpose;
-    irlba::Irlba irb;
+    int rank = Defaults::rank;
+    int nthreads = Defaults::num_threads;
 
 public:
-    /**
-     * Constructor.
-     */
-    MultiBatchPCA() {
-        irb.set_number(Defaults::rank);
-        return;
-    }
-
     /**
      * @param r Number of PCs to compute.
      * This should be smaller than the smaller dimension of the input matrix.
@@ -129,7 +127,7 @@ public:
      * @return A reference to this `MultiBatchPCA` instance.
      */
     MultiBatchPCA& set_rank(int r = Defaults::rank) {
-        irb.set_number(r);
+        rank = r;
         return *this;
     }
 
@@ -151,6 +149,15 @@ public:
      */
     MultiBatchPCA& set_transpose(bool t = Defaults::transpose) {
         transpose = t;
+        return *this;
+    }
+
+    /**
+     * @param n Number of threads to use.
+     * @return A reference to this `MultiBatchPCA` instance.
+     */
+    MultiBatchPCA& set_num_threads(int n = Defaults::num_threads) {
+        nthreads = n;
         return *this;
     }
 
@@ -222,6 +229,10 @@ private:
         // but we want to apply the rotation vectors to the original matrix
         // (after any centering/scaling but without the batch weights).
         auto executor = [&](const auto& emat) -> void {
+            pca_utils::EigenThreadScope t(nthreads);
+            irlba::Irlba irb;
+            irb.set_number(rank);
+
             MultiBatchEigenMatrix<typename std::remove_reference<decltype(emat)>::type> thing(&emat, &weights, &center_v);
             if (scale) {
                 irb.run(irlba::Scaled<decltype(thing)>(&thing, &scale_v), pcs, rotation, variance_explained);
