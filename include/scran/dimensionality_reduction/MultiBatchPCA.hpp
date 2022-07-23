@@ -169,7 +169,7 @@ private:
         Eigen::MatrixXd& pcs, 
         Eigen::MatrixXd& rotation,
         Eigen::VectorXd& variance_explained)
-    {
+    const {
         // Dividing by the scaling factor to mimic the division of 'emat'
         // by the scaling factor (after centering).
         auto rIt = rotation.data();
@@ -189,7 +189,7 @@ private:
         Eigen::MatrixXd& pcs, 
         const Eigen::MatrixXd& rotation,
         Eigen::VectorXd& variance_explained)
-    {
+    const {
         pcs = emat * rotation;
 
         // Effective centering because I don't want to modify 'emat'.
@@ -211,7 +211,7 @@ private:
 
 private:
     template<typename T, typename IDX, typename Batch>
-    void run(const tatami::Matrix<T, IDX>* mat, const Batch* batch, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) {
+    void run(const tatami::Matrix<T, IDX>* mat, const Batch* batch, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
         const size_t NC = mat->ncol();
         const auto& batch_size = block_sizes(NC, batch); 
         const size_t nbatchs = batch_size.size();
@@ -313,7 +313,7 @@ public:
      * @return A `Results` object containing the PCs and the variance explained.
      */
     template<typename T, typename IDX, typename Batch>
-    Results run(const tatami::Matrix<T, IDX>* mat, const Batch* batch) {
+    Results run(const tatami::Matrix<T, IDX>* mat, const Batch* batch) const {
         Results output;
         run(mat, batch, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         return output;
@@ -340,7 +340,7 @@ public:
      * @return A `Results` object containing the PCs and the variance explained.
      */
     template<typename T, typename IDX, typename Batch, typename X>
-    Results run(const tatami::Matrix<T, IDX>* mat, const Batch* batch, const X* features) {
+    Results run(const tatami::Matrix<T, IDX>* mat, const Batch* batch, const X* features) const {
         Results output;
         if (!features) {
             run(mat, batch, output.pcs, output.rotation, output.variance_explained, output.total_variance);
@@ -359,7 +359,7 @@ private:
         const Batch* batch,
         const std::vector<int>& batch_size,
         double& total_var) 
-    {
+    const {
         size_t NR = mat->nrow(), NC = mat->ncol();
         size_t nbatchs = batch_size.size();
         total_var = 0;
@@ -498,7 +498,7 @@ private:
         const Batch* batch,
         const std::vector<int>& batch_size,
         double& total_var) 
-    {
+    const {
         size_t NR = mat->nrow(), NC = mat->ncol();
         total_var = 0;
 

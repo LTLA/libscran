@@ -158,7 +158,7 @@ public:
 
 private:
     template<typename T, typename IDX, typename Block>
-    void run(const tatami::Matrix<T, IDX>* mat, const Block* block, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) {
+    void run(const tatami::Matrix<T, IDX>* mat, const Block* block, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
         const size_t NC = mat->ncol();
         const int nblocks = (NC ? *std::max_element(block, block + NC) + 1 : 1);
         std::vector<int> block_size(nblocks);
@@ -247,7 +247,7 @@ public:
      * @return A `Results` object containing the PCs and the variance explained.
      */
     template<typename T, typename IDX, typename Block>
-    Results run(const tatami::Matrix<T, IDX>* mat, const Block* block) {
+    Results run(const tatami::Matrix<T, IDX>* mat, const Block* block) const {
         Results output;
         run(mat, block, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         return output;
@@ -274,7 +274,7 @@ public:
      * @return A `Results` object containing the PCs and the variance explained.
      */
     template<typename T, typename IDX, typename Block, typename X>
-    Results run(const tatami::Matrix<T, IDX>* mat, const Block* block, const X* features) {
+    Results run(const tatami::Matrix<T, IDX>* mat, const Block* block, const X* features) const {
         Results output;
         if (!features) {
             run(mat, block, output.pcs, output.rotation, output.variance_explained, output.total_variance);
@@ -293,7 +293,7 @@ private:
         const Block* block, 
         const std::vector<int>& block_size, 
         double& total_var) 
-    {
+    const {
         size_t NR = mat->nrow(), NC = mat->ncol();
         total_var = 0;
 
@@ -435,7 +435,7 @@ private:
         const Block* block, 
         const std::vector<int>& block_size, 
         double& total_var) 
-    {
+    const {
         size_t NR = mat->nrow(), NC = mat->ncol();
         total_var = 0;
 

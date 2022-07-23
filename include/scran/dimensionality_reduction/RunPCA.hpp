@@ -106,7 +106,7 @@ public:
 
 private:
     template<typename T, typename IDX>
-    void run(const tatami::Matrix<T, IDX>* mat, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) {
+    void run(const tatami::Matrix<T, IDX>* mat, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
         pca_utils::EigenThreadScope t(nthreads);
         irlba::Irlba irb;
         irb.set_number(rank);
@@ -183,7 +183,7 @@ public:
      * @return A `Results` object containing the PCs and the variance explained.
      */
     template<typename T, typename IDX>
-    Results run(const tatami::Matrix<T, IDX>* mat) {
+    Results run(const tatami::Matrix<T, IDX>* mat) const {
         Results output;
         run(mat, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         return output;
@@ -206,7 +206,7 @@ public:
      * @return A `Results` object containing the PCs and the variance explained.
      */
     template<typename T, typename IDX, typename X>
-    Results run(const tatami::Matrix<T, IDX>* mat, const X* features) {
+    Results run(const tatami::Matrix<T, IDX>* mat, const X* features) const {
         Results output;
 
         if (!features) {
@@ -224,7 +224,7 @@ public:
 
 private:
     template<typename T, typename IDX> 
-    Eigen::SparseMatrix<double> create_eigen_matrix_sparse(const tatami::Matrix<T, IDX>* mat, Eigen::VectorXd& center_v, Eigen::VectorXd& scale_v, double& total_var) {
+    Eigen::SparseMatrix<double> create_eigen_matrix_sparse(const tatami::Matrix<T, IDX>* mat, Eigen::VectorXd& center_v, Eigen::VectorXd& scale_v, double& total_var) const {
         size_t NR = mat->nrow(), NC = mat->ncol();
 
         Eigen::SparseMatrix<double> A(NC, NR); // transposed; we want genes in the columns.
@@ -287,7 +287,7 @@ private:
 
 private:
     template<typename T, typename IDX> 
-    Eigen::MatrixXd create_eigen_matrix_dense(const tatami::Matrix<T, IDX>* mat, double& total_var) {
+    Eigen::MatrixXd create_eigen_matrix_dense(const tatami::Matrix<T, IDX>* mat, double& total_var) const {
         size_t NR = mat->nrow(), NC = mat->ncol();
         total_var = 0;
 
