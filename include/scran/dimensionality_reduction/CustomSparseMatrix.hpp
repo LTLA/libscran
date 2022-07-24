@@ -4,6 +4,11 @@
 #include <vector>
 #include "Eigen/Dense"
 #include "irlba/wrappers.hpp"
+#include "pca_utils.hpp"
+
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+#include "Eigen/Sparse"
+#endif
 
 namespace scran {
 
@@ -17,8 +22,42 @@ public:
 
     auto cols() const { return ncol; }
 
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
 public:
-    void fill_columns(std::vector<std::vector<double> > values, std::vector<std::vector<int> > indices) {
+    void use_eigen() {
+        spmat = Eigen::SparseMatrix<double>(nrow, ncol);
+        eigen = true;
+        return;
+    }
+
+private:
+    bool eigen = false;
+    Eigen::SparseMatrix<double> spmat;
+#endif
+
+public:
+    void fill_columns(const std::vector<std::vector<double> >& values, const std::vector<std::vector<int> >& indices) {
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+        if (eigen) {
+            std::vector<int> nnzeros;
+            nnzeros.reserve(values.size());
+            for (const auto& v : values) {
+                nnzeros.push_back(v.size());
+            }
+
+            spmat.reserve(nnzeros);
+            for (size_t z = 0; z < values.size(); ++z) {
+                const auto& curi = indices[z];
+                const auto& curv = values[z];
+                for (size_t i = 0; i < curi.size(); ++i) {
+                    spmat.insert(curi[i], z) = curv[i];
+                }
+            }
+            spmat.makeCompressed();
+            return;
+        }
+#endif
+
         size_t nnzeros = 0;
         auto pIt = p.begin() + 1;
         for (const auto& v : values) {
@@ -42,7 +81,22 @@ public:
         }
     }
 
-    void fill_rows(std::vector<std::vector<double> > values, std::vector<std::vector<int> > indices, std::vector<int> column_nonzeros) {
+    void fill_rows(const std::vector<std::vector<double> >& values, const std::vector<std::vector<int> >& indices, const std::vector<int>& column_nonzeros) {
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+        if (eigen) {
+            spmat.reserve(column_nonzeros);
+            for (size_t z = 0; z < values.size(); ++z) {
+                const auto& curi = indices[z];
+                const auto& curv = values[z];
+                for (size_t i = 0; i < curi.size(); ++i) {
+                    spmat.insert(z, curi[i]) = curv[i];
+                }
+            }
+            spmat.makeCompressed();
+            return;
+        }
+#endif
+
         size_t nnzeros = 0;
         auto pIt = p.begin() + 1;
         for (auto nz : column_nonzeros) {
@@ -136,6 +190,13 @@ private:
 public:
     template<class Right>
     void multiply(const Right& rhs, Eigen::VectorXd& output) const {
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+        if (eigen) {
+            output.noalias() = spmat * rhs;
+            return;
+        }
+#endif
+
         output.setZero();
 
         if (nthreads == 1) {
@@ -172,6 +233,13 @@ public:
 public:
     template<class Right>
     void adjoint_multiply(const Right& rhs, Eigen::VectorXd& output) const {
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+        if (eigen) {
+            output.noalias() = spmat.adjoint() * rhs;
+            return;
+        }
+#endif
+
         if (nthreads == 1) {
             for (size_t c = 0; c < ncol; ++c) {
                 output[c] = column_dot_product(c, rhs);
@@ -222,6 +290,12 @@ private:
 
 public:
     Eigen::MatrixXd realize() const {
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+        if (eigen) {
+            return Eigen::MatrixXd(spmat);
+        }
+#endif
+
         Eigen::MatrixXd output(nrow, ncol);
         output.setZero();
 

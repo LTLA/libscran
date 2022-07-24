@@ -63,6 +63,10 @@ private:
     int rank = Defaults::rank;
     int nthreads = Defaults::num_threads;
 
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+    bool use_eigen = false;
+#endif
+
 public:
     /**
      * @param r Number of PCs to compute.
@@ -104,6 +108,13 @@ public:
         nthreads = n;
         return *this;
     }
+
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+    RunPCA& set_use_eigen(bool e = false) {
+        use_eigen = true;
+        return *this;
+    }
+#endif
 
 private:
     template<typename T, typename IDX>
@@ -232,8 +243,10 @@ private:
         std::vector<std::vector<double> > values;
         std::vector<std::vector<int> > indices;
 
-#ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::RunPCA", "Preparing the input matrix");
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+        if (use_eigen) {
+            A.use_eigen();
+        }
 #endif
 
         if (mat->prefer_rows()) {
@@ -255,7 +268,7 @@ private:
             }
 
             pca_utils::set_scale(scale, scale_v, total_var);
-            A.fill_columns(std::move(values), std::move(indices));
+            A.fill_columns(values, indices);
         } else {
             std::vector<double> xbuffer(NR);
             std::vector<int> ibuffer(NR);
@@ -278,7 +291,7 @@ private:
 
             tatami::stats::variances::finish_running(NR, center_v.data(), scale_v.data(), nonzeros.data(), count);
             pca_utils::set_scale(scale, scale_v, total_var);
-            A.fill_rows(std::move(values), std::move(indices), std::move(nonzeros));
+            A.fill_rows(values, indices, nonzeros);
         }
 
         return A;

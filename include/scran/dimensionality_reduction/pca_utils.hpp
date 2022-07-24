@@ -4,6 +4,7 @@
 #include "Eigen/Dense"
 #include <algorithm>
 #include <cmath>
+#include "tatami/tatami.hpp"
 
 namespace scran {
 

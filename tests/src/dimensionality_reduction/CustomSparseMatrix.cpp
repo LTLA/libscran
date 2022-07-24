@@ -6,7 +6,7 @@
 
 class CustomSparseMatrixTest : public ::testing::TestWithParam<std::tuple<int, int, int> > {};
 
-TEST_P(CustomSparseMatrixTest, TestFillRows) {
+TEST_P(CustomSparseMatrixTest, Basic) {
     auto param = GetParam();
     size_t nr = std::get<0>(param);
     size_t nc = std::get<1>(param);
@@ -37,15 +37,19 @@ TEST_P(CustomSparseMatrixTest, TestFillRows) {
         }
     }
 
-    for (int mode = 0; mode < 2; ++mode) {
+    for (int mode = 0; mode < 4; ++mode) {
         scran::pca_utils::CustomSparseMatrix A(nr, nc, nt);
         EXPECT_EQ(A.rows(), nr);
         EXPECT_EQ(A.cols(), nc);
 
-        if (mode == 0) {
-            A.fill_rows(std::move(vbyrow), std::move(ibyrow), std::move(col_nzeros));
+        if (mode >= 2) {
+            A.use_eigen(); // testing our test code.
+        }
+
+        if (mode % 2 == 0) {
+            A.fill_rows(vbyrow, ibyrow, col_nzeros);
         } else {
-            A.fill_columns(std::move(vbycol), std::move(ibycol));
+            A.fill_columns(vbycol, ibycol);
         }
 
         // Realizes correctly.

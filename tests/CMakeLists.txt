@@ -53,6 +53,8 @@ target_link_libraries(
     scran
 )
 
+target_compile_definitions(libtest PRIVATE TEST_SCRAN_CUSTOM_SPARSE_MATRIX)
+
 set(USE_OPENMP OFF CACHE BOOL "Compile with OpenMP support")
 if (USE_OPENMP)
     find_package(OpenMP)
