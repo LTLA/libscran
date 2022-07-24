@@ -242,7 +242,7 @@ public:
 
         if (nthreads == 1) {
             for (size_t c = 0; c < ncol; ++c) {
-                output[c] = column_dot_product(c, rhs);
+                output.coeffRef(c) = column_dot_product(c, rhs);
             }
             return;
         }
@@ -258,7 +258,7 @@ public:
             auto curstart = col_starts[t];
             auto curend = col_ends[t];
             for (size_t c = curstart; c < curend; ++c) {
-                output[c] = column_dot_product(c, rhs);
+                output.coeffRef(c) = column_dot_product(c, rhs);
             }
 
 #ifndef SCRAN_CUSTOM_PARALLEL
@@ -284,7 +284,7 @@ private:
 
     void column_sum_product(size_t start, size_t end, double val, Eigen::VectorXd& output) const {
         for (size_t s = start; s < end; ++s) {
-            output[i[s]] += x[s] * val;
+            output.coeffRef(i[s]) += x[s] * val;
         }
     }
 
@@ -302,7 +302,7 @@ public:
         for (size_t c = 0; c < ncol; ++c) {
             size_t col_start = p[c], col_end = p[c + 1];
             for (size_t s = col_start; s < col_end; ++s) {
-                output(i[s], c) = x[s];
+                output.coeffRef(i[s], c) = x[s];
             }
         }
 
