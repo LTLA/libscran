@@ -201,7 +201,7 @@ public:
 
         if (nthreads == 1) {
             for (size_t c = 0; c < ncol; ++c) {
-                column_sum_product(p[c], p[c + 1], rhs[c], output); 
+                column_sum_product(p[c], p[c + 1], rhs.coeff(c), output); 
             }
             return;
         }
@@ -217,7 +217,7 @@ public:
             const auto& starts = row_nonzero_starts[t];
             const auto& ends = row_nonzero_starts[t + 1];
             for (size_t c = 0; c < ncol; ++c) {
-                column_sum_product(starts[c], ends[c], rhs[c], output);
+                column_sum_product(starts[c], ends[c], rhs.coeff(c), output);
             }
 
 #ifndef SCRAN_CUSTOM_PARALLEL
@@ -277,7 +277,7 @@ private:
         size_t col_start = p[c], col_end = p[c + 1];
         double dot = 0;
         for (size_t s = col_start; s < col_end; ++s) {
-            dot += x[s] * rhs[i[s]];
+            dot += x[s] * rhs.coeff(i[s]);
         }
         return dot;
     }
