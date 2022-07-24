@@ -12,6 +12,7 @@
 #include <cmath>
 
 #include "pca_utils.hpp"
+#include "CustomSparseMatrix.hpp"
 
 /**
  * @file RunPCA.hpp
@@ -113,7 +114,7 @@ private:
 
         if (mat->sparse()) {
             Eigen::VectorXd center_v(mat->nrow()), scale_v(mat->nrow());
-            auto emat = create_eigen_matrix_sparse(mat, center_v, scale_v, total_var);
+            auto emat = create_custom_sparse_matrix(mat, center_v, scale_v, total_var);
 
             irlba::Centered<decltype(emat)> centered(&emat, &center_v);
             if (scale) {
@@ -224,10 +225,10 @@ public:
 
 private:
     template<typename T, typename IDX> 
-    Eigen::SparseMatrix<double> create_eigen_matrix_sparse(const tatami::Matrix<T, IDX>* mat, Eigen::VectorXd& center_v, Eigen::VectorXd& scale_v, double& total_var) const {
+    pca_utils::CustomSparseMatrix create_custom_sparse_matrix(const tatami::Matrix<T, IDX>* mat, Eigen::VectorXd& center_v, Eigen::VectorXd& scale_v, double& total_var) const {
         size_t NR = mat->nrow(), NC = mat->ncol();
 
-        Eigen::SparseMatrix<double> A(NC, NR); // transposed; we want genes in the columns.
+        pca_utils::CustomSparseMatrix A(NC, NR, nthreads); // transposed; we want genes in the columns.
         std::vector<std::vector<double> > values;
         std::vector<std::vector<int> > indices;
 
@@ -238,29 +239,29 @@ private:
         if (mat->prefer_rows()) {
             std::vector<double> xbuffer(NC);
             std::vector<int> ibuffer(NC);
-            std::vector<int> nonzeros(NR);
             values.reserve(NR);
             indices.reserve(NR);
+            auto wrk = mat->new_workspace(true);
 
             for (size_t r = 0; r < NR; ++r) {
-                auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data());
+                auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data(), wrk.get());
 
                 auto stats = tatami::stats::variances::compute_direct(range, NC);
                 center_v[r] = stats.first;
                 scale_v[r] = stats.second;
 
-                nonzeros[r] = range.number;
                 values.emplace_back(range.value, range.value + range.number);
                 indices.emplace_back(range.index, range.index + range.number);
             }
 
             pca_utils::set_scale(scale, scale_v, total_var);
-            pca_utils::fill_sparse_matrix<true>(A, indices, values, nonzeros);
+            A.fill_columns(std::move(values), std::move(indices));
         } else {
             std::vector<double> xbuffer(NR);
             std::vector<int> ibuffer(NR);
             values.reserve(NC);
             indices.reserve(NC);
+            auto wrk = mat->new_workspace(false);
 
             center_v.setZero();
             scale_v.setZero();
@@ -269,19 +270,17 @@ private:
 
             // First pass to compute variances and extract non-zero values.
             for (size_t c = 0; c < NC; ++c) {
-                auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data());
+                auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data(), wrk.get());
                 tatami::stats::variances::compute_running(range, center_v.data(), scale_v.data(), nonzeros.data(), count);
                 values.emplace_back(range.value, range.value + range.number);
                 indices.emplace_back(range.index, range.index + range.number);
             }
 
             tatami::stats::variances::finish_running(NR, center_v.data(), scale_v.data(), nonzeros.data(), count);
-
             pca_utils::set_scale(scale, scale_v, total_var);
-            pca_utils::fill_sparse_matrix<false>(A, indices, values, nonzeros);
+            A.fill_rows(std::move(values), std::move(indices), std::move(nonzeros));
         }
 
-        A.makeCompressed();
         return A;
     }
 
