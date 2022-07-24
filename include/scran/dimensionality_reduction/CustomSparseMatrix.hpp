@@ -59,8 +59,9 @@ public:
             const auto& curi = indices[j];
 
             for (size_t k = 0, endk = curv.size(); k < endk; ++k) {
-                auto& pos = p[curi[k]];
+                auto& pos = p[curi[k] + 1];
                 x[pos] = curv[k];
+                i[pos] = j;
                 ++pos;
             }
         }
@@ -86,7 +87,7 @@ private:
             size_t sofar = per_thread;
             for (int t = 0; t < nthreads; ++t) {
                 col_starts[t] = col_counter;
-                while (col_counter < ncol && p[col_counter + 1] < sofar) {
+                while (col_counter < ncol && p[col_counter + 1] <= sofar) {
                     ++col_counter;
                 }
                 col_ends[t] = col_counter;
@@ -105,9 +106,12 @@ private:
             std::vector<size_t> row_starts(nthreads), row_ends(nthreads);
             size_t row_counter = 0;
             size_t sofar = per_thread;
+            size_t cum_rows = 0;
+
             for (int t = 0; t < nthreads; ++t) {
                 row_starts[t] = row_counter;
-                while (row_counter < nrow && p[row_counter] < sofar) {
+                while (row_counter < nrow && cum_rows <= sofar) {
+                    cum_rows += row_nonzeros[row_counter];
                     ++row_counter;
                 }
                 row_ends[t] = row_counter;
@@ -136,7 +140,7 @@ public:
 
         if (nthreads == 1) {
             for (size_t c = 0; c < ncol; ++c) {
-                column_sum_product(p[c], p[c + 1], rhs, output); 
+                column_sum_product(p[c], p[c + 1], rhs[c], output); 
             }
             return;
         }
@@ -152,7 +156,7 @@ public:
             const auto& starts = row_nonzero_starts[t];
             const auto& ends = row_nonzero_starts[t + 1];
             for (size_t c = 0; c < ncol; ++c) {
-                column_sum_product(starts[c], ends[c], rhs, output);
+                column_sum_product(starts[c], ends[c], rhs[c], output);
             }
 
 #ifndef SCRAN_CUSTOM_PARALLEL
@@ -210,11 +214,9 @@ private:
         return dot;
     }
 
-    template<class Right>
-    void column_sum_product(size_t start, size_t end, const Right& rhs, Eigen::VectorXd& output) const {
+    void column_sum_product(size_t start, size_t end, double val, Eigen::VectorXd& output) const {
         for (size_t s = start; s < end; ++s) {
-            auto row = i[s];
-            output[row] += x[s] * rhs[row];
+            output[i[s]] += x[s] * val;
         }
     }
 
