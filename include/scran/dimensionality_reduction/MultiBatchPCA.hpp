@@ -6,12 +6,12 @@
 
 #include "irlba/irlba.hpp"
 #include "Eigen/Dense"
-#include "Eigen/Sparse"
 
 #include <vector>
 #include <cmath>
 
 #include "pca_utils.hpp"
+#include "CustomSparseMatrix.hpp"
 #include "../utils/block_indices.hpp"
 
 /**
@@ -34,32 +34,50 @@ struct MultiBatchEigenMatrix {
 
     template<class Right>
     void multiply(const Right& rhs, Eigen::VectorXd& output) const {
-        output.noalias() = *mat * rhs;
+        if constexpr(irlba::has_multiply_method<Matrix>::value) {
+            output.noalias() = *mat * rhs;
+        } else {
+            mat->multiply(rhs, output);
+        }
+
         double sub = means->dot(rhs);
         for (Eigen::Index i = 0; i < output.size(); ++i) {
-            output[i] -= sub;
-            output[i] *= (*weights)[i];
+            auto& val = output.coeffRef(i);
+            val -= sub;
+            val *= weights->coeff(i);
         }
     }
 
     template<class Right>
     void adjoint_multiply(const Right& rhs, Eigen::VectorXd& output) const {
-        auto combined = weights->cwiseProduct(rhs);
-        output.noalias() = mat->adjoint() * combined;
+        Eigen::VectorXd combined = weights->cwiseProduct(rhs);
+
+        if constexpr(irlba::has_adjoint_multiply_method<Matrix>::value) {
+            output.noalias() = mat->adjoint() * combined;
+        } else {
+            mat->adjoint_multiply(combined, output);
+        }
+
         double sum = combined.sum();
         for (Eigen::Index i = 0; i < output.size(); ++i) {
-            output[i] -= (*means)[i] * sum;
+            output.coeffRef(i) -= means->coeff(i) * sum;
         }
         return;
     }
 
     Eigen::MatrixXd realize() const {
-        Eigen::MatrixXd output(*mat);
+        Eigen::MatrixXd output;
+        if constexpr(irlba::has_realize_method<Matrix>::value) {
+            output = mat->realize();
+        } else {
+            output = Eigen::MatrixXd(*mat);
+        }
+
         for (Eigen::Index c = 0; c < output.cols(); ++c) {
             for (Eigen::Index r = 0; r < output.rows(); ++r) {
-                auto& val = output(r, c);
-                val -= (*means)[c];
-                val *= (*weights)[r];
+                auto& val = output.coeffRef(r, c);
+                val -= means->coeff(c);
+                val *= weights->coeff(r);
             }
         }
         return output;
@@ -119,6 +137,10 @@ private:
     int rank = Defaults::rank;
     int nthreads = Defaults::num_threads;
 
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+    bool use_eigen = false;
+#endif
+
 public:
     /**
      * @param r Number of PCs to compute.
@@ -161,6 +183,13 @@ public:
         return *this;
     }
 
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+    MultiBatchPCA& set_use_eigen(bool e = false) {
+        use_eigen = true;
+        return *this;
+    }
+#endif
+
 private:
     template<class Matrix>
     void reapply(const Matrix& emat, 
@@ -190,7 +219,12 @@ private:
         const Eigen::MatrixXd& rotation,
         Eigen::VectorXd& variance_explained)
     const {
-        pcs = emat * rotation;
+        if constexpr(irlba::has_multiply_method<Matrix>::value) {
+            pcs.noalias() = emat * rotation;
+        } else {
+            pcs.resize(emat.rows(), rotation.cols());
+            emat.multiply(rotation, pcs);
+        }
 
         // Effective centering because I don't want to modify 'emat'.
         auto pIt = pcs.data();
@@ -244,7 +278,7 @@ private:
         };
 
         if (mat->sparse()) {
-            auto emat = create_eigen_matrix_sparse(mat, center_v, scale_v, batch, batch_size, total_var);
+            auto emat = create_custom_sparse_matrix(mat, center_v, scale_v, batch, batch_size, total_var);
             executor(emat);
         } else {
             auto emat = create_eigen_matrix_dense(mat, center_v, scale_v, batch, batch_size, total_var);
@@ -353,7 +387,7 @@ public:
 
 private:
     template<typename T, typename IDX, typename Batch> 
-    Eigen::SparseMatrix<double> create_eigen_matrix_sparse(const tatami::Matrix<T, IDX>* mat, 
+    pca_utils::CustomSparseMatrix create_custom_sparse_matrix(const tatami::Matrix<T, IDX>* mat, 
         Eigen::VectorXd& mean_v, 
         Eigen::VectorXd& scale_v, 
         const Batch* batch,
@@ -364,21 +398,29 @@ private:
         size_t nbatchs = batch_size.size();
         total_var = 0;
 
-        Eigen::SparseMatrix<double> A(NC, NR); // transposed; we want genes in the columns.
+        pca_utils::CustomSparseMatrix A(NC, NR, nthreads); // transposed; we want genes in the columns.
         std::vector<std::vector<double> > values;
         std::vector<std::vector<int> > indices;
+
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+        if (use_eigen) {
+            A.use_eigen();
+        }
+#endif
 
         if (mat->prefer_rows()) {
             std::vector<double> xbuffer(NC);
             std::vector<int> ibuffer(NC);
-            std::vector<int> nnzeros(NR);
+            auto wrk = mat->new_workspace(true);
+
             values.reserve(NR);
             indices.reserve(NR);
+
             std::vector<double> batch_means(nbatchs);
             std::vector<int> batch_count(nbatchs);
 
             for (size_t r = 0; r < NR; ++r) {
-                auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data());
+                auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data(), wrk.get());
 
                 // Computing the grand mean across all batchs.
                 std::fill(batch_means.begin(), batch_means.end(), 0);
@@ -413,25 +455,26 @@ private:
                     proxyvar += diff * diff / batch_size[b];
                 }
 
-                nnzeros[r] = range.number;
                 values.emplace_back(range.value, range.value + range.number);
                 indices.emplace_back(range.index, range.index + range.number);
             }
 
             pca_utils::set_scale(scale, scale_v, total_var);
-            pca_utils::fill_sparse_matrix<true>(A, indices, values, nnzeros);
+            A.fill_columns(values, indices);
         } else {
             std::vector<double> xbuffer(NR);
             std::vector<int> ibuffer(NR);
+            auto wrk = mat->new_workspace(false);
+
             values.reserve(NC);
             indices.reserve(NC);
-            std::vector<int> nnzeros(NR);
 
+            std::vector<int> nnzeros(NR);
             std::vector<std::vector<double> > tmp_means(nbatchs, std::vector<double>(NR));
             std::vector<std::vector<int> > tmp_nonzero(nbatchs, std::vector<int>(NR));
 
             for (size_t c = 0; c < NC; ++c) {
-                auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data());
+                auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data(), wrk.get());
                 values.emplace_back(range.value, range.value + range.number);
                 indices.emplace_back(range.index, range.index + range.number);
 
@@ -482,10 +525,9 @@ private:
             }
 
             pca_utils::set_scale(scale, scale_v, total_var);
-            pca_utils::fill_sparse_matrix<false>(A, indices, values, nnzeros);
+            A.fill_rows(values, indices, nnzeros);
         }
 
-        A.makeCompressed();
         return A;
     }
 
