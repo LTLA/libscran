@@ -207,7 +207,7 @@ public:
         }
 
 #ifndef SCRAN_CUSTOM_PARALLEL
-        #pragma omp parallel for num_threads(nthreads);
+        #pragma omp parallel for num_threads(nthreads)
         for (int t = 0; t < nthreads; ++t) {
 #else
         SCRAN_CUSTOM_PARALLEL(nthreads, [&](int first, int last) -> void {
