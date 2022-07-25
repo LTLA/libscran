@@ -26,10 +26,13 @@ add_executable(
     src/feature_selection/ModelGeneVar.cpp
     src/feature_selection/FitTrendVar.cpp
     src/feature_selection/ChooseHVGs.cpp
+
+    src/dimensionality_reduction/CustomSparseMatrix.cpp
     src/dimensionality_reduction/RunPCA.cpp
     src/dimensionality_reduction/BlockedPCA.cpp
     src/dimensionality_reduction/MultiBatchPCA.cpp
     src/dimensionality_reduction/ScaleByNeighbors.cpp
+
     src/clustering/BuildSNNGraph.cpp
     src/clustering/ClusterSNNGraph.cpp
     src/differential_analysis/summarize_comparisons.cpp
@@ -49,6 +52,8 @@ target_link_libraries(
     gtest_main
     scran
 )
+
+target_compile_definitions(libtest PRIVATE TEST_SCRAN_CUSTOM_SPARSE_MATRIX)
 
 set(USE_OPENMP OFF CACHE BOOL "Compile with OpenMP support")
 if (USE_OPENMP)

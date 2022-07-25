@@ -6,12 +6,12 @@
 
 #include "irlba/irlba.hpp"
 #include "Eigen/Dense"
-#include "Eigen/Sparse"
 
 #include <vector>
 #include <cmath>
 
 #include "pca_utils.hpp"
+#include "CustomSparseMatrix.hpp"
 
 /**
  * @file RunPCA.hpp
@@ -50,21 +50,23 @@ public:
          * See `set_transpose()` for more details.
          */
         static constexpr bool transpose = true;
+
+        /**
+         * See `set_num_threads()` for more details.
+         */
+        static constexpr int num_threads = 1;
     };
 private:
     bool scale = Defaults::scale;
     bool transpose = Defaults::transpose;
-    irlba::Irlba irb;
+    int rank = Defaults::rank;
+    int nthreads = Defaults::num_threads;
+
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+    bool use_eigen = false;
+#endif
 
 public:
-    /**
-     * Constructor. 
-     */
-    RunPCA() {
-        irb.set_number(Defaults::rank);
-        return;
-    }
-
     /**
      * @param r Number of PCs to compute.
      * This should be smaller than the smaller dimension of the input matrix.
@@ -72,7 +74,7 @@ public:
      * @return A reference to this `RunPCA` instance.
      */
     RunPCA& set_rank(int r = Defaults::rank) {
-        irb.set_number(r);
+        rank = r;
         return *this;
     }
 
@@ -97,12 +99,32 @@ public:
         return *this;
     }
 
+    /**
+     * @param n Number of threads to use.
+     * @return A reference to this `RunPCA` instance.
+     */
+    RunPCA& set_num_threads(int n = Defaults::num_threads) {
+        nthreads = n;
+        return *this;
+    }
+
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+    RunPCA& set_use_eigen(bool e = false) {
+        use_eigen = true;
+        return *this;
+    }
+#endif
+
 private:
     template<typename T, typename IDX>
-    void run(const tatami::Matrix<T, IDX>* mat, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) {
+    void run(const tatami::Matrix<T, IDX>* mat, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
+        pca_utils::EigenThreadScope t(nthreads);
+        irlba::Irlba irb;
+        irb.set_number(rank);
+
         if (mat->sparse()) {
             Eigen::VectorXd center_v(mat->nrow()), scale_v(mat->nrow());
-            auto emat = create_eigen_matrix_sparse(mat, center_v, scale_v, total_var);
+            auto emat = create_custom_sparse_matrix(mat, center_v, scale_v, total_var);
 
             irlba::Centered<decltype(emat)> centered(&emat, &center_v);
             if (scale) {
@@ -172,7 +194,7 @@ public:
      * @return A `Results` object containing the PCs and the variance explained.
      */
     template<typename T, typename IDX>
-    Results run(const tatami::Matrix<T, IDX>* mat) {
+    Results run(const tatami::Matrix<T, IDX>* mat) const {
         Results output;
         run(mat, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         return output;
@@ -195,7 +217,7 @@ public:
      * @return A `Results` object containing the PCs and the variance explained.
      */
     template<typename T, typename IDX, typename X>
-    Results run(const tatami::Matrix<T, IDX>* mat, const X* features) {
+    Results run(const tatami::Matrix<T, IDX>* mat, const X* features) const {
         Results output;
 
         if (!features) {
@@ -213,43 +235,45 @@ public:
 
 private:
     template<typename T, typename IDX> 
-    Eigen::SparseMatrix<double> create_eigen_matrix_sparse(const tatami::Matrix<T, IDX>* mat, Eigen::VectorXd& center_v, Eigen::VectorXd& scale_v, double& total_var) {
+    pca_utils::CustomSparseMatrix create_custom_sparse_matrix(const tatami::Matrix<T, IDX>* mat, Eigen::VectorXd& center_v, Eigen::VectorXd& scale_v, double& total_var) const {
         size_t NR = mat->nrow(), NC = mat->ncol();
 
-        Eigen::SparseMatrix<double> A(NC, NR); // transposed; we want genes in the columns.
+        pca_utils::CustomSparseMatrix A(NC, NR, nthreads); // transposed; we want genes in the columns.
         std::vector<std::vector<double> > values;
         std::vector<std::vector<int> > indices;
 
-#ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::RunPCA", "Preparing the input matrix");
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+        if (use_eigen) {
+            A.use_eigen();
+        }
 #endif
 
         if (mat->prefer_rows()) {
             std::vector<double> xbuffer(NC);
             std::vector<int> ibuffer(NC);
-            std::vector<int> nonzeros(NR);
             values.reserve(NR);
             indices.reserve(NR);
+            auto wrk = mat->new_workspace(true);
 
             for (size_t r = 0; r < NR; ++r) {
-                auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data());
+                auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data(), wrk.get());
 
                 auto stats = tatami::stats::variances::compute_direct(range, NC);
                 center_v[r] = stats.first;
                 scale_v[r] = stats.second;
 
-                nonzeros[r] = range.number;
                 values.emplace_back(range.value, range.value + range.number);
                 indices.emplace_back(range.index, range.index + range.number);
             }
 
             pca_utils::set_scale(scale, scale_v, total_var);
-            pca_utils::fill_sparse_matrix<true>(A, indices, values, nonzeros);
+            A.fill_columns(values, indices);
         } else {
             std::vector<double> xbuffer(NR);
             std::vector<int> ibuffer(NR);
             values.reserve(NC);
             indices.reserve(NC);
+            auto wrk = mat->new_workspace(false);
 
             center_v.setZero();
             scale_v.setZero();
@@ -258,25 +282,23 @@ private:
 
             // First pass to compute variances and extract non-zero values.
             for (size_t c = 0; c < NC; ++c) {
-                auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data());
+                auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data(), wrk.get());
                 tatami::stats::variances::compute_running(range, center_v.data(), scale_v.data(), nonzeros.data(), count);
                 values.emplace_back(range.value, range.value + range.number);
                 indices.emplace_back(range.index, range.index + range.number);
             }
 
             tatami::stats::variances::finish_running(NR, center_v.data(), scale_v.data(), nonzeros.data(), count);
-
             pca_utils::set_scale(scale, scale_v, total_var);
-            pca_utils::fill_sparse_matrix<false>(A, indices, values, nonzeros);
+            A.fill_rows(values, indices, nonzeros);
         }
 
-        A.makeCompressed();
         return A;
     }
 
 private:
     template<typename T, typename IDX> 
-    Eigen::MatrixXd create_eigen_matrix_dense(const tatami::Matrix<T, IDX>* mat, double& total_var) {
+    Eigen::MatrixXd create_eigen_matrix_dense(const tatami::Matrix<T, IDX>* mat, double& total_var) const {
         size_t NR = mat->nrow(), NC = mat->ncol();
         total_var = 0;
 

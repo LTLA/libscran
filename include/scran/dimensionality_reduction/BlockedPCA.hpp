@@ -6,12 +6,12 @@
 
 #include "irlba/irlba.hpp"
 #include "Eigen/Dense"
-#include "Eigen/Sparse"
 
 #include <vector>
 #include <cmath>
 
 #include "pca_utils.hpp"
+#include "CustomSparseMatrix.hpp"
 
 /**
  * @file BlockedPCA.hpp
@@ -33,22 +33,31 @@ struct BlockedEigenMatrix {
 
     template<class Right>
     void multiply(const Right& rhs, Eigen::VectorXd& output) const {
-        output.noalias() = (*mat) * rhs;
-        Eigen::MatrixXd sub = (*means) * rhs;
+        if constexpr(irlba::has_multiply_method<Matrix>::value) {
+            output.noalias() = (*mat) * rhs;
+        } else {
+            mat->multiply(rhs, output);
+        }
+
+        Eigen::VectorXd sub = (*means) * rhs;
         for (Eigen::Index i = 0; i < output.size(); ++i) {
-            output[i] -= sub(block[i], 0);
+            output.coeffRef(i) -= sub.coeff(block[i]);
         }
         return;
     }
 
     template<class Right>
     void adjoint_multiply(const Right& rhs, Eigen::VectorXd& output) const {
-        output.noalias() = mat->adjoint() * rhs;
+        if constexpr(irlba::has_adjoint_multiply_method<Matrix>::value) {
+            output.noalias() = mat->adjoint() * rhs;
+        } else {
+            mat->adjoint_multiply(rhs, output);
+        }
 
         Eigen::VectorXd aggr(means->rows());
         aggr.setZero();
         for (Eigen::Index i = 0; i < rhs.size(); ++i) {
-            aggr[block[i]] += rhs[i]; 
+            aggr.coeffRef(block[i]) += rhs.coeff(i); 
         }
 
         output.noalias() -= means->adjoint() * aggr;
@@ -56,10 +65,16 @@ struct BlockedEigenMatrix {
     }
 
     Eigen::MatrixXd realize() const {
-        Eigen::MatrixXd output(*mat);
+        Eigen::MatrixXd output;
+        if constexpr(irlba::has_realize_method<Matrix>::value) {
+            output = mat->realize();
+        } else {
+            output = Eigen::MatrixXd(*mat);
+        }
+
         for (Eigen::Index c = 0; c < output.cols(); ++c) {
             for (Eigen::Index r = 0; r < output.rows(); ++r) {
-                output(r, c) -= (*means)(block[r], c);
+                output.coeffRef(r, c) -= means->coeff(block[r], c);
             }
         }
         return output;
@@ -102,21 +117,23 @@ public:
          * See `set_transpose()` for more details.
          */
         static constexpr bool transpose = true;
+
+        /**
+         * See `set_num_threads` for more details.
+         */
+        static constexpr int num_threads = 1;
     };
 private:
     bool scale = Defaults::scale;
     bool transpose = Defaults::transpose;
-    irlba::Irlba irb;
+    int rank = Defaults::rank;
+    int nthreads = Defaults::num_threads;
+
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+    bool use_eigen = false;
+#endif
 
 public:
-    /**
-     * Constructor. 
-     */
-    BlockedPCA() {
-        irb.set_number(Defaults::rank);
-        return;
-    }
-
     /**
      * @param r Number of PCs to compute.
      * This should be smaller than the smaller dimension of the input matrix.
@@ -124,7 +141,7 @@ public:
      * @return A reference to this `BlockedPCA` instance.
      */
     BlockedPCA& set_rank(int r = Defaults::rank) {
-        irb.set_number(r);
+        rank = r;
         return *this;
     }
 
@@ -149,9 +166,25 @@ public:
         return *this;
     }
 
+    /**
+     * @param n Number of threads to use.
+     * @return A reference to this `BlockedPCA` instance.
+     */
+    BlockedPCA& set_num_threads(int n = Defaults::num_threads) {
+        nthreads = n;
+        return *this;
+    }
+
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+    BlockedPCA& set_use_eigen(bool e = false) {
+        use_eigen = true;
+        return *this;
+    }
+#endif
+
 private:
     template<typename T, typename IDX, typename Block>
-    void run(const tatami::Matrix<T, IDX>* mat, const Block* block, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) {
+    void run(const tatami::Matrix<T, IDX>* mat, const Block* block, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
         const size_t NC = mat->ncol();
         const int nblocks = (NC ? *std::max_element(block, block + NC) + 1 : 1);
         std::vector<int> block_size(nblocks);
@@ -159,10 +192,14 @@ private:
             ++block_size[block[j]];
         }
 
+        pca_utils::EigenThreadScope t(nthreads);
+        irlba::Irlba irb;
+        irb.set_number(rank);
+
         if (mat->sparse()) {
             Eigen::MatrixXd center_m(nblocks, mat->nrow());
             Eigen::VectorXd scale_v(mat->nrow());
-            auto emat = create_eigen_matrix_sparse(mat, center_m, scale_v, block, block_size, total_var);
+            auto emat = create_custom_sparse_matrix(mat, center_m, scale_v, block, block_size, total_var);
 
             BlockedEigenMatrix<decltype(emat), Block> centered(&emat, block, &center_m);
             if (scale) {
@@ -236,7 +273,7 @@ public:
      * @return A `Results` object containing the PCs and the variance explained.
      */
     template<typename T, typename IDX, typename Block>
-    Results run(const tatami::Matrix<T, IDX>* mat, const Block* block) {
+    Results run(const tatami::Matrix<T, IDX>* mat, const Block* block) const {
         Results output;
         run(mat, block, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         return output;
@@ -263,7 +300,7 @@ public:
      * @return A `Results` object containing the PCs and the variance explained.
      */
     template<typename T, typename IDX, typename Block, typename X>
-    Results run(const tatami::Matrix<T, IDX>* mat, const Block* block, const X* features) {
+    Results run(const tatami::Matrix<T, IDX>* mat, const Block* block, const X* features) const {
         Results output;
         if (!features) {
             run(mat, block, output.pcs, output.rotation, output.variance_explained, output.total_variance);
@@ -276,36 +313,39 @@ public:
 
 private:
     template<typename T, typename IDX, typename Block> 
-    Eigen::SparseMatrix<double> create_eigen_matrix_sparse(const tatami::Matrix<T, IDX>* mat, 
+    pca_utils::CustomSparseMatrix create_custom_sparse_matrix(const tatami::Matrix<T, IDX>* mat, 
         Eigen::MatrixXd& center_m, 
         Eigen::VectorXd& scale_v, 
         const Block* block, 
         const std::vector<int>& block_size, 
         double& total_var) 
-    {
+    const {
         size_t NR = mat->nrow(), NC = mat->ncol();
         total_var = 0;
 
-        Eigen::SparseMatrix<double> A(NC, NR); // transposed; we want genes in the columns.
+        pca_utils::CustomSparseMatrix A(NC, NR, nthreads); // transposed; we want genes in the columns.
         std::vector<std::vector<double> > values;
         std::vector<std::vector<int> > indices;
 
         const size_t nblocks = block_size.size();
         double * mbuffer = center_m.data();
 
-#ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::RunPCA", "Preparing the input matrix");
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+        if (use_eigen) {
+            A.use_eigen();
+        }
 #endif
 
         if (mat->prefer_rows()) {
             std::vector<double> xbuffer(NC);
             std::vector<int> ibuffer(NC);
-            std::vector<int> nnzeros(NR);
+            auto wrk = mat->new_workspace(true);
+
             values.reserve(NR);
             indices.reserve(NR);
 
             for (size_t r = 0; r < NR; ++r, mbuffer += nblocks) {
-                auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data());
+                auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data(), wrk.get());
 
                 // Computing the block-wise means.
                 std::fill(mbuffer, mbuffer + nblocks, 0);
@@ -317,8 +357,9 @@ private:
                 }
 
                 // Computing the variance from the sum of squared differences.
-                // This is technically not the correct variance estimate if 
-                // we were to consider the blocks, but it's what the PCA sees.
+                // This is technically not the correct variance estimate if we
+                // were to consider the loss of residual d.f. from estimating
+                // the block means, but it's what the PCA sees, so whatever.
                 double& proxyvar = scale_v[r];
                 proxyvar = 0;
                 {
@@ -329,7 +370,7 @@ private:
                         proxyvar += diff * diff;
                         --block_copy[curb];
                     }
-                    
+
                     for (size_t b = 0; b < nblocks; ++b) {
                         proxyvar += mbuffer[b] * mbuffer[b] * block_copy[b];
                     }
@@ -337,25 +378,26 @@ private:
                     proxyvar /= NC - 1;
                 }
 
-                nnzeros[r] = range.number;
                 values.emplace_back(range.value, range.value + range.number);
                 indices.emplace_back(range.index, range.index + range.number);
             }
 
             pca_utils::set_scale(scale, scale_v, total_var);
-            pca_utils::fill_sparse_matrix<true>(A, indices, values, nnzeros);
+            A.fill_columns(values, indices);
         } else {
             std::vector<double> xbuffer(NR);
             std::vector<int> ibuffer(NR);
+            auto wrk = mat->new_workspace(false);
+
             values.reserve(NC);
             indices.reserve(NC);
-            std::vector<int> nnzeros(NR);
 
+            std::vector<int> nnzeros(NR);
             std::vector<std::vector<double> > tmp_means(nblocks, std::vector<double>(NR));
             std::vector<std::vector<int> > tmp_nonzeros(nblocks, std::vector<int>(NR));
 
             for (size_t c = 0; c < NC; ++c) {
-                auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data());
+                auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data(), wrk.get());
                 values.emplace_back(range.value, range.value + range.number);
                 indices.emplace_back(range.index, range.index + range.number);
 
@@ -410,10 +452,9 @@ private:
             }
 
             pca_utils::set_scale(scale, scale_v, total_var);
-            pca_utils::fill_sparse_matrix<false>(A, indices, values, nnzeros);
+            A.fill_rows(values, indices, nnzeros);
         }
 
-        A.makeCompressed();
         return A;
     }
 
@@ -424,7 +465,7 @@ private:
         const Block* block, 
         const std::vector<int>& block_size, 
         double& total_var) 
-    {
+    const {
         size_t NR = mat->nrow(), NC = mat->ncol();
         total_var = 0;
 
@@ -441,7 +482,7 @@ private:
 
         for (size_t r = 0; r < NR; ++r, outIt += NC) {
             auto ptr = mat->row_copy(r, outIt);
-        
+
             // Compute the means of each block.
             std::fill(mean_buffer.begin(), mean_buffer.end(), 0);
             {

@@ -4,6 +4,7 @@
 #include "Eigen/Dense"
 #include <algorithm>
 #include <cmath>
+#include "tatami/tatami.hpp"
 
 namespace scran {
 
@@ -94,6 +95,28 @@ std::shared_ptr<const tatami::Matrix<T, IDX> > subset_matrix_by_features(const t
 
     return tatami::make_DelayedSubset<0>(std::move(ptr), std::move(subset));
 }
+
+class EigenThreadScope {
+public:
+#ifdef _OPENMP
+    EigenThreadScope(int n) : previous(Eigen::nbThreads()) {
+        Eigen::setNbThreads(n);        
+    }
+
+    EigenThreadScope(const EigenThreadScope&) = delete;
+    EigenThreadScope(EigenThreadScope&&) = delete;
+    EigenThreadScope& operator=(const EigenThreadScope&) = delete;
+    EigenThreadScope& operator=(EigenThreadScope&&) = delete;
+    
+    ~EigenThreadScope() { 
+        Eigen::setNbThreads(previous);
+    }
+#else
+    EigenThreadScope(int dummy) {}
+#endif
+private:
+    int previous;
+};
 
 }
 

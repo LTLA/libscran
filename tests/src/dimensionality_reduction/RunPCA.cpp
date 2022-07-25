@@ -10,19 +10,17 @@
 
 #include "scran/dimensionality_reduction/RunPCA.hpp"
 
-class RunPCATester : public ::testing::TestWithParam<std::tuple<bool, int> > {
+class RunPCATestCore {
 protected:
     std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
 
-    void SetUp() {
+    template<class Param>
+    void assemble(const Param& param) {
         dense_row = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
         dense_column = tatami::convert_to_dense(dense_row.get(), 1);
         sparse_row = tatami::convert_to_sparse(dense_row.get(), 0);
         sparse_column = tatami::convert_to_sparse(dense_row.get(), 1);
-    }
 
-    template<class Param>
-    void assemble(Param param) {
         scale = std::get<0>(param);
         rank = std::get<1>(param);
         return;
@@ -32,59 +30,93 @@ protected:
     int rank;
 };
 
-TEST_P(RunPCATester, Test) {
-    assemble(GetParam());
+/******************************************/
+
+class RunPCABasicTest : public ::testing::TestWithParam<std::tuple<bool, int, int, bool> >, public RunPCATestCore {};
+
+TEST_P(RunPCABasicTest, Test) {
+    auto param = GetParam();
+    assemble(param);
+
     scran::RunPCA runner;
     runner.set_scale(scale).set_rank(rank);
-
-    // Checking that we get more-or-less the same results. 
-    auto res1 = runner.run(dense_row.get());
-    EXPECT_EQ(res1.variance_explained.size(), rank);
-    EXPECT_EQ(res1.pcs.rows(), rank);
-    EXPECT_EQ(res1.pcs.cols(), dense_row->ncol());
-
-    auto res2 = runner.run(dense_column.get());
-    expect_equal_pcs(res1.pcs, res2.pcs);
-    expect_equal_vectors(res1.variance_explained, res2.variance_explained);
-    EXPECT_FLOAT_EQ(res1.total_variance, res2.total_variance);
-
-    auto res3 = runner.run(sparse_row.get());
-    expect_equal_pcs(res1.pcs, res3.pcs);
-    expect_equal_vectors(res1.variance_explained, res3.variance_explained);
-    EXPECT_FLOAT_EQ(res1.total_variance, res3.total_variance);
-
-    auto res4 = runner.run(sparse_column.get());
-    expect_equal_pcs(res1.pcs, res4.pcs);
-    expect_equal_vectors(res1.variance_explained, res4.variance_explained);
-    EXPECT_FLOAT_EQ(res1.total_variance, res4.total_variance);
-
-    // Checking that we scaled the PCs correctly.
-    size_t NC = dense_row->ncol();
-    for (int r = 0; r < rank; ++r) {
-        auto ptr = res1.pcs.data() + r;
-
-        double mean = 0;
-        for (size_t c = 0; c < NC; ++c, ptr += rank) {
-            mean += *ptr;            
-        }
-        mean /= NC;
-        EXPECT_TRUE(std::abs(mean) < 0.00000001);
-
-        double var = 0;
-        ptr = res1.pcs.data() + r;
-        for (size_t c = 0; c < NC; ++c, ptr += rank) {
-            var += (*ptr - mean) * (*ptr - mean);
-        }
-        var /= NC - 1;
-
-        EXPECT_FLOAT_EQ(var, res1.variance_explained[r]);
+    auto ref = runner.run(dense_row.get());
+    
+    auto threads = std::get<2>(param);
+    runner.set_num_threads(threads);
+    auto use_eigen = std::get<3>(param);
+    if (use_eigen) {
+        runner.set_use_eigen(true);
     }
 
-    EXPECT_EQ(res1.rotation.rows(), dense_row->nrow());
-    EXPECT_EQ(res1.rotation.cols(), rank);
+    if (!use_eigen && threads == 1) {
+        EXPECT_EQ(ref.variance_explained.size(), rank);
+        EXPECT_EQ(ref.pcs.rows(), rank);
+        EXPECT_EQ(ref.pcs.cols(), dense_row->ncol());
+        EXPECT_EQ(ref.rotation.rows(), dense_row->nrow());
+        EXPECT_EQ(ref.rotation.cols(), rank);
+
+        // Checking that we scaled the PCs correctly.
+        size_t NC = dense_row->ncol();
+        for (int r = 0; r < rank; ++r) {
+            auto ptr = ref.pcs.data() + r;
+
+            double mean = 0;
+            for (size_t c = 0; c < NC; ++c, ptr += rank) {
+                mean += *ptr;            
+            }
+            mean /= NC;
+            EXPECT_TRUE(std::abs(mean) < 0.00000001);
+
+            double var = 0;
+            ptr = ref.pcs.data() + r;
+            for (size_t c = 0; c < NC; ++c, ptr += rank) {
+                var += (*ptr - mean) * (*ptr - mean);
+            }
+            var /= NC - 1;
+
+            EXPECT_FLOAT_EQ(var, ref.variance_explained[r]);
+        }
+    } else {
+        auto res1 = runner.run(dense_row.get());
+        expect_equal_pcs(ref.pcs, res1.pcs);
+        expect_equal_vectors(ref.variance_explained, res1.variance_explained);
+        EXPECT_FLOAT_EQ(ref.total_variance, res1.total_variance);
+    }
+
+    // Checking that we get more-or-less the same results. 
+    auto res2 = runner.run(dense_column.get());
+    expect_equal_pcs(ref.pcs, res2.pcs);
+    expect_equal_vectors(ref.variance_explained, res2.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res2.total_variance);
+
+    auto res3 = runner.run(sparse_row.get());
+    expect_equal_pcs(ref.pcs, res3.pcs);
+    expect_equal_vectors(ref.variance_explained, res3.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res3.total_variance);
+
+    auto res4 = runner.run(sparse_column.get());
+    expect_equal_pcs(ref.pcs, res4.pcs);
+    expect_equal_vectors(ref.variance_explained, res4.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res4.total_variance);
 }
 
-TEST_P(RunPCATester, SubsetTest) {
+INSTANTIATE_TEST_SUITE_P(
+    RunPCA,
+    RunPCABasicTest,
+    ::testing::Combine(
+        ::testing::Values(false, true), // to scale or not to scale?
+        ::testing::Values(2, 3, 4), // number of PCs to obtain
+        ::testing::Values(1, 3), // number of threads
+        ::testing::Values(false, true) // use Eigen for testing?
+    )
+);
+
+/******************************************/
+
+class RunPCAMoreTest : public ::testing::TestWithParam<std::tuple<bool, int> >, public RunPCATestCore {};
+
+TEST_P(RunPCAMoreTest, Subset) {
     assemble(GetParam());
 
     std::vector<int> subset(dense_row->nrow());
@@ -119,7 +151,7 @@ TEST_P(RunPCATester, SubsetTest) {
     EXPECT_FLOAT_EQ(out.total_variance, ref.total_variance);
 }
 
-TEST_P(RunPCATester, ZeroVariance) {
+TEST_P(RunPCAMoreTest, ZeroVariance) {
     assemble(GetParam());
 
     auto copy = sparse_matrix;
@@ -150,7 +182,7 @@ TEST_P(RunPCATester, ZeroVariance) {
 
 INSTANTIATE_TEST_SUITE_P(
     RunPCA,
-    RunPCATester,
+    RunPCAMoreTest,
     ::testing::Combine(
         ::testing::Values(false, true), // to scale or not to scale?
         ::testing::Values(2, 3, 4) // number of PCs to obtain
