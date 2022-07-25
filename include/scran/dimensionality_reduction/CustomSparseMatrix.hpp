@@ -288,6 +288,13 @@ private:
         }
     }
 
+    void column_sum_product(size_t start, size_t end, const Eigen::VectorXd& rhs, Eigen::MatrixXd& transposed) const {
+        Eigen::Index nc = rhs.size();
+        for (size_t s = start; s < end; ++s) {
+            transposed.col(i[s]).noalias() += x[s] * rhs;
+        }
+    }
+
 public:
     Eigen::MatrixXd realize() const {
 #ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
@@ -307,6 +314,57 @@ public:
         }
 
         return output;
+    }
+
+public:
+    void multiply(const Eigen::MatrixXd& rhs, Eigen::MatrixXd& output) const {
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+        if (eigen) {
+            output.noalias() = spmat * rhs;
+            return;
+        }
+#endif
+
+        size_t nvec = output.cols();
+        Eigen::MatrixXd transposed(nvec, nrow); // using a transposed version for more cache efficiency.
+        transposed.setZero();
+
+        if (nthreads == 1) {
+            Eigen::VectorXd multipliers(nvec);
+            for (size_t c = 0; c < ncol; ++c) {
+                multipliers.noalias() = rhs.row(c);
+                column_sum_product(p[c], p[c + 1], multipliers, transposed);
+            }
+
+            output = transposed.adjoint();
+            return;
+        }
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+        #pragma omp parallel for num_threads(nthreads);
+        for (int t = 0; t < nthreads; ++t) {
+#else
+        SCRAN_CUSTOM_PARALLEL(nthreads, [&](int first, int last) -> void {
+        for (int t = first; t < last; ++t) {
+#endif
+
+            const auto& starts = row_nonzero_starts[t];
+            const auto& ends = row_nonzero_starts[t + 1];
+            Eigen::VectorXd multipliers(nvec);
+            for (size_t c = 0; c < ncol; ++c) {
+                multipliers.noalias() = rhs.row(c);
+                column_sum_product(starts[c], ends[c], multipliers, transposed);
+            }
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+        }
+#else
+        }
+        }, nthreads);
+#endif
+
+        output = transposed.adjoint();
+        return;
     }
 
 private:

@@ -67,7 +67,7 @@ TEST_P(CustomSparseMatrixTest, Basic) {
         }
         EXPECT_TRUE(okay);
 
-        // Multiplies correctly.
+        // Vector multiplies correctly.
         {
             Eigen::VectorXd vec(nc);
             for (auto& v : vec) {
@@ -79,6 +79,26 @@ TEST_P(CustomSparseMatrixTest, Basic) {
             A.multiply(vec, obs);
 
             expect_equal_vectors(ref, obs, 0);
+        }
+
+        // Matrix multiplies correctly.
+        {
+            Eigen::MatrixXd mat(nc, 4);
+            for (Eigen::Index c = 0; c < mat.cols(); ++c) {
+                for (size_t r = 0; r < nc; ++r) {
+                    mat.coeffRef(r, c) = ndist(rng);
+                }
+            }
+
+            Eigen::MatrixXd ref = control * mat;
+            Eigen::MatrixXd obs(nr, 4);
+            A.multiply(mat, obs);
+
+            for (Eigen::Index c = 0; c < mat.cols(); ++c) {
+                Eigen::VectorXd refcol = ref.col(c);
+                Eigen::VectorXd obscol = obs.col(c);
+                expect_equal_vectors(refcol, obscol);
+            }
         }
 
         // Adjoint multiplies correctly.
