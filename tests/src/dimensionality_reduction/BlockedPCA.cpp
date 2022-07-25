@@ -136,7 +136,6 @@ TEST(BlockedMatrixTest, CustomSparse) {
     }
 }
 
-
 /******************************************/
 
 class BlockedPCATestCore {
