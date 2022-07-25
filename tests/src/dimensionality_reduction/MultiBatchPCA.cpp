@@ -13,7 +13,7 @@
 #include "scran/dimensionality_reduction/MultiBatchPCA.hpp"
 #include "scran/dimensionality_reduction/RunPCA.hpp"
 
-TEST(MultiBatchMatrixTest, Test) {
+TEST(MultiBatchMatrixTest, EigenDense) {
     size_t NR = 30, NC = 10;
 
     Eigen::MatrixXd thing(NR, NC);  
@@ -65,22 +65,99 @@ TEST(MultiBatchMatrixTest, Test) {
     }
 }
 
-class MultiBatchPCATester : public ::testing::TestWithParam<std::tuple<bool, int, int> > {
+TEST(MultiBatchMatrixTest, CustomSparse) {
+    size_t NR = 30, NC = 10;
+
+    scran::pca_utils::CustomSparseMatrix thing(NR, NC, 1);  
+    std::vector<std::vector<double> > values(NC);
+    std::vector<std::vector<int> > indices(NC);
+
+    std::mt19937_64 rng;
+    std::normal_distribution<> ndist;
+    std::uniform_real_distribution<> udist(0,1);
+    Eigen::MatrixXd ref(NR, NC);  
+    ref.setZero();
+
+    for (size_t i = 0; i < NR; ++i) {
+        for (size_t j = 0; j < NC; ++j) {
+            if (udist(rng) < 0.2) {
+                auto val = ndist(rng);
+                ref(i, j) = val;
+                values[j].push_back(val);
+                indices[j].push_back(i);
+            }
+        }
+    }
+
+    Eigen::VectorXd means(NC);
+    for (size_t j = 0; j < NC; ++j) {
+        means[j] = ndist(rng);
+    }
+
+    Eigen::VectorXd weights(NR);
+    for (size_t j = 0; j < NR; ++j) {
+        weights[j] = std::abs(ndist(rng)) + 0.1;
+    }
+
+    thing.fill_columns(values, indices);
+    scran::MultiBatchEigenMatrix<decltype(thing)> batched(&thing, &weights, &means);
+    auto realized = batched.realize();
+
+    // Checking that the reference matches up.
+    {
+        scran::MultiBatchEigenMatrix<decltype(ref)> batchedref(&ref, &weights, &means);
+        auto realizedref = batchedref.realize();
+
+        for (Eigen::Index i = 0; i < realizedref.cols(); ++i) {
+            Eigen::VectorXd refcol = realizedref.col(i);
+            Eigen::VectorXd obscol = realized.col(i);
+            expect_equal_vectors(refcol, obscol);
+        }
+    }
+
+    // Trying in the normal orientation.
+    {
+        Eigen::VectorXd rhs(NC);
+        for (size_t i = 0; i < NC; ++i) {
+            rhs[i] = ndist(rng);
+        }
+
+        Eigen::VectorXd prod1(NR);
+        batched.multiply(rhs, prod1);
+        Eigen::VectorXd prod2 = realized * rhs;
+        compare_almost_equal(prod1, prod2);
+    }
+
+    // Trying in the transposed orientation.
+    {
+        Eigen::VectorXd rhs(NR);
+        for (size_t i = 0; i < NR; ++i) {
+            rhs[i] = ndist(rng);
+        }
+
+        Eigen::VectorXd tprod1(NC);
+        batched.adjoint_multiply(rhs, tprod1);
+        Eigen::VectorXd tprod2 = realized.adjoint() * rhs;
+        compare_almost_equal(tprod1, tprod2);
+    }
+}
+
+/******************************************/
+
+class MultiBatchPCATestCore {
 protected:
     std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
 
-    void SetUp() {
+    template<class Param>
+    void assemble(const Param& param) {
+        scale = std::get<0>(param);
+        rank = std::get<1>(param);
+        nblocks = std::get<2>(param);
+
         dense_row = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
         dense_column = tatami::convert_to_dense(dense_row.get(), 1);
         sparse_row = tatami::convert_to_sparse(dense_row.get(), 0);
         sparse_column = tatami::convert_to_sparse(dense_row.get(), 1);
-    }
-
-    template<class Param>
-    void assemble(Param param) {
-        scale = std::get<0>(param);
-        rank = std::get<1>(param);
-        nblocks = std::get<2>(param);
         return;
     }
 
@@ -100,36 +177,72 @@ protected:
     int nblocks;
 };
 
-TEST_P(MultiBatchPCATester, Basic) {
-    assemble(GetParam());
+/******************************************/
+
+class MultiBatchPCABasicTest : public ::testing::TestWithParam<std::tuple<bool, int, int, int, bool> >, public MultiBatchPCATestCore {};
+
+TEST_P(MultiBatchPCABasicTest, Basic) {
+    auto param = GetParam();
+    assemble(param);
 
     scran::MultiBatchPCA runner;
     runner.set_scale(scale).set_rank(rank);
     auto block = generate_blocks(dense_row->ncol(), nblocks);
 
-    // Checking that we get more-or-less the same results.
-    auto res1 = runner.run(dense_row.get(), block.data());
-    EXPECT_EQ(res1.variance_explained.size(), rank);
-    EXPECT_EQ(res1.pcs.rows(), rank);
-    EXPECT_EQ(res1.pcs.cols(), dense_row->ncol());
+    auto ref = runner.run(dense_row.get(), block.data());
+
+    int nthreads = std::get<3>(param);
+    runner.set_num_threads(nthreads);
+    auto use_eigen = std::get<4>(param);
+    if (use_eigen) {
+        runner.set_use_eigen(true);
+    }
+
+    if (nthreads == 1) {
+        EXPECT_EQ(ref.variance_explained.size(), rank);
+        EXPECT_EQ(ref.pcs.rows(), rank);
+        EXPECT_EQ(ref.pcs.cols(), dense_row->ncol());
+    } else {
+        // Checking that we get more-or-less the same results.
+        auto res1 = runner.run(dense_row.get(), block.data());
+        expect_equal_pcs(ref.pcs, res1.pcs);
+        expect_equal_vectors(ref.variance_explained, res1.variance_explained);
+        EXPECT_FLOAT_EQ(ref.total_variance, res1.total_variance);
+    }
 
     auto res2 = runner.run(dense_column.get(), block.data());
-    expect_equal_pcs(res1.pcs, res2.pcs);
-    expect_equal_vectors(res1.variance_explained, res2.variance_explained);
-    EXPECT_FLOAT_EQ(res1.total_variance, res2.total_variance);
+    expect_equal_pcs(ref.pcs, res2.pcs);
+    expect_equal_vectors(ref.variance_explained, res2.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res2.total_variance);
 
     auto res3 = runner.run(sparse_row.get(), block.data());
-    expect_equal_pcs(res1.pcs, res3.pcs);
-    expect_equal_vectors(res1.variance_explained, res3.variance_explained);
-    EXPECT_FLOAT_EQ(res1.total_variance, res3.total_variance);
+    expect_equal_pcs(ref.pcs, res3.pcs);
+    expect_equal_vectors(ref.variance_explained, res3.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res3.total_variance);
 
     auto res4 = runner.run(sparse_column.get(), block.data());
-    expect_equal_pcs(res1.pcs, res4.pcs);
-    expect_equal_vectors(res1.variance_explained, res4.variance_explained);
-    EXPECT_FLOAT_EQ(res1.total_variance, res4.total_variance);
+    expect_equal_pcs(ref.pcs, res4.pcs);
+    expect_equal_vectors(ref.variance_explained, res4.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res4.total_variance);
 }
 
-TEST_P(MultiBatchPCATester, BalancedBlock) {
+INSTANTIATE_TEST_SUITE_P(
+    MultiBatchPCA,
+    MultiBatchPCABasicTest,
+    ::testing::Combine(
+        ::testing::Values(false, true), // to scale or not to scale?
+        ::testing::Values(2, 3, 4), // number of PCs to obtain
+        ::testing::Values(1, 2, 3), // number of blocks
+        ::testing::Values(1, 3), // number of threads
+        ::testing::Values(false, true) // use Eigen for testing?
+    )
+);
+
+/******************************************/
+
+class MultiBatchPCAMoreTest : public ::testing::TestWithParam<std::tuple<bool, int, int> >, public MultiBatchPCATestCore {};
+
+TEST_P(MultiBatchPCAMoreTest, BalancedBlock) {
     assemble(GetParam());
     auto block = generate_blocks(dense_row->ncol(), nblocks);
 
@@ -161,7 +274,7 @@ TEST_P(MultiBatchPCATester, BalancedBlock) {
     }
 }
 
-TEST_P(MultiBatchPCATester, DuplicatedBlocks) {
+TEST_P(MultiBatchPCAMoreTest, DuplicatedBlocks) {
     assemble(GetParam());
     auto block = generate_blocks(dense_row->ncol(), nblocks);
 
@@ -192,7 +305,7 @@ TEST_P(MultiBatchPCATester, DuplicatedBlocks) {
 
 INSTANTIATE_TEST_SUITE_P(
     MultiBatchPCA,
-    MultiBatchPCATester,
+    MultiBatchPCAMoreTest,
     ::testing::Combine(
         ::testing::Values(false, true), // to scale or not to scale?
         ::testing::Values(2, 3, 4), // number of PCs to obtain
