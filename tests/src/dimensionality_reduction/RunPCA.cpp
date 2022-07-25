@@ -40,7 +40,7 @@ TEST_P(RunPCABasicTest, Test) {
 
     scran::RunPCA runner;
     runner.set_scale(scale).set_rank(rank);
-    auto res = runner.run(dense_row.get());
+    auto ref = runner.run(dense_row.get());
     
     auto threads = std::get<2>(param);
     runner.set_num_threads(threads);
@@ -50,16 +50,16 @@ TEST_P(RunPCABasicTest, Test) {
     }
 
     if (!use_eigen && threads == 1) {
-        EXPECT_EQ(res.variance_explained.size(), rank);
-        EXPECT_EQ(res.pcs.rows(), rank);
-        EXPECT_EQ(res.pcs.cols(), dense_row->ncol());
-        EXPECT_EQ(res.rotation.rows(), dense_row->nrow());
-        EXPECT_EQ(res.rotation.cols(), rank);
+        EXPECT_EQ(ref.variance_explained.size(), rank);
+        EXPECT_EQ(ref.pcs.rows(), rank);
+        EXPECT_EQ(ref.pcs.cols(), dense_row->ncol());
+        EXPECT_EQ(ref.rotation.rows(), dense_row->nrow());
+        EXPECT_EQ(ref.rotation.cols(), rank);
 
         // Checking that we scaled the PCs correctly.
         size_t NC = dense_row->ncol();
         for (int r = 0; r < rank; ++r) {
-            auto ptr = res.pcs.data() + r;
+            auto ptr = ref.pcs.data() + r;
 
             double mean = 0;
             for (size_t c = 0; c < NC; ++c, ptr += rank) {
@@ -69,36 +69,36 @@ TEST_P(RunPCABasicTest, Test) {
             EXPECT_TRUE(std::abs(mean) < 0.00000001);
 
             double var = 0;
-            ptr = res.pcs.data() + r;
+            ptr = ref.pcs.data() + r;
             for (size_t c = 0; c < NC; ++c, ptr += rank) {
                 var += (*ptr - mean) * (*ptr - mean);
             }
             var /= NC - 1;
 
-            EXPECT_FLOAT_EQ(var, res.variance_explained[r]);
+            EXPECT_FLOAT_EQ(var, ref.variance_explained[r]);
         }
     } else {
         auto res1 = runner.run(dense_row.get());
-        expect_equal_pcs(res.pcs, res1.pcs);
-        expect_equal_vectors(res.variance_explained, res1.variance_explained);
-        EXPECT_FLOAT_EQ(res.total_variance, res1.total_variance);
+        expect_equal_pcs(ref.pcs, res1.pcs);
+        expect_equal_vectors(ref.variance_explained, res1.variance_explained);
+        EXPECT_FLOAT_EQ(ref.total_variance, res1.total_variance);
     }
 
     // Checking that we get more-or-less the same results. 
     auto res2 = runner.run(dense_column.get());
-    expect_equal_pcs(res.pcs, res2.pcs);
-    expect_equal_vectors(res.variance_explained, res2.variance_explained);
-    EXPECT_FLOAT_EQ(res.total_variance, res2.total_variance);
+    expect_equal_pcs(ref.pcs, res2.pcs);
+    expect_equal_vectors(ref.variance_explained, res2.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res2.total_variance);
 
     auto res3 = runner.run(sparse_row.get());
-    expect_equal_pcs(res.pcs, res3.pcs);
-    expect_equal_vectors(res.variance_explained, res3.variance_explained);
-    EXPECT_FLOAT_EQ(res.total_variance, res3.total_variance);
+    expect_equal_pcs(ref.pcs, res3.pcs);
+    expect_equal_vectors(ref.variance_explained, res3.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res3.total_variance);
 
     auto res4 = runner.run(sparse_column.get());
-    expect_equal_pcs(res.pcs, res4.pcs);
-    expect_equal_vectors(res.variance_explained, res4.variance_explained);
-    EXPECT_FLOAT_EQ(res.total_variance, res4.total_variance);
+    expect_equal_pcs(ref.pcs, res4.pcs);
+    expect_equal_vectors(ref.variance_explained, res4.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res4.total_variance);
 }
 
 INSTANTIATE_TEST_SUITE_P(
