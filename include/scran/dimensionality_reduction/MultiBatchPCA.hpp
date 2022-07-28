@@ -263,7 +263,7 @@ private:
         // but we want to apply the rotation vectors to the original matrix
         // (after any centering/scaling but without the batch weights).
         auto executor = [&](const auto& emat) -> void {
-            pca_utils::EigenThreadScope t(nthreads);
+            irlba::EigenThreadScope t(nthreads);
             irlba::Irlba irb;
             irb.set_number(rank);
 

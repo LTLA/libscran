@@ -118,7 +118,7 @@ public:
 private:
     template<typename T, typename IDX>
     void run(const tatami::Matrix<T, IDX>* mat, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
-        pca_utils::EigenThreadScope t(nthreads);
+        irlba::EigenThreadScope t(nthreads);
         irlba::Irlba irb;
         irb.set_number(rank);
 

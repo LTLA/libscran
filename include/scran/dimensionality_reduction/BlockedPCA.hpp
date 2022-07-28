@@ -192,7 +192,7 @@ private:
             ++block_size[block[j]];
         }
 
-        pca_utils::EigenThreadScope t(nthreads);
+        irlba::EigenThreadScope t(nthreads);
         irlba::Irlba irb;
         irb.set_number(rank);
 
