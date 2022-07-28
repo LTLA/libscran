@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include "../utils/macros.h"
 #include "scran/dimensionality_reduction/ScaleByNeighbors.hpp"
 #include <vector>
 #include <random>

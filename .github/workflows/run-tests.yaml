@@ -16,6 +16,11 @@ jobs:
             omp: true
           }
         - {
+            name: "Ubuntu Latest GCC, custom parallelization", 
+            os: ubuntu-latest,
+            custompar: true
+          }
+        - {
             name: "Ubuntu Latest GCC, coverage enabled", 
             os: ubuntu-latest,
             cov: true
@@ -32,7 +37,7 @@ jobs:
       uses: lukka/get-cmake@latest
 
     - name: Configure the build
-      if: ${{ ! matrix.config.cov && ! matrix.config.omp }}
+      if: ${{ ! matrix.config.cov && ! matrix.config.omp && ! matrix.config.custompar }}
       run: cmake -S . -B build
 
     - name: Configure the build with coverage
@@ -42,6 +47,10 @@ jobs:
     - name: Configure the build with OpenMP
       if: ${{ matrix.config.omp }}
       run: cmake -S . -B build -DUSE_OPENMP=ON
+
+    - name: Configure the build with custom parallelization
+      if: ${{ matrix.config.custompar }}
+      run: cmake -S . -B build -DUSE_CUSTOM_PARALLEL=ON
 
     - name: Run the build
       run: cmake --build build

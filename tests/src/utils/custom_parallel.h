@@ -6,11 +6,11 @@
 #include <thread>
 
 template<class Function>
-void parallelize(size_t n, Function f, size_t nthreads) {
+void custom_parallelize(size_t n, Function f, size_t nthreads) {
     size_t jobs_per_worker = std::ceil(static_cast<double>(n) / nthreads);
     size_t start = 0;
     std::vector<std::thread> jobs;
-    
+
     for (size_t w = 0; w < nthreads; ++w) {
         size_t end = std::min(n, start + jobs_per_worker);
         if (start >= end) {
@@ -25,5 +25,5 @@ void parallelize(size_t n, Function f, size_t nthreads) {
     }
 }
 
-#define SCRAN_CUSTOM_PARALLEL parallelize
+#define SCRAN_CUSTOM_PARALLEL custom_parallelize
 #endif

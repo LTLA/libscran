@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include "../utils/macros.h"
 
 #include "tatami/base/Matrix.hpp"
 #include "tatami/utils/convert_to_dense.hpp"

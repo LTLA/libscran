@@ -1,8 +1,5 @@
 #include <gtest/gtest.h>
-
-#ifdef TEST_SCRAN_CUSTOM_PARALLEL
-#include "../utils/custom_parallel.h"
-#endif
+#include "../utils/macros.h"
 
 #include "scran/differential_analysis/summarize_comparisons.hpp"
 #include "../utils/compare_vectors.h"

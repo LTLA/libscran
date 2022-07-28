@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include "macros.h"
 #include "scran/utils/subset_vector.hpp"
 #include <vector>
 

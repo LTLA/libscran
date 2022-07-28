@@ -56,9 +56,13 @@ target_link_libraries(
 target_compile_definitions(libtest PRIVATE TEST_SCRAN_CUSTOM_SPARSE_MATRIX)
 
 set(USE_OPENMP OFF CACHE BOOL "Compile with OpenMP support")
+set(USE_CUSTOM_PARALLEL OFF CACHE BOOL "Compile with custom parallelization")
+
 if (USE_OPENMP)
     find_package(OpenMP)
     target_link_libraries(libtest OpenMP::OpenMP_CXX)
+elseif(USE_CUSTOM_PARALLEL)
+    target_compile_definitions(libtest PRIVATE TEST_CUSTOM_PARALLEL)
 endif()
 
 set(CODE_COVERAGE OFF CACHE BOOL "Enable coverage testing")
@@ -67,22 +71,5 @@ if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_link_options(libtest PRIVATE --coverage)
 endif()
 
-# Check that the custom parallelization schemes are properly set up.
-add_executable(
-    custom_parallel
-    src/clustering/BuildSNNGraph.cpp
-    src/differential_analysis/summarize_comparisons.cpp
-    src/dimensionality_reduction/ScaleByNeighbors.cpp
-)
-
-set_target_properties(custom_parallel PROPERTIES COMPILE_DEFINITIONS "TEST_SCRAN_CUSTOM_PARALLEL")
-
-target_link_libraries(
-    custom_parallel
-    gtest_main
-    scran
-)
-
 include(GoogleTest)
 gtest_discover_tests(libtest)
-gtest_discover_tests(custom_parallel)

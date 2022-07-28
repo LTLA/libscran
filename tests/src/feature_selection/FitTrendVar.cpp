@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include "../utils/macros.h"
 
 #include "scran/feature_selection/FitTrendVar.hpp"
 

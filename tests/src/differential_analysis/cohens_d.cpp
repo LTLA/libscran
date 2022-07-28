@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include "../utils/macros.h"
 
 #include "scran/differential_analysis/cohens_d.hpp"
 

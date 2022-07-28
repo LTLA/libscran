@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include "macros.h"
 #include "scran/utils/average_vectors.hpp"
 #include <vector>
 

@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include "../utils/macros.h"
 
 #include "../data/data.h"
 #include "../utils/compare_vectors.h"

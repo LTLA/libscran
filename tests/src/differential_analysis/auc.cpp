@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
+#include "../utils/macros.h"
 
-#include <iostream>
 #include "scran/differential_analysis/auc.hpp"
 
 class AUCTest : public ::testing::Test {
