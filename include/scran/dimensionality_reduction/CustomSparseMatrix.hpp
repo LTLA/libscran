@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "Eigen/Dense"
-#include "irlba/wrappers.hpp"
+#include "irlba/parallel.hpp"
 #include "pca_utils.hpp"
 
 #ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
@@ -16,11 +16,15 @@ namespace pca_utils {
 
 class CustomSparseMatrix {
 public:
-    CustomSparseMatrix(size_t nr, size_t nc, int threads) : nrow(nr), ncol(nc), nthreads(threads), p(nc + 1) {}
+    CustomSparseMatrix(size_t nr, size_t nc, int threads) : nrow(nr), ncol(nc), nthreads(threads) {}
 
     auto rows() const { return nrow; }
 
     auto cols() const { return ncol; }
+
+private:
+    typedef irlba::ParallelSparseMatrix<> InternalMatrix;
+    InternalMatrix data;
 
 #ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
 public:
@@ -59,6 +63,7 @@ public:
 #endif
 
         size_t nnzeros = 0;
+        std::vector<size_t> p(ncol + 1);
         auto pIt = p.begin() + 1;
         for (const auto& v : values) {
             nnzeros += v.size();
@@ -66,19 +71,19 @@ public:
             ++pIt;
         }
 
+        std::vector<double> x;
         x.reserve(nnzeros);
         for (const auto& v : values) {
             x.insert(x.end(), v.begin(), v.end());
         }
 
+        std::vector<int> i;
         i.reserve(nnzeros);
         for (const auto& v : indices) {
             i.insert(i.end(), v.begin(), v.end());
         }
 
-        if (nthreads > 1) {
-            fragment_threads();
-        }
+        data = InternalMatrix(nrow, ncol, std::move(x), std::move(i), std::move(p), nthreads);
     }
 
     void fill_rows(const std::vector<std::vector<double> >& values, const std::vector<std::vector<int> >& indices, const std::vector<int>& column_nonzeros) {
@@ -97,6 +102,7 @@ public:
         }
 #endif
 
+        std::vector<size_t> p(ncol + 1);
         size_t nnzeros = 0;
         auto pIt = p.begin() + 1;
         for (auto nz : column_nonzeros) {
@@ -105,9 +111,8 @@ public:
             nnzeros += nz;
         }
 
-        x.resize(nnzeros);
-        i.resize(nnzeros);
-
+        std::vector<double> x(nnzeros);
+        std::vector<int> i(nnzeros);
         for (size_t j = 0, endj = values.size(); j < endj; ++j) {
             const auto& curv = values[j];
             const auto& curi = indices[j];
@@ -120,71 +125,7 @@ public:
             }
         }
 
-        if (nthreads > 1) {
-            fragment_threads();
-        }
-    }
-
-private:
-    std::vector<size_t> col_starts, col_ends;
-    std::vector<std::vector<size_t> > row_nonzero_starts;
-
-    void fragment_threads() {
-        double total_nzeros = p.back();
-        size_t per_thread = std::ceil(total_nzeros / nthreads);
-        
-        // Splitting columns across threads so each thread processes the same number of nonzero elements.
-        col_starts.resize(nthreads);
-        col_ends.resize(nthreads);
-        {
-            size_t col_counter = 0;
-            size_t sofar = per_thread;
-            for (int t = 0; t < nthreads; ++t) {
-                col_starts[t] = col_counter;
-                while (col_counter < ncol && p[col_counter + 1] <= sofar) {
-                    ++col_counter;
-                }
-                col_ends[t] = col_counter;
-                sofar += per_thread;
-            }
-        }
-
-        // Splitting rows across threads so each thread processes the same number of nonzero elements.
-        row_nonzero_starts.resize(nthreads + 1, std::vector<size_t>(ncol));        
-        {
-            std::vector<size_t> row_nonzeros(nrow);
-            for (auto i_ : i) {
-                ++(row_nonzeros[i_]);
-            }
-            
-            std::vector<size_t> row_starts(nthreads), row_ends(nthreads);
-            size_t row_counter = 0;
-            size_t sofar = per_thread;
-            size_t cum_rows = 0;
-
-            for (int t = 0; t < nthreads; ++t) {
-                row_starts[t] = row_counter;
-                while (row_counter < nrow && cum_rows <= sofar) {
-                    cum_rows += row_nonzeros[row_counter];
-                    ++row_counter;
-                }
-                row_ends[t] = row_counter;
-                sofar += per_thread;
-            }
-
-            for (size_t c = 0; c < ncol; ++c) {
-                size_t col_start = p[c], col_end = p[c + 1];
-                row_nonzero_starts[0][c] = col_start;
-
-                size_t s = col_start;
-                for (int thread = 0; thread < nthreads; ++thread) {
-                    while (s < col_end && i[s] < row_ends[thread]) { 
-                        ++s; 
-                    }
-                    row_nonzero_starts[thread + 1][c] = s;
-                }
-            }
-        }
+        data = InternalMatrix(nrow, ncol, std::move(x), std::move(i), std::move(p), nthreads);
     }
 
 public:
@@ -197,40 +138,10 @@ public:
         }
 #endif
 
-        output.setZero();
-
-        if (nthreads == 1) {
-            for (size_t c = 0; c < ncol; ++c) {
-                column_sum_product(p[c], p[c + 1], rhs.coeff(c), output); 
-            }
-            return;
-        }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-        #pragma omp parallel for num_threads(nthreads)
-        for (int t = 0; t < nthreads; ++t) {
-#else
-        SCRAN_CUSTOM_PARALLEL(nthreads, [&](int first, int last) -> void {
-        for (int t = first; t < last; ++t) {
-#endif
-
-            const auto& starts = row_nonzero_starts[t];
-            const auto& ends = row_nonzero_starts[t + 1];
-            for (size_t c = 0; c < ncol; ++c) {
-                column_sum_product(starts[c], ends[c], rhs.coeff(c), output);
-            }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-        }
-#else
-        }
-        }, nthreads);
-#endif
-
+        data.multiply(rhs, output);
         return;
     }
 
-public:
     template<class Right>
     void adjoint_multiply(const Right& rhs, Eigen::VectorXd& output) const {
 #ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
@@ -240,62 +151,10 @@ public:
         }
 #endif
 
-        if (nthreads == 1) {
-            for (size_t c = 0; c < ncol; ++c) {
-                output.coeffRef(c) = column_dot_product(c, rhs);
-            }
-            return;
-        }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-        #pragma omp parallel for num_threads(nthreads)
-        for (int t = 0; t < nthreads; ++t) {
-#else
-        SCRAN_CUSTOM_PARALLEL(nthreads, [&](int first, int last) -> void {
-        for (int t = first; t < last; ++t) {
-#endif
-
-            auto curstart = col_starts[t];
-            auto curend = col_ends[t];
-            for (size_t c = curstart; c < curend; ++c) {
-                output.coeffRef(c) = column_dot_product(c, rhs);
-            }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-        }
-#else
-        }
-        }, nthreads);
-#endif
-
+        data.adjoint_multiply(rhs, output);
         return;
     }
 
-private:
-    template<class Right>
-    double column_dot_product(size_t c, const Right& rhs) const {
-        size_t col_start = p[c], col_end = p[c + 1];
-        double dot = 0;
-        for (size_t s = col_start; s < col_end; ++s) {
-            dot += x[s] * rhs.coeff(i[s]);
-        }
-        return dot;
-    }
-
-    void column_sum_product(size_t start, size_t end, double val, Eigen::VectorXd& output) const {
-        for (size_t s = start; s < end; ++s) {
-            output.coeffRef(i[s]) += x[s] * val;
-        }
-    }
-
-    void column_sum_product(size_t start, size_t end, const Eigen::VectorXd& rhs, Eigen::MatrixXd& transposed) const {
-        Eigen::Index nc = rhs.size();
-        for (size_t s = start; s < end; ++s) {
-            transposed.col(i[s]).noalias() += x[s] * rhs;
-        }
-    }
-
-public:
     Eigen::MatrixXd realize() const {
 #ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
         if (eigen) {
@@ -303,17 +162,7 @@ public:
         }
 #endif
 
-        Eigen::MatrixXd output(nrow, ncol);
-        output.setZero();
-
-        for (size_t c = 0; c < ncol; ++c) {
-            size_t col_start = p[c], col_end = p[c + 1];
-            for (size_t s = col_start; s < col_end; ++s) {
-                output.coeffRef(i[s], c) = x[s];
-            }
-        }
-
-        return output;
+        return data.realize();
     }
 
 public:
@@ -329,16 +178,26 @@ public:
         Eigen::MatrixXd transposed(nvec, nrow); // using a transposed version for more cache efficiency.
         transposed.setZero();
 
+        const auto& x = data.get_values();
+        const auto& i = data.get_indices();
+        const auto& p = data.get_pointers();
+
         if (nthreads == 1) {
             Eigen::VectorXd multipliers(nvec);
             for (size_t c = 0; c < ncol; ++c) {
                 multipliers.noalias() = rhs.row(c);
-                column_sum_product(p[c], p[c + 1], multipliers, transposed);
+                auto start = p[c], end = p[c + 1];
+                for (size_t s = start; s < end; ++s) {
+                    transposed.col(i[s]).noalias() += x[s] * multipliers;
+                }
             }
 
             output = transposed.adjoint();
             return;
         }
+
+
+        const auto& row_nonzero_starts = data.get_secondary_nonzero_starts();
 
 #ifndef SCRAN_CUSTOM_PARALLEL
         #pragma omp parallel for num_threads(nthreads)
@@ -353,7 +212,10 @@ public:
             Eigen::VectorXd multipliers(nvec);
             for (size_t c = 0; c < ncol; ++c) {
                 multipliers.noalias() = rhs.row(c);
-                column_sum_product(starts[c], ends[c], multipliers, transposed);
+                auto start = starts[c], end = ends[c];
+                for (size_t s = start; s < end; ++s) {
+                    transposed.col(i[s]).noalias() += x[s] * multipliers;
+                }
             }
 
 #ifndef SCRAN_CUSTOM_PARALLEL
@@ -370,10 +232,6 @@ public:
 private:
     size_t nrow, ncol;
     int nthreads;
-    
-    std::vector<double> x;
-    std::vector<int> i;
-    std::vector<size_t> p;
 };
 
 }

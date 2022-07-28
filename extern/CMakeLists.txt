@@ -21,7 +21,7 @@ FetchContent_MakeAvailable(WeightedLowess)
 FetchContent_Declare(
   irlba 
   GIT_REPOSITORY https://github.com/LTLA/CppIrlba
-  GIT_TAG 123d0180332e377adc72c207366008086efc67ed
+  GIT_TAG c0954d88906aad6184761a469a48f64fa2051c7d 
 )
 
 FetchContent_MakeAvailable(irlba)
