@@ -1,6 +1,8 @@
 #ifndef SCRAN_FIT_TREND_VAR_H
 #define SCRAN_FIT_TREND_VAR_H
 
+#include "../utils/macros.hpp"
+
 #include <algorithm>
 #include <vector>
 #include "WeightedLowess/WeightedLowess.hpp"

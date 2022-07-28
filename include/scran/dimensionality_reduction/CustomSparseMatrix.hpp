@@ -1,6 +1,8 @@
 #ifndef SCRAN_CUSTOM_SPARSE_MATRIX_HPP
 #define SCRAN_CUSTOM_SPARSE_MATRIX_HPP
 
+#include "../utils/macros.hpp"
+
 #include <vector>
 #include "Eigen/Dense"
 #include "irlba/parallel.hpp"

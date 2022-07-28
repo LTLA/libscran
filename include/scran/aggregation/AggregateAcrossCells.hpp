@@ -1,6 +1,8 @@
 #ifndef SCRAN_AGGREGATE_ACROSS_CELLS_HPP
 #define SCRAN_AGGREGATE_ACROSS_CELLS_HPP
 
+#include "../utils/macros.hpp"
+
 #include <algorithm>
 #include <vector>
 #include "tatami/tatami.hpp"

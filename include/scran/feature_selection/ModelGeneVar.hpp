@@ -1,6 +1,8 @@
 #ifndef SCRAN_MODEL_GENE_VAR_H
 #define SCRAN_MODEL_GENE_VAR_H
 
+#include "../utils/macros.hpp"
+
 #include "tatami/base/Matrix.hpp"
 #include "tatami/stats/apply.hpp"
 

@@ -1,6 +1,8 @@
 #ifndef SCRAN_SUMMARIZE_COMPARISONS_HPP
 #define SCRAN_SUMMARIZE_COMPARISONS_HPP
 
+#include "../utils/macros.hpp"
+
 #include <algorithm>
 #include <numeric>
 #include <vector>

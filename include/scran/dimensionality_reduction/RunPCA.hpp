@@ -1,5 +1,7 @@
-#ifndef SCRAN_RUN_PCA
-#define SCRAN_RUN_PCA
+#ifndef SCRAN_RUN_PCA_HPP
+#define SCRAN_RUN_PCA_HPP
+
+#include "../utils/macros.hpp"
 
 #include "tatami/stats/variances.hpp"
 #include "tatami/base/DelayedSubset.hpp"

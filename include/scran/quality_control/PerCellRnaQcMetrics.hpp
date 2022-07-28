@@ -1,6 +1,8 @@
 #ifndef SCRAN_PER_CELL_QC_METRICS_HPP
 #define SCRAN_PER_CELL_QC_METRICS_HPP
 
+#include "../utils/macros.hpp"
+
 #include <vector>
 #include <algorithm>
 #include <limits>

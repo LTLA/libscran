@@ -1,6 +1,8 @@
 #ifndef VECTOR_TO_POINTERS
 #define VECTOR_TO_POINTERS
 
+#include "macros.hpp"
+
 #include <vector>
 
 /**

@@ -1,6 +1,8 @@
 #ifndef SCRAN_LFC_HPP
 #define SCRAN_LFC_HPP
 
+#include "../utils/macros.hpp"
+
 #include <vector>
 #include <limits>
 

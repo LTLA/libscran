@@ -1,6 +1,8 @@
 #ifndef SCRAN_PER_CELL_QC_FILTERS_H
 #define SCRAN_PER_CELL_QC_FILTERS_H
 
+#include "../utils/macros.hpp"
+
 #include <vector>
 #include <cstdint>
 

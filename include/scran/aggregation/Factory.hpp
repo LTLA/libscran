@@ -1,6 +1,8 @@
 #ifndef SCRAN_AGGREGATION_FACTORY_HPP
 #define SCRAN_AGGREGATION_FACTORY_HPP
 
+#include "../utils/macros.hpp"
+
 #include <vector>
 #include <type_traits>
 #include <algorithm>

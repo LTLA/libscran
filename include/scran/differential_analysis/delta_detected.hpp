@@ -1,6 +1,8 @@
 #ifndef SCRAN_DELTA_DETECTED_HPP
 #define SCRAN_DELTA_DETECTED_HPP
 
+#include "../utils/macros.hpp"
+
 #include <vector>
 #include <limits>
 

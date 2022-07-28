@@ -1,6 +1,8 @@
 #ifndef SCRAN_IS_OUTLIER_H
 #define SCRAN_IS_OUTLIER_H
 
+#include "../utils/macros.hpp"
+
 #include <vector>
 #include <limits>
 #include <cmath>

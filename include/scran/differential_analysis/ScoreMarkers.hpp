@@ -1,6 +1,8 @@
 #ifndef SCRAN_SCORE_MARKERS_HPP
 #define SCRAN_SCORE_MARKERS_HPP
 
+#include "../utils/macros.hpp"
+
 #include "Factory.hpp"
 #include "summarize_comparisons.hpp"
 

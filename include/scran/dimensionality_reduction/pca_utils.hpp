@@ -1,6 +1,8 @@
 #ifndef SCRAN_PCA_UTILS_HPP
 #define SCRAN_PCA_UTILS_HPP
 
+#include "../utils/macros.hpp"
+
 #include "Eigen/Dense"
 #include <algorithm>
 #include <cmath>

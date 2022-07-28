@@ -2,6 +2,7 @@
 #define SCRAN_SNNGRAPHCLUSTERING_HPP
 
 #ifndef SCRAN_EXCLUDE_IGRAPH
+#include "../utils/macros.hpp"
 
 #include "BuildSNNGraph.hpp"
 

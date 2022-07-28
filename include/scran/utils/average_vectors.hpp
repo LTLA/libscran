@@ -1,6 +1,8 @@
 #ifndef AVERAGE_VECTORS_HPP
 #define AVERAGE_VECTORS_HPP
 
+#include "macros.hpp"
+
 #include <vector>
 #include <limits>
 #include <algorithm>

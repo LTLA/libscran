@@ -1,6 +1,8 @@
 #ifndef SCRAN_CLUSTERED_SIZE_FACTORS_HPP
 #define SCRAN_CLUSTERED_SIZE_FACTORS_HPP
 
+#include "../utils/macros.hpp"
+
 #include "MedianSizeFactors.hpp"
 #include "../aggregation/AggregateAcrossCells.hpp"
 

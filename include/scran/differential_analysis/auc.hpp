@@ -1,6 +1,8 @@
 #ifndef SCRAN_PAIRWISE_AUC_HPP
 #define SCRAN_PAIRWISE_AUC_HPP
 
+#include "../utils/macros.hpp"
+
 #include <vector>
 #include <algorithm>
 

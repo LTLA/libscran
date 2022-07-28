@@ -1,6 +1,8 @@
 #ifndef SCRAN_CENTER_SIZE_FACTORS_HPP
 #define SCRAN_CENTER_SIZE_FACTORS_HPP
 
+#include "../utils/macros.hpp"
+
 #include <stdexcept>
 #include <vector>
 #include <algorithm>

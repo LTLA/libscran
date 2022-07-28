@@ -1,6 +1,8 @@
 #ifndef SCRAN_PER_CELL_ADT_QC_METRICS_HPP
 #define SCRAN_PER_CELL_ADT_QC_METRICS_HPP
 
+#include "../utils/macros.hpp"
+
 #include "PerCellRnaQcMetrics.hpp"
 
 /**

@@ -1,6 +1,8 @@
 #ifndef SCRAN_LOG_NORM_COUNTS_H
 #define SCRAN_LOG_NORM_COUNTS_H
 
+#include "../utils/macros.hpp"
+
 #include <algorithm>
 #include <vector>
 #include <numeric>

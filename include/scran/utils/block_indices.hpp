@@ -1,6 +1,8 @@
 #ifndef SCRAN_BLOCK_INDICES_H
 #define SCRAN_BLOCK_INDICES_H
 
+#include "macros.hpp"
+
 #include <vector>
 #include <algorithm>
 #include <stdexcept>

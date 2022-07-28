@@ -1,6 +1,8 @@
 #ifndef SCRAN_BLOCKED_VARIANCES_HPP
 #define SCRAN_BLOCKED_VARIANCES_HPP
 
+#include "../utils/macros.hpp"
+
 #include <vector>
 #include <algorithm>
 #include <limits>

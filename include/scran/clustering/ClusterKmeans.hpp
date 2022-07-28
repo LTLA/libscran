@@ -1,6 +1,8 @@
 #ifndef SCRAN_KMEANSCLUSTERING_HPP
 #define SCRAN_KMEANSCLUSTERING_HPP
 
+#include "../utils/macros.hpp"
+
 #include "kmeans/Kmeans.hpp"
 
 /**

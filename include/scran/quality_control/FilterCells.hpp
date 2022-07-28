@@ -1,6 +1,8 @@
 #ifndef SCRAN_FILTER_CELLS_H
 #define SCRAN_FILTER_CELLS_H
 
+#include "../utils/macros.hpp"
+
 #include "tatami/base/DelayedSubset.hpp"
 #include <vector>
 #include <numeric>

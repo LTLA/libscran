@@ -1,6 +1,8 @@
 #ifndef SCRAN_MEDIAN_SIZE_FACTORS_HPP
 #define SCRAN_MEDIAN_SIZE_FACTORS_HPP
 
+#include "../utils/macros.hpp"
+
 #include <vector>
 #include <limits>
 #include "tatami/stats/medians.hpp"

@@ -1,5 +1,7 @@
-#ifndef SCRAN_BLOCKED_PCA
-#define SCRAN_BLOCKED_PCA
+#ifndef SCRAN_BLOCKED_PCA_HPP
+#define SCRAN_BLOCKED_PCA_HPP
+
+#include "../utils/macros.hpp"
 
 #include "tatami/stats/variances.hpp"
 #include "tatami/base/DelayedSubset.hpp"

@@ -1,6 +1,8 @@
 #ifndef SCRAN_NEIGHBOR_SCALING_HPP
 #define SCRAN_NEIGHBOR_SCALING_HPP
 
+#include "../utils/macros.hpp"
+
 #include <vector>
 #include <cmath>
 #include <memory>
@@ -138,7 +140,7 @@ public:
             dist[i] = neighbors.back().second;
         }
 #ifdef SCRAN_CUSTOM_PARALLEL
-        });
+        }, nthreads);
 #endif
 
         double med = tatami::stats::compute_median<double>(dist.data(), nobs);

@@ -1,6 +1,8 @@
 #ifndef SCRAN_CHOOSE_HVGS_HPP
 #define SCRAN_CHOOSE_HVGS_HPP
 
+#include "../utils/macros.hpp"
+
 #include <vector>
 #include <algorithm>
 #include <numeric>

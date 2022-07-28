@@ -1,6 +1,8 @@
 #ifndef SCRAN_COHEN_D_HPP
 #define SCRAN_COHEN_D_HPP
 
+#include "../utils/macros.hpp"
+
 #include <vector>
 #include <limits>
 #include <algorithm>

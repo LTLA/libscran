@@ -1,6 +1,8 @@
 #ifndef SCRAN_BIDIMENSIONAL_FACTORY_HPP
 #define SCRAN_BIDIMENSIONAL_FACTORY_HPP
 
+#include "../utils/macros.hpp"
+
 #include <vector>
 #include <algorithm>
 #include <limits>

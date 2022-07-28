@@ -1,6 +1,8 @@
 #ifndef SUBSET_VECTOR_HPP
 #define SUBSET_VECTOR_HPP
 
+#include "macros.hpp"
+
 namespace scran {
 
 /**

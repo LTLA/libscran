@@ -1,6 +1,8 @@
 #ifndef SCRAN_BUILDSNNGRAPH_HPP
 #define SCRAN_BUILDSNNGRAPH_HPP
 
+#include "../utils/macros.hpp"
+
 #include <vector>
 #include <algorithm>
 #include <memory>
