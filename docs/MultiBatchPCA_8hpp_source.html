@@ -273,7 +273,7 @@ $(function() {
 <div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>        <span class="comment">// but we want to apply the rotation vectors to the original matrix</span></div>
 <div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>        <span class="comment">// (after any centering/scaling but without the batch weights).</span></div>
 <div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>        <span class="keyword">auto</span> executor = [&amp;](<span class="keyword">const</span> <span class="keyword">auto</span>&amp; emat) -&gt; <span class="keywordtype">void</span> {</div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>            pca_utils::EigenThreadScope t(nthreads);</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>            irlba::EigenThreadScope t(nthreads);</div>
 <div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>            irlba::Irlba irb;</div>
 <div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>            irb.set_number(rank);</div>
 <div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span> </div>

@@ -74,179 +74,181 @@ $(function() {
 <a href="AggregateAcrossCells_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef SCRAN_AGGREGATE_ACROSS_CELLS_HPP</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define SCRAN_AGGREGATE_ACROSS_CELLS_HPP</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;algorithm&gt;</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &quot;tatami/tatami.hpp&quot;</span></div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &quot;Factory.hpp&quot;</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">namespace </span>scran {</div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno"><a class="line" href="classscran_1_1AggregateAcrossCells.html">   25</a></span><span class="keyword">class </span><a class="code hl_class" href="classscran_1_1AggregateAcrossCells.html">AggregateAcrossCells</a> {</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Factor&gt;</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html">   33</a></span>    <span class="keyword">struct </span><a class="code hl_struct" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html">Combinations</a> {</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <a class="code hl_struct" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html">Combinations</a>(<span class="keywordtype">size_t</span> n) : <a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html#aa2aef4a631faf7c47807cef12ed2634c">factors</a>(n) {}</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html#aa2aef4a631faf7c47807cef12ed2634c">   49</a></span>        std::vector&lt;std::vector&lt;Factor&gt; &gt; <a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html#aa2aef4a631faf7c47807cef12ed2634c">factors</a>;</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html#aff25c122a815de09258f468ab4c03d70">   56</a></span>        std::vector&lt;size_t&gt; <a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html#aff25c122a815de09258f468ab4c03d70">counts</a>;</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    };</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Factor, <span class="keyword">typename</span> Combined&gt;</div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="classscran_1_1AggregateAcrossCells.html#a78bfad996edef3a958377c50dabdeff4">   76</a></span>    <span class="keyword">static</span> <a class="code hl_struct" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html">Combinations&lt;Factor&gt;</a> <a class="code hl_function" href="classscran_1_1AggregateAcrossCells.html#a78bfad996edef3a958377c50dabdeff4">combine_factors</a>(<span class="keywordtype">size_t</span> n, std::vector&lt;const Factor*&gt; factors, Combined* combined) {</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        std::vector&lt;size_t&gt; indices(n);</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        std::iota(indices.begin(), indices.end(), 0);</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        std::sort(indices.begin(), indices.end(), [&amp;](<span class="keywordtype">size_t</span> left, <span class="keywordtype">size_t</span> right) -&gt; <span class="keywordtype">bool</span> {</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>            for (auto curf : factors) {</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>                if (curf[left] &lt; curf[right]) {</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>                    return true;</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>                } else if (curf[left] &gt; curf[right]) {</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>                    return false;</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>                }</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>            }</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        });</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        Combinations&lt;Factor&gt; output(factors.size()); </div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        <span class="keywordtype">size_t</span> last = 0;</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        Combined counter = 0;</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <span class="keywordflow">if</span> (n) {</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>            last = indices[0];</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>            combined[last] = counter;</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>            output.counts.push_back(1);</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> f = 0; f &lt; factors.size(); ++f) {</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>                output.factors[f].push_back(factors[f][last]);</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>            }</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        }</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 1; i &lt; n; ++i) {</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>            <span class="keyword">auto</span> current = indices[i];</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>            <span class="keywordtype">bool</span> diff = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>            <span class="keywordflow">for</span> (<span class="keyword">auto</span> curf : factors) {</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>                <span class="keywordflow">if</span> (curf[last] &lt; curf[current]) {</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>                    diff = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>                    <span class="keywordflow">break</span>;</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>                }</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>            }</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>            <span class="keywordflow">if</span> (diff) {</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> f = 0; f &lt; factors.size(); ++f) {</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>                    output.factors[f].push_back(factors[f][current]);</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>                }</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>                output.counts.push_back(1);</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>                ++counter;</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>                ++(output.counts.back());</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>            }</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>            combined[current] = counter;</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>            last = current;</div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>        }</div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>        <span class="keywordflow">return</span> output;</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    }</div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Combined = <span class="keywordtype">int</span>, <span class="keyword">typename</span> Factor&gt;</div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno"><a class="line" href="classscran_1_1AggregateAcrossCells.html#ae36a7bc1ed0d40aa179c3a486a15c0ea">  147</a></span>    <span class="keyword">static</span> std::pair&lt;Combinations&lt;Factor&gt;, std::vector&lt;Combined&gt; &gt; <a class="code hl_function" href="classscran_1_1AggregateAcrossCells.html#ae36a7bc1ed0d40aa179c3a486a15c0ea">combine_factors</a>(<span class="keywordtype">size_t</span> n, std::vector&lt;const Factor*&gt; factors) {</div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>        std::vector&lt;Combined&gt; combined(n);</div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        <span class="keyword">auto</span> output = combine_factors(n, std::move(factors), combined.data());</div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>        <span class="keywordflow">return</span> std::make_pair(std::move(output), std::move(combined));</div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    }</div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span> </div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Data, <span class="keyword">typename</span> Index, <span class="keyword">typename</span> Factor, <span class="keyword">typename</span> Sum, <span class="keyword">typename</span> Detected&gt;</div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno"><a class="line" href="classscran_1_1AggregateAcrossCells.html#abdc190e40b34a4b8d401b1805a59ab29">  178</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classscran_1_1AggregateAcrossCells.html#abdc190e40b34a4b8d401b1805a59ab29">run</a>(<span class="keyword">const</span> tatami::Matrix&lt;Data, Index&gt;* input, <span class="keyword">const</span> Factor* factor, std::vector&lt;Sum*&gt; sums, std::vector&lt;Detected*&gt; detected) {</div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>        aggregate_across_cells::BidimensionalFactory fac(input-&gt;nrow(), input-&gt;ncol(), factor, std::move(sums), std::move(detected));</div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>        tatami::apply&lt;0&gt;(input, fac, num_threads);</div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    } </div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span> </div>
-<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Defaults.html">  188</a></span>    <span class="keyword">struct </span><a class="code hl_struct" href="structscran_1_1AggregateAcrossCells_1_1Defaults.html">Defaults</a> {</div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Defaults.html#a4299b3f74f68fc088d4b2bacf77c5fee">  192</a></span>        <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">bool</span> compute_sums = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Defaults.html#a75c5c2a8222c372e3d6f419b3e1f8ffe">  197</a></span>        <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">bool</span> compute_detected = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span> </div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Defaults.html#a160440174e9ab2842b219b6bfa6d4572">  202</a></span>        <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">int</span> num_threads = 1;</div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>    };</div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span> </div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno"><a class="line" href="classscran_1_1AggregateAcrossCells.html#a7d609cbe6bb3be5808fff3909c07a89b">  211</a></span>    <a class="code hl_class" href="classscran_1_1AggregateAcrossCells.html">AggregateAcrossCells</a>&amp; <a class="code hl_function" href="classscran_1_1AggregateAcrossCells.html#a7d609cbe6bb3be5808fff3909c07a89b">set_compute_sums</a>(<span class="keywordtype">bool</span> c = Defaults::compute_sums) {</div>
-<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>        compute_sums = c;</div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>    }</div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span> </div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno"><a class="line" href="classscran_1_1AggregateAcrossCells.html#a94bd0c4736135d095ab39077bae8e9c8">  222</a></span>    <a class="code hl_class" href="classscran_1_1AggregateAcrossCells.html">AggregateAcrossCells</a>&amp; <a class="code hl_function" href="classscran_1_1AggregateAcrossCells.html#a94bd0c4736135d095ab39077bae8e9c8">set_compute_detected</a>(<span class="keywordtype">bool</span> c = Defaults::compute_detected) {</div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>        compute_detected = c;</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    }</div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span> </div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno"><a class="line" href="classscran_1_1AggregateAcrossCells.html#a9e007b21006c06e0a9c2317cc53b870f">  231</a></span>    <a class="code hl_class" href="classscran_1_1AggregateAcrossCells.html">AggregateAcrossCells</a>&amp; <a class="code hl_function" href="classscran_1_1AggregateAcrossCells.html#a9e007b21006c06e0a9c2317cc53b870f">set_num_threads</a>(<span class="keywordtype">int</span> n = Defaults::num_threads) {</div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>        num_threads = n;</div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    }</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span> </div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    <span class="keywordtype">bool</span> compute_sums = Defaults::compute_sums;</div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    <span class="keywordtype">bool</span> compute_detected = Defaults::compute_detected;</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    <span class="keywordtype">int</span> num_threads = Defaults::num_threads;</div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span> </div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Sum, <span class="keyword">typename</span> Detected&gt;</div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Results.html">  247</a></span>    <span class="keyword">struct </span><a class="code hl_struct" href="structscran_1_1AggregateAcrossCells_1_1Results.html">Results</a> {</div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Results.html#ab8c27b2cd404774166ab6cd258823fd2">  255</a></span>        std::vector&lt;std::vector&lt;Sum&gt; &gt; <a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Results.html#ab8c27b2cd404774166ab6cd258823fd2">sums</a>;</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span> </div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Results.html#adfc4956b7d5dd63cd1176419d56b1643">  264</a></span>        std::vector&lt;std::vector&lt;Detected&gt; &gt; <a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Results.html#adfc4956b7d5dd63cd1176419d56b1643">detected</a>;</div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    };</div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span> </div>
-<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Sum = <span class="keywordtype">double</span>, <span class="keyword">typename</span> Detected = <span class="keywordtype">int</span>, <span class="keyword">typename</span> Data, <span class="keyword">typename</span> Index, <span class="keyword">typename</span> Factor&gt;</div>
-<div class="line"><a id="l00285" name="l00285"></a><span class="lineno"><a class="line" href="classscran_1_1AggregateAcrossCells.html#a892fb19e8090f8d92025deb34fc36736">  285</a></span>    <a class="code hl_struct" href="structscran_1_1AggregateAcrossCells_1_1Results.html">Results&lt;Sum, Detected&gt;</a> <a class="code hl_function" href="classscran_1_1AggregateAcrossCells.html#a892fb19e8090f8d92025deb34fc36736">run</a>(<span class="keyword">const</span> tatami::Matrix&lt;Data, Index&gt;* input, <span class="keyword">const</span> Factor* factor) {</div>
-<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>        <span class="keywordtype">size_t</span> NC = input-&gt;ncol();</div>
-<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>        <span class="keywordtype">size_t</span> nlevels = (NC ? *std::max_element(factor, factor + NC) + 1 : 0);</div>
-<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>        <span class="keywordtype">size_t</span> ngenes = input-&gt;nrow();</div>
-<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span> </div>
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>        <a class="code hl_struct" href="structscran_1_1AggregateAcrossCells_1_1Results.html">Results&lt;Sum, Detected&gt;</a> output;</div>
-<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>        std::vector&lt;Sum*&gt; sumptr;</div>
-<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>        std::vector&lt;Detected*&gt; detptr;</div>
-<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span> </div>
-<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>        <span class="keywordflow">if</span> (compute_sums) {</div>
-<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>            output.<a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Results.html#ab8c27b2cd404774166ab6cd258823fd2">sums</a>.resize(nlevels, std::vector&lt;Sum&gt;(ngenes));</div>
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>            sumptr.resize(nlevels);</div>
-<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> l = 0; l &lt; nlevels; ++l) {</div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>                sumptr[l] = output.<a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Results.html#ab8c27b2cd404774166ab6cd258823fd2">sums</a>[l].data();</div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>            }</div>
-<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>        }</div>
-<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span> </div>
-<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>        <span class="keywordflow">if</span> (compute_detected) {</div>
-<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>            output.<a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Results.html#adfc4956b7d5dd63cd1176419d56b1643">detected</a>.resize(nlevels, std::vector&lt;Detected&gt;(ngenes));</div>
-<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>            detptr.resize(nlevels);</div>
-<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> l = 0; l &lt; nlevels; ++l) {</div>
-<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>                detptr[l] = output.<a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Results.html#adfc4956b7d5dd63cd1176419d56b1643">detected</a>[l].data();</div>
-<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>            }</div>
-<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>        }</div>
-<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span> </div>
-<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>        run(input, factor, std::move(sumptr), std::move(detptr));</div>
-<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>        <span class="keywordflow">return</span> output;</div>
-<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>    } </div>
-<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>};</div>
-<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span> </div>
-<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>}</div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;../utils/macros.hpp&quot;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;algorithm&gt;</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &quot;tatami/tatami.hpp&quot;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &quot;Factory.hpp&quot;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="keyword">namespace </span>scran {</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="classscran_1_1AggregateAcrossCells.html">   27</a></span><span class="keyword">class </span><a class="code hl_class" href="classscran_1_1AggregateAcrossCells.html">AggregateAcrossCells</a> {</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Factor&gt;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html">   35</a></span>    <span class="keyword">struct </span><a class="code hl_struct" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html">Combinations</a> {</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        <a class="code hl_struct" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html">Combinations</a>(<span class="keywordtype">size_t</span> n) : <a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html#aa2aef4a631faf7c47807cef12ed2634c">factors</a>(n) {}</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html#aa2aef4a631faf7c47807cef12ed2634c">   51</a></span>        std::vector&lt;std::vector&lt;Factor&gt; &gt; <a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html#aa2aef4a631faf7c47807cef12ed2634c">factors</a>;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html#aff25c122a815de09258f468ab4c03d70">   58</a></span>        std::vector&lt;size_t&gt; <a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html#aff25c122a815de09258f468ab4c03d70">counts</a>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    };</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Factor, <span class="keyword">typename</span> Combined&gt;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="classscran_1_1AggregateAcrossCells.html#a78bfad996edef3a958377c50dabdeff4">   78</a></span>    <span class="keyword">static</span> <a class="code hl_struct" href="structscran_1_1AggregateAcrossCells_1_1Combinations.html">Combinations&lt;Factor&gt;</a> <a class="code hl_function" href="classscran_1_1AggregateAcrossCells.html#a78bfad996edef3a958377c50dabdeff4">combine_factors</a>(<span class="keywordtype">size_t</span> n, std::vector&lt;const Factor*&gt; factors, Combined* combined) {</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        std::vector&lt;size_t&gt; indices(n);</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        std::iota(indices.begin(), indices.end(), 0);</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        std::sort(indices.begin(), indices.end(), [&amp;](<span class="keywordtype">size_t</span> left, <span class="keywordtype">size_t</span> right) -&gt; <span class="keywordtype">bool</span> {</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>            for (auto curf : factors) {</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>                if (curf[left] &lt; curf[right]) {</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>                    return true;</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>                } else if (curf[left] &gt; curf[right]) {</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>                    return false;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>                }</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>            }</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        });</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        Combinations&lt;Factor&gt; output(factors.size()); </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <span class="keywordtype">size_t</span> last = 0;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        Combined counter = 0;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        <span class="keywordflow">if</span> (n) {</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>            last = indices[0];</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>            combined[last] = counter;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>            output.counts.push_back(1);</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> f = 0; f &lt; factors.size(); ++f) {</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>                output.factors[f].push_back(factors[f][last]);</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>            }</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        }</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 1; i &lt; n; ++i) {</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>            <span class="keyword">auto</span> current = indices[i];</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>            <span class="keywordtype">bool</span> diff = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>            <span class="keywordflow">for</span> (<span class="keyword">auto</span> curf : factors) {</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>                <span class="keywordflow">if</span> (curf[last] &lt; curf[current]) {</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>                    diff = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>                    <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>                }</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>            }</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>            <span class="keywordflow">if</span> (diff) {</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> f = 0; f &lt; factors.size(); ++f) {</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>                    output.factors[f].push_back(factors[f][current]);</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>                }</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>                output.counts.push_back(1);</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>                ++counter;</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>                ++(output.counts.back());</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>            }</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>            combined[current] = counter;</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>            last = current;</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>        }</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>        <span class="keywordflow">return</span> output;</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    }</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Combined = <span class="keywordtype">int</span>, <span class="keyword">typename</span> Factor&gt;</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno"><a class="line" href="classscran_1_1AggregateAcrossCells.html#ae36a7bc1ed0d40aa179c3a486a15c0ea">  149</a></span>    <span class="keyword">static</span> std::pair&lt;Combinations&lt;Factor&gt;, std::vector&lt;Combined&gt; &gt; <a class="code hl_function" href="classscran_1_1AggregateAcrossCells.html#ae36a7bc1ed0d40aa179c3a486a15c0ea">combine_factors</a>(<span class="keywordtype">size_t</span> n, std::vector&lt;const Factor*&gt; factors) {</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>        std::vector&lt;Combined&gt; combined(n);</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>        <span class="keyword">auto</span> output = combine_factors(n, std::move(factors), combined.data());</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>        <span class="keywordflow">return</span> std::make_pair(std::move(output), std::move(combined));</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    }</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span> </div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Data, <span class="keyword">typename</span> Index, <span class="keyword">typename</span> Factor, <span class="keyword">typename</span> Sum, <span class="keyword">typename</span> Detected&gt;</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno"><a class="line" href="classscran_1_1AggregateAcrossCells.html#abdc190e40b34a4b8d401b1805a59ab29">  180</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classscran_1_1AggregateAcrossCells.html#abdc190e40b34a4b8d401b1805a59ab29">run</a>(<span class="keyword">const</span> tatami::Matrix&lt;Data, Index&gt;* input, <span class="keyword">const</span> Factor* factor, std::vector&lt;Sum*&gt; sums, std::vector&lt;Detected*&gt; detected) {</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>        aggregate_across_cells::BidimensionalFactory fac(input-&gt;nrow(), input-&gt;ncol(), factor, std::move(sums), std::move(detected));</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>        tatami::apply&lt;0&gt;(input, fac, num_threads);</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>    } </div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span> </div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Defaults.html">  190</a></span>    <span class="keyword">struct </span><a class="code hl_struct" href="structscran_1_1AggregateAcrossCells_1_1Defaults.html">Defaults</a> {</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Defaults.html#a4299b3f74f68fc088d4b2bacf77c5fee">  194</a></span>        <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">bool</span> compute_sums = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span> </div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Defaults.html#a75c5c2a8222c372e3d6f419b3e1f8ffe">  199</a></span>        <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">bool</span> compute_detected = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span> </div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Defaults.html#a160440174e9ab2842b219b6bfa6d4572">  204</a></span>        <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">int</span> num_threads = 1;</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>    };</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span> </div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno"><a class="line" href="classscran_1_1AggregateAcrossCells.html#a7d609cbe6bb3be5808fff3909c07a89b">  213</a></span>    <a class="code hl_class" href="classscran_1_1AggregateAcrossCells.html">AggregateAcrossCells</a>&amp; <a class="code hl_function" href="classscran_1_1AggregateAcrossCells.html#a7d609cbe6bb3be5808fff3909c07a89b">set_compute_sums</a>(<span class="keywordtype">bool</span> c = Defaults::compute_sums) {</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        compute_sums = c;</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>    }</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span> </div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno"><a class="line" href="classscran_1_1AggregateAcrossCells.html#a94bd0c4736135d095ab39077bae8e9c8">  224</a></span>    <a class="code hl_class" href="classscran_1_1AggregateAcrossCells.html">AggregateAcrossCells</a>&amp; <a class="code hl_function" href="classscran_1_1AggregateAcrossCells.html#a94bd0c4736135d095ab39077bae8e9c8">set_compute_detected</a>(<span class="keywordtype">bool</span> c = Defaults::compute_detected) {</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>        compute_detected = c;</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>    }</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span> </div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno"><a class="line" href="classscran_1_1AggregateAcrossCells.html#a9e007b21006c06e0a9c2317cc53b870f">  233</a></span>    <a class="code hl_class" href="classscran_1_1AggregateAcrossCells.html">AggregateAcrossCells</a>&amp; <a class="code hl_function" href="classscran_1_1AggregateAcrossCells.html#a9e007b21006c06e0a9c2317cc53b870f">set_num_threads</a>(<span class="keywordtype">int</span> n = Defaults::num_threads) {</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        num_threads = n;</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>    }</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span> </div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    <span class="keywordtype">bool</span> compute_sums = Defaults::compute_sums;</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    <span class="keywordtype">bool</span> compute_detected = Defaults::compute_detected;</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    <span class="keywordtype">int</span> num_threads = Defaults::num_threads;</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Sum, <span class="keyword">typename</span> Detected&gt;</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Results.html">  249</a></span>    <span class="keyword">struct </span><a class="code hl_struct" href="structscran_1_1AggregateAcrossCells_1_1Results.html">Results</a> {</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Results.html#ab8c27b2cd404774166ab6cd258823fd2">  257</a></span>        std::vector&lt;std::vector&lt;Sum&gt; &gt; <a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Results.html#ab8c27b2cd404774166ab6cd258823fd2">sums</a>;</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span> </div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno"><a class="line" href="structscran_1_1AggregateAcrossCells_1_1Results.html#adfc4956b7d5dd63cd1176419d56b1643">  266</a></span>        std::vector&lt;std::vector&lt;Detected&gt; &gt; <a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Results.html#adfc4956b7d5dd63cd1176419d56b1643">detected</a>;</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>    };</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span> </div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Sum = <span class="keywordtype">double</span>, <span class="keyword">typename</span> Detected = <span class="keywordtype">int</span>, <span class="keyword">typename</span> Data, <span class="keyword">typename</span> Index, <span class="keyword">typename</span> Factor&gt;</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno"><a class="line" href="classscran_1_1AggregateAcrossCells.html#a892fb19e8090f8d92025deb34fc36736">  287</a></span>    <a class="code hl_struct" href="structscran_1_1AggregateAcrossCells_1_1Results.html">Results&lt;Sum, Detected&gt;</a> <a class="code hl_function" href="classscran_1_1AggregateAcrossCells.html#a892fb19e8090f8d92025deb34fc36736">run</a>(<span class="keyword">const</span> tatami::Matrix&lt;Data, Index&gt;* input, <span class="keyword">const</span> Factor* factor) {</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>        <span class="keywordtype">size_t</span> NC = input-&gt;ncol();</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>        <span class="keywordtype">size_t</span> nlevels = (NC ? *std::max_element(factor, factor + NC) + 1 : 0);</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>        <span class="keywordtype">size_t</span> ngenes = input-&gt;nrow();</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span> </div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>        <a class="code hl_struct" href="structscran_1_1AggregateAcrossCells_1_1Results.html">Results&lt;Sum, Detected&gt;</a> output;</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>        std::vector&lt;Sum*&gt; sumptr;</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>        std::vector&lt;Detected*&gt; detptr;</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span> </div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>        <span class="keywordflow">if</span> (compute_sums) {</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>            output.<a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Results.html#ab8c27b2cd404774166ab6cd258823fd2">sums</a>.resize(nlevels, std::vector&lt;Sum&gt;(ngenes));</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>            sumptr.resize(nlevels);</div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> l = 0; l &lt; nlevels; ++l) {</div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>                sumptr[l] = output.<a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Results.html#ab8c27b2cd404774166ab6cd258823fd2">sums</a>[l].data();</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>            }</div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>        }</div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span> </div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>        <span class="keywordflow">if</span> (compute_detected) {</div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>            output.<a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Results.html#adfc4956b7d5dd63cd1176419d56b1643">detected</a>.resize(nlevels, std::vector&lt;Detected&gt;(ngenes));</div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>            detptr.resize(nlevels);</div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> l = 0; l &lt; nlevels; ++l) {</div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>                detptr[l] = output.<a class="code hl_variable" href="structscran_1_1AggregateAcrossCells_1_1Results.html#adfc4956b7d5dd63cd1176419d56b1643">detected</a>[l].data();</div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>            }</div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>        }</div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span> </div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>        run(input, factor, std::move(sumptr), std::move(detptr));</div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>        <span class="keywordflow">return</span> output;</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>    } </div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>};</div>
 <div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span> </div>
-<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span><span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aclassscran_1_1AggregateAcrossCells_html"><div class="ttname"><a href="classscran_1_1AggregateAcrossCells.html">scran::AggregateAcrossCells</a></div><div class="ttdoc">Aggregate expression values across cells.</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:25</div></div>
-<div class="ttc" id="aclassscran_1_1AggregateAcrossCells_html_a78bfad996edef3a958377c50dabdeff4"><div class="ttname"><a href="classscran_1_1AggregateAcrossCells.html#a78bfad996edef3a958377c50dabdeff4">scran::AggregateAcrossCells::combine_factors</a></div><div class="ttdeci">static Combinations&lt; Factor &gt; combine_factors(size_t n, std::vector&lt; const Factor * &gt; factors, Combined *combined)</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:76</div></div>
-<div class="ttc" id="aclassscran_1_1AggregateAcrossCells_html_a7d609cbe6bb3be5808fff3909c07a89b"><div class="ttname"><a href="classscran_1_1AggregateAcrossCells.html#a7d609cbe6bb3be5808fff3909c07a89b">scran::AggregateAcrossCells::set_compute_sums</a></div><div class="ttdeci">AggregateAcrossCells &amp; set_compute_sums(bool c=Defaults::compute_sums)</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:211</div></div>
-<div class="ttc" id="aclassscran_1_1AggregateAcrossCells_html_a892fb19e8090f8d92025deb34fc36736"><div class="ttname"><a href="classscran_1_1AggregateAcrossCells.html#a892fb19e8090f8d92025deb34fc36736">scran::AggregateAcrossCells::run</a></div><div class="ttdeci">Results&lt; Sum, Detected &gt; run(const tatami::Matrix&lt; Data, Index &gt; *input, const Factor *factor)</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:285</div></div>
-<div class="ttc" id="aclassscran_1_1AggregateAcrossCells_html_a94bd0c4736135d095ab39077bae8e9c8"><div class="ttname"><a href="classscran_1_1AggregateAcrossCells.html#a94bd0c4736135d095ab39077bae8e9c8">scran::AggregateAcrossCells::set_compute_detected</a></div><div class="ttdeci">AggregateAcrossCells &amp; set_compute_detected(bool c=Defaults::compute_detected)</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:222</div></div>
-<div class="ttc" id="aclassscran_1_1AggregateAcrossCells_html_a9e007b21006c06e0a9c2317cc53b870f"><div class="ttname"><a href="classscran_1_1AggregateAcrossCells.html#a9e007b21006c06e0a9c2317cc53b870f">scran::AggregateAcrossCells::set_num_threads</a></div><div class="ttdeci">AggregateAcrossCells &amp; set_num_threads(int n=Defaults::num_threads)</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:231</div></div>
-<div class="ttc" id="aclassscran_1_1AggregateAcrossCells_html_abdc190e40b34a4b8d401b1805a59ab29"><div class="ttname"><a href="classscran_1_1AggregateAcrossCells.html#abdc190e40b34a4b8d401b1805a59ab29">scran::AggregateAcrossCells::run</a></div><div class="ttdeci">void run(const tatami::Matrix&lt; Data, Index &gt; *input, const Factor *factor, std::vector&lt; Sum * &gt; sums, std::vector&lt; Detected * &gt; detected)</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:178</div></div>
-<div class="ttc" id="aclassscran_1_1AggregateAcrossCells_html_ae36a7bc1ed0d40aa179c3a486a15c0ea"><div class="ttname"><a href="classscran_1_1AggregateAcrossCells.html#ae36a7bc1ed0d40aa179c3a486a15c0ea">scran::AggregateAcrossCells::combine_factors</a></div><div class="ttdeci">static std::pair&lt; Combinations&lt; Factor &gt;, std::vector&lt; Combined &gt; &gt; combine_factors(size_t n, std::vector&lt; const Factor * &gt; factors)</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:147</div></div>
-<div class="ttc" id="astructscran_1_1AggregateAcrossCells_1_1Combinations_html"><div class="ttname"><a href="structscran_1_1AggregateAcrossCells_1_1Combinations.html">scran::AggregateAcrossCells::Combinations</a></div><div class="ttdoc">Unique combinations of factors.</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:33</div></div>
-<div class="ttc" id="astructscran_1_1AggregateAcrossCells_1_1Combinations_html_aa2aef4a631faf7c47807cef12ed2634c"><div class="ttname"><a href="structscran_1_1AggregateAcrossCells_1_1Combinations.html#aa2aef4a631faf7c47807cef12ed2634c">scran::AggregateAcrossCells::Combinations::factors</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; Factor &gt; &gt; factors</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:49</div></div>
-<div class="ttc" id="astructscran_1_1AggregateAcrossCells_1_1Combinations_html_aff25c122a815de09258f468ab4c03d70"><div class="ttname"><a href="structscran_1_1AggregateAcrossCells_1_1Combinations.html#aff25c122a815de09258f468ab4c03d70">scran::AggregateAcrossCells::Combinations::counts</a></div><div class="ttdeci">std::vector&lt; size_t &gt; counts</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:56</div></div>
-<div class="ttc" id="astructscran_1_1AggregateAcrossCells_1_1Defaults_html"><div class="ttname"><a href="structscran_1_1AggregateAcrossCells_1_1Defaults.html">scran::AggregateAcrossCells::Defaults</a></div><div class="ttdoc">Default parameters for aggregation.</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:188</div></div>
-<div class="ttc" id="astructscran_1_1AggregateAcrossCells_1_1Results_html"><div class="ttname"><a href="structscran_1_1AggregateAcrossCells_1_1Results.html">scran::AggregateAcrossCells::Results</a></div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:247</div></div>
-<div class="ttc" id="astructscran_1_1AggregateAcrossCells_1_1Results_html_ab8c27b2cd404774166ab6cd258823fd2"><div class="ttname"><a href="structscran_1_1AggregateAcrossCells_1_1Results.html#ab8c27b2cd404774166ab6cd258823fd2">scran::AggregateAcrossCells::Results::sums</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; Sum &gt; &gt; sums</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:255</div></div>
-<div class="ttc" id="astructscran_1_1AggregateAcrossCells_1_1Results_html_adfc4956b7d5dd63cd1176419d56b1643"><div class="ttname"><a href="structscran_1_1AggregateAcrossCells_1_1Results.html#adfc4956b7d5dd63cd1176419d56b1643">scran::AggregateAcrossCells::Results::detected</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; Detected &gt; &gt; detected</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:264</div></div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>}</div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span> </div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aclassscran_1_1AggregateAcrossCells_html"><div class="ttname"><a href="classscran_1_1AggregateAcrossCells.html">scran::AggregateAcrossCells</a></div><div class="ttdoc">Aggregate expression values across cells.</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:27</div></div>
+<div class="ttc" id="aclassscran_1_1AggregateAcrossCells_html_a78bfad996edef3a958377c50dabdeff4"><div class="ttname"><a href="classscran_1_1AggregateAcrossCells.html#a78bfad996edef3a958377c50dabdeff4">scran::AggregateAcrossCells::combine_factors</a></div><div class="ttdeci">static Combinations&lt; Factor &gt; combine_factors(size_t n, std::vector&lt; const Factor * &gt; factors, Combined *combined)</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:78</div></div>
+<div class="ttc" id="aclassscran_1_1AggregateAcrossCells_html_a7d609cbe6bb3be5808fff3909c07a89b"><div class="ttname"><a href="classscran_1_1AggregateAcrossCells.html#a7d609cbe6bb3be5808fff3909c07a89b">scran::AggregateAcrossCells::set_compute_sums</a></div><div class="ttdeci">AggregateAcrossCells &amp; set_compute_sums(bool c=Defaults::compute_sums)</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:213</div></div>
+<div class="ttc" id="aclassscran_1_1AggregateAcrossCells_html_a892fb19e8090f8d92025deb34fc36736"><div class="ttname"><a href="classscran_1_1AggregateAcrossCells.html#a892fb19e8090f8d92025deb34fc36736">scran::AggregateAcrossCells::run</a></div><div class="ttdeci">Results&lt; Sum, Detected &gt; run(const tatami::Matrix&lt; Data, Index &gt; *input, const Factor *factor)</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:287</div></div>
+<div class="ttc" id="aclassscran_1_1AggregateAcrossCells_html_a94bd0c4736135d095ab39077bae8e9c8"><div class="ttname"><a href="classscran_1_1AggregateAcrossCells.html#a94bd0c4736135d095ab39077bae8e9c8">scran::AggregateAcrossCells::set_compute_detected</a></div><div class="ttdeci">AggregateAcrossCells &amp; set_compute_detected(bool c=Defaults::compute_detected)</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:224</div></div>
+<div class="ttc" id="aclassscran_1_1AggregateAcrossCells_html_a9e007b21006c06e0a9c2317cc53b870f"><div class="ttname"><a href="classscran_1_1AggregateAcrossCells.html#a9e007b21006c06e0a9c2317cc53b870f">scran::AggregateAcrossCells::set_num_threads</a></div><div class="ttdeci">AggregateAcrossCells &amp; set_num_threads(int n=Defaults::num_threads)</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:233</div></div>
+<div class="ttc" id="aclassscran_1_1AggregateAcrossCells_html_abdc190e40b34a4b8d401b1805a59ab29"><div class="ttname"><a href="classscran_1_1AggregateAcrossCells.html#abdc190e40b34a4b8d401b1805a59ab29">scran::AggregateAcrossCells::run</a></div><div class="ttdeci">void run(const tatami::Matrix&lt; Data, Index &gt; *input, const Factor *factor, std::vector&lt; Sum * &gt; sums, std::vector&lt; Detected * &gt; detected)</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:180</div></div>
+<div class="ttc" id="aclassscran_1_1AggregateAcrossCells_html_ae36a7bc1ed0d40aa179c3a486a15c0ea"><div class="ttname"><a href="classscran_1_1AggregateAcrossCells.html#ae36a7bc1ed0d40aa179c3a486a15c0ea">scran::AggregateAcrossCells::combine_factors</a></div><div class="ttdeci">static std::pair&lt; Combinations&lt; Factor &gt;, std::vector&lt; Combined &gt; &gt; combine_factors(size_t n, std::vector&lt; const Factor * &gt; factors)</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:149</div></div>
+<div class="ttc" id="astructscran_1_1AggregateAcrossCells_1_1Combinations_html"><div class="ttname"><a href="structscran_1_1AggregateAcrossCells_1_1Combinations.html">scran::AggregateAcrossCells::Combinations</a></div><div class="ttdoc">Unique combinations of factors.</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:35</div></div>
+<div class="ttc" id="astructscran_1_1AggregateAcrossCells_1_1Combinations_html_aa2aef4a631faf7c47807cef12ed2634c"><div class="ttname"><a href="structscran_1_1AggregateAcrossCells_1_1Combinations.html#aa2aef4a631faf7c47807cef12ed2634c">scran::AggregateAcrossCells::Combinations::factors</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; Factor &gt; &gt; factors</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:51</div></div>
+<div class="ttc" id="astructscran_1_1AggregateAcrossCells_1_1Combinations_html_aff25c122a815de09258f468ab4c03d70"><div class="ttname"><a href="structscran_1_1AggregateAcrossCells_1_1Combinations.html#aff25c122a815de09258f468ab4c03d70">scran::AggregateAcrossCells::Combinations::counts</a></div><div class="ttdeci">std::vector&lt; size_t &gt; counts</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:58</div></div>
+<div class="ttc" id="astructscran_1_1AggregateAcrossCells_1_1Defaults_html"><div class="ttname"><a href="structscran_1_1AggregateAcrossCells_1_1Defaults.html">scran::AggregateAcrossCells::Defaults</a></div><div class="ttdoc">Default parameters for aggregation.</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:190</div></div>
+<div class="ttc" id="astructscran_1_1AggregateAcrossCells_1_1Results_html"><div class="ttname"><a href="structscran_1_1AggregateAcrossCells_1_1Results.html">scran::AggregateAcrossCells::Results</a></div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:249</div></div>
+<div class="ttc" id="astructscran_1_1AggregateAcrossCells_1_1Results_html_ab8c27b2cd404774166ab6cd258823fd2"><div class="ttname"><a href="structscran_1_1AggregateAcrossCells_1_1Results.html#ab8c27b2cd404774166ab6cd258823fd2">scran::AggregateAcrossCells::Results::sums</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; Sum &gt; &gt; sums</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:257</div></div>
+<div class="ttc" id="astructscran_1_1AggregateAcrossCells_1_1Results_html_adfc4956b7d5dd63cd1176419d56b1643"><div class="ttname"><a href="structscran_1_1AggregateAcrossCells_1_1Results.html#adfc4956b7d5dd63cd1176419d56b1643">scran::AggregateAcrossCells::Results::detected</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; Detected &gt; &gt; detected</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:266</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

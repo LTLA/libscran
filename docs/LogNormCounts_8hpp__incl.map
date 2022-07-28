@@ -1,11 +1,12 @@
 <map id="scran/normalization/LogNormCounts.hpp" name="scran/normalization/LogNormCounts.hpp">
-<area shape="rect" id="node1" title="Compute log&#45;normalized expression values." alt="" coords="369,5,514,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,184,80,211"/>
-<area shape="rect" id="node3" title=" " alt="" coords="468,184,527,211"/>
-<area shape="rect" id="node4" title=" " alt="" coords="251,102,319,129"/>
-<area shape="rect" id="node5" title=" " alt="" coords="344,95,539,136"/>
-<area shape="rect" id="node6" title=" " alt="" coords="563,102,714,129"/>
-<area shape="rect" id="node7" href="$CenterSizeFactors_8hpp.html" title="Center size factors prior to normalization." alt="" coords="74,102,227,129"/>
-<area shape="rect" id="node9" title=" " alt="" coords="789,102,952,129"/>
-<area shape="rect" id="node8" title=" " alt="" coords="111,184,190,211"/>
+<area shape="rect" id="node1" title="Compute log&#45;normalized expression values." alt="" coords="352,5,497,47"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,184,132,211"/>
+<area shape="rect" id="node3" title=" " alt="" coords="157,184,231,211"/>
+<area shape="rect" id="node4" title=" " alt="" coords="359,184,418,211"/>
+<area shape="rect" id="node5" title=" " alt="" coords="427,102,495,129"/>
+<area shape="rect" id="node6" title=" " alt="" coords="519,95,714,136"/>
+<area shape="rect" id="node7" title=" " alt="" coords="739,102,889,129"/>
+<area shape="rect" id="node8" href="$CenterSizeFactors_8hpp.html" title="Center size factors prior to normalization." alt="" coords="197,102,351,129"/>
+<area shape="rect" id="node10" title=" " alt="" coords="914,102,1077,129"/>
+<area shape="rect" id="node9" title=" " alt="" coords="256,184,335,211"/>
 </map>

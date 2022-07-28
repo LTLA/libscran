@@ -1,9 +1,10 @@
 <map id="scran/differential_analysis/ScoreMarkers.hpp" name="scran/differential_analysis/ScoreMarkers.hpp">
-<area shape="rect" id="node1" title="Compute marker scores for each gene in each group of cells." alt="" coords="316,5,501,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,102,95,129"/>
-<area shape="rect" id="node3" title=" " alt="" coords="119,102,309,129"/>
-<area shape="rect" id="node4" title=" " alt="" coords="334,102,483,129"/>
-<area shape="rect" id="node5" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="507,95,622,136"/>
-<area shape="rect" id="node7" title=" " alt="" coords="646,102,697,129"/>
-<area shape="rect" id="node6" title=" " alt="" coords="535,184,594,211"/>
+<area shape="rect" id="node1" title="Compute marker scores for each gene in each group of cells." alt="" coords="242,5,427,47"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="167,184,294,211"/>
+<area shape="rect" id="node3" title=" " alt="" coords="29,102,118,129"/>
+<area shape="rect" id="node4" title=" " alt="" coords="142,102,333,129"/>
+<area shape="rect" id="node5" title=" " alt="" coords="357,102,507,129"/>
+<area shape="rect" id="node6" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="531,95,645,136"/>
+<area shape="rect" id="node8" title=" " alt="" coords="669,102,720,129"/>
+<area shape="rect" id="node7" title=" " alt="" coords="559,184,617,211"/>
 </map>

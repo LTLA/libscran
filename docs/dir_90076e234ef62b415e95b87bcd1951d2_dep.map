@@ -1,6 +1,8 @@
 <map id="scran/normalization" name="scran/normalization">
-<area shape="rect" id="node1" href="dir_e002ff1ea291957e76cbcff806ec28a3.html" title="aggregation" alt="" coords="31,148,121,196"/>
-<area shape="rect" id="node2" href="dir_90076e234ef62b415e95b87bcd1951d2.html" title="normalization" alt="" coords="27,52,125,100"/>
-<area shape="rect" id="edge1-headlabel" href="dir_000005_000000.html" title="1" alt="" coords="80,122,88,137"/>
-<area shape="rect" id="clust1" href="dir_bdabb9492db2368b3caf0f4c1df6a160.html" title="scran" alt="" coords="16,16,136,207"/>
+<area shape="rect" id="node1" href="dir_9b9de28a72409b9bd6e78458203d0167.html" title="utils" alt="" coords="27,148,99,196"/>
+<area shape="rect" id="node2" href="dir_e002ff1ea291957e76cbcff806ec28a3.html" title="aggregation" alt="" coords="123,148,213,196"/>
+<area shape="rect" id="node3" href="dir_90076e234ef62b415e95b87bcd1951d2.html" title="normalization" alt="" coords="71,52,169,100"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000005_000008.html" title="4" alt="" coords="89,130,97,144"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000005_000000.html" title="1" alt="" coords="151,121,159,135"/>
+<area shape="rect" id="clust1" href="dir_bdabb9492db2368b3caf0f4c1df6a160.html" title="scran" alt="" coords="16,16,224,207"/>
 </map>

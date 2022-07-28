@@ -1,8 +1,9 @@
 <map id="scran/dimensionality_reduction/ScaleByNeighbors.hpp" name="scran/dimensionality_reduction/ScaleByNeighbors.hpp">
-<area shape="rect" id="node1" title="Scale multi&#45;modal embeddings based on their relative variance." alt="" coords="97,5,314,47"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,95,64,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="88,95,147,121"/>
-<area shape="rect" id="node4" title=" " alt="" coords="171,95,239,121"/>
-<area shape="rect" id="node5" title=" " alt="" coords="264,95,411,121"/>
-<area shape="rect" id="node6" title=" " alt="" coords="435,95,603,121"/>
+<area shape="rect" id="node1" title="Scale multi&#45;modal embeddings based on their relative variance." alt="" coords="204,5,421,47"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,95,132,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="157,95,215,121"/>
+<area shape="rect" id="node4" title=" " alt="" coords="239,95,298,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="323,95,391,121"/>
+<area shape="rect" id="node6" title=" " alt="" coords="415,95,562,121"/>
+<area shape="rect" id="node7" title=" " alt="" coords="586,95,754,121"/>
 </map>
