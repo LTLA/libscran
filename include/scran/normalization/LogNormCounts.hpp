@@ -50,12 +50,18 @@ public:
          * Set `set_handle_zeros()` for more details.
          */
         static constexpr bool handle_zeros = false;
+
+        /**
+         * See `set_num_threads()` for more details.
+         */
+        static constexpr int num_threads = 1;
     };
 
 private:
     double pseudo_count = Defaults::pseudo_count;
     bool center = Defaults::center;
     bool handle_zeros = Defaults::handle_zeros;
+    int nthreads = Defaults::num_threads;
     CenterSizeFactors centerer;
 
 public:
@@ -113,6 +119,18 @@ public:
      */
     LogNormCounts& set_handle_zeros(bool z = Defaults::handle_zeros) {
         handle_zeros = z;
+        return *this;
+    }
+
+    /**
+     * @param n Number of threads to use. 
+     * @return A reference to this `LogNormCounts` object.
+     *
+     * Parallelization is only performed to compute size factors,
+     * so this method only has an effect if `size_factors` are not passed to `run()`.
+     */
+    LogNormCounts& set_num_threads(int n = Defaults::num_threads) {
+        nthreads = n;
         return *this;
     }
 
@@ -218,7 +236,7 @@ public:
      */
     template<class MAT>
     std::shared_ptr<MAT> run(std::shared_ptr<MAT> mat) {
-        auto size_factors = tatami::column_sums(mat.get());
+        auto size_factors = tatami::column_sums(mat.get(), nthreads);
         return run_blocked(std::move(mat), std::move(size_factors), static_cast<int*>(NULL));
     }
 
@@ -236,7 +254,7 @@ public:
      */
     template<class MAT, typename B>
     std::shared_ptr<MAT> run_blocked(std::shared_ptr<MAT> mat, const B* block) {
-        auto size_factors = tatami::column_sums(mat.get());
+        auto size_factors = tatami::column_sums(mat.get(), nthreads);
         return run_blocked(mat, std::move(size_factors), block);
     }
 };

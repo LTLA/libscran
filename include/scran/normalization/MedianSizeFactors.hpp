@@ -258,7 +258,7 @@ public:
      */
     template<typename T, typename IDX, typename Out>
     void run_with_mean(const tatami::Matrix<T, IDX>* mat, Out* output) const {
-        auto ref = tatami::row_sums(mat);
+        auto ref = tatami::row_sums(mat, num_threads);
         if (ref.size()) {
             double NC = mat->ncol();
             for (auto& r : ref) {
