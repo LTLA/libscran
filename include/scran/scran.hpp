@@ -1,7 +1,7 @@
 #ifndef SCRAN_SCRAN_HPP
 #define SCRAN_SCRAN_HPP
 
-#include "macros.hpp"
+#include "utils/macros.hpp"
 
 #include "aggregation/AggregateAcrossCells.hpp"
 #include "clustering/BuildSNNGraph.hpp"
