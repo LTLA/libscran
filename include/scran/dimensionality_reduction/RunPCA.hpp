@@ -285,7 +285,7 @@ private:
             // First pass to compute variances and extract non-zero values.
             for (size_t c = 0; c < NC; ++c) {
                 auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data(), wrk.get());
-                tatami::stats::variances::compute_running(range, center_v.data(), scale_v.data(), nonzeros.data(), count);
+                tatami::stats::variances::compute_running(range, center_v.data(), scale_v.data(), nonzeros.data(), count, /* skip_zeros = */ false);
                 values.emplace_back(range.value, range.value + range.number);
                 indices.emplace_back(range.index, range.index + range.number);
             }
