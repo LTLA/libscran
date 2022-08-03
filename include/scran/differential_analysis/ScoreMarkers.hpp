@@ -457,6 +457,304 @@ public:
     }
 
 public:
+    template<class Matrix, typename G, typename Stat>
+    void run_pairwise(
+        const Matrix* p, 
+        const G* group, 
+        std::vector<Stat*> means, 
+        std::vector<Stat*> detected, 
+        std::vector<std::vector<Stat*> > cohen, 
+        std::vector<std::vector<Stat*> > auc,
+        std::vector<std::vector<Stat*> > lfc,
+        std::vector<std::vector<Stat*> > delta_detected) 
+    const {
+        size_t ngroups = means.size();
+        std::vector<int> group_size(ngroups);
+        for (size_t i = 0; i < p->ncol(); ++i) {
+            ++(group_size[group[i]]);
+        }
+
+        std::vector<Stat*> cohen_ptrs, auc_ptrs, lfc_ptrs, delta_ptrs;
+        for (size_t g = 0; g < ngroups; ++g) {
+            cohen_ptrs.insert(cohen_ptrs.end(), cohen[g].begin(), cohen[g].end());
+            auc_ptrs.insert(auc_ptrs.end(), auc[g].begin(), auc[g].end());
+            lfc_ptrs.insert(lfc_ptrs.end(), lfc[g].begin(), lfc[g].end());
+            delta_ptrs.insert(delta_ptrs.end(), delta_detected[g].begin(), delta_detected[g].end());
+        }
+
+        core_pairwise(
+            p, 
+            group, 
+            group_size, 
+            group, 
+            ngroups, 
+            static_cast<const int*>(NULL), 
+            1, 
+            std::move(means), 
+            std::move(detected),
+            std::move(cohen_ptrs), 
+            std::move(auc_ptrs), 
+            std::move(lfc_ptrs), 
+            std::move(delta_ptrs)
+        );
+    }
+
+    template<class Matrix, typename G, typename B, typename Stat>
+    void run_blocked_pairwise(
+        const Matrix* p, 
+        const G* group, 
+        const B* block, 
+        std::vector<std::vector<Stat*> > means, 
+        std::vector<std::vector<Stat*> > detected, 
+        std::vector<std::vector<Stat*> > cohen, 
+        std::vector<std::vector<Stat*> > auc,
+        std::vector<std::vector<Stat*> > lfc,
+        std::vector<std::vector<Stat*> > delta_detected) 
+    const {
+        size_t ngroups = means.size();
+        if (block == NULL) {
+            std::vector<Stat*> means2(ngroups), detected2(ngroups);
+            for (size_t g = 0; g < ngroups; ++g) {
+                means2[g] = means[g][0];
+                detected2[g] = detected[g][0];
+            }
+            run_pairwise(
+                p, 
+                group, 
+                std::move(means2), 
+                std::move(detected2), 
+                std::move(cohen), 
+                std::move(auc), 
+                std::move(lfc), 
+                std::move(delta_detected)
+            );
+            return;
+        }
+
+        size_t nblocks = (ngroups ? means[0].size() : 0); // if means.size() == 0, then there are no groups, so there are no blocks, either.
+        size_t ncombos = ngroups * nblocks;
+        std::vector<int> combos(p->ncol());
+        std::vector<int> combo_size(ncombos);
+
+        for (size_t i = 0; i < combos.size(); ++i) {
+            combos[i] = group[i] * nblocks + block[i];
+            ++(combo_size[combos[i]]);
+        }
+
+        std::vector<Stat*> means2(ncombos), detected2(ncombos);
+        auto mIt = means2.begin(), dIt = detected2.begin();
+        for (int g = 0; g < ngroups; ++g) {
+            for (int b = 0; b < nblocks; ++b, ++mIt, ++dIt) {
+                *mIt = means[g][b];
+                *dIt = detected[g][b];
+            }
+        }
+
+        std::vector<Stat*> cohen_ptrs, auc_ptrs, lfc_ptrs, delta_ptrs;
+        for (size_t g = 0; g < ngroups; ++g) {
+            cohen_ptrs.insert(cohen_ptrs.end(), cohen[g].begin(), cohen[g].end());
+            auc_ptrs.insert(auc_ptrs.end(), auc[g].begin(), auc[g].end());
+            lfc_ptrs.insert(lfc_ptrs.end(), lfc[g].begin(), lfc[g].end());
+            delta_ptrs.insert(delta_ptrs.end(), delta_detected[g].begin(), delta_detected[g].end());
+        }
+
+        core_pairwise(
+            p, 
+            combos.data(), 
+            combo_size, 
+            group, 
+            ngroups, 
+            block, 
+            nblocks, 
+            std::move(means2), 
+            std::move(detected2), 
+            std::move(cohen_ptrs), 
+            std::move(auc_ptrs), 
+            std::move(lfc_ptrs), 
+            std::move(delta_ptrs)
+        );
+    }
+
+private:
+    template<class MAT, typename L, class Ls, typename G, typename B, typename Stat>
+    void core_pairwise(const MAT* p, 
+        const L* level, 
+        const Ls& level_size, 
+        const G* group, 
+        size_t ngroups, 
+        const B* block, 
+        size_t nblocks, 
+        std::vector<Stat*> means, 
+        std::vector<Stat*> detected, 
+        std::vector<Stat*> cohen, 
+        std::vector<Stat*> auc,
+        std::vector<Stat*> lfc,
+        std::vector<Stat*> delta_detected) 
+    const {
+        size_t buffer_size = p->nrow() * ngroups * ngroups;
+
+        if (auc.empty()) {
+            differential_analysis::BidimensionalFactory fact(
+                p->nrow(), 
+                p->ncol(), 
+                std::move(means), 
+                std::move(detected), 
+                std::move(cohen),
+                std::move(lfc),
+                std::move(delta_detected),
+                level, 
+                &level_size, 
+                ngroups, 
+                nblocks, 
+                threshold
+            );
+            tatami::apply<0>(p, fact, num_threads);
+
+        } else {
+            // Need to remake this, as there's no guarantee that 'blocks' exists.
+            std::vector<B> tmp_blocks;
+            if (!block) {
+                tmp_blocks.resize(p->ncol());
+                block = tmp_blocks.data();
+            }
+
+            differential_analysis::PerRowFactory fact(
+                p->nrow(), 
+                p->ncol(), 
+                std::move(means), 
+                std::move(detected), 
+                std::move(cohen),
+                std::move(auc),
+                std::move(lfc),
+                std::move(delta_detected),
+                level, 
+                &level_size, 
+                group, 
+                ngroups, 
+                block, 
+                nblocks, 
+                threshold
+            );
+            tatami::apply<0>(p, fact, num_threads);
+        }
+    }
+
+public:
+    template<typename Stat>
+    struct PairwiseResults {
+        PairwiseResults(
+            size_t ngenes, 
+            size_t ngroups, 
+            size_t nblocks,
+            bool do_cohen,
+            bool do_auc,
+            bool do_lfc,
+            bool do_delta
+        ) :
+            means(ngroups),
+            detected(ngroups)
+        {
+            if (do_cohen) {
+                cohen.resize(ngroups);
+            }
+            if (do_auc) {
+                auc.resize(ngroups);
+            }
+            if (do_lfc) {
+                lfc.resize(ngroups);
+            }
+            if (do_delta) {
+                delta_detected.resize(ngroups);
+            }
+
+            for (size_t g = 0; g < ngroups; ++g) {
+                means[g].resize(nblocks, std::vector<Stat>(ngenes));
+                detected[g].resize(nblocks, std::vector<Stat>(ngenes));
+
+                for (size_t g2 = 0; g2 < ngroups; ++g2) {
+                    auto n = (g == g2 ? 0 : ngenes);
+                    if (do_cohen) {
+                        cohen[g].emplace_back(n);
+                    }
+                    if (do_auc) {
+                        auc[g].emplace_back(n);
+                    }
+                    if (do_lfc) {
+                        lfc[g].emplace_back(n);
+                    }
+                    if (do_delta) {
+                        delta_detected[g].emplace_back(n);
+                    }
+                }
+            }
+        }
+
+        std::vector<std::vector<std::vector<Stat> > > means;
+        std::vector<std::vector<std::vector<Stat> > > detected;
+
+        std::vector<std::vector<Stat> > cohen;
+        std::vector<std::vector<Stat> > auc;
+        std::vector<std::vector<Stat> > lfc;
+        std::vector<std::vector<Stat> > delta_detected;
+    };
+
+    template<typename Stat = double, class MAT, typename G>
+    PairwiseResults run_pairwise(const Matrix* p, const G* group) const {
+        auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
+        PairwiseResults<Stat> res(p->nrow(), ngroups, 1, do_cohen, do_auc, do_lfc, do_delta_detected); 
+
+        auto mean_ptrs = vector_to_pointers3(res.means);
+        auto detect_ptrs = vector_to_pointers3(res.detected);
+
+        auto cohen_ptrs = vector_to_pointers2(res.cohen);
+        auto auc_ptrs = vector_to_pointers2(res.auc);
+        auto lfc_ptrs = vector_to_pointers2(res.lfc);
+        auto delta_ptrs = vector_to_pointers2(res.delta_detected);
+
+        run_pairwise(
+            p, 
+            group, 
+            std::move(mean_ptrs), 
+            std::move(detect_ptrs), 
+            std::move(cohen_ptrs), 
+            std::move(auc_ptrs), 
+            std::move(lfc_ptrs), 
+            std::move(delta_ptrs)
+        );
+    }
+
+    template<typename Stat = double, class MAT, typename G, typename B> 
+    Results<Stat> run_blocked_pairwise(const MAT* p, const G* group, const B* block) {
+        if (block == NULL) {
+            return run(p, group);
+        }
+    
+        auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
+        auto nblocks = *std::max_element(block, block + p->ncol()) + 1;
+        Results<Stat> res(p->nrow(), ngroups, nblocks, do_cohen, do_auc, do_lfc, do_delta_detected); 
+
+        auto mean_ptrs = vector_to_pointers2(res.means);
+        auto detect_ptrs = vector_to_pointers2(res.detected);
+
+        auto cohen_ptrs = vector_to_pointers2(res.cohen);
+        auto auc_ptrs = vector_to_pointers2(res.auc);
+        auto lfc_ptrs = vector_to_pointers2(res.lfc);
+        auto delta_ptrs = vector_to_pointers2(res.delta_detected);
+
+        run_pairwise_blocked(
+            p, 
+            group, 
+            block, 
+            std::move(mean_ptrs), 
+            std::move(detect_ptrs), 
+            std::move(cohen_ptrs), 
+            std::move(auc_ptrs), 
+            std::move(lfc_ptrs), 
+            std::move(delta_ptrs)
+        );
+    }
+
+public:
     /**
      * Score potential marker genes by computing summary statistics across pairwise comparisons between groups.
      *
@@ -496,7 +794,7 @@ public:
     {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
         run_internal(p, group, ngroups, means, detected, cohen, auc, lfc, delta_detected);
-    }        
+    }
 
     /**
      * Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.
