@@ -30,17 +30,17 @@ void fill_tmp_nzeros(const Bundle& details, const Data* ptr, std::vector<Stat>& 
 }
 
 template<class Bundle, typename Stat>
-void transfer_common_stats(Bundle& details, const std::vector<Stat>& tmp_means, const std::vector<Stat>& tmp_nzeros, const std::vector<Stat>& tmp_vars) {
+void transfer_common_stats(size_t row, const std::vector<Stat>& tmp_means, const std::vector<Stat>& tmp_nzeros, const std::vector<Stat>& tmp_vars, Bundle& details) {
     const auto& level_size = *(details.level_size_ptr);
 
     // Transferring the computed means.
     for (size_t l = 0; l < level_size.size(); ++l) {
-        details.means[l][i] = tmp_means[l];
+        details.means[l][row] = tmp_means[l];
     }
 
     // Computing and transferring the proportion detected.
     for (size_t l = 0; l < level_size.size(); ++l) {
-        auto& ndetected = details.detected[l][i];
+        auto& ndetected = details.detected[l][row];
         if (level_size[l]) {
             ndetected = tmp_nzeros[l] / level_size[l];
         } else {
@@ -49,7 +49,7 @@ void transfer_common_stats(Bundle& details, const std::vector<Stat>& tmp_means, 
     }
 
     // Computing the various effect sizes.
-    size_t offset = i * details.ngroups * details.ngroups;
+    size_t offset = row * details.ngroups * details.ngroups;
     if (details.cohen) {
         compute_pairwise_cohens_d(tmp_means.data(), tmp_vars.data(), level_size, details.ngroups, details.nblocks, details.cohen + offset, details.threshold);
     }
@@ -73,7 +73,9 @@ struct BidimensionalBundle {
     size_t NR, NC;
 
     std::vector<Stat*> means, detected;
-    Stat* cohen, lfc, delta_detected;
+    Stat *cohen;
+    Stat *lfc;
+    Stat *delta_detected;
 
     const Level* levels;
     const std::vector<int>* level_size_ptr;
@@ -94,27 +96,28 @@ protected:
 public:
     struct ByRow { 
         ByRow(BidimensionalBundle<Stat, Level> d) :
-            tmp_means(d.level_size_ptr->size()), 
-            tmp_vars(d.level_size_ptr->size()), 
-            tmp_nzeros(d.level_size_ptr->size()), 
-            details(std::move(d)) {}
+            details(std::move(d)),
+            tmp_means(details.level_size_ptr->size()), 
+            tmp_vars(details.level_size_ptr->size()), 
+            tmp_nzeros(details.level_size_ptr->size())
+        {}
 
     private:
-        std::vector<double> tmp_means, tmp_vars, tmp_nzeros;
         BidimensionalBundle<Stat, Level> details;
+        std::vector<double> tmp_means, tmp_vars, tmp_nzeros;
 
     public:
         template<typename T>
         void compute(size_t i, const T* ptr) {
             feature_selection::blocked_variance_with_mean<true>(ptr, details.NC, details.levels, *(details.level_size_ptr), tmp_means, tmp_vars);
             per_row::fill_tmp_nzeros(details, ptr, tmp_nzeros);
-            per_row::transfer_common_stats(details, tmp_means, tmp_nzeros, tmp_vars);
+            per_row::transfer_common_stats(i, tmp_means, tmp_nzeros, tmp_vars, details);
         }
 
         template<class SparseRange>
         void compute(size_t i, const SparseRange& range) {
             feature_selection::blocked_variance_with_mean<true>(range, details.levels, *(details.level_size_ptr), tmp_means, tmp_vars, tmp_nzeros);
-            per_row::transfer_common_stats(details, tmp_means, tmp_nzeros, tmp_vars);
+            per_row::transfer_common_stats(i, tmp_means, tmp_nzeros, tmp_vars, details);
         }
     };
 
@@ -207,7 +210,7 @@ public:
 
         template<typename T>
         void add(const T* ptr) {
-            auto b = this->details.levels[counter];
+            auto b = this->details.levels[this->counter];
             tatami::stats::variances::compute_running(ptr, num, this->details.means[b], this->tmp_vars[b].data(), this->counts[b]);
 
             auto ndetected = this->details.detected[b];
@@ -219,7 +222,7 @@ public:
         }
 
         void finish() {
-            for (size_t b = 0; b < details.level_size_ptr->size(); ++b) {
+            for (size_t b = 0; b < this->details.level_size_ptr->size(); ++b) {
                 tatami::stats::variances::finish_running(num, this->details.means[b], this->tmp_vars[b].data(), this->counts[b]);
             }
             this->finalize_by_cols(0, num);
@@ -245,9 +248,9 @@ public:
         }
 
         size_t shift = copy.ngroups * copy.ngroups * start;
-        for (auto& e : copy.effects) {
-            e += shift;
-        }
+        copy.cohen += shift;
+        copy.lfc += shift;
+        copy.delta_detected += shift;
 
         return DenseByCol(end - start, std::move(copy));
     }
@@ -257,7 +260,7 @@ public:
 
         template<class SparseRange>
         void add(const SparseRange& range) {
-            auto b = this->details.levels[counter];
+            auto b = this->details.levels[this->counter];
             
             // TODO: add a offset to tatami so that we can subtract an offset from the range.
             tatami::stats::variances::compute_running(range, this->details.means[b], this->tmp_vars[b].data(), this->details.detected[b], this->counts[b]);
@@ -266,12 +269,14 @@ public:
         }
 
         void finish() {
-            for (size_t b = 0; b < details.level_size_ptr->size(); ++b) {
-                tatami::stats::variances::finish_running(end - start, 
+            for (size_t b = 0; b < this->details.level_size_ptr->size(); ++b) {
+                tatami::stats::variances::finish_running(
+                    end - start, 
                     this->details.means[b] + start, 
                     this->tmp_vars[b].data() + start, 
                     this->details.detected[b] + start, 
-                    this->counts[b]);
+                    this->counts[b]
+                );
             }
             this->finalize_by_cols(start, end);
         }
@@ -292,7 +297,7 @@ public:
 
 /******* Per-row factory when the AUC is desired ********/
 
-template<typename Stat, typename Level>
+template<typename Stat, typename Level, typename Group, typename Block>
 struct PerRowBundle {
     PerRowBundle(
         size_t nr,
@@ -331,7 +336,10 @@ struct PerRowBundle {
     size_t NR, NC;
 
     std::vector<Stat*> means, detected;
-    Stat* cohen, auc, lfc, delta_detected;
+    Stat *cohen;
+    Stat *auc;
+    Stat *lfc;
+    Stat *delta_detected;
 
     const Level* levels;
     const std::vector<int>* level_size_ptr;
@@ -351,10 +359,10 @@ public:
         size_t nc,
         std::vector<Stat*> m,
         std::vector<Stat*> d,
-        Stat* cohen_,
-        Stat* auc_,
-        Stat* lfc_,
-        Stat* delta_detected_,
+        Stat* cohen,
+        Stat* auc,
+        Stat* lfc,
+        Stat* delta_detected,
         const Level* l,
         const std::vector<int>* ls,
         const Group* g,
@@ -365,12 +373,17 @@ public:
     ) : details(nr, nc, std::move(m), std::move(d), cohen, auc, lfc, delta_detected, l, ls, g, ng, b, nb, t) {}
 
 protected:
-    PerRowBundle<Stat, Level> details;
+    PerRowBundle<Stat, Level, Group, Block> details;
 
 public:
     struct ByRow {
-        ByRow(PerRowBundle d) : 
+        ByRow(PerRowBundle<Stat, Level, Group, Block> d) : 
             details(std::move(d)), 
+
+            tmp_means(details.level_size_ptr->size()), 
+            tmp_vars(details.level_size_ptr->size()), 
+            tmp_nzeros(details.level_size_ptr->size()), 
+
             paired(details.nblocks), 
             num_zeros(details.nblocks, std::vector<int>(details.ngroups)), 
             totals(details.nblocks, std::vector<int>(details.ngroups)), 
@@ -399,7 +412,7 @@ public:
         }
 
     private:
-        PerRowBundle<Stat, Level> details;
+        PerRowBundle<Stat, Level, Group, Block> details;
         std::vector<double> tmp_means, tmp_vars, tmp_nzeros;
 
         // AUC handlers.
@@ -455,9 +468,9 @@ public:
                 p.clear();
             }
 
-            for (size_t c = 0; c < NC; ++c) {
-                auto b = block[c];
-                auto g = group[c];
+            for (size_t c = 0; c < details.NC; ++c) {
+                auto b = details.block[c];
+                auto g = details.group[c];
                 if (ptr[c]) {
                     paired[b].push_back(std::make_pair(ptr[c], g));
                 } else {
@@ -470,13 +483,13 @@ public:
             // And also computing everything else.
             feature_selection::blocked_variance_with_mean<true>(ptr, details.NC, details.levels, *(details.level_size_ptr), tmp_means, tmp_vars);
             per_row::fill_tmp_nzeros(details, ptr, tmp_nzeros);
-            per_row::transfer_common_stats(details, tmp_means, tmp_nzeros, tmp_vars);
+            per_row::transfer_common_stats(i, tmp_means, tmp_nzeros, tmp_vars, details);
             return;
         }
 
         template<class SparseRange>
         void compute(size_t i, const SparseRange& range) {
-            for (size_t b = 0; b < component.details.nblocks; ++b) {
+            for (size_t b = 0; b < details.nblocks; ++b) {
                 std::copy(totals[b].begin(), totals[b].end(), num_zeros[b].begin());
             }
             for (auto& p : paired) {
@@ -486,8 +499,8 @@ public:
             for (size_t j = 0; j < range.number; ++j) {
                 if (range.value[j]) {
                     size_t c = range.index[j];
-                    auto b = block[c];
-                    auto g = group[c];
+                    auto b = details.block[c];
+                    auto g = details.group[c];
                     paired[b].push_back(std::make_pair(range.value[j], g));
                     --(num_zeros[b][g]);
                 }
@@ -497,7 +510,7 @@ public:
 
             // And also computing everything else.
             feature_selection::blocked_variance_with_mean<true>(range, details.levels, *(details.level_size_ptr), tmp_means, tmp_vars, tmp_nzeros);
-            per_row::transfer_common_stats(details, tmp_means, tmp_nzeros, tmp_vars);
+            per_row::transfer_common_stats(i, tmp_means, tmp_nzeros, tmp_vars, details);
             return;
         }
     };

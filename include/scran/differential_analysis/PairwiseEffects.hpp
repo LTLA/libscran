@@ -4,6 +4,7 @@
 #include "../utils/macros.hpp"
 
 #include "Factory.hpp"
+#include "../utils/vector_to_pointers.hpp"
 
 #include "tatami/stats/apply.hpp"
 
@@ -48,12 +49,35 @@ public:
          * See `set_num_threads()`.
          */
         static constexpr int num_threads = 1;
+
+        /**
+         * See `set_compute_cohen()`.
+         */
+        static constexpr bool compute_cohen = true;
+
+        /**
+         * See `set_compute_auc()`.
+         */
+        static constexpr bool compute_auc = true;
+
+        /**
+         * See `set_compute_lfc()`.
+         */
+        static constexpr bool compute_lfc = true;
+
+        /**
+         * See `set_compute_delta_detected()`.
+         */
+        static constexpr bool compute_delta_detected = true;
     };
 
 private:
     double threshold = Defaults::threshold;
-
     int num_threads = Defaults::num_threads;
+    bool do_cohen = Defaults::compute_cohen;
+    bool do_auc = Defaults::compute_auc;
+    bool do_lfc = Defaults::compute_lfc;
+    bool do_delta_detected = Defaults::compute_delta_detected;
 
 public:
     /**
@@ -76,6 +100,58 @@ public:
         return *this;
     }
 
+    /**
+     * @param s Whether to compute Cohen's d. 
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `PairwiseEffects` object.
+     */
+    PairwiseEffects& set_compute_cohen(bool c = Defaults::compute_cohen) {
+        do_cohen = c;
+        return *this;
+    }
+
+    /**
+     * @param c Whether to compute the AUC.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `PairwiseEffects` object.
+     */
+    PairwiseEffects& set_compute_auc(bool c = Defaults::compute_auc) {
+        do_auc = c;
+        return *this;
+    }
+
+    /**
+     * @param c Whether to compute the log-fold change.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `PairwiseEffects` object.
+     */
+    PairwiseEffects& set_compute_lfc(bool c = Defaults::compute_lfc) {
+        do_lfc = c;
+        return *this;
+    }
+
+    /**
+     * @param c Whether to compute the delta-detected.
+     *
+     * This only has an effect for `run()` methods that return `Results`.
+     * Otherwise, we make this decision based on the validity of the input pointers. 
+     *
+     * @return A reference to this `PairwiseEffects` object.
+     */
+    PairwiseEffects& set_compute_delta_detected(bool c = Defaults::compute_delta_detected) {
+        do_delta_detected = c;
+        return *this;
+    }
+
 public:
     template<class Matrix, typename G, typename Stat>
     void run(
@@ -93,7 +169,7 @@ public:
         for (size_t i = 0; i < p->ncol(); ++i) {
             ++(group_size[group[i]]);
         }
-        core(p, group, group_size, group, ngroups, static_cast<const int*>(NULL), 1, means, detected, cohen, auc, lfc, delta_detected);
+        core(p, group, group_size, group, ngroups, static_cast<const int*>(NULL), 1, std::move(means), std::move(detected), cohen, auc, lfc, delta_detected);
     }
 
     template<class Matrix, typename G, typename B, typename Stat>
@@ -101,19 +177,19 @@ public:
         const Matrix* p, 
         const G* group, 
         const B* block, 
-        std::vector<Stat*> means, 
-        std::vector<Stat*> detected, 
+        std::vector<std::vector<Stat*> > means, 
+        std::vector<std::vector<Stat*> > detected, 
         Stat* cohen,
         Stat* auc,
         Stat* lfc,
         Stat* delta_detected) 
     const {
-        size_t ngroups = means.size();
         if (block == NULL) {
             run(p, group, fetch_first(means), fetch_first(detected), cohen, auc, lfc, delta_detected);
             return;
         }
 
+        size_t ngroups = means.size();
         size_t nblocks = (ngroups ? means[0].size() : 0); // if means.size() == 0, then there are no groups, so there are no blocks, either.
         size_t ncombos = ngroups * nblocks;
         std::vector<int> combos(p->ncol());
@@ -133,12 +209,12 @@ public:
             }
         }
 
-        core(p, combos.data(), combo_size, group, ngroups, block, nblocks, means2, detected2, cohen, auc, lfc, delta_detected);
+        core(p, combos.data(), combo_size, group, ngroups, block, nblocks, std::move(means2), std::move(detected2), cohen, auc, lfc, delta_detected);
     }
 
 private:
-    template<class MAT, typename L, class Ls, typename G, typename B, typename Stat>
-    void core(const MAT* p, 
+    template<class Matrix, typename L, class Ls, typename G, typename B, typename Stat>
+    void core(const Matrix* p, 
         const L* level, 
         const Ls& level_size, 
         const G* group, 
@@ -196,6 +272,7 @@ private:
                 nblocks, 
                 threshold
             );
+
             tatami::apply<0>(p, fact, num_threads);
         }
     }
@@ -225,7 +302,7 @@ public:
         std::vector<Stat> delta_detected;
     };
 
-    template<typename Stat = double, class MAT, typename G>
+    template<class Matrix, typename G, typename Stat>
     Results<Stat> run(const Matrix* p, const G* group, std::vector<Stat*> means, std::vector<Stat*> detected) const {
         auto ngroups = means.size();
         Results<Stat> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); 
@@ -239,14 +316,15 @@ public:
             harvest_pointer(res.lfc, do_lfc),
             harvest_pointer(res.delta_detected, do_delta_detected)
         );
-        return; 
+        return res; 
     }
 
-    template<typename Stat = double, class MAT, typename G, typename B> 
-    Results<Stat> run_blocked(const MAT* p, const G* group, const B* block, std::vector<std::vector<Stat*> > means, std::vector<std::vector<Stat*> > detected) const {
+    template<class Matrix, typename G, typename B, typename Stat>
+    Results<Stat> run_blocked(const Matrix* p, const G* group, const B* block, std::vector<std::vector<Stat*> > means, std::vector<std::vector<Stat*> > detected) const {
         if (block == NULL) {
-            return run(p, group);
+            return run(p, group, fetch_first(means), fetch_first(detected));
         }
+
         auto ngroups = means.size();
         Results<Stat> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); 
         run_blocked(
@@ -265,9 +343,9 @@ public:
 
 public:
     template<typename Stat>
-    struct ResultsWithMeans : public Results {
+    struct ResultsWithMeans : public Results<Stat> {
         ResultsWithMeans(size_t ngenes, size_t ngroups, size_t nblocks, bool do_cohen, bool do_auc, bool do_lfc, bool do_delta) :
-            Results(ngenes, ngroups, do_cohen, do_auc, do_lfc, do_delta), means(ngroups), detected(ngroups) 
+            Results<Stat>(ngenes, ngroups, do_cohen, do_auc, do_lfc, do_delta), means(ngroups), detected(ngroups) 
         {
             for (size_t g = 0; g < ngroups; ++g) {
                 means[g].reserve(nblocks);
@@ -283,7 +361,7 @@ public:
         std::vector<std::vector<std::vector<Stat> > > detected;
     };
 
-    template<typename Stat = double, class MAT, typename G>
+    template<typename Stat = double, class Matrix, typename G>
     ResultsWithMeans<Stat> run(const Matrix* p, const G* group) {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
         ResultsWithMeans<Stat> res(p->nrow(), ngroups, 1, do_cohen, do_auc, do_lfc, do_delta_detected); 
@@ -297,14 +375,15 @@ public:
             harvest_pointer(res.lfc, do_lfc),
             harvest_pointer(res.delta_detected, do_delta_detected)
         );
-        return; 
+        return res; 
     }
 
-    template<typename Stat = double, class MAT, typename G, typename B> 
-    PairwiseResults<Stat> run_blocked(const MAT* p, const G* group, const B* block) {
+    template<typename Stat = double, class Matrix, typename G, typename B> 
+    ResultsWithMeans<Stat> run_blocked(const Matrix* p, const G* group, const B* block) {
         if (block == NULL) {
             return run(p, group);
         }
+
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
         auto nblocks = *std::max_element(block, block + p->ncol()) + 1;
         ResultsWithMeans<Stat> res(p->nrow(), ngroups, nblocks, do_cohen, do_auc, do_lfc, do_delta_detected); 
@@ -313,7 +392,7 @@ public:
             group,
             block,
             vector_to_pointers2(res.means),
-            vector_to_pointers2(res.detected)
+            vector_to_pointers2(res.detected),
             harvest_pointer(res.cohen, do_cohen),
             harvest_pointer(res.auc, do_auc),
             harvest_pointer(res.lfc, do_lfc),
@@ -334,7 +413,7 @@ private:
     }
 
     template<typename Stat> 
-    static Stat* harvest_pointers(std::vector<Stat>& source, bool use) {
+    static Stat* harvest_pointer(std::vector<Stat>& source, bool use) {
         if (use) {
             return source.data();
         } else {

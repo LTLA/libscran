@@ -3,7 +3,7 @@
 
 #include "../utils/macros.hpp"
 
-#include "Factory.hpp"
+#include "PairwiseEffects.hpp"
 #include "summarize_comparisons.hpp"
 
 #include "tatami/stats/apply.hpp"
@@ -493,13 +493,16 @@ public:
         std::vector<std::vector<Stat*> > auc,
         std::vector<std::vector<Stat*> > lfc,
         std::vector<std::vector<Stat*> > delta_detected) 
-    {
+    const {
+        size_t ngroups = means.size();
+
         PairwiseEffects pairs;
-        pairs.set_cohen(!cohen.empty()).set_auc(!auc.empty()).set_lfc(!lfc.empty()).set_delta_detected(!delta_detected.empty());
+        pairs.set_compute_cohen(!cohen.empty()).set_compute_auc(!auc.empty()).set_compute_lfc(!lfc.empty()).set_compute_delta_detected(!delta_detected.empty()).set_threshold(threshold);
         auto res = pairs.run(p, group, std::move(means), std::move(detected));
+
         core(
             p->nrow(),
-            means.size(),
+            ngroups,
             res.cohen.data(), 
             res.auc.data(), 
             res.lfc.data(), 
@@ -550,13 +553,16 @@ public:
         std::vector<std::vector<Stat*> > auc,
         std::vector<std::vector<Stat*> > lfc,
         std::vector<std::vector<Stat*> > delta_detected) 
-    {
+    const {
+        size_t ngroups = means.size();
+
         PairwiseEffects pairs;
-        pairs.set_cohen(!cohen.empty()).set_auc(!auc.empty()).set_lfc(!lfc.empty()).set_delta_detected(!delta_detected.empty());
-        auto res = pairs.run_blocked(p, group, std::move(means), std::move(detected));
+        pairs.set_compute_cohen(!cohen.empty()).set_compute_auc(!auc.empty()).set_compute_lfc(!lfc.empty()).set_compute_delta_detected(!delta_detected.empty()).set_threshold(threshold);
+        auto res = pairs.run_blocked(p, group, block, std::move(means), std::move(detected));
+
         core(
             p->nrow(),
-            means.size(),
+            ngroups,
             res.cohen.data(), 
             res.auc.data(), 
             res.lfc.data(), 
@@ -573,21 +579,21 @@ private:
     void core(
         size_t ngenes,
         size_t ngroups,
-        Stat* cohen_ptr,
-        Stat* auc_ptr,
-        Stat* lfc_ptr,
-        Stat* delta_ptr,
-        std::vector<std::vector<Stat*> >& cohen, 
-        std::vector<std::vector<Stat*> >& auc,
-        std::vector<std::vector<Stat*> >& lfc,
-        std::vector<std::vector<Stat*> >& delta_detected) 
-    {
-        auto summarize = [&](Stat* ptr, std::vector<std::vector<Stat*> >& output) -> void {
+        const Stat* cohen_ptr,
+        const Stat* auc_ptr,
+        const Stat* lfc_ptr,
+        const Stat* delta_ptr,
+        std::vector<std::vector<Stat*> > cohen, 
+        std::vector<std::vector<Stat*> > auc,
+        std::vector<std::vector<Stat*> > lfc,
+        std::vector<std::vector<Stat*> > delta_detected) 
+    const {
+        auto summarize = [&](const Stat* ptr, std::vector<std::vector<Stat*> >& output) -> void {
             auto& min_rank = output[scran::differential_analysis::MIN_RANK];
             if (min_rank.size()) {
                 differential_analysis::compute_min_rank(ngenes, ngroups, ptr, min_rank, num_threads);
             }
-            differential_analysis::summarize_comparisons(ngroups, ngroups, ptr, output, num_threads); 
+            differential_analysis::summarize_comparisons(ngenes, ngroups, ptr, output, num_threads); 
         };
 
         if (!cohen.empty()) {
@@ -750,7 +756,7 @@ public:
      * Whether particular statistics are computed depends on the configuration from `set_compute_cohen()` and related setters.
      */
     template<typename Stat = double, class MAT, typename G> 
-    Results<Stat> run(const MAT* p, const G* group) {
+    Results<Stat> run(const MAT* p, const G* group) const {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
         Results<Stat> res(p->nrow(), ngroups, 1, do_cohen, do_auc, do_lfc, do_delta_detected); 
         run(
@@ -784,7 +790,7 @@ public:
      * Whether particular statistics are computed depends on the configuration from `set_compute_cohen()` and related setters.
      */
     template<typename Stat = double, class MAT, typename G, typename B> 
-    Results<Stat> run_blocked(const MAT* p, const G* group, const B* block) {
+    Results<Stat> run_blocked(const MAT* p, const G* group, const B* block) const {
         if (block == NULL) {
             return run(p, group);
         }
