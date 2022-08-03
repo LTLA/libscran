@@ -17,31 +17,63 @@ namespace scran {
 
 namespace differential_analysis {
 
-/******* Base class for factories and workers ********/
+/******* Common functions for per-row filling ********/
+
+namespace per_row {
+
+template<class Bundle, typename Data, typename Stat>
+void fill_tmp_nzeros(const Bundle& details, const Data* ptr, std::vector<Stat>& tmp_nzeros) {
+    std::fill(tmp_nzeros.begin(), tmp_nzeros.end(), 0);
+    for (size_t j = 0; j < details.NC; ++j) {
+        tmp_nzeros[details.levels[j]] += (ptr[j] > 0);
+    }
+}
+
+template<class Bundle, typename Stat>
+void transfer_common_stats(Bundle& details, const std::vector<Stat>& tmp_means, const std::vector<Stat>& tmp_nzeros, const std::vector<Stat>& tmp_vars) {
+    const auto& level_size = *(details.level_size_ptr);
+
+    // Transferring the computed means.
+    for (size_t l = 0; l < level_size.size(); ++l) {
+        details.means[l][i] = tmp_means[l];
+    }
+
+    // Computing and transferring the proportion detected.
+    for (size_t l = 0; l < level_size.size(); ++l) {
+        auto& ndetected = details.detected[l][i];
+        if (level_size[l]) {
+            ndetected = tmp_nzeros[l] / level_size[l];
+        } else {
+            ndetected = std::numeric_limits<double>::quiet_NaN();
+        }
+    }
+
+    // Computing the various effect sizes.
+    size_t offset = i * details.ngroups * details.ngroups;
+    if (details.cohen) {
+        compute_pairwise_cohens_d(tmp_means.data(), tmp_vars.data(), level_size, details.ngroups, details.nblocks, details.cohen + offset, details.threshold);
+    }
+    if (details.lfc) {
+        compute_pairwise_lfc(tmp_means.data(), level_size, details.ngroups, details.nblocks, details.lfc + offset);
+    }
+    if (details.delta_detected) {
+        compute_pairwise_delta_detected(tmp_nzeros.data(), level_size, details.ngroups, details.nblocks, details.delta_detected + offset);
+    }
+}
+
+}
+
+/******* Factory with running support, when AUCs are not desired ********/
 
 template<typename Stat, typename Level>
-struct Base {
-    Base(std::vector<Stat*> m, std::vector<Stat*> d, std::vector<Stat*> e, const Level* l, const std::vector<int>* ls, int ng, int nb, double t) : 
-        means(std::move(m)), detected(std::move(d)), effects(std::move(e)), levels(l), level_size_ptr(ls), ngroups(ng), nblocks(nb), threshold(t) {}
+struct BidimensionalBundle {
+    BidimensionalBundle(size_t nr, size_t nc, std::vector<Stat*> m, std::vector<Stat*> d, Stat* cohen_, Stat* lfc_, Stat* delta_detected_, const Level* l, const std::vector<int>* ls, int ng, int nb, double t) : 
+        NR(nr), NC(nc), means(std::move(m)), detected(std::move(d)), cohen(cohen_), lfc(lfc_), delta_detected(delta_detected_), levels(l), level_size_ptr(ls), ngroups(ng), nblocks(nb), threshold(t) {}
 
-    Stat* cohen() {
-        return effects[0];
-    }
+    size_t NR, NC;
 
-    Stat* auc() {
-        return effects[1];
-    }
-
-    Stat* lfc() {
-        return effects[2];
-    }
-
-    Stat* delta_detected() {
-        return effects[3];
-    }
-    
     std::vector<Stat*> means, detected;
-    std::vector<Stat*> effects;
+    Stat* cohen, lfc, delta_detected;
 
     const Level* levels;
     const std::vector<int>* level_size_ptr;
@@ -50,211 +82,161 @@ struct Base {
     double threshold;
 };
 
-/******* Factory with running support, when AUCs are not desired ********/
-
 template<typename Stat, typename Level> 
 struct BidimensionalFactory {
 public:
-    BidimensionalFactory(size_t nr, size_t nc, std::vector<Stat*> m, std::vector<Stat*> d, std::vector<Stat*> e, const Level* l, const std::vector<int>* ls, int ng, int nb, double t) : 
-        NR(nr), NC(nc), details(std::move(m), std::move(d), std::move(e), l, ls, ng, nb, t) {}
+    BidimensionalFactory(size_t nr, size_t nc, std::vector<Stat*> m, std::vector<Stat*> d, Stat* cohen, Stat* lfc, Stat* delta_detected, const Level* l, const std::vector<int>* ls, int ng, int nb, double t) : 
+        details(nr, nc, std::move(m), std::move(d), cohen, lfc, delta_detected, l, ls, ng, nb, t) {}
 
 protected:
-    size_t NR, NC;
-    Base<Stat, Level> details;
+    BidimensionalBundle<Stat, Level> details;
 
 public:
     struct ByRow { 
-        ByRow(Base<Stat, Level> d) :
+        ByRow(BidimensionalBundle<Stat, Level> d) :
             tmp_means(d.level_size_ptr->size()), 
             tmp_vars(d.level_size_ptr->size()), 
             tmp_nzeros(d.level_size_ptr->size()), 
-            buffer(d.ngroups * d.ngroups),
             details(std::move(d)) {}
 
-        void transfer(size_t i) {
-            const auto& level_size = *(details.level_size_ptr);
+    private:
+        std::vector<double> tmp_means, tmp_vars, tmp_nzeros;
+        BidimensionalBundle<Stat, Level> details;
 
-            // Transferring the computed means.
-            for (size_t l = 0; l < level_size.size(); ++l) {
-                details.means[l][i] = tmp_means[l];
-            }
-
-            // Computing and transferring the proportion detected.
-            for (size_t l = 0; l < level_size.size(); ++l) {
-                auto& ndetected = details.detected[l][i];
-                if (level_size[l]) {
-                    ndetected = tmp_nzeros[l] / level_size[l];
-                } else {
-                    ndetected = std::numeric_limits<double>::quiet_NaN();
-                }
-            }
-
-            // Computing the various effect sizes.
-            size_t offset = i * details.ngroups * details.ngroups;
-            auto cohen_ptr = details.cohen();
-            if (cohen_ptr) {
-                compute_pairwise_cohens_d(tmp_means.data(), tmp_vars.data(), level_size, details.ngroups, details.nblocks, cohen_ptr + offset, details.threshold);
-            }
-
-            auto lfc_ptr = details.lfc();
-            if (lfc_ptr) {
-                compute_pairwise_lfc(tmp_means.data(), level_size, details.ngroups, details.nblocks, lfc_ptr + offset);
-            }
-
-            auto dd_ptr = details.delta_detected();
-            if (dd_ptr) {
-                compute_pairwise_delta_detected(tmp_nzeros.data(), level_size, details.ngroups, details.nblocks, dd_ptr + offset);
-            }
-        }
-
-    protected:
-        std::vector<double> tmp_means, tmp_vars, tmp_nzeros, buffer;
     public:
-        Base<Stat, Level> details;
-    };
-
-public:
-    struct DenseByRow : public ByRow {
-        DenseByRow(size_t nc, Base<Stat, Level> d) : NC(nc), ByRow(std::move(d)) {}
-
         template<typename T>
         void compute(size_t i, const T* ptr) {
-            feature_selection::blocked_variance_with_mean<true>(ptr, NC, this->details.levels, *(this->details.level_size_ptr), this->tmp_means, this->tmp_vars);
-
-            std::fill(this->tmp_nzeros.begin(), this->tmp_nzeros.end(), 0);
-            for (size_t j = 0; j < NC; ++j) {
-                this->tmp_nzeros[this->details.levels[j]] += (ptr[j] > 0);
-            }
-
-            this->transfer(i);
+            feature_selection::blocked_variance_with_mean<true>(ptr, details.NC, details.levels, *(details.level_size_ptr), tmp_means, tmp_vars);
+            per_row::fill_tmp_nzeros(details, ptr, tmp_nzeros);
+            per_row::transfer_common_stats(details, tmp_means, tmp_nzeros, tmp_vars);
         }
-    private:
-        size_t NC;
-    };
-
-    DenseByRow dense_direct() {
-        return DenseByRow(NC, details);
-    }
-
-public:
-    struct SparseByRow : public ByRow {
-        SparseByRow(Base<Stat, Level> d) : ByRow(std::move(d)) {}
 
         template<class SparseRange>
         void compute(size_t i, const SparseRange& range) {
-            feature_selection::blocked_variance_with_mean<true>(range, this->details.levels, *(this->details.level_size_ptr), this->tmp_means, this->tmp_vars, this->tmp_nzeros);
-            this->transfer(i);
+            feature_selection::blocked_variance_with_mean<true>(range, details.levels, *(details.level_size_ptr), tmp_means, tmp_vars, tmp_nzeros);
+            per_row::transfer_common_stats(details, tmp_means, tmp_nzeros, tmp_vars);
         }
     };
 
-    SparseByRow sparse_direct() {
-        return SparseByRow(details);
+    ByRow dense_direct() const {
+        return ByRow(details);
     }
 
-private:
-    static void finalize_by_cols(size_t start, size_t end, const std::vector<std::vector<double> >& tmp_vars, Base<Stat, Level>& details) {
-        const auto& level_size = *(details.level_size_ptr);
-        size_t shift = (details.ngroups) * (details.ngroups);
-        size_t offset = shift * start;
-
-        auto dd_ptr = details.delta_detected();
-        if (dd_ptr) {
-            std::vector<int> tmp_detected(level_size.size());
-            dd_ptr += offset;
-            for (size_t i = start; i < end; ++i) {
-                for (size_t l = 0; l < tmp_detected.size(); ++l) {
-                    tmp_detected[l] = details.detected[l][i];
-                }
-                compute_pairwise_delta_detected(tmp_detected.data(), level_size, details.ngroups, details.nblocks, dd_ptr);
-                dd_ptr += shift;
-            } 
-        }
-
-        // Dividing to obtain the proportion of detected cells per group.
-        for (size_t b = 0; b < level_size.size(); ++b) {
-            auto ptr = details.detected[b];
-            if (level_size[b]) {
-                for (size_t r = start; r < end; ++r) {
-                    ptr[r] /= level_size[b];
-                }
-            } else {
-                std::fill(ptr + start, ptr + end, std::numeric_limits<double>::quiet_NaN());
-            }
-        }
-
-        // We transfer values to a temporary buffer for cache efficiency upon
-        // repeated accesses in pairwise calculations.
-        auto cohen_ptr = details.cohen();
-        auto lfc_ptr = details.lfc();
-        if (cohen_ptr || lfc_ptr) {
-            std::vector<double> tmp_means(level_size.size()), tmp_vars_single(level_size.size());
-            if (cohen_ptr) {
-                cohen_ptr += offset;
-            }
-            if (lfc_ptr) {
-                lfc_ptr += offset;
-            }
-
-            for (size_t i = start; i < end; ++i) {
-                for (size_t l = 0; l < tmp_means.size(); ++l) {
-                    tmp_means[l] = details.means[l][i];
-                }
-                if (cohen_ptr) {
-                    for (size_t l = 0; l < tmp_vars_single.size(); ++l) {
-                        tmp_vars_single[l] = tmp_vars[l][i];
-                    }
-                    compute_pairwise_cohens_d(tmp_means.data(), tmp_vars_single.data(), level_size, details.ngroups, details.nblocks, cohen_ptr, details.threshold);
-                    cohen_ptr += shift;
-                }
-                if (lfc_ptr) {
-                    compute_pairwise_lfc(tmp_means.data(), level_size, details.ngroups, details.nblocks, lfc_ptr);
-                    lfc_ptr += shift;
-                }
-            }
-        }
-    };
+    ByRow sparse_direct() const {
+        return ByRow(details);
+    }
 
 public:
-    struct DenseByCol {
-        DenseByCol(size_t start, size_t end, Base<Stat, Level> d) : 
-            num(end - start), 
-            tmp_vars(d.level_size_ptr->size(), std::vector<double>(num)), 
-            counts(d.level_size_ptr->size()),
-            details(std::move(d)) {}
+    struct ByCol { 
+        ByCol(BidimensionalBundle<Stat, Level> d, size_t num) : 
+            details(std::move(d)),
+            tmp_vars(details.level_size_ptr->size(), std::vector<double>(num)), 
+            counts(details.level_size_ptr->size())
+        {}
+
+        void finalize_by_cols(size_t start, size_t end) {
+            const auto& level_size = *(details.level_size_ptr);
+            size_t shift = (details.ngroups) * (details.ngroups);
+            size_t offset = shift * start;
+
+            auto dd_ptr = details.delta_detected;
+            if (dd_ptr) {
+                std::vector<int> tmp_detected(level_size.size());
+                dd_ptr += offset;
+                for (size_t i = start; i < end; ++i) {
+                    for (size_t l = 0; l < tmp_detected.size(); ++l) {
+                        tmp_detected[l] = details.detected[l][i];
+                    }
+                    compute_pairwise_delta_detected(tmp_detected.data(), level_size, details.ngroups, details.nblocks, dd_ptr);
+                    dd_ptr += shift;
+                } 
+            }
+
+            // Dividing to obtain the proportion of detected cells per group.
+            for (size_t b = 0; b < level_size.size(); ++b) {
+                auto ptr = details.detected[b];
+                if (level_size[b]) {
+                    for (size_t r = start; r < end; ++r) {
+                        ptr[r] /= level_size[b];
+                    }
+                } else {
+                    std::fill(ptr + start, ptr + end, std::numeric_limits<double>::quiet_NaN());
+                }
+            }
+
+            // We transfer values to a temporary buffer for cache efficiency upon
+            // repeated accesses in pairwise calculations.
+            auto cohen_ptr = details.cohen;
+            auto lfc_ptr = details.lfc;
+            if (cohen_ptr || lfc_ptr) {
+                std::vector<double> tmp_means(level_size.size()), tmp_vars_single(level_size.size());
+                if (cohen_ptr) {
+                    cohen_ptr += offset;
+                }
+                if (lfc_ptr) {
+                    lfc_ptr += offset;
+                }
+
+                for (size_t i = start; i < end; ++i) {
+                    for (size_t l = 0; l < tmp_means.size(); ++l) {
+                        tmp_means[l] = details.means[l][i];
+                    }
+                    if (cohen_ptr) {
+                        for (size_t l = 0; l < tmp_vars_single.size(); ++l) {
+                            tmp_vars_single[l] = tmp_vars[l][i];
+                        }
+                        compute_pairwise_cohens_d(tmp_means.data(), tmp_vars_single.data(), level_size, details.ngroups, details.nblocks, cohen_ptr, details.threshold);
+                        cohen_ptr += shift;
+                    }
+                    if (lfc_ptr) {
+                        compute_pairwise_lfc(tmp_means.data(), level_size, details.ngroups, details.nblocks, lfc_ptr);
+                        lfc_ptr += shift;
+                    }
+                }
+            }
+        }
+    protected:
+        BidimensionalBundle<Stat, Level> details;
+        std::vector<std::vector<double> > tmp_vars;
+        std::vector<int> counts;
+        size_t counter = 0;
+    };
+
+    struct DenseByCol : public ByCol {
+        DenseByCol(size_t n, BidimensionalBundle<Stat, Level> d) : ByCol(std::move(d), n), num(n) {}
 
         template<typename T>
         void add(const T* ptr) {
-            auto b = details.levels[counter];
-            tatami::stats::variances::compute_running(ptr, num, details.means[b], tmp_vars[b].data(), counts[b]);
+            auto b = this->details.levels[counter];
+            tatami::stats::variances::compute_running(ptr, num, this->details.means[b], this->tmp_vars[b].data(), this->counts[b]);
 
-            auto ndetected = details.detected[b];
+            auto ndetected = this->details.detected[b];
             for (size_t j = 0; j < num; ++j, ++ndetected) {
                 *ndetected += (ptr[j] > 0);
             }
  
-            ++counter;
+            ++(this->counter);
         }
 
         void finish() {
             for (size_t b = 0; b < details.level_size_ptr->size(); ++b) {
-                tatami::stats::variances::finish_running(num, details.means[b], tmp_vars[b].data(), counts[b]);
+                tatami::stats::variances::finish_running(num, this->details.means[b], this->tmp_vars[b].data(), this->counts[b]);
             }
-            finalize_by_cols(0, num, tmp_vars, details);
+            this->finalize_by_cols(0, num);
         }
     private:
-        size_t counter = 0, num;
-        std::vector<std::vector<double> > tmp_vars;
-        std::vector<int> counts;
-        Base<Stat, Level> details;
+        size_t num;
     };
 
-    DenseByCol dense_running() {
-        return DenseByCol(0, this->NR, this->details);
+    DenseByCol dense_running() const {
+        return DenseByCol(details.NR, details);
     }
 
-    DenseByCol dense_running(size_t start, size_t end) {
+    DenseByCol dense_running(size_t start, size_t end) const {
         auto copy = this->details;
 
+        // Shifting all the pointers to pretend that we have a smaller number
+        // of rows, so that we can reduce the size of the temporary vectors. 
         for (auto& m : copy.means) {
             m += start;
         }
@@ -267,84 +249,138 @@ public:
             e += shift;
         }
 
-        return DenseByCol(start, end, std::move(copy));
+        return DenseByCol(end - start, std::move(copy));
     }
 
-public:
-    struct SparseByCol { 
-        SparseByCol(size_t nr, size_t s, size_t e, Base<Stat, Level> d) : 
-            start(s), end(e), 
-            tmp_vars(d.level_size_ptr->size(), std::vector<double>(nr)), 
-            counts(d.level_size_ptr->size()),
-            details(std::move(d)) {}
+    struct SparseByCol : public ByCol { 
+        SparseByCol(size_t nr, size_t s, size_t e, BidimensionalBundle<Stat, Level> d) : ByCol(std::move(d), nr), start(s), end(e) {}
 
         template<class SparseRange>
         void add(const SparseRange& range) {
-            auto b = details.levels[counter];
-            tatami::stats::variances::compute_running(range, details.means[b], tmp_vars[b].data(), details.detected[b], counts[b]);
-            ++counter;
+            auto b = this->details.levels[counter];
+            
+            // TODO: add a offset to tatami so that we can subtract an offset from the range.
+            tatami::stats::variances::compute_running(range, this->details.means[b], this->tmp_vars[b].data(), this->details.detected[b], this->counts[b]);
+
+            ++(this->counter);
         }
 
         void finish() {
             for (size_t b = 0; b < details.level_size_ptr->size(); ++b) {
                 tatami::stats::variances::finish_running(end - start, 
-                    details.means[b] + start, 
-                    tmp_vars[b].data() + start, 
-                    details.detected[b] + start, 
-                    counts[b]);
+                    this->details.means[b] + start, 
+                    this->tmp_vars[b].data() + start, 
+                    this->details.detected[b] + start, 
+                    this->counts[b]);
             }
-            finalize_by_cols(start, end, tmp_vars, details);
+            this->finalize_by_cols(start, end);
         }
     private:
-        size_t start, end, counter = 0;
-        std::vector<std::vector<double> > tmp_vars;
-        std::vector<int> counts;
-        Base<Stat, Level> details;
+        size_t start, end;
     };
 
     SparseByCol sparse_running() {
-        return SparseByCol(NR, 0, NR, this->details);
+        return SparseByCol(details.NR, 0, details.NR, details);
     }
 
     SparseByCol sparse_running(size_t start, size_t end) {
-        return SparseByCol(NR, start, end, this->details);
+        // Just making the temporary vectors with all rows, so that we don't 
+        // have to worry about subtracting the indices when doing sparse iteration.
+        return SparseByCol(details.NR, start, end, details);
     }
 };
 
 /******* Per-row factory when the AUC is desired ********/
 
+template<typename Stat, typename Level>
+struct PerRowBundle {
+    PerRowBundle(
+        size_t nr,
+        size_t nc,
+        std::vector<Stat*> m,
+        std::vector<Stat*> d,
+        Stat* cohen_,
+        Stat* auc_,
+        Stat* lfc_,
+        Stat* delta_detected_,
+        const Level* l,
+        const std::vector<int>* ls,
+        const Group* g,
+        int ng,
+        const Block* b,
+        int nb,
+        double t
+    ) : 
+        NR(nr), 
+        NC(nc), 
+        means(std::move(m)), 
+        detected(std::move(d)), 
+        cohen(cohen_), 
+        auc(auc_), 
+        lfc(lfc_), 
+        delta_detected(delta_detected_), 
+        levels(l), 
+        level_size_ptr(ls), 
+        group(g),
+        block(b),
+        ngroups(ng), 
+        nblocks(nb), 
+        threshold(t) 
+    {}
+
+    size_t NR, NC;
+
+    std::vector<Stat*> means, detected;
+    Stat* cohen, auc, lfc, delta_detected;
+
+    const Level* levels;
+    const std::vector<int>* level_size_ptr;
+
+    const Group* group;
+    const Block* block;
+    int ngroups, nblocks;
+
+    double threshold;
+};
+
 template<typename Stat, typename Level, typename Group, typename Block> 
 struct PerRowFactory {
 public:
-    PerRowFactory(size_t nr, size_t nc, std::vector<Stat*> m, std::vector<Stat*> d, std::vector<Stat*> e, const Level* l, const std::vector<int>* ls, 
-        const Group* g, int ng, const Block* b, int nb, double t) : 
-        NC(nc), group(g), block(b), 
-        factory(nr, nc, std::move(m), std::move(d), std::move(e), l, ls, ng, nb, t) {}
+    PerRowFactory(
+        size_t nr,
+        size_t nc,
+        std::vector<Stat*> m,
+        std::vector<Stat*> d,
+        Stat* cohen_,
+        Stat* auc_,
+        Stat* lfc_,
+        Stat* delta_detected_,
+        const Level* l,
+        const std::vector<int>* ls,
+        const Group* g,
+        int ng,
+        const Block* b,
+        int nb,
+        double t
+    ) : details(nr, nc, std::move(m), std::move(d), cohen, auc, lfc, delta_detected, l, ls, g, ng, b, nb, t) {}
 
-    static constexpr bool supports_sparse = true;
-    static constexpr bool supports_running = false;
-private:
-    size_t NC;
-    const Group* group;
-    const Block* block;
-    BidimensionalFactory<Stat, Level> factory;
+protected:
+    PerRowBundle<Stat, Level> details;
 
 public:
-    template<class Component>
     struct ByRow {
-        ByRow(const Group* g, const Block* b, Component c) : 
-            component(std::move(c)), 
-            paired(component.details.nblocks), 
-            num_zeros(component.details.nblocks, std::vector<int>(component.details.ngroups)), 
-            totals(component.details.nblocks, std::vector<int>(component.details.ngroups)), 
-            auc_buffer(component.details.ngroups * component.details.ngroups), 
-            denominator(component.details.ngroups, std::vector<double>(component.details.ngroups)),
-            group(g), block(b)
+        ByRow(PerRowBundle d) : 
+            details(std::move(d)), 
+            paired(details.nblocks), 
+            num_zeros(details.nblocks, std::vector<int>(details.ngroups)), 
+            totals(details.nblocks, std::vector<int>(details.ngroups)), 
+            auc_buffer(details.ngroups * details.ngroups), 
+            denominator(details.ngroups, std::vector<double>(details.ngroups))
         {
-            const auto& ngroups = component.details.ngroups;
-            const auto& nblocks = component.details.nblocks;
+            const auto& ngroups = details.ngroups;
+            const auto& nblocks = details.nblocks;
 
-            auto lsIt = component.details.level_size_ptr->begin();
+            auto lsIt = details.level_size_ptr->begin();
             for (size_t g = 0; g < ngroups; ++g) {
                 for (size_t b = 0; b < nblocks; ++b, ++lsIt) {
                     totals[b][g] = *lsIt;
@@ -362,28 +398,30 @@ public:
             return;
         }
 
-        Component component;
+    private:
+        PerRowBundle<Stat, Level> details;
+        std::vector<double> tmp_means, tmp_vars, tmp_nzeros;
+
+        // AUC handlers.
         std::vector<PairedStore> paired;
         std::vector<std::vector<int> > num_zeros;
         std::vector<std::vector<int> > totals;
         std::vector<double> auc_buffer;
         std::vector<std::vector<double> > denominator;
-        const Group* group;
-        const Block* block;
 
-        void process(size_t i) {
-            const auto& ngroups = component.details.ngroups;
-            auto output = component.details.auc() + i * ngroups * ngroups;
+        void process_auc(size_t i) {
+            const auto& ngroups = details.ngroups;
+            auto output = details.auc + i * ngroups * ngroups;
 
-            for (size_t b = 0; b < component.details.nblocks; ++b) {
+            for (size_t b = 0; b < details.nblocks; ++b) {
                 auto& pr = paired[b];
                 auto& nz = num_zeros[b];
                 const auto& tt = totals[b];
 
                 std::fill(auc_buffer.begin(), auc_buffer.end(), 0);
 
-                if (component.details.threshold) {
-                    compute_pairwise_auc(pr, nz, tt, auc_buffer.data(), component.details.threshold, false);
+                if (details.threshold) {
+                    compute_pairwise_auc(pr, nz, tt, auc_buffer.data(), details.threshold, false);
                 } else {
                     compute_pairwise_auc(pr, nz, tt, auc_buffer.data(), false);
                 }
@@ -406,76 +444,70 @@ public:
                 }
             }
         }
-    };
 
-public:
-    template<class Component>
-    struct DenseByRow : public ByRow<Component>  {
-        DenseByRow(size_t nc, const Group* g, const Block* b, Component c) : NC(nc), ByRow<Component>(g, b, std::move(c)) {}
-
+    public:
         template<typename T>
         void compute(size_t i, const T* ptr) {
-            for (auto& z : this->num_zeros) {
+            for (auto& z : num_zeros) {
                 std::fill(z.begin(), z.end(), 0);
             }
-            for (auto& p : this->paired) {
+            for (auto& p : paired) {
                 p.clear();
             }
 
             for (size_t c = 0; c < NC; ++c) {
-                auto b = this->block[c];
-                auto g = this->group[c];
+                auto b = block[c];
+                auto g = group[c];
                 if (ptr[c]) {
-                    this->paired[b].push_back(std::make_pair(ptr[c], g));
+                    paired[b].push_back(std::make_pair(ptr[c], g));
                 } else {
-                    ++(this->num_zeros[b][g]);
+                    ++(num_zeros[b][g]);
                 }
             }
 
-            this->process(i);
-            this->component.template compute(i, ptr);
+            process_auc(i);
+
+            // And also computing everything else.
+            feature_selection::blocked_variance_with_mean<true>(ptr, details.NC, details.levels, *(details.level_size_ptr), tmp_means, tmp_vars);
+            per_row::fill_tmp_nzeros(details, ptr, tmp_nzeros);
+            per_row::transfer_common_stats(details, tmp_means, tmp_nzeros, tmp_vars);
             return;
         }
-    private:
-        size_t NC;
-    };
-
-    auto dense_direct() {
-        return DenseByRow<decltype(factory.dense_direct())>(NC, group, block, factory.dense_direct());
-    }
-
-public:
-    template<class Component>
-    struct SparseByRow : public ByRow<Component>  {
-        SparseByRow(const Group* g, const Block* b, Component c) : ByRow<Component>(g, b, std::move(c)) {}
 
         template<class SparseRange>
         void compute(size_t i, const SparseRange& range) {
-            for (size_t b = 0; b < this->component.details.nblocks; ++b) {
-                std::copy(this->totals[b].begin(), this->totals[b].end(), this->num_zeros[b].begin());
+            for (size_t b = 0; b < component.details.nblocks; ++b) {
+                std::copy(totals[b].begin(), totals[b].end(), num_zeros[b].begin());
             }
-            for (auto& p : this->paired) {
+            for (auto& p : paired) {
                 p.clear();
             }
 
             for (size_t j = 0; j < range.number; ++j) {
                 if (range.value[j]) {
                     size_t c = range.index[j];
-                    auto b = this->block[c];
-                    auto g = this->group[c];
-                    this->paired[b].push_back(std::make_pair(range.value[j], g));
-                    --(this->num_zeros[b][g]);
+                    auto b = block[c];
+                    auto g = group[c];
+                    paired[b].push_back(std::make_pair(range.value[j], g));
+                    --(num_zeros[b][g]);
                 }
             }
 
-            this->process(i);
-            this->component.template compute(i, range);
+            process_auc(i);
+
+            // And also computing everything else.
+            feature_selection::blocked_variance_with_mean<true>(range, details.levels, *(details.level_size_ptr), tmp_means, tmp_vars, tmp_nzeros);
+            per_row::transfer_common_stats(details, tmp_means, tmp_nzeros, tmp_vars);
             return;
         }
     };
 
-    auto sparse_direct() {
-        return SparseByRow<decltype(factory.sparse_direct())>(group, block, factory.sparse_direct());
+    ByRow dense_direct() {
+        return ByRow(details);
+    }
+
+    ByRow sparse_direct() {
+        return ByRow(details);
     }
 };
 
