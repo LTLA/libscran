@@ -1,10 +1,12 @@
 #include <gtest/gtest.h>
 #include "../utils/macros.h"
 
+#include "scran/differential_analysis/SummarizeEffects.hpp"
 #include "scran/differential_analysis/summarize_comparisons.hpp"
 #include "../utils/compare_vectors.h"
 
 #include <numeric>
+#include <random>
 
 TEST(SummarizeComparisonsTest, Medians) {
     std::vector<double> stuff{0.2, 0.1, 0.3, 0.5, 0.4};
@@ -35,9 +37,9 @@ protected:
         }
     }
 
+    int ngroups, ngenes = 11;
     std::vector<double> output;
     std::vector<std::vector<double*> > ptrs;
-    int ngroups, ngenes = 11;
 };
 
 /* For each group, the effect sizes start from `group_id * gene` for the
@@ -175,8 +177,8 @@ protected:
         }
     }
 
-    std::vector<double*> ptrs;
     std::vector<double> output;
+    std::vector<double*> ptrs;
 };
 
 TEST_P(ComputeMinRankTest, Basic) {
@@ -252,4 +254,58 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(1, 3) // number of threads
 );
 
+/*********************************************/
 
+TEST(SummarizeEffects, Basic) {
+    size_t ngenes = 11, ngroups = 3;
+    std::vector<double> stuff(ngroups * ngroups * ngenes);
+    std::mt19937_64 rng(12345);
+    std::normal_distribution ndist;
+    for (auto& s : stuff) {
+        s = ndist(rng);
+    }
+
+    scran::SummarizeEffects summarizer;
+    auto res = summarizer.run(ngenes, ngroups, stuff.data());
+    EXPECT_EQ(res.size(), scran::differential_analysis::n_summaries);
+
+    // Summaries are actually filled.
+    for (const auto& r : res) {
+        EXPECT_EQ(r.size(), ngroups);
+
+        for (const auto& x : r) {
+            EXPECT_EQ(x.size(), ngenes);
+
+            bool nonzero = false;
+            for (auto g : x) {
+                if (g != 0) {
+                    nonzero = true;
+                }
+            }
+            EXPECT_TRUE(nonzero);
+        }
+
+        // Different summaries for different groups.
+        EXPECT_NE(r[0], r[1]);
+        EXPECT_NE(r[0], r[2]);
+    }
+
+    // Same results with multiple threads.
+    summarizer.set_num_threads(3);
+    auto res2 = summarizer.run(ngenes, ngroups, stuff.data());
+    EXPECT_EQ(res, res2);
+}
+
+TEST(SummarizeEffects, None) {
+    size_t ngenes = 0, ngroups = 3;
+    std::vector<double> stuff;
+
+    scran::SummarizeEffects summarizer;
+    summarizer.set_compute_min(false).set_compute_max(false).set_compute_median(false).set_compute_min_rank(false).set_compute_mean(false);
+    auto res = summarizer.run(ngenes, ngroups, stuff.data());
+
+    EXPECT_EQ(res.size(), scran::differential_analysis::n_summaries);
+    for (const auto& r : res) {
+        EXPECT_EQ(r.size(), 0);
+    }
+}

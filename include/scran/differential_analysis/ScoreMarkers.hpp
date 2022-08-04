@@ -3,11 +3,11 @@
 
 #include "../utils/macros.hpp"
 
-#include "Factory.hpp"
-#include "summarize_comparisons.hpp"
+#include "../utils/vector_to_pointers.hpp"
+#include "PairwiseEffects.hpp"
+#include "SummarizeEffects.hpp"
 
 #include "tatami/stats/apply.hpp"
-#include "../utils/vector_to_pointers.hpp"
 
 #include <array>
 
@@ -24,100 +24,22 @@ namespace scran {
  *
  * Markers are identified by differential expression analyses between pairs of groups of cells (e.g., clusters, cell types).
  * Given `n` groups, each group is involved in `n - 1` pairwise comparisons and thus has `n - 1` effect sizes.
- * For each group, we compute summary statistics - e.g., the minimum, median, mean - of the effect sizes across all of that group's comparisons.
+ * For each group, we compute summary statistics - e.g., median, mean - of the effect sizes across all of that group's comparisons.
  * Users can then sort by any of these summaries to obtain a ranking of potential marker genes for each group.
+ *
  * The choice of effect size and summary statistic determines the characteristics of the resulting marker set.
+ * For the effect sizes: we compute Cohen's d, the area under the curve (AUC), the log-fold change and the delta-detected,
+ * which are described in more detail in the documentation for `PairwiseEffects`,
+ * For the summary statistics: we compute the minimum, mean, median, maximum and min-rank of the effect sizes across each group's pairwise comparisons,
+ * which are described in `SummarizeEffects`.
  *
- * @section effect-sizes Effect sizes
- * The log-fold change (LFC) is the difference in the mean log-expression between groups.
- * This is fairly straightforward to interpret - as log-fold change of +1 corresponds to a two-fold upregulation in the first group compared to the second.
- * For this interpretation, we assume that the input matrix contains log-transformed normalized expression values.
+ * If the dataset contains blocking factors such as batch or sample, we compute the effect size within each level of the blocking factor.
+ * This avoids interference from batch effects or sample-to-sample variation.
+ * Users can also adjust the effect size to account for a minimum log-fold change threshold,
+ * in order to focus on markers with larger changes in expression.
+ * See `PairwiseEffects` for more details. 
  *
- * The delta-detected is the difference in the proportion of cells with detected expression between groups.
- * This lies between 1 and -1, with the extremes occurring when a gene is silent in one group and detected in all cells of the other group.
- * For this interpretation, we assume that the input matrix contains non-negative expression values, where a value of zero corresponds to lack of detectable expression.
- *
- * Cohen's d is the standardized log-fold change between two groups.
- * This is defined as the difference in the mean log-expression for each group scaled by the average standard deviation across the two groups.
- * (Technically, we should use the pooled variance; however, this introduces some unpleasant asymmetry depending on the variance of the larger group, so we take a simple average instead.)
- * A positive value indicates that the gene is upregulated in the first gene compared to the second.
- * Cohen's d is analogous to the t-statistic in a two-sample t-test and avoids spuriously large effect sizes from comparisons between highly variable groups.
- * We can also interpret Cohen's d as the number of standard deviations between the two group means.
- *
- * The area under the curve (AUC) can be interpreted as the probability that a randomly chosen observation in one group is greater than a randomly chosen observation in the other group. 
- * Values greater than 0.5 indicate that a gene is upregulated in the first group.
- * The AUC is closely related to the U-statistic used in the Wilcoxon rank sum test. 
- * The key difference between the AUC and Cohen's d is that the former is less sensitive to the variance within each group, e.g.,
- * if two distributions exhibit no overlap, the AUC is the same regardless of the variance of each distribution. 
- * This may or may not be desirable as it improves robustness to outliers but reduces the information available to obtain a highly resolved ranking. 
- *
- * @section lfc-threshold With a log-fold change threshold
- * Setting a log-fold change threshold can be helpful as it prioritizes genes with large shifts in expression instead of those with low variances.
- * Currently, only positive thresholds are supported - this focuses on genes upregulated in the first group compared to the second.
- * The effect size definitions are generalized when testing against a non-zero log-fold change threshold.
- *
- * Cohen's d is redefined as the standardized difference between the observed log-fold change and the specified threshold, analogous to the TREAT method from **limma**.
- * Large positive values are only obtained when the observed log-fold change is significantly greater than the threshold.
- * For example, if we had a threshold of 2 and we obtained a Cohen's d of 3, this means that the observed log-fold change was 3 standard deviations above 2.
- * Importantly, a negative Cohen's d cannot be intepreted as downregulation, as the log-fold change may still be positive but less than the threshold.
- * 
- * The AUC generalized to the probability of obtaining a random observation in one group that is greater than a random observation plus the threshold in the other group.
- * For example, if we had a threshold of 2 and we obtained an AUC of 0.8, this means that - 80% of the time - 
- * the random observation from the first group would be greater than a random observation from the second group by 2 or more.
- * Again, AUCs below 0.5 cannot be interpreted as downregulation, as it may be caused by a positive log-fold change that is less than the threshold.
- * 
- * @section summary Summary statistics
- * The choice of summary statistic dictates the interpretation of the ranking.
- * Given a group X:
- * 
- * - A large mean effect size indicates that the gene is upregulated in X compared to the average of the other groups.
- *   A small value indicates that the gene is downregulated in X instead.
- *   This is a good general-purpose summary statistic for ranking, usually by decreasing size to obtain upregulated markers in X.
- * - A large median effect size indicates that the gene is upregulated in X compared to most (>50%) other groups.
- *   A small value indicates that the gene is downregulated in X instead.
- *   This is also a good general-purpose summary with the advantage of being more robust to outlier effects 
- *   (but also the disadvantage of being less sensitive to strong effects in a minority of comparisons).
- * - A large minimum effect size indicates that the gene is upregulated in X compared to all other groups.
- *   A small value indicates that the gene is downregulated in X compared to at least one other group.
- *   For upregulation, this is the most stringent summary as markers will only have extreme values if they are _uniquely_ upregulated in X compared to every other group.
- *   However, it may not be effective if X is closely related to any of the groups.
- * - A large maximum effect size indicates that the gene is upregulated in X compared to at least one other group.
- *   A small value indicates that the gene is downregulated in X compared to all other groups.
- *   For downregulation, this is the most stringent summary as markers will only have extreme values if they are _uniquely_ downregulated in X compared to every other group.
- *   However, it may not be effective if X is closely related to any of the groups.
- * - The "minimum rank" (a.k.a. min-rank) is defined by ranking genes based on decreasing effect size _within_ each comparison, and then taking the smallest rank _across_ comparisons.
- *   A minimum rank of 1 means that the gene is the top upregulated gene in at least one comparison to another group.
- *   More generally, a minimum rank of T indicates that the gene is the T-th upregulated gene in at least one comparison. 
- *   Applying a threshold on the minimum rank is useful for obtaining a set of genes that, in combination, are guaranteed to distinguish X from every other group.
- *
- * The exact definition of "large" and "small" depends on the choice of effect size.
- * For Cohen's d, LFC and delta-detected, the value must be positive to be considered "large", and negative to be considered "small".
- * For the AUC, a value greater than 0.5 is considered "large" and less than 0.5 is considered "small".
- * Note that this interpretation is contingent on the log-fold change threshold - for positive thresholds, small effects cannot be unambiguously interpreted as downregulation.
- *
- * @section blocked Blocked comparisons
- * In the presence of multiple batches, we can block on the batch of origin for each cell.
- * Comparisons are only performed between the groups of cells in the same batch (also called "blocking level" below).
- * The batch-specific effect sizes are then combined into a single aggregate value for calculation of summary statistics.
- * This strategy avoids most problems related to batch effects as we never directly compare across different blocking levels.
- *
- * Specifically, for each gene and each pair of groups, we obtain one effect size per blocking level.
- * We consolidate these into a single statistic by computing the weighted mean across levels.
- * The weight for each level is defined as the product of the sizes of the two groups;
- * this favors contribution from levels with more cells in both groups, where the effect size is presumably more reliable.
- * (Obviously, levels with no cells in either group will not contribute anything to the weighted mean.)
- *
- * If two groups never co-occur in the same blocking level, no effect size will be computed.
- * We do not attempt to reconcile batch effects in a partially confounded scenario.
- * As such, this particular pair of groups will not contribute to the calculation of the summary statistics for either group.
- *
- * @section other Other statistics
- * We report the mean log-expression of all cells in each group, as well as the proportion of cells with detectable expression in each group.
- * These statistics are useful for quickly interpreting the differences in expression driving the effect size summaries.
- *
- * If blocking is involved, we compute the mean and proportion for each group in each separate blocking level.
- * This is helpful for detecting differences in expression between batches.
- * They can also be combined into a single statistic for each group by using the `average_vectors()` or `average_vectors_weighted()` functions.
+ * As a courtesy, we also compute the mean expression a
  */
 class ScoreMarkers {
 public:
@@ -493,10 +415,12 @@ public:
         std::vector<std::vector<Stat*> > auc,
         std::vector<std::vector<Stat*> > lfc,
         std::vector<std::vector<Stat*> > delta_detected) 
-    {
-        auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
-        run_internal(p, group, ngroups, means, detected, cohen, auc, lfc, delta_detected);
-    }        
+    const {
+        size_t ngroups = means.size();
+        auto pairs = setup_pairwise(cohen, auc, lfc, delta_detected);
+        auto res = pairs.run(p, group, std::move(means), std::move(detected));
+        run_summarize(p->nrow(), ngroups, res, std::move(cohen), std::move(auc), std::move(lfc), std::move(delta_detected));
+    }
 
     /**
      * Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.
@@ -537,143 +461,48 @@ public:
         std::vector<std::vector<Stat*> > auc,
         std::vector<std::vector<Stat*> > lfc,
         std::vector<std::vector<Stat*> > delta_detected) 
-    {
-        auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
-        if (block == NULL) {
-            std::vector<Stat*> means2(ngroups), detected2(ngroups);
-            for (size_t g = 0; g < ngroups; ++g) {
-                means2[g] = means[g][0];
-                detected2[g] = detected[g][0];
-            }
-            run_internal(p, group, ngroups, means2, detected2, cohen, auc, lfc, delta_detected);
-            return;
-        }
-    
-        auto nblocks = *std::max_element(block, block + p->ncol()) + 1;
-        run_blocked_internal(p, group, block, ngroups, nblocks, means, detected, cohen, auc, lfc, delta_detected);
-        return;
+    const {
+        size_t ngroups = means.size();
+        auto pairs = setup_pairwise(cohen, auc, lfc, delta_detected);
+        auto res = pairs.run_blocked(p, group, block, std::move(means), std::move(detected));
+        run_summarize(p->nrow(), ngroups, res, std::move(cohen), std::move(auc), std::move(lfc), std::move(delta_detected));
     }
 
 private:
-    template<class MAT, typename G, typename Stat>
-    void run_internal(const MAT* p, const G* group, int ngroups, 
-        std::vector<Stat*>& means, 
-        std::vector<Stat*>& detected, 
-        std::vector<std::vector<Stat*> >& cohen, 
-        std::vector<std::vector<Stat*> >& auc,
-        std::vector<std::vector<Stat*> >& lfc,
-        std::vector<std::vector<Stat*> >& delta_detected) 
-    {
-        std::vector<int> group_size(ngroups);
-        for (size_t i = 0; i < p->ncol(); ++i) {
-            ++(group_size[group[i]]);
-        }
-        core(p, group, group_size, group, ngroups, static_cast<const int*>(NULL), 1, means, detected, cohen, auc, lfc, delta_detected);
+    template<typename Stat>
+    PairwiseEffects setup_pairwise(
+        const std::vector<std::vector<Stat*> >& cohen,
+        const std::vector<std::vector<Stat*> >& auc,
+        const std::vector<std::vector<Stat*> >& lfc,
+        const std::vector<std::vector<Stat*> >& delta_detected
+    ) const {
+        PairwiseEffects pairs;
+        pairs
+            .set_num_threads(num_threads)
+            .set_threshold(threshold)
+            .set_compute_cohen(!cohen.empty())
+            .set_compute_auc(!auc.empty())
+            .set_compute_lfc(!lfc.empty())
+            .set_compute_delta_detected(!delta_detected.empty());
+        return pairs;
     }
 
-    template<class MAT, typename G, typename B, typename Stat>
-    void run_blocked_internal(const MAT* p, const G* group, const B* block, int ngroups, int nblocks,
-        std::vector<std::vector<Stat*> >& means, 
-        std::vector<std::vector<Stat*> >& detected, 
-        std::vector<std::vector<Stat*> >& cohen, 
-        std::vector<std::vector<Stat*> >& auc,
-        std::vector<std::vector<Stat*> >& lfc,
-        std::vector<std::vector<Stat*> >& delta_detected) 
-    {
-        int ncombos = ngroups * nblocks;
-        std::vector<int> combos(p->ncol());
-        std::vector<int> combo_size(ncombos);
-
-        for (size_t i = 0; i < combos.size(); ++i) {
-            combos[i] = group[i] * nblocks + block[i];
-            ++(combo_size[combos[i]]);
-        }
-
-        std::vector<Stat*> means2(ncombos), detected2(ncombos);
-        auto mIt = means2.begin(), dIt = detected2.begin();
-        for (int g = 0; g < ngroups; ++g) {
-            for (int b = 0; b < nblocks; ++b, ++mIt, ++dIt) {
-                *mIt = means[g][b];
-                *dIt = detected[g][b];
-            }
-        }
-
-        core(p, combos.data(), combo_size, group, ngroups, block, nblocks, means2, detected2, cohen, auc, lfc, delta_detected);
-    }
-
-    template<class MAT, typename L, class Ls, typename G, typename B, typename Stat>
-    void core(const MAT* p, 
-        const L* level, const Ls& level_size, 
-        const G* group, int ngroups, 
-        const B* block, int nblocks, 
-        std::vector<Stat*>& means, 
-        std::vector<Stat*>& detected, 
-        std::vector<std::vector<Stat*> >& cohen, 
-        std::vector<std::vector<Stat*> >& auc,
-        std::vector<std::vector<Stat*> >& lfc,
-        std::vector<std::vector<Stat*> >& delta_detected) 
-    {
-        size_t buffer_size = p->nrow() * ngroups * ngroups;
-
-        const bool do_cohen = !cohen.empty();
-        std::vector<Stat> cohen_buffer(do_cohen ?  buffer_size : 0);
-        Stat* cohen_ptr = do_cohen ? cohen_buffer.data() : NULL;
-
-        const bool do_auc = !auc.empty();
-        std::vector<Stat> auc_buffer(do_auc ? buffer_size : 0);
-        Stat* auc_ptr = do_auc ? auc_buffer.data() : NULL;
-
-        const bool do_lfc = !lfc.empty();
-        std::vector<Stat> lfc_buffer(do_lfc ? buffer_size : 0);
-        Stat* lfc_ptr = do_lfc ? lfc_buffer.data() : NULL;
-
-        const bool do_delta = !delta_detected.empty();
-        std::vector<Stat> delta_buffer(do_delta ? buffer_size : 0);
-        Stat* delta_ptr = do_delta ? delta_buffer.data() : NULL;
-
-        std::vector<Stat*> effects { cohen_ptr, auc_ptr, lfc_ptr, delta_ptr };
-
-#ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::ScoreMarkers", "Performing pairwise comparisons between groups of cells");
-#endif
-        if (!do_auc) {
-            differential_analysis::BidimensionalFactory fact(p->nrow(), p->ncol(), means, detected, effects, level, &level_size, ngroups, nblocks, threshold);
-            tatami::apply<0>(p, fact, num_threads);
-
-        } else {
-            // Need to remake this, as there's no guarantee that 'blocks' exists.
-            std::vector<B> tmp_blocks;
-            if (!block) {
-                tmp_blocks.resize(p->ncol());
-                block = tmp_blocks.data();
-            }
-
-            differential_analysis::PerRowFactory fact(p->nrow(), p->ncol(), means, detected, effects, level, &level_size, group, ngroups, block, nblocks, threshold);
-            tatami::apply<0>(p, fact, num_threads);
-        }
-
-        auto summarize = [&](Stat* ptr, std::vector<std::vector<Stat*> >& output) -> void {
-            auto& min_rank = output[scran::differential_analysis::MIN_RANK];
-            if (min_rank.size()) {
-                differential_analysis::compute_min_rank(p->nrow(), ngroups, ptr, min_rank, num_threads);
-            }
-            differential_analysis::summarize_comparisons(p->nrow(), ngroups, ptr, output, num_threads); 
-        };
-
-        if (do_cohen) {
-            summarize(cohen_ptr, cohen);
-        }
-        if (do_auc) {
-            summarize(auc_ptr, auc);
-        }
-        if (do_lfc) {
-            summarize(lfc_ptr, lfc);
-        }
-        if (do_delta) {
-            summarize(delta_ptr, delta_detected);
-        }
-
-        return;
+    template<typename Stat>
+    void run_summarize(
+        size_t ngenes,
+        size_t ngroups,
+        const PairwiseEffects::Results<Stat>& res,
+        std::vector<std::vector<Stat*> > cohen,
+        std::vector<std::vector<Stat*> > auc,
+        std::vector<std::vector<Stat*> > lfc,
+        std::vector<std::vector<Stat*> > delta_detected) 
+    const {
+        SummarizeEffects summarizer;
+        summarizer.set_num_threads(num_threads);
+        summarizer.run(ngenes, ngroups, res.cohen.data(), std::move(cohen));
+        summarizer.run(ngenes, ngroups, res.auc.data(), std::move(auc));
+        summarizer.run(ngenes, ngroups, res.lfc.data(), std::move(lfc));
+        summarizer.run(ngenes, ngroups, res.delta_detected.data(), std::move(delta_detected));
     }
 
 public:
@@ -820,19 +649,19 @@ public:
      * Whether particular statistics are computed depends on the configuration from `set_compute_cohen()` and related setters.
      */
     template<typename Stat = double, class MAT, typename G> 
-    Results<Stat> run(const MAT* p, const G* group) {
+    Results<Stat> run(const MAT* p, const G* group) const {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
         Results<Stat> res(p->nrow(), ngroups, 1, do_cohen, do_auc, do_lfc, do_delta_detected); 
-
-        auto mean_ptrs = vector_to_pointers3(res.means);
-        auto detect_ptrs = vector_to_pointers3(res.detected);
-
-        auto cohen_ptrs = vector_to_pointers2(res.cohen);
-        auto auc_ptrs = vector_to_pointers2(res.auc);
-        auto lfc_ptrs = vector_to_pointers2(res.lfc);
-        auto delta_ptrs = vector_to_pointers2(res.delta_detected);
-
-        run_internal(p, group, ngroups, mean_ptrs, detect_ptrs, cohen_ptrs, auc_ptrs, lfc_ptrs, delta_ptrs);
+        run(
+            p, 
+            group,
+            vector_to_pointers3(res.means),
+            vector_to_pointers3(res.detected),
+            vector_to_pointers(res.cohen),
+            vector_to_pointers(res.auc),
+            vector_to_pointers(res.lfc),
+            vector_to_pointers(res.delta_detected)
+        );
         return res;
     }
 
@@ -854,7 +683,7 @@ public:
      * Whether particular statistics are computed depends on the configuration from `set_compute_cohen()` and related setters.
      */
     template<typename Stat = double, class MAT, typename G, typename B> 
-    Results<Stat> run_blocked(const MAT* p, const G* group, const B* block) {
+    Results<Stat> run_blocked(const MAT* p, const G* group, const B* block) const {
         if (block == NULL) {
             return run(p, group);
         }
@@ -863,35 +692,18 @@ public:
         auto nblocks = *std::max_element(block, block + p->ncol()) + 1;
         Results<Stat> res(p->nrow(), ngroups, nblocks, do_cohen, do_auc, do_lfc, do_delta_detected); 
 
-        auto mean_ptrs = vector_to_pointers2(res.means);
-        auto detect_ptrs = vector_to_pointers2(res.detected);
-
-        auto cohen_ptrs = vector_to_pointers2(res.cohen);
-        auto auc_ptrs = vector_to_pointers2(res.auc);
-        auto lfc_ptrs = vector_to_pointers2(res.lfc);
-        auto delta_ptrs = vector_to_pointers2(res.delta_detected);
-
-        run_blocked_internal(p, group, block, ngroups, nblocks, mean_ptrs, detect_ptrs, cohen_ptrs, auc_ptrs, lfc_ptrs, delta_ptrs);
+        run_blocked(
+            p, 
+            group,
+            block,
+            vector_to_pointers(res.means),
+            vector_to_pointers(res.detected),
+            vector_to_pointers(res.cohen),
+            vector_to_pointers(res.auc),
+            vector_to_pointers(res.lfc),
+            vector_to_pointers(res.delta_detected)
+        );
         return res;
-    }
-
-private:
-    template<typename Stat>
-    std::vector<std::vector<Stat*> > vector_to_pointers2(std::vector<std::vector<std::vector<Stat> > >& input) {
-        std::vector<std::vector<Stat*> > ptrs;
-        for (auto& current : input) {
-            ptrs.push_back(vector_to_pointers(current));
-        }
-        return ptrs;
-    }
-
-    template<typename Stat>
-    std::vector<Stat*> vector_to_pointers3(std::vector<std::vector<std::vector<Stat> > >& input) {
-        std::vector<Stat*> ptrs;
-        for (auto& current : input) {
-            ptrs.push_back(current[0].data()); // first vector from each element.
-        }
-        return ptrs;
     }
 };
 

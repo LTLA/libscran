@@ -876,8 +876,9 @@ RECURSIVE              = YES
 EXCLUDE                = ../include/scran/utils/block_indices.hpp \
                          ../include/scran/differential_analysis/auc.hpp \
                          ../include/scran/differential_analysis/cohens_d.hpp \
+                         ../include/scran/differential_analysis/lfc.hpp \
+                         ../include/scran/differential_analysis/delta_detected.hpp \
                          ../include/scran/differential_analysis/Factory.hpp \
-                         ../include/scran/differential_analysis/summarize_comparisons.hpp \
                          ../include/scran/dimensionality_reduction/pca_utils.hpp \
                          ../include/scran/feature_selection/blocked_variances.hpp
 

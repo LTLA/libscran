@@ -8,10 +8,23 @@
 #include <vector>
 #include <cmath>
 
+/**
+ * @file summarize_comparisons.hpp
+ *
+ * @brief Utilities for effect summarization.
+ */
+
 namespace scran {
 
+/**
+ * @brief Utilities for differential analysis.
+ */
 namespace differential_analysis {
 
+/**
+ * Choice of summary statistic for the pairwise effects of a given group, see `SummarizeEffects` for details.
+ * `n_summaries` is used to denote the number of summaries. 
+ */
 enum summary {
     MIN,
     MEAN,
@@ -21,6 +34,9 @@ enum summary {
     n_summaries 
 };
 
+/**
+ * @cond
+ */
 template<class IT>
 double median (IT start, size_t n) {
     int halfway = n / 2;
@@ -151,6 +167,10 @@ void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vect
     }, threads);
 #endif
 }
+
+/**
+ * @endcond
+ */
 
 }
 

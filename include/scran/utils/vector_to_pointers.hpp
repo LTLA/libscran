@@ -52,6 +52,24 @@ inline std::vector<const T*> vector_to_pointers(const std::vector<std::vector<T>
     return output;
 }
 
+/**
+ * Extract a vector of vector of pointers from a vector of vectors of vectors..
+ *
+ * @tparam T Type of data.
+ * @param input Vector of vector of vector of values.
+ *
+ * @return A vector of vector of pointers to each inner vector in `input`.
+ */
+template<typename T>
+std::vector<std::vector<T*> > vector_to_pointers(std::vector<std::vector<std::vector<T> > >& input) {
+    std::vector<std::vector<T*> > output;
+    output.reserve(input.size());
+    for (auto& current : input) {
+        output.emplace_back(vector_to_pointers(current));
+    }
+    return output;
+}
+
 }
 
 #endif
