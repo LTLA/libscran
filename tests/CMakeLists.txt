@@ -35,12 +35,15 @@ add_executable(
 
     src/clustering/BuildSNNGraph.cpp
     src/clustering/ClusterSNNGraph.cpp
+
     src/differential_analysis/summarize_comparisons.cpp
     src/differential_analysis/auc.cpp
     src/differential_analysis/cohens_d.cpp
     src/differential_analysis/lfc.cpp
     src/differential_analysis/delta_detected.cpp
     src/differential_analysis/ScoreMarkers.cpp
+    src/differential_analysis/PairwiseEffects.cpp
+
     src/aggregation/AggregateAcrossCells.cpp
     src/utils/average_vectors.cpp
     src/utils/subset_vector.cpp
