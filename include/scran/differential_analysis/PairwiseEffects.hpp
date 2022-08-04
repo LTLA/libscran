@@ -20,15 +20,6 @@ namespace scran {
  * @cond
  */
 template<typename Stat>
-std::vector<std::vector<Stat*> > vector_to_pointers2(std::vector<std::vector<std::vector<Stat> > >& input) {
-    std::vector<std::vector<Stat*> > ptrs;
-    for (auto& current : input) {
-        ptrs.push_back(vector_to_pointers(current));
-    }
-    return ptrs;
-}
-
-template<typename Stat>
 std::vector<Stat*> vector_to_pointers3(std::vector<std::vector<std::vector<Stat> > >& input) {
     std::vector<Stat*> ptrs;
     for (auto& current : input) {
@@ -584,8 +575,8 @@ public:
             p,
             group,
             block,
-            vector_to_pointers2(res.means),
-            vector_to_pointers2(res.detected),
+            vector_to_pointers(res.means),
+            vector_to_pointers(res.detected),
             harvest_pointer(res.cohen, do_cohen),
             harvest_pointer(res.auc, do_auc),
             harvest_pointer(res.lfc, do_lfc),

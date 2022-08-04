@@ -3,11 +3,11 @@
 
 #include "../utils/macros.hpp"
 
+#include "../utils/vector_to_pointers.hpp"
 #include "PairwiseEffects.hpp"
-#include "summarize_comparisons.hpp"
+#include "SummarizeEffects.hpp"
 
 #include "tatami/stats/apply.hpp"
-#include "../utils/vector_to_pointers.hpp"
 
 #include <array>
 
@@ -495,23 +495,9 @@ public:
         std::vector<std::vector<Stat*> > delta_detected) 
     const {
         size_t ngroups = means.size();
-
-        PairwiseEffects pairs;
-        pairs.set_compute_cohen(!cohen.empty()).set_compute_auc(!auc.empty()).set_compute_lfc(!lfc.empty()).set_compute_delta_detected(!delta_detected.empty()).set_threshold(threshold);
+        auto pairs = setup_pairwise(cohen, auc, lfc, delta_detected);
         auto res = pairs.run(p, group, std::move(means), std::move(detected));
-
-        core(
-            p->nrow(),
-            ngroups,
-            res.cohen.data(), 
-            res.auc.data(), 
-            res.lfc.data(), 
-            res.delta_detected.data(),
-            std::move(cohen),
-            std::move(auc),
-            std::move(lfc),
-            std::move(delta_detected)
-        );
+        run_summarize(p->nrow(), ngroups, res, std::move(cohen), std::move(auc), std::move(lfc), std::move(delta_detected));
     }
 
     /**
@@ -555,61 +541,46 @@ public:
         std::vector<std::vector<Stat*> > delta_detected) 
     const {
         size_t ngroups = means.size();
-
-        PairwiseEffects pairs;
-        pairs.set_compute_cohen(!cohen.empty()).set_compute_auc(!auc.empty()).set_compute_lfc(!lfc.empty()).set_compute_delta_detected(!delta_detected.empty()).set_threshold(threshold);
+        auto pairs = setup_pairwise(cohen, auc, lfc, delta_detected);
         auto res = pairs.run_blocked(p, group, block, std::move(means), std::move(detected));
-
-        core(
-            p->nrow(),
-            ngroups,
-            res.cohen.data(), 
-            res.auc.data(), 
-            res.lfc.data(), 
-            res.delta_detected.data(),
-            std::move(cohen),
-            std::move(auc),
-            std::move(lfc),
-            std::move(delta_detected)
-        );
+        run_summarize(p->nrow(), ngroups, res, std::move(cohen), std::move(auc), std::move(lfc), std::move(delta_detected));
     }
 
 private:
     template<typename Stat>
-    void core(
+    PairwiseEffects setup_pairwise(
+        const std::vector<std::vector<Stat*> >& cohen,
+        const std::vector<std::vector<Stat*> >& auc,
+        const std::vector<std::vector<Stat*> >& lfc,
+        const std::vector<std::vector<Stat*> >& delta_detected
+    ) const {
+        PairwiseEffects pairs;
+        pairs
+            .set_num_threads(num_threads)
+            .set_threshold(threshold)
+            .set_compute_cohen(!cohen.empty())
+            .set_compute_auc(!auc.empty())
+            .set_compute_lfc(!lfc.empty())
+            .set_compute_delta_detected(!delta_detected.empty());
+        return pairs;
+    }
+
+    template<typename Stat>
+    void run_summarize(
         size_t ngenes,
         size_t ngroups,
-        const Stat* cohen_ptr,
-        const Stat* auc_ptr,
-        const Stat* lfc_ptr,
-        const Stat* delta_ptr,
-        std::vector<std::vector<Stat*> > cohen, 
+        const PairwiseEffects::Results<Stat>& res,
+        std::vector<std::vector<Stat*> > cohen,
         std::vector<std::vector<Stat*> > auc,
         std::vector<std::vector<Stat*> > lfc,
         std::vector<std::vector<Stat*> > delta_detected) 
     const {
-        auto summarize = [&](const Stat* ptr, std::vector<std::vector<Stat*> >& output) -> void {
-            auto& min_rank = output[scran::differential_analysis::MIN_RANK];
-            if (min_rank.size()) {
-                differential_analysis::compute_min_rank(ngenes, ngroups, ptr, min_rank, num_threads);
-            }
-            differential_analysis::summarize_comparisons(ngenes, ngroups, ptr, output, num_threads); 
-        };
-
-        if (!cohen.empty()) {
-            summarize(cohen_ptr, cohen);
-        }
-        if (!auc.empty()) {
-            summarize(auc_ptr, auc);
-        }
-        if (!lfc.empty()) {
-            summarize(lfc_ptr, lfc);
-        }
-        if (!delta_detected.empty()) {
-            summarize(delta_ptr, delta_detected);
-        }
-
-        return;
+        SummarizeEffects summarizer;
+        summarizer.set_num_threads(num_threads);
+        summarizer.run(ngenes, ngroups, res.cohen.data(), std::move(cohen));
+        summarizer.run(ngenes, ngroups, res.auc.data(), std::move(auc));
+        summarizer.run(ngenes, ngroups, res.lfc.data(), std::move(lfc));
+        summarizer.run(ngenes, ngroups, res.delta_detected.data(), std::move(delta_detected));
     }
 
 public:
@@ -764,10 +735,10 @@ public:
             group,
             vector_to_pointers3(res.means),
             vector_to_pointers3(res.detected),
-            vector_to_pointers2(res.cohen),
-            vector_to_pointers2(res.auc),
-            vector_to_pointers2(res.lfc),
-            vector_to_pointers2(res.delta_detected)
+            vector_to_pointers(res.cohen),
+            vector_to_pointers(res.auc),
+            vector_to_pointers(res.lfc),
+            vector_to_pointers(res.delta_detected)
         );
         return res;
     }
@@ -803,12 +774,12 @@ public:
             p, 
             group,
             block,
-            vector_to_pointers2(res.means),
-            vector_to_pointers2(res.detected),
-            vector_to_pointers2(res.cohen),
-            vector_to_pointers2(res.auc),
-            vector_to_pointers2(res.lfc),
-            vector_to_pointers2(res.delta_detected)
+            vector_to_pointers(res.means),
+            vector_to_pointers(res.detected),
+            vector_to_pointers(res.cohen),
+            vector_to_pointers(res.auc),
+            vector_to_pointers(res.lfc),
+            vector_to_pointers(res.delta_detected)
         );
         return res;
     }
