@@ -54,7 +54,10 @@ namespace scran {
  * The interpretation above is also contingent on the log-fold change threshold used in `PairwiseEffects`.
  * For positive thresholds, small effects cannot be unambiguously interpreted as downregulation, as the effect is already adjusted to account for the threshold.
  * As a result, only large effects can be interpreted as evidence for upregulation.
- * Conversely, for negative thresholds, large effects cannot be unambiguously interpreted as upregulation.
+ *
+ * `NaN` effect sizes are allowed, e.g., if two groups do not exist in the same block for a blocked analysis in `PairwiseEffects`.
+ * This class will ignore `NaN` values when computing each summary.
+ * If all effects are `NaN` for a particular group, the summary statistic will also be `NaN`.
  *
  * All choices of summary statistics are enumerated by `differential_analysis::summary`.
  */

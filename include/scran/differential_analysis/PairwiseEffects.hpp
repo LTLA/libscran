@@ -36,6 +36,67 @@ std::vector<Stat*> vector_to_pointers3(std::vector<std::vector<std::vector<Stat>
  *
  * This class computes the effect sizes for the pairwise comparisons used in `ScoreMarkers`, prior to any ranking of marker genes.
  * It may be desirable to call this function directly if the pairwise effects themselves are of interest, rather than per-group summaries.
+ *
+ * @section effect-sizes Choice of effect sizes
+ * The log-fold change (LFC) is the difference in the mean log-expression between groups.
+ * This is fairly straightforward to interpret - as log-fold change of +1 corresponds to a two-fold upregulation in the first group compared to the second.
+ * For this interpretation, we assume that the input matrix contains log-transformed normalized expression values.
+ *
+ * The delta-detected is the difference in the proportion of cells with detected expression between groups.
+ * This lies between 1 and -1, with the extremes occurring when a gene is silent in one group and detected in all cells of the other group.
+ * For this interpretation, we assume that the input matrix contains non-negative expression values, where a value of zero corresponds to lack of detectable expression.
+ *
+ * Cohen's d is the standardized log-fold change between two groups.
+ * This is defined as the difference in the mean log-expression for each group scaled by the average standard deviation across the two groups.
+ * (Technically, we should use the pooled variance; however, this introduces some unpleasant asymmetry depending on the variance of the larger group, so we take a simple average instead.)
+ * A positive value indicates that the gene is upregulated in the first gene compared to the second.
+ * Cohen's d is analogous to the t-statistic in a two-sample t-test and avoids spuriously large effect sizes from comparisons between highly variable groups.
+ * We can also interpret Cohen's d as the number of standard deviations between the two group means.
+ *
+ * The area under the curve (AUC) can be interpreted as the probability that a randomly chosen observation in one group is greater than a randomly chosen observation in the other group. 
+ * Values greater than 0.5 indicate that a gene is upregulated in the first group.
+ * The AUC is closely related to the U-statistic used in the Wilcoxon rank sum test. 
+ * The key difference between the AUC and Cohen's d is that the former is less sensitive to the variance within each group, e.g.,
+ * if two distributions exhibit no overlap, the AUC is the same regardless of the variance of each distribution. 
+ * This may or may not be desirable as it improves robustness to outliers but reduces the information available to obtain a highly resolved ranking. 
+ *
+ * @section lfc-threshold With a log-fold change threshold
+ * Setting a log-fold change threshold can be helpful as it prioritizes genes with large shifts in expression instead of those with low variances.
+ * Currently, only positive thresholds are supported - this focuses on genes upregulated in the first group compared to the second.
+ * The effect size definitions are generalized when testing against a non-zero log-fold change threshold.
+ *
+ * Cohen's d is redefined as the standardized difference between the observed log-fold change and the specified threshold, analogous to the TREAT method from **limma**.
+ * Large positive values are only obtained when the observed log-fold change is significantly greater than the threshold.
+ * For example, if we had a threshold of 2 and we obtained a Cohen's d of 3, this means that the observed log-fold change was 3 standard deviations above 2.
+ * Importantly, a negative Cohen's d cannot be intepreted as downregulation, as the log-fold change may still be positive but less than the threshold.
+ * 
+ * The AUC generalized to the probability of obtaining a random observation in one group that is greater than a random observation plus the threshold in the other group.
+ * For example, if we had a threshold of 2 and we obtained an AUC of 0.8, this means that - 80% of the time - 
+ * the random observation from the first group would be greater than a random observation from the second group by 2 or more.
+ * Again, AUCs below 0.5 cannot be interpreted as downregulation, as it may be caused by a positive log-fold change that is less than the threshold.
+ * 
+ * @section blocked Blocked comparisons
+ * In the presence of multiple batches, we can block on the batch of origin for each cell.
+ * Comparisons are only performed between the groups of cells in the same batch (also called "blocking level" below).
+ * The batch-specific effect sizes are then combined into a single aggregate value for output.
+ * This strategy avoids most problems related to batch effects as we never directly compare across different blocking levels.
+ *
+ * Specifically, for each gene and each pair of groups, we obtain one effect size per blocking level.
+ * We consolidate these into a single statistic by computing the weighted mean across levels.
+ * The weight for each level is defined as the product of the sizes of the two groups;
+ * this favors contribution from levels with more cells in both groups, where the effect size is presumably more reliable.
+ * (Obviously, levels with no cells in either group will not contribute anything to the weighted mean.)
+ *
+ * If two groups never co-occur in the same blocking level, no effect size will be computed and a `NaN` is reported in the output.
+ * We do not attempt to reconcile batch effects in a partially confounded scenario.
+ *
+ * @section other Other statistics
+ * We report the mean log-expression of all cells in each group, as well as the proportion of cells with detectable expression in each group.
+ * These statistics are useful for quickly interpreting the differences in expression driving the effect size summaries.
+ *
+ * If blocking is involved, we compute the mean and proportion for each group in each separate blocking level.
+ * This is helpful for detecting differences in expression between batches.
+ * They can also be combined into a single statistic for each group by using the `average_vectors()` or `average_vectors_weighted()` functions.
  */
 class PairwiseEffects {
 public:
@@ -157,7 +218,7 @@ public:
 
 public:
     /**
-     * Score potential marker genes by computing summary statistics across pairwise comparisons between groups.
+     * Compute effect sizes for pairwise comparisons between groups.
      * On output, `means`, `detected`, `cohen`, `auc`, `lfc` and `delta_detected` are filled with their corresponding statistics. 
      *
      * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
@@ -199,7 +260,7 @@ public:
     }
 
     /**
-     * Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.
+     * Compute effect sizes for pairwise comparisons between groups, accounting for any blocking factor in the dataset.
      * On output, `means`, `detected`, `cohen`, `auc`, `lfc` and `delta_detected` are filled with their corresponding statistics. 
      *
      * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
