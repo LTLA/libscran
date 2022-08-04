@@ -102,9 +102,19 @@ $(function() {
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordflow">return</span> output;</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>}</div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>}</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="vector__to__pointers_8hpp.html#a701fa9241011d6c4aa5ea84e33ee62ce">   64</a></span>std::vector&lt;std::vector&lt;T*&gt; &gt; <a class="code hl_function" href="vector__to__pointers_8hpp.html#ab4600cde1ede42175b03490d96949524">vector_to_pointers</a>(std::vector&lt;std::vector&lt;std::vector&lt;T&gt; &gt; &gt;&amp; input) {</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    std::vector&lt;std::vector&lt;T*&gt; &gt; output;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    output.reserve(input.size());</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; current : input) {</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        output.emplace_back(<a class="code hl_function" href="vector__to__pointers_8hpp.html#ab4600cde1ede42175b03490d96949524">vector_to_pointers</a>(current));</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    }</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keywordflow">return</span> output;</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>}</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>}</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="amacros_8hpp_html"><div class="ttname"><a href="macros_8hpp.html">macros.hpp</a></div><div class="ttdoc">Set common macros used through libscran.</div></div>
 <div class="ttc" id="avector__to__pointers_8hpp_html_ab4600cde1ede42175b03490d96949524"><div class="ttname"><a href="vector__to__pointers_8hpp.html#ab4600cde1ede42175b03490d96949524">scran::vector_to_pointers</a></div><div class="ttdeci">std::vector&lt; T * &gt; vector_to_pointers(std::vector&lt; std::vector&lt; T &gt; &gt; &amp;input)</div><div class="ttdef"><b>Definition:</b> vector_to_pointers.hpp:26</div></div>
 </div><!-- fragment --></div><!-- contents -->

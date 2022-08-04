@@ -1,3 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structscran_1_1PerCellAdtQcFilters_1_1Results.html" title="Results of the QC filtering." alt="" coords="5,5,180,47"/>
+<area shape="rect" id="node1" href="$structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results." alt="" coords="5,5,156,47"/>
+<area shape="rect" id="node2" href="$structscran_1_1PairwiseEffects_1_1ResultsWithMeans.html" title="Pairwise effect size results, with per&#45;group means." alt="" coords="204,5,387,47"/>
 </map>

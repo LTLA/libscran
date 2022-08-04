@@ -1,7 +1,7 @@
 var searchData=
 [
   ['max_0',['max',['../structscran_1_1ClusterSNNGraphMultiLevel_1_1Results.html#a569e235d05befc66022b27cf329c1b2d',1,'scran::ClusterSNNGraphMultiLevel::Results']]],
-  ['means_1',['means',['../structscran_1_1ScoreMarkers_1_1Results.html#acb23c7cf180478f30280747c6e49900c',1,'scran::ScoreMarkers::Results::means()'],['../structscran_1_1ModelGeneVar_1_1Results.html#a30c93b46a06b60773cfe1cbb895c4f32',1,'scran::ModelGeneVar::Results::means()']]],
+  ['means_1',['means',['../structscran_1_1PairwiseEffects_1_1ResultsWithMeans.html#a87855adf90d0f74a2cc108fba7119255',1,'scran::PairwiseEffects::ResultsWithMeans::means()'],['../structscran_1_1ScoreMarkers_1_1Results.html#acb23c7cf180478f30280747c6e49900c',1,'scran::ScoreMarkers::Results::means()'],['../structscran_1_1ModelGeneVar_1_1Results.html#a30c93b46a06b60773cfe1cbb895c4f32',1,'scran::ModelGeneVar::Results::means()']]],
   ['membership_2',['membership',['../structscran_1_1ClusterSNNGraphMultiLevel_1_1Results.html#a27434f77a03c488270b68c08e5105e80',1,'scran::ClusterSNNGraphMultiLevel::Results::membership()'],['../structscran_1_1ClusterSNNGraphWalktrap_1_1Results.html#aa14b1d5ff2045c1513039697e5320d0f',1,'scran::ClusterSNNGraphWalktrap::Results::membership()'],['../structscran_1_1ClusterSNNGraphLeiden_1_1Results.html#a2a59465810969c36e6a084f5cac31675',1,'scran::ClusterSNNGraphLeiden::Results::membership()']]],
   ['merges_3',['merges',['../structscran_1_1ClusterSNNGraphWalktrap_1_1Results.html#aa6ef7c62f9f348d3e26592956c467e50',1,'scran::ClusterSNNGraphWalktrap::Results']]],
   ['min_5fdetected_5fdrop_4',['min_detected_drop',['../structscran_1_1PerCellAdtQcFilters_1_1Defaults.html#aa229e997491d3190175097269e3d98d1',1,'scran::PerCellAdtQcFilters::Defaults']]],

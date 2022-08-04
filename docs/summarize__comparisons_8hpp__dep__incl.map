@@ -1,0 +1,6 @@
+<map id="scran/differential_analysis/summarize_comparisons.hpp" name="scran/differential_analysis/summarize_comparisons.hpp">
+<area shape="rect" id="node1" title="Utilities for effect summarization." alt="" coords="39,5,181,61"/>
+<area shape="rect" id="node2" href="$SummarizeEffects_8hpp.html" title="Summarize the effect sizes from pairwise comparisons." alt="" coords="5,109,215,151"/>
+<area shape="rect" id="node3" href="$ScoreMarkers_8hpp.html" title="Compute marker scores for each gene in each group of cells." alt="" coords="17,199,203,240"/>
+<area shape="rect" id="node4" href="$scran_8hpp_source.html" title=" " alt="" coords="53,288,167,315"/>
+</map>

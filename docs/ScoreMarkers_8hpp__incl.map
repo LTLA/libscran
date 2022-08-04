@@ -1,10 +1,15 @@
 <map id="scran/differential_analysis/ScoreMarkers.hpp" name="scran/differential_analysis/ScoreMarkers.hpp">
-<area shape="rect" id="node1" title="Compute marker scores for each gene in each group of cells." alt="" coords="242,5,427,47"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="167,184,294,211"/>
-<area shape="rect" id="node3" title=" " alt="" coords="29,102,118,129"/>
-<area shape="rect" id="node4" title=" " alt="" coords="142,102,333,129"/>
-<area shape="rect" id="node5" title=" " alt="" coords="357,102,507,129"/>
-<area shape="rect" id="node6" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="531,95,645,136"/>
-<area shape="rect" id="node8" title=" " alt="" coords="669,102,720,129"/>
-<area shape="rect" id="node7" title=" " alt="" coords="559,184,617,211"/>
+<area shape="rect" id="node1" title="Compute marker scores for each gene in each group of cells." alt="" coords="267,5,452,47"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="368,259,495,285"/>
+<area shape="rect" id="node3" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="374,169,489,211"/>
+<area shape="rect" id="node5" href="$PairwiseEffects_8hpp.html" title="Compute pairwise effect sizes between groups of cells." alt="" coords="239,95,375,121"/>
+<area shape="rect" id="node7" title=" " alt="" coords="35,177,185,203"/>
+<area shape="rect" id="node8" href="$SummarizeEffects_8hpp.html" title="Summarize the effect sizes from pairwise comparisons." alt="" coords="451,95,601,121"/>
+<area shape="rect" id="node13" title=" " alt="" coords="626,95,677,121"/>
+<area shape="rect" id="node4" title=" " alt="" coords="533,259,591,285"/>
+<area shape="rect" id="node6" title=" " alt="" coords="209,177,299,203"/>
+<area shape="rect" id="node9" href="$summarize__comparisons_8hpp.html" title="Utilities for effect summarization." alt="" coords="615,177,805,203"/>
+<area shape="rect" id="node10" title=" " alt="" coords="615,259,690,285"/>
+<area shape="rect" id="node11" title=" " alt="" coords="715,259,783,285"/>
+<area shape="rect" id="node12" title=" " alt="" coords="807,259,866,285"/>
 </map>
