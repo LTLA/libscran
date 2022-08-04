@@ -78,7 +78,6 @@ protected:
     template<class Effects>
     static void check_effects(size_t ngenes, size_t group, const Effects& effects, bool do_auc = false, bool has_boundaries = false, double lower = 0, double upper = 0) {
         EXPECT_EQ(effects.size(), group * group * ngenes);
-        bool at_least_one_nonzero = false;
 
         for (size_t g = 0; g < ngenes; ++g) {
             auto start = effects.data() + g * group * group;
@@ -99,15 +98,6 @@ protected:
                 }
             }
 
-            if (!at_least_one_nonzero) {
-                for (size_t i = 0; i < group * group; ++i) {
-                    if (start[i] != 0) {
-                        at_least_one_nonzero = true;
-                        break;
-                    }
-                }
-            }
-
             if (has_boundaries) {
                 for (size_t n = 0; n < group; ++n) {
                     for (size_t o = 0; o < group; ++o) {
@@ -118,10 +108,35 @@ protected:
                 }
             }
         }
-
-        EXPECT_TRUE(at_least_one_nonzero);
     }
 
+    template<class Effects>
+    void at_least_one_nonzero(size_t ngenes, size_t group, const Effects& effects, bool global = false) {
+        if (!global) {
+            for (size_t g = 0; g < ngenes; ++g) {
+                auto start = effects.data() + g * group * group;
+                bool at_least_one_nonzero = false;
+                for (size_t i = 0; i < group * group; ++i) {
+                    if (start[i] != 0) {
+                        at_least_one_nonzero = true;
+                        break;
+                    }
+                }
+                EXPECT_TRUE(at_least_one_nonzero);
+            }
+        } else {
+            bool at_least_one_nonzero = false;
+            for (size_t g = 0; g < ngenes; ++g) {
+                auto start = effects.data() + g * group * group;
+                for (size_t i = 0; i < group * group; ++i) {
+                    if (start[i] != 0) {
+                        return;
+                    }
+                }
+            }
+            EXPECT_TRUE(at_least_one_nonzero);
+        }
+    }
 };
 
 /*********************************************/
@@ -179,6 +194,14 @@ TEST_P(PairwiseEffectsTest, Basics) {
         if (do_auc) {
             check_effects(ngenes, ngroups, res.auc, true, true, 0, 1);
         }
+
+        at_least_one_nonzero(ngenes, ngroups, res.cohen);
+        at_least_one_nonzero(ngenes, ngroups, res.lfc);
+        at_least_one_nonzero(ngenes, ngroups, res.delta_detected, true); // too granular to guarantee change in proportion per gene.
+        if (do_auc) {
+            at_least_one_nonzero(ngenes, ngroups, res.auc, true);
+        }
+
     } else {
         // Comparing to the same call, but parallelized.
         auto res1 = chd.run(dense_row.get(), groupings.data());
