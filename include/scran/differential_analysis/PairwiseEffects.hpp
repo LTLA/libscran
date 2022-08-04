@@ -8,6 +8,12 @@
 
 #include "tatami/stats/apply.hpp"
 
+/**
+ * @file PairwiseEffects.hpp
+ *
+ * @brief Compute pairwise effect sizes between groups of cells.
+ */
+
 namespace scran {
 
 /**
@@ -34,6 +40,12 @@ std::vector<Stat*> vector_to_pointers3(std::vector<std::vector<std::vector<Stat>
  * @endcond
  */
 
+/**
+ * @brief Compute pairwise effect size between groups of cells.
+ *
+ * This class computes the effect sizes for the pairwise comparisons used in `ScoreMarkers`, prior to any ranking of marker genes.
+ * It may be desirable to call this function directly if the pairwise effects themselves are of interest, rather than per-group summaries.
+ */
 class PairwiseEffects {
 public:
     /**
@@ -101,7 +113,7 @@ public:
     }
 
     /**
-     * @param s Whether to compute Cohen's d. 
+     * @param c Whether to compute Cohen's d. 
      *
      * This only has an effect for `run()` methods that return `Results`.
      * Otherwise, we make this decision based on the validity of the input pointers. 
@@ -153,6 +165,29 @@ public:
     }
 
 public:
+    /**
+     * Score potential marker genes by computing summary statistics across pairwise comparisons between groups.
+     * On output, `means`, `detected`, `cohen`, `auc`, `lfc` and `delta_detected` are filled with their corresponding statistics. 
+     *
+     * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
+     * @tparam G Integer type for the group assignments.
+     * @tparam Stat Floating-point type to store the statistics.
+     *
+     * @param p Pointer to a **tatami** matrix instance.
+     * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
+     * Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
+     * @param[out] means Vector of length equal to the number of groups.
+     * Each element corresponds to a group and is a pointer to an array of length equal to the number of rows in `p`.
+     * This is used to store the mean expression of each group across all genes.
+     * @param[out] detected Vector of length equal to the number of groups,
+     * Each element corresponds to a group and is a pointer to an array of length equal to the number of rows in `p`.
+     * This is used to store the proportion of detected expression in each group.
+     * @param[out] cohen Pointer to an array of length equal to $GN^2$, where `N` is the number of groups and `G` is the number of genes (see `Results` for details).
+     * This is filled with the Cohen's d for the pairwise comparisons between groups across all genes.
+     * @param[out] auc Pointer to an array as described for `cohen`, but instead storing the AUC.
+     * @param[out] lfc Pointer to an array as described for `cohen`, but instead storing the log-fold change. 
+     * @param[out] delta_detected Pointer to an array as described for `cohen`, but instead the delta in the detected proportions.
+     */
     template<class Matrix, typename G, typename Stat>
     void run(
         const Matrix* p, 
@@ -172,6 +207,34 @@ public:
         core(p, group, group_size, group, ngroups, static_cast<const int*>(NULL), 1, std::move(means), std::move(detected), cohen, auc, lfc, delta_detected);
     }
 
+    /**
+     * Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.
+     * On output, `means`, `detected`, `cohen`, `auc`, `lfc` and `delta_detected` are filled with their corresponding statistics. 
+     *
+     * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
+     * @tparam G Integer type for the group assignments.
+     * @tparam B Integer type for the block assignments.
+     * @tparam Stat Floating-point type to store the statistics.
+     *
+     * @param p Pointer to a **tatami** matrix instance.
+     * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
+     * Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
+     * @param[in] block Pointer to an array of length equal to the number of columns in `p`, containing the blocking factor.
+     * Block identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
+     * @param[out] means Vector of length equal to the number of groups.
+     * Each element corresponds to a group and is another vector of length equal to the number of blocks.
+     * Each entry of the inner vector is a pointer to an array of length equal to the number of rows in `p`,
+     * which is used to store the mean expression of each group across all genes.
+     * @param[out] detected Vector of length equal to the number of groups.
+     * Each element corresponds to a group and is another vector of length equal to the number of blocks.
+     * Each entry of the inner vector is a pointer to an array of length equal to the number of rows in `p`,
+     * which is used to store the proportion of detected expression in each group.
+     * @param[out] cohen Pointer to an array of length equal to $GN^2$, where `N` is the number of groups and `G` is the number of genes (see `Results` for details).
+     * This is filled with the Cohen's d for the pairwise comparisons between groups across all genes.
+     * @param[out] auc Pointer to an array as described for `cohen`, but instead storing the AUC.
+     * @param[out] lfc Pointer to an array as described for `cohen`, but instead storing the log-fold change. 
+     * @param[out] delta_detected Pointer to an array as described for `cohen`, but instead the delta in the detected proportions.
+     */
     template<class Matrix, typename G, typename B, typename Stat>
     void run_blocked(
         const Matrix* p, 
@@ -278,8 +341,22 @@ private:
     }
 
 public:
+    /**
+     * @brief Pairwise effect size results.
+     *
+     * @tparam Stat Floating-point type to store the statistics.
+     *
+     * For any given effect size, the pairwise statistics are stored in a 3-dimensional array.
+     * The first dimension is the fastest changing, is of length equal to the number of groups, and represents the first group.
+     * The second dimension is the next fastest changing, is also of length equal to the number of groups, and represents the second group.
+     * The third dimension is the slowest changing, is of length equal to the number of genes, and represents the gene.
+     * Thus, an entry $(i, j, k)$ represents the effect size of gene $k$ for group $i$ against group $j$.
+     */
     template<typename Stat>
     struct Results {
+        /**
+         * @cond
+         */
         Results(size_t ngenes, size_t ngroups, bool do_cohen, bool do_auc, bool do_lfc, bool do_delta) {
             size_t nelements = ngenes * ngroups * ngroups;
             if (do_cohen) {
@@ -295,13 +372,51 @@ public:
                 delta_detected.resize(nelements);
             }
         }
+        /**
+         * @endcond
+         */
 
+        /**
+         * Vector of pairwise Cohen's d, to be interpreted as a 3-dimensional array.
+         */
         std::vector<Stat> cohen;
+
+        /**
+         * Vector of pairwise AUCs, to be interpreted as a 3-dimensional array.
+         */
         std::vector<Stat> auc;
+
+        /**
+         * Vector of pairwise log-fold changes, to be interpreted as a 3-dimensional array.
+         */
         std::vector<Stat> lfc;
+
+        /**
+         * Vector of pairwise delta-detected, to be interpreted as a 3-dimensional array.
+         */
         std::vector<Stat> delta_detected;
     };
 
+    /**
+     * Score potential marker genes by computing summary statistics across pairwise comparisons between groups.
+     *
+     * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
+     * @tparam G Integer type for the group assignments.
+     * @tparam Stat Floating-point type to store the statistics.
+     *
+     * @param p Pointer to a **tatami** matrix instance.
+     * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
+     * Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
+     * @param[out] means Vector of length equal to the number of groups.
+     * Each element corresponds to a group and is a pointer to an array of length equal to the number of rows in `p`.
+     * This is used to store the mean expression of each group across all genes.
+     * @param[out] detected Vector of length equal to the number of groups,
+     * Each element corresponds to a group and is a pointer to an array of length equal to the number of rows in `p`.
+     * This is used to store the proportion of detected expression in each group.
+     *
+     * @return A `Results` object is returned containing the pairwise effects.
+     * `means` and `detected` are filled with their corresponding statistics on output.
+     */
     template<class Matrix, typename G, typename Stat>
     Results<Stat> run(const Matrix* p, const G* group, std::vector<Stat*> means, std::vector<Stat*> detected) const {
         auto ngroups = means.size();
@@ -319,6 +434,31 @@ public:
         return res; 
     }
 
+    /**
+     * Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.
+     *
+     * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
+     * @tparam G Integer type for the group assignments.
+     * @tparam B Integer type for the block assignments.
+     * @tparam Stat Floating-point type to store the statistics.
+     *
+     * @param p Pointer to a **tatami** matrix instance.
+     * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
+     * Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
+     * @param[in] block Pointer to an array of length equal to the number of columns in `p`, containing the blocking factor.
+     * Block identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
+     * @param[out] means Vector of length equal to the number of groups.
+     * Each element corresponds to a group and is another vector of length equal to the number of blocks.
+     * Each entry of the inner vector is a pointer to an array of length equal to the number of rows in `p`,
+     * which is used to store the mean expression of each group across all genes.
+     * @param[out] detected Vector of length equal to the number of groups.
+     * Each element corresponds to a group and is another vector of length equal to the number of blocks.
+     * Each entry of the inner vector is a pointer to an array of length equal to the number of rows in `p`,
+     * which is used to store the proportion of detected expression in each group.
+     *
+     * @return A `Results` object is returned containing the pairwise effects.
+     * `means` and `detected` are filled with their corresponding statistics on output.
+     */
     template<class Matrix, typename G, typename B, typename Stat>
     Results<Stat> run_blocked(const Matrix* p, const G* group, const B* block, std::vector<std::vector<Stat*> > means, std::vector<std::vector<Stat*> > detected) const {
         if (block == NULL) {
@@ -342,8 +482,18 @@ public:
     }
 
 public:
+    /**
+     * @brief Pairwise effect size results, with per-group means.
+     *
+     * @tparam Stat Floating-point type to store the statistics.
+     *
+     * See `Results` for more details on how to interpret the 3-dimensional effect size arrays.
+     */
     template<typename Stat>
     struct ResultsWithMeans : public Results<Stat> {
+        /**
+         * @cond
+         */
         ResultsWithMeans(size_t ngenes, size_t ngroups, size_t nblocks, bool do_cohen, bool do_auc, bool do_lfc, bool do_delta) :
             Results<Stat>(ngenes, ngroups, do_cohen, do_auc, do_lfc, do_delta), means(ngroups), detected(ngroups) 
         {
@@ -356,11 +506,38 @@ public:
                 }
             }
         }
+        /**
+         * @endcond
+         */
 
+        /**
+         * Each element of `means` corresponds to a group and is itself a vector of length equal to the number of blocks.
+         * For group `i`, each element of `means[i]` corresponds to a block and is itself a vector of length equal to the number of genes.
+         * For block `j`, each element of `means[i][j]` corresponds to a gene and contains the mean expression of that gene in block `j` for group `i`.
+         */
         std::vector<std::vector<std::vector<Stat> > > means;
+
+        /**
+         * Each element of `detected` corresponds to a group and is itself a vector of length equal to the number of blocks.
+         * For group `i`, each element of `detected[i]` corresponds to a block and is itself a vector of length equal to the number of genes.
+         * For block `j`, each element of `detected[i][j]` corresponds to a gene and contains the proportion of detected expression of that gene in block `j` for group `i`.
+         */
         std::vector<std::vector<std::vector<Stat> > > detected;
     };
 
+    /**
+     * Score potential marker genes by computing summary statistics across pairwise comparisons between groups.
+     *
+     * @tparam Stat Floating-point type to store the statistics.
+     * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
+     * @tparam G Integer type for the group assignments.
+     *
+     * @param p Pointer to a **tatami** matrix instance.
+     * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
+     * Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
+     *
+     * @return A `ResultsWithMeans` object is returned containing the pairwise effects, plus the mean expression and detected proportion in each group.
+     */
     template<typename Stat = double, class Matrix, typename G>
     ResultsWithMeans<Stat> run(const Matrix* p, const G* group) {
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
@@ -378,6 +555,22 @@ public:
         return res; 
     }
 
+    /**
+     * Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.
+     *
+     * @tparam Stat Floating-point type to store the statistics.
+     * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
+     * @tparam G Integer type for the group assignments.
+     * @tparam B Integer type for the block assignments.
+     *
+     * @param p Pointer to a **tatami** matrix instance.
+     * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
+     * Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
+     * @param[in] block Pointer to an array of length equal to the number of columns in `p`, containing the blocking factor.
+     * Block identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
+     *
+     * @return A `ResultsWithMeans` object is returned containing the pairwise effects, plus the mean expression and detected proportion in each group and block.
+     */
     template<typename Stat = double, class Matrix, typename G, typename B> 
     ResultsWithMeans<Stat> run_blocked(const Matrix* p, const G* group, const B* block) {
         if (block == NULL) {
