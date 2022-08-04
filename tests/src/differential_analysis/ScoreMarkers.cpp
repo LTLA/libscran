@@ -66,7 +66,7 @@ protected:
     static void compare_effects(int ngroups, const Result& res, const Result& other, bool do_auc) {
         // Don't compare min-rank here, as minor numerical differences
         // can change the ranks by a small amount when effects are tied.
-        for (int s = 0; s < 4; ++s) {
+        for (int s = 0; s < scran::differential_analysis::MIN_RANK; ++s) {
             EXPECT_EQ(res.cohen[s].size(), other.cohen[s].size());
             EXPECT_EQ(res.lfc[s].size(), other.lfc[s].size());
             EXPECT_EQ(res.delta_detected[s].size(), other.delta_detected[s].size());
@@ -219,25 +219,8 @@ TEST_P(ScoreMarkersTest, Blocked) {
         auto res2 = chd.run(dense_row.get(), g2.data());
 
         if (NC % ngroups == 0) {
-            // Everything should be equal to those in each batch, if the number of cells is a multiple
-            // of the number of groups (and thus the `grouping` vector is perfectly recycled).
-            for (int s = 0; s <= scran::differential_analysis::MAX; ++s) {
-                for (int l = 0; l < ngroups; ++l) {
-                    compare_almost_equal(comres.cohen[s][l], res1.cohen[s][l]);
-                    compare_almost_equal(comres.cohen[s][l], res2.cohen[s][l]);
-
-                    compare_almost_equal(comres.lfc[s][l], res1.lfc[s][l]);
-                    compare_almost_equal(comres.lfc[s][l], res2.lfc[s][l]);
-
-                    compare_almost_equal(comres.delta_detected[s][l], res1.delta_detected[s][l]);
-                    compare_almost_equal(comres.delta_detected[s][l], res2.delta_detected[s][l]);
-
-                    if (do_auc) {
-                        compare_almost_equal(comres.auc[s][l], res1.auc[s][l]);
-                        compare_almost_equal(comres.auc[s][l], res2.auc[s][l]);
-                    }
-                }
-            }
+            compare_effects(ngroups, comres, res1, do_auc);
+            compare_effects(ngroups, comres, res2, do_auc);
         }
 
         for (int l = 0; l < ngroups; ++l) {
@@ -287,49 +270,6 @@ class ScoreMarkersScenarioTest : public ::testing::TestWithParam<std::tuple<int,
     }
 };
 
-TEST_P(ScoreMarkersScenarioTest, Self) {
-    // Replicating the same matrix 'ngroups' times.
-    int ngroups = std::get<0>(GetParam());
-    std::vector<std::shared_ptr<tatami::NumericMatrix> > stuff;
-    for (int i = 0; i < ngroups; ++i) {
-        stuff.push_back(dense_row);
-    }
-    auto combined = tatami::make_DelayedBind<1>(std::move(stuff));
-
-    // Creating two groups; second group can be larger than the first, to check
-    // for correct behavior w.r.t. imbalanced groups.
-    size_t NC = dense_row->ncol();
-    std::vector<int> groupings(NC * ngroups);
-    std::fill(groupings.begin(), groupings.begin() + NC, 0);
-    std::fill(groupings.begin() + NC, groupings.end(), 1); 
-
-    scran::ScoreMarkers chd;
-    bool do_auc = std::get<1>(GetParam());
-    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
-    auto res = chd.run(combined.get(), groupings.data());
-
-    // All AUCs should be 0.5, all Cohen/LFC/delta-d's should be 0.
-    size_t ngenes = dense_row->nrow();
-    for (int l = 0; l < 2; ++l) {
-        for (size_t g = 0; g < ngenes; ++g) {
-            if (do_auc) {
-                EXPECT_EQ(res.auc[scran::differential_analysis::MIN][l][g], 0.5);
-                EXPECT_EQ(res.auc[scran::differential_analysis::MAX][l][g], 0.5);
-            }
-
-            // Handle some numerical imprecision...
-            EXPECT_TRUE(std::abs(res.cohen[scran::differential_analysis::MIN][l][g]) < 1e-10);
-            EXPECT_TRUE(std::abs(res.cohen[scran::differential_analysis::MAX][l][g]) < 1e-10);
-
-            EXPECT_TRUE(std::abs(res.lfc[scran::differential_analysis::MIN][l][g]) < 1e-10);
-            EXPECT_TRUE(std::abs(res.lfc[scran::differential_analysis::MAX][l][g]) < 1e-10);
-
-            EXPECT_TRUE(std::abs(res.delta_detected[scran::differential_analysis::MIN][l][g]) < 1e-10);
-            EXPECT_TRUE(std::abs(res.delta_detected[scran::differential_analysis::MAX][l][g]) < 1e-10);
-        }
-    }
-}
-
 TEST_P(ScoreMarkersScenarioTest, Thresholds) {
     auto ngroups = std::get<0>(GetParam());
     std::vector<int> groupings = create_groupings(dense_row->ncol(), ngroups);
@@ -361,62 +301,7 @@ TEST_P(ScoreMarkersScenarioTest, Thresholds) {
     }
 }
 
-TEST_P(ScoreMarkersScenarioTest, Missing) {
-    auto ngroups = std::get<0>(GetParam());
-    std::vector<int> groupings = create_groupings(dense_row->ncol(), ngroups);
-
-    scran::ScoreMarkers chd;
-    bool do_auc = std::get<1>(GetParam());
-    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
-    auto ref = chd.run(dense_row.get(), groupings.data());
-    
-    for (auto& g : groupings) { // 0 is the missing group.
-        ++g;
-    }
-    auto lost = chd.run(dense_row.get(), groupings.data());
-
-    // Everything should be NaN.
-    size_t ngenes = dense_row->nrow();
-    for (size_t g = 0; g < ngenes; ++g) {
-        if (do_auc) {
-            for (int s = 0; s <= scran::differential_analysis::MAX; ++s) {
-                EXPECT_TRUE(std::isnan(lost.auc[s][0][g]));
-            }
-        }
-
-        for (int s = 0; s <= scran::differential_analysis::MAX; ++s) {
-            EXPECT_TRUE(std::isnan(lost.cohen[s][0][g]));
-            EXPECT_TRUE(std::isnan(lost.lfc[s][0][g]));
-            EXPECT_TRUE(std::isnan(lost.delta_detected[s][0][g]));
-
-        }
-
-        // Minimum rank is set to the number of genes + 1.
-        EXPECT_EQ(lost.cohen[scran::differential_analysis::MIN_RANK][0][g], dense_row->nrow() + 1);
-        if (do_auc) {
-            EXPECT_EQ(lost.auc[scran::differential_analysis::MIN_RANK][0][g], dense_row->nrow() + 1);
-        }
-    }
-
-    // Other metrics should be the same as usual.
-    for (int l = 0; l < ngroups; ++l) {
-        for (size_t g = 0; g < ngenes; ++g) {
-            if (do_auc) {
-                for (int s = 0; s <= scran::differential_analysis::MAX; ++s) {
-                    EXPECT_EQ(ref.auc[s][l][g], lost.auc[s][l+1][g]);
-                }
-            }
-
-            for (int s = 0; s <= scran::differential_analysis::MAX; ++s) {
-                EXPECT_EQ(ref.cohen[s][l][g], lost.cohen[s][l+1][g]);
-                EXPECT_EQ(ref.lfc[s][l][g], lost.lfc[s][l+1][g]);
-                EXPECT_EQ(ref.delta_detected[s][l][g], lost.delta_detected[s][l+1][g]);
-            }
-        }
-    }
-}
-
-TEST_P(ScoreMarkersTest, BlockConfounded) {
+TEST_P(ScoreMarkersScenarioTest, BlockConfounded) {
     auto NC = dense_row->ncol();
     auto ngroups = std::get<0>(GetParam());
     std::vector<int> groupings = create_groupings(NC, ngroups);
@@ -438,7 +323,7 @@ TEST_P(ScoreMarkersTest, BlockConfounded) {
     for (size_t c = 0; c < NC; ++c) {
         auto g = groupings[c];
         if (g != 0) {
-            subgroups.push_back(g);
+            subgroups.push_back(g - 1);
             keep.push_back(c);
         }
     }
@@ -467,11 +352,11 @@ TEST_P(ScoreMarkersTest, BlockConfounded) {
     if (ngroups > 2) {
         for (int l = 1; l < ngroups; ++l) {
             for (int s = 0; s < scran::differential_analysis::n_summaries; ++s) {
-                EXPECT_EQ(ref.cohen[s][l], comres.cohen[s][l]);
-                EXPECT_EQ(ref.lfc[s][l], comres.lfc[s][l]);
-                EXPECT_EQ(ref.delta_detected[s][l], comres.delta_detected[s][l]);
+                EXPECT_EQ(ref.cohen[s][l - 1], comres.cohen[s][l]);
+                EXPECT_EQ(ref.lfc[s][l - 1], comres.lfc[s][l]);
+                EXPECT_EQ(ref.delta_detected[s][l - 1], comres.delta_detected[s][l]);
                 if (do_auc) {
-                    EXPECT_EQ(ref.auc[s][l], comres.auc[s][l]);
+                    EXPECT_EQ(ref.auc[s][l - 1], comres.auc[s][l]);
                 }
             }
         }
@@ -497,10 +382,10 @@ TEST(ScoreMarkersTest, MinRank) {
 
     std::vector<double> buffer(ngenes * nsamples, 0);
     for (int i = 0; i < ngenes; ++i) {
-        buffer[i * nsamples + 1] = i; // second column gets increasing rank with later genes
+        buffer[i * nsamples + 1] = i; // second group gets increasing rank with later genes
         buffer[i * nsamples + 3] = i+1;
 
-        buffer[i * nsamples + 4] = -i; // third column gets decreasing rank with later genes
+        buffer[i * nsamples + 4] = -i; // third group gets decreasing rank with later genes
         buffer[i * nsamples + 6] = -i + 1;
     }
 
@@ -511,8 +396,8 @@ TEST(ScoreMarkersTest, MinRank) {
     auto res = chd.run(&mat, grouping.data());
 
     for (int i = 0; i < ngenes; ++i) {
-        EXPECT_EQ(res.cohen[4][1][i], ngenes - i); // second column
-        EXPECT_EQ(res.cohen[4][2][i], i + 1);  // third column
+        EXPECT_EQ(res.cohen[4][1][i], ngenes - i); // second group
+        EXPECT_EQ(res.cohen[4][2][i], i + 1);  // third group
     }
 }
 

@@ -78,6 +78,7 @@ protected:
     template<class Effects>
     static void check_effects(size_t ngenes, size_t group, const Effects& effects, bool do_auc = false, bool has_boundaries = false, double lower = 0, double upper = 0) {
         EXPECT_EQ(effects.size(), group * group * ngenes);
+        bool at_least_one_nonzero = false;
 
         for (size_t g = 0; g < ngenes; ++g) {
             auto start = effects.data() + g * group * group;
@@ -98,6 +99,15 @@ protected:
                 }
             }
 
+            if (!at_least_one_nonzero) {
+                for (size_t i = 0; i < group * group; ++i) {
+                    if (start[i] != 0) {
+                        at_least_one_nonzero = true;
+                        break;
+                    }
+                }
+            }
+
             if (has_boundaries) {
                 for (size_t n = 0; n < group; ++n) {
                     for (size_t o = 0; o < group; ++o) {
@@ -108,7 +118,10 @@ protected:
                 }
             }
         }
+
+        EXPECT_TRUE(at_least_one_nonzero);
     }
+
 };
 
 /*********************************************/
