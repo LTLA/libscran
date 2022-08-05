@@ -130,6 +130,32 @@ public:
         data = InternalMatrix(nrow, ncol, std::move(x), std::move(i), std::move(p), nthreads);
     }
 
+    void fill_direct(std::vector<double> x, std::vector<int> i, std::vector<size_t> p) {
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+        if (eigen) {
+            std::vector<int> column_nonzeros(ncol);
+            for (size_t c = 0; c < ncol; ++c) {
+                column_nonzeros[c] = p[c+1] - p[c];
+            }
+            spmat.reserve(column_nonzeros);
+
+            auto xIt = x.begin();
+            auto iIt = i.begin();
+            for (size_t c = 0; c < ncol; ++c) {
+                size_t n = column_nonzeros[c];
+                for (size_t i = 0; i < n; ++i, ++xIt, ++iIt) {
+                    spmat.insert(*iIt, c) = *xIt;
+                }
+            }
+
+            spmat.makeCompressed();
+            return;
+        }
+#endif
+
+        data = InternalMatrix(nrow, ncol, std::move(x), std::move(i), std::move(p), nthreads);
+    }
+
 public:
     template<class Right>
     void multiply(const Right& rhs, Eigen::VectorXd& output) const {
