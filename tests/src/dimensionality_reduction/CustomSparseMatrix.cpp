@@ -20,38 +20,36 @@ TEST_P(CustomSparseMatrixTest, Basic) {
     std::uniform_real_distribution udist(0.0, 1.0);
     std::normal_distribution ndist;
 
-    std::vector<std::vector<double> > vbyrow(nr), vbycol(nc);
-    std::vector<std::vector<int> > ibyrow(nr), ibycol(nc);
-    std::vector<int> col_nzeros(nc);
+    std::vector<double> values;
+    std::vector<int> indices;
+    std::vector<size_t> ptrs(nc + 1);
 
     for (size_t c = 0; c < nc; ++c) {
         for (size_t r = 0; r < nr; ++r) {
             if (udist(rng) < 0.2) {
                 double val = ndist(rng);
                 control(r, c) = val;
-                vbyrow[r].push_back(val);
-                ibyrow[r].push_back(c);
-                vbycol[c].push_back(val);
-                ibycol[c].push_back(r);
-                ++(col_nzeros[c]);
+                values.push_back(val);
+                indices.push_back(r);
+                ++ptrs[c + 1];
             }
         }
     }
 
-    for (int mode = 0; mode < 4; ++mode) {
+    for (size_t i = 0; i < nc; ++i) {
+        ptrs[i+1] += ptrs[i];
+    }
+
+    for (int mode = 0; mode < 2; ++mode) {
         scran::pca_utils::CustomSparseMatrix A(nr, nc, nt);
         EXPECT_EQ(A.rows(), nr);
         EXPECT_EQ(A.cols(), nc);
 
-        if (mode >= 2) {
+        if (mode >= 1) {
             A.use_eigen(); // testing our test code.
         }
 
-        if (mode % 2 == 0) {
-            A.fill_rows(vbyrow, ibyrow, col_nzeros);
-        } else {
-            A.fill_columns(vbycol, ibycol);
-        }
+        A.fill_direct(values, indices, ptrs);
 
         // Realizes correctly.
         auto realized = A.realize();
