@@ -67,8 +67,9 @@ TEST(BlockedMatrixTest, CustomSparse) {
     auto block = generate_blocks(NR, NB);
 
     scran::pca_utils::CustomSparseMatrix thing(NR, NC, 1);  
-    std::vector<std::vector<double> > values(NC);
-    std::vector<std::vector<int> > indices(NC);
+    std::vector<double> values;
+    std::vector<int> indices;
+    std::vector<size_t> ptrs(NC + 1);
 
     std::mt19937_64 rng;
     std::normal_distribution<> ndist;
@@ -76,15 +77,20 @@ TEST(BlockedMatrixTest, CustomSparse) {
     Eigen::MatrixXd ref(NR, NC);  
     ref.setZero();
 
-    for (size_t i = 0; i < NR; ++i) {
-        for (size_t j = 0; j < NC; ++j) {
+    for (size_t c = 0; c < NC; ++c) {
+        for (size_t r = 0; r < NR; ++r) {
             if (udist(rng) < 0.2) {
                 auto val = ndist(rng);
-                ref(i, j) = val;
-                values[j].push_back(val);
-                indices[j].push_back(i);
+                ref(r, c) = val;
+                values.push_back(val);
+                indices.push_back(r);
+                ++ptrs[c+1];
             }
         }
+    }
+
+    for (size_t i = 0; i < NC; ++i) {
+        ptrs[i+1] += ptrs[i];
     }
 
     Eigen::MatrixXd centers(NB, NC);
@@ -94,7 +100,7 @@ TEST(BlockedMatrixTest, CustomSparse) {
         }
     }
 
-    thing.fill_columns(values, indices);
+    thing.fill_direct(std::move(values), std::move(indices), std::move(ptrs));
     scran::BlockedEigenMatrix<decltype(thing), int> blocked(&thing, block.data(), &centers);
     auto realized = blocked.realize();
 

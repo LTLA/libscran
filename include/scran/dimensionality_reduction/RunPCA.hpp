@@ -239,10 +239,7 @@ private:
     template<typename T, typename IDX> 
     pca_utils::CustomSparseMatrix create_custom_sparse_matrix(const tatami::Matrix<T, IDX>* mat, Eigen::VectorXd& center_v, Eigen::VectorXd& scale_v, double& total_var) const {
         size_t NR = mat->nrow(), NC = mat->ncol();
-
         pca_utils::CustomSparseMatrix A(NC, NR, nthreads); // transposed; we want genes in the columns.
-        std::vector<std::vector<double> > values;
-        std::vector<std::vector<int> > indices;
 
 #ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
         if (use_eigen) {
@@ -250,51 +247,41 @@ private:
         }
 #endif
 
-        if (mat->prefer_rows()) {
-            std::vector<double> xbuffer(NC);
-            std::vector<int> ibuffer(NC);
-            values.reserve(NR);
-            indices.reserve(NR);
-            auto wrk = mat->new_workspace(true);
+        std::vector<double> values;
+        std::vector<int> indices;
+        std::vector<size_t> ptrs = pca_utils::fill_transposed_compressed_sparse_vectors(mat, values, indices, nthreads);
 
+        // Computing the means and variances.
+        {
+#ifndef SCRAN_CUSTOM_PARALLEL
+            #pragma omp parallel for num_threads(nthreads)
             for (size_t r = 0; r < NR; ++r) {
-                auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data(), wrk.get());
+#else
+            SCRAN_CUSTOM_PARALLEL(NR, [&](size_t first, size_t last) -> void {
+            for (size_t r = first; r < last; ++r) {
+#endif
 
-                auto stats = tatami::stats::variances::compute_direct(range, NC);
-                center_v[r] = stats.first;
-                scale_v[r] = stats.second;
+                auto offset = ptrs[r];
+                tatami::SparseRange<double, int> range;
+                range.number = ptrs[r+1] - offset;
+                range.value = values.data() + offset;
+                range.index = indices.data() + offset;
 
-                values.emplace_back(range.value, range.value + range.number);
-                indices.emplace_back(range.index, range.index + range.number);
+                auto results = tatami::stats::variances::compute_direct(range, NC);
+                center_v.coeffRef(r) = results.first;
+                scale_v.coeffRef(r) = results.second;
+
+#ifndef SCRAN_CUSTOM_PARALLEL
             }
+#else
+            }
+            }, nthreads);
+#endif
 
             pca_utils::set_scale(scale, scale_v, total_var);
-            A.fill_columns(values, indices);
-        } else {
-            std::vector<double> xbuffer(NR);
-            std::vector<int> ibuffer(NR);
-            values.reserve(NC);
-            indices.reserve(NC);
-            auto wrk = mat->new_workspace(false);
-
-            center_v.setZero();
-            scale_v.setZero();
-            std::vector<int> nonzeros(NR);
-            int count = 0;
-
-            // First pass to compute variances and extract non-zero values.
-            for (size_t c = 0; c < NC; ++c) {
-                auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data(), wrk.get());
-                tatami::stats::variances::compute_running(range, center_v.data(), scale_v.data(), nonzeros.data(), count, /* skip_zeros = */ false);
-                values.emplace_back(range.value, range.value + range.number);
-                indices.emplace_back(range.index, range.index + range.number);
-            }
-
-            tatami::stats::variances::finish_running(NR, center_v.data(), scale_v.data(), nonzeros.data(), count);
-            pca_utils::set_scale(scale, scale_v, total_var);
-            A.fill_rows(values, indices, nonzeros);
         }
 
+        A.fill_direct(std::move(values), std::move(indices), std::move(ptrs));
         return A;
     }
 

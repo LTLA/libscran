@@ -395,12 +395,7 @@ private:
         double& total_var) 
     const {
         size_t NR = mat->nrow(), NC = mat->ncol();
-        size_t nbatchs = batch_size.size();
-        total_var = 0;
-
         pca_utils::CustomSparseMatrix A(NC, NR, nthreads); // transposed; we want genes in the columns.
-        std::vector<std::vector<double> > values;
-        std::vector<std::vector<int> > indices;
 
 #ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
         if (use_eigen) {
@@ -408,126 +403,81 @@ private:
         }
 #endif
 
-        if (mat->prefer_rows()) {
-            std::vector<double> xbuffer(NC);
-            std::vector<int> ibuffer(NC);
-            auto wrk = mat->new_workspace(true);
+        std::vector<double> values;
+        std::vector<int> indices;
+        std::vector<size_t> ptrs = pca_utils::fill_transposed_compressed_sparse_vectors(mat, values, indices, nthreads);
 
-            values.reserve(NR);
-            indices.reserve(NR);
+        // Computing grand means and variances with weights.
+        {
+            size_t nbatchs = batch_size.size();
 
-            std::vector<double> batch_means(nbatchs);
-            std::vector<int> batch_count(nbatchs);
+#ifndef SCRAN_CUSTOM_PARALLEL
+            #pragma omp parallel num_threads(nthreads)
+            {
+#else
+            SCRAN_CUSTOM_PARALLEL(NR, [&](size_t first, size_t last) -> void {
+#endif
 
-            for (size_t r = 0; r < NR; ++r) {
-                auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data(), wrk.get());
+                std::vector<double> batch_means(nbatchs);
+                std::vector<int> batch_count(nbatchs);
 
-                // Computing the grand mean across all batchs.
-                std::fill(batch_means.begin(), batch_means.end(), 0);
-                std::fill(batch_count.begin(), batch_count.end(), 0);
-                for (size_t i = 0; i < range.number; ++i) {
-                    auto b = batch[range.index[i]];
-                    batch_means[b] += range.value[i];
-                    ++batch_count[b];
+#ifndef SCRAN_CUSTOM_PARALLEL
+                #pragma omp for
+                for (size_t r = 0; r < NR; ++r) {
+#else
+                for (size_t r = first; r < last; ++r) {
+#endif
+
+                    auto offset = ptrs[r];
+                    size_t num_entries = ptrs[r+1] - offset;
+                    auto value_ptr = values.data() + offset;
+                    auto index_ptr = indices.data() + offset;
+
+                    // Computing the grand mean across all batchs.
+                    std::fill(batch_means.begin(), batch_means.end(), 0);
+                    std::fill(batch_count.begin(), batch_count.end(), 0);
+                    for (size_t i = 0; i < num_entries; ++i) {
+                        auto b = batch[index_ptr[i]];
+                        batch_means[b] += value_ptr[i];
+                        ++batch_count[b];
+                    }
+
+                    double& grand_mean = mean_v[r];
+                    grand_mean = 0;
+                    for (size_t b = 0; b < nbatchs; ++b) {
+                        grand_mean += batch_means[b] / batch_size[b];
+                    }
+                    grand_mean /= nbatchs;
+
+                    // Computing pseudo-variances where each batch's contribution
+                    // is weighted inversely proportional to its size. This aims to
+                    // match up with the variances used in the PCA but not the
+                    // variances of the output components (where weightings are not used).
+                    double& proxyvar = scale_v[r];
+                    proxyvar = 0;
+                    for (size_t b = 0; b < nbatchs; ++b) {
+                        double zero_sum = (batch_size[b] - batch_count[b]) * grand_mean * grand_mean;
+                        proxyvar += zero_sum / batch_size[b];
+                    }
+
+                    for (size_t i = 0; i < num_entries; ++i) {
+                        double diff = value_ptr[i] - grand_mean;
+                        auto b = batch[index_ptr[i]];
+                        proxyvar += diff * diff / batch_size[b];
+                    }
+
+#ifndef SCRAN_CUSTOM_PARALLEL
                 }
-
-                double& grand_mean = mean_v[r];
-                grand_mean = 0;
-                for (size_t b = 0; b < nbatchs; ++b) {
-                    grand_mean += batch_means[b] / batch_size[b];
-                }
-                grand_mean /= nbatchs;
-
-                // Computing pseudo-variances where each batch's contribution
-                // is weighted inversely proportional to its size. This aims to
-                // match up with the variances used in the PCA but not the
-                // variances of the output components (where weightings are not used).
-                double& proxyvar = scale_v[r];
-                proxyvar = 0;
-                for (size_t b = 0; b < nbatchs; ++b) {
-                    double zero_sum = (batch_size[b] - batch_count[b]) * grand_mean * grand_mean;
-                    proxyvar += zero_sum / batch_size[b];
-                }
-
-                for (size_t i = 0; i < range.number; ++i) {
-                    double diff = range.value[i] - grand_mean;
-                    auto b = batch[range.index[i]];
-                    proxyvar += diff * diff / batch_size[b];
-                }
-
-                values.emplace_back(range.value, range.value + range.number);
-                indices.emplace_back(range.index, range.index + range.number);
             }
+#else
+                }
+            }, nthreads);
+#endif
 
             pca_utils::set_scale(scale, scale_v, total_var);
-            A.fill_columns(values, indices);
-        } else {
-            std::vector<double> xbuffer(NR);
-            std::vector<int> ibuffer(NR);
-            auto wrk = mat->new_workspace(false);
-
-            values.reserve(NC);
-            indices.reserve(NC);
-
-            std::vector<int> nnzeros(NR);
-            std::vector<std::vector<double> > tmp_means(nbatchs, std::vector<double>(NR));
-            std::vector<std::vector<int> > tmp_nonzero(nbatchs, std::vector<int>(NR));
-
-            for (size_t c = 0; c < NC; ++c) {
-                auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data(), wrk.get());
-                values.emplace_back(range.value, range.value + range.number);
-                indices.emplace_back(range.index, range.index + range.number);
-
-                // Collecting values for the means.
-                Batch curb = batch[c];
-                auto& cur_means = tmp_means[curb];
-                auto& cur_nonzero= tmp_nonzero[curb];
-                for (size_t i = 0; i < range.number; ++i) {
-                    auto r = range.index[i];
-                    cur_means[r] += range.value[i];
-                    ++cur_nonzero[r];
-                    ++nnzeros[r];
-                }
-            }
-
-            // Finalizing the means.
-            mean_v.setZero();
-            for (size_t b = 0; b < nbatchs; ++b) {
-                const auto& cur_means = tmp_means[b];
-                for (size_t r = 0; r < NR; ++r) {
-                    mean_v[r] += cur_means[r] / batch_size[b];
-                }
-            }
-            for (size_t r = 0; r < NR; ++r) {
-                mean_v[r] /= nbatchs;
-            }
-
-            // Computing the pseudo-variances for each gene.
-            scale_v.setZero();
-            for (size_t c = 0; c < NC; ++c) {
-                const auto& cur_vals = values[c];
-                const auto& cur_idx = indices[c];
-                auto bs = batch_size[batch[c]];
-
-                for (size_t i = 0; i < cur_idx.size(); ++i) {
-                    auto r = cur_idx[i];
-                    double diff = cur_vals[i] - mean_v[r];
-                    scale_v[r] += diff * diff / bs;
-                }
-            }
-
-            for (size_t b = 0; b < nbatchs; ++b) {
-                const auto& used = tmp_nonzero[b];
-                for (size_t r = 0; r < NR; ++r) {
-                    double zero_sum = mean_v[r] * mean_v[r] * (batch_size[b] - used[r]);
-                    scale_v[r] += zero_sum / batch_size[b];
-                }
-            }
-
-            pca_utils::set_scale(scale, scale_v, total_var);
-            A.fill_rows(values, indices, nnzeros);
         }
 
+        A.fill_direct(std::move(values), std::move(indices), std::move(ptrs));
         return A;
     }
 

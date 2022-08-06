@@ -42,90 +42,28 @@ private:
 #endif
 
 public:
-    void fill_columns(const std::vector<std::vector<double> >& values, const std::vector<std::vector<int> >& indices) {
+    void fill_direct(std::vector<double> x, std::vector<int> i, std::vector<size_t> p) {
 #ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
         if (eigen) {
-            std::vector<int> nnzeros;
-            nnzeros.reserve(values.size());
-            for (const auto& v : values) {
-                nnzeros.push_back(v.size());
+            std::vector<int> column_nonzeros(ncol);
+            for (size_t c = 0; c < ncol; ++c) {
+                column_nonzeros[c] = p[c+1] - p[c];
             }
-
-            spmat.reserve(nnzeros);
-            for (size_t z = 0; z < values.size(); ++z) {
-                const auto& curi = indices[z];
-                const auto& curv = values[z];
-                for (size_t i = 0; i < curi.size(); ++i) {
-                    spmat.insert(curi[i], z) = curv[i];
-                }
-            }
-            spmat.makeCompressed();
-            return;
-        }
-#endif
-
-        size_t nnzeros = 0;
-        std::vector<size_t> p(ncol + 1);
-        auto pIt = p.begin() + 1;
-        for (const auto& v : values) {
-            nnzeros += v.size();
-            *pIt = nnzeros;
-            ++pIt;
-        }
-
-        std::vector<double> x;
-        x.reserve(nnzeros);
-        for (const auto& v : values) {
-            x.insert(x.end(), v.begin(), v.end());
-        }
-
-        std::vector<int> i;
-        i.reserve(nnzeros);
-        for (const auto& v : indices) {
-            i.insert(i.end(), v.begin(), v.end());
-        }
-
-        data = InternalMatrix(nrow, ncol, std::move(x), std::move(i), std::move(p), nthreads);
-    }
-
-    void fill_rows(const std::vector<std::vector<double> >& values, const std::vector<std::vector<int> >& indices, const std::vector<int>& column_nonzeros) {
-#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
-        if (eigen) {
             spmat.reserve(column_nonzeros);
-            for (size_t z = 0; z < values.size(); ++z) {
-                const auto& curi = indices[z];
-                const auto& curv = values[z];
-                for (size_t i = 0; i < curi.size(); ++i) {
-                    spmat.insert(z, curi[i]) = curv[i];
+
+            auto xIt = x.begin();
+            auto iIt = i.begin();
+            for (size_t c = 0; c < ncol; ++c) {
+                size_t n = column_nonzeros[c];
+                for (size_t i = 0; i < n; ++i, ++xIt, ++iIt) {
+                    spmat.insert(*iIt, c) = *xIt;
                 }
             }
+
             spmat.makeCompressed();
             return;
         }
 #endif
-
-        std::vector<size_t> p(ncol + 1);
-        size_t nnzeros = 0;
-        auto pIt = p.begin() + 1;
-        for (auto nz : column_nonzeros) {
-            *pIt = nnzeros;
-            ++pIt;
-            nnzeros += nz;
-        }
-
-        std::vector<double> x(nnzeros);
-        std::vector<int> i(nnzeros);
-        for (size_t j = 0, endj = values.size(); j < endj; ++j) {
-            const auto& curv = values[j];
-            const auto& curi = indices[j];
-
-            for (size_t k = 0, endk = curv.size(); k < endk; ++k) {
-                auto& pos = p[curi[k] + 1];
-                x[pos] = curv[k];
-                i[pos] = j;
-                ++pos;
-            }
-        }
 
         data = InternalMatrix(nrow, ncol, std::move(x), std::move(i), std::move(p), nthreads);
     }
