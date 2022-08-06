@@ -323,14 +323,7 @@ private:
         double& total_var) 
     const {
         size_t NR = mat->nrow(), NC = mat->ncol();
-        total_var = 0;
-
         pca_utils::CustomSparseMatrix A(NC, NR, nthreads); // transposed; we want genes in the columns.
-        std::vector<std::vector<double> > values;
-        std::vector<std::vector<int> > indices;
-
-        const size_t nblocks = block_size.size();
-        double * mbuffer = center_m.data();
 
 #ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
         if (use_eigen) {
@@ -338,21 +331,33 @@ private:
         }
 #endif
 
-        if (mat->prefer_rows()) {
-            std::vector<double> xbuffer(NC);
-            std::vector<int> ibuffer(NC);
-            auto wrk = mat->new_workspace(true);
+        std::vector<double> values;
+        std::vector<int> indices;
+        std::vector<size_t> ptrs(NR + 1);
+        pca_utils::fill_compressed_sparse_vectors(mat, values, indices, ptrs, nthreads);
 
-            values.reserve(NR);
-            indices.reserve(NR);
+        // Computing block-specific means and variances.
+        {
+            const size_t nblocks = block_size.size();
 
-            for (size_t r = 0; r < NR; ++r, mbuffer += nblocks) {
-                auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data(), wrk.get());
+#ifndef SCRAN_CUSTOM_PARALLEL
+            #pragma omp parallel for num_threads(nthreads)
+            for (size_t r = 0; r < NR; ++r) {
+#else
+            SCRAN_CUSTOM_PARALLEL(NR, [&](size_t first, size_t last) -> void {
+            for (size_t r = first; r < last; ++r) {
+#endif
+
+                auto offset = ptrs[r];
+                size_t num_entries = ptrs[r+1] - offset;
+                auto value_ptr = values.data() + offset;
+                auto index_ptr = indices.data() + offset;
 
                 // Computing the block-wise means.
+                auto mbuffer = center_m.data() + nblocks * r;
                 std::fill(mbuffer, mbuffer + nblocks, 0);
-                for (size_t i = 0; i < range.number; ++i) {
-                    mbuffer[block[range.index[i]]] += range.value[i];
+                for (size_t i = 0; i < num_entries; ++i) {
+                    mbuffer[block[index_ptr[i]]] += value_ptr[i];
                 }
                 for (size_t b = 0; b < nblocks; ++b) {
                     mbuffer[b] /= block_size[b];
@@ -366,9 +371,9 @@ private:
                 proxyvar = 0;
                 {
                     auto block_copy = block_size;
-                    for (size_t i = 0; i < range.number; ++i) {
-                        Block curb = block[range.index[i]];
-                        double diff = range.value[i] - mbuffer[curb];
+                    for (size_t i = 0; i < num_entries; ++i) {
+                        Block curb = block[index_ptr[i]];
+                        double diff = value_ptr[i] - mbuffer[curb];
                         proxyvar += diff * diff;
                         --block_copy[curb];
                     }
@@ -380,83 +385,17 @@ private:
                     proxyvar /= NC - 1;
                 }
 
-                values.emplace_back(range.value, range.value + range.number);
-                indices.emplace_back(range.index, range.index + range.number);
+#ifndef SCRAN_CUSTOM_PARALLEL
             }
+#else
+            }
+            }, nthreads);
+#endif
 
             pca_utils::set_scale(scale, scale_v, total_var);
-            A.fill_columns(values, indices);
-        } else {
-            std::vector<double> xbuffer(NR);
-            std::vector<int> ibuffer(NR);
-            auto wrk = mat->new_workspace(false);
-
-            values.reserve(NC);
-            indices.reserve(NC);
-
-            std::vector<int> nnzeros(NR);
-            std::vector<std::vector<double> > tmp_means(nblocks, std::vector<double>(NR));
-            std::vector<std::vector<int> > tmp_nonzeros(nblocks, std::vector<int>(NR));
-
-            for (size_t c = 0; c < NC; ++c) {
-                auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data(), wrk.get());
-                values.emplace_back(range.value, range.value + range.number);
-                indices.emplace_back(range.index, range.index + range.number);
-
-                // Collecting values for the means.
-                Block curb = block[c];
-                auto& cur_means = tmp_means[curb];
-                auto& cur_nonzeros = tmp_nonzeros[curb];
-                for (size_t i = 0; i < range.number; ++i) {
-                    auto r = range.index[i];
-                    cur_means[r] += range.value[i];
-                    ++cur_nonzeros[r];
-                    ++nnzeros[r];
-                }
-            }
-
-            // Finalizing the means.
-            for (size_t b = 0; b < nblocks; ++b) {
-                auto& cur_means = tmp_means[b];
-                for (size_t r = 0; r < cur_means.size(); ++r) {
-                    cur_means[r] /= block_size[b];
-                    center_m(b, r) = cur_means[r];
-                }
-            }
-
-            // Computing the pseudo-variances for each gene.
-            {
-                scale_v.setZero();
-
-                for (size_t c = 0; c < NC; ++c) {
-                    const auto& cur_means = tmp_means[block[c]];
-                    const auto& cur_vals = values[c];
-                    const auto& cur_idx = indices[c];
-
-                    for (size_t i = 0; i < cur_idx.size(); ++i) {
-                        auto r = cur_idx[i];
-                        double diff = cur_vals[i] - cur_means[r];
-                        scale_v[r] += diff * diff;
-                    }
-                }
-
-                for (size_t b = 0; b < nblocks; ++b) {
-                    const auto& cur_means = tmp_means[b];
-                    const auto& cur_nonzeros = tmp_nonzeros[b];
-                    for (size_t r = 0; r < NR; ++r) {
-                        scale_v[r] += cur_means[r] * cur_means[r] * (block_size[b] - cur_nonzeros[r]);
-                    }
-                }
-
-                for (size_t r = 0; r < NR; ++r) {
-                    scale_v[r] /= NC - 1;
-                }
-            }
-
-            pca_utils::set_scale(scale, scale_v, total_var);
-            A.fill_rows(values, indices, nnzeros);
         }
 
+        A.fill_direct(std::move(values), std::move(indices), std::move(ptrs));
         return A;
     }
 
