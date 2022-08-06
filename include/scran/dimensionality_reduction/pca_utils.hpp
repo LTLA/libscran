@@ -100,8 +100,9 @@ std::shared_ptr<const tatami::Matrix<T, IDX> > subset_matrix_by_features(const t
 }
 
 template<class Matrix>
-void fill_compressed_sparse_vectors(const Matrix* mat, std::vector<double>& values, std::vector<int>& indices, std::vector<size_t>& ptrs, int nthreads) {
+std::vector<size_t> fill_transposed_compressed_sparse_vectors(const Matrix* mat, std::vector<double>& values, std::vector<int>& indices, int nthreads) {
     size_t NR = mat->nrow(), NC = mat->ncol();
+    std::vector<size_t> ptrs(NR + 1);
 
     if (mat->prefer_rows()) {
         /*** First round, to fetch the number of zeros in each row. ***/
@@ -192,7 +193,7 @@ void fill_compressed_sparse_vectors(const Matrix* mat, std::vector<double>& valu
                     std::vector<size_t> nonzeros_per_row(NR);
                     std::vector<double> xbuffer(NC);
                     std::vector<int> ibuffer(NC);
-                    auto wrk = mat->new_workspace(true);
+                    auto wrk = mat->new_workspace(false);
 
                     for (size_t c = startcol; c < endcol; ++c) {
                         auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data(), wrk.get());
@@ -246,7 +247,7 @@ void fill_compressed_sparse_vectors(const Matrix* mat, std::vector<double>& valu
 
                 size_t startrow = rows_per_thread * t, endrow = std::min(startrow + rows_per_thread, NR);
                 if (startrow < endrow) {
-                    auto wrk = mat->new_workspace(true);
+                    auto wrk = mat->new_workspace(false);
                     std::vector<double> xbuffer(endrow - startrow);
                     std::vector<int> ibuffer(endrow - startrow);
 
@@ -270,6 +271,8 @@ void fill_compressed_sparse_vectors(const Matrix* mat, std::vector<double>& valu
 #endif
         }
     }
+
+    return ptrs;
 }
 
 }

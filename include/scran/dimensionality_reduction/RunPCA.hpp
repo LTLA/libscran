@@ -249,8 +249,7 @@ private:
 
         std::vector<double> values;
         std::vector<int> indices;
-        std::vector<size_t> ptrs(NR + 1);
-        pca_utils::fill_compressed_sparse_vectors(mat, values, indices, ptrs, nthreads);
+        std::vector<size_t> ptrs = pca_utils::fill_transposed_compressed_sparse_vectors(mat, values, indices, nthreads);
 
         // Computing the means and variances.
         {
