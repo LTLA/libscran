@@ -423,7 +423,7 @@ private:
                 std::vector<int> batch_count(nbatchs);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
-                #pragma omp parallel for
+                #pragma omp for
                 for (size_t r = 0; r < NR; ++r) {
 #else
                 for (size_t r = first; r < last; ++r) {
