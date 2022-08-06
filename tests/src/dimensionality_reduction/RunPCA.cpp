@@ -8,6 +8,7 @@
 #include "tatami/base/DenseMatrix.hpp"
 #include "tatami/utils/convert_to_dense.hpp"
 #include "tatami/utils/convert_to_sparse.hpp"
+#include "tatami/stats/variances.hpp"
 
 #include "scran/dimensionality_reduction/RunPCA.hpp"
 
@@ -78,6 +79,15 @@ TEST_P(RunPCABasicTest, Test) {
 
             EXPECT_FLOAT_EQ(var, ref.variance_explained[r]);
         }
+
+        if (scale) {
+            EXPECT_FLOAT_EQ(dense_row->nrow(), ref.total_variance);
+        } else {
+            auto vars = tatami::row_variances(dense_row.get());
+            auto total_var = std::accumulate(vars.begin(), vars.end(), 0.0);
+            EXPECT_FLOAT_EQ(total_var, ref.total_variance);
+        }
+
     } else {
         auto res1 = runner.run(dense_row.get());
         expect_equal_pcs(ref.pcs, res1.pcs);

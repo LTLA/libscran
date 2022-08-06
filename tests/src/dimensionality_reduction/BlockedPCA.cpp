@@ -192,6 +192,43 @@ TEST_P(BlockedPCABasicTest, Basic) {
         EXPECT_EQ(ref.pcs.rows(), rank);
         EXPECT_EQ(ref.pcs.cols(), dense_row->ncol());
         EXPECT_EQ(ref.variance_explained.size(), rank);
+
+        // Should be centered.
+        size_t NC = dense_row->ncol();
+        for (int r = 0; r < rank; ++r) {
+            auto ptr = ref.pcs.data() + r;
+
+            double mean = 0;
+            for (size_t c = 0; c < NC; ++c, ptr += rank) {
+                mean += *ptr;
+            }
+            mean /= NC;
+            EXPECT_TRUE(std::abs(mean) < 0.00000001);
+        }
+
+        // Total variance makes sense. Remember, this doesn't consider the
+        // loss of d.f. from calculation of the block means.
+        if (scale) {
+            EXPECT_FLOAT_EQ(dense_row->nrow(), ref.total_variance);
+        } else {
+            double total_var = 0;
+            for (int b = 0; b < nblocks; ++b) {
+                std::vector<int> keep;
+                for (size_t i = 0; i < block.size(); ++i) {
+                    if (block[i] == b) {
+                        keep.push_back(i);
+                    }
+                }
+
+                if (keep.size() > 1) {
+                    auto sub = tatami::make_DelayedSubset<1>(dense_row, keep);
+                    auto vars = tatami::row_variances(sub.get());
+                    total_var += std::accumulate(vars.begin(), vars.end(), 0.0) * (keep.size() - 1);
+                }
+            }
+            EXPECT_FLOAT_EQ(total_var / (NC - 1), ref.total_variance);
+        }
+
     } else {
         auto res1 = runner.run(dense_row.get(), block.data());
         expect_equal_pcs(ref.pcs, res1.pcs);
