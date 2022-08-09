@@ -30,7 +30,8 @@ int main(int argc, char * argv[]) {
     pca_res.pcs.adjointInPlace(); 
 
     // Performing clustering.
-    auto clust_res = scran::ClusterSNNGraphMultiLevel().run(npcs, pca_res.pcs.cols(), pca_res.pcs.data());
+    auto graph = scran::BuildSNNGraph().run(npcs, pca_res.pcs.cols(), pca_res.pcs.data());
+    auto clust_res = scran::ClusterSNNGraphMultiLevel().run(graph);
     const auto& best_clustering = clust_res.membership[clust_res.max];
 
     int nclusters = *std::max_element(best_clustering.begin(), best_clustering.end()) + 1;
