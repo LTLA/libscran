@@ -1,5 +1,0 @@
-<map id="scran/clustering/BuildSNNGraph.hpp" name="scran/clustering/BuildSNNGraph.hpp">
-<area shape="rect" id="node1" title="Build a shared nearest&#45;neighbor graph on the cells." alt="" coords="26,5,261,32"/>
-<area shape="rect" id="node2" href="$ClusterSNNGraph_8hpp.html" title="Identify clusters of cells from a shared nearest&#45;neighbor graph." alt="" coords="5,80,164,121"/>
-<area shape="rect" id="node3" href="$scran_8hpp_source.html" title=" " alt="" coords="86,169,201,196"/>
-</map>
