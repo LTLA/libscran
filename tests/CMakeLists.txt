@@ -46,6 +46,8 @@ add_executable(
     src/differential_analysis/PairwiseEffects.cpp
 
     src/aggregation/AggregateAcrossCells.cpp
+    src/aggregation/DownsampleByNeighbors.cpp
+
     src/utils/average_vectors.cpp
     src/utils/subset_vector.cpp
     src/data/data_sparse.cpp
