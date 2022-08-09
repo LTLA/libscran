@@ -11,6 +11,7 @@ var searchData=
   ['percellrnaqcfilters_8',['PerCellRnaQcFilters',['../classscran_1_1PerCellRnaQcFilters.html',1,'scran']]],
   ['percellrnaqcfilters_2ehpp_9',['PerCellRnaQcFilters.hpp',['../PerCellRnaQcFilters_8hpp.html',1,'']]],
   ['percellrnaqcmetrics_10',['PerCellRnaQcMetrics',['../classscran_1_1PerCellRnaQcMetrics.html',1,'scran']]],
-  ['prior_5fcount_11',['prior_count',['../structscran_1_1MedianSizeFactors_1_1Defaults.html#a909251588d34d41237a64df1dd85552c',1,'scran::MedianSizeFactors::Defaults']]],
-  ['pseudo_5fcount_12',['pseudo_count',['../structscran_1_1LogNormCounts_1_1Defaults.html#a4bd0c603b56d3194fc3dc26b310152c9',1,'scran::LogNormCounts::Defaults']]]
+  ['prebuilt_11',['Prebuilt',['../classscran_1_1AssignReferenceClusters.html#a7f3df554269927a6765c6aade796713e',1,'scran::AssignReferenceClusters']]],
+  ['prior_5fcount_12',['prior_count',['../structscran_1_1MedianSizeFactors_1_1Defaults.html#a909251588d34d41237a64df1dd85552c',1,'scran::MedianSizeFactors::Defaults']]],
+  ['pseudo_5fcount_13',['pseudo_count',['../structscran_1_1LogNormCounts_1_1Defaults.html#a4bd0c603b56d3194fc3dc26b310152c9',1,'scran::LogNormCounts::Defaults']]]
 ];
