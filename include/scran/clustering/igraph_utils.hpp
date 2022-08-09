@@ -69,41 +69,18 @@ private:
     }
 
 public:
-    Vector() : active(false) {}
-
-    Vector(size_t size) {
+    Vector(size_t size = 0) {
         if (igraph_vector_init(&vector, size)) {
             throw std::runtime_error("failed to initialize igraph vector of size " + std::to_string(size));
         }
     }
-
-    Vector(const Vector& other) : active(other.active) {
-        try_copy(vector, other.vector, other.active);
-    }
     
-    Vector& operator=(const Vector& other) {
-        if (this != &other) {
-            try_destroy(vector, active);
-            try_copy(vector, other.vector, other.active);
-            active = other.active;
-        }
-        return *this;
-    }
-
-    // See https://docs.microsoft.com/en-us/cpp/cpp/move-constructors-and-move-assignment-operators-cpp?view=msvc-170
-    Vector(Vector&& other) : vector(std::move(other.vector)), active(other.active) {
-        other.active = false;
-    }
-
-    Vector& operator=(Vector&& other) {
-        if (this != &other) {
-            try_destroy(vector, active);
-            vector = std::move(other.vector);
-            active = other.active;
-            other.active = false;
-        }
-        return *this;
-    }
+    // Just deleting the methods here, because the Vector 
+    // is strictly internal and we don't do any of these.
+    Vector(const Vector& other) = delete;
+    Vector& operator=(const Vector& other) = delete;
+    Vector(Vector&& other) = delete;
+    Vector& operator=(Vector&& other) = delete;
 
     ~Vector() {
         try_destroy(vector, active);
@@ -114,9 +91,7 @@ public:
 };
 
 struct Matrix {
-    Matrix() : active(false) {}
-
-    Matrix(size_t nrows, size_t ncols) {
+    Matrix(size_t nrows = 0, size_t ncols = 0) {
         if (igraph_matrix_init(&matrix, nrows, ncols)) {
             throw std::runtime_error("failed to initialize igraph " + std::to_string(nrows) + "x" + std::to_string(ncols) + " matrix");
         }
@@ -188,6 +163,7 @@ public:
         return *this;
     }
 
+    // See https://docs.microsoft.com/en-us/cpp/cpp/move-constructors-and-move-assignment-operators-cpp?view=msvc-170
     Graph(Graph&& other) : graph(std::move(other.graph)), active(other.active) {
         other.active = false;
     }
@@ -222,7 +198,7 @@ public:
      * Users should not pass this pointer to `igraph_destroy`; the `Graph` destructor will handle the freeing.
      */
     const igraph_t* get_graph() const {
-        return &graph.graph;
+        return &graph;
     }
 };
 

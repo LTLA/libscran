@@ -131,6 +131,7 @@ public:
         auto& membership = membership_holder.vector;
         auto& memberships = memberships_holder.matrix;
 
+        // No need to free this, as it's just a view.
         igraph_vector_t weight_view;
         igraph_vector_view(&weight_view, weights, igraph_ecount(graph.get_graph()));
 
@@ -235,7 +236,7 @@ public:
      * @return A `Results` object containing the clustering results for all cells.
      */
     Results run(const BuildSNNGraph::Results& store) const {
-        return run(store.get_graph(), store.weights.data());
+        return run(store.to_igraph(), store.weights.data());
     }
 
     /**
@@ -254,6 +255,7 @@ public:
         auto& membership = membership_holder.vector;
         auto& merges = merges_holder.matrix;
 
+        // No need to free this, as it's just a view.
         igraph_vector_t weight_view;
         igraph_vector_view(&weight_view, weights, igraph_ecount(graph.get_graph()));
 
@@ -291,7 +293,7 @@ public:
  * This applies Leiden clustering on a shared nearest neighbor graph.
  * See [here](https://igraph.org/c/doc/igraph-Community.html#igraph_community_leiden) for more details on the Leiden algorithm. 
  */
-class ClusterSNNGraphLeiden : public ClusterSNNGraph {
+class ClusterSNNGraphLeiden {
 public:
     /**
      * @brief Default parameter settings.
@@ -335,36 +337,6 @@ private:
     int seed = Defaults::seed;
 
 public:
-    /**
-     * @param k Number of neighbors, see `BuildSNNGraph::set_neighbors()`.
-     *
-     * @return A reference to this `ClusterSNNGraphLeiden` object.
-     */
-    ClusterSNNGraphLeiden& set_neighbors(int k = BuildSNNGraph::Defaults::neighbors) {
-        builder.set_neighbors(k);
-        return *this;
-    }
-
-    /**
-     * @param a Whether to use a approximate nearest neighbor search, see `BuildSNNGraph::set_approximate()`.
-     *
-     * @return A reference to this `ClusterSNNGraph` object.
-     */
-    ClusterSNNGraphLeiden& set_approximate(bool a = BuildSNNGraph::Defaults::approximate) {
-        builder.set_approximate(a);
-        return *this;
-    }
-
-    /**
-     * @param s Weighting scheme to use, see `BuildSNNGraph::set_weighting_scheme()`.
-     *
-     * @return A reference to this `ClusterSNNGraphLeiden` object.
-     */
-    ClusterSNNGraphLeiden& set_weighting_scheme(BuildSNNGraph::Scheme s = BuildSNNGraph::Defaults::weighting_scheme) {
-        builder.set_weighting_scheme(s);
-        return *this;
-    }
-
     /**
      * @param s Seed for the default **igraph** random number generator.
      * 
@@ -451,7 +423,7 @@ public:
      * @return A `Results` object containing the clustering results for all cells.
      */
     Results run(const BuildSNNGraph::Results& store) const {
-        return run(store.get_graph(), store.weights.data());
+        return run(store.to_igraph(), store.weights.data());
     }
 
     /**
@@ -471,16 +443,20 @@ public:
         igraph::RNGScope rngs(seed);
         Results output;
 
+        // No need to free this, as it's just a view.
+        igraph_vector_t weight_view;
+        igraph_vector_view(&weight_view, weights, igraph_ecount(graph.get_graph()));
+
         if (!modularity) {
             for (int i = 0; i < iterations; ++i) {
-                output.status = igraph_community_leiden(graph.get_graph(), &weights_view, NULL, resolution, beta, (i > 0), &membership, &nb_clusters, &quality);
+                output.status = igraph_community_leiden(graph.get_graph(), &weight_view, NULL, resolution, beta, (i > 0), &membership, &nb_clusters, &quality);
                 if (output.status) {
                     break;
                 }
             }
         } else {
             // Based on https://igraph.org/c/doc/igraph-Community.html#igraph_community_leiden.
-            Vector degree_holder(igraph_vcount(graph.get_graph()));
+            igraph::Vector degree_holder(igraph_vcount(graph.get_graph()));
             auto& degree = degree_holder.vector;
             igraph_degree(graph.get_graph(), &degree, igraph_vss_all(), IGRAPH_ALL, 1);
 
@@ -489,7 +465,7 @@ public:
             double mod_resolution = resolution / (2 * igraph_ecount(graph.get_graph()));
             
             for (int i = 0; i < iterations; ++i) {
-                output.status = igraph_community_leiden(graph.get_graph(), &weights_view, &degree, mod_resolution, beta, (i > 0), &membership, &nb_clusters, &quality);
+                output.status = igraph_community_leiden(graph.get_graph(), &weight_view, &degree, mod_resolution, beta, (i > 0), &membership, &nb_clusters, &quality);
                 if (output.status) {
                     break;
                 }
