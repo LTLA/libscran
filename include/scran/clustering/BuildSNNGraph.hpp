@@ -130,8 +130,9 @@ public:
 
 public:
     /**
-     * Results of graph construction.
-     * These are stored using **igraph** data types in preparation for community detection.
+     * @brief Results of SNN graph construction.
+     *
+     * Edges and weights are stored using **igraph** data types in preparation for community detection.
      */
     struct Results {
         /**
@@ -153,6 +154,7 @@ public:
 
         /**
          * Create an **igraph** graph object from the edges.
+         * Note that weights are not included in the output object and should be supplied separately to relevant functions.
          *
          * @return An undirected graph created from `edges`.
          */
