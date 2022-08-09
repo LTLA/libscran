@@ -36,6 +36,7 @@ add_executable(
 
     src/clustering/BuildSNNGraph.cpp
     src/clustering/ClusterSNNGraph.cpp
+    src/clustering/AssignReferenceClusters.cpp
 
     src/differential_analysis/summarize_comparisons.cpp
     src/differential_analysis/auc.cpp
