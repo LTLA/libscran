@@ -3,6 +3,9 @@
 
 #include "../utils/macros.hpp"
 
+#include "igraph.h"
+#include "igraph_utils.hpp"
+
 #include <vector>
 #include <algorithm>
 #include <memory>
@@ -127,9 +130,38 @@ public:
 
 public:
     /**
-     * A tuple containing the index of the first node, the index of the second node, and the weight of the edge between them.
+     * Results of graph construction.
+     * These are stored using **igraph** data types in preparation for community detection.
      */
-    typedef std::tuple<size_t, size_t, double> WeightedEdge;
+    struct Results {
+        /**
+         * Number of cells in the dataset.
+         */
+        size_t ncells;
+
+        /**
+         * Vector of paired indices defining the edges between cells.
+         * The number of edges is half the length of `edges`, where `edges[2*i]` and `edges[2*i+1]` define the vertices for edge `i`.
+         */
+        std::vector<igraph_real_t> edges;
+
+        /**
+         * Vector of weights for the edges.
+         * This is of length equal to the number of edges, where each `weights[i]` corresponds to an edge `i` in `edges`. 
+         */
+        std::vector<igraph_real_t> weights;
+
+        /**
+         * Create an **igraph** graph object from the edges.
+         *
+         * @return An undirected graph created from `edges`.
+         */
+        igraph::Graph to_igraph() const {
+            igraph_vector_t edge_view;
+            igraph_vector_view(&edge_view, edges.data(), edges.size());
+            return igraph::Graph(&edge_view, ncells, /* directed = */ false);
+        }
+    };
 
     /**
      * @param ndims Number of dimensions.
@@ -138,10 +170,9 @@ public:
      * Rows should be dimensions while columns should be cells.
      * Data should be stored in column-major format.
      *
-     * @return A `deque` containing all the edges of the graph as `WeightedEdge`s.
-     * In each `WeightedEdge`, the first index is guaranteed to be larger than the second index, so as to avoid unnecessary duplicates.
+     * @return The edges and weights of the constructed SNN graph.
      */
-    std::deque<WeightedEdge> run(size_t ndims, size_t ncells, const double* mat) const {
+    Results run(size_t ndims, size_t ncells, const double* mat) const {
         std::unique_ptr<knncolle::Base<> > ptr;
         if (!approximate) {
             ptr.reset(new knncolle::VpTreeEuclidean<>(ndims, ncells, mat));
@@ -156,14 +187,11 @@ public:
      *
      * @param search Pointer to a `knncolle::Base` instance to use for the nearest-neighbor search.
      *
-     * @return A `deque` identical to that returned by the other `run()` methods.
+     * @return The edges and weights of the constructed SNN graph.
      */
     template<class Algorithm>
-    std::deque<WeightedEdge> run(const Algorithm* search) const {
+    Results run(const Algorithm* search) const {
         // Collecting neighbors.
-#ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::BuildSNNGraph", "Identifying nearest neighbors");
-#endif
         size_t ncells = search->nobs();
         std::vector<std::vector<int> > indices(ncells);
 
@@ -188,15 +216,18 @@ public:
     }
 
     /**
+     * @tparam Indices Vector of integer indices.
+     *
      * @param indices Vector of indices of the neighbors for each cell, sorted by increasing distance.
      *
-     * @return A `deque` identical to that returned by the other `run()` methods.
+     * @return The edges and weights of the constructed SNN graph.
      */
-    std::deque<WeightedEdge> run(const std::vector<std::vector<int> >& indices) const {
+    template<class Indices>
+    Results run(const std::vector<Indices>& indices) const {
         size_t ncells = indices.size();
 
         // Not parallel-frendly, so we don't construct this with the neighbor search
-        std::vector<std::vector<std::pair<int, size_t> > > hosts(ncells);
+        std::vector<std::vector<std::pair<int, int> > > hosts(ncells);
         for (size_t i = 0; i < ncells; ++i) {
             hosts[i].push_back(std::make_pair(0, i)); // each point is its own 0-th nearest neighbor
             const auto& current = indices[i];
@@ -208,73 +239,118 @@ public:
         }
 
         // Constructing the shared neighbor graph.
-#ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::BuildSNNGraph", "Computing shared neighbor weights");
+        std::vector<std::vector<int> > edge_stores(ncells);
+        std::vector<std::vector<double> > weight_stores(ncells);
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+        #pragma omp parallel num_threads(nthreads)
+        {
+#else
+        SCRAN_CUSTOM_PARALLEL(ncells, [&](size_t start, size_t end) -> void {
 #endif
-        std::vector<size_t> current_added;
-        current_added.reserve(ncells);
-        std::vector<int> current_score(ncells);
-        std::deque<WeightedEdge> store;
 
-        for (size_t j = 0; j < ncells; ++j) {
-            const auto& current_neighbors = indices[j];
+            std::vector<int> current_score(ncells);
+            std::vector<int> current_added;
+            current_added.reserve(ncells);
 
-            for (int i = 0; i <= current_neighbors.size(); ++i) {
-                // First iteration treats 'j' as the zero-th neighbor.
-                // Remaining iterations go through the neighbors of 'j'.
-                const int cur_neighbor = (i==0 ? j : current_neighbors[i-1]);
+#ifndef SCRAN_CUSTOM_PARALLEL
+            #pragma omp for
+            for (size_t j = 0; j < ncells; ++j) {
+#else
+            for (size_t j = start; j < end; ++j) {
+#endif
 
-                // Going through all observations 'h' for which 'cur_neighbor'
-                // is a nearest neighbor, a.k.a., 'cur_neighbor' is a shared
-                // neighbor of both 'h' and 'j'.
-                for (auto& h : hosts[cur_neighbor]) {
-                    const auto& othernode = h.second;
+                const auto& current_neighbors = indices[j];
+                for (int i = 0; i <= current_neighbors.size(); ++i) {
+                    // First iteration treats 'j' as the zero-th neighbor.
+                    // Remaining iterations go through the neighbors of 'j'.
+                    const int cur_neighbor = (i==0 ? j : current_neighbors[i-1]);
 
-                    if (othernode < j) { // avoid duplicates from symmetry in the SNN calculations.
-                        int& existing_other = current_score[othernode];
-                        if (weight_scheme == RANKED) {
-                            // Recording the lowest combined rank per neighbor.
-                            int currank = h.first + i;
-                            if (existing_other == 0) { 
-                                existing_other = currank;
-                                current_added.push_back(othernode);
-                            } else if (existing_other > currank) {
-                                existing_other = currank;
+                    // Going through all observations 'h' for which 'cur_neighbor'
+                    // is a nearest neighbor, a.k.a., 'cur_neighbor' is a shared
+                    // neighbor of both 'h' and 'j'.
+                    for (const auto& h : hosts[cur_neighbor]) {
+                        auto othernode = h.second;
+
+                        if (othernode < j) { // avoid duplicates from symmetry in the SNN calculations.
+                            int& existing_other = current_score[othernode];
+                            if (weight_scheme == RANKED) {
+                                // Recording the lowest combined rank per neighbor.
+                                int currank = h.first + i;
+                                if (existing_other == 0) { 
+                                    existing_other = currank;
+                                    current_added.push_back(othernode);
+                                } else if (existing_other > currank) {
+                                    existing_other = currank;
+                                }
+                            } else {
+                                // Recording the number of shared neighbors.
+                                if (existing_other==0) { 
+                                    current_added.push_back(othernode);
+                                } 
+                                ++existing_other;
                             }
-                        } else {
-                            // Recording the number of shared neighbors.
-                            if (existing_other==0) { 
-                                current_added.push_back(othernode);
-                            } 
-                            ++existing_other;
                         }
                     }
                 }
-            }
-           
-            // Converting to edges.
-            for (auto othernode : current_added) {
-                int& otherscore=current_score[othernode];
-                double finalscore;
-                if (weight_scheme == RANKED) {
-                    finalscore = static_cast<double>(current_neighbors.size()) - 0.5 * static_cast<double>(otherscore);
-                } else {
-                    finalscore = otherscore;
-                    if (weight_scheme == JACCARD) {
-                        finalscore = finalscore / (2 * (current_neighbors.size() + 1) - finalscore);
+               
+                // Converting to edges.
+                auto& current_edges = edge_stores[j];
+                current_edges.reserve(current_added.size() * 2);
+                auto& current_weights = weight_stores[j];
+                current_weights.reserve(current_added.size() * 2);
+
+                for (auto othernode : current_added) {
+                    int& otherscore = current_score[othernode];
+                    double finalscore;
+                    if (weight_scheme == RANKED) {
+                        finalscore = static_cast<double>(current_neighbors.size()) - 0.5 * static_cast<double>(otherscore);
+                    } else {
+                        finalscore = otherscore;
+                        if (weight_scheme == JACCARD) {
+                            finalscore = finalscore / (2 * (current_neighbors.size() + 1) - finalscore);
+                        }
                     }
+
+                    current_edges.push_back(j);
+                    current_edges.push_back(othernode);
+                    current_weights.push_back(std::max(finalscore, 1e-6)); // Ensuring that an edge with a positive weight is always reported.
+
+                    // Resetting all those added to zero.
+                    otherscore = 0;
                 }
+                current_added.clear();
 
-                // Ensuring that an edge with a positive weight is always reported.
-                store.push_back(WeightedEdge(j, othernode, std::max(finalscore, 1e-6)));
-
-                // Resetting all those added to zero.
-                otherscore=0;
+#ifndef SCRAN_CUSTOM_PARALLEL
             }
-            current_added.clear();
+        } 
+#else
+            }
+        }, nthreads);
+#endif
+
+        // Collating the total number of edges.
+        size_t nedges = 0;
+        for (const auto& w : weight_stores) {
+            nedges += w.size();
         }
 
-        return store;
+        Results output;
+        output.ncells = ncells;
+
+        output.weights.reserve(nedges);
+        for (const auto& w : weight_stores) {
+            output.weights.insert(output.weights.end(), w.begin(), w.end());
+        }
+        weight_stores.clear();
+        weight_stores.shrink_to_fit(); // forcibly release memory so that we have some more space for edges.
+
+        output.edges.reserve(nedges * 2);
+        for (const auto& e : edge_stores) {
+            output.edges.insert(output.edges.end(), e.begin(), e.end());
+        }
+
+        return output;
     }
 };
 
