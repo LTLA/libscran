@@ -40,7 +40,8 @@ auto pca_res = scran::RunPCA().set_rank(npcs).run(normalized.get(), keep.data())
 pca_res.pcs.adjointInPlace();
 
 // Performing clustering.
-auto clust_res = scran::ClusterSNNGraphMultiLevel().run(npcs, pca_res.pcs.cols(), pca_res.pcs.data());
+auto graph = scran::BuildSNNGraph().run(npcs, pca_res.pcs.cols(), pca_res.pcs.data());
+auto clust_res = scran::ClusterSNNGraphMultiLevel().run(graph);
 const auto& best_clustering = clust_res.membership[clust_res.max];
 
 // Throw in some marker detection.
