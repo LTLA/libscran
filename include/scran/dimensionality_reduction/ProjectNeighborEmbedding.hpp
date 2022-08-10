@@ -24,12 +24,14 @@ namespace scran {
  * This class projects cells into a "destination" embedding based on their neighbors in another "source" embedding.
  * It is primarily intended for mapping cells in a test dataset onto a 2-dimensional visualization generated from a reference dataset, 
  * after detecting the nearest neighbors in the reference for each test cell in PC space.
- * For example, we could downsample a dataset with `DownsampleByNeighbors`, generate a 2D visualization for the subset from the PCs, and then use this class to project all cells onto the visualization.
+ * For example, we could downsample a dataset with `DownsampleByNeighbors`, generate a 2D visualization for the subset from the PCs, 
+ * and then use `ProjectNeighborEmbedding` to project all cells onto the visualization.
  *
  * The projected location in the destination embedding for each test cell is defined as a weighted average of the coordinates of its neighbors.
- * The weight for each neighbor is a function of its distances to the test cell in the source embedding.
+ * The weight for each neighbor is a function of its distance to the test cell in the source embedding.
  * We use a tricube weighting scheme so that distant neighbors in low-density regions are given less weight in the average.
- * The bandwidth for each test cell is defined as the largest distance in its set of neighbors. 
+ * The bandwidth for each test cell is defined as the median distance among `k` neighbors plus a multiple of the MAD;
+ * this follows the same MAD-based outlier detection approach as `IsOutlier`.
  */
 class ProjectNeighborEmbedding {
 public:
