@@ -4,5 +4,6 @@ var searchData=
   ['percelladtqcfilters_1',['PerCellAdtQcFilters',['../classscran_1_1PerCellAdtQcFilters.html',1,'scran']]],
   ['percelladtqcmetrics_2',['PerCellAdtQcMetrics',['../classscran_1_1PerCellAdtQcMetrics.html',1,'scran']]],
   ['percellrnaqcfilters_3',['PerCellRnaQcFilters',['../classscran_1_1PerCellRnaQcFilters.html',1,'scran']]],
-  ['percellrnaqcmetrics_4',['PerCellRnaQcMetrics',['../classscran_1_1PerCellRnaQcMetrics.html',1,'scran']]]
+  ['percellrnaqcmetrics_4',['PerCellRnaQcMetrics',['../classscran_1_1PerCellRnaQcMetrics.html',1,'scran']]],
+  ['projectneighborembedding_5',['ProjectNeighborEmbedding',['../classscran_1_1ProjectNeighborEmbedding.html',1,'scran']]]
 ];
