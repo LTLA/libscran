@@ -282,7 +282,7 @@ public:
      * to be filled with the projected coordinates in the destination embedding for the test dataset.
      * This should have number of rows and columns equal to `nembed` and `neighbors.size()`, respectively.
      */
-    template<typename Index, typename Float>
+    template<typename Index = int, typename Float>
     void run(int ndim, size_t nref, const Float* ref, size_t ntest, const Float* test, int nembed, const Float* ref_embedding, Float* output) const {
         std::shared_ptr<knncolle::Base<Index, Float> > ptr;
         if (approximate) {
@@ -291,6 +291,29 @@ public:
             ptr.reset(new knncolle::VpTreeEuclidean<Index, Float>(ndim, nref, ref));
         }
         run(ptr.get(), ntest, test, nembed, ref_embedding, output);
+    }
+
+    /**
+     * @tparam Index Integer type for the indices.
+     * @tparam Float Floating point type for distances and embeddings.
+     *
+     * @param ndim Number of dimensions in the source embedding.
+     * @param nref Number of cells in the reference dataset.
+     * @param[in] ref Pointer to a column-major array of coordinates of dimensions (rows) and cells (columns) for the source embedding of the reference dataset.
+     * @param ntest Number of cells in the test dataset.
+     * @param[in] ref Pointer to a column-major array of coordinates of dimensions (rows) and cells (columns) for the source embedding of the test dataset.
+     * @param nembed Number of dimensions of the destination embedding.
+     * @param ref_embedding Pointer to a column-major array of dimensions (rows) and cells (columns),
+     * containing coordinates of the destination embedding for the reference dataset.
+     *
+     * @return Vector containing the projected coordinates in the destination embedding for the test dataset.
+     * This should be interpreted as a column-major array with number of rows and columns equal to `nembed` and `neighbors.size()`, respectively.
+     */
+    template<typename Index = int, typename Float>
+    std::vector<Float> run(int ndim, size_t nref, const Float* ref, size_t ntest, const Float* test, int nembed, const Float* ref_embedding) const {
+        std::vector<Float> output(ntest * nembed);
+        run<Index, Float>(ndim, nref, ref, ntest, test, nembed, ref_embedding, output.data());
+        return output;
     }
 };
 

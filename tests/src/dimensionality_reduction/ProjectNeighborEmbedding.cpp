@@ -4,13 +4,6 @@
 #include <vector>
 #include <random>
 
-class ProjectNeighborEmbeddingTest : public ::testing::Test {
-protected:
-    std::vector<double> simulate_dense_array(int ndim, size_t nobs, int seed) const {
-        return vec;
-    }
-};
-
 TEST(ProjectNeighborEmbeddingTest, Basic) {
     std::vector<std::vector<std::pair<int, double> > > neighbors(1); // empty first neighbor.
     neighbors.emplace_back(std::vector<std::pair<int, double> >{ { 0, 1.5 } }); // 1 neighbor
@@ -19,7 +12,7 @@ TEST(ProjectNeighborEmbeddingTest, Basic) {
 
     int ndim = 2;
     std::vector<double> destination { -1, -1, 1, 1, 2, 2 };
-    std::vector<double> output(neighbors.size() * 2);
+    std::vector<double> output(ndim * neighbors.size());
 
     scran::ProjectNeighborEmbedding runner;
     runner.run(neighbors, ndim, destination.data(), output.data());
@@ -39,7 +32,7 @@ TEST(ProjectNeighborEmbeddingTest, Outliers) {
 
     int ndim = 2;
     std::vector<double> destination { -1, -1, 1, 1, 2, 2, -2, -2 };
-    std::vector<double> output(neighbors.size() * 2);
+    std::vector<double> output(ndim * neighbors.size());
 
     scran::ProjectNeighborEmbedding runner;
     runner.run(neighbors, ndim, destination.data(), output.data());
@@ -58,20 +51,33 @@ TEST(ProjectNeighborEmbeddingTest, OtherInputs) {
     std::normal_distribution<> dist;
     std::mt19937_64 rng(9999);
     std::vector<double> src_ref(nref * ndim);
-    for (auto& v : vec) {
+    for (auto& v : src_ref) {
         v = dist(rng);
     }
 
     size_t ntest = 12;
     std::vector<double> src_test(ntest * ndim);
-    for (auto& v : vec) {
+    for (auto& v : src_test) {
         v = dist(rng);
     }
 
     int nembed = 2;
     std::vector<double> dest_ref(nref * nembed);
-    for (auto& v : vec) {
+    for (auto& v : dest_ref) {
         v = dist(rng);
     }
-}
 
+    scran::ProjectNeighborEmbedding runner;
+    auto output = runner.run(ndim, nref, src_ref.data(), ntest, src_test.data(), nembed, dest_ref.data());
+
+    // Comparing to supplying a neighbor list.
+    knncolle::VpTreeEuclidean<int, double> index(ndim, nref, src_ref.data());
+    std::vector<std::vector<std::pair<int, double> > > neighbors(ntest);
+    for (size_t t = 0; t < ntest; ++t) {
+        neighbors[t] = index.find_nearest_neighbors(src_test.data() + t * ndim, scran::ProjectNeighborEmbedding::Defaults::num_neighbors);
+    }
+
+    std::vector<double> expected(nembed * ntest);
+    runner.run(neighbors, nembed, dest_ref.data(), expected.data());
+    EXPECT_EQ(output, expected);
+}
