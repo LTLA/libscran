@@ -111,34 +111,91 @@ public:
     std::vector<Index> run(const std::vector<std::vector<std::pair<Index, Float> > >& neighbors) const {
         size_t nobs = neighbors.size();
 
-        std::vector<std::pair<Float, Index> > ordered;
+        std::vector<std::tuple<int, Float, Index> > ordered;
         ordered.reserve(nobs);
-        for (size_t n = 0; n < nobs; ++n) {
-            const auto& current = neighbors[n];
-            Float dist_to_k = (current.empty() ? std::numeric_limits<Float>::infinity() : current.back().second);
-            ordered.emplace_back(dist_to_k, n);
-        }
-        std::sort(ordered.begin(), ordered.end());
+        std::vector<Index> chosen;
+        std::vector<char> covered(nobs);
 
-        std::vector<Index> output;
-        std::vector<char> represented(nobs);
-        for (size_t n = 0; n < nobs; ++n) {
-            auto candidate = ordered[n].second;
-            if (represented[candidate]) {
-                continue;
+        while (1) {
+            // Identifying all non-covered points and counting the number of covered neighbors.
+            ordered.clear();
+            bool fresh = chosen.empty();
+
+            for (size_t n = 0; n < nobs; ++n) {
+                if (covered[n]) {
+                    continue;
+                }
+                const auto& current = neighbors[n];
+                Float dist_to_k = (current.empty() ? std::numeric_limits<Float>::infinity() : current.back().second);
+
+                int num_covered = 0;
+                if (!fresh) { // must be zero at the start, so no need to loop.
+                    for (auto x : current) {
+                        num_covered += covered[x.first];
+                    }
+                }
+                ordered.emplace_back(num_covered, dist_to_k, n);
             }
 
-            represented[candidate] = 1;
-            output.push_back(candidate);
+            if (ordered.empty()) {
+                break;
+            }
 
-            const auto& current = neighbors[n];
-            for (const auto& x : current) {
-                represented[x.first] = 1;
+            // Sorting by the number of covered neighbors (first) and the distance to the k-th neighbor (second).
+            std::sort(ordered.begin(), ordered.end(), [](const auto& left, const auto& right) -> bool {
+                if (std::get<0>(left) < std::get<0>(right)) {
+                    return true;
+                } else if (std::get<0>(left) == std::get<0>(right)) {
+                    return std::get<1>(left) < std::get<1>(right);
+                }
+                return false;
+            });
+
+            // Sweeping through the ordered list and choosing new representatives. This loop needs to
+            // consider the possibility that a representative chosen in an earlier iteration will update
+            // the coverage count in later iterations - so we stop iterating as soon as there is a 
+            // potential change in the order that would require a resort via the outer 'while' loop.
+            bool needs_resort = false;
+            int resort_limit;
+
+            for (const auto& o : ordered) {
+                auto candidate = std::get<2>(o);
+                auto original_num = std::get<0>(o);
+                if (covered[candidate]) {
+                    continue;
+                } else if (needs_resort && original_num >= resort_limit) {
+                    break;
+                }
+
+                const auto& current = neighbors[candidate];
+                int updated_num = 0;
+                for (auto x : current) {
+                    updated_num += covered[x.first];
+                }
+
+                if (updated_num == original_num && (!needs_resort || updated_num < resort_limit)) {
+                    chosen.push_back(candidate);
+                    covered[candidate] = 1;
+                    for (const auto& x : current) {
+                        covered[x.first] = 1;
+                    }
+                } else {
+                    if (!needs_resort) {
+                        needs_resort = true;
+                        resort_limit = updated_num;
+                    } else if (resort_limit > updated_num) {
+                        // Narrowing the resort limit. Note that this won't compromise previous uses of 'resort_limit'
+                        // that resulted in a choice of a representative. 'updated_num' must be greater than the original 
+                        // coverage number for the current iteration, and all previous choices of representatives must 
+                        // have had equal or lower coverage numbers, so the narrowing wouldn't have affected them.
+                        resort_limit = updated_num;
+                    }
+                }
             }
         }
 
-        std::sort(output.begin(), output.end());
-        return output;
+        std::sort(chosen.begin(), chosen.end());
+        return chosen;
     }
 
 public:
