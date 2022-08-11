@@ -93,13 +93,17 @@ TEST_F(DownsampleByNeighborsTest, Reference) {
         std::sort(ordered.begin(), ordered.end());
         temp.clear();
 
-        for (auto& current : ordered) {
+        for (const auto& current : ordered) {
             if (current.first.first > k) {
                 temp.push_back(current);
                 continue;
             }
 
             auto index = current.second;
+            if (covered[index]) {
+                continue;
+            }
+
             const auto& curneighbors = neighbors[index];
             int updated_num = 0;
             for (auto x : curneighbors) {

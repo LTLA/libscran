@@ -156,7 +156,11 @@ public:
                 if (left.covered < right.covered) {
                     return true;
                 } else if (left.covered == right.covered) {
-                    return left.distance < right.distance;
+                    if (left.distance < right.distance) {
+                        return true;
+                    } else if (left.distance == right.distance) {
+                        return left.index < right.index; // for tied distances, if two cells are each other's k-th neighbor.
+                    }
                 }
                 return false;
             });
@@ -221,11 +225,11 @@ public:
      */
     template<typename Index = int, typename Float>
     std::vector<Index> run(int ndim, size_t nobs, const Float* data) const {
-        std::shared_ptr<knncolle::Base<int, Float> > ptr;
+        std::shared_ptr<knncolle::Base<Index, Float> > ptr;
         if (approximate) {
-            ptr.reset(new knncolle::AnnoyEuclidean<int, Float>(ndim, nobs, data));
+            ptr.reset(new knncolle::AnnoyEuclidean<Index, Float>(ndim, nobs, data));
         } else {
-            ptr.reset(new knncolle::VpTreeEuclidean<int, Float>(ndim, nobs, data));
+            ptr.reset(new knncolle::VpTreeEuclidean<Index, Float>(ndim, nobs, data));
         }
         return run(ptr.get()); 
     }
