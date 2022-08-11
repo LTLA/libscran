@@ -114,7 +114,14 @@ public:
     std::vector<Index> run(const std::vector<std::vector<std::pair<Index, Float> > >& neighbors) const {
         size_t nobs = neighbors.size();
 
-        std::vector<std::tuple<int, Float, Index> > ordered;
+        struct Observation {
+            Observation(Float d, Index i, int c) : distance(d), index(i), covered(c) {}
+            Float distance;
+            Index index;
+            int covered;
+        };
+
+        std::vector<Observation> ordered;
         ordered.reserve(nobs);
         std::vector<Index> chosen;
         std::vector<char> covered(nobs);
@@ -137,7 +144,7 @@ public:
                         num_covered += covered[x.first];
                     }
                 }
-                ordered.emplace_back(num_covered, dist_to_k, n);
+                ordered.emplace_back(dist_to_k, n, num_covered);
             }
 
             if (ordered.empty()) {
@@ -145,11 +152,11 @@ public:
             }
 
             // Sorting by the number of covered neighbors (first) and the distance to the k-th neighbor (second).
-            std::sort(ordered.begin(), ordered.end(), [](const auto& left, const auto& right) -> bool {
-                if (std::get<0>(left) < std::get<0>(right)) {
+            std::sort(ordered.begin(), ordered.end(), [](const Observation& left, const Observation& right) -> bool {
+                if (left.covered < right.covered) {
                     return true;
-                } else if (std::get<0>(left) == std::get<0>(right)) {
-                    return std::get<1>(left) < std::get<1>(right);
+                } else if (left.covered == right.covered) {
+                    return left.distance < right.distance;
                 }
                 return false;
             });
@@ -162,8 +169,8 @@ public:
             int resort_limit;
 
             for (const auto& o : ordered) {
-                auto candidate = std::get<2>(o);
-                auto original_num = std::get<0>(o);
+                auto candidate = o.index;
+                auto original_num = o.covered;
                 if (covered[candidate]) {
                     continue;
                 } else if (needs_resort && original_num >= resort_limit) {
