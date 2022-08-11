@@ -78,7 +78,7 @@ TEST_F(DownsampleByNeighborsTest, Reference) {
     auto num_neighbors = scran::DownsampleByNeighbors::Defaults::num_neighbors;
 
     // Reference calculation.
-    std::vector<std::pair<std::pair<int, double>, int> > ordered, temp;
+    std::vector<std::pair<std::pair<int, double>, int> > ordered, temp, temp2;
     ordered.reserve(nobs);
     std::vector<std::vector<std::pair<int, double> > > neighbors(nobs);
     for (size_t n = 0; n < nobs; ++n) {
@@ -89,7 +89,7 @@ TEST_F(DownsampleByNeighborsTest, Reference) {
     std::vector<int> chosen;
     std::vector<char> covered(nobs);
 
-    for (int k = 0; k < num_neighbors; ++k) {
+    for (int k = 0; k <= num_neighbors; ++k) {
         std::sort(ordered.begin(), ordered.end());
         temp.clear();
 
@@ -118,7 +118,8 @@ TEST_F(DownsampleByNeighborsTest, Reference) {
             }
         }
 
-        for (auto& current : temp) {
+        temp2.clear();
+        for (auto current : temp) {
             if (!covered[current.second]) {
                 const auto& curneighbors = neighbors[current.second];
                 int updated_num = 0;
@@ -126,13 +127,14 @@ TEST_F(DownsampleByNeighborsTest, Reference) {
                     updated_num += covered[x.first];
                 }
                 current.first.first = updated_num;
+                temp2.push_back(current);
             }
         }
-        std::cout << temp.size() << std::endl;
-        ordered.swap(temp);
+        ordered.swap(temp2);
     }
 
     std::sort(chosen.begin(), chosen.end());
 
     EXPECT_EQ(res, chosen);
+    EXPECT_TRUE(res.size() <= 200);
 }
