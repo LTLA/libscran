@@ -50,7 +50,7 @@ TEST_F(DownsampleByNeighborsTest, Sanity) {
 }
 
 TEST_F(DownsampleByNeighborsTest, Approximate) {
-    int ndim = 5;
+    int ndim = 8;
     int nobs = 1001;
 
     fill(ndim, nobs);
@@ -65,4 +65,80 @@ TEST_F(DownsampleByNeighborsTest, Approximate) {
     std::set<int> collected(res.begin(), res.end());
     EXPECT_TRUE(collected.find(17) != collected.end());
     EXPECT_TRUE(collected.find(235) != collected.end());
+}
+
+TEST_F(DownsampleByNeighborsTest, Reference) {
+    int ndim = 8;
+    int nobs = 1001;
+    fill(ndim, nobs);
+    knncolle::VpTreeEuclidean<int, double> index(ndim, nobs, data.data());
+
+    scran::DownsampleByNeighbors down;
+    auto res = down.run(ndim, nobs, data.data());
+    auto num_neighbors = scran::DownsampleByNeighbors::Defaults::num_neighbors;
+
+    // Reference calculation.
+    std::vector<std::pair<std::pair<int, double>, int> > ordered, temp, temp2;
+    ordered.reserve(nobs);
+    std::vector<std::vector<std::pair<int, double> > > neighbors(nobs);
+    for (size_t n = 0; n < nobs; ++n) {
+        neighbors[n] = index.find_nearest_neighbors(n, num_neighbors);
+        ordered.emplace_back(std::make_pair(0, neighbors[n].back().second), static_cast<int>(n));
+    }
+
+    std::vector<int> chosen;
+    std::vector<char> covered(nobs);
+
+    for (int k = 0; k <= num_neighbors; ++k) {
+        std::sort(ordered.begin(), ordered.end());
+        temp.clear();
+
+        for (const auto& current : ordered) {
+            if (current.first.first > k) {
+                temp.push_back(current);
+                continue;
+            }
+
+            auto index = current.second;
+            if (covered[index]) {
+                continue;
+            }
+
+            const auto& curneighbors = neighbors[index];
+            int updated_num = 0;
+            for (auto x : curneighbors) {
+                updated_num += covered[x.first];
+            }
+
+            if (updated_num > k) {
+                temp.push_back(current);
+                continue;
+            }
+
+            chosen.push_back(index);
+            covered[index] = 1;
+            for (auto x : curneighbors) {
+                covered[x.first] = 1;
+            }
+        }
+
+        temp2.clear();
+        for (auto current : temp) {
+            if (!covered[current.second]) {
+                const auto& curneighbors = neighbors[current.second];
+                int updated_num = 0;
+                for (auto x : curneighbors) {
+                    updated_num += covered[x.first];
+                }
+                current.first.first = updated_num;
+                temp2.push_back(current);
+            }
+        }
+        ordered.swap(temp2);
+    }
+
+    std::sort(chosen.begin(), chosen.end());
+
+    EXPECT_EQ(res, chosen);
+    EXPECT_TRUE(res.size() <= 200);
 }

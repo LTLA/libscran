@@ -20,14 +20,17 @@ namespace scran {
 /**
  * @brief Downsample a dataset based on its neighbors.
  *
- * This function generates a deterministic downsampling of a dataset based on nearest neighbors. 
- * The algorithm is fairly simple - we identify the `k`-nearest neighbors of each cell,
- * we sort all cells by the distance to their `k`-th neighbor,
- * and then we only retain cells in the subset if they are not neighbors of a cell with a lower `k`-th distance.
- * Thus, each retained cell serves as a representative for up to `k` of its neighboring cells.
+ * This function generates a deterministic downsampling of a dataset based on nearest neighbors.
+ * To do so, we identify the `k`-nearest neighbors of each cell and use that to define its local neighborhood.
+ * We find the cell that does not belong in the local neighborhood of any previously retained cell,
+ * and has the fewest neighbors in any of the local neighborhoods of previously retained cells;
+ * ties are broken using the smallest distance to the cell's `k`-th neighbor (i.e., the densest region of space).
+ * This cell is retained in the downsampled subset and we repeat this process until all cells have been processed.
  *
- * This approach ensures that the subsetted points are well-distributed across the dataset.
+ * Each retained cell serves as a representative for up to `k` of its nearest neighboring cells.
+ * This approach ensures that the downsampled points are well-distributed across the dataset.
  * Low-frequency subpopulations will always have at least a few representatives if they are sufficiently distant from other subpopulations.
+ * In contrast, random sampling does not provide strong guarantees for capture of a rare subpopulation.
  * We also preserve the relative density across the dataset as more representatives will be generated from high-density regions. 
  * This simplifies the interpretation of analysis results generated from the subsetted dataset.
  */
@@ -111,34 +114,102 @@ public:
     std::vector<Index> run(const std::vector<std::vector<std::pair<Index, Float> > >& neighbors) const {
         size_t nobs = neighbors.size();
 
-        std::vector<std::pair<Float, Index> > ordered;
+        struct Observation {
+            Observation(Float d, Index i, int c) : distance(d), index(i), covered(c) {}
+            Float distance;
+            Index index;
+            int covered;
+        };
+
+        std::vector<Observation> ordered;
         ordered.reserve(nobs);
-        for (size_t n = 0; n < nobs; ++n) {
-            const auto& current = neighbors[n];
-            Float dist_to_k = (current.empty() ? std::numeric_limits<Float>::infinity() : current.back().second);
-            ordered.emplace_back(dist_to_k, n);
-        }
-        std::sort(ordered.begin(), ordered.end());
+        std::vector<Index> chosen;
+        std::vector<char> covered(nobs);
 
-        std::vector<Index> output;
-        std::vector<char> represented(nobs);
-        for (size_t n = 0; n < nobs; ++n) {
-            auto candidate = ordered[n].second;
-            if (represented[candidate]) {
-                continue;
+        while (1) {
+            // Identifying all non-covered points and counting the number of covered neighbors.
+            ordered.clear();
+            bool fresh = chosen.empty();
+
+            for (size_t n = 0; n < nobs; ++n) {
+                if (covered[n]) {
+                    continue;
+                }
+                const auto& current = neighbors[n];
+                Float dist_to_k = (current.empty() ? std::numeric_limits<Float>::infinity() : current.back().second);
+
+                int num_covered = 0;
+                if (!fresh) { // must be zero at the start, so no need to loop.
+                    for (auto x : current) {
+                        num_covered += covered[x.first];
+                    }
+                }
+                ordered.emplace_back(dist_to_k, n, num_covered);
             }
 
-            represented[candidate] = 1;
-            output.push_back(candidate);
+            if (ordered.empty()) {
+                break;
+            }
 
-            const auto& current = neighbors[n];
-            for (const auto& x : current) {
-                represented[x.first] = 1;
+            // Sorting by the number of covered neighbors (first) and the distance to the k-th neighbor (second).
+            std::sort(ordered.begin(), ordered.end(), [](const Observation& left, const Observation& right) -> bool {
+                if (left.covered < right.covered) {
+                    return true;
+                } else if (left.covered == right.covered) {
+                    if (left.distance < right.distance) {
+                        return true;
+                    } else if (left.distance == right.distance) {
+                        return left.index < right.index; // for tied distances, if two cells are each other's k-th neighbor.
+                    }
+                }
+                return false;
+            });
+
+            // Sweeping through the ordered list and choosing new representatives. This loop needs to
+            // consider the possibility that a representative chosen in an earlier iteration will update
+            // the coverage count in later iterations - so we stop iterating as soon as there is a 
+            // potential change in the order that would require a resort via the outer 'while' loop.
+            bool needs_resort = false;
+            int resort_limit;
+
+            for (const auto& o : ordered) {
+                auto candidate = o.index;
+                auto original_num = o.covered;
+                if (covered[candidate]) {
+                    continue;
+                } else if (needs_resort && original_num >= resort_limit) {
+                    break;
+                }
+
+                const auto& current = neighbors[candidate];
+                int updated_num = 0;
+                for (auto x : current) {
+                    updated_num += covered[x.first];
+                }
+
+                if (updated_num == original_num && (!needs_resort || updated_num < resort_limit)) {
+                    chosen.push_back(candidate);
+                    covered[candidate] = 1;
+                    for (const auto& x : current) {
+                        covered[x.first] = 1;
+                    }
+                } else {
+                    if (!needs_resort) {
+                        needs_resort = true;
+                        resort_limit = updated_num;
+                    } else if (resort_limit > updated_num) {
+                        // Narrowing the resort limit. Note that this won't compromise previous uses of 'resort_limit'
+                        // that resulted in a choice of a representative. 'updated_num' must be greater than the original 
+                        // coverage number for the current iteration, and all previous choices of representatives must 
+                        // have had equal or lower coverage numbers, so the narrowing wouldn't have affected them.
+                        resort_limit = updated_num;
+                    }
+                }
             }
         }
 
-        std::sort(output.begin(), output.end());
-        return output;
+        std::sort(chosen.begin(), chosen.end());
+        return chosen;
     }
 
 public:
@@ -154,11 +225,11 @@ public:
      */
     template<typename Index = int, typename Float>
     std::vector<Index> run(int ndim, size_t nobs, const Float* data) const {
-        std::shared_ptr<knncolle::Base<int, Float> > ptr;
+        std::shared_ptr<knncolle::Base<Index, Float> > ptr;
         if (approximate) {
-            ptr.reset(new knncolle::AnnoyEuclidean<int, Float>(ndim, nobs, data));
+            ptr.reset(new knncolle::AnnoyEuclidean<Index, Float>(ndim, nobs, data));
         } else {
-            ptr.reset(new knncolle::VpTreeEuclidean<int, Float>(ndim, nobs, data));
+            ptr.reset(new knncolle::VpTreeEuclidean<Index, Float>(ndim, nobs, data));
         }
         return run(ptr.get()); 
     }
