@@ -94,7 +94,7 @@ TEST_F(DownsampleByNeighborsTest, Reference) {
         temp.clear();
 
         for (auto& current : ordered) {
-            if (current.first.first != k) {
+            if (current.first.first > k) {
                 temp.push_back(current);
                 continue;
             }
@@ -106,23 +106,29 @@ TEST_F(DownsampleByNeighborsTest, Reference) {
                 updated_num += covered[x.first];
             }
 
-            if (updated_num == k) {
-                chosen.push_back(index);
-                covered[index] = 1;
-                for (auto x : curneighbors) {
-                    covered[x.first] = 1;
-                }
+            if (updated_num > k) {
+                temp.push_back(current);
+                continue;
+            }
+
+            chosen.push_back(index);
+            covered[index] = 1;
+            for (auto x : curneighbors) {
+                covered[x.first] = 1;
             }
         }
 
         for (auto& current : temp) {
-            const auto& curneighbors = neighbors[current.second];
-            int updated_num = 0;
-            for (auto x : curneighbors) {
-                updated_num += covered[x.first];
+            if (!covered[current.second]) {
+                const auto& curneighbors = neighbors[current.second];
+                int updated_num = 0;
+                for (auto x : curneighbors) {
+                    updated_num += covered[x.first];
+                }
+                current.first.first = updated_num;
             }
-            current.first.first = updated_num;
         }
+        std::cout << temp.size() << std::endl;
         ordered.swap(temp);
     }
 
