@@ -191,8 +191,8 @@ std::vector<size_t> fill_transposed_compressed_sparse_vectors(const Matrix* mat,
                 size_t startcol = cols_per_thread * t, endcol = std::min(startcol + cols_per_thread, NC);
                 if (startcol < endcol) {
                     std::vector<size_t> nonzeros_per_row(NR);
-                    std::vector<double> xbuffer(NC);
-                    std::vector<int> ibuffer(NC);
+                    std::vector<double> xbuffer(NR);
+                    std::vector<int> ibuffer(NR);
                     auto wrk = mat->new_workspace(false);
 
                     for (size_t c = startcol; c < endcol; ++c) {
