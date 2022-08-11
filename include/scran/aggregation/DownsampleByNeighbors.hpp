@@ -20,14 +20,17 @@ namespace scran {
 /**
  * @brief Downsample a dataset based on its neighbors.
  *
- * This function generates a deterministic downsampling of a dataset based on nearest neighbors. 
- * The algorithm is fairly simple - we identify the `k`-nearest neighbors of each cell,
- * we sort all cells by the distance to their `k`-th neighbor,
- * and then we only retain cells in the subset if they are not neighbors of a cell with a lower `k`-th distance.
- * Thus, each retained cell serves as a representative for up to `k` of its neighboring cells.
+ * This function generates a deterministic downsampling of a dataset based on nearest neighbors.
+ * To do so, we identify the `k`-nearest neighbors of each cell and use that to define its local neighborhood.
+ * We find the cell that does not belong in the local neighborhood of any previously retained cell,
+ * and has the fewest neighbors in any of the local neighborhoods of previously retained cells;
+ * ties are broken using the smallest distance to the cell's `k`-th neighbor (i.e., the densest region of space).
+ * This cell is retained in the downsampled subset and we repeat this process until all cells have been processed.
  *
- * This approach ensures that the subsetted points are well-distributed across the dataset.
+ * Each retained cell serves as a representative for up to `k` of its nearest neighboring cells.
+ * This approach ensures that the downsampled points are well-distributed across the dataset.
  * Low-frequency subpopulations will always have at least a few representatives if they are sufficiently distant from other subpopulations.
+ * In contrast, random sampling does not provide strong guarantees for capture of a rare subpopulation.
  * We also preserve the relative density across the dataset as more representatives will be generated from high-density regions. 
  * This simplifies the interpretation of analysis results generated from the subsetted dataset.
  */
