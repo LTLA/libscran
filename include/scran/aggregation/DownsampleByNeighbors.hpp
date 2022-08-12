@@ -6,6 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include <limits>
+#include <memory>
 
 #include "knncolle/knncolle.hpp"
 
