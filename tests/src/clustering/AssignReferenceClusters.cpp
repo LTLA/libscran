@@ -19,7 +19,7 @@ protected:
     }
 };
 
-TEST_P(AssignReferenceClustersTest, ReferenceCheck) {
+TEST_P(AssignReferenceClustersTest, Basic) {
     int ndim = 8;
     int nref = 501;
     auto ref = create(ndim, nref, ndim * nref / 3);
@@ -37,53 +37,39 @@ TEST_P(AssignReferenceClustersTest, ReferenceCheck) {
     auto test = create(ndim, ntest, ndim * ntest / 2);
 
     // Running the damn thing.
-    double quantile = GetParam();
+    double k = GetParam();
     scran::AssignReferenceClusters runner;
-    runner.set_quantile(quantile);
+    runner.set_num_neighbors(k);
     auto output = runner.run(ndim, nref, ref.data(), clusters.data(), ntest, test.data());
 
-    // Comparing to the reference calculation.
-    std::vector<int> expected(ntest);
+    EXPECT_EQ(output.assigned.size(), ntest);
+    EXPECT_EQ(output.best_prop.size(), ntest);
+    EXPECT_EQ(output.second_prop.size(), ntest);
+
     for (size_t t = 0; t < ntest; ++t) {
-        std::vector<std::vector<double> > distances(nclusters);
-        auto tptr = test.data() + t * ndim;
-
-        for (size_t r = 0; r < nref; ++r) {
-            auto rptr = ref.data() + r * ndim;
-            double dval = 0;
-            for (int d = 0; d < ndim; ++d) {
-                dval += (tptr[d] - rptr[d]) * (tptr[d] - rptr[d]);
-            }
-            distances[clusters[r]].push_back(std::sqrt(dval));
-        }
-
-        double best = -1;
-        int& keep = expected[t];
-
-        for (int c = 0; c < nclusters; ++c) {
-            auto& current = distances[c];
-            std::sort(current.begin(), current.end());
-
-            double pos = (current.size() - 1) * quantile;
-            int left = pos;
-            int right = left + 1;
-            double frac_left = (right - pos);
-            double frac_right = (pos - left);
-
-            double score = (right == current.size() ? current[left] : current[left] * frac_left + current[right] * frac_right);
-            if (best < 0 || score < best) {
-                best = score;
-                keep = c;
-            }
-        }
+        EXPECT_TRUE(output.assigned[t] >= 0);
+        EXPECT_TRUE(output.assigned[t] < nclusters);
+        EXPECT_FALSE(output.best_prop[t] < output.second_prop[t]);
+        EXPECT_TRUE(output.best_prop[t] > 0);
     }
 
-    EXPECT_EQ(expected, output);
+    // Comparing to the other method.
+    knncolle::VpTreeEuclidean<> index(ndim, nref, ref.data());
+    std::vector<std::vector<std::pair<int, double> > > collected;
+    for (size_t t = 0; t < ntest; ++t) {
+        collected.push_back(index.find_nearest_neighbors(test.data() + t * ndim, k));
+    }
+    auto output2 = runner.run(collected, nref, clusters.data());
+    EXPECT_EQ(output.assigned, output2.assigned);
+    EXPECT_EQ(output.best_prop, output2.best_prop);
+    EXPECT_EQ(output.second_prop, output2.second_prop);
 
     // Comparing to multiple threads.
     runner.set_num_threads(3);
     auto poutput = runner.run(ndim, nref, ref.data(), clusters.data(), ntest, test.data());
-    EXPECT_EQ(output, poutput);
+    EXPECT_EQ(output.assigned, poutput.assigned);
+    EXPECT_EQ(output.best_prop, poutput.best_prop);
+    EXPECT_EQ(output.second_prop, poutput.second_prop);
 }
 
 TEST_P(AssignReferenceClustersTest, SanityCheck) {
@@ -119,17 +105,24 @@ TEST_P(AssignReferenceClustersTest, SanityCheck) {
     test.insert(test.end(), ndim, 10);
 
     // Actually running it.
-    double quantile = GetParam();
+    int k = GetParam();
     scran::AssignReferenceClusters runner;
-    runner.set_quantile(quantile).set_approximate(true);
+    runner.set_num_neighbors(k).set_approximate(true);
 
     auto output = runner.run(ndim, nref, ref.data(), clusters.data(), 3, test.data());
     std::vector<int> expected { 0, 1, 2 };
-    EXPECT_EQ(output, expected);
+    EXPECT_EQ(output.assigned, expected);
+
+    for (auto p : output.best_prop) {
+        EXPECT_TRUE(p > 0.9);
+    }
+    for (auto p : output.second_prop) {
+        EXPECT_TRUE(p < 0.1);
+    }
 }
 
 INSTANTIATE_TEST_SUITE_P(
     AssignReferenceClusters,
     AssignReferenceClustersTest,
-    ::testing::Values(0, 0.1, 0.2, 0.25) // zero looks for the closest only.
+    ::testing::Values(1, 5, 10) 
 );

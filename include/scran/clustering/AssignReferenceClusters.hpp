@@ -19,20 +19,16 @@ namespace scran {
 /**
  * @brief Assign cells to their closest reference cluster.
  *
- * This uses a [**SingleR**](https://bioconductor.org/packages/SingleR)-like approach to assign a cell to a cluster in a reference dataset.
- * The idea is that we have a test dataset containing cells with no clusters, and a reference dataset containing cluster assignments.
- * For each test cell, we compute a score for each reference cluster, defined as a certain (low) quantile of the distances to all reference cells in that cluster.
- * The test cell is then assigned to the cluster with the lowest quantile.
- *
- * We use this approach as it adjusts for differences in the number of reference cells in each cluster.
- * For comparison, a simpler approach would be to just define the cluster of a test cell as the majority of the cluster assignments of its neighbors in the reference dataset.
- * This approach would favor assignment of test cells to clusters with more reference cells, simply because it is easier to obtain a majority.
- * Our approach is also better than using the closest centroid of each reference cluster as the quantile accounts for heterogeneity within each cluster;
- * more dispersed clusters are not overly penalized for having many observations far from the centroid.
- * 
+ * This class assigns the test cell to the most frequent cluster among its neighbors in the reference dataset.
  * The reference dataset is usually generated as a subset of the test dataset, e.g., using `DownsampleByNeighbors`.
  * In this manner, we can quickly cluster on the subset and then propagate assignments back to the full dataset.
- * Note that this function expects low-dimensional coordinates as input - see [**singlepp**](https://ltla.github.io/singlepp) for classification based on the original count matrix.
+ * 
+ * Admittedly, this is not the most "correct" approach for reference assignment as it favors abundant clusters that are more likely to achieve a majority.
+ * Nonetheless, we use it because (i) it's fast and (ii) any inaccuracies near the cluster boundaries are acceptable given that the boundaries are arbitrary anyway.
+ * A more accurate approach would be to use **singlepp**-like classification but this is very slow for single-cell reference datasets.
+ *
+ * Note that this function expects low-dimensional coordinates for neighbor searching.
+ * See [**singlepp**](https://ltla.github.io/singlepp) for classification based on the original count matrix instead.
  */
 class AssignReferenceClusters {
 public:
@@ -41,9 +37,9 @@ public:
      */
     struct Defaults {
         /**
-         * See `set_quantile()` for details.
+         * See `set_num_neighbors()` for details.
          */
-        static constexpr double quantile = 0.2;
+        static constexpr double num_neighbors = 20;
 
         /**
          * See `set_approximate()` for details.
@@ -54,23 +50,33 @@ public:
          * See `set_num_threads()` for details.
          */
         static constexpr int num_threads = 1;
+
+        /**
+         * See `set_report_best()` for details.
+         */
+        static constexpr bool report_best = true;
+
+        /**
+         * See `set_report_best()` for details.
+         */
+        static constexpr bool report_second = true;
     };
 
     /**
-     * @param q Quantile to use for creating a per-cluster score.
+     * @param k Number of neighbors to use for assigning a cluster.
      * Smaller values focus more on the local neighborhood around each test cell, while larger values focus on the behavior of the bulk of the cluster. 
      *
-     * @return A reference to this `DownsampleByNeighbors` object.
+     * @return A reference to this `AssignReferenceClusters` object.
      */
-    AssignReferenceClusters& set_quantile(double q = Defaults::quantile) {
-        quantile = q;
+    AssignReferenceClusters& set_num_neighbors(int n = Defaults::num_neighbors) {
+        num_neighbors = n;
         return *this;
     }
 
     /**
      * @param n Number of threads to use for neighbor detection.
      *
-     * @return A reference to this `DownsampleByNeighbors` object.
+     * @return A reference to this `AssignReferenceClusters` object.
      */
     AssignReferenceClusters& set_num_threads(int n = Defaults::num_threads) {
         nthreads = n;
@@ -80,82 +86,70 @@ public:
     /**
      * @param a Whether approximate neighbor detection should be used.
      *
-     * @return A reference to this `DownsampleByNeighbors` object.
+     * @return A reference to this `AssignReferenceClusters` object.
      */
     AssignReferenceClusters& set_approximate(int a = Defaults::approximate) {
         approximate = a;
         return *this;
     }
 
+    /**
+     * @param r Whether to report the proportion of the best cluster for each cell.
+     * This can be a useful diagnostic to remove poor assignments when the best proportion is low.
+     *
+     * @return A reference to this `AssignReferenceClusters` object.
+     */
+    AssignReferenceClusters& set_report_best(bool r = Defaults::report_best) {
+        report_best = r;
+        return *this;
+    }
+
+    /**
+     * @param r Whether to report the proportion of the second-best cluster for each cell.
+     * This can be a useful diagnostic to remove ambiguous assignments when the second-best proportion is close to the best proportion.
+     *
+     * @return A reference to this `AssignReferenceClusters` object.
+     */
+    AssignReferenceClusters& set_report_second(bool r = Defaults::report_second) {
+        report_second = r;
+        return *this;
+    }
+
 private:
-    double quantile = Defaults::quantile;
+    int num_neighbors = Defaults::num_neighbors;
     int nthreads = Defaults::num_threads;
     bool approximate = Defaults::approximate;
+    bool report_best = Defaults::report_best;
+    bool report_second = Defaults::report_second;
 
-public:
-    /**
-     * Vector of neighbor search indices for the reference clusters.
-     * This has length equal to the number of clusters, where each entry contains a search index for the corresponding cluster in `clusters` of `build()`.
-     *
-     * @tparam Index Integer type for the cell indices.
-     * @tparam Float Floating point type for the distances.
-     */
-    template<typename Index, typename Float>
-    using Prebuilt = std::vector<std::shared_ptr<knncolle::Base<Index, Float> > >;
-
-    /**
-     * Build the search indices from the reference dataset, to be used for cluster assignment in `run()`.
-     *
-     * @tparam Index Integer type for the cell indices.
-     * @tparam Float Floating point type for the distances.
-     * @tparam Cluster Integer type for the cluster assignments.
-     *
-     * @param ndim Number of dimensions.
-     * @param nref Number of cells in the reference dataset.
-     * @param[in] ref Pointer to a column-major array of coordinates of dimensions (rows) and cells (columns) for the reference dataset.
-     * This should be a low-dimensional embedding, e.g., from `RunPCA`.
-     * @param[in] clusters Pointer to an array of length equal to `nref`, containing the cluster assignment for each cell in the reference.
-     * All integers in $[0, N)$ should be present at least once, where $N$ is the total number of unique clusters.
-     * 
-     * @return The prebuilt indices, for use in `run()`.
-     */
-    template<typename Index = int, typename Float, typename Cluster>
-    Prebuilt<Index, Float> build(int ndim, size_t nref, const Float* ref, const Cluster* clusters) const {
-        Cluster nclusters = (nref ? *(std::max_element(clusters, clusters + nref)) + 1 : 0);
-
-        std::vector<std::vector<Float> > buffers(nclusters);
-        for (size_t r = 0; r < nref; ++r) {
-            auto& current = buffers[clusters[r]];
-            auto ptr = ref + r * ndim;
-            current.insert(current.end(), ptr, ptr + ndim);
+    template<typename Index, typename Float, typename Cluster>
+    static std::tuple<Cluster, Float, Float> assign(const std::vector<std::pair<Index, Float> >& neighbors, const Cluster* clusters, Cluster nclusters, int* buffer) {
+        std::fill(buffer, buffer + nclusters, 0);
+        for (const auto& n : neighbors) {
+            ++(buffer[clusters[n.first]]);
         }
 
-        Prebuilt<Index, Float> indices(nclusters);
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-        #pragma omp parallel for num_threads(nthreads)
-        for (Cluster c = 0; c < nclusters; ++c) {
-#else
-        SCRAN_CUSTOM_PARALLEL(nclusters, [&](size_t start, size_t end) -> void {
-        for (size_t c = start; c < end; ++c) {
-#endif
-
-            const auto& buffer = buffers[c];
-            size_t nobs = buffer.size() / ndim;
-            if (approximate) {
-                indices[c].reset(new knncolle::AnnoyEuclidean<Index, Float>(ndim, nobs, buffer.data()));
-            } else {
-                indices[c].reset(new knncolle::VpTreeEuclidean<Index, Float>(ndim, nobs, buffer.data()));
+        Cluster best = 0, second = 0;
+        bool no_second = true;
+        for (Cluster c = 1; c < nclusters; ++c) {
+            if (buffer[best] < buffer[c]) {
+                second = best;
+                best = c;
+                no_second = false;
+            } else if (no_second || buffer[second] < buffer[c]) {
+                second = c;
+                no_second = false;
             }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
         }
-#else
-        }
-        }, nthreads);
-#endif
 
-        return indices;
+        Float best_prop = (nclusters ? static_cast<Float>(buffer[best]) / neighbors.size() : std::numeric_limits<Float>::quiet_NaN());
+        Float second_prop = (nclusters > 1 ? static_cast<Float>(buffer[second]) / neighbors.size() : std::numeric_limits<Float>::quiet_NaN());
+        return std::make_tuple(best, best_prop, second_prop);
+    }
+
+    template<typename T>
+    static T* harvest_pointer(std::vector<T>& source, bool doit) {
+        return (doit ? source.data() : static_cast<T*>(NULL));
     }
 
 public:
@@ -175,14 +169,207 @@ public:
      * @param ntest Number of cells in the test dataset.
      * @param[in] test Pointer to a column-major array of coordinates of dimensions (rows) and cells (columns) for the test dataset.
      * This should be a low-dimensional embedding in the same space as `ref`.
-     * 
-     * @return Vector of cluster assignments for each cell in the test dataset.
+     * @param[out] assigned Pointer to an array of length equal to `ntest`.
+     * On output, this is filled with the cluster assignments for each cell in the test dataset.
+     * @param[out] best_prop Pointer to an array of length equal to `ntest`.
+     * On output, this is filled with the proportion of neighbors supporting the cluster assignment in `assigned`.
+     * If `NULL`, this value is not saved.
+     * @param[out] second_prop Pointer to an array of length equal to `ntest`.
+     * On output, this is filled with the second-highest proportion of neighbors for a cluster other than the one reported in `assigned`.
+     * If `NULL`, this value is not saved.
      */
     template<typename Index = int, typename Float, typename Cluster>
-    std::vector<Cluster> run(int ndim, size_t nref, const Float* ref, const Cluster* clusters, size_t ntest, const Float* test) const {
-        std::vector<Cluster> output(ntest);
-        auto built = build(ndim, nref, ref, clusters);
-        run(built, ntest, test, output.data());
+    void run(int ndim, size_t nref, const Float* ref, const Cluster* clusters, size_t ntest, const Float* test, Cluster* assigned, Float* best_prop, Float* second_prop) const {
+        std::shared_ptr<knncolle::Base<Index, Float> > ptr;
+        if (approximate) {
+            ptr.reset(new knncolle::AnnoyEuclidean<Index, Float>(ndim, nref, ref));
+        } else {
+            ptr.reset(new knncolle::VpTreeEuclidean<Index, Float>(ndim, nref, ref));
+        }
+        run(ptr.get(), clusters, ntest, test, assigned, best_prop, second_prop);
+    }
+
+    /**
+     * Assign cells in the test dataset to reference clusters.
+     *
+     * @tparam Index Integer type for the cell indices.
+     * @tparam Float Floating point type for the distances.
+     * @tparam Cluster Integer type for the cluster assignments.
+     *
+     * @param index Pointer to a `knncolle::Base` neighbor search index, constructed from the reference dataset.
+     * @param[in] clusters Pointer to an array of length equal to `nref`, containing the cluster assignment for each cell in the reference.
+     * All integers in $[0, N)$ should be present at least once, where $N$ is the total number of unique clusters.
+     * @param ntest Number of cells in the test dataset.
+     * @param[in] test Pointer to a column-major array of coordinates of dimensions (rows) and cells (columns) for the test dataset.
+     * This should be a low-dimensional embedding in the same space as the reference dataset used to construct `index`.
+     * @param[out] assigned Pointer to an array of length equal to `ntest`.
+     * On output, this is filled with the cluster assignments for each cell in the test dataset.
+     * @param[out] best_prop Pointer to an array of length equal to `ntest`.
+     * On output, this is filled with the proportion of neighbors supporting the cluster assignment in `assigned`.
+     * If `NULL`, this value is not saved.
+     * @param[out] second_prop Pointer to an array of length equal to `ntest`.
+     * On output, this is filled with the second-highest proportion of neighbors for a cluster other than the one reported in `assigned`.
+     * If `NULL`, this value is not saved.
+     */
+    template<typename Index = int, typename Float, typename Cluster>
+    void run(const knncolle::Base<Index, Float>* index, const Cluster* clusters, size_t ntest, const Float* test, Cluster* assigned, Float* best_prop, Float* second_prop) const {
+        Cluster nclusters = (index->nobs() ? *std::max_element(clusters, clusters + index->nobs()) + 1 : 0);
+        size_t ndim = index->ndim();
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+        #pragma omp parallel num_threads(nthreads)
+        {
+#else
+        SCRAN_CUSTOM_PARALLEL(ntest, [&](size_t start, size_t end) -> void {
+#endif
+
+            std::vector<int> buffer(nclusters);
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+            #pragma omp for
+            for (size_t o = 0; o < ntest; ++o) {
+#else
+            for (size_t o = start; o < end; ++o) {
+#endif
+
+                auto neighbors = index->find_nearest_neighbors(test + o * ndim, num_neighbors);
+                auto details = assign(neighbors, clusters, nclusters, buffer.data());
+                assigned[o] = std::get<0>(details);
+                if (best_prop != NULL) {
+                    best_prop[o] = std::get<1>(details);
+                }
+                if (second_prop != NULL) {
+                    second_prop[o] = std::get<2>(details);
+                }
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+            }
+        }
+#else
+            }
+        }, nthreads);
+#endif
+    }
+
+    /**
+     * Assign cells in the test dataset to reference clusters based on pre-built search indices.
+     *
+     * @tparam Index Integer type for the cell indices.
+     * @tparam Float Floating point type for the distances.
+     * @tparam Cluster Integer type for the cluster assignments.
+     *
+     * @param neighbors Precomputed neighbors for each test cell.
+     * The outer vector should have length equal to the number of cells in the test dataset.
+     * Each inner vector contains the neighbors for the corresponding test cell.
+     * @param nref Number of cells in the reference dataset.
+     * @param[in] clusters Pointer to an array of length equal to `nref`, containing the cluster assignment for each cell in the reference.
+     * All integers in $[0, N)$ should be present at least once, where $N$ is the total number of unique clusters.
+     * @param[out] assigned Pointer to an array of length equal to `neighbors.size()`.
+     * On output, this is filled with the cluster assignments for each cell in the test dataset.
+     * @param[out] best_prop Pointer to an array of length equal to `neighbors.size()`.
+     * On output, this is filled with the proportion of neighbors supporting the cluster assignment in `assigned`.
+     * If `NULL`, this value is not saved.
+     * @param[out] second_prop Pointer to an array of length equal to `neighbors.size()`.
+     * On output, this is filled with the second-highest proportion of neighbors for a cluster other than the one reported in `assigned`.
+     * If `NULL`, this value is not saved.
+     */
+    template<typename Index, typename Float, typename Cluster>
+    void run(const std::vector<std::vector<std::pair<Index, Float> > >& neighbors, size_t nref, const Cluster* clusters, Cluster* assigned, Float* best_prop, Float* second_prop) const {
+        size_t ntest = neighbors.size();
+        Cluster nclusters = (nref ? *std::max_element(clusters, clusters + nref) + 1 : 0);
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+        #pragma omp parallel num_threads(nthreads)
+        {
+#else
+        SCRAN_CUSTOM_PARALLEL(ntest, [&](size_t start, size_t end) -> void {
+#endif
+
+            std::vector<int> buffer(nclusters);
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+            #pragma omp for
+            for (size_t o = 0; o < ntest; ++o) {
+#else
+            for (size_t o = start; o < end; ++o) {
+#endif
+
+                auto details = assign(neighbors[o], clusters, nclusters, buffer.data());
+                assigned[o] = std::get<0>(details);
+                if (best_prop != NULL) {
+                    best_prop[o] = std::get<1>(details);
+                }
+                if (second_prop != NULL) {
+                    second_prop[o] = std::get<2>(details);
+                }
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+            }
+        }
+#else
+            }
+        }, nthreads);
+#endif
+    }
+
+public:
+    /**
+     * @brief Results of the cluster assignment.
+     *
+     * @tparam Float Floating point type for the distances.
+     * @tparam Cluster Integer type for the cluster assignments.
+     */
+    template<typename Float, typename Cluster>
+    struct Results {
+        /**
+         * @cond
+         */
+        Results(size_t n, bool best, bool second) : assigned(n), best_prop(best ? n : 0), second_prop(second ? n : 0) {}
+        /**
+         * @endcond
+         */
+        
+        /**
+         * Vector of length equal to the number of cells in the test dataset, containing the assigned cluster for each cell.
+         */
+        std::vector<Cluster> assigned;
+
+        /**
+         * Vector of length equal to the number of cells in the test dataset, containing the proportion of neighbors supporting a cell's assignment in `assigned`.
+         * If `set_report_best()` is `false`, this vector is empty.
+         */
+        std::vector<Float> best_prop;
+
+        /**
+         * Vector of length equal to the number of cells in the test dataset, containing the proportion of neighbors supporting the second-most frequent cluster for a cell.
+         * If `set_report_second()` is `false`, this vector is empty.
+         */
+        std::vector<Float> second_prop;
+    };
+
+    /**
+     * Assign cells in the test dataset to reference clusters.
+     *
+     * @tparam Index Integer type for the cell indices.
+     * @tparam Float Floating point type for the distances.
+     * @tparam Cluster Integer type for the cluster assignments.
+     *
+     * @param ndim Number of dimensions.
+     * @param nref Number of cells in the reference dataset.
+     * @param[in] ref Pointer to a column-major array of coordinates of dimensions (rows) and cells (columns) for the reference dataset.
+     * This should be a low-dimensional embedding, e.g., from `RunPCA`.
+     * @param[in] clusters Pointer to an array of length equal to `nref`, containing the cluster assignment for each cell in the reference.
+     * All integers in $[0, N)$ should be present at least once, where $N$ is the total number of unique clusters.
+     * @param ntest Number of cells in the test dataset.
+     * @param[in] test Pointer to a column-major array of coordinates of dimensions (rows) and cells (columns) for the test dataset.
+     * This should be a low-dimensional embedding in the same space as `ref`.
+     * 
+     * @return A `Results` object containing the cluster assignment results for each cell in the test dataset.
+     */
+    template<typename Index = int, typename Float, typename Cluster>
+    Results<Float, Cluster> run(int ndim, size_t nref, const Float* ref, const Cluster* clusters, size_t ntest, const Float* test) const {
+        Results<Float, Cluster> output(ntest, report_best, report_second);
+        run(ndim, nref, ref, clusters, ntest, test, output.assigned.data(), harvest_pointer(output.best_prop, report_best), harvest_pointer(output.second_prop, report_second));
         return output;
     }
 
@@ -193,22 +380,20 @@ public:
      * @tparam Float Floating point type for the distances.
      * @tparam Cluster Integer type for the cluster assignments.
      *
-     * @param ndim Number of dimensions.
-     * @param nref Number of cells in the reference dataset.
-     * @param[in] ref Pointer to a column-major array of coordinates of dimensions (rows) and cells (columns) for the reference dataset.
-     * This should be a low-dimensional embedding, e.g., from `RunPCA`.
+     * @param index Pointer to a `knncolle::Base` neighbor search index, constructed from the reference dataset.
      * @param[in] clusters Pointer to an array of length equal to `nref`, containing the cluster assignment for each cell in the reference.
      * All integers in $[0, N)$ should be present at least once, where $N$ is the total number of unique clusters.
      * @param ntest Number of cells in the test dataset.
      * @param[in] test Pointer to a column-major array of coordinates of dimensions (rows) and cells (columns) for the test dataset.
-     * This should be a low-dimensional embedding in the same space as `ref`.
-     * @param[out] output Pointer to an array of length equal to `ntest`.
-     * On output, this is filled with the cluster assignments for each cell in the test dataset.
+     * This should be a low-dimensional embedding in the same space as the reference dataset used to construct `index`.
+     *
+     * @return A `Results` object containing the cluster assignment results for each cell in the test dataset.
      */
     template<typename Index = int, typename Float, typename Cluster>
-    void run(int ndim, size_t nref, const Float* ref, const Cluster* clusters, size_t ntest, const Float* test, Cluster* output) const {
-        auto built = build(ndim, nref, ref, clusters);
-        run(built, ntest, test, output);
+    Results<Float, Cluster> run(const knncolle::Base<Index, Float>* index, const Cluster* clusters, size_t ntest, const Float* test) const {
+        Results<Float, Cluster> output(ntest, report_best, report_second);
+        run(index, clusters, ntest, test, output.assigned.data(), harvest_pointer(output.best_prop, report_best), harvest_pointer(output.second_prop, report_second));
+        return output;
     }
 
     /**
@@ -218,65 +403,20 @@ public:
      * @tparam Float Floating point type for the distances.
      * @tparam Cluster Integer type for the cluster assignments.
      *
-     * @param built Prebuilt search indices created by `build()`.
-     * @param ntest Number of cells in the test dataset.
-     * @param[in] test Pointer to a column-major array of coordinates of dimensions (rows) and cells (columns) for the test dataset.
-     * This should be a low-dimensional embedding in the same space as that used to construct `built`.
-     * @param[out] output Pointer to an array of length equal to `ntest`.
-     * On output, this is filled with the cluster assignments for each cell in the test dataset.
+     * @param neighbors Precomputed neighbors for each test cell.
+     * The outer vector should have length equal to the number of cells in the test dataset.
+     * Each inner vector contains the neighbors for the corresponding test cell.
+     * @param nref Number of cells in the reference dataset.
+     * @param[in] clusters Pointer to an array of length equal to `nref`, containing the cluster assignment for each cell in the reference.
+     * All integers in $[0, N)$ should be present at least once, where $N$ is the total number of unique clusters.
+     * 
+     * @return A `Results` object containing the cluster assignment results for each cell in the test dataset.
      */
     template<typename Index, typename Float, typename Cluster>
-    void run(const Prebuilt<Index, Float>& built, size_t ntest, const Float* test, Cluster* output) const {
-        size_t nclusters = built.size();
-        int ndim = (built.size() ? built.front()->ndim() : 0); // setting to zero doesn't matter if there are no clusters.
-
-        // This part is pretty much stolen from singlepp.
-        std::vector<Index> search(nclusters);
-        std::vector<Float> left(nclusters), right(nclusters);
-
-        for (size_t c = 0; c < nclusters; ++c) {
-            size_t denom = built[c]->nobs() - 1;
-            double prod = denom * quantile;
-            auto k = std::ceil(prod) + 1;
-            search[c] = k;
-            left[c] = static_cast<double>(k - 1) - prod;
-            right[c] = prod - static_cast<double>(k - 2);
-        }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-        #pragma omp parallel num_threads(nthreads)
-        for (size_t o = 0; o < ntest; ++o) {
-#else
-        SCRAN_CUSTOM_PARALLEL(ntest, [&](size_t start, size_t end) -> void {
-        for (size_t o = start; o < end; ++o) {
-#endif
-
-            auto ptr = test + o * ndim;
-            double best = -1;
-            Cluster choice;
-
-            for (size_t c = 0; c < nclusters; ++c) {
-                auto k = search[c];
-                auto found = built[c]->find_nearest_neighbors(ptr, k);
-                auto curscore = found[k - 1].second;
-                if (k != 1) {
-                    curscore = left[c] * found[k - 2].second + right[c] * curscore;
-                }
-
-                if (best < 0 || curscore < best) {
-                    best = curscore;
-                    choice = c;
-                }
-            }
-
-            output[o] = choice;
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-        }
-#else
-        }
-        }, nthreads);
-#endif
+    Results<Float, Cluster> run(const std::vector<std::vector<std::pair<Index, Float> > >& neighbors, size_t nref, const Cluster* clusters) {
+        Results<Float, Cluster> output(neighbors.size(), report_best, report_second);
+        run(neighbors, nref, clusters, output.assigned.data(), harvest_pointer(output.best_prop, report_best), harvest_pointer(output.second_prop, report_second));
+        return output;
     }
 };
 
