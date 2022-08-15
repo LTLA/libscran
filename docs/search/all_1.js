@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['beta_0',['beta',['../structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#a90a2dca1eed5d37c6b12da18e9f0d9e8',1,'scran::ClusterSNNGraphLeiden::Defaults']]],
-  ['block_5fmode_1',['block_mode',['../structscran_1_1CenterSizeFactors_1_1Defaults.html#a1b72abdcaa1fcd1bc846418e0480c2b6',1,'scran::CenterSizeFactors::Defaults']]],
-  ['blockedpca_2',['BlockedPCA',['../classscran_1_1BlockedPCA.html',1,'scran']]],
-  ['blockedpca_2ehpp_3',['BlockedPCA.hpp',['../BlockedPCA_8hpp.html',1,'']]],
-  ['blockmode_4',['BlockMode',['../classscran_1_1CenterSizeFactors.html#a511d8d0b9259cd5e3595edb8b8573189',1,'scran::CenterSizeFactors']]],
-  ['build_5',['build',['../classscran_1_1AssignReferenceClusters.html#ad8025731b479f39402310d92afaa1a17',1,'scran::AssignReferenceClusters']]]
+  ['best_5fprop_0',['best_prop',['../structscran_1_1AssignReferenceClusters_1_1Results.html#ad3bcd193b3baee7203399f9ccf8e6ca3',1,'scran::AssignReferenceClusters::Results']]],
+  ['beta_1',['beta',['../structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#a90a2dca1eed5d37c6b12da18e9f0d9e8',1,'scran::ClusterSNNGraphLeiden::Defaults']]],
+  ['block_5fmode_2',['block_mode',['../structscran_1_1CenterSizeFactors_1_1Defaults.html#a1b72abdcaa1fcd1bc846418e0480c2b6',1,'scran::CenterSizeFactors::Defaults']]],
+  ['blockedpca_3',['BlockedPCA',['../classscran_1_1BlockedPCA.html',1,'scran']]],
+  ['blockedpca_2ehpp_4',['BlockedPCA.hpp',['../BlockedPCA_8hpp.html',1,'']]],
+  ['blockmode_5',['BlockMode',['../classscran_1_1CenterSizeFactors.html#a511d8d0b9259cd5e3595edb8b8573189',1,'scran::CenterSizeFactors']]]
 ];

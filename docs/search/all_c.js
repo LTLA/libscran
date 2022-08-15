@@ -11,9 +11,8 @@ var searchData=
   ['percellrnaqcfilters_8',['PerCellRnaQcFilters',['../classscran_1_1PerCellRnaQcFilters.html',1,'scran']]],
   ['percellrnaqcfilters_2ehpp_9',['PerCellRnaQcFilters.hpp',['../PerCellRnaQcFilters_8hpp.html',1,'']]],
   ['percellrnaqcmetrics_10',['PerCellRnaQcMetrics',['../classscran_1_1PerCellRnaQcMetrics.html',1,'scran']]],
-  ['prebuilt_11',['Prebuilt',['../classscran_1_1AssignReferenceClusters.html#a7f3df554269927a6765c6aade796713e',1,'scran::AssignReferenceClusters']]],
-  ['prior_5fcount_12',['prior_count',['../structscran_1_1MedianSizeFactors_1_1Defaults.html#a909251588d34d41237a64df1dd85552c',1,'scran::MedianSizeFactors::Defaults']]],
-  ['projectneighborembedding_13',['ProjectNeighborEmbedding',['../classscran_1_1ProjectNeighborEmbedding.html',1,'scran']]],
-  ['projectneighborembedding_2ehpp_14',['ProjectNeighborEmbedding.hpp',['../ProjectNeighborEmbedding_8hpp.html',1,'']]],
-  ['pseudo_5fcount_15',['pseudo_count',['../structscran_1_1LogNormCounts_1_1Defaults.html#a4bd0c603b56d3194fc3dc26b310152c9',1,'scran::LogNormCounts::Defaults']]]
+  ['prior_5fcount_11',['prior_count',['../structscran_1_1MedianSizeFactors_1_1Defaults.html#a909251588d34d41237a64df1dd85552c',1,'scran::MedianSizeFactors::Defaults']]],
+  ['projectneighborembedding_12',['ProjectNeighborEmbedding',['../classscran_1_1ProjectNeighborEmbedding.html',1,'scran']]],
+  ['projectneighborembedding_2ehpp_13',['ProjectNeighborEmbedding.hpp',['../ProjectNeighborEmbedding_8hpp.html',1,'']]],
+  ['pseudo_5fcount_14',['pseudo_count',['../structscran_1_1LogNormCounts_1_1Defaults.html#a4bd0c603b56d3194fc3dc26b310152c9',1,'scran::LogNormCounts::Defaults']]]
 ];
