@@ -59,11 +59,6 @@ public:
          * See `set_nmads()` for details.
          */
         static constexpr double nmads = 3;
-
-        /**
-         * See `set_scale()` for details.
-         */
-        static constexpr double scale = 5;
     };
 
     /**
@@ -111,23 +106,10 @@ public:
         return *this;
     }
 
-    /**
-     * @param s Scaling of the bandwidth for the gaussian kernel.
-     * Larger values reduce the influence of the closest neighbor in the reference on the projected location of each test cell - 
-     * this usually results in less clumping in the visualization.
-     *
-     * @return A reference to this `ProjectNeighborEmbedding` object.
-     */
-    ProjectNeighborEmbedding& set_scale(double s = Defaults::scale) {
-        scale = s;
-        return *this;
-    }
-
 private:
     int nthreads = Defaults::num_threads;
     int num_neighbors = Defaults::num_neighbors;
     double nmads = Defaults::nmads;
-    double scale = Defaults::scale;
     bool approximate = Defaults::approximate;
 
     template<typename Index, typename Float>
@@ -192,7 +174,7 @@ private:
         }
 
         // Compute the weight using a gaussian kernel.
-        Float denom = bandwidth * bandwidth * 2 * scale;
+        Float denom = bandwidth * bandwidth * 2;
         auto compute_weight = [&](Float dist2) -> Float {
             // Protect against float overflow. 
             if (denom > 1 || std::numeric_limits<Float>::max() * denom > dist2) {
