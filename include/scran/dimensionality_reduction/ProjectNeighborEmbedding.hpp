@@ -8,7 +8,6 @@
 #include <cmath>
 
 #include "knncolle/knncolle.hpp"
-#include "tatami/stats/medians.hpp"
 
 /** 
  * @file ProjectNeighborEmbedding.hpp
@@ -27,11 +26,17 @@ namespace scran {
  * For example, we could downsample a dataset with `DownsampleByNeighbors`, generate a 2D visualization for the subset from the PCs, 
  * and then use `ProjectNeighborEmbedding` to project all cells onto the visualization.
  *
- * The projected location in the destination embedding for each test cell is defined as a weighted average of the coordinates of its neighbors.
- * The weight for each neighbor is a function of its distance to the test cell in the source embedding.
- * We use a tricube weighting scheme so that distant neighbors in low-density regions are given less weight in the average.
- * The bandwidth for each test cell is defined as the median distance among `k` neighbors plus a multiple of the MAD;
- * this follows the same MAD-based outlier detection approach as `IsOutlier`.
+ * The projected location in the destination embedding for each test cell is determined by voting for its best neighbor.
+ * For each test cell, we find all of its "primary" neighbors in the source embedding.
+ * For each primary neighbor, we examine its own nearest neighbors in the destination embedding.
+ * For that set of neighbor's neighbors, we compute the distance to the test cell, and we convert that into a weight using a Gaussian kernel.
+ * Summation of the weights yields a score for the primary neighbor; the primary neighbor with the highest score is elected.
+ * The projected coordinates for the test cell are then computed as a weighted average of the embeddings for the elected neighbor's neighbors.
+ *
+ * We use this approach as it preserves the structure of the destination embedding.
+ * In particular, we avoid the formation of spurious intermediate populations, which is common when naively averaging the destination coordinates of the primary neighbors.
+ * (This is because many embedding algorithms will separate primary neighbors in the destination embedding, such that an average will not be close to any of those neighbors.)
+ * The downside is that there may be some visible clumping in sparse regions of the destination embedding.
  */
 class ProjectNeighborEmbedding {
 public:
@@ -54,11 +59,6 @@ public:
          * See `set_num_threads()` for details.
          */
         static constexpr int num_threads = 1;
-
-        /**
-         * See `set_nmads()` for details.
-         */
-        static constexpr double nmads = 3;
     };
 
     /**
@@ -95,21 +95,9 @@ public:
         return *this;
     }
 
-    /**
-     * @param n Number of MADs to use for identifying outlier neighbors.
-     * Smaller values improve robustness to outliers at the cost of reducing the stability of the averages.
-     *
-     * @return A reference to this `ProjectNeighborEmbedding` object.
-     */
-    ProjectNeighborEmbedding& set_nmads(double n = Defaults::nmads) {
-        nmads = n;
-        return *this;
-    }
-
 private:
     int nthreads = Defaults::num_threads;
     int num_neighbors = Defaults::num_neighbors;
-    double nmads = Defaults::nmads;
     bool approximate = Defaults::approximate;
 
     template<typename Index, typename Float>
