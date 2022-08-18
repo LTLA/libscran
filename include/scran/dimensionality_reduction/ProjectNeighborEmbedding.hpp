@@ -8,6 +8,7 @@
 #include <cmath>
 
 #include "knncolle/knncolle.hpp"
+#include "aarand/aarand.hpp"
 
 /** 
  * @file ProjectNeighborEmbedding.hpp
@@ -30,13 +31,12 @@ namespace scran {
  * For each test cell, we find all of its "primary" neighbors in the source embedding.
  * For each primary neighbor, we examine its own nearest neighbors in the destination embedding.
  * For that set of neighbor's neighbors, we compute the distance to the test cell, and we convert that into a weight using a Gaussian kernel.
- * Summation of the weights yields a score for the primary neighbor; the primary neighbor with the highest score is elected.
- * The projected coordinates for the test cell are then computed as a weighted average of the embeddings for the elected neighbor's neighbors.
+ * Summation of the weights yields a score for the primary neighbor; the primary neighbor with the highest score is elected as the projection location.
  *
- * We use this approach as it preserves the structure of the destination embedding.
+ * This approach avoids introducing any artifacts in the destination embedding.
  * In particular, we avoid the formation of spurious intermediate populations, which is common when naively averaging the destination coordinates of the primary neighbors.
- * (This is because many embedding algorithms will separate primary neighbors in the destination embedding, such that an average will not be close to any of those neighbors.)
- * The downside is that there may be some visible clumping in sparse regions of the destination embedding.
+ * This is because many embedding algorithms will separate primary neighbors in the destination embedding, such that an average will not be close to any of those neighbors.
+ * Additionally, we do not jitter the test cells around the elected primary neighbor, as this forms visually distracting clumps when many test cells elect the same primary neighbor.
  */
 class ProjectNeighborEmbedding {
 public:
@@ -53,7 +53,6 @@ public:
          * See `set_approximate()` for details.
          */
         static constexpr int approximate = false;
-
 
         /**
          * See `set_num_threads()` for details.
@@ -209,17 +208,21 @@ private:
             }
         }
 
+        // ... and using it as the projection location. 
+        auto src = embedding + best_neighbor * nembed;
+        std::copy(src, src + nembed, output);
+
         // Computing the average of the neighbor set with the largest weights.
         // The maximum weight better be positive!
-        std::fill(output, output + nembed, 0);
-        const auto& candidates = embedded_neighbors[best_neighbor];
-        for (auto x : candidates) {
-            auto w = cache.at(x) / max_weight;
-            auto src = embedding + x * nembed;
-            for (int e = 0; e < nembed; ++e) {
-                output[e] += w * src[e];
-            }
-        }
+//        std::fill(output, output + nembed, static_cast<Float>(0));
+//        const auto& candidates = embedded_neighbors[best_neighbor];
+//        for (auto x : candidates) {
+//            auto w = cache.at(x) / max_weight;
+//            auto src = embedding + x * nembed;
+//            for (int e = 0; e < nembed; ++e) {
+//                output[e] += w * src[e];
+//            }
+//        }
     }
 
 public:
@@ -260,7 +263,8 @@ public:
             for (size_t o = start; o < end; ++o) {
 #endif
 
-                project_location(neighbors[o], embedded_neighbors, ndim, ref, test + o * ndim, nembed, ref_embedding, cache, output + o * nembed);
+                const auto& current = neighbors[o];
+                project_location(current, embedded_neighbors, ndim, ref, test + o * ndim, nembed, ref_embedding, cache, output + o * nembed);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
             }

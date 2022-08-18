@@ -75,8 +75,6 @@ TEST_F(ProjectNeighborEmbeddingTest, SanityCheck) {
     }
 
     scran::ProjectNeighborEmbedding runner;
-    auto output = runner.run(ndim, nref * duplicator, src_ref2.data(), ntest, src_test.data(), nembed, dest_ref2.data());
-
     runner.set_num_neighbors(duplicator);
     auto exact = runner.run(ndim, nref * duplicator, src_ref2.data(), ntest, src_test.data(), nembed, dest_ref2.data());
 
@@ -88,12 +86,9 @@ TEST_F(ProjectNeighborEmbeddingTest, SanityCheck) {
         auto best = index.find_nearest_neighbors(src_test.data() + t * ndim, 1)[0].first;
         auto expected = dest_ref.data() + best * nembed;
         auto observed = exact.data() + t * nembed;
-        auto other = output.data() + t * nembed;
-
         for (int e = 0; e < nembed; ++e) {
             constexpr double tol = 1e-8;
             EXPECT_TRUE(same_same(expected[e], observed[e], tol));
-            EXPECT_TRUE(!same_same(expected[e], other[e], tol)); 
         }
     }
 }
