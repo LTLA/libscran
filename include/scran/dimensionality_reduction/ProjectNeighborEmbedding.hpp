@@ -42,7 +42,7 @@ public:
         /**
          * See `set_num_neighbors()` for details.
          */
-        static constexpr int num_neighbors = 20;
+        static constexpr int num_neighbors = 10;
 
         /**
          * See `set_approximate()` for details.
@@ -79,8 +79,6 @@ public:
      * @param a Whether an approximate neighbor search should be performed.
      *
      * @return A reference to this `ProjectNeighborEmbedding` object.
-     * 
-     * Note that this parameter only has an effect in the `run()` method that accepts a data matrix for the source embedding.
      */
     ProjectNeighborEmbedding& set_approximate(int a = Defaults::approximate) {
         approximate = a;
@@ -115,61 +113,123 @@ private:
     bool approximate = Defaults::approximate;
 
     template<typename Index, typename Float>
-    void compute_weighted_average(const std::vector<std::pair<Index, Float> >& neighbors, Float* buffer, int ndim, const Float* embedding, Float* output) const {
-        size_t nneighbors = neighbors.size();
-
-        Float bandwidth = 0;
-        if (nneighbors) {
-            for (size_t n = 0; n < nneighbors; ++n) {
-                buffer[n] = neighbors[n].second;
-            }
-            Float median = tatami::stats::compute_median<Float>(buffer, nneighbors);
-
-            for (size_t n = 0; n < nneighbors; ++n) {
-                buffer[n] = std::abs(neighbors[n].second - median);
-            }
-
-            // Scaling equivalence with a normal distribution's SD. Not sure
-            // how much difference it makes, but we do it for IsOutlier so we
-            // might as well do it here.
-            Float mad = tatami::stats::compute_median<Float>(buffer, nneighbors) * 1.4826; 
-
-            bandwidth = median + mad * nmads;
-        }
-
-        Float total = 0;
-        if (bandwidth) {
-            for (size_t i = 0; i < neighbors.size(); ++i) {
-                Float diff = std::min(1.0, neighbors[i].second / bandwidth);
-                Float sub = 1 - diff * diff * diff;
-                buffer[i] = sub * sub * sub;
-                total += buffer[i];
-            }
-        }
-
-        if (total == 0) {
-            if (nneighbors) { // everyone's equal distance.
-                std::fill(output, output + ndim, 0);
-                for (size_t i = 0; i < neighbors.size(); ++i) {
-                    auto nptr = embedding + neighbors[i].first * ndim;
-                    for (int d = 0; d < ndim; ++d) {
-                        output[d] += nptr[d];
-                    }
-                }
-                for (int d = 0; d < ndim; ++d) {
-                    output[d] /= neighbors.size();
-                }
-            } else { // no neighbors at all.
-                std::fill(output, output + ndim, std::numeric_limits<Float>::quiet_NaN());
-            }
+    std::vector<std::vector<Index> > find_embedded_neighbors(int ndim, size_t nobs, const Float* embedding) const {
+        std::shared_ptr<knncolle::Base<Index, Float> > ptr;
+        if (approximate) {
+            ptr.reset(new knncolle::AnnoyEuclidean<Index, Float>(ndim, nobs, embedding));
         } else {
-            std::fill(output, output + ndim, 0);
-            for (size_t i = 0; i < neighbors.size(); ++i) {
-                auto nptr = embedding + neighbors[i].first * ndim;
-                Float weight = buffer[i] / total;
-                for (int d = 0; d < ndim; ++d) {
-                    output[d] += nptr[d] * weight;
+            ptr.reset(new knncolle::VpTreeEuclidean<Index, Float>(ndim, nobs, embedding));
+        }
+
+        std::vector<std::vector<Index> > output(nobs);
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+        #pragma omp parallel for num_threads(nthreads)
+        for (size_t o = 0; o < nobs; ++o) {
+#else
+        SCRAN_CUSTOM_PARALLEL(nobs, [&](size_t start, size_t end) -> void {
+        for (size_t o = start; o < end; ++o) {
+#endif
+
+            auto current = ptr->find_nearest_neighbors(embedding + o * ndim, num_neighbors);
+            auto& store = output[o];
+            store.reserve(current.size() + 1);
+            store.push_back(o); // adding self for easier iteration later.
+            for (const auto& x : current) {
+                store.push_back(x.first);
+            }
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+        }
+#else
+        }
+        }, nthreads);
+#endif
+
+        return output;
+    }
+
+    template<typename Index, typename Float>
+    void project_location(
+            const std::vector<std::pair<Index, Float> >& neighbors, 
+            const std::vector<std::vector<Index> >& embedded_neighbors, 
+            int ndim, 
+            const Float* ref,
+            const Float* coord,
+            int nembed,
+            const Float* embedding, 
+            std::unordered_map<Index, Float>& cache, 
+            Float* output) 
+    const {
+        if (neighbors.empty()) {
+            std::fill(output, output + nembed, std::numeric_limits<Float>::quiet_NaN());
+            return;
+        }
+
+        Float bandwidth = neighbors.front().second;
+        if (bandwidth == 0) {
+            auto src = embedding + nembed * neighbors.front().first;
+            std::copy(src, src + nembed, output);
+            return;
+        }
+
+        // Compute the weight using a gaussian kernel.
+        Float denom = bandwidth * bandwidth * 2;
+        auto compute_weight = [&](Float dist2) -> Float {
+            // Protect against float overflow. 
+            if (denom > 1 || std::numeric_limits<Float>::max() * denom > dist2) {
+                return std::exp(-dist2 / denom);
+            } else {
+                return 0;
+            }
+        };
+
+        // Prefilling the immediate neighbors to avoid unnecessary compute.
+        cache.clear();
+        for (const auto& neighbor : neighbors) {
+            cache[neighbor.first] = compute_weight(neighbor.second * neighbor.second);
+        }
+
+        // Finding the neighbor with the max total weight amongst its own neighbor set.
+        Float max_weight = 0;
+        Index best_neighbor = neighbors.front().first;
+
+        for (const auto& neighbor : neighbors) {
+            const auto& candidates = embedded_neighbors[neighbor.first];
+            Float current_weight = 0;
+
+            for (auto x : candidates) {
+                Float w;
+                auto it = cache.find(x);
+                if (it == cache.end()) {
+                    Float dist2 = 0;
+                    auto pos = ref + x * ndim;
+                    for (int d = 0; d < ndim; ++d) {
+                        dist2 += (pos[d] - coord[d]) * (pos[d] - coord[d]);
+                    }
+                    w = compute_weight(dist2);
+                    cache[x] = w;
+                } else {
+                    w = it->second;
                 }
+                current_weight += w;
+            }
+
+            if (current_weight > max_weight) {
+                max_weight = current_weight;
+                best_neighbor = neighbor.first;
+            }
+        }
+
+        // Computing the average of the neighbor set with the largest weights.
+        // The maximum weight better be positive!
+        std::fill(output, output + nembed, 0);
+        const auto& candidates = embedded_neighbors[best_neighbor];
+        for (auto x : candidates) {
+            auto w = cache.at(x) / max_weight;
+            auto src = embedding + x * nembed;
+            for (int e = 0; e < nembed; ++e) {
+                output[e] += w * src[e];
             }
         }
     }
@@ -190,28 +250,29 @@ public:
      * This should have number of rows and columns equal to `nembed` and `neighbors.size()`, respectively.
      */
     template<typename Index, typename Float>
-    void run(const std::vector<std::vector<std::pair<Index, Float> > >& neighbors, int nembed, const Float* ref_embedding, Float* output) const {
-        size_t nobs = neighbors.size();
+    void run(int ndim, size_t nref, const Float* ref, size_t ntest, const Float* test, int nembed, const Float* ref_embedding, const std::vector<std::vector<std::pair<Index, Float> > >& neighbors, Float* output) const {
+        if (ntest != neighbors.size()) {
+            throw std::runtime_error("'neighbors' should have length equal to 'ntest'");
+        }
+        auto embedded_neighbors = find_embedded_neighbors<Index, Float>(nembed, nref, ref_embedding);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
         #pragma omp parallel num_threads(nthreads)
         {
 #else
-        SCRAN_CUSTOM_PARALLEL(nobs, [&](size_t start, size_t end) -> void {
+        SCRAN_CUSTOM_PARALLEL(ntest, [&](size_t start, size_t end) -> void {
 #endif
 
-            std::vector<Float> buffer;
+            std::unordered_map<Index, Float> cache;
 
 #ifndef SCRAN_CUSTOM_PARALLEL
             #pragma omp for
-            for (size_t o = 0; o < nobs; ++o) {
+            for (size_t o = 0; o < ntest; ++o) {
 #else
             for (size_t o = start; o < end; ++o) {
 #endif
 
-                const auto& current = neighbors[o];
-                buffer.resize(current.size());
-                compute_weighted_average(current, buffer.data(), nembed, ref_embedding, output + o * nembed);
+                project_location(neighbors[o], embedded_neighbors, ndim, ref, test + o * ndim, nembed, ref_embedding, cache, output + o * nembed);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
             }
@@ -236,8 +297,14 @@ public:
      * This should have number of rows and columns equal to `nembed` and `neighbors.size()`, respectively.
      */
     template<typename Index, typename Float>
-    void run(const knncolle::Base<Index, Float>* index, size_t ntest, const Float* test, int nembed, const Float* ref_embedding, Float* output) const {
-        int ndim = index->ndim();
+    void run(int ndim, size_t nref, const Float* ref, size_t ntest, const Float* test, int nembed, const Float* ref_embedding, const knncolle::Base<Index, Float>* index, Float* output) const {
+        if (nref != index->nobs()) {
+            throw std::runtime_error("'index' should have number of observations equal to 'nref'");
+        }
+        if (ndim != index->ndim()) {
+            throw std::runtime_error("'index' should have number of dimensions equal to 'ndim'");
+        }
+        auto embedded_neighbors = find_embedded_neighbors<Index, Float>(nembed, nref, ref_embedding);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
         #pragma omp parallel num_threads(nthreads)
@@ -246,7 +313,7 @@ public:
         SCRAN_CUSTOM_PARALLEL(ntest, [&](size_t start, size_t end) -> void {
 #endif
 
-            std::vector<Float> buffer(num_neighbors);
+            std::unordered_map<Index, Float> cache;
 
 #ifndef SCRAN_CUSTOM_PARALLEL
             #pragma omp for
@@ -256,8 +323,7 @@ public:
 #endif
 
                 auto current = index->find_nearest_neighbors(test + o * ndim, num_neighbors);
-                buffer.resize(current.size());
-                compute_weighted_average(current, buffer.data(), nembed, ref_embedding, output + o * nembed);
+                project_location(current, embedded_neighbors, ndim, ref, test + o * ndim, nembed, ref_embedding, cache, output + o * nembed);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
             }
@@ -292,7 +358,7 @@ public:
         } else {
             ptr.reset(new knncolle::VpTreeEuclidean<Index, Float>(ndim, nref, ref));
         }
-        run(ptr.get(), ntest, test, nembed, ref_embedding, output);
+        run(ndim, nref, ref, ntest, test, nembed, ref_embedding, ptr.get(), output);
     }
 
     /**
