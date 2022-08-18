@@ -95,8 +95,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a10ac2910df05a817d0cd8b4001dcb735"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0533a39dc93bc59e68f76ae09e551132"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ProjectNeighborEmbedding.html">ProjectNeighborEmbedding</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ProjectNeighborEmbedding.html#a0533a39dc93bc59e68f76ae09e551132">set_num_threads</a> (int n=<a class="el" href="structscran_1_1ProjectNeighborEmbedding_1_1Defaults.html#a9bfe4b576464c8bc2be93ee56d37566c">Defaults::num_threads</a>)</td></tr>
 <tr class="separator:a0533a39dc93bc59e68f76ae09e551132"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7b944c6d132a15d699f08044eb16efb7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ProjectNeighborEmbedding.html">ProjectNeighborEmbedding</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ProjectNeighborEmbedding.html#a7b944c6d132a15d699f08044eb16efb7">set_nmads</a> (double n=<a class="el" href="structscran_1_1ProjectNeighborEmbedding_1_1Defaults.html#a13f00f9ced26dc554d8811e7ceffb37e">Defaults::nmads</a>)</td></tr>
-<tr class="separator:a7b944c6d132a15d699f08044eb16efb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a52e7afdfd26cf4519a1b5fb180285e73"><td class="memTemplParams" colspan="2">template&lt;typename Index , typename Float &gt; </td></tr>
 <tr class="memitem:a52e7afdfd26cf4519a1b5fb180285e73"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ProjectNeighborEmbedding.html#a52e7afdfd26cf4519a1b5fb180285e73">run</a> (int ndim, size_t nref, const Float *ref, size_t ntest, const Float *test, int nembed, const Float *ref_embedding, const std::vector&lt; std::vector&lt; std::pair&lt; Index, Float &gt; &gt; &gt; &amp;neighbors, Float *output) const</td></tr>
 <tr class="separator:a52e7afdfd26cf4519a1b5fb180285e73"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -113,7 +111,8 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Project cells into a low-dimensional embedding using neighbors. </p>
 <p >This class projects cells into a "destination" embedding based on their neighbors in another "source" embedding. It is primarily intended for mapping cells in a test dataset onto a 2-dimensional visualization generated from a reference dataset, after detecting the nearest neighbors in the reference for each test cell in PC space. For example, we could downsample a dataset with <code><a class="el" href="classscran_1_1DownsampleByNeighbors.html" title="Downsample a dataset based on its neighbors.">DownsampleByNeighbors</a></code>, generate a 2D visualization for the subset from the PCs, and then use <code><a class="el" href="classscran_1_1ProjectNeighborEmbedding.html" title="Project cells into a low-dimensional embedding using neighbors.">ProjectNeighborEmbedding</a></code> to project all cells onto the visualization.</p>
-<p >The projected location in the destination embedding for each test cell is defined as a weighted average of the coordinates of its neighbors. The weight for each neighbor is a function of its distance to the test cell in the source embedding. We use a tricube weighting scheme so that distant neighbors in low-density regions are given less weight in the average. The bandwidth for each test cell is defined as the median distance among <code>k</code> neighbors plus a multiple of the MAD; this follows the same MAD-based outlier detection approach as <code><a class="el" href="classscran_1_1IsOutlier.html" title="Define outlier values based on MADs.">IsOutlier</a></code>. </p>
+<p >The projected location in the destination embedding for each test cell is determined by voting for its best neighbor. For each test cell, we find all of its "primary" neighbors in the source embedding. For each primary neighbor, we examine its own nearest neighbors in the destination embedding. For that set of neighbor's neighbors, we compute the distance to the test cell, and we convert that into a weight using a Gaussian kernel. Summation of the weights yields a score for the primary neighbor; the primary neighbor with the highest score is elected. The projected coordinates for the test cell are then computed as a weighted average of the embeddings for the elected neighbor's neighbors.</p>
+<p >We use this approach as it preserves the structure of the destination embedding. In particular, we avoid the formation of spurious intermediate populations, which is common when naively averaging the destination coordinates of the primary neighbors. (This is because many embedding algorithms will separate primary neighbors in the destination embedding, such that an average will not be close to any of those neighbors.) The downside is that there may be some visible clumping in sparse regions of the destination embedding. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a1e9f4bfc255a60bdd244b5491503966b" name="a1e9f4bfc255a60bdd244b5491503966b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1e9f4bfc255a60bdd244b5491503966b">&#9670;&nbsp;</a></span>run() <span class="overload">[1/4]</span></h2>
@@ -515,39 +514,6 @@ template&lt;typename Index  = int, typename Float &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">a</td><td>Whether an approximate neighbor search should be performed.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ProjectNeighborEmbedding.html" title="Project cells into a low-dimensional embedding using neighbors.">ProjectNeighborEmbedding</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="a7b944c6d132a15d699f08044eb16efb7" name="a7b944c6d132a15d699f08044eb16efb7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7b944c6d132a15d699f08044eb16efb7">&#9670;&nbsp;</a></span>set_nmads()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ProjectNeighborEmbedding.html">ProjectNeighborEmbedding</a> &amp; scran::ProjectNeighborEmbedding::set_nmads </td>
-          <td>(</td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1ProjectNeighborEmbedding_1_1Defaults.html#a13f00f9ced26dc554d8811e7ceffb37e">Defaults::nmads</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">n</td><td>Number of MADs to use for identifying outlier neighbors. Smaller values improve robustness to outliers at the cost of reducing the stability of the averages.</td></tr>
   </table>
   </dd>
 </dl>
