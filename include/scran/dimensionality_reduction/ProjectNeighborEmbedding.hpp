@@ -58,6 +58,8 @@ public:
          * See `set_num_threads()` for details.
          */
         static constexpr int num_threads = 1;
+
+        static constexpr int steps = 3;
     };
 
     /**
@@ -98,7 +100,9 @@ private:
     int nthreads = Defaults::num_threads;
     int num_neighbors = Defaults::num_neighbors;
     bool approximate = Defaults::approximate;
+    int steps = Defaults::steps;
 
+private:
     template<typename Index, typename Float>
     std::vector<std::vector<Index> > find_embedded_neighbors(int ndim, size_t nobs, const Float* embedding) const {
         std::shared_ptr<knncolle::Base<Index, Float> > ptr;
@@ -136,27 +140,56 @@ private:
         return output;
     }
 
+    template<typename Index, typename Float, typename Thing,  class Rng>
+    static Index choose_step(const std::vector<Thing>& neighbors, std::vector<Float>& buffer, Rng& rng) {
+        for (size_t n = 1; n < buffer.size(); ++n) {
+            buffer[n] += buffer[n-1];
+        }
+
+        Float total_weight = buffer.back();
+        Float sample = total_weight * aarand::standard_uniform<Float>(rng);
+
+        for (size_t n = 0; n < neighbors.size(); ++n) {
+            if (buffer[n] >= sample) {
+                if constexpr(std::is_same<Thing, Index>::value) {
+                    return neighbors[n];
+                } else {
+                    return neighbors[n].first;
+                }
+            }
+        }
+
+        if constexpr(std::is_same<Thing, Index>::value) {
+            return neighbors[0];
+        } else {
+            return neighbors[0].first;
+        }
+    }
+
     template<typename Index, typename Float>
     void project_location(
+            size_t index,
             const std::vector<std::pair<Index, Float> >& neighbors, 
             const std::vector<std::vector<Index> >& embedded_neighbors, 
             int ndim, 
             const Float* ref,
-            const Float* coord,
+            const Float* test,
             int nembed,
             const Float* embedding, 
             std::unordered_map<Index, Float>& cache, 
+            std::vector<Float>& buffer,
             Float* output) 
     const {
+        auto curout = output + index * nembed;
         if (neighbors.empty()) {
-            std::fill(output, output + nembed, std::numeric_limits<Float>::quiet_NaN());
+            std::fill(curout, curout + nembed, std::numeric_limits<Float>::quiet_NaN());
             return;
         }
 
         Float bandwidth = neighbors.front().second;
         if (bandwidth == 0) {
             auto src = embedding + nembed * neighbors.front().first;
-            std::copy(src, src + nembed, output);
+            std::copy(src, src + nembed, curout);
             return;
         }
 
@@ -173,17 +206,22 @@ private:
 
         // Prefilling the immediate neighbors to avoid unnecessary compute.
         cache.clear();
+        buffer.clear();
         for (const auto& neighbor : neighbors) {
-            cache[neighbor.first] = compute_weight(neighbor.second * neighbor.second);
+            auto w = compute_weight(neighbor.second * neighbor.second);
+            cache[neighbor.first] = w;
+            buffer.push_back(w);
         }
 
-        // Finding the neighbor with the max total weight amongst its own neighbor set.
-        Float max_weight = 0;
-        Index best_neighbor = neighbors.front().first;
+        // Choosing the starting point.
+        std::mt19937_64 rng(index + 5867);
+        Index current_position = this->choose_step<Index, Float>(neighbors, buffer, rng);
 
-        for (const auto& neighbor : neighbors) {
-            const auto& candidates = embedded_neighbors[neighbor.first];
-            Float current_weight = 0;
+        // Performing a random walk around the starting point.
+        auto coord = test + index * ndim;
+        for (int s = 0; s <= steps; ++s) {
+            const auto& candidates = embedded_neighbors[current_position];
+            buffer.clear();
 
             for (auto x : candidates) {
                 Float w;
@@ -199,30 +237,29 @@ private:
                 } else {
                     w = it->second;
                 }
-                current_weight += w;
+                buffer.push_back(w);
             }
 
-            if (current_weight > max_weight) {
-                max_weight = current_weight;
-                best_neighbor = neighbor.first;
+            if (s < steps) {
+                current_position = this->choose_step<Index, Float>(candidates, buffer, rng);
+            } else {
+                // Final location uses a weighted average where the existing 
+                // weights are jiggled a little to provide some jitter.
+                Float total_weight = 0;
+                for (size_t n = 0; n < buffer.size(); ++n) {
+                    auto w = buffer[n] * std::max(aarand::standard_uniform<Float>(rng), static_cast<Float>(0.000001));
+                    total_weight += w;
+                    auto src = embedding + candidates[n] * nembed;
+                    for (int e = 0; e < nembed; ++e) {
+                        curout[e] += w * src[e];
+                    }
+                }
+
+                for (int e = 0; e < nembed; ++e) {
+                    curout[e] /= total_weight;
+                }
             }
         }
-
-        // ... and using it as the projection location. 
-        auto src = embedding + best_neighbor * nembed;
-        std::copy(src, src + nembed, output);
-
-        // Computing the average of the neighbor set with the largest weights.
-        // The maximum weight better be positive!
-//        std::fill(output, output + nembed, static_cast<Float>(0));
-//        const auto& candidates = embedded_neighbors[best_neighbor];
-//        for (auto x : candidates) {
-//            auto w = cache.at(x) / max_weight;
-//            auto src = embedding + x * nembed;
-//            for (int e = 0; e < nembed; ++e) {
-//                output[e] += w * src[e];
-//            }
-//        }
     }
 
 public:
@@ -255,6 +292,7 @@ public:
 #endif
 
             std::unordered_map<Index, Float> cache;
+            std::vector<Float> buffer;
 
 #ifndef SCRAN_CUSTOM_PARALLEL
             #pragma omp for
@@ -264,7 +302,7 @@ public:
 #endif
 
                 const auto& current = neighbors[o];
-                project_location(current, embedded_neighbors, ndim, ref, test + o * ndim, nembed, ref_embedding, cache, output + o * nembed);
+                project_location(o, current, embedded_neighbors, ndim, ref, test, nembed, ref_embedding, cache, buffer, output);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
             }
@@ -306,6 +344,7 @@ public:
 #endif
 
             std::unordered_map<Index, Float> cache;
+            std::vector<Float> buffer;
 
 #ifndef SCRAN_CUSTOM_PARALLEL
             #pragma omp for
@@ -315,7 +354,7 @@ public:
 #endif
 
                 auto current = index->find_nearest_neighbors(test + o * ndim, num_neighbors);
-                project_location(current, embedded_neighbors, ndim, ref, test + o * ndim, nembed, ref_embedding, cache, output + o * nembed);
+                project_location(o, current, embedded_neighbors, ndim, ref, test, nembed, ref_embedding, cache, buffer, output);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
             }
