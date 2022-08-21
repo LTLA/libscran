@@ -95,23 +95,23 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a6891a8dc59fe89d40cf4915da4a15fd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6b5993d8df83b1a4dd8e0dc1ff42ee45"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1DownsampleByNeighbors.html">DownsampleByNeighbors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1DownsampleByNeighbors.html#a6b5993d8df83b1a4dd8e0dc1ff42ee45">set_approximate</a> (int a=<a class="el" href="structscran_1_1DownsampleByNeighbors_1_1Defaults.html#a217dc2cf9a3fb84e137360a078b0ea49">Defaults::approximate</a>)</td></tr>
 <tr class="separator:a6b5993d8df83b1a4dd8e0dc1ff42ee45"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2f43176a297d4742b3bb4f2c9dae8d8d"><td class="memTemplParams" colspan="2">template&lt;typename Index , typename Float &gt; </td></tr>
-<tr class="memitem:a2f43176a297d4742b3bb4f2c9dae8d8d"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; Index &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1DownsampleByNeighbors.html#a2f43176a297d4742b3bb4f2c9dae8d8d">run</a> (const std::vector&lt; std::vector&lt; std::pair&lt; Index, Float &gt; &gt; &gt; &amp;neighbors) const</td></tr>
-<tr class="separator:a2f43176a297d4742b3bb4f2c9dae8d8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abf04378183d153c3677f1e992e1452e6"><td class="memTemplParams" colspan="2">template&lt;typename Index  = int, typename Float &gt; </td></tr>
-<tr class="memitem:abf04378183d153c3677f1e992e1452e6"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; Index &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1DownsampleByNeighbors.html#abf04378183d153c3677f1e992e1452e6">run</a> (int ndim, size_t nobs, const Float *data) const</td></tr>
-<tr class="separator:abf04378183d153c3677f1e992e1452e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af4ce774f06fa76552a8de715b3408fb9"><td class="memTemplParams" colspan="2">template&lt;typename Index , typename Float &gt; </td></tr>
-<tr class="memitem:af4ce774f06fa76552a8de715b3408fb9"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; Index &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1DownsampleByNeighbors.html#af4ce774f06fa76552a8de715b3408fb9">run</a> (const knncolle::Base&lt; Index, Float &gt; *index) const</td></tr>
-<tr class="separator:af4ce774f06fa76552a8de715b3408fb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3fefac1ba6a166d97e525ba63593fddd"><td class="memTemplParams" colspan="2">template&lt;typename Index , typename Float &gt; </td></tr>
+<tr class="memitem:a3fefac1ba6a166d97e525ba63593fddd"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; Index &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1DownsampleByNeighbors.html#a3fefac1ba6a166d97e525ba63593fddd">run</a> (const std::vector&lt; std::vector&lt; std::pair&lt; Index, Float &gt; &gt; &gt; &amp;neighbors, Index *assigned) const</td></tr>
+<tr class="separator:a3fefac1ba6a166d97e525ba63593fddd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b88cc9e50826fe0a399c3a9f15e3361"><td class="memTemplParams" colspan="2">template&lt;typename Index  = int, typename Float &gt; </td></tr>
+<tr class="memitem:a3b88cc9e50826fe0a399c3a9f15e3361"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; Index &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1DownsampleByNeighbors.html#a3b88cc9e50826fe0a399c3a9f15e3361">run</a> (int ndim, size_t nobs, const Float *data, Index *assigned) const</td></tr>
+<tr class="separator:a3b88cc9e50826fe0a399c3a9f15e3361"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a582b257a8a333ffc4ae94ae3288055f2"><td class="memTemplParams" colspan="2">template&lt;typename Index , typename Float &gt; </td></tr>
+<tr class="memitem:a582b257a8a333ffc4ae94ae3288055f2"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; Index &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1DownsampleByNeighbors.html#a582b257a8a333ffc4ae94ae3288055f2">run</a> (const knncolle::Base&lt; Index, Float &gt; *index, Index *assigned) const</td></tr>
+<tr class="separator:a582b257a8a333ffc4ae94ae3288055f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Downsample a dataset based on its neighbors. </p>
 <p >This function generates a deterministic downsampling of a dataset based on nearest neighbors. To do so, we identify the <code>k</code>-nearest neighbors of each cell and use that to define its local neighborhood. We find the cell that does not belong in the local neighborhood of any previously retained cell, and has the fewest neighbors in any of the local neighborhoods of previously retained cells; ties are broken using the smallest distance to the cell's <code>k</code>-th neighbor (i.e., the densest region of space). This cell is retained in the downsampled subset and we repeat this process until all cells have been processed.</p>
 <p >Each retained cell serves as a representative for up to <code>k</code> of its nearest neighboring cells. This approach ensures that the downsampled points are well-distributed across the dataset. Low-frequency subpopulations will always have at least a few representatives if they are sufficiently distant from other subpopulations. In contrast, random sampling does not provide strong guarantees for capture of a rare subpopulation. We also preserve the relative density across the dataset as more representatives will be generated from high-density regions. This simplifies the interpretation of analysis results generated from the subsetted dataset. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="af4ce774f06fa76552a8de715b3408fb9" name="af4ce774f06fa76552a8de715b3408fb9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af4ce774f06fa76552a8de715b3408fb9">&#9670;&nbsp;</a></span>run() <span class="overload">[1/3]</span></h2>
+<a id="a582b257a8a333ffc4ae94ae3288055f2" name="a582b257a8a333ffc4ae94ae3288055f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a582b257a8a333ffc4ae94ae3288055f2">&#9670;&nbsp;</a></span>run() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -125,8 +125,18 @@ template&lt;typename Index , typename Float &gt; </div>
           <td class="memname">std::vector&lt; Index &gt; scran::DownsampleByNeighbors::run </td>
           <td>(</td>
           <td class="paramtype">const knncolle::Base&lt; Index, Float &gt; *&#160;</td>
-          <td class="paramname"><em>index</em></td><td>)</td>
-          <td> const</td>
+          <td class="paramname"><em>index</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Index *&#160;</td>
+          <td class="paramname"><em>assigned</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -144,16 +154,17 @@ template&lt;typename Index , typename Float &gt; </div>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">index</td><td>Pointer to a <code>knncolle::Base</code> index object, containing a pre-built neighbor index for a dataset.</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">index</td><td>Pointer to a <code>knncolle::Base</code> index object, containing a pre-built neighbor index for a dataset. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">assigned</td><td>Vector of length equal to the number of cells in <code>neighbors</code>. On output, this contains the index of the representative for each cell in the original dataset. This may also be a null pointer, in which case nothing is returned.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Vector of indices of the chosen representative cells. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Vector of indices of the chosen representative cells. The length of this vector depends on the dataset and the specified number of neighbors in <code><a class="el" href="classscran_1_1DownsampleByNeighbors.html#aba8c99956dc466841c902a938cd01d31">set_num_neighbors()</a></code>. Indices are sorted in increasing order. </dd></dl>
 
 </div>
 </div>
-<a id="a2f43176a297d4742b3bb4f2c9dae8d8d" name="a2f43176a297d4742b3bb4f2c9dae8d8d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2f43176a297d4742b3bb4f2c9dae8d8d">&#9670;&nbsp;</a></span>run() <span class="overload">[2/3]</span></h2>
+<a id="a3fefac1ba6a166d97e525ba63593fddd" name="a3fefac1ba6a166d97e525ba63593fddd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fefac1ba6a166d97e525ba63593fddd">&#9670;&nbsp;</a></span>run() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -167,8 +178,18 @@ template&lt;typename Index , typename Float &gt; </div>
           <td class="memname">std::vector&lt; Index &gt; scran::DownsampleByNeighbors::run </td>
           <td>(</td>
           <td class="paramtype">const std::vector&lt; std::vector&lt; std::pair&lt; Index, Float &gt; &gt; &gt; &amp;&#160;</td>
-          <td class="paramname"><em>neighbors</em></td><td>)</td>
-          <td> const</td>
+          <td class="paramname"><em>neighbors</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Index *&#160;</td>
+          <td class="paramname"><em>assigned</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -186,16 +207,17 @@ template&lt;typename Index , typename Float &gt; </div>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">neighbors</td><td>Vector of vector of neighbors for each cell. Each entry of the outer vector corresponds to a cell, and each inner vector contains the index and distance of its nearest neighbors. It is assumed that each inner vector is sorted by increasing distance.</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">neighbors</td><td>Vector of vector of neighbors for each cell. Each entry of the outer vector corresponds to a cell, and each inner vector contains the index and distance of its nearest neighbors. It is assumed that each inner vector is sorted by increasing distance. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">assigned</td><td>Vector of length equal to the number of cells in <code>neighbors</code>. On output, this contains the index of the representative for each cell in the original dataset. This may also be a null pointer, in which case nothing is returned.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Vector of indices of the chosen representative cells. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Vector of indices of the chosen representative cells. The length of this vector depends on the dataset and the specified number of neighbors in <code><a class="el" href="classscran_1_1DownsampleByNeighbors.html#aba8c99956dc466841c902a938cd01d31">set_num_neighbors()</a></code>. Indices are sorted in increasing order. </dd></dl>
 
 </div>
 </div>
-<a id="abf04378183d153c3677f1e992e1452e6" name="abf04378183d153c3677f1e992e1452e6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abf04378183d153c3677f1e992e1452e6">&#9670;&nbsp;</a></span>run() <span class="overload">[3/3]</span></h2>
+<a id="a3b88cc9e50826fe0a399c3a9f15e3361" name="a3b88cc9e50826fe0a399c3a9f15e3361"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b88cc9e50826fe0a399c3a9f15e3361">&#9670;&nbsp;</a></span>run() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -221,7 +243,13 @@ template&lt;typename Index  = int, typename Float &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Float *&#160;</td>
-          <td class="paramname"><em>data</em>&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Index *&#160;</td>
+          <td class="paramname"><em>assigned</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -244,13 +272,14 @@ template&lt;typename Index  = int, typename Float &gt; </div>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ndim</td><td>Number of dimensions. </td></tr>
-    <tr><td class="paramname">nobs</td><td>Number of observations, i.e., cells. </td></tr>
-    <tr><td class="paramname">data</td><td>Pointer to a column-major array of dimensions (rows) by cells (columns) containing coordinates for each cell, typically in some kind of embedding.</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">ndim</td><td>Number of dimensions. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">nobs</td><td>Number of observations, i.e., cells. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">data</td><td>Pointer to a column-major array of dimensions (rows) by cells (columns) containing coordinates for each cell, typically in some kind of embedding. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">assigned</td><td>Vector of length equal to the number of cells in <code>neighbors</code>. On output, this contains the index of the representative for each cell in the original dataset. This may also be a null pointer, in which case nothing is returned.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Vector of indices of the chosen representative cells. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Vector of indices of the chosen representative cells. The length of this vector depends on the dataset and the specified number of neighbors in <code><a class="el" href="classscran_1_1DownsampleByNeighbors.html#aba8c99956dc466841c902a938cd01d31">set_num_neighbors()</a></code>. Indices are sorted in increasing order. </dd></dl>
 
 </div>
 </div>
@@ -284,7 +313,7 @@ template&lt;typename Index  = int, typename Float &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1DownsampleByNeighbors.html" title="Downsample a dataset based on its neighbors.">DownsampleByNeighbors</a></code> object.</dd></dl>
-<p>Note that this is only used in <code><a class="el" href="classscran_1_1DownsampleByNeighbors.html#a2f43176a297d4742b3bb4f2c9dae8d8d">run()</a></code> when a data matrix is supplied. </p>
+<p>Note that this is only used in <code><a class="el" href="classscran_1_1DownsampleByNeighbors.html#a3fefac1ba6a166d97e525ba63593fddd">run()</a></code> when a data matrix is supplied. </p>
 
 </div>
 </div>
@@ -318,7 +347,7 @@ template&lt;typename Index  = int, typename Float &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1DownsampleByNeighbors.html" title="Downsample a dataset based on its neighbors.">DownsampleByNeighbors</a></code> object.</dd></dl>
-<p>Note that this is only used in <code><a class="el" href="classscran_1_1DownsampleByNeighbors.html#a2f43176a297d4742b3bb4f2c9dae8d8d">run()</a></code> when a list of neighbors is not supplied. </p>
+<p>Note that this is only used in <code><a class="el" href="classscran_1_1DownsampleByNeighbors.html#a3fefac1ba6a166d97e525ba63593fddd">run()</a></code> when a list of neighbors is not supplied. </p>
 
 </div>
 </div>
@@ -352,7 +381,7 @@ template&lt;typename Index  = int, typename Float &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1DownsampleByNeighbors.html" title="Downsample a dataset based on its neighbors.">DownsampleByNeighbors</a></code> object.</dd></dl>
-<p>Note that this is only used in <code><a class="el" href="classscran_1_1DownsampleByNeighbors.html#a2f43176a297d4742b3bb4f2c9dae8d8d">run()</a></code> when a list of neighbors is not supplied. </p>
+<p>Note that this is only used in <code><a class="el" href="classscran_1_1DownsampleByNeighbors.html#a3fefac1ba6a166d97e525ba63593fddd">run()</a></code> when a list of neighbors is not supplied. </p>
 
 </div>
 </div>
