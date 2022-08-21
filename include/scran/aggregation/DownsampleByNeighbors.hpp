@@ -108,11 +108,16 @@ public:
      * Each entry of the outer vector corresponds to a cell,
      * and each inner vector contains the index and distance of its nearest neighbors.
      * It is assumed that each inner vector is sorted by increasing distance.
+     * @param[out] assigned Vector of length equal to the number of cells in `neighbors`.
+     * On output, this contains the index of the representative for each cell in the original dataset.
+     * This may also be a null pointer, in which case nothing is returned.
      *
      * @return Vector of indices of the chosen representative cells.
+     * The length of this vector depends on the dataset and the specified number of neighbors in `set_num_neighbors()`. 
+     * Indices are sorted in increasing order.
      */
     template<typename Index, typename Float>
-    std::vector<Index> run(const std::vector<std::vector<std::pair<Index, Float> > >& neighbors) const {
+    std::vector<Index> run(const std::vector<std::vector<std::pair<Index, Float> > >& neighbors, Index* assigned) const {
         size_t nobs = neighbors.size();
 
         struct Observation {
@@ -194,6 +199,12 @@ public:
                     for (const auto& x : current) {
                         covered[x.first] = 1;
                     }
+                    if (assigned) {
+                        assigned[candidate] = candidate;
+                        for (const auto& x : current) {
+                            assigned[x.first] = candidate;
+                        }
+                    }
                 } else {
                     if (!needs_resort) {
                         needs_resort = true;
@@ -221,18 +232,23 @@ public:
      * @param ndim Number of dimensions.
      * @param nobs Number of observations, i.e., cells.
      * @param data Pointer to a column-major array of dimensions (rows) by cells (columns) containing coordinates for each cell, typically in some kind of embedding.
+     * @param[out] assigned Vector of length equal to the number of cells in `neighbors`.
+     * On output, this contains the index of the representative for each cell in the original dataset.
+     * This may also be a null pointer, in which case nothing is returned.
      *
      * @return Vector of indices of the chosen representative cells.
+     * The length of this vector depends on the dataset and the specified number of neighbors in `set_num_neighbors()`. 
+     * Indices are sorted in increasing order.
      */
     template<typename Index = int, typename Float>
-    std::vector<Index> run(int ndim, size_t nobs, const Float* data) const {
+    std::vector<Index> run(int ndim, size_t nobs, const Float* data, Index* assigned) const {
         std::shared_ptr<knncolle::Base<Index, Float> > ptr;
         if (approximate) {
             ptr.reset(new knncolle::AnnoyEuclidean<Index, Float>(ndim, nobs, data));
         } else {
             ptr.reset(new knncolle::VpTreeEuclidean<Index, Float>(ndim, nobs, data));
         }
-        return run(ptr.get()); 
+        return run(ptr.get(), assigned); 
     }
 
     /**
@@ -241,11 +257,16 @@ public:
      *
      * @param index Pointer to a `knncolle::Base` index object,
      * containing a pre-built neighbor index for a dataset.
+     * @param[out] assigned Vector of length equal to the number of cells in `neighbors`.
+     * On output, this contains the index of the representative for each cell in the original dataset.
+     * This may also be a null pointer, in which case nothing is returned.
      *
      * @return Vector of indices of the chosen representative cells.
+     * The length of this vector depends on the dataset and the specified number of neighbors in `set_num_neighbors()`. 
+     * Indices are sorted in increasing order.
      */
     template<typename Index, typename Float>
-    std::vector<Index> run(const knncolle::Base<Index, Float>* index) const {
+    std::vector<Index> run(const knncolle::Base<Index, Float>* index, Index* assigned) const {
         size_t nobs = index->nobs();
         std::vector<std::vector<std::pair<Index, Float> > > neighbors(nobs);
 
@@ -266,7 +287,7 @@ public:
         }, nthreads);
 #endif
 
-        return run(neighbors);
+        return run(neighbors, assigned);
     }
 };
 

@@ -35,8 +35,14 @@ TEST_F(DownsampleByNeighborsTest, Sanity) {
     fill_with_crap(ndim, 13, -5.2);
 
     scran::DownsampleByNeighbors down;
-    auto res = down.run(ndim, nobs, data.data());
+    std::vector<int> assigned(nobs, -1);
+    auto res = down.run(ndim, nobs, data.data(), assigned.data());
     EXPECT_TRUE(res.size() < 50); // should see some downsampling.
+
+    // Check that all 'assigned' were filled with something.
+    for (auto a : assigned) {
+        EXPECT_TRUE(a >= 0);
+    }
 
     // Ensure that our special points are also collected.
     std::set<int> collected(res.begin(), res.end());
@@ -45,7 +51,7 @@ TEST_F(DownsampleByNeighborsTest, Sanity) {
 
     // Same results in parallel.
     down.set_num_threads(3);
-    auto pres = down.run(ndim, nobs, data.data());
+    auto pres = down.run(ndim, nobs, data.data(), static_cast<int*>(NULL));
     EXPECT_EQ(pres, res);
 }
 
@@ -59,7 +65,7 @@ TEST_F(DownsampleByNeighborsTest, Approximate) {
 
     scran::DownsampleByNeighbors down;
     down.set_approximate(true).set_num_neighbors(50);
-    auto res = down.run(ndim, nobs, data.data());
+    auto res = down.run(ndim, nobs, data.data(), static_cast<int*>(NULL));
     EXPECT_TRUE(res.size() < 200);
 
     std::set<int> collected(res.begin(), res.end());
@@ -74,7 +80,8 @@ TEST_F(DownsampleByNeighborsTest, Reference) {
     knncolle::VpTreeEuclidean<int, double> index(ndim, nobs, data.data());
 
     scran::DownsampleByNeighbors down;
-    auto res = down.run(ndim, nobs, data.data());
+    std::vector<int> assigned(nobs, -1);
+    auto res = down.run(ndim, nobs, data.data(), assigned.data());
     auto num_neighbors = scran::DownsampleByNeighbors::Defaults::num_neighbors;
 
     // Reference calculation.
@@ -88,6 +95,7 @@ TEST_F(DownsampleByNeighborsTest, Reference) {
 
     std::vector<int> chosen;
     std::vector<char> covered(nobs);
+    std::vector<int> ref_assigned(nobs);
 
     for (int k = 0; k <= num_neighbors; ++k) {
         std::sort(ordered.begin(), ordered.end());
@@ -117,8 +125,10 @@ TEST_F(DownsampleByNeighborsTest, Reference) {
 
             chosen.push_back(index);
             covered[index] = 1;
+            ref_assigned[index] = index;
             for (auto x : curneighbors) {
                 covered[x.first] = 1;
+                ref_assigned[x.first] = index;
             }
         }
 
@@ -140,5 +150,6 @@ TEST_F(DownsampleByNeighborsTest, Reference) {
     std::sort(chosen.begin(), chosen.end());
 
     EXPECT_EQ(res, chosen);
+    EXPECT_EQ(assigned, ref_assigned);
     EXPECT_TRUE(res.size() <= 200);
 }
