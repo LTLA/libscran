@@ -127,8 +127,10 @@ TEST_F(DownsampleByNeighborsTest, Reference) {
             covered[index] = 1;
             ref_assigned[index] = index;
             for (auto x : curneighbors) {
-                covered[x.first] = 1;
-                ref_assigned[x.first] = index;
+                if (!covered[x.first]) {
+                    covered[x.first] = 1;
+                    ref_assigned[x.first] = index;
+                }
             }
         }
 

@@ -195,14 +195,21 @@ public:
 
                 if (updated_num == original_num && (!needs_resort || updated_num < resort_limit)) {
                     chosen.push_back(candidate);
-                    covered[candidate] = 1;
-                    for (const auto& x : current) {
-                        covered[x.first] = 1;
-                    }
+
+                    // Do this before 'covered' is modified.
                     if (assigned) {
                         assigned[candidate] = candidate;
                         for (const auto& x : current) {
-                            assigned[x.first] = candidate;
+                            if (!covered[x.first]) {
+                                assigned[x.first] = candidate;
+                            }
+                        }
+                    }
+
+                    covered[candidate] = 1;
+                    for (const auto& x : current) {
+                        if (!covered[x.first]) {
+                            covered[x.first] = 1;
                         }
                     }
                 } else {
