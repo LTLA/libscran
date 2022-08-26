@@ -445,7 +445,8 @@ public:
 
         // No need to free this, as it's just a view.
         igraph_vector_t weight_view;
-        igraph_vector_view(&weight_view, weights, igraph_ecount(graph.get_graph()));
+        size_t nedges = igraph_ecount(graph.get_graph());
+        igraph_vector_view(&weight_view, weights, nedges);
 
         if (!modularity) {
             for (int i = 0; i < iterations; ++i) {
@@ -456,16 +457,16 @@ public:
             }
         } else {
             // Based on https://igraph.org/c/doc/igraph-Community.html#igraph_community_leiden.
-            igraph::Vector degree_holder(igraph_vcount(graph.get_graph()));
-            auto& degree = degree_holder.vector;
-            igraph_degree(graph.get_graph(), &degree, igraph_vss_all(), IGRAPH_ALL, 1);
+            // Copying the adjustment of igraph::cluster_leiden in the R package. 
+            igraph::Vector strength_holder(igraph_vcount(graph.get_graph()));
+            auto& strength = strength_holder.vector;
+            igraph_strength(graph.get_graph(), &strength, igraph_vss_all(), IGRAPH_ALL, 1, &weight_view);
 
-            // This assumes that resolution = 1 in the example in the C documentation. 
-            // igraph::cluster_leiden in the R package does the same thing.
-            double mod_resolution = resolution / (2 * igraph_ecount(graph.get_graph()));
-            
+            double total_weights = std::accumulate(weights, weights + nedges, 0.0);
+            double mod_resolution = resolution / (2 * total_weights);
+
             for (int i = 0; i < iterations; ++i) {
-                output.status = igraph_community_leiden(graph.get_graph(), &weight_view, &degree, mod_resolution, beta, (i > 0), &membership, &nb_clusters, &quality);
+                output.status = igraph_community_leiden(graph.get_graph(), &weight_view, &strength, mod_resolution, beta, (i > 0), &membership, &nb_clusters, &quality);
                 if (output.status) {
                     break;
                 }
