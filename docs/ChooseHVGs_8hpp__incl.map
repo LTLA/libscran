@@ -1,8 +1,8 @@
 <map id="scran/feature_selection/ChooseHVGs.hpp" name="scran/feature_selection/ChooseHVGs.hpp">
-<area shape="rect" id="node1" title="Choose highly variable genes for downstream analyses." alt="" coords="198,5,355,47"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,95,132,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="157,95,215,121"/>
-<area shape="rect" id="node4" title=" " alt="" coords="239,95,314,121"/>
-<area shape="rect" id="node5" title=" " alt="" coords="339,95,407,121"/>
-<area shape="rect" id="node6" title=" " alt="" coords="431,95,493,121"/>
+<area shape="rect" id="node1" title="Choose highly variable genes for downstream analyses." alt="" coords="198,5,355,45"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,93,132,119"/>
+<area shape="rect" id="node3" title=" " alt="" coords="157,93,215,119"/>
+<area shape="rect" id="node4" title=" " alt="" coords="239,93,314,119"/>
+<area shape="rect" id="node5" title=" " alt="" coords="339,93,407,119"/>
+<area shape="rect" id="node6" title=" " alt="" coords="431,93,493,119"/>
 </map>

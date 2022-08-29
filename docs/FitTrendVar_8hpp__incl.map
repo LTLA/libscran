@@ -1,7 +1,7 @@
 <map id="scran/feature_selection/FitTrendVar.hpp" name="scran/feature_selection/FitTrendVar.hpp">
-<area shape="rect" id="node1" title="Fit a mean&#45;variance trend to log&#45;count data." alt="" coords="161,5,318,47"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,95,132,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="157,95,231,121"/>
-<area shape="rect" id="node4" title=" " alt="" coords="255,95,314,121"/>
-<area shape="rect" id="node5" title=" " alt="" coords="338,95,589,121"/>
+<area shape="rect" id="node1" title="Fit a mean&#45;variance trend to log&#45;count data." alt="" coords="161,5,318,45"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,93,132,119"/>
+<area shape="rect" id="node3" title=" " alt="" coords="157,93,231,119"/>
+<area shape="rect" id="node4" title=" " alt="" coords="255,93,314,119"/>
+<area shape="rect" id="node5" title=" " alt="" coords="338,93,589,119"/>
 </map>

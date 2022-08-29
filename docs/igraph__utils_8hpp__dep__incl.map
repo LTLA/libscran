@@ -1,6 +1,6 @@
 <map id="scran/clustering/igraph_utils.hpp" name="scran/clustering/igraph_utils.hpp">
-<area shape="rect" id="node1" title="Utilities for manipulating igraph data structures." alt="" coords="48,5,201,47"/>
-<area shape="rect" id="node2" href="$BuildSNNGraph_8hpp_source.html" title=" " alt="" coords="85,95,319,121"/>
-<area shape="rect" id="node3" href="$ClusterSNNGraph_8hpp.html" title="Identify clusters of cells from a shared nearest&#45;neighbor graph." alt="" coords="5,169,164,211"/>
-<area shape="rect" id="node4" href="$scran_8hpp_source.html" title=" " alt="" coords="86,259,201,285"/>
+<area shape="rect" id="node1" title="Utilities for manipulating igraph data structures." alt="" coords="48,5,201,45"/>
+<area shape="rect" id="node2" href="$BuildSNNGraph_8hpp_source.html" title=" " alt="" coords="85,93,319,119"/>
+<area shape="rect" id="node3" href="$ClusterSNNGraph_8hpp.html" title="Identify clusters of cells from a shared nearest&#45;neighbor graph." alt="" coords="5,167,164,207"/>
+<area shape="rect" id="node4" href="$scran_8hpp_source.html" title=" " alt="" coords="86,255,201,280"/>
 </map>

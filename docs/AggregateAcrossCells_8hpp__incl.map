@@ -1,9 +1,9 @@
 <map id="scran/aggregation/AggregateAcrossCells.hpp" name="scran/aggregation/AggregateAcrossCells.hpp">
-<area shape="rect" id="node1" title="Aggregate expression values across cells." alt="" coords="183,5,371,47"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,169,132,196"/>
-<area shape="rect" id="node3" title=" " alt="" coords="157,169,231,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="362,169,421,196"/>
-<area shape="rect" id="node5" title=" " alt="" coords="397,95,519,121"/>
-<area shape="rect" id="node6" href="$Factory_8hpp_source.html" title=" " alt="" coords="232,95,321,121"/>
-<area shape="rect" id="node7" title=" " alt="" coords="255,169,338,196"/>
+<area shape="rect" id="node1" title="Aggregate expression values across cells." alt="" coords="183,5,371,45"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,167,132,192"/>
+<area shape="rect" id="node3" title=" " alt="" coords="157,167,231,192"/>
+<area shape="rect" id="node4" title=" " alt="" coords="362,167,421,192"/>
+<area shape="rect" id="node5" title=" " alt="" coords="397,93,519,119"/>
+<area shape="rect" id="node6" href="$Factory_8hpp_source.html" title=" " alt="" coords="232,93,321,119"/>
+<area shape="rect" id="node7" title=" " alt="" coords="255,167,338,192"/>
 </map>
