@@ -191,30 +191,35 @@ class MultiBatchPCABasicTest : public ::testing::TestWithParam<std::tuple<bool, 
 TEST_P(MultiBatchPCABasicTest, Basic) {
     auto param = GetParam();
     assemble(param);
+    int nthreads = std::get<3>(param);
+    auto use_eigen = std::get<4>(param);
 
     scran::MultiBatchPCA runner;
     runner.set_scale(scale).set_rank(rank);
     auto block = generate_blocks(dense_row->ncol(), nblocks);
-
     auto ref = runner.run(dense_row.get(), block.data());
 
-    int nthreads = std::get<3>(param);
     runner.set_num_threads(nthreads);
-    auto use_eigen = std::get<4>(param);
-    if (use_eigen) {
-        runner.set_use_eigen(true);
-    }
+    runner.set_use_eigen(use_eigen);
 
-    if (nthreads == 1) {
-        EXPECT_EQ(ref.variance_explained.size(), rank);
-        EXPECT_EQ(ref.pcs.rows(), rank);
-        EXPECT_EQ(ref.pcs.cols(), dense_row->ncol());
-    } else {
-        // Checking that we get more-or-less the same results.
+    if (use_eigen) {
+        // Results should be similar with Eigen matrices.
         auto res1 = runner.run(dense_row.get(), block.data());
         expect_equal_pcs(ref.pcs, res1.pcs);
         expect_equal_vectors(ref.variance_explained, res1.variance_explained);
         EXPECT_FLOAT_EQ(ref.total_variance, res1.total_variance);
+
+    } else if (nthreads == 1) {
+        EXPECT_EQ(ref.variance_explained.size(), rank);
+        EXPECT_EQ(ref.pcs.rows(), rank);
+        EXPECT_EQ(ref.pcs.cols(), dense_row->ncol());
+
+    } else {
+        // Results should be EXACTLY the same with parallelization.
+        auto res1 = runner.run(dense_row.get(), block.data());
+        EXPECT_EQ(ref.pcs, res1.pcs);
+        EXPECT_EQ(ref.variance_explained, res1.variance_explained);
+        EXPECT_EQ(ref.total_variance, res1.total_variance);
     }
 
     auto res2 = runner.run(dense_column.get(), block.data());
