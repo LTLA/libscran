@@ -70,9 +70,11 @@ void blocked_variance_with_mean(const SparseRange& range, const B* block, Bs& bl
     std::fill(tmp_nzero.begin(), tmp_nzero.end(), 0);
 
     for (size_t j = 0; j < range.number; ++j) {
-        auto b = get_block<blocked>(range.index[j], block);
-        tmp_means[b] += range.value[j];
-        ++tmp_nzero[b];
+        if (range.value[j]) { // ensure correct calculation of tmp_nzero if there are zeros in the values.
+            auto b = get_block<blocked>(range.index[j], block);
+            tmp_means[b] += range.value[j];
+            ++tmp_nzero[b];
+        }
     }
     finish_means(block_size, tmp_means);
 
