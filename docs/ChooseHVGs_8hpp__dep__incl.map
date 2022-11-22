@@ -1,4 +1,4 @@
 <map id="scran/feature_selection/ChooseHVGs.hpp" name="scran/feature_selection/ChooseHVGs.hpp">
-<area shape="rect" id="node1" title="Choose highly variable genes for downstream analyses." alt="" coords="5,5,163,45"/>
-<area shape="rect" id="node2" href="$scran_8hpp_source.html" title=" " alt="" coords="27,93,141,119"/>
+<area shape="rect" id="node1" title="Choose highly variable genes for downstream analyses." coords="5,5,163,45"/>
+<area shape="rect" id="node2" href="$scran_8hpp_source.html" title=" " coords="27,93,141,119"/>
 </map>

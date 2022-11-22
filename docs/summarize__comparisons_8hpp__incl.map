@@ -1,8 +1,8 @@
 <map id="scran/differential_analysis/summarize_comparisons.hpp" name="scran/differential_analysis/summarize_comparisons.hpp">
-<area shape="rect" id="node1" title="Utilities for effect summarization." alt="" coords="219,5,361,60"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,108,132,133"/>
-<area shape="rect" id="node3" title=" " alt="" coords="157,108,231,133"/>
-<area shape="rect" id="node4" title=" " alt="" coords="256,108,324,133"/>
-<area shape="rect" id="node5" title=" " alt="" coords="349,108,407,133"/>
-<area shape="rect" id="node6" title=" " alt="" coords="431,108,490,133"/>
+<area shape="rect" id="node1" title="Utilities for effect summarization." coords="219,5,361,60"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." coords="5,108,132,133"/>
+<area shape="rect" id="node3" title=" " coords="157,108,231,133"/>
+<area shape="rect" id="node4" title=" " coords="256,108,324,133"/>
+<area shape="rect" id="node5" title=" " coords="349,108,407,133"/>
+<area shape="rect" id="node6" title=" " coords="431,108,490,133"/>
 </map>

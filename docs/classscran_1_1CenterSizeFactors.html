@@ -107,12 +107,14 @@ Public Types</h2></td></tr>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ac8edc812cc10eb1439d21c7d78570650"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1CenterSizeFactors.html">CenterSizeFactors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1CenterSizeFactors.html#ac8edc812cc10eb1439d21c7d78570650">set_block_mode</a> (<a class="el" href="classscran_1_1CenterSizeFactors.html#a511d8d0b9259cd5e3595edb8b8573189">BlockMode</a> b=<a class="el" href="structscran_1_1CenterSizeFactors_1_1Defaults.html#a1b72abdcaa1fcd1bc846418e0480c2b6">Defaults::block_mode</a>)</td></tr>
 <tr class="separator:ac8edc812cc10eb1439d21c7d78570650"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad2561f20767110e7088b3297b31cd7d3"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:ad2561f20767110e7088b3297b31cd7d3"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1CenterSizeFactors.html#ad2561f20767110e7088b3297b31cd7d3">run</a> (size_t n, T *size_factors)</td></tr>
-<tr class="separator:ad2561f20767110e7088b3297b31cd7d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a484e8c86406c422ed86e128b167030d0"><td class="memTemplParams" colspan="2">template&lt;typename T , typename B &gt; </td></tr>
-<tr class="memitem:a484e8c86406c422ed86e128b167030d0"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1CenterSizeFactors.html#a484e8c86406c422ed86e128b167030d0">run_blocked</a> (size_t n, T *size_factors, const B *block)</td></tr>
-<tr class="separator:a484e8c86406c422ed86e128b167030d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef603859bb04b43b408c6a67418c69d9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1CenterSizeFactors.html">CenterSizeFactors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1CenterSizeFactors.html#aef603859bb04b43b408c6a67418c69d9">set_ignore_zeros</a> (bool i=<a class="el" href="structscran_1_1CenterSizeFactors_1_1Defaults.html#a818565bd477ef479ae6a557d54ed4a47">Defaults::ignore_zeros</a>)</td></tr>
+<tr class="separator:aef603859bb04b43b408c6a67418c69d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9214094c2b9004094e94f14bbc435767"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a9214094c2b9004094e94f14bbc435767"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1CenterSizeFactors.html#a9214094c2b9004094e94f14bbc435767">run</a> (size_t n, T *size_factors) const</td></tr>
+<tr class="separator:a9214094c2b9004094e94f14bbc435767"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3fa9e4cc11073a04fdcdc7443e883234"><td class="memTemplParams" colspan="2">template&lt;typename T , typename B &gt; </td></tr>
+<tr class="memitem:a3fa9e4cc11073a04fdcdc7443e883234"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1CenterSizeFactors.html#a3fa9e4cc11073a04fdcdc7443e883234">run_blocked</a> (size_t n, T *size_factors, const B *block) const</td></tr>
+<tr class="separator:a3fa9e4cc11073a04fdcdc7443e883234"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -140,8 +142,8 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="ad2561f20767110e7088b3297b31cd7d3" name="ad2561f20767110e7088b3297b31cd7d3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad2561f20767110e7088b3297b31cd7d3">&#9670;&#160;</a></span>run()</h2>
+<a id="a9214094c2b9004094e94f14bbc435767" name="a9214094c2b9004094e94f14bbc435767"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9214094c2b9004094e94f14bbc435767">&#9670;&#160;</a></span>run()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -166,7 +168,7 @@ template&lt;typename T &gt; </div>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -192,8 +194,8 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a484e8c86406c422ed86e128b167030d0" name="a484e8c86406c422ed86e128b167030d0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a484e8c86406c422ed86e128b167030d0">&#9670;&#160;</a></span>run_blocked()</h2>
+<a id="a3fa9e4cc11073a04fdcdc7443e883234" name="a3fa9e4cc11073a04fdcdc7443e883234"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fa9e4cc11073a04fdcdc7443e883234">&#9670;&#160;</a></span>run_blocked()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -224,7 +226,7 @@ template&lt;typename T , typename B &gt; </div>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -277,13 +279,47 @@ template&lt;typename T , typename B &gt; </div>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">b</td><td>Strategy for handling blocks in <code><a class="el" href="classscran_1_1CenterSizeFactors.html#a484e8c86406c422ed86e128b167030d0">run_blocked()</a></code>.</td></tr>
+    <tr><td class="paramname">b</td><td>Strategy for handling blocks in <code><a class="el" href="classscran_1_1CenterSizeFactors.html#a3fa9e4cc11073a04fdcdc7443e883234">run_blocked()</a></code>.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1CenterSizeFactors.html" title="Center size factors prior to scaling normalization.">CenterSizeFactors</a></code> object.</dd></dl>
-<p>With the <code>PER_BLOCK</code> strategy, size factors are scaled separately for each block so that they have a mean of 1 within each block. The scaled size factors are identical to those obtained by separate invocations of <code><a class="el" href="classscran_1_1CenterSizeFactors.html#ad2561f20767110e7088b3297b31cd7d3">CenterSizeFactors::run()</a></code> on the size factors for each block. This can be desirable to ensure consistency with independent analyses of each block - otherwise, the centering would depend on the size factors across all blocks.</p>
+<p>With the <code>PER_BLOCK</code> strategy, size factors are scaled separately for each block so that they have a mean of 1 within each block. The scaled size factors are identical to those obtained by separate invocations of <code><a class="el" href="classscran_1_1CenterSizeFactors.html#a9214094c2b9004094e94f14bbc435767">CenterSizeFactors::run()</a></code> on the size factors for each block. This can be desirable to ensure consistency with independent analyses of each block - otherwise, the centering would depend on the size factors across all blocks.</p>
 <p >With the <code>LOWEST</code> strategy, we compute the mean size factor for each block and we divide all size factors by the minimum mean. In effect, we downscale all blocks to match the coverage of the lowest-coverage block. This is useful for datasets with highly heterogeneous coverage of different blocks as it avoids egregious upscaling of low-coverage blocks. (By contrast, downscaling is always safe as it simply discards information across all blocks by shrinking log-fold changes towards zero at low expression.) </p>
+
+</div>
+</div>
+<a id="aef603859bb04b43b408c6a67418c69d9" name="aef603859bb04b43b408c6a67418c69d9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aef603859bb04b43b408c6a67418c69d9">&#9670;&#160;</a></span>set_ignore_zeros()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1CenterSizeFactors.html">CenterSizeFactors</a> &amp; scran::CenterSizeFactors::set_ignore_zeros </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>i</em> = <code><a class="el" href="structscran_1_1CenterSizeFactors_1_1Defaults.html#a818565bd477ef479ae6a557d54ed4a47">Defaults::ignore_zeros</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">i</td><td>Whether to ignore zeros when computing the mean size factor.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1CenterSizeFactors.html" title="Center size factors prior to scaling normalization.">CenterSizeFactors</a></code> object.</dd></dl>
+<p>While size factors of zero are generally invalid, they may occur in datasets that have not been properly filtered to remove low-quality cells. In such cases, we may wish to ignore size factors of zero so as to avoid a spurious deflation of the mean during centering. This is useful if some filtering is to be applied after normalization - by ignoring zeros now, we ensure that we get the same result as if we had removed those zeros prior to centering. </p>
 
 </div>
 </div>

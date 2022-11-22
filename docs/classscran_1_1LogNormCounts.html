@@ -426,7 +426,7 @@ template&lt;class MAT , class V , typename B &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Specify whether to handle zero size factors. If false, size factors of zero will raise an error; otherwise, they will be automatically set to the smallest non-zero size factor after centering. Setting this to <code>true</code> is useful when all-zero cells are present, as this ensures that they are all-zero in the normalized matrix (rather than undefined values due to division by zero).</p>
+<p >Specify whether to handle zero size factors. If false, size factors of zero will raise an error; otherwise, they will be automatically set to the smallest non-zero size factor after centering (or 1, if all size factors are zero). Setting this to <code>true</code> ensures that any all-zero cells are represented by all-zero columns in the normalized matrix, which is a reasonable outcome if those cells cannot be filtered out during upstream quality control. Note that the centering process ignores zeros, see <code><a class="el" href="classscran_1_1CenterSizeFactors.html#aef603859bb04b43b408c6a67418c69d9">CenterSizeFactors::set_ignore_zeros()</a></code> for more details.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">s</td><td>Whether to accept positive size factors only.</td></tr>

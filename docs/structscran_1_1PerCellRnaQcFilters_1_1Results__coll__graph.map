@@ -1,4 +1,4 @@
 <map id="scran::PerCellRnaQcFilters::Results&lt; X &gt;" name="scran::PerCellRnaQcFilters::Results&lt; X &gt;">
-<area shape="rect" id="node1" title="Results of the QC filtering." alt="" coords="5,108,184,148"/>
-<area shape="rect" id="node2" href="$structscran_1_1PerCellRnaQcFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric." alt="" coords="5,5,184,45"/>
+<area shape="rect" id="node1" title="Results of the QC filtering." coords="5,108,184,148"/>
+<area shape="rect" id="node2" href="$structscran_1_1PerCellRnaQcFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric." coords="5,5,184,45"/>
 </map>

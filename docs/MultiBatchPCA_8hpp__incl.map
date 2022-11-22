@@ -1,14 +1,14 @@
 <map id="scran/dimensionality_reduction/MultiBatchPCA.hpp" name="scran/dimensionality_reduction/MultiBatchPCA.hpp">
-<area shape="rect" id="node1" title="Compute PCA after adjusting for differences between batch sizes." alt="" coords="521,5,720,45"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,93,180,119"/>
-<area shape="rect" id="node3" title=" " alt="" coords="205,93,410,119"/>
-<area shape="rect" id="node4" title=" " alt="" coords="434,93,533,119"/>
-<area shape="rect" id="node5" title=" " alt="" coords="477,167,572,192"/>
-<area shape="rect" id="node6" title=" " alt="" coords="597,167,655,192"/>
-<area shape="rect" id="node7" title=" " alt="" coords="901,93,959,119"/>
-<area shape="rect" id="node8" title=" " alt="" coords="970,167,1069,192"/>
-<area shape="rect" id="node9" href="$CustomSparseMatrix_8hpp_source.html" title=" " alt="" coords="659,93,825,119"/>
-<area shape="rect" id="node12" title=" " alt="" coords="983,93,1146,119"/>
-<area shape="rect" id="node10" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="819,167,945,192"/>
-<area shape="rect" id="node11" title=" " alt="" coords="679,167,794,192"/>
+<area shape="rect" id="node1" title="Compute PCA after adjusting for differences between batch sizes." coords="521,5,720,45"/>
+<area shape="rect" id="node2" title=" " coords="5,93,180,119"/>
+<area shape="rect" id="node3" title=" " coords="205,93,410,119"/>
+<area shape="rect" id="node4" title=" " coords="434,93,533,119"/>
+<area shape="rect" id="node5" title=" " coords="477,167,572,192"/>
+<area shape="rect" id="node6" title=" " coords="597,167,655,192"/>
+<area shape="rect" id="node7" title=" " coords="901,93,959,119"/>
+<area shape="rect" id="node8" title=" " coords="970,167,1069,192"/>
+<area shape="rect" id="node9" href="$CustomSparseMatrix_8hpp_source.html" title=" " coords="659,93,825,119"/>
+<area shape="rect" id="node12" title=" " coords="983,93,1146,119"/>
+<area shape="rect" id="node10" href="$macros_8hpp.html" title="Set common macros used through libscran." coords="819,167,945,192"/>
+<area shape="rect" id="node11" title=" " coords="679,167,794,192"/>
 </map>

@@ -1,4 +1,4 @@
 <map id="scran/normalization/MedianSizeFactors.hpp" name="scran/normalization/MedianSizeFactors.hpp">
-<area shape="rect" id="node1" title="Compute median&#45;based size factors." alt="" coords="9,5,170,45"/>
-<area shape="rect" id="node2" href="$GroupedSizeFactors_8hpp.html" title="Compute size factors for groups of cells." alt="" coords="5,93,173,133"/>
+<area shape="rect" id="node1" title="Compute median&#45;based size factors." coords="9,5,170,45"/>
+<area shape="rect" id="node2" href="$GroupedSizeFactors_8hpp.html" title="Compute size factors for groups of cells." coords="5,93,173,133"/>
 </map>

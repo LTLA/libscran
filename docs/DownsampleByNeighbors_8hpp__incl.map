@@ -1,9 +1,9 @@
 <map id="scran/aggregation/DownsampleByNeighbors.hpp" name="scran/aggregation/DownsampleByNeighbors.hpp">
-<area shape="rect" id="node1" title="Downsample a dataset based on its neighbors." alt="" coords="219,5,423,45"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,93,132,119"/>
-<area shape="rect" id="node3" title=" " alt="" coords="157,93,215,119"/>
-<area shape="rect" id="node4" title=" " alt="" coords="239,93,314,119"/>
-<area shape="rect" id="node5" title=" " alt="" coords="338,93,391,119"/>
-<area shape="rect" id="node6" title=" " alt="" coords="416,93,484,119"/>
-<area shape="rect" id="node7" title=" " alt="" coords="509,93,655,119"/>
+<area shape="rect" id="node1" title="Downsample a dataset based on its neighbors." coords="219,5,423,45"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." coords="5,93,132,119"/>
+<area shape="rect" id="node3" title=" " coords="157,93,215,119"/>
+<area shape="rect" id="node4" title=" " coords="239,93,314,119"/>
+<area shape="rect" id="node5" title=" " coords="338,93,391,119"/>
+<area shape="rect" id="node6" title=" " coords="416,93,484,119"/>
+<area shape="rect" id="node7" title=" " coords="509,93,655,119"/>
 </map>

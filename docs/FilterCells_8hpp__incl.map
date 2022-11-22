@@ -1,8 +1,8 @@
 <map id="scran/quality_control/FilterCells.hpp" name="scran/quality_control/FilterCells.hpp">
-<area shape="rect" id="node1" title="Filter out low&#45;quality cells from the count matrix." alt="" coords="345,5,486,45"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,93,132,119"/>
-<area shape="rect" id="node3" title=" " alt="" coords="157,93,362,119"/>
-<area shape="rect" id="node4" title=" " alt="" coords="386,93,445,119"/>
-<area shape="rect" id="node5" title=" " alt="" coords="469,93,537,119"/>
-<area shape="rect" id="node6" title=" " alt="" coords="562,93,637,119"/>
+<area shape="rect" id="node1" title="Filter out low&#45;quality cells from the count matrix." coords="345,5,486,45"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." coords="5,93,132,119"/>
+<area shape="rect" id="node3" title=" " coords="157,93,362,119"/>
+<area shape="rect" id="node4" title=" " coords="386,93,445,119"/>
+<area shape="rect" id="node5" title=" " coords="469,93,537,119"/>
+<area shape="rect" id="node6" title=" " coords="562,93,637,119"/>
 </map>

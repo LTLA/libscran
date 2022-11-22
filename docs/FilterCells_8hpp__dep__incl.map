@@ -1,4 +1,4 @@
 <map id="scran/quality_control/FilterCells.hpp" name="scran/quality_control/FilterCells.hpp">
-<area shape="rect" id="node1" title="Filter out low&#45;quality cells from the count matrix." alt="" coords="5,5,147,45"/>
-<area shape="rect" id="node2" href="$scran_8hpp_source.html" title=" " alt="" coords="19,93,133,119"/>
+<area shape="rect" id="node1" title="Filter out low&#45;quality cells from the count matrix." coords="5,5,147,45"/>
+<area shape="rect" id="node2" href="$scran_8hpp_source.html" title=" " coords="19,93,133,119"/>
 </map>
