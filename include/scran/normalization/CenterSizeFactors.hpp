@@ -36,10 +36,17 @@ public:
          * See `set_block_mode()` for details.
          */
         static constexpr BlockMode block_mode = LOWEST;
+
+        /**
+         * Set `set_ignore_zeros()` for more details.
+         */
+        static constexpr bool ignore_zeros = true;
     };
 
 private:
     BlockMode block_mode = Defaults::block_mode;
+
+    bool ignore_zeros = Defaults::ignore_zeros;
 
 public:
     /**
@@ -87,6 +94,20 @@ public:
         return *this;
     }
 
+    /**
+     * @param i Whether to ignore zeros when computing the mean size factor.
+     *
+     * @return A reference to this `CenterSizeFactors` object.
+     *
+     * While size factors of zero are generally invalid, they may occur in datasets that have not been properly filtered to remove low-quality cells.
+     * In such cases, we may wish to ignore size factors of zero so as to avoid a spurious deflation of the mean during centering.
+     * This is useful if some filtering is to be applied after normalization - by ignoring zeros now, we ensure that we get the same result as if we had removed those zeros prior to centering. 
+     */
+    CenterSizeFactors& set_ignore_zeros(bool i = Defaults::ignore_zeros) {
+        ignore_zeros = i;
+        return *this;
+    }
+
 public:
     /**
      * @tparam T Floating-point type for the size factors.
@@ -98,21 +119,33 @@ public:
      * A boolean is returned indicating whether size factors of zero were detected.
      */
     template<typename T>
-    bool run(size_t n, T* size_factors) {
-        bool has_zero = false;
+    bool run(size_t n, T* size_factors) const {
+        size_t num_zeros = 0;
 
         if (n) { // avoid division by zero
-            has_zero = validate(n, size_factors);
-            double mean = std::accumulate(size_factors, size_factors + n, static_cast<double>(0)) / n;
+            double mean = 0;
+            for (size_t i = 0; i < n; ++i) {
+                const auto& current = size_factors[i];
+                if (current < 0) {
+                   throw std::runtime_error("negative size factors detected");
+                } 
+
+                if (current == 0) {
+                   ++num_zeros;
+                } else {
+                    mean += current;
+                }
+            }
 
             if (mean) { // avoid division by zero
+                mean /= (ignore_zeros ? n - num_zeros : n);
                 for (size_t i = 0; i < n; ++i){
                     size_factors[i] /= mean;
                 }
             }
         }
 
-        return has_zero;
+        return num_zeros > 0;
     }
 
     /**
@@ -130,35 +163,64 @@ public:
      * A boolean is returned indicating whether size factors of zero were detected.
      */
     template<typename T, typename B>
-    bool run_blocked(size_t n, T* size_factors, const B* block) {
+    bool run_blocked(size_t n, T* size_factors, const B* block) const {
         if (block == NULL) {
             return run(n, size_factors);
         } 
-        
+
         bool has_zero = false;
         if (n) {
-            has_zero = validate(n, size_factors);
-
             size_t ngroups = *std::max_element(block, block + n) + 1;
             std::vector<double> group_mean(ngroups);
             std::vector<double> group_num(ngroups);
 
             for (size_t i = 0; i < n; ++i) {
-                group_mean[block[i]] += size_factors[i];
-                ++group_num[block[i]];
+                const auto& current = size_factors[i];
+                if (current < 0) {
+                   throw std::runtime_error("negative size factors detected");
+                }
+
+                const auto& b = block[i];
+                if (current == 0) {
+                    if (!ignore_zeros) {
+                        ++group_num[b];
+                    }
+                    has_zero = true;
+                } else {
+                    group_mean[b] += size_factors[i];
+                    ++group_num[b];
+                }
             }
+
             for (size_t g = 0; g < ngroups; ++g) {
-                group_mean[g] /= group_num[g];
+                if (group_num[g]) {
+                    group_mean[g] /= group_num[g];
+                }
             }
 
             if (block_mode == PER_BLOCK) {
                 for (size_t i = 0; i < n; ++i) {
-                    size_factors[i] /= group_mean[block[i]];
+                    const auto& div = group_mean[block[i]];
+                    if (div) {
+                        size_factors[i] /= div;
+                    }
                 }
+
             } else if (block_mode == LOWEST) {
-                double min = *std::min_element(group_mean.begin(), group_mean.end());
-                for (size_t i = 0; i < n; ++i) {
-                    size_factors[i] /= min;
+                // Ignore groups with means of zeros, either because they're full of zeros themselves
+                // or they have no cells associated with them.
+                double min = std::numeric_limits<double>::infinity();
+                for (size_t b = 0; b < ngroups; ++b) {
+                    const auto& div = group_mean[b];
+                    if (div && div < min) {
+                        min = div;
+                    }
+                }
+
+                if (std::isfinite(min)) {
+                    for (size_t i = 0; i < n; ++i) {
+                        size_factors[i] /= min;
+                    }
                 }
             }
         }

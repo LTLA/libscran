@@ -156,10 +156,9 @@ TEST_F(LogNormCountsTester, NonStrict) {
         }
     }
 
-    // Uses 0.5, which is the smallest non-zero.
     empty[0] = 0.5;
     empty[1] = 1;
-    double center = 1.5 / empty.size();
+    double center = 1.5 / 2; // centering only considers non-zero elements by default.
 
     {
         auto lognormed = lnc.run(mat, empty);
@@ -167,6 +166,7 @@ TEST_F(LogNormCountsTester, NonStrict) {
             auto output = lognormed->column(i);
             auto output2 = mat->column(i);
 
+            // Uses 0.5 as the fill-in, which is the smallest non-zero.
             auto sf = (i <= 1 ? empty[i] : 0.5) / center;
             for (auto& o : output2) {
                 o = std::log1p(o/sf)/std::log(2);

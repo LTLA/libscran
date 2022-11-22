@@ -109,9 +109,10 @@ public:
     /**
      * Specify whether to handle zero size factors. 
      * If false, size factors of zero will raise an error;
-     * otherwise, they will be automatically set to the smallest non-zero size factor after centering.
-     * Setting this to `true` is useful when all-zero cells are present, as this ensures that they are all-zero in the normalized matrix 
-     * (rather than undefined values due to division by zero).
+     * otherwise, they will be automatically set to the smallest non-zero size factor after centering (or 1, if all size factors are zero).
+     * Setting this to `true` ensures that any all-zero cells are represented by all-zero columns in the normalized matrix,
+     * which is a reasonable outcome if those cells cannot be filtered out during upstream quality control.
+     * Note that the centering process ignores zeros, see `CenterSizeFactors::set_ignore_zeros()` for more details.
      *
      * @param s Whether to accept positive size factors only.
      *
