@@ -42,6 +42,10 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(knncolle)
 
 if(NOT SCRAN_EXCLUDE_IGRAPH)
+    # Disable the errors to future-proof against later (more stringent) compiler versions.
+    # At this point, we don't really have a choice, so we might as well let it pass.
+    set(IGRAPH_WARNINGS_AS_ERRORS OFF CACHE BOOL "" FORCE)
+
     FetchContent_Declare(
       igraph
       URL https://github.com/igraph/igraph/releases/download/0.9.4/igraph-0.9.4.tar.gz
