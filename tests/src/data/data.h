@@ -2,6 +2,7 @@
 #define TEST_DATA_H
 
 #include <vector>
+#include <cstddef>
 
 extern const std::vector<double> sparse_matrix;
 
