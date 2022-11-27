@@ -43,10 +43,10 @@ inline double cohen_denominator(double left_var, double right_var) {
     }
 }
 
-template<typename Stat, typename Ls>
-double compute_pairwise_cohens_d(int g1, int g2, const Stat* means, const Stat* vars, const Ls& level_size, int ngroups, int nblocks, double threshold) {
+template<typename Stat, typename Ls, class Output>
+void compute_pairwise_cohens_d(int g1, int g2, const Stat* means, const Stat* vars, const Ls& level_size, int ngroups, int nblocks, double threshold, Output& output) {
     double total_weight = 0;
-    double output = 0;
+    constexpr bool do_both = !std::is_same<double, Output>::value;
 
     for (int b = 0; b < nblocks; ++b) {
         int offset1 = g1 * nblocks + b;
@@ -72,16 +72,37 @@ double compute_pairwise_cohens_d(int g1, int g2, const Stat* means, const Stat* 
 
         double weight = left_size * right_size;
         total_weight += weight;
-        output += compute_cohens_d(left_mean, right_mean, denom, threshold) * weight;
+
+        double extra = compute_cohens_d(left_mean, right_mean, denom, threshold) * weight;
+        if constexpr(do_both) {
+            output.first += extra;
+            if (threshold) {
+                output.second += compute_cohens_d(right_mean, left_mean, denom, threshold) * weight;
+            }
+        } else {
+            output += extra;
+        }
     }
 
-    if (total_weight) {
-        output /= total_weight;
+    if constexpr(do_both) {
+        if (total_weight) {
+            output.first /= total_weight;
+            if (threshold) {
+                output.second /= total_weight;
+            } else {
+                output.second = -output.first;
+            }
+        } else {
+            output.first = std::numeric_limits<double>::quiet_NaN();
+            output.second = std::numeric_limits<double>::quiet_NaN();
+        }
     } else {
-        output = std::numeric_limits<double>::quiet_NaN();
+        if (total_weight) {
+            output /= total_weight;
+        } else {
+            output = std::numeric_limits<double>::quiet_NaN();
+        }
     }
-
-    return output;
 }
 
 template<typename Stat, typename Ls>
@@ -90,22 +111,19 @@ void compute_pairwise_cohens_d(int g1, const Stat* means, const Stat* vars, cons
         if (g1 == g2) {
             continue;
         }
-        output[g2] = compute_pairwise_cohens_d(g1, g2, means, vars, level_size, ngroups, nblocks, threshold);
+        output[g2] = 0;
+        compute_pairwise_cohens_d(g1, g2, means, vars, level_size, ngroups, nblocks, threshold, output[g2]);
     }
 }
 
 template<typename Stat, typename Ls>
 void compute_pairwise_cohens_d (const Stat* means, const Stat* vars, const Ls& level_size, int ngroups, int nblocks, double threshold, Stat* output) {
     for (int g1 = 0; g1 < ngroups; ++g1) {
-        for (int g2 = 0; g2 < ngroups; ++g2) {
-            if (g1 == g2) {
-                continue;
-            }
-            if (threshold == 0 && g2 < g1) {
-                output[g1 * ngroups + g2] = -output[g2 * ngroups + g1];
-            } else {
-                output[g1 * ngroups + g2] = compute_pairwise_cohens_d(g1, g2, means, vars, level_size, ngroups, nblocks, threshold);
-            }
+        for (int g2 = 0; g2 < g1; ++g2) {
+            std::pair<double, double> output;
+            compute_pairwise_cohens_d(g1, g2, means, vars, level_size, ngroups, nblocks, threshold, output);
+            output[g1 * ngroups + g2] = output.first;
+            output[g2 * ngroups + g1] = output.second;
         }
     }
 }
