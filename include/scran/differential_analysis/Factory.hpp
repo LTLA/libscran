@@ -17,7 +17,202 @@ namespace scran {
 
 namespace differential_analysis {
 
-/******* Common functions for per-row filling ********/
+/****************************************************************************
+ * The 'simple' class of factories computes per-group statistics that are
+ * ultimately used to compute pairwise effect sizes. It does not need to
+ * compute the pairwise effects directly because we're not using the AUC yet.
+ ****************************************************************************/
+
+template<typename Stat, typename Level>
+struct SimpleBundle {
+    SimpleBundle(size_t nr, size_t nc, const Level* l, const std::vector<int>* ls, Stat* m, Stat* v, Stat* d) :
+        NR(nr), NC(nc), levels(l), level_size_ptr(ls), means(m), variances(v), detected(d) {}
+
+    size_t NR, NC;
+    const Level* levels;
+    const std::vector<int>* level_size_ptr;
+    Stat* means, detected, variances;
+};
+
+template<typename Stat, typename Level>
+class SimplePerRowFactory {
+public:
+    SimplePerRowFactory(size_t nr, size_t nc, const Level* l, const std::vector<int>* ls, Stat* m, Stat* v, Stat* d) :
+        details(nr, nc, l, ls, m, v, d) {}
+
+private:
+    SimpleBundle<Stat, Level> details;
+
+public:
+    struct ByRow { 
+        ByRow(SimpleBundle<Stat, Level> d) : details(std::move(d)) {}
+
+    private:
+        SimpleBundle<Stat, Level> details;
+
+    public:
+        template<typename T>
+        void compute(size_t i, const T* ptr) {
+            auto nlevels = level_size_ptr->size();
+            auto offset = nlevels * i;
+            feature_selection::blocked_variance_with_mean<true>(ptr, details.NC, details.levels, *(details.level_size_ptr), details.means + offset, details.variances + offset);
+
+            auto tmp_nzeros = details.detected + nlevels * i;
+            std::fill(tmp_nzeros, tmp_nzeros + nlevels, 0);
+            for (size_t j = 0; j < details.NC; ++j) {
+                tmp_nzeros[details.levels[j]] += (ptr[j] > 0);
+            }
+        }
+
+        template<class SparseRange>
+        void compute(size_t i, const SparseRange& range) {
+            auto nlevels = level_size_ptr->size();
+            auto offset = nlevels * i;
+            feature_selection::blocked_variance_with_mean<true>(range, details.levels, *(details.level_size_ptr), details.means + offset, details.variances + offset, details.detected + offset);
+        }
+    };
+
+    ByRow dense_direct() const {
+        return ByRow(details);
+    }
+
+    ByRow sparse_direct() const {
+        return ByRow(details);
+    }
+};
+
+template<typename Stat, typename Level>
+class SimpleBidimensionalFactory : public SimplePerRowFactory<Stat, Level> { 
+public:
+    SimpleBidirectionalFactory(size_t nr, size_t nc, const Level* l, const std::vector<int>* ls, std::vector<Stat*> m, std::vector<Stat*> v, std::vector<Stat*> d) :
+        details(nr, nc, l, ls, m, v, d) {}
+
+private:
+    SimpleBundle<Stat, Level> details;
+
+public:
+    struct ByCol { 
+        ByCol(size_t size, SimpleBundle<Stat, Level> d) : 
+            details(std::move(d)), 
+            tmp_means(details.level_size_ptr->size(), std::vector<Stat>(size)),
+            tmp_vars(details.level_size_ptr->size(), std::vector<Stat>(size)),
+            tmp_detected(details.level_size_ptr->size(), std::vector<Stat>(size)),
+            tmp_counts(details.level_size_ptr->size())
+        {}
+
+    protected:
+        SimpleBundle<Stat, Level> details;
+        std::vector<std::vector<Stat> > tmp_means, tmp_vars, tmp_detected;
+        std::vector<Stat> tmp_counts;
+        size_t counter = 0;
+    };
+
+public:
+    struct DenseByCol : public ByCol {
+        DenseByCol(size_t s, size_t e, SimpleBundle<Stat, Level> d) : ByCol(e - s, std::move(d)), start_row(s), num_rows(e - s) {}
+
+        template<typename T>
+        void add(const T* ptr) {
+            auto b = this->details.levels[this->counter];
+            tatami::stats::variances::compute_running(ptr, num_rows, this->tmp_means[b].data(), this->tmp_vars[b].data(), this->tmp_counts[b]);
+
+            auto ndetected = this->tmp_detected[b].data();
+            for (size_t j = 0; j < num_rows; ++j, ++ndetected) {
+                *ndetected += (ptr[j] > 0);
+            }
+ 
+            ++(this->counter);
+        }
+
+        void finish() {
+            for (size_t b = 0; b < this->details.level_size_ptr->size(); ++b) {
+                tatami::stats::variances::finish_running(num_rows, this->details.means[b], this->tmp_vars[b].data(), this->tmp_counts[b]);
+            }
+            transpose(this->tmp_means, this->details.means);
+            transpose(this->tmp_variances, this->details.variances);
+            transpose(this->tmp_detected, this->details.detected);
+        }
+
+    protected:
+        size_t start_row, num_rows;
+
+        void transpose(const std::vector<std::vector<Stat> >& source, Stat* sink) {
+            size_t nlevels = source.size();
+            for (size_t r = 0; r < num_rows; ++r) {
+                auto output = sink + (r + start_row) * nlevels;
+                for (size_t b = 0; b < nlevels; ++b, ++output) {
+                    *output = source[b][r];
+                }
+            }
+        }
+    };
+
+    DenseByCol dense_running() const {
+        return DenseByCol(0, details.NR, details);
+    }
+
+    DenseByCol dense_running(size_t start, size_t end) const {
+        return DenseByCol(start, end, details);
+    }
+
+public:
+    struct SparseByCol : public ByCol { 
+        SparseByCol(size_t s, size_t e, size_t nr, SimpleBundle<Stat, Level> d) : ByCol(nr, std::move(d)), start_row(s), num_rows(e - s) {} 
+
+        template<class SparseRange>
+        void add(const SparseRange& range) {
+            auto b = this->details.levels[this->counter];
+            
+            // TODO: add a offset to tatami so that we can subtract an offset from the range.
+            tatami::stats::variances::compute_running(range, this->tmp_means[b].data(), this->tmp_variances[b].data(), this->tmp_detected[b].data(), this->tmp_counts[b]);
+
+            ++(this->counter);
+        }
+
+        void finish() {
+            for (size_t b = 0; b < this->details.level_size_ptr->size(); ++b) {
+                tatami::stats::variances::finish_running(
+                    num_rows,
+                    this->tmp_means[b].data() + start_row, 
+                    this->tmp_variances[b].data() + start_row, 
+                    this->tmp_detected[b].data() + start_row, 
+                    this->tmp_counts[b]
+                );
+            }
+            transpose(this->tmp_means, this->details.means);
+            transpose(this->tmp_variances, this->details.variances);
+            transpose(this->tmp_detected, this->details.detected);
+        }
+
+    protected:
+        size_t start_row, num_rows;
+
+        void transpose(const std::vector<std::vector<Stat> >& source, Stat* sink) {
+            size_t nlevels = source.size();
+            for (size_t r = 0; r < num_rows; ++r) {
+                auto g = r + start_row;
+                auto output = sink + g * nlevels;
+                for (size_t b = 0; b < nlevels; ++b, ++output) {
+                    *output = source[b][g];
+                }
+            }
+        }
+    };
+
+    SparseByCol sparse_running() {
+        return SparseByCol(0, details.NR, details.NR, details);
+    }
+
+    SparseByCol sparse_running(size_t start, size_t end) {
+        // Just making the temporary vectors with all rows, so that we don't 
+        // have to worry about subtracting the indices when doing sparse iteration.
+        return SparseByCol(start, end, details.NR, details);
+    }
+};
+
+/****************************************************************************
+ * TODO: per-row factory when the AUC is desired
+ ****************************************************************************/
 
 namespace per_row {
 
@@ -62,240 +257,6 @@ void transfer_common_stats(size_t row, const std::vector<Stat>& tmp_means, const
 }
 
 }
-
-/******* Factory with running support, when AUCs are not desired ********/
-
-template<typename Stat, typename Level>
-struct BidimensionalBundle {
-    BidimensionalBundle(size_t nr, size_t nc, std::vector<Stat*> m, std::vector<Stat*> d, Stat* cohen_, Stat* lfc_, Stat* delta_detected_, const Level* l, const std::vector<int>* ls, int ng, int nb, double t) : 
-        NR(nr), NC(nc), means(std::move(m)), detected(std::move(d)), cohen(cohen_), lfc(lfc_), delta_detected(delta_detected_), levels(l), level_size_ptr(ls), ngroups(ng), nblocks(nb), threshold(t) {}
-
-    size_t NR, NC;
-
-    std::vector<Stat*> means, detected;
-    Stat *cohen;
-    Stat *lfc;
-    Stat *delta_detected;
-
-    const Level* levels;
-    const std::vector<int>* level_size_ptr;
-
-    int ngroups, nblocks;
-    double threshold;
-};
-
-template<typename Stat, typename Level> 
-struct BidimensionalFactory {
-public:
-    BidimensionalFactory(size_t nr, size_t nc, std::vector<Stat*> m, std::vector<Stat*> d, Stat* cohen, Stat* lfc, Stat* delta_detected, const Level* l, const std::vector<int>* ls, int ng, int nb, double t) : 
-        details(nr, nc, std::move(m), std::move(d), cohen, lfc, delta_detected, l, ls, ng, nb, t) {}
-
-protected:
-    BidimensionalBundle<Stat, Level> details;
-
-public:
-    struct ByRow { 
-        ByRow(BidimensionalBundle<Stat, Level> d) :
-            details(std::move(d)),
-            tmp_means(details.level_size_ptr->size()), 
-            tmp_vars(details.level_size_ptr->size()), 
-            tmp_nzeros(details.level_size_ptr->size())
-        {}
-
-    private:
-        BidimensionalBundle<Stat, Level> details;
-        std::vector<double> tmp_means, tmp_vars, tmp_nzeros;
-
-    public:
-        template<typename T>
-        void compute(size_t i, const T* ptr) {
-            feature_selection::blocked_variance_with_mean<true>(ptr, details.NC, details.levels, *(details.level_size_ptr), tmp_means, tmp_vars);
-            per_row::fill_tmp_nzeros(details, ptr, tmp_nzeros);
-            per_row::transfer_common_stats(i, tmp_means, tmp_nzeros, tmp_vars, details);
-        }
-
-        template<class SparseRange>
-        void compute(size_t i, const SparseRange& range) {
-            feature_selection::blocked_variance_with_mean<true>(range, details.levels, *(details.level_size_ptr), tmp_means, tmp_vars, tmp_nzeros);
-            per_row::transfer_common_stats(i, tmp_means, tmp_nzeros, tmp_vars, details);
-        }
-    };
-
-    ByRow dense_direct() const {
-        return ByRow(details);
-    }
-
-    ByRow sparse_direct() const {
-        return ByRow(details);
-    }
-
-public:
-    struct ByCol { 
-        ByCol(BidimensionalBundle<Stat, Level> d, size_t num) : 
-            details(std::move(d)),
-            tmp_vars(details.level_size_ptr->size(), std::vector<double>(num)), 
-            counts(details.level_size_ptr->size())
-        {}
-
-        void finalize_by_cols(size_t start, size_t end) {
-            const auto& level_size = *(details.level_size_ptr);
-            size_t shift = (details.ngroups) * (details.ngroups);
-            size_t offset = shift * start;
-
-            auto dd_ptr = details.delta_detected;
-            if (dd_ptr) {
-                std::vector<int> tmp_detected(level_size.size());
-                dd_ptr += offset;
-                for (size_t i = start; i < end; ++i) {
-                    for (size_t l = 0; l < tmp_detected.size(); ++l) {
-                        tmp_detected[l] = details.detected[l][i];
-                    }
-                    compute_pairwise_delta_detected(tmp_detected.data(), level_size, details.ngroups, details.nblocks, dd_ptr);
-                    dd_ptr += shift;
-                } 
-            }
-
-            // Dividing to obtain the proportion of detected cells per group.
-            for (size_t b = 0; b < level_size.size(); ++b) {
-                auto ptr = details.detected[b];
-                if (level_size[b]) {
-                    for (size_t r = start; r < end; ++r) {
-                        ptr[r] /= level_size[b];
-                    }
-                } else {
-                    std::fill(ptr + start, ptr + end, std::numeric_limits<double>::quiet_NaN());
-                }
-            }
-
-            // We transfer values to a temporary buffer for cache efficiency upon
-            // repeated accesses in pairwise calculations.
-            auto cohen_ptr = details.cohen;
-            auto lfc_ptr = details.lfc;
-            if (cohen_ptr || lfc_ptr) {
-                std::vector<double> tmp_means(level_size.size()), tmp_vars_single(level_size.size());
-                if (cohen_ptr) {
-                    cohen_ptr += offset;
-                }
-                if (lfc_ptr) {
-                    lfc_ptr += offset;
-                }
-
-                for (size_t i = start; i < end; ++i) {
-                    for (size_t l = 0; l < tmp_means.size(); ++l) {
-                        tmp_means[l] = details.means[l][i];
-                    }
-                    if (cohen_ptr) {
-                        for (size_t l = 0; l < tmp_vars_single.size(); ++l) {
-                            tmp_vars_single[l] = tmp_vars[l][i];
-                        }
-                        compute_pairwise_cohens_d(tmp_means.data(), tmp_vars_single.data(), level_size, details.ngroups, details.nblocks, cohen_ptr, details.threshold);
-                        cohen_ptr += shift;
-                    }
-                    if (lfc_ptr) {
-                        compute_pairwise_lfc(tmp_means.data(), level_size, details.ngroups, details.nblocks, lfc_ptr);
-                        lfc_ptr += shift;
-                    }
-                }
-            }
-        }
-    protected:
-        BidimensionalBundle<Stat, Level> details;
-        std::vector<std::vector<double> > tmp_vars;
-        std::vector<int> counts;
-        size_t counter = 0;
-    };
-
-    struct DenseByCol : public ByCol {
-        DenseByCol(size_t n, BidimensionalBundle<Stat, Level> d) : ByCol(std::move(d), n), num(n) {}
-
-        template<typename T>
-        void add(const T* ptr) {
-            auto b = this->details.levels[this->counter];
-            tatami::stats::variances::compute_running(ptr, num, this->details.means[b], this->tmp_vars[b].data(), this->counts[b]);
-
-            auto ndetected = this->details.detected[b];
-            for (size_t j = 0; j < num; ++j, ++ndetected) {
-                *ndetected += (ptr[j] > 0);
-            }
- 
-            ++(this->counter);
-        }
-
-        void finish() {
-            for (size_t b = 0; b < this->details.level_size_ptr->size(); ++b) {
-                tatami::stats::variances::finish_running(num, this->details.means[b], this->tmp_vars[b].data(), this->counts[b]);
-            }
-            this->finalize_by_cols(0, num);
-        }
-    private:
-        size_t num;
-    };
-
-    DenseByCol dense_running() const {
-        return DenseByCol(details.NR, details);
-    }
-
-    DenseByCol dense_running(size_t start, size_t end) const {
-        auto copy = this->details;
-
-        // Shifting all the pointers to pretend that we have a smaller number
-        // of rows, so that we can reduce the size of the temporary vectors. 
-        for (auto& m : copy.means) {
-            m += start;
-        }
-        for (auto& d : copy.detected) {
-            d += start;
-        }
-
-        size_t shift = copy.ngroups * copy.ngroups * start;
-        copy.cohen += shift;
-        copy.lfc += shift;
-        copy.delta_detected += shift;
-
-        return DenseByCol(end - start, std::move(copy));
-    }
-
-    struct SparseByCol : public ByCol { 
-        SparseByCol(size_t nr, size_t s, size_t e, BidimensionalBundle<Stat, Level> d) : ByCol(std::move(d), nr), start(s), end(e) {}
-
-        template<class SparseRange>
-        void add(const SparseRange& range) {
-            auto b = this->details.levels[this->counter];
-            
-            // TODO: add a offset to tatami so that we can subtract an offset from the range.
-            tatami::stats::variances::compute_running(range, this->details.means[b], this->tmp_vars[b].data(), this->details.detected[b], this->counts[b]);
-
-            ++(this->counter);
-        }
-
-        void finish() {
-            for (size_t b = 0; b < this->details.level_size_ptr->size(); ++b) {
-                tatami::stats::variances::finish_running(
-                    end - start, 
-                    this->details.means[b] + start, 
-                    this->tmp_vars[b].data() + start, 
-                    this->details.detected[b] + start, 
-                    this->counts[b]
-                );
-            }
-            this->finalize_by_cols(start, end);
-        }
-    private:
-        size_t start, end;
-    };
-
-    SparseByCol sparse_running() {
-        return SparseByCol(details.NR, 0, details.NR, details);
-    }
-
-    SparseByCol sparse_running(size_t start, size_t end) {
-        // Just making the temporary vectors with all rows, so that we don't 
-        // have to worry about subtracting the indices when doing sparse iteration.
-        return SparseByCol(details.NR, start, end, details);
-    }
-};
-
-/******* Per-row factory when the AUC is desired ********/
 
 template<typename Stat, typename Level, typename Group, typename Block>
 struct PerRowBundle {
