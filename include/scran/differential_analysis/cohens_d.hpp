@@ -120,10 +120,10 @@ template<typename Stat, typename Ls>
 void compute_pairwise_cohens_d (const Stat* means, const Stat* vars, const Ls& level_size, int ngroups, int nblocks, double threshold, Stat* output) {
     for (int g1 = 0; g1 < ngroups; ++g1) {
         for (int g2 = 0; g2 < g1; ++g2) {
-            std::pair<double, double> output;
-            compute_pairwise_cohens_d(g1, g2, means, vars, level_size, ngroups, nblocks, threshold, output);
-            output[g1 * ngroups + g2] = output.first;
-            output[g2 * ngroups + g1] = output.second;
+            std::pair<double, double> tmp;
+            compute_pairwise_cohens_d(g1, g2, means, vars, level_size, ngroups, nblocks, threshold, tmp);
+            output[g1 * ngroups + g2] = tmp.first;
+            output[g2 * ngroups + g1] = tmp.second;
         }
     }
 }

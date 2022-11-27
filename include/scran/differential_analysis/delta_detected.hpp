@@ -11,7 +11,7 @@ namespace scran {
 namespace differential_analysis {
 
 template<typename Count, typename Ls>
-double compute_pairwise_delta_detected (const Count* detected, const Ls& level_size, int ngroups, int nblocks) {
+double compute_pairwise_delta_detected (int g1, int g2, const Count* detected, const Ls& level_size, int ngroups, int nblocks) {
     double total_weight = 0;
     double output = 0;
 

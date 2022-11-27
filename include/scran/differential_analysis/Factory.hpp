@@ -31,7 +31,7 @@ struct SimpleBundle {
     size_t NR, NC;
     const Level* levels;
     const std::vector<int>* level_size_ptr;
-    Stat* means, detected, variances;
+    Stat* means, *detected, *variances;
 };
 
 template<typename Stat, typename Level>
@@ -40,7 +40,7 @@ public:
     SimplePerRowFactory(size_t nr, size_t nc, const Level* l, const std::vector<int>* ls, Stat* m, Stat* v, Stat* d) :
         details(nr, nc, l, ls, m, v, d) {}
 
-private:
+protected:
     SimpleBundle<Stat, Level> details;
 
 public:
@@ -53,7 +53,7 @@ public:
     public:
         template<typename T>
         void compute(size_t i, const T* ptr) {
-            auto nlevels = level_size_ptr->size();
+            auto nlevels = details.level_size_ptr->size();
             auto offset = nlevels * i;
             feature_selection::blocked_variance_with_mean<true>(ptr, details.NC, details.levels, *(details.level_size_ptr), details.means + offset, details.variances + offset);
 
@@ -66,7 +66,7 @@ public:
 
         template<class SparseRange>
         void compute(size_t i, const SparseRange& range) {
-            auto nlevels = level_size_ptr->size();
+            auto nlevels = details.level_size_ptr->size();
             auto offset = nlevels * i;
             feature_selection::blocked_variance_with_mean<true>(range, details.levels, *(details.level_size_ptr), details.means + offset, details.variances + offset, details.detected + offset);
         }
@@ -84,11 +84,8 @@ public:
 template<typename Stat, typename Level>
 class SimpleBidimensionalFactory : public SimplePerRowFactory<Stat, Level> { 
 public:
-    SimpleBidirectionalFactory(size_t nr, size_t nc, const Level* l, const std::vector<int>* ls, std::vector<Stat*> m, std::vector<Stat*> v, std::vector<Stat*> d) :
-        details(nr, nc, l, ls, m, v, d) {}
-
-private:
-    SimpleBundle<Stat, Level> details;
+    SimpleBidimensionalFactory(size_t nr, size_t nc, const Level* l, const std::vector<int>* ls, Stat* m, Stat* v, Stat* d) : 
+        SimplePerRowFactory<Stat, Level>(nr, nc, l, ls, m, v, d) {}
 
 public:
     struct ByCol { 
@@ -103,7 +100,7 @@ public:
     protected:
         SimpleBundle<Stat, Level> details;
         std::vector<std::vector<Stat> > tmp_means, tmp_vars, tmp_detected;
-        std::vector<Stat> tmp_counts;
+        std::vector<int> tmp_counts;
         size_t counter = 0;
     };
 
@@ -126,10 +123,10 @@ public:
 
         void finish() {
             for (size_t b = 0; b < this->details.level_size_ptr->size(); ++b) {
-                tatami::stats::variances::finish_running(num_rows, this->details.means[b], this->tmp_vars[b].data(), this->tmp_counts[b]);
+                tatami::stats::variances::finish_running(num_rows, this->tmp_means[b].data(), this->tmp_vars[b].data(), this->tmp_counts[b]);
             }
             transpose(this->tmp_means, this->details.means);
-            transpose(this->tmp_variances, this->details.variances);
+            transpose(this->tmp_vars, this->details.variances);
             transpose(this->tmp_detected, this->details.detected);
         }
 
@@ -148,11 +145,11 @@ public:
     };
 
     DenseByCol dense_running() const {
-        return DenseByCol(0, details.NR, details);
+        return DenseByCol(0, this->details.NR, this->details);
     }
 
     DenseByCol dense_running(size_t start, size_t end) const {
-        return DenseByCol(start, end, details);
+        return DenseByCol(start, end, this->details);
     }
 
 public:
@@ -164,7 +161,7 @@ public:
             auto b = this->details.levels[this->counter];
             
             // TODO: add a offset to tatami so that we can subtract an offset from the range.
-            tatami::stats::variances::compute_running(range, this->tmp_means[b].data(), this->tmp_variances[b].data(), this->tmp_detected[b].data(), this->tmp_counts[b]);
+            tatami::stats::variances::compute_running(range, this->tmp_means[b].data(), this->tmp_vars[b].data(), this->tmp_detected[b].data(), this->tmp_counts[b]);
 
             ++(this->counter);
         }
@@ -174,13 +171,13 @@ public:
                 tatami::stats::variances::finish_running(
                     num_rows,
                     this->tmp_means[b].data() + start_row, 
-                    this->tmp_variances[b].data() + start_row, 
+                    this->tmp_vars[b].data() + start_row, 
                     this->tmp_detected[b].data() + start_row, 
                     this->tmp_counts[b]
                 );
             }
             transpose(this->tmp_means, this->details.means);
-            transpose(this->tmp_variances, this->details.variances);
+            transpose(this->tmp_vars, this->details.variances);
             transpose(this->tmp_detected, this->details.detected);
         }
 
@@ -200,13 +197,13 @@ public:
     };
 
     SparseByCol sparse_running() {
-        return SparseByCol(0, details.NR, details.NR, details);
+        return SparseByCol(0, this->details.NR, this->details.NR, this->details);
     }
 
     SparseByCol sparse_running(size_t start, size_t end) {
         // Just making the temporary vectors with all rows, so that we don't 
         // have to worry about subtracting the indices when doing sparse iteration.
-        return SparseByCol(start, end, details.NR, details);
+        return SparseByCol(start, end, this->details.NR, this->details);
     }
 };
 
@@ -246,7 +243,7 @@ void transfer_common_stats(size_t row, const std::vector<Stat>& tmp_means, const
     // Computing the various effect sizes.
     size_t offset = row * details.ngroups * details.ngroups;
     if (details.cohen) {
-        compute_pairwise_cohens_d(tmp_means.data(), tmp_vars.data(), level_size, details.ngroups, details.nblocks, details.cohen + offset, details.threshold);
+        compute_pairwise_cohens_d(tmp_means.data(), tmp_vars.data(), level_size, details.ngroups, details.nblocks, details.threshold, details.cohen + offset);
     }
     if (details.lfc) {
         compute_pairwise_lfc(tmp_means.data(), level_size, details.ngroups, details.nblocks, details.lfc + offset);

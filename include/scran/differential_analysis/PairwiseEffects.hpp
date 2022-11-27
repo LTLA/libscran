@@ -4,6 +4,9 @@
 #include "../utils/macros.hpp"
 
 #include "Factory.hpp"
+#include "cohens_d.hpp"
+#include "lfc.hpp"
+#include "delta_detected.hpp"
 #include "../utils/vector_to_pointers.hpp"
 
 #include "tatami/stats/apply.hpp"
@@ -343,12 +346,13 @@ private:
         Stat* lfc,
         Stat* delta_detected) 
     const {
-        size_t buffer_size = p->nrow() * ngroups * ngroups;
-
         if (auc == NULL) {
             // Computing the key statistics.
-            size_t holding = level_size.size() * p->nrow();
+            size_t ngenes = p->nrow();
+            size_t nlevels = level_size.size();
+            size_t holding = level_size.size() * ngenes;
             std::vector<double> tmp_means(holding), tmp_variances(holding), tmp_detected(holding);
+
             differential_analysis::SimpleBidimensionalFactory fact(
                 p->nrow(), 
                 p->ncol(), 
@@ -368,12 +372,19 @@ private:
             for (size_t gene = start; gene < end; ++gene) {
 #endif
 
+                size_t in_offset = gene * nlevels;
+                auto mptr = tmp_means.data() + in_offset;
+                auto dptr = tmp_detected.data() + in_offset;
+                for (size_t l = 0; l < nlevels; ++l) {
+                    means[l][gene] = mptr[l];
+                    detected[l][gene] = dptr[l];
+                }
+
                 // Deriving the pairwise statistics.
-                size_t in_offset = gene * level_size.size();
                 size_t out_offset = gene * ngroups * ngroups;
-                compute_pairwise_cohens_d(means.data() + in_offset, variances.data() + in_offset, level_size, ngroups, nblocks, threshold, cohen + out_offset);
-                compute_pairwise_delta_detected(detected.data() + in_offset, level_size, ngroups, nblocks, delta_detected + out_offset);
-                compute_pairwise_lfc(means.data() + in_offset, level_size, ngroups, nblocks, lfc + out_offset);
+                differential_analysis::compute_pairwise_cohens_d(mptr, tmp_variances.data() + in_offset, level_size, ngroups, nblocks, threshold, cohen + out_offset);
+                differential_analysis::compute_pairwise_delta_detected(dptr, level_size, ngroups, nblocks, delta_detected + out_offset);
+                differential_analysis::compute_pairwise_lfc(mptr, level_size, ngroups, nblocks, lfc + out_offset);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
             }
