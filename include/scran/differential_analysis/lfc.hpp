@@ -11,40 +11,50 @@ namespace scran {
 namespace differential_analysis {
 
 template<typename Stat, typename Ls>
+double compute_pairwise_lfc(int g1, int g2, const Stat* means, const Ls& level_size, int ngroups, int nblocks) {
+    double total_weight = 0;
+    double output = 0;
+
+    for (int b = 0; b < nblocks; ++b) {
+        int offset1 = g1 * nblocks + b;
+        const auto& left_mean = means[offset1];
+        const auto& left_size = level_size[offset1];
+        if (!left_size) {
+            continue;
+        }
+
+        int offset2 = g2 * nblocks + b;
+        const auto& right_mean = means[offset2]; 
+        const auto& right_size = level_size[offset2];
+        if (!right_size) {
+            continue;
+        }
+
+        double weight = left_size * right_size;
+        total_weight += weight;
+        output += (left_mean - right_mean) * weight;
+    }
+
+    if (total_weight) {
+        output /= total_weight;
+    } else {
+        output = std::numeric_limits<double>::quiet_NaN();
+    }
+
+    return output;
+}
+
+template<typename Stat, typename Ls>
 void compute_pairwise_lfc (const Stat* means, const Ls& level_size, int ngroups, int nblocks, Stat* output) {
     for (int g1 = 0; g1 < ngroups; ++g1) {
         for (int g2 = 0; g2 < g1; ++g2) {
-            double total_weight = 0;
-            double& total_d1 = output[g1 * ngroups + g2];
-            total_d1 = 0;
-
-            for (int b = 0; b < nblocks; ++b) {
-                int offset1 = g1 * nblocks + b;
-                const auto& left_mean = means[offset1];
-                const auto& left_size = level_size[offset1];
-                if (!left_size) {
-                    continue;
-                }
-
-                int offset2 = g2 * nblocks + b;
-                const auto& right_mean = means[offset2]; 
-                const auto& right_size = level_size[offset2];
-                if (!right_size) {
-                    continue;
-                }
-
-                double weight = left_size * right_size;
-                total_weight += weight;
-                total_d1 += (left_mean - right_mean) * weight;
+            if (g1 == g2) {
+                continue;
             }
-
-            double& total_d2 = output[g2 * ngroups + g1];
-            if (total_weight) {
-                total_d1 /= total_weight;
-                total_d2 = -total_d1;
+            if (g2 < g1) {
+                output[g1 * ngroups + g2] = -output[g2 * ngroups + g1];
             } else {
-                total_d1 = std::numeric_limits<double>::quiet_NaN();
-                total_d2 = std::numeric_limits<double>::quiet_NaN();
+                output[g1 * ngroups + g2] = compute_pairwise_lfc(g1, g2, means, level_size, ngroups, nblocks);
             }
         }
     }

@@ -346,21 +346,41 @@ private:
         size_t buffer_size = p->nrow() * ngroups * ngroups;
 
         if (auc == NULL) {
-            differential_analysis::BidimensionalFactory fact(
+            // Computing the key statistics.
+            size_t holding = level_size.size() * p->nrow();
+            std::vector<double> tmp_means(holding), tmp_variances(holding), tmp_detected(holding);
+            differential_analysis::SimpleBidimensionalFactory fact(
                 p->nrow(), 
                 p->ncol(), 
-                std::move(means), 
-                std::move(detected), 
-                cohen,
-                lfc,
-                delta_detected,
                 level, 
                 &level_size, 
-                ngroups, 
-                nblocks, 
-                threshold
+                tmp_means.data(),
+                tmp_variances.data(),
+                tmp_detected.data()
             );
             tatami::apply<0>(p, fact, num_threads);
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+            #pragma omp parallel for num_threads(threads)
+            for (size_t gene = 0; gene < ngenes; ++gene) {
+#else
+            SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
+            for (size_t gene = start; gene < end; ++gene) {
+#endif
+
+                // Deriving the pairwise statistics.
+                size_t in_offset = gene * level_size.size();
+                size_t out_offset = gene * ngroups * ngroups;
+                compute_pairwise_cohens_d(means.data() + in_offset, variances.data() + in_offset, level_size, ngroups, nblocks, threshold, cohen + out_offset);
+                compute_pairwise_delta_detected(detected.data() + in_offset, level_size, ngroups, nblocks, delta_detected + out_offset);
+                compute_pairwise_lfc(means.data() + in_offset, level_size, ngroups, nblocks, lfc + out_offset);
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+            }
+#else
+            }
+            });
+#endif
 
         } else {
             // Need to remake this, as there's no guarantee that 'blocks' exists.
