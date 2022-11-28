@@ -541,7 +541,9 @@ private:
             }
 
             size_t holding = ngenes * ngroups;
-            std::vector<double> full_cohen(holding), full_delta_detected(holding), full_lfc(holding);
+            std::vector<double> full_cohen(cohen.size() ? holding : 0), 
+                full_delta_detected(delta_detected.size() ? holding : 0), 
+                full_lfc(lfc.size() ? holding : 0);
 
             // Looping over each group and computing the various summaries. We do this on
             // a per-group basis to avoid having to store the full group-by-group matrix of
@@ -559,22 +561,27 @@ private:
                     for (size_t gene = start; gene < end; ++gene) {
 #endif
 
+                        size_t in_offset = nlevels * gene;
+                        auto my_means = tmp_means + in_offset;
+                        auto my_variances = tmp_variances + in_offset;
+                        auto my_detected = tmp_detected + in_offset;
+
                         auto full_offset = gene * ngroups;
                         if (cohen.size()) {
                             auto cohen_ptr = full_cohen.data() + full_offset;
-                            differential_analysis::compute_pairwise_cohens_d(group, tmp_means, tmp_variances, level_size, ngroups, nblocks, threshold, cohen_ptr);
+                            differential_analysis::compute_pairwise_cohens_d(group, my_means, my_variances, level_size, ngroups, nblocks, threshold, cohen_ptr);
                             differential_analysis::summarize_comparisons(ngroups, cohen_ptr, group, gene, cohen, effect_buffer);
                         }
 
                         if (delta_detected.size()) {
                             auto delta_detected_ptr = full_delta_detected.data() + full_offset;
-                            differential_analysis::compute_pairwise_simple_diff(group, tmp_detected, level_size, ngroups, nblocks, delta_detected_ptr);
+                            differential_analysis::compute_pairwise_simple_diff(group, my_detected, level_size, ngroups, nblocks, delta_detected_ptr);
                             differential_analysis::summarize_comparisons(ngroups, delta_detected_ptr, group, gene, delta_detected, effect_buffer);
                         }
 
                         if (lfc.size()) {
                             auto lfc_ptr = full_lfc.data() + full_offset;
-                            differential_analysis::compute_pairwise_simple_diff(group, tmp_means, level_size, ngroups, nblocks, lfc_ptr);
+                            differential_analysis::compute_pairwise_simple_diff(group, my_means, level_size, ngroups, nblocks, lfc_ptr);
                             differential_analysis::summarize_comparisons(ngroups, lfc_ptr, group, gene, lfc, effect_buffer);
                         }
 

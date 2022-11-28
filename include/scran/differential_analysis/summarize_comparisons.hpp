@@ -162,9 +162,10 @@ void compute_min_rank(size_t ngenes, int ngroups, int group, const Stat* effects
         int counter = 0;
         for (int t = 0; t < threads; ++t) {
             for (int g = 0; g < per_thread && counter < ngroups; ++g, ++counter) {
-                if (g != group) {
-                    assignments[t].push_back(counter);
+                if (counter == group) {
+                    ++counter;
                 }
+                assignments[t].push_back(counter);
             }
         }
     }
@@ -182,7 +183,7 @@ void compute_min_rank(size_t ngenes, int ngroups, int group, const Stat* effects
     SCRAN_CUSTOM_PARALLEL(threads, [&](size_t start, size_t end) -> void {
         std::vector<std::pair<Stat, int> > buffer(ngenes);
         for (int t = start; t < end; ++t) {  // should be a no-op loop, but we do this just in case.
-            for (auto& g : assignments[t]) {
+            for (auto g : assignments[t]) {
 #endif
 
                 auto used = fill_and_sort_rank_buffer(effects + g, ngroups, buffer);
