@@ -109,14 +109,14 @@ public:
     public:
         template<typename T>
         void compute(size_t i, const T* ptr) {
-            feature_selection::blocked_variance_with_mean<true>(ptr, details.NC, details.levels, *(details.level_size_ptr), tmp_means, tmp_vars);
+            feature_selection::blocked_variance_with_mean<true>(ptr, details.NC, details.levels, details.level_size_ptr->size(), details.level_size_ptr->data(), tmp_means.data(), tmp_vars.data());
             per_row::fill_tmp_nzeros(details, ptr, tmp_nzeros);
             per_row::transfer_common_stats(i, tmp_means, tmp_nzeros, tmp_vars, details);
         }
 
         template<class SparseRange>
         void compute(size_t i, const SparseRange& range) {
-            feature_selection::blocked_variance_with_mean<true>(range, details.levels, *(details.level_size_ptr), tmp_means, tmp_vars, tmp_nzeros);
+            feature_selection::blocked_variance_with_mean<true>(range, details.levels, details.level_size_ptr->size(), details.level_size_ptr->data(), tmp_means.data(), tmp_vars.data(), tmp_nzeros.data());
             per_row::transfer_common_stats(i, tmp_means, tmp_nzeros, tmp_vars, details);
         }
     };
@@ -481,7 +481,7 @@ public:
             process_auc(i);
 
             // And also computing everything else.
-            feature_selection::blocked_variance_with_mean<true>(ptr, details.NC, details.levels, *(details.level_size_ptr), tmp_means, tmp_vars);
+            feature_selection::blocked_variance_with_mean<true>(ptr, details.NC, details.levels, details.level_size_ptr->size(), details.level_size_ptr->data(), tmp_means.data(), tmp_vars.data());
             per_row::fill_tmp_nzeros(details, ptr, tmp_nzeros);
             per_row::transfer_common_stats(i, tmp_means, tmp_nzeros, tmp_vars, details);
             return;
@@ -509,7 +509,7 @@ public:
             process_auc(i);
 
             // And also computing everything else.
-            feature_selection::blocked_variance_with_mean<true>(range, details.levels, *(details.level_size_ptr), tmp_means, tmp_vars, tmp_nzeros);
+            feature_selection::blocked_variance_with_mean<true>(range, details.levels, details.level_size_ptr->size(), details.level_size_ptr->data(), tmp_means.data(), tmp_vars.data(), tmp_nzeros.data());
             per_row::transfer_common_stats(i, tmp_means, tmp_nzeros, tmp_vars, details);
             return;
         }

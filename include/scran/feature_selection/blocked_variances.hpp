@@ -23,9 +23,9 @@ B get_block(size_t j, const B* block) {
     }
 }
 
-template<class Bs, class Tmp>
-void finish_means(Bs& block_size, Tmp& tmp_means) {
-    for (size_t b = 0; b < tmp_means.size(); ++b) {
+template<typename Bs, typename Stat>
+void finish_means(size_t n, const Bs* block_size, Stat* tmp_means) {
+    for (size_t b = 0; b < n; ++b) {
         if (block_size[b]) {
             tmp_means[b] /= block_size[b];
         } else {
@@ -34,9 +34,9 @@ void finish_means(Bs& block_size, Tmp& tmp_means) {
     }
 }
 
-template<class Bs, class Tmp>
-void finish_variances(Bs& block_size, Tmp& tmp_vars) {
-    for (size_t b = 0; b < tmp_vars.size(); ++b) {
+template<typename Bs, typename Stat>
+void finish_variances(size_t n, const Bs* block_size, Stat* tmp_vars) {
+    for (size_t b = 0; b < n; ++b) {
         if (block_size[b] > 1) {
             tmp_vars[b] /= block_size[b] - 1;
         } else {
@@ -45,30 +45,27 @@ void finish_variances(Bs& block_size, Tmp& tmp_vars) {
     }
 }
 
-template<bool blocked, typename T, typename B, class Bs, class Tmp>
-void blocked_variance_with_mean(const T* ptr, size_t NC, const B* block, Bs& block_size, Tmp& tmp_means, Tmp& tmp_vars) {
-    std::fill(tmp_means.begin(), tmp_means.end(), 0);
-    std::fill(tmp_vars.begin(), tmp_vars.end(), 0);
-
+template<bool blocked, typename T, typename B, typename Bs, typename Stat>
+void blocked_variance_with_mean(const T* ptr, size_t NC, const B* block, size_t nblocks, const Bs* block_size, Stat* tmp_means, Stat* tmp_vars) {
+    std::fill(tmp_means, tmp_means + nblocks, 0);
     for (size_t j = 0; j < NC; ++j) {
         auto b = get_block<blocked>(j, block);
         tmp_means[b] += ptr[j];
     }
-    finish_means(block_size, tmp_means);
+    finish_means(nblocks, block_size, tmp_means);
 
+    std::fill(tmp_vars, tmp_vars + nblocks, 0);
     for (size_t j = 0; j < NC; ++j) {
         auto b = get_block<blocked>(j, block);
         tmp_vars[b] += (ptr[j] - tmp_means[b]) * (ptr[j] - tmp_means[b]);
     }
-    finish_variances(block_size, tmp_vars);
+    finish_variances(nblocks, block_size, tmp_vars);
 }
 
-template<bool blocked, class SparseRange, typename B, class Bs, class Tmpd, class Tmpi> 
-void blocked_variance_with_mean(const SparseRange& range, const B* block, Bs& block_size, Tmpd& tmp_means, Tmpd& tmp_vars, Tmpi& tmp_nzero) {
-    std::fill(tmp_means.begin(), tmp_means.end(), 0);
-    std::fill(tmp_vars.begin(), tmp_vars.end(), 0);
-    std::fill(tmp_nzero.begin(), tmp_nzero.end(), 0);
-
+template<bool blocked, class SparseRange, typename B, typename Bs, typename Stat, typename Stati>
+void blocked_variance_with_mean(const SparseRange& range, const B* block, size_t nblocks, const Bs* block_size, Stat* tmp_means, Stat* tmp_vars, Stati* tmp_nzero) {
+    std::fill(tmp_means, tmp_means + nblocks, 0);
+    std::fill(tmp_nzero, tmp_nzero + nblocks, 0);
     for (size_t j = 0; j < range.number; ++j) {
         if (range.value[j]) { // ensure correct calculation of tmp_nzero if there are zeros in the values.
             auto b = get_block<blocked>(range.index[j], block);
@@ -76,16 +73,17 @@ void blocked_variance_with_mean(const SparseRange& range, const B* block, Bs& bl
             ++tmp_nzero[b];
         }
     }
-    finish_means(block_size, tmp_means);
+    finish_means(nblocks, block_size, tmp_means);
 
+    std::fill(tmp_vars, tmp_vars + nblocks, 0);
     for (size_t j = 0; j < range.number; ++j) {
         auto b = get_block<blocked>(range.index[j], block);
         tmp_vars[b] += (range.value[j] - tmp_means[b]) * (range.value[j] - tmp_means[b]);
     }
-    for (size_t b = 0; b < block_size.size(); ++b) {
+    for (size_t b = 0; b < nblocks; ++b) {
         tmp_vars[b] += tmp_means[b] * tmp_means[b] * (block_size[b] - tmp_nzero[b]);
     }
-    finish_variances(block_size, tmp_vars);
+    finish_variances(nblocks, block_size, tmp_vars);
 }
 
 template<typename S, typename B, class Bs>
@@ -112,7 +110,7 @@ public:
 
         template<typename T>
         void compute(size_t i, const T* ptr) {
-            blocked_variance_with_mean<blocked>(ptr, NC, this->block, *(this->block_size_ptr), this->tmp_means, this->tmp_vars);
+            blocked_variance_with_mean<blocked>(ptr, NC, this->block, this->block_size_ptr->size(), this->block_size_ptr->data(), this->tmp_means.data(), this->tmp_vars.data());
             for (size_t b = 0; b < this->tmp_means.size(); ++b) {
                 this->means[b][i] = this->tmp_means[b];
                 this->variances[b][i] = this->tmp_vars[b];
@@ -134,7 +132,7 @@ public:
 
         template<class SparseRange> 
         void compute(size_t i, const SparseRange& range) {
-            blocked_variance_with_mean<blocked>(range, this->block, *(this->block_size_ptr), this->tmp_means, this->tmp_vars, tmp_nzero);
+            blocked_variance_with_mean<blocked>(range, this->block, this->block_size_ptr->size(), this->block_size_ptr->data(), this->tmp_means.data(), this->tmp_vars.data(), tmp_nzero.data());
             for (size_t b = 0; b < this->tmp_means.size(); ++b) {
                 this->means[b][i] = this->tmp_means[b];
                 this->variances[b][i] = this->tmp_vars[b];
