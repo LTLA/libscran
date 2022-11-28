@@ -4,6 +4,8 @@
 #include "../utils/macros.hpp"
 
 #include "Factory.hpp"
+#include "cohens_d.hpp"
+#include "simple_diff.hpp"
 #include "../utils/vector_to_pointers.hpp"
 
 #include "tatami/stats/apply.hpp"
@@ -251,12 +253,10 @@ public:
         Stat* lfc,
         Stat* delta_detected) 
     const {
-        size_t ngroups = means.size();
-        std::vector<int> group_size(ngroups);
-        for (size_t i = 0; i < p->ncol(); ++i) {
-            ++(group_size[group[i]]);
-        }
-        core(p, group, group_size, group, ngroups, static_cast<const int*>(NULL), 1, std::move(means), std::move(detected), cohen, auc, lfc, delta_detected);
+        int ngroups = means.size();
+        differential_analysis::EffectsCalculator runner(num_threads, threshold);
+        Overlord overlord(std::move(means), std::move(detected), cohen, auc, lfc, delta_detected, threshold);
+        runner.run(p, group, ngroups, overlord);
     }
 
     /**
@@ -304,93 +304,110 @@ public:
             return;
         }
 
-        size_t ngroups = means.size();
-        size_t nblocks = (ngroups ? means[0].size() : 0); // if means.size() == 0, then there are no groups, so there are no blocks, either.
-        size_t ncombos = ngroups * nblocks;
-        std::vector<int> combos(p->ncol());
-        std::vector<int> combo_size(ncombos);
+        int ngroups = means.size();
+        int nblocks = (ngroups ? means[0].size() : 0); // no blocks = no groups.
 
-        for (size_t i = 0; i < combos.size(); ++i) {
-            combos[i] = group[i] * nblocks + block[i];
-            ++(combo_size[combos[i]]);
-        }
-
+        int ncombos = ngroups * nblocks;
         std::vector<Stat*> means2(ncombos), detected2(ncombos);
-        auto mIt = means2.begin(), dIt = detected2.begin();
-        for (int g = 0; g < ngroups; ++g) {
-            for (int b = 0; b < nblocks; ++b, ++mIt, ++dIt) {
-                *mIt = means[g][b];
-                *dIt = detected[g][b];
+        {
+            auto mIt = means2.begin(), dIt = detected2.begin();
+            for (int g = 0; g < ngroups; ++g) {
+                for (int b = 0; b < nblocks; ++b, ++mIt, ++dIt) {
+                    *mIt = means[g][b];
+                    *dIt = detected[g][b];
+                }
             }
         }
 
-        core(p, combos.data(), combo_size, group, ngroups, block, nblocks, std::move(means2), std::move(detected2), cohen, auc, lfc, delta_detected);
+        differential_analysis::EffectsCalculator runner(num_threads, threshold);
+        Overlord overlord(std::move(means2), std::move(detected2), cohen, auc, lfc, delta_detected, threshold);
+        runner.run_blocked(p, group, ngroups, block, nblocks, overlord);
     }
 
 private:
-    template<class Matrix, typename L, class Ls, typename G, typename B, typename Stat>
-    void core(const Matrix* p, 
-        const L* level, 
-        const Ls& level_size, 
-        const G* group, 
-        size_t ngroups, 
-        const B* block, 
-        size_t nblocks, 
-        std::vector<Stat*> means, 
-        std::vector<Stat*> detected, 
-        Stat* cohen, 
-        Stat* auc,
-        Stat* lfc,
-        Stat* delta_detected) 
-    const {
-        size_t buffer_size = p->nrow() * ngroups * ngroups;
+    template<typename Stat>
+    struct Overlord {
+        Overlord(std::vector<Stat*> m, std::vector<Stat*> d, Stat* cohen_, Stat* auc_, Stat* lfc_, Stat* dd_, double t) : 
+            means(std::move(m)), detected(std::move(d)), cohen(cohen_), auc(auc_), lfc(lfc_), delta_detected(dd_), threshold(t) {}
 
-        if (auc == NULL) {
-            differential_analysis::BidimensionalFactory fact(
-                p->nrow(), 
-                p->ncol(), 
-                std::move(means), 
-                std::move(detected), 
-                cohen,
-                lfc,
-                delta_detected,
-                level, 
-                &level_size, 
-                ngroups, 
-                nblocks, 
-                threshold
-            );
-            tatami::apply<0>(p, fact, num_threads);
+        bool needs_auc() const { 
+            return auc != NULL;
+        }
 
-        } else {
-            // Need to remake this, as there's no guarantee that 'blocks' exists.
-            std::vector<B> tmp_blocks;
-            if (!block) {
-                tmp_blocks.resize(p->ncol());
-                block = tmp_blocks.data();
+    private:
+        std::vector<Stat*> means;
+        std::vector<Stat*> detected;
+        Stat* cohen;
+        Stat* auc;
+        Stat* lfc;
+        Stat* delta_detected;
+        double threshold;
+
+    public:
+        void process(size_t ngenes, const std::vector<int>& level_size, int ngroups, int nblocks, double* tmp_means, double* tmp_variances, double* tmp_detected, int threads) {
+            size_t nlevels = level_size.size();
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+            #pragma omp parallel num_threads(threads)
+            {
+                #pragma omp for
+                for (size_t gene = 0; gene < ngenes; ++gene) {
+#else
+            SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
+                for (size_t gene = start; gene < end; ++gene) {
+#endif
+
+                    size_t in_offset = nlevels * gene;
+                    auto my_means = tmp_means + in_offset;
+                    auto my_variances = tmp_variances + in_offset;
+                    auto my_detected = tmp_detected + in_offset;
+
+                    size_t nlevels = level_size.size();
+                    for (size_t l = 0; l < nlevels; ++l) {
+                        means[l][gene] = my_means[l];
+                        detected[l][gene] = my_detected[l];
+                    }
+
+                    size_t out_offset = gene * ngroups * ngroups;
+
+                    if (cohen != NULL) {
+                        differential_analysis::compute_pairwise_cohens_d(my_means, my_variances, level_size, ngroups, nblocks, threshold, cohen + out_offset);
+                    }
+
+                    if (delta_detected != NULL) {
+                        differential_analysis::compute_pairwise_simple_diff(my_detected, level_size, ngroups, nblocks, delta_detected + out_offset);
+                    }
+
+                    if (lfc != NULL) {
+                        differential_analysis::compute_pairwise_simple_diff(my_means, level_size, ngroups, nblocks, lfc + out_offset);
+                    }
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+                }
+            }
+#else
+                }
+            }, threads);
+#endif
+        }
+
+    public:
+        struct ComplexWorker {
+            ComplexWorker(Overlord* p) : parent(p) {}
+            Overlord* const parent;
+
+            Stat* prepare_auc_buffer(size_t gene, int ngroups) { 
+                return parent->auc + gene * ngroups * ngroups;
             }
 
-            differential_analysis::PerRowFactory fact(
-                p->nrow(), 
-                p->ncol(), 
-                std::move(means), 
-                std::move(detected), 
-                cohen,
-                auc,
-                lfc,
-                delta_detected,
-                level, 
-                &level_size, 
-                group, 
-                ngroups, 
-                block, 
-                nblocks, 
-                threshold
-            );
+            // No-op, because it's copied straight into the auc_buffer.
+            void consume_auc_buffer(size_t, int, const double*) {}
+        };
 
-            tatami::apply<0>(p, fact, num_threads);
+        ComplexWorker complex_worker() {
+            return ComplexWorker(this);
         }
-    }
+    };
 
 public:
     /**
