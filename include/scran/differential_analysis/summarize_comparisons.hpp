@@ -112,7 +112,7 @@ void summarize_comparisons(size_t ngenes, int ngroups, const Stat* effects, std:
 #endif
         auto base = effects + gene * ngroups * ngroups;
         for (int l = 0; l < ngroups; ++l) {
-            summarize_comparisons(ngroups, effects, l, gene, output, effect_buffer);
+            summarize_comparisons(ngroups, base + l * ngroups, l, gene, output, effect_buffer);
         }
     }
 #ifndef SCRAN_CUSTOM_PARALLEL            
