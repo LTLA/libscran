@@ -1,12 +1,12 @@
 <map id="scran/utils/vector_to_pointers.hpp" name="scran/utils/vector_to_pointers.hpp">
-<area shape="rect" id="node1" title="Create a vector of pointers from a vector of vectors." coords="370,5,493,45"/>
-<area shape="rect" id="node2" href="$PairwiseEffects_8hpp.html" title="Compute pairwise effect sizes between groups of cells." coords="37,93,232,133"/>
-<area shape="rect" id="node3" href="$ScoreMarkers_8hpp.html" title="Compute marker scores for each gene in each group of cells." coords="72,181,258,221"/>
-<area shape="rect" id="node4" href="$scran_8hpp_source.html" title=" " coords="538,357,653,383"/>
-<area shape="rect" id="node5" href="$SummarizeEffects_8hpp.html" title="Summarize the effect sizes from pairwise comparisons." coords="256,93,466,133"/>
-<area shape="rect" id="node6" href="$ModelGeneVar_8hpp.html" title="Model the per&#45;gene variance from log&#45;count data." coords="332,269,489,309"/>
-<area shape="rect" id="node7" href="$PerCellAdtQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from ADT data." coords="513,269,678,309"/>
-<area shape="rect" id="node8" href="$PerCellRnaQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from RNA metrics." coords="840,181,1008,221"/>
-<area shape="rect" id="node9" href="$PerCellRnaQcMetrics_8hpp_source.html" title=" " coords="623,93,798,133"/>
-<area shape="rect" id="node10" href="$PerCellAdtQcMetrics_8hpp.html" title="Compute per&#45;cell quality control metrics from an ADT count matrix." coords="592,181,764,221"/>
+<area shape="rect" id="node1" title="Create a vector of pointers from a vector of vectors." coords="263,5,386,45"/>
+<area shape="rect" id="node2" href="$PairwiseEffects_8hpp.html" title="Compute pairwise effect sizes between groups of cells." coords="67,93,262,133"/>
+<area shape="rect" id="node3" href="$ScoreMarkers_8hpp.html" title="Compute marker scores for each gene in each group of cells." coords="33,181,218,221"/>
+<area shape="rect" id="node4" href="$scran_8hpp_source.html" title=" " coords="370,357,484,383"/>
+<area shape="rect" id="node5" href="$SummarizeEffects_8hpp.html" title="Summarize the effect sizes from pairwise comparisons." coords="638,93,848,133"/>
+<area shape="rect" id="node6" href="$ModelGeneVar_8hpp.html" title="Model the per&#45;gene variance from log&#45;count data." coords="163,269,320,309"/>
+<area shape="rect" id="node7" href="$PerCellAdtQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from ADT data." coords="344,269,510,309"/>
+<area shape="rect" id="node8" href="$PerCellRnaQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from RNA metrics." coords="635,181,803,221"/>
+<area shape="rect" id="node9" href="$PerCellRnaQcMetrics_8hpp_source.html" title=" " coords="388,93,562,133"/>
+<area shape="rect" id="node10" href="$PerCellAdtQcMetrics_8hpp.html" title="Compute per&#45;cell quality control metrics from an ADT count matrix." coords="388,181,560,221"/>
 </map>

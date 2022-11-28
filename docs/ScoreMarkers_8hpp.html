@@ -84,9 +84,12 @@ $(function() {
 <p>Compute marker scores for each gene in each group of cells.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="macros_8hpp_source.html">../utils/macros.hpp</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="vector__to__pointers_8hpp_source.html">../utils/vector_to_pointers.hpp</a>&quot;</code><br />
+<code>#include &quot;Factory.hpp&quot;</code><br />
+<code>#include &quot;cohens_d.hpp&quot;</code><br />
+<code>#include &quot;simple_diff.hpp&quot;</code><br />
+<code>#include &quot;<a class="el" href="summarize__comparisons_8hpp_source.html">summarize_comparisons.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="PairwiseEffects_8hpp_source.html">PairwiseEffects.hpp</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="SummarizeEffects_8hpp_source.html">SummarizeEffects.hpp</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="vector__to__pointers_8hpp_source.html">../utils/vector_to_pointers.hpp</a>&quot;</code><br />
 <code>#include &quot;tatami/stats/apply.hpp&quot;</code><br />
 <code>#include &lt;array&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
@@ -94,19 +97,21 @@ Include dependency graph for ScoreMarkers.hpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="ScoreMarkers_8hpp__incl.png" border="0" usemap="#ascran_2differential__analysis_2ScoreMarkers_8hpp" alt=""/></div>
 <map name="ascran_2differential__analysis_2ScoreMarkers_8hpp" id="ascran_2differential__analysis_2ScoreMarkers_8hpp">
-<area shape="rect" title="Compute marker scores for each gene in each group of cells." coords="267,5,452,45"/>
-<area shape="rect" href="macros_8hpp.html" title="Set common macros used through libscran." coords="368,255,495,280"/>
-<area shape="rect" href="vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." coords="374,167,489,207"/>
-<area shape="rect" href="PairwiseEffects_8hpp.html" title="Compute pairwise effect sizes between groups of cells." coords="239,93,375,119"/>
-<area shape="rect" title=" " coords="35,174,185,199"/>
-<area shape="rect" href="SummarizeEffects_8hpp.html" title="Summarize the effect sizes from pairwise comparisons." coords="451,93,601,119"/>
-<area shape="rect" title=" " coords="626,93,677,119"/>
-<area shape="rect" title=" " coords="533,255,591,280"/>
-<area shape="rect" title=" " coords="209,174,299,199"/>
-<area shape="rect" href="summarize__comparisons_8hpp.html" title="Utilities for effect summarization." coords="615,174,805,199"/>
-<area shape="rect" title=" " coords="615,255,690,280"/>
-<area shape="rect" title=" " coords="715,255,783,280"/>
-<area shape="rect" title=" " coords="807,255,866,280"/>
+<area shape="rect" title="Compute marker scores for each gene in each group of cells." coords="310,5,495,45"/>
+<area shape="rect" href="macros_8hpp.html" title="Set common macros used through libscran." coords="235,255,362,280"/>
+<area shape="rect" title=" " coords="27,174,116,199"/>
+<area shape="rect" title=" " coords="140,174,243,199"/>
+<area shape="rect" href="simple__diff_8hpp_source.html" title=" " coords="319,174,427,199"/>
+<area shape="rect" href="summarize__comparisons_8hpp.html" title="Utilities for effect summarization." coords="764,174,955,199"/>
+<area shape="rect" href="PairwiseEffects_8hpp.html" title="Compute pairwise effect sizes between groups of cells." coords="229,93,365,119"/>
+<area shape="rect" href="vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." coords="452,167,566,207"/>
+<area shape="rect" title=" " coords="590,174,740,199"/>
+<area shape="rect" title=" " coords="592,93,642,119"/>
+<area shape="rect" title=" " coords="480,255,538,280"/>
+<area shape="rect" title=" " coords="386,255,440,280"/>
+<area shape="rect" title=" " coords="726,255,801,280"/>
+<area shape="rect" title=" " coords="826,255,894,280"/>
+<area shape="rect" title=" " coords="918,255,977,280"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">

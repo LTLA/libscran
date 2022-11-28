@@ -1,8 +1,11 @@
 <map id="scran/differential_analysis/PairwiseEffects.hpp" name="scran/differential_analysis/PairwiseEffects.hpp">
-<area shape="rect" id="node1" title="Compute pairwise effect sizes between groups of cells." coords="70,5,265,45"/>
+<area shape="rect" id="node1" title="Compute pairwise effect sizes between groups of cells." coords="199,5,394,45"/>
 <area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." coords="5,181,132,207"/>
-<area shape="rect" id="node3" title=" " coords="60,101,149,126"/>
-<area shape="rect" id="node4" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." coords="174,93,289,133"/>
-<area shape="rect" id="node6" title=" " coords="313,101,462,126"/>
-<area shape="rect" id="node5" title=" " coords="202,181,261,207"/>
+<area shape="rect" id="node3" title=" " coords="313,101,403,126"/>
+<area shape="rect" id="node4" title=" " coords="427,101,529,126"/>
+<area shape="rect" id="node5" href="$simple__diff_8hpp_source.html" title=" " coords="181,101,289,126"/>
+<area shape="rect" id="node8" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." coords="42,93,157,133"/>
+<area shape="rect" id="node9" title=" " coords="554,101,703,126"/>
+<area shape="rect" id="node6" title=" " coords="157,181,215,207"/>
+<area shape="rect" id="node7" title=" " coords="239,181,293,207"/>
 </map>
