@@ -55,7 +55,15 @@ public:
         void compute(size_t i, const T* ptr) {
             auto nlevels = details.level_size_ptr->size();
             auto offset = nlevels * i;
-            feature_selection::blocked_variance_with_mean<true>(ptr, details.NC, details.levels, *(details.level_size_ptr), details.means + offset, details.variances + offset);
+            feature_selection::blocked_variance_with_mean<true>(
+                ptr, 
+                details.NC, 
+                details.levels, 
+                details.level_size_ptr->size(), 
+                details.level_size_ptr->data(), 
+                details.means + offset, 
+                details.variances + offset
+            );
 
             auto tmp_nzeros = details.detected + nlevels * i;
             std::fill(tmp_nzeros, tmp_nzeros + nlevels, 0);
@@ -68,7 +76,15 @@ public:
         void compute(size_t i, const SparseRange& range) {
             auto nlevels = details.level_size_ptr->size();
             auto offset = nlevels * i;
-            feature_selection::blocked_variance_with_mean<true>(range, details.levels, *(details.level_size_ptr), details.means + offset, details.variances + offset, details.detected + offset);
+            feature_selection::blocked_variance_with_mean<true>(
+                range, 
+                details.levels, 
+                details.level_size_ptr->size(), 
+                details.level_size_ptr->data(), 
+                details.means + offset, 
+                details.variances + offset, 
+                details.detected + offset
+            );
         }
     };
 
@@ -439,7 +455,7 @@ public:
             process_auc(i);
 
             // And also computing everything else.
-            feature_selection::blocked_variance_with_mean<true>(ptr, details.NC, details.levels, *(details.level_size_ptr), tmp_means, tmp_vars);
+            feature_selection::blocked_variance_with_mean<true>(ptr, details.NC, details.levels, details.level_size_ptr->size(), details.level_size_ptr->data(), tmp_means.data(), tmp_vars.data());
             per_row::fill_tmp_nzeros(details, ptr, tmp_nzeros);
             per_row::transfer_common_stats(i, tmp_means, tmp_nzeros, tmp_vars, details);
             return;
@@ -467,7 +483,7 @@ public:
             process_auc(i);
 
             // And also computing everything else.
-            feature_selection::blocked_variance_with_mean<true>(range, details.levels, *(details.level_size_ptr), tmp_means, tmp_vars, tmp_nzeros);
+            feature_selection::blocked_variance_with_mean<true>(range, details.levels, details.level_size_ptr->size(), details.level_size_ptr->data(), tmp_means.data(), tmp_vars.data(), tmp_nzeros.data());
             per_row::transfer_common_stats(i, tmp_means, tmp_nzeros, tmp_vars, details);
             return;
         }

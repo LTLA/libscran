@@ -60,7 +60,7 @@ void summarize_comparisons(int ngroups, const Stat* effects, int group, size_t g
     {
         auto eptr = effects;
         for (int r = 0; r < ngroups; ++r, ++eptr) {
-            if (r == l || std::isnan(*eptr)) {
+            if (r == group || std::isnan(*eptr)) {
                 continue;
             }
             *elast = *eptr;
