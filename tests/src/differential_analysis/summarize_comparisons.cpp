@@ -269,25 +269,46 @@ TEST(SummarizeEffects, Basic) {
     auto res = summarizer.run(ngenes, ngroups, stuff.data());
     EXPECT_EQ(res.size(), scran::differential_analysis::n_summaries);
 
-    // Summaries are actually filled.
     for (const auto& r : res) {
         EXPECT_EQ(r.size(), ngroups);
 
-        for (const auto& x : r) {
-            EXPECT_EQ(x.size(), ngenes);
+        // Different summaries for different groups.
+        EXPECT_NE(r[0], r[1]);
+        EXPECT_NE(r[0], r[2]);
+    }
 
+    // Summaries are actually filled.
+    for (size_t g = 0; g < ngroups; ++g) {
+        for (int r = 0; r < scran::differential_analysis::n_summaries; ++r) {
+            const auto& x = res[r][g];
+            EXPECT_EQ(x.size(), ngenes);
             bool nonzero = false;
-            for (auto g : x) {
-                if (g != 0) {
+            for (auto v : x) {
+                if (v != 0) {
                     nonzero = true;
                 }
             }
             EXPECT_TRUE(nonzero);
         }
 
-        // Different summaries for different groups.
-        EXPECT_NE(r[0], r[1]);
-        EXPECT_NE(r[0], r[2]);
+        // Min, max and mean make sense.
+        const auto& min_vec = res[scran::differential_analysis::MIN][g];
+        const auto& max_vec = res[scran::differential_analysis::MAX][g];
+        const auto& mean_vec = res[scran::differential_analysis::MEAN][g];
+        const auto& med_vec = res[scran::differential_analysis::MEDIAN][g];
+        for (size_t i = 0; i < ngenes; ++i) {
+            EXPECT_TRUE(min_vec[i] <= mean_vec[i]);
+            EXPECT_TRUE(max_vec[i] >= mean_vec[i]);
+            EXPECT_TRUE(min_vec[i] <= med_vec[i]);
+            EXPECT_TRUE(max_vec[i] >= med_vec[i]);
+        }
+
+        // Minimum rank makes sense.
+        const auto& ranks = res[scran::differential_analysis::MIN_RANK][g];
+        for (auto x : ranks) {
+            EXPECT_TRUE(x >= 1);
+            EXPECT_TRUE(x <= ngenes);
+        }
     }
 
     // Same results with multiple threads.
