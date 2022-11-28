@@ -125,6 +125,55 @@ void summarize_comparisons(size_t ngenes, int ngroups, const Stat* effects, std:
 }
 
 template<typename Stat>
+void compute_min_rank_internal(size_t ngenes, int stride, const Stat* effects, Stat* output, std::vector<std::pair<Stat, int> >& buffer) {
+    auto bIt = buffer.begin();
+    for (size_t i = 0; i < ngenes; ++i, effects += stride) {
+        if (!std::isnan(*effects)) {
+            bIt->first = -*effects; // negative to sort by decreasing value.
+            bIt->second = i;
+            ++bIt;
+        }
+    }
+    std::sort(buffer.begin(), bIt);
+
+    double counter = 1;
+    for (auto bcopy = buffer.begin(); bcopy != bIt; ++bcopy) {
+        auto& current = output[bcopy->second];
+        if (counter < current) {
+            current = counter;
+        }
+        ++counter;
+    }
+}
+
+template<typename Stat>
+void compute_min_rank(size_t ngenes, int ngroups, int group, const Stat* effects, Stat* output, int threads) {
+    std::fill(output, output + ngenes, ngenes + 1); 
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+    #pragma omp parallel num_threads(threads)
+    {
+        std::vector<std::pair<Stat, int> > buffer(ngenes);
+        #pragma omp for
+        for (int g = 0; g < ngroups; ++g) {
+#else
+    SCRAN_CUSTOM_PARALLEL(ngroups, [&](size_t start, size_t end) -> void {
+        std::vector<std::pair<Stat, int> > buffer(ngenes);
+        for (int g = start; g < end; ++g) {        
+#endif
+            if (g == group) {
+                continue;
+            }
+            compute_min_rank_internal(ngenes, ngroups, effects + g, output, buffer);
+        }
+#ifndef SCRAN_CUSTOM_PARALLEL
+    }
+#else
+    }, threads);
+#endif
+}
+
+template<typename Stat>
 void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vector<Stat*>& output, int threads) {
     auto shift = ngroups * ngroups;
 
@@ -141,28 +190,11 @@ void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vect
 #endif
             auto target = output[g];
             std::fill(target, target + ngenes, ngenes + 1); 
-
             for (int g2 = 0; g2 < ngroups; ++g2) {
                 if (g == g2) {
                     continue;
                 }
-
-                auto copy = effects + g * ngroups + g2;
-                auto bIt = buffer.begin();
-                for (size_t i = 0; i < ngenes; ++i, copy += shift) {
-                    if (!std::isnan(*copy)) {
-                        bIt->first = -*copy; // negative to sort by decreasing value.
-                        bIt->second = i;
-                        ++bIt;
-                    }
-                }
-                std::sort(buffer.begin(), bIt);
-
-                double counter = 1;
-                for (auto bcopy = buffer.begin(); bcopy != bIt; ++bcopy) {
-                    target[bcopy->second] = std::min(counter, target[bcopy->second]);
-                    ++counter;
-                }
+                compute_min_rank_internal(ngenes, shift, effects + g2 * ngroups, target, buffer);
             }
         }
 #ifndef SCRAN_CUSTOM_PARALLEL

@@ -365,7 +365,7 @@ private:
             tatami::apply<0>(p, fact, num_threads);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
-            #pragma omp parallel num_threads(threads)
+            #pragma omp parallel for num_threads(threads)
             for (size_t gene = 0; gene < ngenes; ++gene) {
 #else
             SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
@@ -396,7 +396,7 @@ private:
             }
 #else
             }
-            });
+            }, threads);
 #endif
 
         } else {

@@ -45,6 +45,13 @@ double compute_pairwise_simple_diff(int g1, int g2, const Stat* values, const Ls
 }
 
 template<typename Stat, typename Ls>
+void compute_pairwise_simple_diff(int g1, const Stat* values, const Ls& level_size, int ngroups, int nblocks, Stat* output) {
+    for (int g2 = 0; g2 < ngroups; ++g2) {
+        output[g1] = compute_pairwise_simple_diff(g1, g2, values, level_size, ngroups, nblocks);
+    }
+}
+
+template<typename Stat, typename Ls>
 void compute_pairwise_simple_diff(const Stat* values, const Ls& level_size, int ngroups, int nblocks, Stat* output) {
     for (int g1 = 0; g1 < ngroups; ++g1) {
         for (int g2 = 0; g2 < g1; ++g2) {

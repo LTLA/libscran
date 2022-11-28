@@ -417,9 +417,83 @@ public:
         std::vector<std::vector<Stat*> > delta_detected) 
     const {
         size_t ngroups = means.size();
-        auto pairs = setup_pairwise(cohen, auc, lfc, delta_detected);
-        auto res = pairs.run(p, group, std::move(means), std::move(detected));
-        run_summarize(p->nrow(), ngroups, res, std::move(cohen), std::move(auc), std::move(lfc), std::move(delta_detected));
+
+        if (auc.size()) {
+            auto pairs = setup_pairwise(cohen, auc, lfc, delta_detected);
+            auto res = pairs.run(p, group, std::move(means), std::move(detected));
+            run_summarize(p->nrow(), ngroups, res, std::move(cohen), std::move(auc), std::move(lfc), std::move(delta_detected));
+        } else {
+            // Computing the key statistics.
+            size_t ngenes = p->nrow();
+            size_t nlevels = level_size.size();
+            size_t holding = nlevels * ngenes;
+            std::vector<double> tmp_means(holding), tmp_variances(holding), tmp_detected(holding);
+
+            differential_analysis::SimpleBidimensionalFactory fact(
+                p->nrow(), 
+                p->ncol(), 
+                level, 
+                &level_size, 
+                tmp_means.data(),
+                tmp_variances.data(),
+                tmp_detected.data()
+            );
+            tatami::apply<0>(p, fact, num_threads);
+
+            size_t group_holding = ngroups * ngenes;
+            std::vector<double> cohen(group_holding), lfc(group_holding), delta_detected(group_holding);
+
+            for (size_t group = 0; group < ngroups; ++group) {
+#ifndef SCRAN_CUSTOM_PARALLEL
+                #pragma omp parallel num_threads(threads)
+                {
+                    std::vector<double> effect_buffer(ngroups);
+                    for (size_t gene = 0; gene < ngenes; ++gene) {
+#else
+                SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
+                    std::vector<double> effect_buffer(ngroups);
+                    for (size_t gene = start; gene < end; ++gene) {
+#endif
+                        size_t in_offset = gene * nlevels;
+                        auto mptr = tmp_means.data() + in_offset;
+                        auto dptr = tmp_detected.data() + in_offset;
+
+                        for (size_t l = 0; l < nlevels; ++l) {
+                            means[l][gene] = mptr[l];
+                            if (level_size[l]) {
+                                dptr[l] /= level_size[l];
+                            } else {
+                                dptr[l] = std::numeric_limits<double>::quiet_NaN();
+                            }
+                            detected[l][gene] = dptr[l];
+                        }
+
+                        size_t out_offset = gene * ngroups;
+                        auto cohen_ptr = tmp_cohen.data() + out_offset;
+                        differential_analysis::compute_pairwise_cohens_d(group, mptr, tmp_variances.data() + in_offset, level_size, ngroups, nblocks, threshold, cohen_ptr);
+                        differential_analysis::summarize_comparisons(ngroups, cohen_ptr, group, gene, cohen, effect_buffer);
+
+                        auto delta_detected_ptr = tmp_delta_detected.data() + out_offset;
+                        differential_analysis::compute_pairwise_simple_diff(group, dptr, level_size, ngroups, nblocks, delta_detected_ptr);
+                        differential_analysis::summarize_comparisons(ngroups, delta_detected_ptr, group, gene, lfc, effect_buffer);
+
+                        auto lfc_ptr = tmp_lfc.data() + out_offset;
+                        differential_analysis::compute_pairwise_simple_diff(group, mptr, level_size, ngroups, nblocks, lfc_ptr);
+                        differential_analysis::summarize_comparisons(ngroups, lfc_ptr, group, gene, lfc, effect_buffer);
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+                    }
+                }
+#else
+                    }
+                }, threads);
+#endif
+
+                if (cohen[differential_analysis::MIN_RANK].size()) {
+                    differential_analysis::compute_min_rank(ngenes, ngroups, tmp_cohen.data(), cohen[differential_analysis::MIN_RANK][group], threads);
+                }
+            }
+        }
     }
 
     /**
