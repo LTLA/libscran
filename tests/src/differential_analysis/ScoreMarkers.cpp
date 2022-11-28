@@ -266,6 +266,10 @@ INSTANTIATE_TEST_CASE_P(
 
 /*********************************************/
 
+// Comparing the efficient ScoreMarkers implementation against the
+// PairwiseEffects + SummarizeEffects combination, which is less mind-bending
+// but requires holding a large 3D matrix in memory.
+
 class ScoreMarkersAgainstPairwiseTest : public ::testing::TestWithParam<std::tuple<int, bool> >, public ScoreMarkersTestCore {
 protected:
     void SetUp() {

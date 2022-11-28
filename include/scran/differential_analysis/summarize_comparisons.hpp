@@ -179,7 +179,7 @@ void compute_min_rank(size_t ngenes, int ngroups, int group, const Stat* effects
         std::vector<std::pair<Stat, int> > buffer(ngenes);
         #pragma omp for
         for (int t = 0; t < threads; ++t) {
-            for (auto g : assignments) {
+            for (auto g : assignments[t]) {
 #else
     SCRAN_CUSTOM_PARALLEL(threads, [&](size_t start, size_t end) -> void {
         std::vector<std::pair<Stat, int> > buffer(ngenes);
