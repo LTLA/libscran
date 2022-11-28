@@ -46,7 +46,7 @@ inline double cohen_denominator(double left_var, double right_var) {
 template<typename Stat, typename Ls, class Output>
 void compute_pairwise_cohens_d(int g1, int g2, const Stat* means, const Stat* vars, const Ls& level_size, int ngroups, int nblocks, double threshold, Output& output) {
     double total_weight = 0;
-    constexpr bool do_both = !std::is_same<double, Output>::value;
+    constexpr bool do_both_sides = !std::is_same<Stat, Output>::value;
 
     for (int b = 0; b < nblocks; ++b) {
         int offset1 = g1 * nblocks + b;
@@ -74,7 +74,7 @@ void compute_pairwise_cohens_d(int g1, int g2, const Stat* means, const Stat* va
         total_weight += weight;
 
         double extra = compute_cohens_d(left_mean, right_mean, denom, threshold) * weight;
-        if constexpr(do_both) {
+        if constexpr(do_both_sides) {
             output.first += extra;
             if (threshold) {
                 output.second += compute_cohens_d(right_mean, left_mean, denom, threshold) * weight;
@@ -84,7 +84,7 @@ void compute_pairwise_cohens_d(int g1, int g2, const Stat* means, const Stat* va
         }
     }
 
-    if constexpr(do_both) {
+    if constexpr(do_both_sides) {
         if (total_weight) {
             output.first /= total_weight;
             if (threshold) {
