@@ -34,76 +34,69 @@ struct SimpleBundle {
     Stat* means, *detected, *variances;
 };
 
-template<typename Stat, typename Level>
-class SimplePerRowFactory {
-public:
-    SimplePerRowFactory(size_t nr, size_t nc, const Level* l, const std::vector<int>* ls, Stat* m, Stat* v, Stat* d) :
-        details(nr, nc, l, ls, m, v, d) {}
+struct SimpleByRow { 
+    SimpleByRow(SimpleBundle<Stat, Level> d) : details(std::move(d)) {}
 
-protected:
+public:
+    template<typename T>
+    void compute(size_t i, const T* ptr) {
+        auto nlevels = details.level_size_ptr->size();
+        auto offset = nlevels * i;
+
+        feature_selection::blocked_variance_with_mean<true>(
+            ptr, 
+            details.NC, 
+            details.levels, 
+            nlevels,
+            details.level_size_ptr->data(), 
+            details.means + offset, 
+            details.variances + offset
+        );
+
+        auto tmp_nzeros = details.detected + nlevels * i;
+        std::fill(tmp_nzeros, tmp_nzeros + nlevels, 0);
+        for (size_t j = 0; j < details.NC; ++j) {
+            tmp_nzeros[details.levels[j]] += (ptr[j] > 0);
+        }
+    }
+
+    template<class SparseRange>
+    void compute(size_t i, const SparseRange& range) {
+        auto nlevels = details.level_size_ptr->size();
+        auto offset = nlevels * i;
+
+        feature_selection::blocked_variance_with_mean<true>(
+            range, 
+            details.levels, 
+            nlevels,
+            details.level_size_ptr->data(), 
+            details.means + offset, 
+            details.variances + offset, 
+            details.detected + offset
+        );
+    }
+
+public:
     SimpleBundle<Stat, Level> details;
-
-public:
-    struct ByRow { 
-        ByRow(SimpleBundle<Stat, Level> d) : details(std::move(d)) {}
-
-    private:
-        SimpleBundle<Stat, Level> details;
-
-    public:
-        template<typename T>
-        void compute(size_t i, const T* ptr) {
-            auto nlevels = details.level_size_ptr->size();
-            auto offset = nlevels * i;
-
-            feature_selection::blocked_variance_with_mean<true>(
-                ptr, 
-                details.NC, 
-                details.levels, 
-                nlevels,
-                details.level_size_ptr->data(), 
-                details.means + offset, 
-                details.variances + offset
-            );
-
-            auto tmp_nzeros = details.detected + nlevels * i;
-            std::fill(tmp_nzeros, tmp_nzeros + nlevels, 0);
-            for (size_t j = 0; j < details.NC; ++j) {
-                tmp_nzeros[details.levels[j]] += (ptr[j] > 0);
-            }
-        }
-
-        template<class SparseRange>
-        void compute(size_t i, const SparseRange& range) {
-            auto nlevels = details.level_size_ptr->size();
-            auto offset = nlevels * i;
-
-            feature_selection::blocked_variance_with_mean<true>(
-                range, 
-                details.levels, 
-                nlevels,
-                details.level_size_ptr->data(), 
-                details.means + offset, 
-                details.variances + offset, 
-                details.detected + offset
-            );
-        }
-    };
-
-    ByRow dense_direct() const {
-        return ByRow(details);
-    }
-
-    ByRow sparse_direct() const {
-        return ByRow(details);
-    }
 };
 
 template<typename Stat, typename Level>
-class SimpleBidimensionalFactory : public SimplePerRowFactory<Stat, Level> { 
+class SimpleBidimensionalFactory {
 public:
     SimpleBidimensionalFactory(size_t nr, size_t nc, const Level* l, const std::vector<int>* ls, Stat* m, Stat* v, Stat* d) : 
-        SimplePerRowFactory<Stat, Level>(nr, nc, l, ls, m, v, d) {}
+        details(nr, nc, l, ls, m, v, d) {}
+
+private:
+    SimpleBundle<Stat, Level> details;
+
+public:
+    SimpleByRow dense_direct() const {
+        return SimpleByRow(details);
+    }
+
+    SimpleByRow sparse_direct() const {
+        return SimpleByRow(details);
+    };
 
 public:
     struct ByCol { 
@@ -230,150 +223,49 @@ public:
 };
 
 /****************************************************************************
- * TODO: per-row factory when the AUC is desired
+ * The 'complex' class of factories performs pairwise comparisons directly for
+ * the effect sizes that cannot be easily derived from simple per-group
+ * statistics. This currently includes the AUC.
  ****************************************************************************/
 
-namespace per_row {
-
-template<class Bundle, typename Data, typename Stat>
-void fill_tmp_nzeros(const Bundle& details, const Data* ptr, std::vector<Stat>& tmp_nzeros) {
-    std::fill(tmp_nzeros.begin(), tmp_nzeros.end(), 0);
-    for (size_t j = 0; j < details.NC; ++j) {
-        tmp_nzeros[details.levels[j]] += (ptr[j] > 0);
-    }
-}
-
-template<class Bundle, typename Stat>
-void transfer_common_stats(size_t row, const std::vector<Stat>& tmp_means, const std::vector<Stat>& tmp_nzeros, const std::vector<Stat>& tmp_vars, Bundle& details) {
-    const auto& level_size = *(details.level_size_ptr);
-
-    // Transferring the computed means.
-    for (size_t l = 0; l < level_size.size(); ++l) {
-        details.means[l][row] = tmp_means[l];
-    }
-
-    // Computing and transferring the proportion detected.
-    for (size_t l = 0; l < level_size.size(); ++l) {
-        auto& ndetected = details.detected[l][row];
-        if (level_size[l]) {
-            ndetected = tmp_nzeros[l] / level_size[l];
-        } else {
-            ndetected = std::numeric_limits<double>::quiet_NaN();
-        }
-    }
-
-    // Computing the various effect sizes.
-    size_t offset = row * details.ngroups * details.ngroups;
-    if (details.cohen) {
-        compute_pairwise_cohens_d(tmp_means.data(), tmp_vars.data(), level_size, details.ngroups, details.nblocks, details.threshold, details.cohen + offset);
-    }
-    if (details.lfc) {
-        compute_pairwise_lfc(tmp_means.data(), level_size, details.ngroups, details.nblocks, details.lfc + offset);
-    }
-    if (details.delta_detected) {
-        compute_pairwise_delta_detected(tmp_nzeros.data(), level_size, details.ngroups, details.nblocks, details.delta_detected + offset);
-    }
-}
-
-}
-
-template<typename Stat, typename Level, typename Group, typename Block>
-struct PerRowBundle {
-    PerRowBundle(
-        size_t nr,
-        size_t nc,
-        std::vector<Stat*> m,
-        std::vector<Stat*> d,
-        Stat* cohen_,
-        Stat* auc_,
-        Stat* lfc_,
-        Stat* delta_detected_,
-        const Level* l,
-        const std::vector<int>* ls,
-        const Group* g,
-        int ng,
-        const Block* b,
-        int nb,
-        double t
-    ) : 
-        NR(nr), 
-        NC(nc), 
-        means(std::move(m)), 
-        detected(std::move(d)), 
-        cohen(cohen_), 
-        auc(auc_), 
-        lfc(lfc_), 
-        delta_detected(delta_detected_), 
-        levels(l), 
-        level_size_ptr(ls), 
-        group(g),
-        block(b),
-        ngroups(ng), 
-        nblocks(nb), 
-        threshold(t) 
-    {}
-
-    size_t NR, NC;
-
-    std::vector<Stat*> means, detected;
-    Stat *cohen;
-    Stat *auc;
-    Stat *lfc;
-    Stat *delta_detected;
-
-    const Level* levels;
-    const std::vector<int>* level_size_ptr;
-
+template<typename Group, typename Block, class Overlord>
+struct ComplexPerRowBundle {
+    ComplexPerRowBundle(const Group* g, int ng, const Block* b, int nb, double t, Overlord* store) : group(g), block(b), ngroups(ng), nblocks(nb), threshold(t), overlord(ova) {}
     const Group* group;
     const Block* block;
     int ngroups, nblocks;
-
     double threshold;
+    Overlord* overlord;
 };
 
 template<typename Stat, typename Level, typename Group, typename Block> 
-struct PerRowFactory {
+struct ComplexPerRowFactory {
 public:
-    PerRowFactory(
-        size_t nr,
-        size_t nc,
-        std::vector<Stat*> m,
-        std::vector<Stat*> d,
-        Stat* cohen,
-        Stat* auc,
-        Stat* lfc,
-        Stat* delta_detected,
-        const Level* l,
-        const std::vector<int>* ls,
-        const Group* g,
-        int ng,
-        const Block* b,
-        int nb,
-        double t
-    ) : details(nr, nc, std::move(m), std::move(d), cohen, auc, lfc, delta_detected, l, ls, g, ng, b, nb, t) {}
+    ComplexPerRowFactory(size_t nr, size_t nc, const Level* l, const std::vector<int>* ls, Stat* m, Stat* v, Stat* d, const Group* g, int ng, const Block* b, int nb, double t, Overlord* ova) :
+        simple_details(nr, nc, l, ls, m, v, d), extra_details(g, ng, b, nb, t, ova) {}
 
-protected:
-    PerRowBundle<Stat, Level, Group, Block> details;
+private:
+    SimpleBundle<Stat, Level> simple_details;
+    ComplexPerRowBundle<Group, Block, Overlord> extra_details;
 
 public:
+    template<class Worker>
     struct ByRow {
-        ByRow(PerRowBundle<Stat, Level, Group, Block> d) : 
-            details(std::move(d)), 
-
-            tmp_means(details.level_size_ptr->size()), 
-            tmp_vars(details.level_size_ptr->size()), 
-            tmp_nzeros(details.level_size_ptr->size()), 
-
-            paired(details.nblocks), 
-            num_zeros(details.nblocks, std::vector<int>(details.ngroups)), 
-            totals(details.nblocks, std::vector<int>(details.ngroups)), 
-            auc_buffer(details.ngroups * details.ngroups), 
-            denominator(details.ngroups, std::vector<double>(details.ngroups))
+        ByRow(SimpleBundle<Stat, Level> d1, ComplexPerRowBundle<Stat, Group, Block> d2, Worker w) : 
+            simple_handler(std::move(d1)),
+            extra_details(std::move(d2)),
+            worker(std::move(w)),
+            paired(extra_details.nblocks), 
+            num_zeros(extra_details.nblocks, std::vector<int>(extra_details.ngroups)), 
+            totals(extra_details.nblocks, std::vector<int>(extra_details.ngroups)), 
+            auc_buffer1(extra_details.ngroups * extra_details.ngroups), 
+            auc_buffer2(extra_details.ngroups * extra_details.ngroups), 
+            denominator(extra_details.ngroups, std::vector<double>(extra_details.ngroups))
         {
-            const auto& ngroups = details.ngroups;
-            const auto& nblocks = details.nblocks;
+            const auto& ngroups = extra_details.ngroups;
+            const auto& nblocks = extra_details.nblocks;
 
-            auto lsIt = details.level_size_ptr->begin();
+            auto lsIt = this->details.level_size_ptr->begin();
             for (size_t g = 0; g < ngroups; ++g) {
                 for (size_t b = 0; b < nblocks; ++b, ++lsIt) {
                     totals[b][g] = *lsIt;
@@ -392,47 +284,48 @@ public:
         }
 
     private:
-        PerRowBundle<Stat, Level, Group, Block> details;
-        std::vector<double> tmp_means, tmp_vars, tmp_nzeros;
+        SimpleByRow<Stat, Level> simple_handler;
+        ComplexPerRowBundle<Stat, Group, Block> extra_details;
+        Worker worker;
 
         // AUC handlers.
         std::vector<PairedStore> paired;
         std::vector<std::vector<int> > num_zeros;
         std::vector<std::vector<int> > totals;
-        std::vector<double> auc_buffer;
+        std::vector<double> auc_buffer1, auc_buffer2;
         std::vector<std::vector<double> > denominator;
 
         void process_auc(size_t i) {
-            const auto& ngroups = details.ngroups;
-            auto output = details.auc + i * ngroups * ngroups;
+            const auto& ngroups = extra_details.ngroups;
+            auto output = extra_details.auc + i * ngroups * ngroups;
+            std::fill(auc_buffer2.begin(), auc_buffer2.end(), 0);
 
-            for (size_t b = 0; b < details.nblocks; ++b) {
+            for (size_t b = 0; b < extra_details.nblocks; ++b) {
                 auto& pr = paired[b];
                 auto& nz = num_zeros[b];
                 const auto& tt = totals[b];
 
-                std::fill(auc_buffer.begin(), auc_buffer.end(), 0);
+                std::fill(auc_buffer1.begin(), auc_buffer1.end(), 0);
 
-                if (details.threshold) {
-                    compute_pairwise_auc(pr, nz, tt, auc_buffer.data(), details.threshold, false);
+                if (extra_details.threshold) {
+                    compute_pairwise_auc(pr, nz, tt, auc_buffer1.data(), extra_details.threshold, false);
                 } else {
-                    compute_pairwise_auc(pr, nz, tt, auc_buffer.data(), false);
+                    compute_pairwise_auc(pr, nz, tt, auc_buffer1.data(), false);
                 }
 
                 // Adding to the blocks.
-                for (size_t g1 = 0; g1 < ngroups; ++g1) {
-                    for (size_t g2 = 0; g2 < ngroups; ++g2) {
-                        output[g1 * ngroups + g2] += auc_buffer[g1 * ngroups + g2];
-                    }
+                for (size_t g = 0, end = auc_buffer2.size(); g < end; ++g) {
+                    auc_buffer2[g] += auc_buffer1[g];
                 }
             }
 
             for (size_t g1 = 0; g1 < ngroups; ++g1) {
                 for (size_t g2 = 0; g2 < ngroups; ++g2) {
+                    auto& current = auc_buffer2[g1 * ngroups + g2];
                     if (denominator[g1][g2]) {
-                        output[g1 * ngroups + g2] /= denominator[g1][g2];
+                        current /= denominator[g1][g2];
                     } else {
-                        output[g1 * ngroups + g2] = std::numeric_limits<double>::quiet_NaN();
+                        current = std::numeric_limits<double>::quiet_NaN();
                     }
                 }
             }
@@ -448,9 +341,9 @@ public:
                 p.clear();
             }
 
-            for (size_t c = 0; c < details.NC; ++c) {
-                auto b = details.block[c];
-                auto g = details.group[c];
+            for (size_t c = 0; c < simple_handler.details.NC; ++c) {
+                auto b = extra_details.block[c];
+                auto g = extra_details.group[c];
                 if (ptr[c]) {
                     paired[b].push_back(std::make_pair(ptr[c], g));
                 } else {
@@ -459,17 +352,15 @@ public:
             }
 
             process_auc(i);
+            worker.process(i, extra_details.ngroups, auc_buffer2.data());
 
-            // And also computing everything else.
-            feature_selection::blocked_variance_with_mean<true>(ptr, details.NC, details.levels, details.level_size_ptr->size(), details.level_size_ptr->data(), tmp_means.data(), tmp_vars.data());
-            per_row::fill_tmp_nzeros(details, ptr, tmp_nzeros);
-            per_row::transfer_common_stats(i, tmp_means, tmp_nzeros, tmp_vars, details);
+            simpler.compute(i, ptr);
             return;
         }
 
         template<class SparseRange>
         void compute(size_t i, const SparseRange& range) {
-            for (size_t b = 0; b < details.nblocks; ++b) {
+            for (size_t b = 0; b < extra_details.nblocks; ++b) {
                 std::copy(totals[b].begin(), totals[b].end(), num_zeros[b].begin());
             }
             for (auto& p : paired) {
@@ -479,28 +370,28 @@ public:
             for (size_t j = 0; j < range.number; ++j) {
                 if (range.value[j]) {
                     size_t c = range.index[j];
-                    auto b = details.block[c];
-                    auto g = details.group[c];
+                    auto b = extra_details.block[c];
+                    auto g = extra_details.group[c];
                     paired[b].push_back(std::make_pair(range.value[j], g));
                     --(num_zeros[b][g]);
                 }
             }
 
             process_auc(i);
+            worker.process(i, extra_details.ngroups, auc_buffer2.data());
 
-            // And also computing everything else.
-            feature_selection::blocked_variance_with_mean<true>(range, details.levels, details.level_size_ptr->size(), details.level_size_ptr->data(), tmp_means.data(), tmp_vars.data(), tmp_nzeros.data());
-            per_row::transfer_common_stats(i, tmp_means, tmp_nzeros, tmp_vars, details);
+            simpler.compute(i, range);
             return;
         }
     };
 
+public:
     ByRow dense_direct() {
-        return ByRow(details);
+        return ByRow(details, overlord->complex_worker());
     }
 
     ByRow sparse_direct() {
-        return ByRow(details);
+        return ByRow(details, overlord->complex_worker());
     }
 };
 

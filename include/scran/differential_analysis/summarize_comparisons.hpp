@@ -52,47 +52,49 @@ double median (IT start, size_t n) {
 }
 
 template<typename Stat>
-void summarize_comparisons(int ngroups, const Stat* effects, int group, size_t gene, std::vector<std::vector<Stat*> >& output, std::vector<Stat>& buffer) {
-    auto ebegin = buffer.data();
-    auto elast = ebegin;	
+void summarize_comparisons(int ngroups, const Stat* effects, size_t gene, std::vector<std::vector<Stat*> >& output, std::vector<Stat>& buffer) {
+    for (int group = 0; group < ngroups; ++group) {
+        auto ebegin = buffer.data();
+        auto elast = ebegin;	
 
-    // Ignoring the self comparison and pruning out NaNs.
-    {
-        auto eptr = effects;
-        for (int r = 0; r < ngroups; ++r, ++eptr) {
-            if (r == group || std::isnan(*eptr)) {
-                continue;
+        // Ignoring the self comparison and pruning out NaNs.
+        {
+            auto eptr = effects + group * ngroups;
+            for (int r = 0; r < ngroups; ++r, ++eptr) {
+                if (r == group || std::isnan(*eptr)) {
+                    continue;
+                }
+                *elast = *eptr;
+                ++elast;
             }
-            *elast = *eptr;
-            ++elast;
         }
-    }
 
-    int ncomps = elast - ebegin;
-    if (ncomps == 0) {
-        for (size_t i = 0; i < MIN_RANK; ++i) {
-            if (output[i].size()) {
-                output[i][group][gene] = std::numeric_limits<double>::quiet_NaN();
+        int ncomps = elast - ebegin;
+        if (ncomps == 0) {
+            for (size_t i = 0; i < MIN_RANK; ++i) {
+                if (output[i].size()) {
+                    output[i][group][gene] = std::numeric_limits<double>::quiet_NaN();
+                }
             }
-        }
-    } else if (ncomps == 1) {
-        for (size_t i = 0; i < MIN_RANK; ++i) { 
-            if (output[i].size()) {
-                output[i][group][gene] = *ebegin;
+        } else if (ncomps == 1) {
+            for (size_t i = 0; i < MIN_RANK; ++i) { 
+                if (output[i].size()) {
+                    output[i][group][gene] = *ebegin;
+                }
             }
-        }
-    } else {
-        if (output[MIN].size()) {
-            output[MIN][group][gene] = *std::min_element(ebegin, elast);
-        }
-        if (output[MEAN].size()) {
-            output[MEAN][group][gene] = std::accumulate(ebegin, elast, 0.0) / ncomps; 
-        }
-        if (output[MEDIAN].size()) {
-            output[MEDIAN][group][gene] = median(ebegin, ncomps); 
-        }
-        if (output[MAX].size()) {
-            output[MAX][group][gene] = *std::max_element(ebegin, elast);
+        } else {
+            if (output[MIN].size()) {
+                output[MIN][group][gene] = *std::min_element(ebegin, elast);
+            }
+            if (output[MEAN].size()) {
+                output[MEAN][group][gene] = std::accumulate(ebegin, elast, 0.0) / ncomps; 
+            }
+            if (output[MEDIAN].size()) {
+                output[MEDIAN][group][gene] = median(ebegin, ncomps); 
+            }
+            if (output[MAX].size()) {
+                output[MAX][group][gene] = *std::max_element(ebegin, elast);
+            }
         }
     }
 }
@@ -102,22 +104,23 @@ void summarize_comparisons(size_t ngenes, int ngroups, const Stat* effects, std:
 #ifndef SCRAN_CUSTOM_PARALLEL
     #pragma omp parallel num_threads(threads)
     {
-    std::vector<double> effect_buffer(ngroups);
-    #pragma omp for
-    for (size_t gene = 0; gene < ngenes; ++gene) {
+        std::vector<double> effect_buffer(ngroups);
+        #pragma omp for
+        for (size_t gene = 0; gene < ngenes; ++gene) {
 #else
     SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
-    std::vector<double> effect_buffer(ngroups);
-    for (size_t gene = start; gene < end; ++gene) {
+        std::vector<double> effect_buffer(ngroups);
+        for (size_t gene = start; gene < end; ++gene) {
 #endif
-        auto base = effects + gene * ngroups * ngroups;
-        for (int l = 0; l < ngroups; ++l) {
-            summarize_comparisons(ngroups, base + l * ngroups, l, gene, output, effect_buffer);
-        }
-    }
+
+            auto base = effects + gene * ngroups * ngroups;
+            summarize_comparisons(ngroups, base, gene, output, effect_buffer);
+
 #ifndef SCRAN_CUSTOM_PARALLEL            
+        }
 	}
 #else
+        }
     }, threads);
 #endif
 
