@@ -3,14 +3,14 @@
 
 #include <cmath>
 #include <vector>
-#include "scran/differential_analysis/lfc.hpp"
+#include "scran/differential_analysis/simple_diff.hpp"
 
 TEST(MarkerLogFC, Unblocked) {
     std::vector<double> means{0.1, 0.2, 0.3, 0.4};
     std::vector<int> group_sizes{ 10, 5, 12, 34 }; // don't really matter.
 
     std::vector<double> output(means.size() * means.size());
-    scran::differential_analysis::compute_pairwise_lfc(means.data(), group_sizes, means.size(), 1, output.data());
+    scran::differential_analysis::compute_pairwise_simple_diff(means.data(), group_sizes, means.size(), 1, output.data());
 
     for (size_t g = 0; g < means.size(); ++g) {
         for (size_t g2 = 0; g2 < means.size(); ++g2) {
@@ -25,7 +25,7 @@ TEST(MarkerLogFC, ZeroSize) {
     std::vector<int> group_sizes{ 0, 5, 1, 1, 5 }; 
 
     std::vector<double> output(means.size() * means.size());
-    scran::differential_analysis::compute_pairwise_lfc(means.data(), group_sizes, means.size(), 1, output.data());
+    scran::differential_analysis::compute_pairwise_simple_diff(means.data(), group_sizes, means.size(), 1, output.data());
 
     for (size_t g = 0; g < means.size(); ++g) {
         for (size_t g2 = 0; g2 < means.size(); ++g2) {
@@ -50,7 +50,7 @@ TEST(MarkerLogFC, Blocked) {
     std::vector<int> group_sizes{ 10, 5, 12, 34, 15, 2, 3, 6 }; 
 
     std::vector<double> output(ngroups * ngroups);
-    scran::differential_analysis::compute_pairwise_lfc(means.data(), group_sizes, ngroups, nblocks, output.data());
+    scran::differential_analysis::compute_pairwise_simple_diff(means.data(), group_sizes, ngroups, nblocks, output.data());
 
     for (size_t g1 = 0; g1 < ngroups; ++g1) {
         int offset1 = g1 * nblocks;
@@ -78,7 +78,7 @@ TEST(MarkerLogFC, BlockedMissing) {
     std::vector<int> group_sizes{ 0, 5, 0, 34, 0, 23, 0, 6 }; 
 
     std::vector<double> output(ngroups * ngroups);
-    scran::differential_analysis::compute_pairwise_lfc(means.data(), group_sizes, ngroups, nblocks, output.data());
+    scran::differential_analysis::compute_pairwise_simple_diff(means.data(), group_sizes, ngroups, nblocks, output.data());
 
     // Effectively excising the first block.
     std::vector<double> output2(ngroups * ngroups);
@@ -92,7 +92,7 @@ TEST(MarkerLogFC, BlockedMissing) {
         }
     }
 
-    scran::differential_analysis::compute_pairwise_lfc(sub_means.data(), subgroup_sizes, ngroups, nblocks - 1, output2.data());
+    scran::differential_analysis::compute_pairwise_simple_diff(sub_means.data(), subgroup_sizes, ngroups, nblocks - 1, output2.data());
 
     EXPECT_EQ(output, output2);
 }

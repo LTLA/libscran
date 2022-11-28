@@ -5,8 +5,7 @@
 
 #include "Factory.hpp"
 #include "cohens_d.hpp"
-#include "lfc.hpp"
-#include "delta_detected.hpp"
+#include "simple_diff.hpp"
 #include "../utils/vector_to_pointers.hpp"
 
 #include "tatami/stats/apply.hpp"
@@ -256,7 +255,7 @@ public:
     const {
         int ngroups = means.size();
         differential_analysis::EffectsCalculator runner(num_threads, threshold);
-        Overlord overlord(std::move(means), std::move(detected), cohen, auc, lfc, delta_detected);
+        Overlord overlord(std::move(means), std::move(detected), cohen, auc, lfc, delta_detected, threshold);
         runner.run(p, group, ngroups, overlord);
     }
 
@@ -310,35 +309,39 @@ public:
 
         int ncombos = ngroups * nblocks;
         std::vector<Stat*> means2(ncombos), detected2(ncombos);
-        auto mIt = means2.begin(), dIt = detected2.begin();
-        for (int g = 0; g < ngroups; ++g) {
-            for (int b = 0; b < nblocks; ++b, ++mIt, ++dIt) {
-                *mIt = means[g][b];
-                *dIt = detected[g][b];
+        {
+            auto mIt = means2.begin(), dIt = detected2.begin();
+            for (int g = 0; g < ngroups; ++g) {
+                for (int b = 0; b < nblocks; ++b, ++mIt, ++dIt) {
+                    *mIt = means[g][b];
+                    *dIt = detected[g][b];
+                }
             }
         }
 
         differential_analysis::EffectsCalculator runner(num_threads, threshold);
-        Overlord overlord(std::move(means2), std::move(detected2), cohen, auc, lfc, delta_detected);
-        runner.run(p, group, ngroups, block, nblocks, overlord);
+        Overlord overlord(std::move(means2), std::move(detected2), cohen, auc, lfc, delta_detected, threshold);
+        runner.run_blocked(p, group, ngroups, block, nblocks, overlord);
     }
 
 private:
+    template<typename Stat>
     struct Overlord {
-        Overlord(std::vector<Stat*> m, std::vector<Stat*> d, Stat* cohen_, Stat* auc_, Stat* lfc_, Stat* dd_) : 
-            means(std::move(m)), detected(std::move(d)), cohen(cohen_), auc(auc_), lfc(lfc_), delta_detected(dd_) {}
+        Overlord(std::vector<Stat*> m, std::vector<Stat*> d, Stat* cohen_, Stat* auc_, Stat* lfc_, Stat* dd_, double t) : 
+            means(std::move(m)), detected(std::move(d)), cohen(cohen_), auc(auc_), lfc(lfc_), delta_detected(dd_), threshold(t) {}
 
         bool needs_auc() const { 
             return auc != NULL;
         }
 
     private:
-        std::vector<std::vector<Stat*> > means;
-        std::vector<std::vector<Stat*> > detected;
+        std::vector<Stat*> means;
+        std::vector<Stat*> detected;
         Stat* cohen;
         Stat* auc;
         Stat* lfc;
         Stat* delta_detected;
+        double threshold;
 
     public:
         void process(size_t ngenes, const std::vector<int>& level_size, int ngroups, int nblocks, double* tmp_means, double* tmp_variances, double* tmp_detected, int threads) {
@@ -393,13 +396,15 @@ private:
             ComplexWorker(Overlord* p) : parent(p) {}
             Overlord* const parent;
 
-            void process(size_t gene, int ngroups, const double* tmp_auc) {
-                auto shift = ngroups * ngroups;
-                std::copy(tmp_auc, tmp_auc + shift, parent->auc + shift * gene);
+            Stat* prepare_auc_buffer(size_t gene, int ngroups) { 
+                return parent->auc + gene * ngroups * ngroups;
             }
+
+            // No-op, because it's copied straight into the auc_buffer.
+            void consume_auc_buffer(size_t, int, const double*) {}
         };
 
-        ComplexWorker complex_worker() const {
+        ComplexWorker complex_worker() {
             return ComplexWorker(this);
         }
     };

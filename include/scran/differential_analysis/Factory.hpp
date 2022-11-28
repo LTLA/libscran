@@ -7,11 +7,10 @@
 #include <algorithm>
 #include <limits>
 
+#include "../utils/vector_to_pointers.hpp"
 #include "../feature_selection/blocked_variances.hpp"
-#include "cohens_d.hpp"
 #include "auc.hpp"
-#include "lfc.hpp"
-#include "delta_detected.hpp"
+#include "tatami/stats/apply.hpp"
 
 namespace scran {
 
@@ -34,6 +33,7 @@ struct SimpleBundle {
     Stat* means, *detected, *variances;
 };
 
+template<typename Stat, typename Level>
 struct SimpleByRow { 
     SimpleByRow(SimpleBundle<Stat, Level> d) : details(std::move(d)) {}
 
@@ -90,12 +90,12 @@ private:
     SimpleBundle<Stat, Level> details;
 
 public:
-    SimpleByRow dense_direct() const {
-        return SimpleByRow(details);
+    SimpleByRow<Stat, Level> dense_direct() const {
+        return SimpleByRow<Stat, Level>(details);
     }
 
-    SimpleByRow sparse_direct() const {
-        return SimpleByRow(details);
+    SimpleByRow<Stat, Level> sparse_direct() const {
+        return SimpleByRow<Stat, Level>(details);
     };
 
 public:
@@ -225,12 +225,13 @@ public:
 /****************************************************************************
  * The 'complex' class of factories performs pairwise comparisons directly for
  * the effect sizes that cannot be easily derived from simple per-group
- * statistics. This currently includes the AUC.
+ * statistics. This currently includes the AUC. It is assumed that 'Overlord'
+ * implements something for handling the AUCs once computed for each gene. 
  ****************************************************************************/
 
 template<typename Group, typename Block, class Overlord>
 struct ComplexPerRowBundle {
-    ComplexPerRowBundle(const Group* g, int ng, const Block* b, int nb, double t, Overlord* store) : group(g), block(b), ngroups(ng), nblocks(nb), threshold(t), overlord(ova) {}
+    ComplexPerRowBundle(const Group* g, int ng, const Block* b, int nb, double t, Overlord* ova) : group(g), block(b), ngroups(ng), nblocks(nb), threshold(t), overlord(ova) {}
     const Group* group;
     const Block* block;
     int ngroups, nblocks;
@@ -238,7 +239,7 @@ struct ComplexPerRowBundle {
     Overlord* overlord;
 };
 
-template<typename Stat, typename Level, typename Group, typename Block> 
+template<typename Stat, typename Level, typename Group, typename Block, class Overlord> 
 struct ComplexPerRowFactory {
 public:
     ComplexPerRowFactory(size_t nr, size_t nc, const Level* l, const std::vector<int>* ls, Stat* m, Stat* v, Stat* d, const Group* g, int ng, const Block* b, int nb, double t, Overlord* ova) :
@@ -249,23 +250,21 @@ private:
     ComplexPerRowBundle<Group, Block, Overlord> extra_details;
 
 public:
-    template<class Worker>
     struct ByRow {
-        ByRow(SimpleBundle<Stat, Level> d1, ComplexPerRowBundle<Stat, Group, Block> d2, Worker w) : 
+        ByRow(SimpleBundle<Stat, Level> d1, ComplexPerRowBundle<Group, Block, Overlord> d2, typename Overlord::ComplexWorker w) : 
             simple_handler(std::move(d1)),
             extra_details(std::move(d2)),
             worker(std::move(w)),
             paired(extra_details.nblocks), 
             num_zeros(extra_details.nblocks, std::vector<int>(extra_details.ngroups)), 
             totals(extra_details.nblocks, std::vector<int>(extra_details.ngroups)), 
-            auc_buffer1(extra_details.ngroups * extra_details.ngroups), 
-            auc_buffer2(extra_details.ngroups * extra_details.ngroups), 
+            auc_buffer(extra_details.ngroups * extra_details.ngroups), 
             denominator(extra_details.ngroups, std::vector<double>(extra_details.ngroups))
         {
             const auto& ngroups = extra_details.ngroups;
             const auto& nblocks = extra_details.nblocks;
 
-            auto lsIt = this->details.level_size_ptr->begin();
+            auto lsIt = simple_handler.details.level_size_ptr->begin();
             for (size_t g = 0; g < ngroups; ++g) {
                 for (size_t b = 0; b < nblocks; ++b, ++lsIt) {
                     totals[b][g] = *lsIt;
@@ -285,43 +284,42 @@ public:
 
     private:
         SimpleByRow<Stat, Level> simple_handler;
-        ComplexPerRowBundle<Stat, Group, Block> extra_details;
-        Worker worker;
+        ComplexPerRowBundle<Group, Block, Overlord> extra_details;
+        typename Overlord::ComplexWorker worker;
 
         // AUC handlers.
         std::vector<PairedStore> paired;
         std::vector<std::vector<int> > num_zeros;
         std::vector<std::vector<int> > totals;
-        std::vector<double> auc_buffer1, auc_buffer2;
+        std::vector<double> auc_buffer;
         std::vector<std::vector<double> > denominator;
 
-        void process_auc(size_t i) {
+        void process_auc(size_t i, double* output) {
             const auto& ngroups = extra_details.ngroups;
-            auto output = extra_details.auc + i * ngroups * ngroups;
-            std::fill(auc_buffer2.begin(), auc_buffer2.end(), 0);
+            std::fill(output, output + ngroups * ngroups, 0);
 
             for (size_t b = 0; b < extra_details.nblocks; ++b) {
                 auto& pr = paired[b];
                 auto& nz = num_zeros[b];
                 const auto& tt = totals[b];
 
-                std::fill(auc_buffer1.begin(), auc_buffer1.end(), 0);
+                std::fill(auc_buffer.begin(), auc_buffer.end(), 0);
 
                 if (extra_details.threshold) {
-                    compute_pairwise_auc(pr, nz, tt, auc_buffer1.data(), extra_details.threshold, false);
+                    compute_pairwise_auc(pr, nz, tt, auc_buffer.data(), extra_details.threshold, false);
                 } else {
-                    compute_pairwise_auc(pr, nz, tt, auc_buffer1.data(), false);
+                    compute_pairwise_auc(pr, nz, tt, auc_buffer.data(), false);
                 }
 
                 // Adding to the blocks.
-                for (size_t g = 0, end = auc_buffer2.size(); g < end; ++g) {
-                    auc_buffer2[g] += auc_buffer1[g];
+                for (size_t g = 0, end = auc_buffer.size(); g < end; ++g) {
+                    output[g] += auc_buffer[g];
                 }
             }
 
             for (size_t g1 = 0; g1 < ngroups; ++g1) {
                 for (size_t g2 = 0; g2 < ngroups; ++g2) {
-                    auto& current = auc_buffer2[g1 * ngroups + g2];
+                    auto& current = output[g1 * ngroups + g2];
                     if (denominator[g1][g2]) {
                         current /= denominator[g1][g2];
                     } else {
@@ -351,10 +349,11 @@ public:
                 }
             }
 
-            process_auc(i);
-            worker.process(i, extra_details.ngroups, auc_buffer2.data());
+            auto store = worker.prepare_auc_buffer(i, extra_details.ngroups);
+            process_auc(i, store);
+            worker.consume_auc_buffer(i, extra_details.ngroups, store);
 
-            simpler.compute(i, ptr);
+            simple_handler.compute(i, ptr);
             return;
         }
 
@@ -377,25 +376,142 @@ public:
                 }
             }
 
-            process_auc(i);
-            worker.process(i, extra_details.ngroups, auc_buffer2.data());
+            auto store = worker.prepare_auc_buffer(i, extra_details.ngroups);
+            process_auc(i, store);
+            worker.consume_auc_buffer(i, extra_details.ngroups, store);
 
-            simpler.compute(i, range);
+            simple_handler.compute(i, range);
             return;
         }
     };
 
 public:
-    ByRow dense_direct() {
-        return ByRow(details, overlord->complex_worker());
+    auto dense_direct() {
+        return ByRow(simple_details, extra_details, extra_details.overlord->complex_worker());
     }
 
-    ByRow sparse_direct() {
-        return ByRow(details, overlord->complex_worker());
+    auto sparse_direct() {
+        return ByRow(simple_details, extra_details, extra_details.overlord->complex_worker());
+    }
+};
+
+/****************************************************************************
+ * The EffectsCalculator class handles the Factory construction and the apply()
+ * call, given an Overlord object that describes how to process the statistics
+ * in a 'with-AUC' and 'without-AUC' scenario. The overlord should implement:
+ *
+ * - a `needs_auc()` method
+ * - a `process()` method, for the simple statistics.
+ * - a `complex_worker()` method that returns an object with the methods:
+ *   - `obtain_auc_buffer()`
+ *   - `consume_auc_buffer()`
+ ****************************************************************************/
+
+class EffectsCalculator {
+public:
+    EffectsCalculator(int nt, double t) : num_threads(nt), threshold(t) {}
+
+private:
+    int num_threads;
+    double threshold;
+
+public:
+    template<class Matrix, typename G, class Overlord>
+    void run(const Matrix* p, const G* group, int ngroups, Overlord& overlord) const {
+        std::vector<int> group_size(ngroups);
+        for (size_t i = 0, end = p->ncol(); i < end; ++i) {
+            ++(group_size[group[i]]);
+        }
+        core(p, group, group_size, group, ngroups, static_cast<const int*>(NULL), 1, overlord);
+    }
+
+    template<class Matrix, typename G, typename B, class Overlord>
+    void run_blocked(const Matrix* p, const G* group, int ngroups, const B* block, int nblocks, Overlord& overlord) const {
+        if (block == NULL) {
+            run(p, group, ngroups, overlord);
+            return;
+        }
+
+        size_t ncombos = ngroups * nblocks;
+        std::vector<int> combos(p->ncol());
+        std::vector<int> combo_size(ncombos);
+        for (size_t i = 0; i < combos.size(); ++i) {
+            combos[i] = group[i] * nblocks + block[i];
+            ++(combo_size[combos[i]]);
+        }
+
+        core(p, combos.data(), combo_size, group, ngroups, block, nblocks, overlord);
+    }
+
+private:
+    template<class Matrix, typename L, class Ls, typename G, typename B, class Overlord>
+    void core(const Matrix* p, const L* level, const Ls& level_size, const G* group, size_t ngroups, const B* block, size_t nblocks, Overlord& overlord) const {
+        size_t ngenes = p->nrow();
+        size_t nlevels = level_size.size();
+        size_t holding = nlevels * ngenes;
+        std::vector<double> tmp_means(holding), tmp_variances(holding), tmp_detected(holding);
+
+        if (!overlord.needs_auc()) {
+            differential_analysis::SimpleBidimensionalFactory fact(
+                p->nrow(), 
+                p->ncol(), 
+                level, 
+                &level_size, 
+                tmp_means.data(),
+                tmp_variances.data(),
+                tmp_detected.data()
+            );
+            tatami::apply<0>(p, fact, num_threads);
+
+        } else {
+            // Need to remake this, as there's no guarantee that 'blocks' exists.
+            std::vector<B> tmp_blocks;
+            if (!block) {
+                tmp_blocks.resize(p->ncol());
+                block = tmp_blocks.data();
+            }
+
+            differential_analysis::ComplexPerRowFactory fact(
+                p->nrow(), 
+                p->ncol(), 
+                level, 
+                &level_size, 
+                tmp_means.data(),
+                tmp_variances.data(),
+                tmp_detected.data(),
+                group,
+                ngroups,
+                block,
+                nblocks,
+                threshold,
+                &overlord
+            );
+            tatami::apply<0>(p, fact, num_threads);
+        }
+
+        // Dividing through to get the actual detected proportions.
+        // Don't bother parallelizing this, given how simple it is.
+        auto dptr = tmp_detected.data();
+        for (size_t gene = 0; gene < ngenes; ++gene) {
+            size_t in_offset = gene * nlevels;
+            for (size_t l = 0; l < nlevels; ++l, ++dptr) {
+                if (level_size[l]) {
+                    *dptr /= level_size[l];
+                } else {
+                    *dptr = std::numeric_limits<double>::quiet_NaN();
+                }
+            }
+        }
+
+        // Allowing the overlord to process the statistics as it sees fit.
+        overlord.process(p->nrow(), level_size, ngroups, nblocks, tmp_means.data(), tmp_variances.data(), tmp_detected.data(), num_threads);
     }
 };
 
 }
+/**
+ * @endcond
+ */
 
 }
 
