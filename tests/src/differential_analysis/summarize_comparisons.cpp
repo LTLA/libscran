@@ -236,7 +236,7 @@ TEST_P(ComputeMinRankTest, Missing) {
         0, X, 4, 2, 0, 1, 2, n, 0,
         0, 2, 3, n, 0, 3, 3, n, 0,
         0, 3, 1, 1, 0, X, 4, n, 0
-     * afte we remove the NA and promote all subsequent entries.
+     * after we remove the NA and promote all subsequent entries.
      */
 
     configure(ngenes, ngroups);
@@ -252,6 +252,68 @@ INSTANTIATE_TEST_CASE_P(
     ComputeMinRank,
     ComputeMinRankTest,
     ::testing::Values(1, 3) // number of threads
+);
+
+// Also checking that our multiple min_rank variants are consistent
+// with each other, especially when threading gets involved.
+class ComputeMinRankTestThreaded : public ::testing::TestWithParam<std::tuple<int, int, bool> > {
+protected:
+    std::vector<double*> configure(int ngenes, int ngroups, double* ptr) {
+        std::vector<double*> ptrs;
+        for (int g = 0; g < ngroups; ++g, ptr += ngenes) {
+            ptrs.push_back(ptr);
+        }
+        return ptrs;
+    }
+};
+
+TEST_P(ComputeMinRankTestThreaded, Consistency) {
+    auto param = GetParam();
+    size_t ngenes = 20;
+    size_t ngroups = std::get<0>(param);
+    size_t nthreads = std::get<1>(param);
+    bool add_nans = std::get<2>(param);
+
+    std::mt19937_64 rng(/* seed */ ngroups * nthreads + add_nans);
+    std::vector<double> effects(ngenes * ngroups * ngroups);
+    std::normal_distribution<double> dist;
+    std::uniform_real_distribution<double> unif;
+    for (auto& e : effects) {
+        e = dist(rng);
+        if (add_nans && unif(rng) <= 0.05) {
+            e = std::numeric_limits<double>::quiet_NaN();
+        }
+    }
+
+    std::vector<double> ref_output(ngroups * ngenes);
+    std::vector<double*> ref_ptrs = configure(ngenes, ngroups, ref_output.data());
+    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), ref_ptrs, 1);
+
+    std::vector<double> threaded_output(ngroups * ngenes);
+    std::vector<double*> threaded_ptrs = configure(ngenes, ngroups, threaded_output.data());
+    scran::differential_analysis::compute_min_rank(ngenes, ngroups, effects.data(), threaded_ptrs, nthreads);
+    EXPECT_EQ(threaded_output, ref_output);
+
+    std::vector<double> pergroup_output(ngroups * ngenes);
+    for (size_t g = 0; g < ngroups; ++g) {
+        std::vector<double> copy(ngroups * ngenes);
+        for (size_t i = 0; i < ngenes; ++i) {
+            auto base = effects.data() + i * ngroups * ngroups + g * ngroups;
+            std::copy(base, base + ngroups, copy.data() + i * ngroups);
+        }
+        scran::differential_analysis::compute_min_rank(ngenes, ngroups, g, copy.data(), pergroup_output.data() + g * ngenes, nthreads);
+    }
+    EXPECT_EQ(pergroup_output, ref_output);
+}
+
+INSTANTIATE_TEST_CASE_P(
+    ComputeMinRankThreaded,
+    ComputeMinRankTestThreaded,
+    ::testing::Combine(
+        ::testing::Values(1, 2, 3), // number of threads
+        ::testing::Values(2, 3, 4, 5), // number of groups
+        ::testing::Values(false, true) // whether to spike in NaN's.
+    )
 );
 
 /*********************************************/

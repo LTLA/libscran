@@ -158,15 +158,16 @@ void compute_min_rank(size_t ngenes, int ngroups, int group, const Stat* effects
     // Assign groups to threads, minus the 'group' itself.
     std::vector<std::vector<int> > assignments(threads);
     {
-        int per_thread = std::ceil(static_cast<double>(ngroups - 1) / threads);
-        int counter = 0;
-        for (int t = 0; t < threads; ++t) {
-            for (int g = 0; g < per_thread && counter < ngroups; ++g, ++counter) {
-                if (counter == group) {
-                    ++counter;
-                }
-                assignments[t].push_back(counter);
+        size_t per_thread = std::ceil(static_cast<double>(ngroups - 1) / threads);
+        auto cur_thread = assignments.begin();
+        for (int counter = 0; counter < ngroups; ++counter) {
+            if (counter == group) {
+                continue;
             }
+            if (cur_thread->size() > per_thread) {
+                ++cur_thread;
+            }
+            cur_thread->push_back(counter);
         }
     }
 
