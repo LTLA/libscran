@@ -52,49 +52,47 @@ double median (IT start, size_t n) {
 }
 
 template<typename Stat>
-void summarize_comparisons(int ngroups, const Stat* effects, size_t gene, std::vector<std::vector<Stat*> >& output, std::vector<Stat>& buffer) {
-    for (int group = 0; group < ngroups; ++group) {
-        auto ebegin = buffer.data();
-        auto elast = ebegin;	
+void summarize_comparisons(int ngroups, const Stat* effects, int group, size_t gene, std::vector<std::vector<Stat*> >& output, std::vector<Stat>& buffer) {
+    auto ebegin = buffer.data();
+    auto elast = ebegin;	
 
-        // Ignoring the self comparison and pruning out NaNs.
-        {
-            auto eptr = effects + group * ngroups;
-            for (int r = 0; r < ngroups; ++r, ++eptr) {
-                if (r == group || std::isnan(*eptr)) {
-                    continue;
-                }
-                *elast = *eptr;
-                ++elast;
+    // Ignoring the self comparison and pruning out NaNs.
+    {
+        auto eptr = effects;
+        for (int r = 0; r < ngroups; ++r, ++eptr) {
+            if (r == group || std::isnan(*eptr)) {
+                continue;
+            }
+            *elast = *eptr;
+            ++elast;
+        }
+    }
+
+    int ncomps = elast - ebegin;
+    if (ncomps == 0) {
+        for (size_t i = 0; i < MIN_RANK; ++i) {
+            if (output[i].size()) {
+                output[i][group][gene] = std::numeric_limits<double>::quiet_NaN();
             }
         }
-
-        int ncomps = elast - ebegin;
-        if (ncomps == 0) {
-            for (size_t i = 0; i < MIN_RANK; ++i) {
-                if (output[i].size()) {
-                    output[i][group][gene] = std::numeric_limits<double>::quiet_NaN();
-                }
+    } else if (ncomps == 1) {
+        for (size_t i = 0; i < MIN_RANK; ++i) { 
+            if (output[i].size()) {
+                output[i][group][gene] = *ebegin;
             }
-        } else if (ncomps == 1) {
-            for (size_t i = 0; i < MIN_RANK; ++i) { 
-                if (output[i].size()) {
-                    output[i][group][gene] = *ebegin;
-                }
-            }
-        } else {
-            if (output[MIN].size()) {
-                output[MIN][group][gene] = *std::min_element(ebegin, elast);
-            }
-            if (output[MEAN].size()) {
-                output[MEAN][group][gene] = std::accumulate(ebegin, elast, 0.0) / ncomps; 
-            }
-            if (output[MEDIAN].size()) {
-                output[MEDIAN][group][gene] = median(ebegin, ncomps); 
-            }
-            if (output[MAX].size()) {
-                output[MAX][group][gene] = *std::max_element(ebegin, elast);
-            }
+        }
+    } else {
+        if (output[MIN].size()) {
+            output[MIN][group][gene] = *std::min_element(ebegin, elast);
+        }
+        if (output[MEAN].size()) {
+            output[MEAN][group][gene] = std::accumulate(ebegin, elast, 0.0) / ncomps; 
+        }
+        if (output[MEDIAN].size()) {
+            output[MEDIAN][group][gene] = median(ebegin, ncomps); 
+        }
+        if (output[MAX].size()) {
+            output[MAX][group][gene] = *std::max_element(ebegin, elast);
         }
     }
 }
@@ -114,9 +112,11 @@ void summarize_comparisons(size_t ngenes, int ngroups, const Stat* effects, std:
 #endif
 
             auto base = effects + gene * ngroups * ngroups;
-            summarize_comparisons(ngroups, base, gene, output, effect_buffer);
+            for (int l = 0; l < ngroups; ++l) {
+                summarize_comparisons(ngroups, base + l * ngroups, l, gene, output, effect_buffer);
+            }
 
-#ifndef SCRAN_CUSTOM_PARALLEL            
+#ifndef SCRAN_CUSTOM_PARALLEL 
         }
 	}
 #else
@@ -125,28 +125,6 @@ void summarize_comparisons(size_t ngenes, int ngroups, const Stat* effects, std:
 #endif
 
     return;
-}
-
-template<typename Stat>
-void compute_min_rank_internal(size_t ngenes, int stride, const Stat* effects, Stat* output, std::vector<std::pair<Stat, int> >& buffer) {
-    auto bIt = buffer.begin();
-    for (size_t i = 0; i < ngenes; ++i, effects += stride) {
-        if (!std::isnan(*effects)) {
-            bIt->first = -*effects; // negative to sort by decreasing value.
-            bIt->second = i;
-            ++bIt;
-        }
-    }
-    std::sort(buffer.begin(), bIt);
-
-    double counter = 1;
-    for (auto bcopy = buffer.begin(); bcopy != bIt; ++bcopy) {
-        auto& current = output[bcopy->second];
-        if (counter < current) {
-            current = counter;
-        }
-        ++counter;
-    }
 }
 
 template<typename Stat>
@@ -162,7 +140,7 @@ void compute_min_rank(size_t ngenes, int ngroups, int group, const Stat* effects
 #else
     SCRAN_CUSTOM_PARALLEL(ngroups, [&](size_t start, size_t end) -> void {
         std::vector<std::pair<Stat, int> > buffer(ngenes);
-        for (int g = start; g < end; ++g) {        
+        for (int g = start; g < end; ++g) { 
 #endif
             if (g == group) {
                 continue;
@@ -189,7 +167,7 @@ void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vect
 #else
     SCRAN_CUSTOM_PARALLEL(ngroups, [&](size_t start, size_t end) -> void {
         std::vector<std::pair<Stat, int> > buffer(ngenes);
-        for (int g = start; g < end; ++g) {        
+        for (int g = start; g < end; ++g) { 
 #endif
             auto target = output[g];
             std::fill(target, target + ngenes, ngenes + 1); 
@@ -197,7 +175,26 @@ void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vect
                 if (g == g2) {
                     continue;
                 }
-                compute_min_rank_internal(ngenes, shift, effects + g2 * ngroups, target, buffer);
+
+                auto bIt = buffer.begin();
+                auto stride = ngroups * ngroups;
+                for (size_t i = 0; i < ngenes; ++i, effects += stride) {
+                    if (!std::isnan(*effects)) {
+                        bIt->first = -*effects; // negative to sort by decreasing value.
+                        bIt->second = i;
+                        ++bIt;
+                    }
+                }
+                std::sort(buffer.begin(), bIt);
+
+                double counter = 1;
+                for (auto bcopy = buffer.begin(); bcopy != bIt; ++bcopy) {
+                    auto& current = output[bcopy->second];
+                    if (counter < current) {
+                        current = counter;
+                    }
+                    ++counter;
+                }
             }
         }
 #ifndef SCRAN_CUSTOM_PARALLEL

@@ -106,37 +106,22 @@ private:
             tatami::apply<0>(p, fact, num_threads);
         }
 
-#ifndef SCRAN_CUSTOM_PARALLEL
-        #pragma omp parallel num_threads(threads)
-        {
-            auto unit = overlord.worker();
-            #pragma omp for
-            for (size_t gene = 0; gene < ngenes; ++gene) {
-#else
-        SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
-            auto unit = overlord.simple_worker();
-            for (size_t gene = start; gene < end; ++gene) {
-#endif
-
-                size_t in_offset = gene * nlevels;
-                auto dptr = tmp_detected.data() + in_offset;
-                for (size_t l = 0; l < nlevels; ++l) {
-                    if (level_size[l]) {
-                        dptr[l] /= level_size[l];
-                    } else {
-                        dptr[l] = std::numeric_limits<double>::quiet_NaN();
-                    }
+        // Dividing through to get the actual detected proportions.
+        // Don't bother parallelizing this, given how simple it is.
+        auto dptr = tmp_detected.data();
+        for (size_t gene = 0; gene < ngenes; ++gene) {
+            size_t in_offset = gene * nlevels;
+            for (size_t l = 0; l < nlevels; ++l, ++dptr) {
+                if (level_size[l]) {
+                    *dptr /= level_size[l];
+                } else {
+                    *dptr = std::numeric_limits<double>::quiet_NaN();
                 }
-
-                unit.process(gene, level_size, ngroups, nblocks, tmp_means.data() + in_offset, tmp_variances.data() + in_offset, dptr);
-
-#ifndef SCRAN_CUSTOM_PARALLEL
             }
         }
-#else
-            }
-        }, threads);
-#endif
+
+        // Allowing the overlord to process the statistics as it sees fit.
+        overlord.process(p->nrow(), level_size, ngroups, nblocks, tmp_means.data() + in_offset, tmp_variances.data(), tmp_detected.data(), num_threads);
     }
 };
 

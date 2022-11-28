@@ -515,47 +515,88 @@ private:
         int ngroups;
 
     public:
-        struct SimpleWorker {
-            SimpleWorker(Overlord* p) : 
-                parent(p), 
-                effect_buffer(parent->ngroups),
-                tmp_cohen(parent->ngroups * parent->ngroups),
-                tmp_delta_detected(parent->ngroups * parent->ngroups),
-                tmp_lfc(parent->ngroups * parent->ngroups)
-            {}
+        void process(size_t ngenes, const std::vector<int>& level_size, int ngroups, int nblocks, double* tmp_means, double* tmp_variances, double* tmp_detected, int threads) {
+            size_t nlevels = level_size.size();
 
-            Overlord* const parent;
-            std::vector<double> effect_buffer;
-            std::vector<double> tmp_cohen, tmp_delta_detected, tmp_lfc;
+            // Transferring the block-wise statistics over.
+            {
+                auto my_means = tmp_means;
+                auto my_detected = tmp_detected;
+                for (size_t gene = 0; gene < ngenes; ++gene) {
+                    size_t in_offset = nlevels * gene;
+                    for (size_t l = 0; l < nlevels; ++l, ++my_means, ++my_detected) {
+                        means[l][gene] = *my_means;
+                        detected[l][gene] = *my_detected;
+                    }
+                }
+            }
 
-            void process(size_t gene, const std::vector<int>& level_size, int ngroups, int nblocks, double* tmp_means, double* tmp_variances, double* tmp_detected) {
-                size_t nlevels = level_size.size();
-                for (size_t l = 0; l < nlevels; ++l) {
-                    means[l][gene] = mptr[l];
-                    detected[l][gene] = dptr[l];
+            size_t holding = ngenes * ngroups;
+            std::vector<double> tmp_cohen(holding), tmp_delta_detected(holding), tmp_lfc(holding);
+
+            // Looping over each group and computing the various summaries. We do this on
+            // a per-group basis to avoid having to store the full group-by-group matrix of
+            // effect sizes that we would otherwise need as input to SummarizeEffects.
+            for (int group = 0; group < ngroups; ++group) {
+#ifndef SCRAN_CUSTOM_PARALLEL
+                #pragma omp parallel num_threads(threads)
+                {
+                    #pragma omp for
+                    for (size_t gene = 0; gene < ngenes; ++gene) {
+#else
+                SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
+                    for (size_t gene = start; gene < end; ++gene) {
+#endif
+
+                        auto tmp_offset = gene * ngroups;
+                        if (cohen.size()) {
+                            auto cohen_ptr = tmp_cohen.data() + tmp_offset;
+                            differential_analysis::compute_pairwise_cohens_d(group, tmp_means, tmp_variances, level_size, ngroups, nblocks, threshold, cohen_ptr);
+                            differential_analysis::summarize_comparisons(ngroups, cohen_ptr, group, gene, cohen, effect_buffer);
+                        }
+
+                        if (delta_detected.size()) {
+                            auto delta_detected_ptr = tmp_delta_detected.data() + tmp_offset;
+                            differential_analysis::compute_pairwise_simple_diff(group, dptr, level_size, ngroups, nblocks, delta_detected_ptr);
+                            differential_analysis::summarize_comparisons(ngroups, delta_detected_ptr, group, gene, delta_detected, effect_buffer);
+                        }
+
+                        if (lfc.size()) {
+                            auto lfc_ptr = tmp_lfc.data() + tmp_offset;
+                            differential_analysis::compute_pairwise_simple_diff(group, mptr, level_size, ngroups, nblocks, lfc_ptr);
+                            differential_analysis::summarize_comparisons(ngroups, lfc_ptr, group, gene, lfc, effect_buffer);
+                        }
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+                    }
+                }
+#else
+                    }
+                }, threads);
+#endif
+
+                if (cohen.size() && cohen[differential_analysis::summary::MIN_RANK].size()) {
+                    differential_analysis::compute_min_rank(ngenes, ngroups, group, tmp_cohen.data(), cohen[differential_analysis::summary::MIN_RANK][group], threads);
                 }
 
-                auto cohen_ptr = tmp_cohen.data();
-                differential_analysis::compute_pairwise_cohens_d(tmp_means, tmp_variances, level_size, ngroups, nblocks, threshold, cohen_ptr);
-                differential_analysis::summarize_comparisons(ngroups, cohen_ptr, gene, cohen, effect_buffer);
+                if (lfc.size() && lfc[differential_analysis::summary::MIN_RANK].size()) {
+                    differential_analysis::compute_min_rank(ngenes, ngroups, group, tmp_lfc.data(), lfc[differential_analysis::summary::MIN_RANK][group], threads);
+                }
 
-                auto delta_detected_ptr = tmp_delta_detected.data();
-                differential_analysis::compute_pairwise_simple_diff(dptr, level_size, ngroups, nblocks, delta_detected_ptr);
-                differential_analysis::summarize_comparisons(ngroups, delta_detected_ptr, gene, delta_detected, effect_buffer);
-
-                auto lfc_ptr = tmp_lfc.data();
-                differential_analysis::compute_pairwise_simple_diff(mptr, level_size, ngroups, nblocks, lfc_ptr);
-                differential_analysis::summarize_comparisons(ngroups, lfc_ptr, gene, lfc, effect_buffer);
+                if (delta_detected.size() && delta_detected[differential_analysis::summary::MIN_RANK].size()) {
+                    differential_analysis::compute_min_rank(ngenes, ngroups, group, tmp_delta_detected.data(), delta_detected[differential_analysis::summary::MIN_RANK][group], threads);
+                }
             }
-        };
 
-        SimpleWorker simple_worker() const {
-            return SimpleWorker(this);
+            if (auc.size() && auc[differential_analysis::summary::MIN_RANK].size()) {
+                differential_analysis::compute_min_rank(ngenes, ngroups, tmp_auc_pairs.data(), auc[differential_analysis::summary::MIN_RANK], threads);
+            }
         }
-        
+
     public:
         struct ComplexWorker {
-
+            ComplexWorker(Overlord* p) : parent(p) {}
+            Overlord* const parent;
         };
 
     };
@@ -629,7 +670,7 @@ public:
                     type.emplace_back(ngenes);
                 }
             };
-            
+
             means.resize(ngroups);
             detected.resize(ngroups);
             for (int g = 0; g < ngroups; ++g) {
@@ -779,7 +820,7 @@ public:
         if (block == NULL) {
             return run(p, group);
         }
-    
+ 
         auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
         auto nblocks = *std::max_element(block, block + p->ncol()) + 1;
         Results<Stat> res(p->nrow(), ngroups, nblocks, do_cohen, do_auc, do_lfc, do_delta_detected); 

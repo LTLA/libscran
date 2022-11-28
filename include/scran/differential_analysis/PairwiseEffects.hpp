@@ -329,7 +329,7 @@ private:
             means(std::move(m)), detected(std::move(d)), cohen(cohen_), auc(auc_), lfc(lfc_), delta_detected(dd_) {}
 
         bool needs_auc() const { 
-            return auc != nullptr;
+            return auc != NULL;
         }
 
     private:
@@ -341,26 +341,51 @@ private:
         Stat* delta_detected;
 
     public:
-        struct SimpleWorker {
-            SimpleWorker(Overlord* p) : parent(p) {}
-            Overlord* const parent;
+        void process(size_t ngenes, const std::vector<int>& level_size, int ngroups, int nblocks, double* tmp_means, double* tmp_variances, double* tmp_detected, int threads) {
+            size_t nlevels = level_size.size();
 
-            void process(size_t gene, const std::vector<int>& level_size, int ngroups, int nblocks, double* tmp_means, double* tmp_variances, double* tmp_detected) {
-                size_t nlevels = level_size.size();
-                for (size_t l = 0; l < nlevels; ++l) {
-                    parent->means[l][gene] = tmp_means[l];
-                    parent->detected[l][gene] = tmp_detected[l];
+#ifndef SCRAN_CUSTOM_PARALLEL
+            #pragma omp parallel num_threads(threads)
+            {
+                #pragma omp for
+                for (size_t gene = 0; gene < ngenes; ++gene) {
+#else
+            SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
+                for (size_t gene = start; gene < end; ++gene) {
+#endif
+
+                    size_t in_offset = nlevels * gene;
+                    auto my_means = tmp_means + in_offset;
+                    auto my_variances = tmp_variances + in_offset;
+                    auto my_detected = tmp_detected + in_offset;
+
+                    size_t nlevels = level_size.size();
+                    for (size_t l = 0; l < nlevels; ++l) {
+                        means[l][gene] = my_means[l];
+                        detected[l][gene] = my_detected[l];
+                    }
+
+                    size_t out_offset = gene * ngroups * ngroups;
+
+                    if (cohen != NULL) {
+                        differential_analysis::compute_pairwise_cohens_d(my_means, my_variances, level_size, ngroups, nblocks, threshold, cohen + out_offset);
+                    }
+
+                    if (delta_detected != NULL) {
+                        differential_analysis::compute_pairwise_simple_diff(my_detected, level_size, ngroups, nblocks, delta_detected + out_offset);
+                    }
+
+                    if (lfc != NULL) {
+                        differential_analysis::compute_pairwise_simple_diff(my_means, level_size, ngroups, nblocks, lfc + out_offset);
+                    }
+
+#ifndef SCRAN_CUSTOM_PARALLEL
                 }
-
-                size_t out_offset = gene * ngroups * ngroups;
-                differential_analysis::compute_pairwise_cohens_d(tmp_means, tmp_variances, level_size, ngroups, nblocks, threshold, parent->cohen + out_offset);
-                differential_analysis::compute_pairwise_simple_diff(tmp_detected, level_size, ngroups, nblocks, parent->delta_detected + out_offset);
-                differential_analysis::compute_pairwise_simple_diff(tmp_means, level_size, ngroups, nblocks, parent->lfc + out_offset);
             }
-        };
-
-        SimpleWorker simple_worker() const {
-            return SimpleWorker(this);
+#else
+                }
+            }, threads);
+#endif
         }
 
     public:
