@@ -365,7 +365,7 @@ private:
             tatami::apply<0>(p, fact, num_threads);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
-            #pragma omp parallel for num_threads(threads)
+            #pragma omp parallel num_threads(threads)
             for (size_t gene = 0; gene < ngenes; ++gene) {
 #else
             SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
@@ -375,16 +375,22 @@ private:
                 size_t in_offset = gene * nlevels;
                 auto mptr = tmp_means.data() + in_offset;
                 auto dptr = tmp_detected.data() + in_offset;
+
                 for (size_t l = 0; l < nlevels; ++l) {
                     means[l][gene] = mptr[l];
+                    if (level_size[l]) {
+                        dptr[l] /= level_size[l];
+                    } else {
+                        dptr[l] = std::numeric_limits<double>::quiet_NaN();
+                    }
                     detected[l][gene] = dptr[l];
                 }
 
                 // Deriving the pairwise statistics.
                 size_t out_offset = gene * ngroups * ngroups;
                 differential_analysis::compute_pairwise_cohens_d(mptr, tmp_variances.data() + in_offset, level_size, ngroups, nblocks, threshold, cohen + out_offset);
-                differential_analysis::compute_pairwise_delta_detected(dptr, level_size, ngroups, nblocks, delta_detected + out_offset);
-                differential_analysis::compute_pairwise_lfc(mptr, level_size, ngroups, nblocks, lfc + out_offset);
+                differential_analysis::compute_pairwise_simple_diff(dptr, level_size, ngroups, nblocks, delta_detected + out_offset);
+                differential_analysis::compute_pairwise_simple_diff(mptr, level_size, ngroups, nblocks, lfc + out_offset);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
             }

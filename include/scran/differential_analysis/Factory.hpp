@@ -55,11 +55,12 @@ public:
         void compute(size_t i, const T* ptr) {
             auto nlevels = details.level_size_ptr->size();
             auto offset = nlevels * i;
+
             feature_selection::blocked_variance_with_mean<true>(
                 ptr, 
                 details.NC, 
                 details.levels, 
-                details.level_size_ptr->size(), 
+                nlevels,
                 details.level_size_ptr->data(), 
                 details.means + offset, 
                 details.variances + offset
@@ -76,10 +77,11 @@ public:
         void compute(size_t i, const SparseRange& range) {
             auto nlevels = details.level_size_ptr->size();
             auto offset = nlevels * i;
+
             feature_selection::blocked_variance_with_mean<true>(
                 range, 
                 details.levels, 
-                details.level_size_ptr->size(), 
+                nlevels,
                 details.level_size_ptr->data(), 
                 details.means + offset, 
                 details.variances + offset, 
@@ -122,15 +124,15 @@ public:
 
 public:
     struct DenseByCol : public ByCol {
-        DenseByCol(size_t s, size_t e, SimpleBundle<Stat, Level> d) : ByCol(e - s, std::move(d)), start_row(s), num_rows(e - s) {}
+        DenseByCol(size_t s, size_t e, SimpleBundle<Stat, Level> d) : ByCol(e - s, std::move(d)), start_row(s), thread_rows(e - s) {}
 
         template<typename T>
         void add(const T* ptr) {
             auto b = this->details.levels[this->counter];
-            tatami::stats::variances::compute_running(ptr, num_rows, this->tmp_means[b].data(), this->tmp_vars[b].data(), this->tmp_counts[b]);
+            tatami::stats::variances::compute_running(ptr, thread_rows, this->tmp_means[b].data(), this->tmp_vars[b].data(), this->tmp_counts[b]);
 
             auto ndetected = this->tmp_detected[b].data();
-            for (size_t j = 0; j < num_rows; ++j, ++ndetected) {
+            for (size_t j = 0; j < thread_rows; ++j, ++ndetected) {
                 *ndetected += (ptr[j] > 0);
             }
  
@@ -138,20 +140,22 @@ public:
         }
 
         void finish() {
-            for (size_t b = 0; b < this->details.level_size_ptr->size(); ++b) {
-                tatami::stats::variances::finish_running(num_rows, this->tmp_means[b].data(), this->tmp_vars[b].data(), this->tmp_counts[b]);
+            auto nlevels = this->details.level_size_ptr->size();
+            for (size_t b = 0; b < nlevels; ++b) {
+                tatami::stats::variances::finish_running(thread_rows, this->tmp_means[b].data(), this->tmp_vars[b].data(), this->tmp_counts[b]);
             }
+
             transpose(this->tmp_means, this->details.means);
             transpose(this->tmp_vars, this->details.variances);
             transpose(this->tmp_detected, this->details.detected);
         }
 
     protected:
-        size_t start_row, num_rows;
+        size_t start_row, thread_rows;
 
         void transpose(const std::vector<std::vector<Stat> >& source, Stat* sink) {
             size_t nlevels = source.size();
-            for (size_t r = 0; r < num_rows; ++r) {
+            for (size_t r = 0; r < thread_rows; ++r) {
                 auto output = sink + (r + start_row) * nlevels;
                 for (size_t b = 0; b < nlevels; ++b, ++output) {
                     *output = source[b][r];
@@ -170,7 +174,7 @@ public:
 
 public:
     struct SparseByCol : public ByCol { 
-        SparseByCol(size_t s, size_t e, size_t nr, SimpleBundle<Stat, Level> d) : ByCol(nr, std::move(d)), start_row(s), num_rows(e - s) {} 
+        SparseByCol(size_t s, size_t e, size_t nr, SimpleBundle<Stat, Level> d) : ByCol(nr, std::move(d)), start_row(s), thread_rows(e - s) {} 
 
         template<class SparseRange>
         void add(const SparseRange& range) {
@@ -183,26 +187,28 @@ public:
         }
 
         void finish() {
-            for (size_t b = 0; b < this->details.level_size_ptr->size(); ++b) {
+            auto nlevels = this->details.level_size_ptr->size();
+            for (size_t b = 0; b < nlevels; ++b) {
                 tatami::stats::variances::finish_running(
-                    num_rows,
+                    thread_rows,
                     this->tmp_means[b].data() + start_row, 
                     this->tmp_vars[b].data() + start_row, 
-                    this->tmp_detected[b].data() + start_row, 
+                    this->tmp_detected[b].data() + start_row,
                     this->tmp_counts[b]
                 );
             }
+
             transpose(this->tmp_means, this->details.means);
             transpose(this->tmp_vars, this->details.variances);
             transpose(this->tmp_detected, this->details.detected);
         }
 
     protected:
-        size_t start_row, num_rows;
+        size_t start_row, thread_rows;
 
         void transpose(const std::vector<std::vector<Stat> >& source, Stat* sink) {
             size_t nlevels = source.size();
-            for (size_t r = 0; r < num_rows; ++r) {
+            for (size_t r = 0; r < thread_rows; ++r) {
                 auto g = r + start_row;
                 auto output = sink + g * nlevels;
                 for (size_t b = 0; b < nlevels; ++b, ++output) {
