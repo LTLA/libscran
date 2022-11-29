@@ -228,7 +228,7 @@ $(function() {
 <div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>            <span class="keywordflow">if</span> (counter == group) {</div>
 <div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>                <span class="keywordflow">continue</span>;</div>
 <div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>            }</div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>            <span class="keywordflow">if</span> (cur_thread-&gt;size() &gt; per_thread) {</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>            <span class="keywordflow">if</span> (cur_thread-&gt;size() &gt;= per_thread) {</div>
 <div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>                ++cur_thread;</div>
 <div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>            }</div>
 <div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>            cur_thread-&gt;push_back(counter);</div>
