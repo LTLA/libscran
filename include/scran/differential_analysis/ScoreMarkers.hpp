@@ -7,7 +7,6 @@
 #include "cohens_d.hpp"
 #include "simple_diff.hpp"
 #include "summarize_comparisons.hpp"
-#include "PairwiseEffects.hpp"
 #include "../utils/vector_to_pointers.hpp"
 
 #include "tatami/stats/apply.hpp"
@@ -784,8 +783,8 @@ public:
         run(
             p, 
             group,
-            vector_to_pointers3(res.means),
-            vector_to_pointers3(res.detected),
+            vector_to_front_pointers(res.means),
+            vector_to_front_pointers(res.detected),
             vector_to_pointers(res.cohen),
             vector_to_pointers(res.auc),
             vector_to_pointers(res.lfc),

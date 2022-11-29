@@ -19,21 +19,6 @@
 namespace scran {
 
 /**
- * @cond
- */
-template<typename Stat>
-std::vector<Stat*> vector_to_pointers3(std::vector<std::vector<std::vector<Stat> > >& input) {
-    std::vector<Stat*> ptrs;
-    for (auto& current : input) {
-        ptrs.push_back(current.front().data()); // first vector from each element.
-    }
-    return ptrs;
-}
-/**
- * @endcond
- */
-
-/**
  * @brief Compute pairwise effect size between groups of cells.
  *
  * This class computes the effect sizes for the pairwise comparisons used in `ScoreMarkers`, prior to any ranking of marker genes.
@@ -621,8 +606,8 @@ public:
         run(
             p, 
             group, 
-            vector_to_pointers3(res.means), 
-            vector_to_pointers3(res.detected), 
+            vector_to_front_pointers(res.means), 
+            vector_to_front_pointers(res.detected), 
             harvest_pointer(res.cohen, do_cohen),
             harvest_pointer(res.auc, do_auc),
             harvest_pointer(res.lfc, do_lfc),
