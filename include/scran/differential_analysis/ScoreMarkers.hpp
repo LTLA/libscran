@@ -13,6 +13,8 @@
 #include "tatami/stats/apply.hpp"
 
 #include <array>
+#include <unordered_map>
+#include <vector>
 
 /**
  * @file ScoreMarkers.hpp
@@ -84,9 +86,14 @@ public:
         static constexpr double threshold = 0;
 
         /**
-         * See `set_num_threads()`.
+         * See `set_num_threads()` for details.
          */
         static constexpr int num_threads = 1;
+
+        /** 
+         * See `set_cache_size()` for details.
+         */
+        static constexpr int cache_size = 100;
     };
 private:
     double threshold = Defaults::threshold;
@@ -96,6 +103,7 @@ private:
     ComputeSummaries do_lfc = Defaults::compute_all_summaries();
     ComputeSummaries do_delta_detected = Defaults::compute_all_summaries();
 
+    int cache_size = Defaults::cache_size;
     int nthreads = Defaults::num_threads;
 
 public:
@@ -110,6 +118,27 @@ public:
         return *this;
     }
 
+    /**
+     * @param n Number of threads to use. 
+     * @return A reference to this `ScoreMarkers` object.
+     */
+    ScoreMarkers& set_num_threads(int n = Defaults::num_threads) {
+        nthreads = n;
+        return *this;
+    }
+
+    /**
+     * @param c Size of the cache, in terms of the number of pairwise comparisons.
+     * Larger values speed up the comparisons at the cost of higher memory consumption.
+     *
+     * @return A reference to this `ScoreMarkers` object.
+     */
+    ScoreMarkers& set_cache_size(int c = Defaults::cache_size) {
+        cache_size = c;
+        return *this;
+    }
+
+public:
     /**
      * @param c Which summary statistics to compute for Cohen's d.
      *
@@ -279,15 +308,6 @@ public:
      */
     ScoreMarkers& set_compute_delta_detected(differential_analysis::summary s, bool c) {
         do_delta_detected[s] = c;
-        return *this;
-    }
-
-    /**
-     * @param n Number of threads to use. 
-     * @return A reference to this `ScoreMarkers` object.
-     */
-    ScoreMarkers& set_num_threads(int n = Defaults::num_threads) {
-        nthreads = n;
         return *this;
     }
 
@@ -550,69 +570,221 @@ private:
             }
         }
 
-        size_t holding = ngenes * ngroups;
-        std::vector<double> full_cohen(cohen.size() ? holding : 0), 
-            full_delta_detected(delta_detected.size() ? holding : 0), 
-            full_lfc(lfc.size() ? holding : 0);
-
         // Looping over each group and computing the various summaries. We do this on
         // a per-group basis to avoid having to store the full group-by-group matrix of
         // effect sizes that we would otherwise need as input to SummarizeEffects.
-        for (int group = 0; group < ngroups; ++group) {
+        std::vector<double> full_set(ngroups * ngenes);
+        std::unordered_map<int, std::vector<Stat> > cache;
+        cache.reserve(cache_size);
+        std::vector<unsigned char> actions(ngroups);
+        std::vector<std::vector<Stat> > staging_cache(ngroups);
+
+        auto configure_cache = [&](int group) -> void {
+            for (int other = 0; other < ngroups; ++other) {
+                if (other == group) {
+                    actions[other] = 0;
+                    continue;
+                }
+
+                // Impossible to be cached by a previous run,
+                // so we can skip a hash look-up.
+                if (other > group) {
+                    actions[other] = 1;
+                    continue;
+                }
+
+                size_t key = other * ngroups + group;
+                auto it = cache.find(key);
+                if (it == cache.end()) {
+                    actions[other] = 1;
+                    continue;
+                }
+
+                // Transferring the cached vector to the full_set.
+                actions[other] = 0;
+                const auto& x = it->second;
+                for (size_t i = 0, end = x.size(); i < end; ++i) {
+                    full_set[group + i * ngroups] = x[i];
+                }
+                cache.erase(it);
+            }
+
+            // We only cache the effect size on the other side if
+            // the cache has space and those effect sizes might be used.
+            int cache_free = cache_size - static_cast<int>(cache.size());
+            for (int other = 0; other < ngroups && cache_free > 0; ++other) {
+                if (actions[other] == 0) {
+                    continue;
+                }
+                if (other < group) { 
+                    continue;
+                }
+                actions[other] = 2;
+                staging_cache[other].resize(ngenes);
+                --cache_free;
+            }
+        };
+
+        auto transfer_cache = [&](int group) -> void {
+            for (int other = 0; other < ngroups; ++other) {
+                if (actions[other] == 2) {
+                    cache[group * ngroups + other] = std::move(staging_cache[other]);
+                }
+            }
+        };
+
+        if (cohen.size()) {
+            cache.clear();
+
+            for (int group = 0; group < ngroups; ++group) {
+                configure_cache(group);
+
 #ifndef SCRAN_CUSTOM_PARALLEL
-            #pragma omp parallel num_threads(nthreads)
-            {
-                std::vector<double> effect_buffer(ngroups);
-                #pragma omp for
-                for (size_t gene = 0; gene < ngenes; ++gene) {
+                #pragma omp parallel num_threads(nthreads)
+                {
+                    std::vector<double> effect_buffer(ngroups);
+                    #pragma omp for
+                    for (size_t gene = 0; gene < ngenes; ++gene) {
 #else
-            SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
-                std::vector<double> effect_buffer(ngroups);
-                for (size_t gene = start; gene < end; ++gene) {
+                SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
+                    std::vector<double> effect_buffer(ngroups);
+                    for (size_t gene = start; gene < end; ++gene) {
 #endif
 
-                    size_t in_offset = nlevels * gene;
-                    auto my_means = tmp_means + in_offset;
-                    auto my_variances = tmp_variances + in_offset;
-                    auto my_detected = tmp_detected + in_offset;
+                        size_t in_offset = nlevels * gene;
+                        auto my_means = tmp_means + in_offset;
+                        auto my_variances = tmp_variances + in_offset;
 
-                    auto full_offset = gene * ngroups;
-                    if (cohen.size()) {
-                        auto cohen_ptr = full_cohen.data() + full_offset;
-                        differential_analysis::compute_pairwise_cohens_d(group, my_means, my_variances, level_size, ngroups, nblocks, threshold, cohen_ptr);
+                        auto cohen_ptr = full_set.data() + gene * ngroups;
+                        for (int other = 0; other < ngroups; ++other) {
+                            if (actions[other] == 0) {
+                                continue;
+                            }
+
+                            if (actions[other] == 1) {
+                                cohen_ptr[other] = differential_analysis::compute_pairwise_cohens_d<false>(group, other, my_means, my_variances, level_size, ngroups, nblocks, threshold);
+                                continue;
+                            }
+
+                            auto tmp = differential_analysis::compute_pairwise_cohens_d<true>(group, other, my_means, my_variances, level_size, ngroups, nblocks, threshold);
+                            cohen_ptr[other] = tmp.first;
+                            staging_cache[other][gene] = tmp.second;
+                        }
+
                         differential_analysis::summarize_comparisons(ngroups, cohen_ptr, group, gene, cohen, effect_buffer);
-                    }
-
-                    if (delta_detected.size()) {
-                        auto delta_detected_ptr = full_delta_detected.data() + full_offset;
-                        differential_analysis::compute_pairwise_simple_diff(group, my_detected, level_size, ngroups, nblocks, delta_detected_ptr);
-                        differential_analysis::summarize_comparisons(ngroups, delta_detected_ptr, group, gene, delta_detected, effect_buffer);
-                    }
-
-                    if (lfc.size()) {
-                        auto lfc_ptr = full_lfc.data() + full_offset;
-                        differential_analysis::compute_pairwise_simple_diff(group, my_means, level_size, ngroups, nblocks, lfc_ptr);
-                        differential_analysis::summarize_comparisons(ngroups, lfc_ptr, group, gene, lfc, effect_buffer);
-                    }
 
 #ifndef SCRAN_CUSTOM_PARALLEL
+                    }
                 }
-            }
 #else
-                }
-            }, nthreads);
+                    }
+                }, nthreads);
 #endif
 
-            if (cohen.size() && cohen[differential_analysis::summary::MIN_RANK].size()) {
-                differential_analysis::compute_min_rank(ngenes, ngroups, group, full_cohen.data(), cohen[differential_analysis::summary::MIN_RANK][group], nthreads);
-            }
+                if (cohen[differential_analysis::summary::MIN_RANK].size()) {
+                    differential_analysis::compute_min_rank(ngenes, ngroups, group, full_set.data(), cohen[differential_analysis::summary::MIN_RANK][group], nthreads);
+                }
 
-            if (lfc.size() && lfc[differential_analysis::summary::MIN_RANK].size()) {
-                differential_analysis::compute_min_rank(ngenes, ngroups, group, full_lfc.data(), lfc[differential_analysis::summary::MIN_RANK][group], nthreads);
+                transfer_cache(group);
             }
+        }
 
-            if (delta_detected.size() && delta_detected[differential_analysis::summary::MIN_RANK].size()) {
-                differential_analysis::compute_min_rank(ngenes, ngroups, group, full_delta_detected.data(), delta_detected[differential_analysis::summary::MIN_RANK][group], nthreads);
+        if (lfc.size()) {
+            cache.clear();
+
+            for (int group = 0; group < ngroups; ++group) {
+                configure_cache(group);
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+                #pragma omp parallel num_threads(nthreads)
+                {
+                    std::vector<double> effect_buffer(ngroups);
+                    #pragma omp for
+                    for (size_t gene = 0; gene < ngenes; ++gene) {
+#else
+                SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
+                    std::vector<double> effect_buffer(ngroups);
+                    for (size_t gene = start; gene < end; ++gene) {
+#endif
+
+                        auto my_means = tmp_means + nlevels * gene;
+                        auto lfc_ptr = full_set.data() + gene * ngroups;
+                        for (int other = 0; other < ngroups; ++other) {
+                            if (actions[other] == 0) {
+                                continue;
+                            }
+
+                            auto val = differential_analysis::compute_pairwise_simple_diff(group, other, my_means, level_size, ngroups, nblocks);
+                            lfc_ptr[other] = val;
+                            if (actions[other] == 2) {
+                                staging_cache[other][gene] = -val;
+                            } 
+                        }
+
+                        differential_analysis::summarize_comparisons(ngroups, lfc_ptr, group, gene, lfc, effect_buffer);
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+                    }
+                }
+#else
+                    }
+                }, nthreads);
+#endif
+
+                if (lfc[differential_analysis::summary::MIN_RANK].size()) {
+                    differential_analysis::compute_min_rank(ngenes, ngroups, group, full_set.data(), lfc[differential_analysis::summary::MIN_RANK][group], nthreads);
+                }
+
+                transfer_cache(group);
+            }
+        }
+
+        if (delta_detected.size()) {
+            cache.clear();
+
+            for (int group = 0; group < ngroups; ++group) {
+#ifndef SCRAN_CUSTOM_PARALLEL
+                #pragma omp parallel num_threads(nthreads)
+                {
+                    std::vector<double> effect_buffer(ngroups);
+                    #pragma omp for
+                    for (size_t gene = 0; gene < ngenes; ++gene) {
+#else
+                SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
+                    std::vector<double> effect_buffer(ngroups);
+                    for (size_t gene = start; gene < end; ++gene) {
+#endif
+
+                        auto my_detected = tmp_detected + gene * nlevels;
+                        auto delta_detected_ptr = full_set.data() + gene * ngroups;
+
+                        for (int other = 0; other < ngroups; ++other) {
+                            if (actions[other] == 0) {
+                                continue;
+                            }
+
+                            auto val = differential_analysis::compute_pairwise_simple_diff(group, other, my_detected, level_size, ngroups, nblocks);
+                            delta_detected_ptr[other] = val;
+                            if (actions[other] == 2) {
+                                staging_cache[other][gene] = -val;
+                            } 
+                        }
+
+                        differential_analysis::summarize_comparisons(ngroups, delta_detected_ptr, group, gene, delta_detected, effect_buffer);
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+                    }
+                }
+#else
+                    }
+                }, nthreads);
+#endif
+
+                if (delta_detected[differential_analysis::summary::MIN_RANK].size()) {
+                    differential_analysis::compute_min_rank(ngenes, ngroups, group, full_set.data(), delta_detected[differential_analysis::summary::MIN_RANK][group], nthreads);
+                }
+
+                transfer_cache(group);
             }
         }
     }
