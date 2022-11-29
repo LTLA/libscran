@@ -12,7 +12,7 @@
 #include "tatami/stats/apply.hpp"
 
 #include <array>
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 /**
@@ -22,6 +22,162 @@
  */
 
 namespace scran {
+
+/**
+ * @cond
+ */
+namespace differential_analysis {
+
+// This cache tries to store as many of the reverse effects as possible before
+// it starts evicting. Evictions are based on the principle that it is better
+// to store effects that will be re-used quickly, thus freeing up the cache for
+// future stores. The 'speed' of reusability of each cache entry depends on the
+// first group in the comparison corresponding to each cached effect size; the
+// smaller the first group, the sooner it will be reached when iterating across
+// groups in the ScoreMarkers function.
+//
+// So, the policy is to evict cache entries when the identity of the first
+// group in the cached entry is larger than the corresponding value for the
+// incoming entry. Given that, if the cache is full, we have to throw away
+// one of these effects anyway, I'd prefer to hold onto the one we're using
+// soon, because at least it'll be freed up rapidly.
+template<typename Stat>
+struct EffectsCacher {
+    EffectsCacher(size_t ngenes_, int ngroups_, int cache_size_) :
+        ngenes(ngenes_),
+        ngroups(ngroups_),
+        cache_size(cache_size_),
+        full_set(ngroups * ngenes),
+        actions(ngroups),
+        staging_cache(ngroups)
+    {
+        vector_pool.reserve(cache_size);
+    }
+
+public:
+    size_t ngenes;
+    int ngroups;
+    int cache_size;
+
+    std::vector<double> full_set;
+    std::vector<unsigned char> actions;
+    std::vector<std::vector<Stat> > staging_cache;
+    std::vector<std::vector<Stat> > vector_pool;
+
+    std::map<std::pair<int, int>, std::vector<Stat> > cached;
+
+public:
+    void clear() {
+        cached.clear();
+    }
+
+public:
+    void configure(int group) {
+        for (int other = 0; other < ngroups; ++other) {
+            if (other == group) {
+                actions[other] = 0;
+                continue;
+            }
+
+            if (cache_size == 0) {
+                actions[other] = 1;
+                continue;
+            }
+
+            // Impossible to be cached by a previous run, so we can skip a 
+            // look-up - however, it is a candidate to _be_ cached, possibly
+            // evicting other existing cache entries.
+            if (other > group) {
+                actions[other] = 2;
+                continue;
+            }
+
+            // Need to recompute cache entries that were previously evicted.
+            if (cached.empty()) { 
+                actions[other] = 1;
+                continue;
+            }
+
+            const auto& front = cached.begin()->first;
+            if (front.first > group || front.second > other) { // less-thans should be impossible.
+                actions[other] = 1;
+                continue;
+            }
+
+            // Transferring the cached vector to the full_set.
+            actions[other] = 0;
+            auto& x = cached.begin()->second;
+            for (size_t i = 0, end = x.size(); i < end; ++i) {
+                full_set[group + i * ngroups] = x[i];
+            }
+
+            vector_pool.emplace_back(std::move(x)); // recycle memory to avoid heap reallocations.
+            cached.erase(cached.begin());
+        }
+
+        // Refining our choice by doing a dummy run and seeing
+        // whether eviction actually happens. If it doesn't, we won't
+        // bother caching, beause that would be a waste of memory accesses.
+        for (int other = 0; other < ngroups; ++other) {
+            if (actions[other] != 2) {
+                continue;
+            }
+
+            std::pair<int, int> key(other, group);
+            if (cached.size() < static_cast<size_t>(cache_size)) {
+                cached[key] = std::vector<Stat>();
+                prepare_staging_cache(other);
+                continue;
+            }
+
+            auto it = cached.end();
+            --it;
+            if ((it->first).first > other) {
+                // Evict the existing entry. This is safe to do so as the
+                // evicted entry won't be used in this round anyway.
+                auto& evicted = it->second;
+                if (evicted.size()) {
+                    vector_pool.emplace_back(std::move(evicted));
+                }
+                cached.erase(it);
+                prepare_staging_cache(other);
+                cached[key] = std::vector<Stat>();
+            } else {
+                // No evictions, so we don't even bother computing the reverse.
+                actions[other] = 1;
+            }
+        }
+    }
+
+    void transfer(int group) {
+        for (int other = 0; other < ngroups; ++other) {
+            if (actions[other] != 2) {
+                continue;
+            }
+
+            // All the to-be-staged logic is already implemented in 'configure()'.
+            auto& staged = staging_cache[other];
+            std::pair<int, int> key(other, group);
+            cached[key] = std::move(staged);
+        }
+    }
+
+private:
+    void prepare_staging_cache(int other) {
+        if (vector_pool.empty()) {
+            staging_cache[other].resize(ngenes);
+        } else {
+            // Recycling existing heap allocations.
+            staging_cache[other] = std::move(vector_pool.back());
+            vector_pool.pop_back();
+        }
+    }
+};
+
+}
+/**
+ * @endcond
+ */
 
 /**
  * @brief Score each gene as a candidate marker for each group of cells.
@@ -572,71 +728,16 @@ private:
         // Looping over each group and computing the various summaries. We do this on
         // a per-group basis to avoid having to store the full group-by-group matrix of
         // effect sizes that we would otherwise need as input to SummarizeEffects.
-        std::vector<double> full_set(ngroups * ngenes);
-        std::unordered_map<int, std::vector<Stat> > cache;
-        cache.reserve(cache_size);
-        std::vector<unsigned char> actions(ngroups);
-        std::vector<std::vector<Stat> > staging_cache(ngroups);
-
-        auto configure_cache = [&](int group) -> void {
-            for (int other = 0; other < ngroups; ++other) {
-                if (other == group) {
-                    actions[other] = 0;
-                    continue;
-                }
-
-                // Impossible to be cached by a previous run,
-                // so we can skip a hash look-up.
-                if (other > group) {
-                    actions[other] = 1;
-                    continue;
-                }
-
-                size_t key = other * ngroups + group;
-                auto it = cache.find(key);
-                if (it == cache.end()) {
-                    actions[other] = 1;
-                    continue;
-                }
-
-                // Transferring the cached vector to the full_set.
-                actions[other] = 0;
-                const auto& x = it->second;
-                for (size_t i = 0, end = x.size(); i < end; ++i) {
-                    full_set[group + i * ngroups] = x[i];
-                }
-                cache.erase(it);
-            }
-
-            // We only cache the effect size on the other side if
-            // the cache has space and those effect sizes might be used.
-            int cache_free = cache_size - static_cast<int>(cache.size());
-            for (int other = 0; other < ngroups && cache_free > 0; ++other) {
-                if (actions[other] == 0) {
-                    continue;
-                }
-                if (other < group) { 
-                    continue;
-                }
-                actions[other] = 2;
-                staging_cache[other].resize(ngenes);
-                --cache_free;
-            }
-        };
-
-        auto transfer_cache = [&](int group) -> void {
-            for (int other = 0; other < ngroups; ++other) {
-                if (actions[other] == 2) {
-                    cache[group * ngroups + other] = std::move(staging_cache[other]);
-                }
-            }
-        };
+        differential_analysis::EffectsCacher<Stat> cache(ngenes, ngroups, cache_size);
+        auto& full_set = cache.full_set;
+        auto& actions = cache.actions;
+        auto& staging_cache = cache.staging_cache;
 
         if (cohen.size()) {
             cache.clear();
 
             for (int group = 0; group < ngroups; ++group) {
-                configure_cache(group);
+                cache.configure(group);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
                 #pragma omp parallel num_threads(nthreads)
@@ -684,7 +785,7 @@ private:
                     differential_analysis::compute_min_rank(ngenes, ngroups, group, full_set.data(), cohen[differential_analysis::summary::MIN_RANK][group], nthreads);
                 }
 
-                transfer_cache(group);
+                cache.transfer(group);
             }
         }
 
@@ -692,7 +793,7 @@ private:
             cache.clear();
 
             for (int group = 0; group < ngroups; ++group) {
-                configure_cache(group);
+                cache.configure(group);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
                 #pragma omp parallel num_threads(nthreads)
@@ -734,7 +835,7 @@ private:
                     differential_analysis::compute_min_rank(ngenes, ngroups, group, full_set.data(), lfc[differential_analysis::summary::MIN_RANK][group], nthreads);
                 }
 
-                transfer_cache(group);
+                cache.transfer(group);
             }
         }
 
@@ -783,7 +884,7 @@ private:
                     differential_analysis::compute_min_rank(ngenes, ngroups, group, full_set.data(), delta_detected[differential_analysis::summary::MIN_RANK][group], nthreads);
                 }
 
-                transfer_cache(group);
+                cache.transfer(group);
             }
         }
     }
