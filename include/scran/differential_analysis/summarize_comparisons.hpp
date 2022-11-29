@@ -164,7 +164,7 @@ void compute_min_rank(size_t ngenes, int ngroups, int group, const Stat* effects
             if (counter == group) {
                 continue;
             }
-            if (cur_thread->size() > per_thread) {
+            if (cur_thread->size() >= per_thread) {
                 ++cur_thread;
             }
             cur_thread->push_back(counter);
