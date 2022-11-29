@@ -400,11 +400,12 @@ public:
  * call, given an Overlord object that describes how to process the statistics
  * in a 'with-AUC' and 'without-AUC' scenario. The overlord should implement:
  *
- * - a `needs_auc()` method
- * - a `process()` method, for the simple statistics.
+ * - a `needs_auc()` method, indicating whether AUCs should be computed.
  * - a `complex_worker()` method that returns an object with the methods:
  *   - `obtain_auc_buffer()`
  *   - `consume_auc_buffer()`
+ *
+ * Check out PairwiseEffects and ScoreMarkers for concrete examples.
  ****************************************************************************/
 
 class EffectsCalculator {
@@ -416,20 +417,38 @@ private:
     double threshold;
 
 public:
+    struct State {
+        State(int ngroups_, int nblocks_, std::vector<int> ls, size_t ngenes_) : 
+            ngroups(ngroups_), 
+            nblocks(nblocks_), 
+            level_size(std::move(ls)),
+            ngenes(ngenes_),
+            means(ngenes * level_size.size()),
+            variances(means.size()),
+            detected(means.size())
+        {}
+
+        int ngroups;
+        int nblocks = 1;
+        std::vector<int> level_size;
+        size_t ngenes;
+        std::vector<double> means, variances, detected;
+    };
+
+public:
     template<class Matrix, typename G, class Overlord>
-    void run(const Matrix* p, const G* group, int ngroups, Overlord& overlord) const {
+    State run(const Matrix* p, const G* group, int ngroups, Overlord& overlord) const {
         std::vector<int> group_size(ngroups);
         for (size_t i = 0, end = p->ncol(); i < end; ++i) {
             ++(group_size[group[i]]);
         }
-        core(p, group, group_size, group, ngroups, static_cast<const int*>(NULL), 1, overlord);
+        return core(p, group, std::move(group_size), group, ngroups, static_cast<const int*>(NULL), 1, overlord);
     }
 
     template<class Matrix, typename G, typename B, class Overlord>
-    void run_blocked(const Matrix* p, const G* group, int ngroups, const B* block, int nblocks, Overlord& overlord) const {
+    State run_blocked(const Matrix* p, const G* group, int ngroups, const B* block, int nblocks, Overlord& overlord) const {
         if (block == NULL) {
-            run(p, group, ngroups, overlord);
-            return;
+            return run(p, group, ngroups, overlord);
         }
 
         size_t ncombos = ngroups * nblocks;
@@ -440,16 +459,19 @@ public:
             ++(combo_size[combos[i]]);
         }
 
-        core(p, combos.data(), combo_size, group, ngroups, block, nblocks, overlord);
+        return core(p, combos.data(), std::move(combo_size), group, ngroups, block, nblocks, overlord);
     }
 
 private:
-    template<class Matrix, typename L, class Ls, typename G, typename B, class Overlord>
-    void core(const Matrix* p, const L* level, const Ls& level_size, const G* group, size_t ngroups, const B* block, size_t nblocks, Overlord& overlord) const {
+    template<class Matrix, typename L, typename G, typename B, class Overlord>
+    State core(const Matrix* p, const L* level, std::vector<int> ls, const G* group, size_t ngroups, const B* block, size_t nblocks, Overlord& overlord) const {
         size_t ngenes = p->nrow();
+        State output(ngroups, nblocks, std::move(ls), ngenes);
+        const auto& level_size = output.level_size;
         size_t nlevels = level_size.size();
-        size_t holding = nlevels * ngenes;
-        std::vector<double> tmp_means(holding), tmp_variances(holding), tmp_detected(holding);
+        auto& tmp_means = output.means;
+        auto& tmp_variances = output.variances;
+        auto& tmp_detected = output.detected;
 
         if (!overlord.needs_auc()) {
             differential_analysis::SimpleBidimensionalFactory fact(
@@ -503,8 +525,7 @@ private:
             }
         }
 
-        // Allowing the overlord to process the statistics as it sees fit.
-        overlord.process(p->nrow(), level_size, ngroups, nblocks, tmp_means.data(), tmp_variances.data(), tmp_detected.data(), num_threads);
+        return output;
     }
 };
 

@@ -139,7 +139,7 @@ public:
 
 private:
     double threshold = Defaults::threshold;
-    int num_threads = Defaults::num_threads;
+    int nthreads = Defaults::num_threads;
     bool do_cohen = Defaults::compute_cohen;
     bool do_auc = Defaults::compute_auc;
     bool do_lfc = Defaults::compute_lfc;
@@ -162,7 +162,7 @@ public:
      * @return A reference to this `PairwiseEffects` object.
      */
     PairwiseEffects& set_num_threads(int n = Defaults::num_threads) {
-        num_threads = n;
+        nthreads = n;
         return *this;
     }
 
@@ -254,9 +254,10 @@ public:
         Stat* delta_detected) 
     const {
         int ngroups = means.size();
-        differential_analysis::EffectsCalculator runner(num_threads, threshold);
-        Overlord overlord(std::move(means), std::move(detected), cohen, auc, lfc, delta_detected, threshold);
-        runner.run(p, group, ngroups, overlord);
+        differential_analysis::EffectsCalculator runner(nthreads, threshold);
+        Overlord overlord(auc);
+        auto state = runner.run(p, group, ngroups, overlord);
+        process_simple_effects(state, means, detected, cohen, lfc, delta_detected);
     }
 
     /**
@@ -319,85 +320,29 @@ public:
             }
         }
 
-        differential_analysis::EffectsCalculator runner(num_threads, threshold);
-        Overlord overlord(std::move(means2), std::move(detected2), cohen, auc, lfc, delta_detected, threshold);
-        runner.run_blocked(p, group, ngroups, block, nblocks, overlord);
+        differential_analysis::EffectsCalculator runner(nthreads, threshold);
+        Overlord overlord(auc);
+        auto state = runner.run_blocked(p, group, ngroups, block, nblocks, overlord);
+        process_simple_effects(state, means2, detected2, cohen, lfc, delta_detected);
     }
 
 private:
     template<typename Stat>
     struct Overlord {
-        Overlord(std::vector<Stat*> m, std::vector<Stat*> d, Stat* cohen_, Stat* auc_, Stat* lfc_, Stat* dd_, double t) : 
-            means(std::move(m)), detected(std::move(d)), cohen(cohen_), auc(auc_), lfc(lfc_), delta_detected(dd_), threshold(t) {}
+        Overlord(Stat* auc_) : auc(auc_) {}
 
         bool needs_auc() const { 
             return auc != NULL;
         }
 
-    private:
-        std::vector<Stat*> means;
-        std::vector<Stat*> detected;
-        Stat* cohen;
         Stat* auc;
-        Stat* lfc;
-        Stat* delta_detected;
-        double threshold;
 
-    public:
-        void process(size_t ngenes, const std::vector<int>& level_size, int ngroups, int nblocks, double* tmp_means, double* tmp_variances, double* tmp_detected, int threads) {
-            size_t nlevels = level_size.size();
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-            #pragma omp parallel num_threads(threads)
-            {
-                #pragma omp for
-                for (size_t gene = 0; gene < ngenes; ++gene) {
-#else
-            SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
-                for (size_t gene = start; gene < end; ++gene) {
-#endif
-
-                    size_t in_offset = nlevels * gene;
-                    auto my_means = tmp_means + in_offset;
-                    auto my_variances = tmp_variances + in_offset;
-                    auto my_detected = tmp_detected + in_offset;
-
-                    size_t nlevels = level_size.size();
-                    for (size_t l = 0; l < nlevels; ++l) {
-                        means[l][gene] = my_means[l];
-                        detected[l][gene] = my_detected[l];
-                    }
-
-                    size_t out_offset = gene * ngroups * ngroups;
-
-                    if (cohen != NULL) {
-                        differential_analysis::compute_pairwise_cohens_d(my_means, my_variances, level_size, ngroups, nblocks, threshold, cohen + out_offset);
-                    }
-
-                    if (delta_detected != NULL) {
-                        differential_analysis::compute_pairwise_simple_diff(my_detected, level_size, ngroups, nblocks, delta_detected + out_offset);
-                    }
-
-                    if (lfc != NULL) {
-                        differential_analysis::compute_pairwise_simple_diff(my_means, level_size, ngroups, nblocks, lfc + out_offset);
-                    }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-                }
-            }
-#else
-                }
-            }, threads);
-#endif
-        }
-
-    public:
         struct ComplexWorker {
-            ComplexWorker(Overlord* p) : parent(p) {}
-            Overlord* const parent;
+            ComplexWorker(Stat* auc_) : auc(auc_) {}
+            Stat* auc;
 
             Stat* prepare_auc_buffer(size_t gene, int ngroups) { 
-                return parent->auc + gene * ngroups * ngroups;
+                return auc + gene * ngroups * ngroups;
             }
 
             // No-op, because it's copied straight into the auc_buffer.
@@ -405,9 +350,71 @@ private:
         };
 
         ComplexWorker complex_worker() {
-            return ComplexWorker(this);
+            return ComplexWorker(this->auc);
         }
     };
+
+    template<typename Stat>
+    void process_simple_effects(
+        const differential_analysis::EffectsCalculator::State& state, 
+        std::vector<Stat*>& means, 
+        std::vector<Stat*>& detected, 
+        Stat* cohen, 
+        Stat* lfc, 
+        Stat* delta_detected) 
+    const {
+        auto ngenes = state.ngenes;
+        const auto& level_size = state.level_size;
+        auto nlevels = level_size.size();
+        auto ngroups = state.ngroups;
+        auto nblocks = state.nblocks;
+        const auto* tmp_means = state.means.data();
+        const auto* tmp_variances = state.variances.data();
+        const auto* tmp_detected = state.detected.data();
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+        #pragma omp parallel num_threads(nthreads)
+        {
+            #pragma omp for
+            for (size_t gene = 0; gene < ngenes; ++gene) {
+#else
+        SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
+            for (size_t gene = start; gene < end; ++gene) {
+#endif
+
+                size_t in_offset = nlevels * gene;
+                auto my_means = tmp_means + in_offset;
+                auto my_variances = tmp_variances + in_offset;
+                auto my_detected = tmp_detected + in_offset;
+
+                size_t nlevels = level_size.size();
+                for (size_t l = 0; l < nlevels; ++l) {
+                    means[l][gene] = my_means[l];
+                    detected[l][gene] = my_detected[l];
+                }
+
+                size_t out_offset = gene * ngroups * ngroups;
+
+                if (cohen != NULL) {
+                    differential_analysis::compute_pairwise_cohens_d(my_means, my_variances, level_size, ngroups, nblocks, threshold, cohen + out_offset);
+                }
+
+                if (delta_detected != NULL) {
+                    differential_analysis::compute_pairwise_simple_diff(my_detected, level_size, ngroups, nblocks, delta_detected + out_offset);
+                }
+
+                if (lfc != NULL) {
+                    differential_analysis::compute_pairwise_simple_diff(my_means, level_size, ngroups, nblocks, lfc + out_offset);
+                }
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+            }
+        }
+#else
+            }
+        }, nthreads);
+#endif
+    }
 
 public:
     /**
