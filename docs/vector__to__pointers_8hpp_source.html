@@ -88,7 +88,7 @@ $(function() {
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="keyword">namespace </span>scran {</div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="vector__to__pointers_8hpp.html#ab4600cde1ede42175b03490d96949524">   26</a></span><span class="keyword">inline</span> std::vector&lt;T*&gt; <a class="code hl_function" href="vector__to__pointers_8hpp.html#ab4600cde1ede42175b03490d96949524">vector_to_pointers</a>(std::vector&lt;std::vector&lt;T&gt; &gt;&amp; input) {</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="vector__to__pointers_8hpp.html#ab4600cde1ede42175b03490d96949524">   26</a></span>std::vector&lt;T*&gt; <a class="code hl_function" href="vector__to__pointers_8hpp.html#ab4600cde1ede42175b03490d96949524">vector_to_pointers</a>(std::vector&lt;std::vector&lt;T&gt; &gt;&amp; input) {</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    std::vector&lt;T*&gt; output(input.size());</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keyword">auto</span> oIt = output.begin();</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; i : input) {</div>
@@ -99,7 +99,7 @@ $(function() {
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>}</div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="vector__to__pointers_8hpp.html#ab779e5059834ccb43c97f536ba26a4ab">   45</a></span><span class="keyword">inline</span> std::vector&lt;const T*&gt; <a class="code hl_function" href="vector__to__pointers_8hpp.html#ab4600cde1ede42175b03490d96949524">vector_to_pointers</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;T&gt; &gt;&amp; input) {</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="vector__to__pointers_8hpp.html#ab779e5059834ccb43c97f536ba26a4ab">   45</a></span>std::vector&lt;const T*&gt; <a class="code hl_function" href="vector__to__pointers_8hpp.html#ab4600cde1ede42175b03490d96949524">vector_to_pointers</a>(<span class="keyword">const</span> std::vector&lt;std::vector&lt;T&gt; &gt;&amp; input) {</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>    std::vector&lt;const T*&gt; output(input.size());</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    <span class="keyword">auto</span> oIt = output.begin();</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; i : input) {</div>
@@ -119,9 +119,21 @@ $(function() {
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keywordflow">return</span> output;</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>}</div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>}</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="comment">// Convenience method to get the pointers if each middle vector contains exactly one inner vector.</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="comment">// This allows us to create pointer vectors in the same format as the first vector_to_pointers overload.</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>std::vector&lt;T*&gt; vector_to_front_pointers(std::vector&lt;std::vector&lt;std::vector&lt;T&gt; &gt; &gt;&amp; input) {</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    std::vector&lt;T*&gt; ptrs;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>    ptrs.reserve(input.size());</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keywordflow">for</span> (<span class="keyword">auto</span>&amp; current : input) {</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        ptrs.push_back(current.front().data()); <span class="comment">// first vector from each element.</span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    }</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <span class="keywordflow">return</span> ptrs;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>}</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>}</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="amacros_8hpp_html"><div class="ttname"><a href="macros_8hpp.html">macros.hpp</a></div><div class="ttdoc">Set common macros used through libscran.</div></div>
 <div class="ttc" id="avector__to__pointers_8hpp_html_ab4600cde1ede42175b03490d96949524"><div class="ttname"><a href="vector__to__pointers_8hpp.html#ab4600cde1ede42175b03490d96949524">scran::vector_to_pointers</a></div><div class="ttdeci">std::vector&lt; T * &gt; vector_to_pointers(std::vector&lt; std::vector&lt; T &gt; &gt; &amp;input)</div><div class="ttdef"><b>Definition:</b> vector_to_pointers.hpp:26</div></div>
 </div><!-- fragment --></div><!-- contents -->

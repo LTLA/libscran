@@ -1,5 +1,0 @@
-<map id="scran/differential_analysis/PairwiseEffects.hpp" name="scran/differential_analysis/PairwiseEffects.hpp">
-<area shape="rect" id="node1" title="Compute pairwise effect sizes between groups of cells." coords="5,5,200,45"/>
-<area shape="rect" id="node2" href="$ScoreMarkers_8hpp.html" title="Compute marker scores for each gene in each group of cells." coords="10,93,195,133"/>
-<area shape="rect" id="node3" href="$scran_8hpp_source.html" title=" " coords="45,181,160,207"/>
-</map>

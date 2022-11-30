@@ -100,16 +100,16 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="vector__to__pointers_8hpp__dep__incl.png" border="0" usemap="#ascran_2utils_2vector__to__pointers_8hppdep" alt=""/></div>
 <map name="ascran_2utils_2vector__to__pointers_8hppdep" id="ascran_2utils_2vector__to__pointers_8hppdep">
-<area shape="rect" title="Create a vector of pointers from a vector of vectors." coords="263,5,386,45"/>
-<area shape="rect" href="PairwiseEffects_8hpp.html" title="Compute pairwise effect sizes between groups of cells." coords="67,93,262,133"/>
-<area shape="rect" href="ScoreMarkers_8hpp.html" title="Compute marker scores for each gene in each group of cells." coords="33,181,218,221"/>
-<area shape="rect" href="scran_8hpp_source.html" title=" " coords="370,357,484,383"/>
-<area shape="rect" href="SummarizeEffects_8hpp.html" title="Summarize the effect sizes from pairwise comparisons." coords="638,93,848,133"/>
-<area shape="rect" href="ModelGeneVar_8hpp.html" title="Model the per&#45;gene variance from log&#45;count data." coords="163,269,320,309"/>
-<area shape="rect" href="PerCellAdtQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from ADT data." coords="344,269,510,309"/>
-<area shape="rect" href="PerCellRnaQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from RNA metrics." coords="635,181,803,221"/>
-<area shape="rect" href="PerCellRnaQcMetrics_8hpp_source.html" title=" " coords="388,93,562,133"/>
-<area shape="rect" href="PerCellAdtQcMetrics_8hpp.html" title="Compute per&#45;cell quality control metrics from an ADT count matrix." coords="388,181,560,221"/>
+<area shape="rect" title="Create a vector of pointers from a vector of vectors." coords="437,5,560,45"/>
+<area shape="rect" href="PairwiseEffects_8hpp.html" title="Compute pairwise effect sizes between groups of cells." coords="5,93,200,133"/>
+<area shape="rect" href="ScoreMarkers_8hpp.html" title="Compute marker scores for each gene in each group of cells." coords="275,269,461,309"/>
+<area shape="rect" href="scran_8hpp_source.html" title=" " coords="561,357,676,383"/>
+<area shape="rect" href="SummarizeEffects_8hpp.html" title="Summarize the effect sizes from pairwise comparisons." coords="830,93,1039,133"/>
+<area shape="rect" href="ModelGeneVar_8hpp.html" title="Model the per&#45;gene variance from log&#45;count data." coords="347,181,504,221"/>
+<area shape="rect" href="PerCellAdtQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from ADT data." coords="536,269,701,309"/>
+<area shape="rect" href="PerCellRnaQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from RNA metrics." coords="827,181,995,221"/>
+<area shape="rect" href="PerCellRnaQcMetrics_8hpp_source.html" title=" " coords="579,93,754,133"/>
+<area shape="rect" href="PerCellAdtQcMetrics_8hpp.html" title="Compute per&#45;cell quality control metrics from an ADT count matrix." coords="579,181,751,221"/>
 </map>
 </div>
 </div>
@@ -137,9 +137,6 @@ Functions</h2></td></tr>
 <div class="memproto">
 <div class="memtemplate">
 template&lt;typename T &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">std::vector&lt; const T * &gt; scran::vector_to_pointers </td>
@@ -149,11 +146,6 @@ template&lt;typename T &gt; </div>
           <td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 <p >Extract a vector of <code>const</code> pointers from a vector of vectors.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
@@ -213,9 +205,6 @@ template&lt;typename T &gt; </div>
 <div class="memproto">
 <div class="memtemplate">
 template&lt;typename T &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">std::vector&lt; T * &gt; scran::vector_to_pointers </td>
@@ -225,11 +214,6 @@ template&lt;typename T &gt; </div>
           <td></td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 <p >Extract a vector of pointers from a vector of vectors. This is a convenient utility as many <b>scran</b> functions accept the former but can return the latter.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
