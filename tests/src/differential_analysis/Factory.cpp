@@ -8,44 +8,10 @@
 #include "utils.h"
 #include "../utils/compare_almost_equal.h"
 
-class DifferentialAnalysisEffectsCalculatorTestCore : public DifferentialAnalysisTestCore {
-protected:
-    struct Overlord {
-        Overlord(bool a, size_t nrows, int ngroups) : do_auc(a), store(nrows * ngroups * ngroups) {}
-
-        bool do_auc;
-        bool needs_auc() const {
-            return do_auc;
-        }
-
-        std::vector<double> store;
-
-        struct ComplexWorker {
-            ComplexWorker(double* s) : store(s) {}
-
-            std::vector<double> buffer;
-            double* store;
-            double* prepare_auc_buffer(size_t i, int ngroups) {
-                buffer.resize(ngroups * ngroups);
-                return buffer.data();
-            }
-
-            void consume_auc_buffer(size_t i, int ngroups, double*) {
-                std::copy(buffer.begin(), buffer.end(), store + i * ngroups * ngroups);
-                return;
-            }
-        };
-
-        ComplexWorker complex_worker() {
-            return ComplexWorker(store.data());
-        }
-    };
-};
-
 /*******************************************************/
 
 class DifferentialAnalysisEffectsCalculatorEdgeCaseTest : 
-    public DifferentialAnalysisEffectsCalculatorTestCore,
+    public DifferentialAnalysisTestCore,
     public ::testing::Test
 {};
 
@@ -64,7 +30,7 @@ TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, Simple) {
     tatami::DenseRowMatrix<double, int> mat(nrows, ncols, std::move(mat_buffer));
 
     scran::differential_analysis::EffectsCalculator runner(1, 0);
-    Overlord ova(true, nrows, ngroups);
+    EffectsOverlord ova(true, nrows, ngroups);
     auto state = runner.run(&mat, groups.data(), ngroups, ova);
 
     // Check that the means are as expected.
@@ -117,7 +83,7 @@ TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, AllZeros) {
     tatami::DenseRowMatrix<double, int> mat(nrows, ncols, std::move(mat_buffer));
 
     scran::differential_analysis::EffectsCalculator runner(1, 0);
-    Overlord ova(true, nrows, ngroups);
+    EffectsOverlord ova(true, nrows, ngroups);
     auto state = runner.run(&mat, groups.data(), ngroups, ova);
 
     EXPECT_EQ(state.means, std::vector<double>(nrows * ngroups));
@@ -137,7 +103,7 @@ TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, AllZeros) {
 /*******************************************************/
 
 class DifferentialAnalysisEffectsCalculatorUnblockedTest : 
-    public DifferentialAnalysisEffectsCalculatorTestCore,
+    public DifferentialAnalysisTestCore,
     public ::testing::TestWithParam<std::tuple<int, bool, int> >
 {
 protected:
@@ -149,6 +115,60 @@ protected:
     }
 };
 
+TEST_P(DifferentialAnalysisEffectsCalculatorUnblockedTest, Manual) {
+    auto param = GetParam();
+    auto ngroups = std::get<0>(param);
+    bool do_auc = std::get<1>(param);
+    auto nthreads = std::get<2>(param);
+
+    auto groups = create_groupings(ncols, ngroups);
+
+    scran::differential_analysis::EffectsCalculator runner(nthreads, 0);
+    EffectsOverlord ova(do_auc, nrows, ngroups);
+    auto state = runner.run(dense_row.get(), groups.data(), ngroups, ova);
+
+    // Manually calculating the mean and variance.
+    std::vector<double> means(nrows * ngroups), detected(nrows * ngroups);
+    std::vector<double> aucs(do_auc ? nrows * ngroups * ngroups : 0);
+
+    for (size_t g = 0; g < nrows; ++g) {
+        std::vector<double> buf(ncols);
+        auto ptr = dense_row->row(g, buf.data());
+
+        for (int c = 0; c < buf.size(); ++c) {
+            size_t offset = g * ngroups + groups[c];
+            means[offset] += ptr[c];
+            detected[offset] += (ptr[c] != 0);
+        }
+
+        for (int b = 0; b < ngroups; ++b) {
+            size_t offset = g * ngroups + b;
+            means[offset] /= state.level_size[b];
+            detected[offset] /= state.level_size[b];
+        }
+
+        if (do_auc) {
+            // Manually computing the AUCs.
+            scran::differential_analysis::PairedStore store;
+            std::vector<int> num_zeros(ngroups);
+            for (size_t c = 0; c < ncols; ++c) {
+                if (ptr[c]) {
+                    store.emplace_back(ptr[c], groups[c]);
+                } else {
+                    ++num_zeros[groups[c]];
+                }
+            }
+            scran::differential_analysis::compute_pairwise_auc(store, num_zeros, state.level_size, aucs.data() + g * ngroups * ngroups, true);
+        }
+    }
+
+    EXPECT_EQ(state.means, means);
+    EXPECT_EQ(state.detected, detected);
+    if (do_auc) {
+        EXPECT_EQ(aucs, ova.store);
+    }
+}
+
 TEST_P(DifferentialAnalysisEffectsCalculatorUnblockedTest, Consistency) {
     auto param = GetParam();
     auto ngroups = std::get<0>(param);
@@ -158,7 +178,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorUnblockedTest, Consistency) {
     auto groups = create_groupings(ncols, ngroups);
 
     scran::differential_analysis::EffectsCalculator runner(nthreads, 0);
-    Overlord ova(do_auc, nrows, ngroups);
+    EffectsOverlord ova(do_auc, nrows, ngroups);
     auto state = runner.run(dense_row.get(), groups.data(), ngroups, ova);
 
     // Checking the various helper statistics.
@@ -175,7 +195,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorUnblockedTest, Consistency) {
     // Checking aganst the single-core case.
     if (nthreads > 1) {
         scran::differential_analysis::EffectsCalculator runner(1, 0);
-        Overlord ova1(do_auc, nrows, ngroups);
+        EffectsOverlord ova1(do_auc, nrows, ngroups);
         auto state1 = runner.run(dense_row.get(), groups.data(), ngroups, ova1);
         EXPECT_EQ(state.means, state1.means);
         EXPECT_EQ(state.variances, state1.variances);
@@ -186,19 +206,19 @@ TEST_P(DifferentialAnalysisEffectsCalculatorUnblockedTest, Consistency) {
     // Comparing different implementations that are used for different
     // matrices. This is our version of a reference check, otherwise we'd just
     // be reimplementing one of the implementations, and that's no fun.
-    Overlord ova2(do_auc, nrows, ngroups);
+    EffectsOverlord ova2(do_auc, nrows, ngroups);
     auto state2 = runner.run(sparse_row.get(), groups.data(), ngroups, ova2);
     compare_almost_equal(state.means, state2.means);
     compare_almost_equal(state.variances, state2.variances);
     EXPECT_EQ(state.detected, state2.detected);
 
-    Overlord ova3(do_auc, nrows, ngroups);
+    EffectsOverlord ova3(do_auc, nrows, ngroups);
     auto state3 = runner.run(dense_column.get(), groups.data(), ngroups, ova3);
     compare_almost_equal(state.means, state3.means);
     compare_almost_equal(state.variances, state3.variances);
     EXPECT_EQ(state.detected, state3.detected);
 
-    Overlord ova4(do_auc, nrows, ngroups);
+    EffectsOverlord ova4(do_auc, nrows, ngroups);
     auto state4 = runner.run(sparse_column.get(), groups.data(), ngroups, ova4);
     compare_almost_equal(state.means, state4.means);
     compare_almost_equal(state.variances, state4.variances);
@@ -219,7 +239,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorUnblockedTest, SingleBlock) {
     auto groups = create_groupings(ncols, ngroups);
 
     scran::differential_analysis::EffectsCalculator runner(nthreads, 0);
-    Overlord ova(do_auc, nrows, ngroups);
+    EffectsOverlord ova(do_auc, nrows, ngroups);
     auto state = runner.run(dense_row.get(), groups.data(), ngroups, ova);
 
     // Checking that we get the same results.
@@ -250,7 +270,7 @@ INSTANTIATE_TEST_CASE_P(
 /*******************************************************/
 
 class DifferentialAnalysisEffectsCalculatorBlockedTest : 
-    public DifferentialAnalysisEffectsCalculatorTestCore,
+    public DifferentialAnalysisTestCore,
     public ::testing::TestWithParam<std::tuple<int, int, bool, int> >
 {
 protected:
@@ -273,7 +293,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Consistency) {
     auto blocks = create_blocks(ncols, nblocks);
 
     scran::differential_analysis::EffectsCalculator runner(nthreads, 0);
-    Overlord ova(do_auc, nrows, ngroups);
+    EffectsOverlord ova(do_auc, nrows, ngroups);
     auto state = runner.run_blocked(dense_row.get(), groups.data(), ngroups, blocks.data(), nblocks, ova);
 
     // Checking the various helper statistics.
@@ -290,7 +310,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Consistency) {
     // Checking aganst the single-core case.
     if (nthreads > 1) {
         scran::differential_analysis::EffectsCalculator runner(1, 0);
-        Overlord ova1(do_auc, nrows, ngroups);
+        EffectsOverlord ova1(do_auc, nrows, ngroups);
         auto state1 = runner.run_blocked(dense_row.get(), groups.data(), ngroups, blocks.data(), nblocks, ova1);
         EXPECT_EQ(state.means, state1.means);
         EXPECT_EQ(state.variances, state1.variances);
@@ -301,19 +321,19 @@ TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Consistency) {
     // Comparing different implementations that are used for different
     // matrices. This is our version of a reference check, otherwise we'd just
     // be reimplementing one of the implementations, and that's no fun.
-    Overlord ova2(do_auc, nrows, ngroups);
+    EffectsOverlord ova2(do_auc, nrows, ngroups);
     auto state2 = runner.run_blocked(sparse_row.get(), groups.data(), ngroups, blocks.data(), nblocks, ova2);
     compare_almost_equal(state.means, state2.means);
     compare_almost_equal(state.variances, state2.variances);
     EXPECT_EQ(state.detected, state2.detected);
 
-    Overlord ova3(do_auc, nrows, ngroups);
+    EffectsOverlord ova3(do_auc, nrows, ngroups);
     auto state3 = runner.run_blocked(dense_column.get(), groups.data(), ngroups, blocks.data(), nblocks, ova3);
     compare_almost_equal(state.means, state3.means);
     compare_almost_equal(state.variances, state3.variances);
     EXPECT_EQ(state.detected, state3.detected);
 
-    Overlord ova4(do_auc, nrows, ngroups);
+    EffectsOverlord ova4(do_auc, nrows, ngroups);
     auto state4 = runner.run_blocked(sparse_column.get(), groups.data(), ngroups, blocks.data(), nblocks, ova4);
     compare_almost_equal(state.means, state4.means);
     compare_almost_equal(state.variances, state4.variances);
@@ -352,7 +372,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Subsetted) {
         }
 
         auto sub = tatami::make_DelayedSubset<1>(dense_row, std::move(subset));
-        Overlord subova(do_auc, nrows, ngroups);
+        EffectsOverlord subova(do_auc, nrows, ngroups);
         auto substate = runner.run(sub.get(), subgroups.data(), ngroups, subova);
 
         for (size_t r = 0; r < nrows; ++r) {
@@ -366,7 +386,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Subsetted) {
         }
     }
 
-    Overlord ova(do_auc, nrows, ngroups);
+    EffectsOverlord ova(do_auc, nrows, ngroups);
     auto state = runner.run_blocked(dense_row.get(), groups.data(), ngroups, blocks.data(), nblocks, ova);
     EXPECT_EQ(means, state.means);
     EXPECT_EQ(variances, state.variances);
@@ -382,7 +402,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Duplicates) {
 
     auto groups0 = create_groupings(ncols, ngroups);
     scran::differential_analysis::EffectsCalculator runner(nthreads, 0);
-    Overlord ova(do_auc, nrows, ngroups);
+    EffectsOverlord ova(do_auc, nrows, ngroups);
     auto ref = runner.run(dense_row.get(), groups0.data(), ngroups, ova);
 
     // Duplicate the matrix and check that we get the same AUC results.
@@ -395,7 +415,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Duplicates) {
     }
     auto mat = tatami::make_DelayedBind<1>(std::move(bound));
 
-    Overlord ova2(do_auc, nrows, ngroups);
+    EffectsOverlord ova2(do_auc, nrows, ngroups);
     auto state2 = runner.run_blocked(mat.get(), groups.data(), ngroups, blocks.data(), nblocks, ova2);
     EXPECT_EQ(state2.ngroups, ngroups);
     EXPECT_EQ(state2.nblocks, nblocks);
@@ -434,7 +454,7 @@ INSTANTIATE_TEST_CASE_P(
 /*******************************************************/
 
 class DifferentialAnalysisEffectsCalculatorThresholdTest : 
-    public DifferentialAnalysisEffectsCalculatorTestCore,
+    public DifferentialAnalysisTestCore,
     public ::testing::Test
 {
 protected:
@@ -451,11 +471,11 @@ TEST_F(DifferentialAnalysisEffectsCalculatorThresholdTest, Smaller) {
     auto groups = create_groupings(ncols, ngroups);
 
     scran::differential_analysis::EffectsCalculator runner0(1, 0);
-    Overlord ova0(true, nrows, ngroups);
+    EffectsOverlord ova0(true, nrows, ngroups);
     auto state0 = runner0.run(dense_row.get(), groups.data(), ngroups, ova0);
 
     scran::differential_analysis::EffectsCalculator runner1(1, 1);
-    Overlord ova1(true, nrows, ngroups);
+    EffectsOverlord ova1(true, nrows, ngroups);
     auto state1 = runner1.run(dense_row.get(), groups.data(), ngroups, ova1);
 
     // Setting a threshold should always result in a smaller AUC - 
@@ -483,7 +503,7 @@ TEST_F(DifferentialAnalysisEffectsCalculatorThresholdTest, Zeroed) {
 
     // Using a huge threshold should force all AUCs to zero.
     scran::differential_analysis::EffectsCalculator runner(1, 1000);
-    Overlord ova(true, nrows, ngroups);
+    EffectsOverlord ova(true, nrows, ngroups);
     auto state = runner.run(dense_row.get(), groups.data(), ngroups, ova);
     EXPECT_EQ(ova.store, std::vector<double>(ngroups * ngroups * nrows));
 }

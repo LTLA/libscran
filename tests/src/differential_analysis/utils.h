@@ -40,6 +40,38 @@ protected:
         }
         return blocks;
     }
+
+protected:
+    struct EffectsOverlord {
+        EffectsOverlord(bool a, size_t nrows, int ngroups) : do_auc(a), store(nrows * ngroups * ngroups) {}
+
+        bool do_auc;
+        bool needs_auc() const {
+            return do_auc;
+        }
+
+        std::vector<double> store;
+
+        struct ComplexWorker {
+            ComplexWorker(double* s) : store(s) {}
+
+            std::vector<double> buffer;
+            double* store;
+            double* prepare_auc_buffer(size_t i, int ngroups) {
+                buffer.resize(ngroups * ngroups);
+                return buffer.data();
+            }
+
+            void consume_auc_buffer(size_t i, int ngroups, double*) {
+                std::copy(buffer.begin(), buffer.end(), store + i * ngroups * ngroups);
+                return;
+            }
+        };
+
+        ComplexWorker complex_worker() {
+            return ComplexWorker(store.data());
+        }
+    };
 };
 
 #endif
