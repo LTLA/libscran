@@ -56,7 +56,7 @@ public:
         auto tmp_nzeros = details.detected + nlevels * i;
         std::fill(tmp_nzeros, tmp_nzeros + nlevels, 0);
         for (size_t j = 0; j < details.NC; ++j) {
-            tmp_nzeros[details.levels[j]] += (ptr[j] > 0);
+            tmp_nzeros[details.levels[j]] += (ptr[j] != 0);
         }
     }
 
@@ -126,7 +126,7 @@ public:
 
             auto ndetected = this->tmp_detected[b].data();
             for (size_t j = 0; j < thread_rows; ++j, ++ndetected) {
-                *ndetected += (ptr[j] > 0);
+                *ndetected += (ptr[j] != 0);
             }
  
             ++(this->counter);
