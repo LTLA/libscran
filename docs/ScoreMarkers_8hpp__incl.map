@@ -1,16 +1,17 @@
 <map id="scran/differential_analysis/ScoreMarkers.hpp" name="scran/differential_analysis/ScoreMarkers.hpp">
-<area shape="rect" id="node1" title="Compute marker scores for each gene in each group of cells." coords="412,5,597,45"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." coords="88,181,215,207"/>
-<area shape="rect" id="node3" title=" " coords="543,101,632,126"/>
-<area shape="rect" id="node4" title=" " coords="656,101,759,126"/>
-<area shape="rect" id="node5" href="$simple__diff_8hpp_source.html" title=" " coords="5,101,113,126"/>
-<area shape="rect" id="node8" href="$summarize__comparisons_8hpp.html" title="Utilities for effect summarization." coords="328,101,519,126"/>
-<area shape="rect" id="node12" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." coords="189,93,303,133"/>
-<area shape="rect" id="node13" title=" " coords="783,101,933,126"/>
-<area shape="rect" id="node14" title=" " coords="957,101,1007,126"/>
-<area shape="rect" id="node6" title=" " coords="239,181,298,207"/>
-<area shape="rect" id="node7" title=" " coords="10,181,63,207"/>
-<area shape="rect" id="node9" title=" " coords="322,181,397,207"/>
-<area shape="rect" id="node10" title=" " coords="421,181,489,207"/>
-<area shape="rect" id="node11" title=" " coords="514,181,573,207"/>
+<area shape="rect" id="node1" title="Compute marker scores for each gene in each group of cells." coords="433,5,618,45"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." coords="104,181,230,207"/>
+<area shape="rect" id="node3" title=" " coords="564,101,653,126"/>
+<area shape="rect" id="node4" title=" " coords="677,101,780,126"/>
+<area shape="rect" id="node5" href="$simple__diff_8hpp_source.html" title=" " coords="26,101,134,126"/>
+<area shape="rect" id="node6" title=" " coords="255,181,314,207"/>
+<area shape="rect" id="node8" href="$summarize__comparisons_8hpp.html" title="Utilities for effect summarization." coords="349,101,540,126"/>
+<area shape="rect" id="node12" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." coords="159,93,274,133"/>
+<area shape="rect" id="node13" title=" " coords="804,101,954,126"/>
+<area shape="rect" id="node14" title=" " coords="978,101,1028,126"/>
+<area shape="rect" id="node15" title=" " coords="1053,101,1100,126"/>
+<area shape="rect" id="node7" title=" " coords="26,181,79,207"/>
+<area shape="rect" id="node9" title=" " coords="338,181,412,207"/>
+<area shape="rect" id="node10" title=" " coords="437,181,505,207"/>
+<area shape="rect" id="node11" title=" " coords="530,181,588,207"/>
 </map>
