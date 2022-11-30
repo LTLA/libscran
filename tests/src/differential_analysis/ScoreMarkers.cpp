@@ -366,6 +366,55 @@ INSTANTIATE_TEST_CASE_P(
 
 /*********************************************/
 
+// Checking that we get the same results for different cache sizes.
+
+class ScoreMarkersCacheTest : public ::testing::TestWithParam<std::tuple<int, int> >, public ScoreMarkersTestCore {
+protected:
+    void SetUp() {
+        assemble();
+    }
+
+    template<class EffectSummary>
+    void compare_effects(int ngroups, const EffectSummary& res, const EffectSummary& other) const {
+        for (int s = 0; s < scran::differential_analysis::n_summaries; ++s) {
+            EXPECT_EQ(res[s].size(), other[s].size());
+            for (int l = 0; l < ngroups; ++l) {
+                EXPECT_EQ(res[s][l], other[s][l]);
+            }
+        }
+    }
+};
+
+TEST_P(ScoreMarkersCacheTest, Basic) {
+    auto param = GetParam();
+
+    auto ngroups = std::get<0>(param);
+    std::vector<int> groupings = create_groupings(dense_row->ncol(), ngroups);
+    auto cache_size = std::get<1>(param);
+
+    scran::ScoreMarkers chd;
+    chd.set_cache_size(cache_size);
+    auto cached = chd.run(dense_row.get(), groupings.data());
+    chd.set_cache_size(0);
+    auto uncached = chd.run(dense_row.get(), groupings.data());
+
+    compare_effects(ngroups, cached.cohen, uncached.cohen);
+    compare_effects(ngroups, cached.auc, uncached.auc);
+    compare_effects(ngroups, cached.lfc, uncached.lfc);
+    compare_effects(ngroups, cached.delta_detected, uncached.delta_detected);
+}
+
+INSTANTIATE_TEST_CASE_P(
+    ScoreMarkersCache,
+    ScoreMarkersCacheTest,
+    ::testing::Combine(
+        ::testing::Values(2, 3, 4, 5), // number of clusters
+        ::testing::Values(5, 10, 20, 100) // size of the cache
+    )
+);
+
+/*********************************************/
+
 class ScoreMarkersScenarioTest : public ::testing::TestWithParam<std::tuple<int, bool> >, public ScoreMarkersTestCore {
     void SetUp() {
         assemble();

@@ -7,6 +7,7 @@
 #include <limits>
 #include <algorithm>
 #include <cmath>
+#include <type_traits>
 
 namespace scran {
 
@@ -44,7 +45,7 @@ inline double cohen_denominator(double left_var, double right_var) {
 }
 
 template<typename Stat, typename Ls, class Output>
-void compute_pairwise_cohens_d(int g1, int g2, const Stat* means, const Stat* vars, const Ls& level_size, int ngroups, int nblocks, double threshold, Output& output) {
+void compute_pairwise_cohens_d_internal(int g1, int g2, const Stat* means, const Stat* vars, const Ls& level_size, int ngroups, int nblocks, double threshold, Output& output) {
     double total_weight = 0;
     constexpr bool do_both_sides = !std::is_same<Stat, Output>::value;
 
@@ -105,14 +106,16 @@ void compute_pairwise_cohens_d(int g1, int g2, const Stat* means, const Stat* va
     }
 }
 
-template<typename Stat, typename Ls>
-void compute_pairwise_cohens_d(int g1, const Stat* means, const Stat* vars, const Ls& level_size, int ngroups, int nblocks, double threshold, Stat* output) {
-    for (int g2 = 0; g2 < ngroups; ++g2) {
-        if (g1 == g2) {
-            continue;
-        }
-        output[g2] = 0;
-        compute_pairwise_cohens_d(g1, g2, means, vars, level_size, ngroups, nblocks, threshold, output[g2]);
+template<bool both, typename Stat, typename Ls>
+typename std::conditional<both, std::pair<Stat, Stat>, Stat>::type compute_pairwise_cohens_d(int g1, int g2, const Stat* means, const Stat* vars, const Ls& level_size, int ngroups, int nblocks, double threshold) {
+    if constexpr(!both) {
+        Stat output = 0;
+        compute_pairwise_cohens_d_internal(g1, g2, means, vars, level_size, ngroups, nblocks, threshold, output);
+        return output;
+    } else {
+        std::pair<Stat, Stat> output(0, 0);
+        compute_pairwise_cohens_d_internal(g1, g2, means, vars, level_size, ngroups, nblocks, threshold, output);
+        return output;
     }
 }
 
@@ -120,8 +123,7 @@ template<typename Stat, typename Ls>
 void compute_pairwise_cohens_d (const Stat* means, const Stat* vars, const Ls& level_size, int ngroups, int nblocks, double threshold, Stat* output) {
     for (int g1 = 0; g1 < ngroups; ++g1) {
         for (int g2 = 0; g2 < g1; ++g2) {
-            std::pair<double, double> tmp;
-            compute_pairwise_cohens_d(g1, g2, means, vars, level_size, ngroups, nblocks, threshold, tmp);
+            auto tmp = compute_pairwise_cohens_d<true>(g1, g2, means, vars, level_size, ngroups, nblocks, threshold);
             output[g1 * ngroups + g2] = tmp.first;
             output[g2 * ngroups + g1] = tmp.second;
         }
