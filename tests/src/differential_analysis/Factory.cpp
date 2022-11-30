@@ -430,3 +430,60 @@ INSTANTIATE_TEST_CASE_P(
         ::testing::Values(1, 3) // number of threads
     )
 );
+
+/*******************************************************/
+
+class DifferentialAnalysisEffectsCalculatorThresholdTest : 
+    public DifferentialAnalysisEffectsCalculatorTestCore,
+    public ::testing::Test
+{
+protected:
+    static constexpr size_t nrows = 100;
+    static constexpr size_t ncols = 50;
+
+    void SetUp() {
+        assemble(nrows, ncols);
+    }
+};
+
+TEST_F(DifferentialAnalysisEffectsCalculatorThresholdTest, Smaller) {
+    int ngroups = 2;
+    auto groups = create_groupings(ncols, ngroups);
+
+    scran::differential_analysis::EffectsCalculator runner0(1, 0);
+    Overlord ova0(true, nrows, ngroups);
+    auto state0 = runner0.run(dense_row.get(), groups.data(), ngroups, ova0);
+
+    scran::differential_analysis::EffectsCalculator runner1(1, 1);
+    Overlord ova1(true, nrows, ngroups);
+    auto state1 = runner1.run(dense_row.get(), groups.data(), ngroups, ova1);
+
+    // Setting a threshold should always result in a smaller AUC - 
+    // not necessarily an AUC closer to 0.5, just smaller, because
+    // the treatment of a threshold is as if the distribution was shifted.
+    for (size_t r = 0; r < nrows; ++r) {
+        for (int g1 = 0; g1 < ngroups; ++g1) {
+            for (int g2 = 0; g2 < ngroups; ++g2) {
+                if (g1 == g2) {
+                    continue;
+                }
+                size_t offset = r * ngroups * ngroups + g1 * ngroups + g2;
+                EXPECT_TRUE(ova0.store[offset] >= ova1.store[offset]);
+            }
+        }
+    }
+
+    // Checking that at least one entry was a '>'.
+    EXPECT_NE(ova0.store, ova1.store);
+}
+
+TEST_F(DifferentialAnalysisEffectsCalculatorThresholdTest, Zeroed) {
+    int ngroups = 2;
+    auto groups = create_groupings(ncols, ngroups);
+
+    // Using a huge threshold should force all AUCs to zero.
+    scran::differential_analysis::EffectsCalculator runner(1, 1000);
+    Overlord ova(true, nrows, ngroups);
+    auto state = runner.run(dense_row.get(), groups.data(), ngroups, ova);
+    EXPECT_EQ(ova.store, std::vector<double>(ngroups * ngroups * nrows));
+}
