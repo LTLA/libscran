@@ -38,6 +38,100 @@ protected:
     };
 };
 
+/*******************************************************/
+
+class DifferentialAnalysisEffectsCalculatorEdgeCaseTest : 
+    public DifferentialAnalysisEffectsCalculatorTestCore,
+    public ::testing::Test
+{};
+
+TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, Simple) {
+    size_t ncols = 18;
+    size_t ngroups = 5;
+    auto groups = create_groupings(ncols, ngroups);
+
+    std::vector<double> mat_buffer;
+    size_t nrows = 9;
+    for (size_t r = 1; r <= nrows; ++r) {
+        for (size_t c = 0; c < ncols; ++c) {
+            mat_buffer.push_back(groups[c] * r);
+        }
+    }
+    tatami::DenseRowMatrix<double, int> mat(nrows, ncols, std::move(mat_buffer));
+
+    scran::differential_analysis::EffectsCalculator runner(1, 0);
+    Overlord ova(true, nrows, ngroups);
+    auto state = runner.run(&mat, groups.data(), ngroups, ova);
+
+    // Check that the means are as expected.
+    for (size_t r = 0; r < nrows; ++r) {
+        auto it = state.means.begin() + r * ngroups;
+        std::vector<double> observed(it, it + ngroups);
+
+        std::vector<double> expected(ngroups);
+        for (size_t g = 0; g < ngroups; ++g) {
+            expected[g] = g * (r + 1);
+        }
+        EXPECT_EQ(expected, observed);
+    }
+
+    // Check that the variances and detected are as expected.
+    EXPECT_EQ(state.variances, std::vector<double>(nrows * ngroups));
+
+    std::vector<double> expected(nrows * ngroups, 1);
+    for (size_t r = 0; r < nrows; ++r) {
+        expected[r * ngroups] = 0; // first group is zero because the group index is zero.
+    }
+    EXPECT_EQ(state.detected, expected);
+
+    // Check that the pairwise AUCs are as expected.
+    for (size_t r = 0; r < nrows; ++r) {
+        auto base = ova.store.begin() + r * ngroups * ngroups;
+        std::vector<double> observed(base, base + ngroups * ngroups);
+
+        std::vector<double> expected(ngroups * ngroups);
+        for (size_t g1 = 0; g1 < ngroups; ++g1) {
+            for (size_t g2 = 0; g2 < ngroups; ++g2) {
+                if (g1 == g2) {
+                    continue;
+                }
+                expected[g1 * ngroups + g2] = g1 > g2;
+            }
+        }
+
+        EXPECT_EQ(observed, expected);
+    }
+}
+
+TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, AllZeros) {
+    size_t ncols = 21;
+    size_t ngroups = 5;
+    auto groups = create_groupings(ncols, ngroups);
+
+    size_t nrows = 3;
+    std::vector<double> mat_buffer(ncols * nrows);
+    tatami::DenseRowMatrix<double, int> mat(nrows, ncols, std::move(mat_buffer));
+
+    scran::differential_analysis::EffectsCalculator runner(1, 0);
+    Overlord ova(true, nrows, ngroups);
+    auto state = runner.run(&mat, groups.data(), ngroups, ova);
+
+    EXPECT_EQ(state.means, std::vector<double>(nrows * ngroups));
+    EXPECT_EQ(state.variances, std::vector<double>(nrows * ngroups));
+    EXPECT_EQ(state.detected, std::vector<double>(nrows * ngroups));
+
+    // AUCs should all be tied if they're all zero.
+    std::vector<double> expected(nrows * ngroups * ngroups, 0.5);
+    for (size_t r = 0; r < nrows; ++r) {
+        for (size_t g = 0; g < ngroups; ++g) {
+            expected[r * ngroups * ngroups + g * ngroups + g] = 0; 
+        }
+    }
+    EXPECT_EQ(ova.store, expected);
+}
+
+/*******************************************************/
+
 class DifferentialAnalysisEffectsCalculatorUnblockedTest : 
     public DifferentialAnalysisEffectsCalculatorTestCore,
     public ::testing::TestWithParam<std::tuple<int, bool, int> >
@@ -122,4 +216,5 @@ INSTANTIATE_TEST_CASE_P(
     )
 );
 
+/*******************************************************/
 
