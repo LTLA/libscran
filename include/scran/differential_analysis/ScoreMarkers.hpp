@@ -108,7 +108,7 @@ public:
             actions[other] = 0;
             auto& x = cached.begin()->second;
             for (size_t i = 0, end = x.size(); i < end; ++i) {
-                full_set[group + i * ngroups] = x[i];
+                full_set[other + i * ngroups] = x[i];
             }
 
             vector_pool.emplace_back(std::move(x)); // recycle memory to avoid heap reallocations.
@@ -843,6 +843,8 @@ private:
             cache.clear();
 
             for (int group = 0; group < ngroups; ++group) {
+                cache.configure(group);
+
 #ifndef SCRAN_CUSTOM_PARALLEL
                 #pragma omp parallel num_threads(nthreads)
                 {
