@@ -4,55 +4,30 @@
 #include "tatami/base/Matrix.hpp"
 #include "tatami/base/DelayedBind.hpp"
 #include "tatami/base/DelayedSubset.hpp"
-#include "tatami/utils/convert_to_dense.hpp"
-#include "tatami/utils/convert_to_sparse.hpp"
 #include "scran/differential_analysis/ScoreMarkers.hpp"
 #include "scran/differential_analysis/PairwiseEffects.hpp"
 #include "scran/differential_analysis/SummarizeEffects.hpp"
 
-#include "../data/data.h"
 #include "../utils/compare_almost_equal.h"
-
-class ScoreMarkersTestCore {
-protected:
-    std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
-
-    void assemble() {
-        dense_row = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
-        dense_column = tatami::convert_to_dense(dense_row.get(), 1);
-        sparse_row = tatami::convert_to_sparse(dense_row.get(), 0);
-        sparse_column = tatami::convert_to_sparse(dense_row.get(), 1);
-    }
-
-    static std::vector<int> create_groupings(size_t n, int ngroups) {
-        std::vector<int> groupings(n);
-        for (size_t g = 0; g < groupings.size(); ++g) {
-            groupings[g] = g % ngroups;
-        }
-        return groupings;
-    }
-};
+#include "utils.h"
 
 /*********************************************/
 
-class ScoreMarkersTest : public ::testing::TestWithParam<std::tuple<int, bool, int> >, public ScoreMarkersTestCore {
+class ScoreMarkersTest : 
+    public ::testing::TestWithParam<std::tuple<int, bool, int> >, 
+    public DifferentialAnalysisTestCore {
 protected:
     void SetUp() {
         assemble();
     }
-    
-    template<class Result>
-    static void compare_basic(int ngroups, const Result& res, const Result& other) {
-        for (int l = 0; l < ngroups; ++l) {
-            EXPECT_EQ(other.means[l].size(), 1);
-            EXPECT_EQ(other.detected[l].size(), 1);
-            compare_almost_equal(res.means[l][0], other.means[l][0]);
-            compare_almost_equal(res.detected[l][0], other.detected[l][0]);
-        }
-    }
 
-    template<class Result>
-    static void compare_blocked(int ngroups, int nblocks, const Result& res, const Result& other) {
+    template<class Left, class Right>
+    static void compare_basic(const Left& res, const Right& other, int ngroups, int nblocks) {
+        EXPECT_EQ(other.means.size(), ngroups);
+        EXPECT_EQ(other.detected.size(), ngroups);
+        EXPECT_EQ(res.means.size(), ngroups);
+        EXPECT_EQ(res.detected.size(), ngroups);
+
         for (int l = 0; l < ngroups; ++l) {
             EXPECT_EQ(other.means[l].size(), nblocks);
             EXPECT_EQ(other.detected[l].size(), nblocks);
@@ -64,27 +39,29 @@ protected:
         }
     }
 
-    template<class Result>
-    static void compare_effects(int ngroups, const Result& res, const Result& other, bool do_auc) {
+    template<class EffectVectors>
+    static void compare_effects(int ngroups, const EffectVectors& res, const EffectVectors& other) {
+        EXPECT_EQ(res.size(), scran::differential_analysis::n_summaries);
+        EXPECT_EQ(other.size(), scran::differential_analysis::n_summaries);
+
         // Don't compare min-rank here, as minor numerical differences
         // can change the ranks by a small amount when effects are tied.
         for (int s = 0; s < scran::differential_analysis::MIN_RANK; ++s) {
-            EXPECT_EQ(res.cohen[s].size(), other.cohen[s].size());
-            EXPECT_EQ(res.lfc[s].size(), other.lfc[s].size());
-            EXPECT_EQ(res.delta_detected[s].size(), other.delta_detected[s].size());
-
+            EXPECT_EQ(res[s].size(), ngroups);
+            EXPECT_EQ(other[s].size(), ngroups);
             for (int l = 0; l < ngroups; ++l) {
-                compare_almost_equal(res.cohen[s][l], other.cohen[s][l]);
-                compare_almost_equal(res.lfc[s][l], other.lfc[s][l]);
-                compare_almost_equal(res.delta_detected[s][l], other.delta_detected[s][l]);
+                compare_almost_equal(res[s][l], other[s][l]);
             }
+        }
+    }
 
-            if (do_auc) {
-                EXPECT_EQ(res.auc[s].size(), other.auc[s].size());
-                for (int l = 0; l < ngroups; ++l) {
-                    compare_almost_equal(res.auc[s][l], other.auc[s][l]);
-                }
-            }
+    template<class Result>
+    static void compare_effects(int ngroups, const Result& res, const Result& other, bool do_auc) {
+        compare_effects(ngroups, res.cohen, other.cohen);
+        compare_effects(ngroups, res.lfc, other.lfc);
+        compare_effects(ngroups, res.delta_detected, other.delta_detected);
+        if (do_auc) {
+            compare_effects(ngroups, res.auc, other.auc);
         }
     }
 
@@ -115,143 +92,131 @@ protected:
     }
 };
 
-TEST_P(ScoreMarkersTest, Basics) {
-    auto ngroups = std::get<0>(GetParam());
-    std::vector<int> groupings = create_groupings(dense_row->ncol(), ngroups);
+// Comparing the efficient ScoreMarkers implementation against the
+// PairwiseEffects + SummarizeEffects combination, which is less mind-bending
+// but requires holding a large 3D matrix in memory.
 
+TEST_P(ScoreMarkersTest, AgainstPairwise) {
+    auto param = GetParam();
+    auto ngroups = std::get<0>(param);
+    bool do_auc = std::get<1>(param);
+    auto nthreads = std::get<2>(param);
+
+    std::vector<int> groupings = create_groupings(dense_row->ncol(), ngroups);
     scran::ScoreMarkers chd;
-    bool do_auc = std::get<1>(GetParam());
+    chd.set_num_threads(nthreads);
     chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
     auto res = chd.run(dense_row.get(), groupings.data());
 
-    auto nthreads = std::get<2>(GetParam());
-    chd.set_num_threads(nthreads);
+    scran::PairwiseEffects paired;
+    paired.set_num_threads(nthreads);
+    paired.set_compute_auc(do_auc); // false, if we want to check the running implementations.
+    auto pairres = paired.run(dense_row.get(), groupings.data());
+    compare_basic(res, pairres, ngroups, 1);
 
-    if (nthreads == 1) {
-        size_t ngenes = dense_row->nrow();
+    scran::SummarizeEffects summarizer;
+    summarizer.set_num_threads(nthreads);
+    size_t ngenes = dense_row->nrow();
+    auto cohen_summ = summarizer.run(ngenes, ngroups, pairres.cohen.data());
+    compare_effects(ngroups, cohen_summ, res.cohen);
 
-        // Running cursory checks on the metrics.
-        for (size_t g = 0; g < ngenes; ++g) {
-            std::vector<double> buf(dense_row->ncol());
-            auto ptr = dense_row->row(g, buf.data());
+    auto lfc_summ = summarizer.run(ngenes, ngroups, pairres.lfc.data());
+    compare_effects(ngroups, lfc_summ, res.lfc);
 
-            for (int l = 0; l < ngroups; ++l) {
-                double curmean = 0, curdetected = 0;
-                int count = 0;
-                for (int i = l; i < dense_row->ncol(); i += ngroups) {
-                    curmean += ptr[i];
-                    curdetected += (ptr[i] > 0);
-                    ++count;
-                }
+    auto delta_detected_summ = summarizer.run(ngenes, ngroups, pairres.delta_detected.data());
+    compare_effects(ngroups, delta_detected_summ, res.delta_detected);
 
-                curmean /= count;
-                EXPECT_EQ(curmean, res.means[l][0][g]);
-                curdetected /= count;
-                EXPECT_EQ(curdetected, res.detected[l][0][g]);
-            }
-        }
-
-        // Running some further checks on the effects.
-        for (int l = 0; l < ngroups; ++l) {
-            check_effects(ngenes, l, res.cohen);
-            check_effects(ngenes, l, res.lfc);
-
-            check_effects(ngenes, l, res.delta_detected);
-            for (size_t g = 0; g < ngenes; ++g) {
-                double curmin = res.delta_detected[scran::differential_analysis::MIN][l][g];
-                double curmax = res.delta_detected[scran::differential_analysis::MAX][l][g];
-                EXPECT_TRUE(curmin >= -1);
-                EXPECT_TRUE(curmax <= 1);
-            }
-
-            if (do_auc) {
-                check_effects(ngenes, l, res.auc);
-                for (size_t g = 0; g < ngenes; ++g) {
-                    double curmin = res.auc[scran::differential_analysis::MIN][l][g];
-                    double curmax = res.auc[scran::differential_analysis::MAX][l][g];
-                    EXPECT_TRUE(curmin >= 0);
-                    EXPECT_TRUE(curmax <= 1);
-                }
-            }
-        }
-    } else {
-        // Comparing to the same call, but parallelized.
-        auto res1 = chd.run(dense_row.get(), groupings.data());
-        compare_basic(ngroups, res, res1);
-        compare_effects(ngroups, res, res1, do_auc);
+    if (do_auc) {
+        auto auc_summ = summarizer.run(ngenes, ngroups, pairres.auc.data());
+        compare_effects(ngroups, auc_summ, res.auc);
     }
-
-    // Comparing to other implementations. 
-    auto res2 = chd.run(sparse_row.get(), groupings.data());
-    compare_basic(ngroups, res, res2);
-    compare_effects(ngroups, res, res2, do_auc);
-
-    auto res3 = chd.run(dense_column.get(), groupings.data());
-    compare_basic(ngroups, res, res3);
-    compare_effects(ngroups, res, res3, do_auc);
-
-    auto res4 = chd.run(sparse_column.get(), groupings.data());
-    compare_basic(ngroups, res, res4);
-    compare_effects(ngroups, res, res4, do_auc);
 }
 
-TEST_P(ScoreMarkersTest, Blocked) {
-    // Check that everything is more or less computed correctly,
-    // by duplicating the matrices and blocking on them.
-    auto combined = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{dense_row, dense_row});
+TEST_P(ScoreMarkersTest, AgainstPairwiseBlocked) {
+    auto param = GetParam();
+    auto ngroups = std::get<0>(param);
+    bool do_auc = std::get<1>(param);
+    auto nthreads = std::get<2>(param);
 
     auto NC = dense_row->ncol();
-    auto ngroups = std::get<0>(GetParam());
-    std::vector<int> groupings = create_groupings(NC * 2, ngroups);
-    std::vector<int> blocks(groupings.size());
-    std::fill(blocks.begin() + NC, blocks.end(), 1);
+    std::vector<int> groupings = create_groupings(NC, ngroups);
+    std::vector<int> blocks = create_blocks(NC, 2);
 
     scran::ScoreMarkers chd;
-    bool do_auc = std::get<1>(GetParam());
     chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
-    auto comres = chd.run_blocked(combined.get(), groupings.data(), blocks.data());
-
-    auto nthreads = std::get<2>(GetParam());
     chd.set_num_threads(nthreads);
+    auto res = chd.run_blocked(dense_row.get(), groupings.data(), blocks.data());
 
-    if (nthreads == 1) {
-        std::vector<int> g1(groupings.begin(), groupings.begin() + NC);
-        auto res1 = chd.run(dense_row.get(), g1.data());
-        std::vector<int> g2(groupings.begin() + NC, groupings.end());
-        auto res2 = chd.run(dense_row.get(), g2.data());
+    scran::PairwiseEffects paired;
+    paired.set_compute_auc(do_auc); // false, if we want to check the running implementations.
+    paired.set_num_threads(nthreads);
+    auto pairres = paired.run_blocked(dense_row.get(), groupings.data(), blocks.data());
+    compare_basic(res, pairres, ngroups, 2);
 
-        if (NC % ngroups == 0) {
-            compare_effects(ngroups, comres, res1, do_auc);
-            compare_effects(ngroups, comres, res2, do_auc);
+    scran::SummarizeEffects summarizer;
+    summarizer.set_num_threads(nthreads);
+
+    size_t ngenes = dense_row->nrow();
+    auto cohen_summ = summarizer.run(ngenes, ngroups, pairres.cohen.data());
+    compare_effects(ngroups, cohen_summ, res.cohen);
+
+    auto lfc_summ = summarizer.run(ngenes, ngroups, pairres.lfc.data());
+    compare_effects(ngroups, lfc_summ, res.lfc);
+
+    auto delta_detected_summ = summarizer.run(ngenes, ngroups, pairres.delta_detected.data());
+    compare_effects(ngroups, delta_detected_summ, res.delta_detected);
+
+    if (do_auc) {
+        auto auc_summ = summarizer.run(ngenes, ngroups, pairres.auc.data());
+        compare_effects(ngroups, auc_summ, res.auc);
+    }
+}
+
+TEST_P(ScoreMarkersTest, Basic) {
+    auto param = GetParam();
+    auto ngroups = std::get<0>(param);
+    bool do_auc = std::get<1>(param);
+    auto nthreads = std::get<2>(param);
+
+    std::vector<int> groupings = create_groupings(dense_row->ncol(), ngroups);
+    size_t ngenes = dense_row->nrow();
+
+    scran::ScoreMarkers chd;
+    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
+    chd.set_num_threads(nthreads);
+    auto res = chd.run(dense_row.get(), groupings.data());
+
+    // Running some further checks on the effects.
+    for (int l = 0; l < ngroups; ++l) {
+        check_effects(ngenes, l, res.cohen);
+        check_effects(ngenes, l, res.lfc);
+
+        check_effects(ngenes, l, res.delta_detected);
+        for (size_t g = 0; g < ngenes; ++g) {
+            double curmin = res.delta_detected[scran::differential_analysis::MIN][l][g];
+            double curmax = res.delta_detected[scran::differential_analysis::MAX][l][g];
+            EXPECT_TRUE(curmin >= -1);
+            EXPECT_TRUE(curmax <= 1);
         }
 
-        for (int l = 0; l < ngroups; ++l) {
-            compare_almost_equal(comres.means[l][0], res1.means[l][0]);
-            compare_almost_equal(comres.detected[l][0], res1.detected[l][0]);
-            compare_almost_equal(comres.means[l][1], res2.means[l][0]);
-            compare_almost_equal(comres.detected[l][1], res2.detected[l][0]);
+        if (do_auc) {
+            check_effects(ngenes, l, res.auc);
+            for (size_t g = 0; g < ngenes; ++g) {
+                double curmin = res.auc[scran::differential_analysis::MIN][l][g];
+                double curmax = res.auc[scran::differential_analysis::MAX][l][g];
+                EXPECT_TRUE(curmin >= 0);
+                EXPECT_TRUE(curmax <= 1);
+            }
         }
-    } else {
-        // Comparing to the same call, but parallelized.
-        auto comres1 = chd.run_blocked(combined.get(), groupings.data(), blocks.data());
-        compare_blocked(ngroups, 2, comres, comres1);
-        compare_effects(ngroups, comres, comres1, do_auc);
     }
 
-    auto combined2 = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{sparse_row, sparse_row});
-    auto comres2 = chd.run_blocked(combined2.get(), groupings.data(), blocks.data());
-    compare_blocked(ngroups, 2, comres, comres2);
-    compare_effects(ngroups, comres, comres2, do_auc);
-
-    auto combined3 = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{dense_column, dense_column});
-    auto comres3 = chd.run_blocked(combined3.get(), groupings.data(), blocks.data());
-    compare_blocked(ngroups, 2, comres, comres3);
-    compare_effects(ngroups, comres, comres3, do_auc);
-
-    auto combined4 = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{sparse_column, sparse_column});
-    auto comres4 = chd.run_blocked(combined4.get(), groupings.data(), blocks.data());
-    compare_blocked(ngroups, 2, comres, comres4);
-    compare_effects(ngroups, comres, comres4, do_auc);
+    if (nthreads > 1) {
+        // Comparing to the same call, but not parallelized.
+        chd.set_num_threads(1);
+        auto res1 = chd.run(dense_row.get(), groupings.data());
+        compare_basic(res, res1, ngroups, 1);
+        compare_effects(ngroups, res, res1, do_auc);
+    }
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -266,109 +231,11 @@ INSTANTIATE_TEST_CASE_P(
 
 /*********************************************/
 
-// Comparing the efficient ScoreMarkers implementation against the
-// PairwiseEffects + SummarizeEffects combination, which is less mind-bending
-// but requires holding a large 3D matrix in memory.
-
-class ScoreMarkersAgainstPairwiseTest : public ::testing::TestWithParam<std::tuple<int, bool> >, public ScoreMarkersTestCore {
-protected:
-    void SetUp() {
-        assemble();
-    }
-
-    template<class EffectSummary>
-    void compare_effects(int ngroups, const EffectSummary& res, const EffectSummary& other) const {
-        for (int s = 0; s < scran::differential_analysis::n_summaries; ++s) {
-            EXPECT_EQ(res[s].size(), other[s].size());
-            for (int l = 0; l < ngroups; ++l) {
-                EXPECT_EQ(res[s][l], other[s][l]);
-            }
-        }
-    }
-};
-
-TEST_P(ScoreMarkersAgainstPairwiseTest, Simple) {
-    auto param = GetParam();
-
-    auto ngroups = std::get<0>(param);
-    std::vector<int> groupings = create_groupings(dense_row->ncol(), ngroups);
-    bool do_auc = std::get<1>(param);
-
-    scran::ScoreMarkers chd;
-    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
-    auto res = chd.run(dense_row.get(), groupings.data());
-
-    scran::PairwiseEffects paired;
-    paired.set_compute_auc(do_auc); // false, if we want to check the running implementations.
-    auto pairres = paired.run(dense_row.get(), groupings.data());
-
-    scran::SummarizeEffects summarizer;
-    size_t ngenes = dense_row->nrow();
-    auto cohen_summ = summarizer.run(ngenes, ngroups, pairres.cohen.data());
-    compare_effects(ngroups, cohen_summ, res.cohen);
-
-    auto lfc_summ = summarizer.run(ngenes, ngroups, pairres.lfc.data());
-    compare_effects(ngroups, lfc_summ, res.lfc);
-
-    auto delta_detected_summ = summarizer.run(ngenes, ngroups, pairres.delta_detected.data());
-    compare_effects(ngroups, delta_detected_summ, res.delta_detected);
-
-    if (do_auc) {
-        auto auc_summ = summarizer.run(ngenes, ngroups, pairres.auc.data());
-        compare_effects(ngroups, auc_summ, res.auc);
-    }
-}
-
-TEST_P(ScoreMarkersAgainstPairwiseTest, Blocked) {
-    auto param = GetParam();
-
-    auto combined = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{dense_row, dense_row});
-    auto NC = dense_row->ncol();
-    auto ngroups = std::get<0>(GetParam());
-    std::vector<int> groupings = create_groupings(NC * 2, ngroups);
-    std::vector<int> blocks(groupings.size());
-    std::fill(blocks.begin() + NC, blocks.end(), 1);
-
-    bool do_auc = std::get<1>(param);
-    scran::ScoreMarkers chd;
-    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
-    auto res = chd.run(dense_row.get(), groupings.data());
-
-    scran::PairwiseEffects paired;
-    paired.set_compute_auc(do_auc); // false, if we want to check the running implementations.
-    auto pairres = paired.run(dense_row.get(), groupings.data());
-
-    scran::SummarizeEffects summarizer;
-    size_t ngenes = dense_row->nrow();
-    auto cohen_summ = summarizer.run(ngenes, ngroups, pairres.cohen.data());
-    compare_effects(ngroups, cohen_summ, res.cohen);
-
-    auto lfc_summ = summarizer.run(ngenes, ngroups, pairres.lfc.data());
-    compare_effects(ngroups, lfc_summ, res.lfc);
-
-    auto delta_detected_summ = summarizer.run(ngenes, ngroups, pairres.delta_detected.data());
-    compare_effects(ngroups, delta_detected_summ, res.delta_detected);
-
-    if (do_auc) {
-        auto auc_summ = summarizer.run(ngenes, ngroups, pairres.auc.data());
-        compare_effects(ngroups, auc_summ, res.auc);
-    }
-}
-
-INSTANTIATE_TEST_CASE_P(
-    ScoreMarkersAgainstPairwise,
-    ScoreMarkersAgainstPairwiseTest,
-    ::testing::Combine(
-        ::testing::Values(2, 3, 4, 5), // number of clusters
-        ::testing::Values(false, true) // with or without the AUC?
-    )
-);
-
-/*********************************************/
-
 // Checking that we get the same results for different cache sizes.
 
-class ScoreMarkersCacheTest : public ::testing::TestWithParam<std::tuple<int, int> >, public ScoreMarkersTestCore {
+class ScoreMarkersCacheTest : 
+    public ::testing::TestWithParam<std::tuple<int, int> >, 
+    public DifferentialAnalysisTestCore {
 protected:
     void SetUp() {
         assemble();
@@ -408,26 +275,25 @@ INSTANTIATE_TEST_CASE_P(
     ScoreMarkersCache,
     ScoreMarkersCacheTest,
     ::testing::Combine(
-        ::testing::Values(2, 3, 4, 5), // number of clusters
+        ::testing::Values(2, 4, 8, 16), // number of clusters
         ::testing::Values(5, 10, 20, 100) // size of the cache
     )
 );
 
 /*********************************************/
 
-class ScoreMarkersScenarioTest : public ::testing::TestWithParam<std::tuple<int, bool> >, public ScoreMarkersTestCore {
+class ScoreMarkersScenarioTest : public ::testing::Test, public DifferentialAnalysisTestCore {
+protected:
     void SetUp() {
         assemble();
     }
 };
 
-TEST_P(ScoreMarkersScenarioTest, Thresholds) {
-    auto ngroups = std::get<0>(GetParam());
+TEST_F(ScoreMarkersScenarioTest, Thresholds) {
+    int ngroups = 3;
     std::vector<int> groupings = create_groupings(dense_row->ncol(), ngroups);
 
     scran::ScoreMarkers chd;
-    bool do_auc = std::get<1>(GetParam());
-    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
     auto ref = chd.run(dense_row.get(), groupings.data());
     auto out = chd.set_threshold(1).run(dense_row.get(), groupings.data());
 
@@ -437,35 +303,29 @@ TEST_P(ScoreMarkersScenarioTest, Thresholds) {
             for (size_t g = 0; g < dense_row->nrow(); ++g) {
                 EXPECT_TRUE(ref.cohen[s][l][g] > out.cohen[s][l][g]);
 
-                if (do_auc) {
-                    some_diff |= (ref.auc[s][l][g] > out.auc[s][l][g]);
-
-                    // '>' is not guaranteed due to imprecision with ranks... but (see below).
-                    EXPECT_TRUE(ref.auc[s][l][g] >= out.auc[s][l][g]); 
-                }
+                // '>' is not guaranteed due to imprecision with ranks... but (see below).
+                some_diff |= (ref.auc[s][l][g] > out.auc[s][l][g]);
+                EXPECT_TRUE(ref.auc[s][l][g] >= out.auc[s][l][g]); 
             }
         }
     }
 
-    if (do_auc) {
-        EXPECT_TRUE(some_diff); // (from above)... at least one is '>', hopefully.
-    }
+    EXPECT_TRUE(some_diff); // (from above)... at least one is '>', hopefully.
 }
 
-TEST_P(ScoreMarkersScenarioTest, BlockConfounded) {
+TEST_F(ScoreMarkersScenarioTest, BlockConfounded) {
     auto NC = dense_row->ncol();
-    auto ngroups = std::get<0>(GetParam());
+    int ngroups = 4;
     std::vector<int> groupings = create_groupings(NC, ngroups);
 
     // Block is fully confounded with one group.
     std::vector<int> blocks(NC);
+    int lost = 0;
     for (size_t c = 0; c < NC; ++c) {
-        blocks[c] = groupings[c] == 0;
+        blocks[c] = groupings[c] == lost;
     }
 
     scran::ScoreMarkers chd;
-    bool do_auc = std::get<1>(GetParam());
-    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
     auto comres = chd.run_blocked(dense_row.get(), groupings.data(), blocks.data());
 
     // Excluding the group and running on the remaining samples.
@@ -481,47 +341,34 @@ TEST_P(ScoreMarkersScenarioTest, BlockConfounded) {
 
     auto sub = tatami::make_DelayedSubset<1>(dense_row, std::move(keep));
     auto ref = chd.run(sub.get(), subgroups.data()); 
-    
-    // Expect all but the first group to give the same results.
+
+    // First group is effectively all-NA.
     int ngenes = dense_row->nrow();
-    for (int l = 0; l < (ngroups == 2 ? 2 : 1); ++l) {
-        for (int s = 0; s < scran::differential_analysis::MIN_RANK; ++s) {
-            for (int g = 0; g < ngenes; ++g) {
-                EXPECT_TRUE(std::isnan(comres.cohen[s][l][g]));
-                EXPECT_TRUE(std::isnan(comres.lfc[s][l][g]));
-                EXPECT_TRUE(std::isnan(comres.delta_detected[s][l][g]));
-                if (do_auc) {
-                    EXPECT_TRUE(std::isnan(comres.auc[s][l][g]));
-                }
-            }
-        }
+    for (int s = 0; s < scran::differential_analysis::MIN_RANK; ++s) {
         for (int g = 0; g < ngenes; ++g) {
-            EXPECT_EQ(comres.cohen[scran::differential_analysis::MIN_RANK][l][g], ngenes + 1);
+            EXPECT_TRUE(std::isnan(comres.cohen[s][lost][g]));
+            EXPECT_TRUE(std::isnan(comres.lfc[s][lost][g]));
+            EXPECT_TRUE(std::isnan(comres.delta_detected[s][lost][g]));
+            EXPECT_TRUE(std::isnan(comres.auc[s][lost][g]));
         }
     }
+    for (int g = 0; g < ngenes; ++g) {
+        EXPECT_EQ(comres.cohen[scran::differential_analysis::MIN_RANK][lost][g], ngenes + 1);
+    }
 
-    if (ngroups > 2) {
-        for (int l = 1; l < ngroups; ++l) {
-            for (int s = 0; s < scran::differential_analysis::n_summaries; ++s) {
-                EXPECT_EQ(ref.cohen[s][l - 1], comres.cohen[s][l]);
-                EXPECT_EQ(ref.lfc[s][l - 1], comres.lfc[s][l]);
-                EXPECT_EQ(ref.delta_detected[s][l - 1], comres.delta_detected[s][l]);
-                if (do_auc) {
-                    EXPECT_EQ(ref.auc[s][l - 1], comres.auc[s][l]);
-                }
-            }
+    // Expect all but the first group to give the same results.
+    for (int l = 0; l < ngroups; ++l) {
+        if (l == lost) {
+            continue;
+        }
+        for (int s = 0; s < scran::differential_analysis::n_summaries; ++s) {
+            EXPECT_EQ(ref.cohen[s][l - 1], comres.cohen[s][l]);
+            EXPECT_EQ(ref.lfc[s][l - 1], comres.lfc[s][l]);
+            EXPECT_EQ(ref.delta_detected[s][l - 1], comres.delta_detected[s][l]);
+            EXPECT_EQ(ref.auc[s][l - 1], comres.auc[s][l]);
         }
     }
 }
- 
-INSTANTIATE_TEST_CASE_P(
-    ScoreMarkersScenario,
-    ScoreMarkersScenarioTest,
-    ::testing::Combine(
-        ::testing::Values(2, 3, 4, 5), // number of clusters
-        ::testing::Values(false, true) // with or without the AUC?
-    )
-);
 
 /*********************************************/
 
