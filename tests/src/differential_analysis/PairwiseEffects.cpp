@@ -260,6 +260,38 @@ TEST_F(PairwiseEffectsScenarioTest, Self) {
     compare_almost_equal(delta_detected, res.delta_detected);
 }
 
+TEST_F(PairwiseEffectsScenarioTest, Perfect) {
+    int ngroups = 5;
+    std::vector<int> groupings = create_groupings(ncols, ngroups);
+
+    int nrows = 33;
+    std::vector<double> pretend;
+    for (int r = 0; r < nrows; ++r) {
+        pretend.insert(pretend.end(), groupings.begin(), groupings.end());
+    }
+
+    tatami::DenseRowMatrix<double, int> mat(nrows, groupings.size(), std::move(pretend));
+    scran::PairwiseEffects chd;
+    auto res = chd.run(&mat, groupings.data());
+
+    for (size_t g = 0; g < nrows; ++g) {
+        for (int l = 0; l < ngroups; ++l) {
+            for (int l2 = 0; l2 < ngroups; ++l2) {
+                if (l == l2) {
+                    continue;
+                }
+
+                size_t offset = g * ngroups * ngroups + l * ngroups + l2;  
+                EXPECT_EQ(res.lfc[offset], l - l2);
+                EXPECT_EQ(res.delta_detected[offset], (l > 0) - (l2 > 0));
+                EXPECT_EQ(res.auc[offset], static_cast<double>(l > l2));
+                EXPECT_TRUE(std::isinf(res.cohen[offset]));
+                EXPECT_EQ(res.cohen[offset] > 0, l > l2);
+            }
+        }
+    }
+}
+
 TEST_F(PairwiseEffectsScenarioTest, Thresholds) {
     int ngroups = 3;
     std::vector<int> groupings = create_groupings(ncols, ngroups);
@@ -275,7 +307,7 @@ TEST_F(PairwiseEffectsScenarioTest, Thresholds) {
         for (int l = 0; l < ngroups; ++l) {
             for (int l2 = 0; l2 < ngroups; ++l2) {
                 if (l == l2) {
-                    break;
+                    continue;
                 }
 
                 // Threshold should have some effect for cohen.
