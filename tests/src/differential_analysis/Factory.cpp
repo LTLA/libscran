@@ -100,6 +100,60 @@ TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, AllZeros) {
     EXPECT_EQ(ova.store, expected);
 }
 
+TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, MissingGroup) {
+    size_t ncols = 17;
+    size_t ngroups = 3;
+
+    auto groups = create_groupings(ncols, ngroups);
+    int lost = 1;
+    for (auto& g : groups) {
+        if (g == lost) {
+            g = 0;
+        }
+    }
+
+    size_t nrows = 13;
+    assemble(nrows, ncols);
+
+    scran::differential_analysis::EffectsCalculator runner(1, 0);
+    EffectsOverlord ova(true, nrows, ngroups);
+    auto state = runner.run(dense_row->get(), groups.data(), ngroups, ova);
+
+    for (size_t r = 0; r < nrows; ++r) {
+        EXPECT_TRUE(std::isnan(state.means[r * ngroups + lost]));
+        EXPECT_TRUE(std::isnan(state.variances[r * ngroups + lost]));
+        EXPECT_TRUE(std::isnan(state.detected[r * ngroups + lost]));
+    }
+}
+
+TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, MissingBlock) {
+    size_t ncols = 19;
+    size_t ngroups = 3;
+    auto groups = create_groupings(ncols, ngroups);
+
+    int nblocks = 2;
+    std::vector<int> blocks(ncols, 1);
+
+    size_t nrows = 21;
+    assemble(nrows, ncols);
+
+    scran::differential_analysis::EffectsCalculator runner(1, 0);
+    EffectsOverlord ova(true, nrows, ngroups);
+    auto state = runner.run_blocked(dense_row->get(), groups.data(), ngroups, blocks.data(), nblocks, ova);
+
+    for (size_t r = 0; r < nrows; ++r) {
+        for (int g = 0; g < ngroups; ++g) {
+            EXPECT_TRUE(std::isnan(state.means[r * ngroups * nblocks + g]));
+            EXPECT_TRUE(std::isnan(state.variances[r * ngroups * nblocks + g]));
+            EXPECT_TRUE(std::isnan(state.detected[r * ngroups * nblocks + g]));
+
+            EXPECT_FALSE(std::isnan(state.means[r * ngroups * nblocks + ngroups + g]));
+            EXPECT_FALSE(std::isnan(state.variances[r * ngroups * nblocks + ngroups + g]));
+            EXPECT_FALSE(std::isnan(state.detected[r * ngroups * nblocks + ngroups + g]));
+        }
+    }
+}
+
 /*******************************************************/
 
 class DifferentialAnalysisEffectsCalculatorUnblockedTest : 
