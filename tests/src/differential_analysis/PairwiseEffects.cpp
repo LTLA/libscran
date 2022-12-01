@@ -4,8 +4,6 @@
 #include "tatami/base/Matrix.hpp"
 #include "tatami/base/DelayedBind.hpp"
 #include "tatami/base/DelayedSubset.hpp"
-#include "tatami/utils/convert_to_dense.hpp"
-#include "tatami/utils/convert_to_sparse.hpp"
 #include "scran/differential_analysis/PairwiseEffects.hpp"
 
 #include "../utils/compare_almost_equal.h"
