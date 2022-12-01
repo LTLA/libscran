@@ -117,12 +117,36 @@ TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, MissingGroup) {
 
     scran::differential_analysis::EffectsCalculator runner(1, 0);
     EffectsOverlord ova(true, nrows, ngroups);
-    auto state = runner.run(dense_row->get(), groups.data(), ngroups, ova);
+    auto state = runner.run(dense_row.get(), groups.data(), ngroups, ova);
 
     for (size_t r = 0; r < nrows; ++r) {
         EXPECT_TRUE(std::isnan(state.means[r * ngroups + lost]));
         EXPECT_TRUE(std::isnan(state.variances[r * ngroups + lost]));
         EXPECT_TRUE(std::isnan(state.detected[r * ngroups + lost]));
+
+        // Everything else is fine though.
+        for (int g = 0; g < ngroups; ++g) {
+            if (g == lost) {
+                continue;
+            }
+            EXPECT_FALSE(std::isnan(state.means[r * ngroups + g]));
+            EXPECT_FALSE(std::isnan(state.variances[r * ngroups + g]));
+            EXPECT_FALSE(std::isnan(state.detected[r * ngroups + g]));
+        }
+
+        for (int g = 0; g < ngroups; ++g) {
+            for (int g2 = 0; g2 < ngroups; ++g2) {
+                if (g == g2) {
+                    continue;
+                }
+                auto val = ova.store[r * ngroups * ngroups + g * ngroups + g2];
+                if (g == lost || g2 == lost) {
+                    EXPECT_TRUE(std::isnan(val));
+                } else {
+                    EXPECT_FALSE(std::isnan(val));
+                }
+            }
+        }
     }
 }
 
@@ -138,20 +162,30 @@ TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, MissingBlock) {
     assemble(nrows, ncols);
 
     scran::differential_analysis::EffectsCalculator runner(1, 0);
-    EffectsOverlord ova(true, nrows, ngroups);
-    auto state = runner.run_blocked(dense_row->get(), groups.data(), ngroups, blocks.data(), nblocks, ova);
+    EffectsOverlord ova_state(true, nrows, ngroups);
+    auto state = runner.run_blocked(dense_row.get(), groups.data(), ngroups, blocks.data(), nblocks, ova_state);
 
+    std::vector<double> means(ngroups * nrows), variances(ngroups * nrows), detected(ngroups * nrows);
     for (size_t r = 0; r < nrows; ++r) {
         for (int g = 0; g < ngroups; ++g) {
-            EXPECT_TRUE(std::isnan(state.means[r * ngroups * nblocks + g]));
-            EXPECT_TRUE(std::isnan(state.variances[r * ngroups * nblocks + g]));
-            EXPECT_TRUE(std::isnan(state.detected[r * ngroups * nblocks + g]));
+            size_t offset = r * ngroups * nblocks + g * nblocks;
+            EXPECT_TRUE(std::isnan(state.means[offset]));
+            EXPECT_TRUE(std::isnan(state.variances[offset]));
+            EXPECT_TRUE(std::isnan(state.detected[offset]));
 
-            EXPECT_FALSE(std::isnan(state.means[r * ngroups * nblocks + ngroups + g]));
-            EXPECT_FALSE(std::isnan(state.variances[r * ngroups * nblocks + ngroups + g]));
-            EXPECT_FALSE(std::isnan(state.detected[r * ngroups * nblocks + ngroups + g]));
+            size_t in_offset = r * (ngroups * nblocks) + g * nblocks + 1, out_offset = ngroups * r + g;
+            means[out_offset] = state.means[in_offset];
+            variances[out_offset] = state.variances[in_offset];
+            detected[out_offset] = state.detected[in_offset];
         }
     }
+
+    EffectsOverlord ova_ref(true, nrows, ngroups);
+    auto ref = runner.run(dense_row.get(), groups.data(), ngroups, ova_ref);
+    EXPECT_EQ(means, ref.means);
+    EXPECT_EQ(detected, ref.detected);
+    EXPECT_EQ(variances, ref.variances);
+    EXPECT_EQ(ova_state.store, ova_ref.store);
 }
 
 /*******************************************************/

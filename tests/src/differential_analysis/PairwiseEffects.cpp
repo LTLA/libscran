@@ -321,136 +321,121 @@ INSTANTIATE_TEST_CASE_P(
 
 /*********************************************/
 
-class PairwiseEffectsScenarioTest : public ::testing::TestWithParam<std::tuple<int, bool> >, public PairwiseEffectsTestCore {
+class PairwiseEffectsScenarioTest : public ::testing::Test, public PairwiseEffectsTestCore {
+protected:
+    static constexpr size_t nrows = 100;
+    static constexpr size_t ncols = 50;
+
     void SetUp() {
-        assemble();
+        assemble(nrows, ncols);
     }
 };
 
-TEST_P(PairwiseEffectsScenarioTest, Self) {
+TEST_F(PairwiseEffectsScenarioTest, Self) {
+    int copies = 3;
+
     // Replicating the same matrix 'ngroups' times.
-    int ngroups = std::get<0>(GetParam());
     std::vector<std::shared_ptr<tatami::NumericMatrix> > stuff;
-    for (int i = 0; i < ngroups; ++i) {
+    for (int i = 0; i < copies; ++i) {
         stuff.push_back(dense_row);
     }
     auto combined = tatami::make_DelayedBind<1>(std::move(stuff));
 
     // Creating two groups; second group can be larger than the first, to check
     // for correct behavior w.r.t. imbalanced groups.
-    size_t NC = dense_row->ncol();
-    std::vector<int> groupings(NC * ngroups);
-    std::fill(groupings.begin(), groupings.begin() + NC, 0);
-    std::fill(groupings.begin() + NC, groupings.end(), 1); 
+    std::vector<int> groupings(ncols * copies);
+    std::fill(groupings.begin(), groupings.begin() + ncols, 0);
+    std::fill(groupings.begin() + ncols, groupings.end(), 1); 
 
     scran::PairwiseEffects chd;
-    bool do_auc = std::get<1>(GetParam());
-    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
     auto res = chd.run(combined.get(), groupings.data());
 
     // All AUCs should be 0.5, all Cohen/LFC/delta-d's should be 0.
-    size_t ngenes = dense_row->nrow();
-    for (size_t g = 0; g < ngenes; ++g) {
-        for (int l = 0; l < 2; ++l) {
-            for (int l2 = 0; l2 < 2; ++l2) {
-                if (l == l2) {
-                    break;
-                }
+    int ngroups = 2;
+    std::vector<double> cohen(ngroups * ngroups * nrows);
+    auto lfc = cohen, delta_detected = cohen;
+    std::vector<double> auc(cohen.size(), 0.5);
 
-                // Only 2 groups here, despite the 'ngroups' variable!
-                size_t offset = g * 2 * 2 + l * 2 + l2;  
-
-                // Handle some numerical imprecision...
-                EXPECT_TRUE(std::abs(res.cohen[offset]) < 1e-10);
-                EXPECT_TRUE(std::abs(res.lfc[offset]) < 1e-10);
-                EXPECT_TRUE(std::abs(res.delta_detected[offset]) < 1e-10);
-                if (do_auc) {
-                    EXPECT_FLOAT_EQ(res.auc[offset], 0.5);
-                }
-            }
+    for (size_t g = 0; g < nrows; ++g) {
+        for (int l = 0; l < ngroups; ++l) {
+            size_t offset = g * ngroups * ngroups + l * ngroups + l;  
+            auc[offset] = 0;
         }
     }
+
+    compare_almost_equal(cohen, res.cohen);
+    compare_almost_equal(auc, res.auc);
+    compare_almost_equal(lfc, res.lfc);
+    compare_almost_equal(delta_detected, res.delta_detected);
 }
 
-TEST_P(PairwiseEffectsScenarioTest, Thresholds) {
-    auto ngroups = std::get<0>(GetParam());
-    std::vector<int> groupings = create_groupings(dense_row->ncol(), ngroups);
+TEST_F(PairwiseEffectsScenarioTest, Thresholds) {
+    int ngroups = 3;
+    std::vector<int> groupings = create_groupings(ncols, ngroups);
 
     scran::PairwiseEffects chd;
-    bool do_auc = std::get<1>(GetParam());
-    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
     auto ref = chd.run(dense_row.get(), groupings.data());
     auto out = chd.set_threshold(1).run(dense_row.get(), groupings.data());
+    EXPECT_EQ(ref.lfc, out.lfc);
+    EXPECT_EQ(ref.delta_detected, out.delta_detected);
 
     bool some_diff = false;
-    size_t ngenes = dense_row->nrow();
-    for (size_t g = 0; g < ngenes; ++g) {
+    for (size_t g = 0; g < nrows; ++g) {
         for (int l = 0; l < ngroups; ++l) {
             for (int l2 = 0; l2 < ngroups; ++l2) {
                 if (l == l2) {
                     break;
                 }
 
+                // Threshold should have some effect for cohen.
                 size_t offset = g * ngroups * ngroups + l * ngroups + l2;  
                 EXPECT_TRUE(ref.cohen[offset] > out.cohen[offset]);
 
-                if (do_auc) {
-                    some_diff |= (ref.auc[offset] > out.auc[offset]);
-
-                    // '>' is not guaranteed due to imprecision with ranks... but (see below).
-                    EXPECT_TRUE(ref.auc[offset] >= out.auc[offset]); 
-                }
+                // '>' is not guaranteed due to imprecision with ranks... but (see below).
+                EXPECT_TRUE(ref.auc[offset] >= out.auc[offset]); 
             }
         }
     }
 
-    if (do_auc) {
-        EXPECT_TRUE(some_diff); // (from above)... at least one is '>', hopefully.
-    }
+    // There should be at least some difference here.
+    EXPECT_NE(ref.auc, out.auc);
 }
 
-TEST_P(PairwiseEffectsScenarioTest, Missing) {
-    auto ngroups = std::get<0>(GetParam());
-    std::vector<int> groupings = create_groupings(dense_row->ncol(), ngroups);
+TEST_F(PairwiseEffectsScenarioTest, Missing) {
+    int ngroups = 3;
+    std::vector<int> groupings = create_groupings(ncols, ngroups);
 
     scran::PairwiseEffects chd;
-    bool do_auc = std::get<1>(GetParam());
-    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
     auto ref = chd.run(dense_row.get(), groupings.data());
-    
-    for (auto& g : groupings) { // 0 is the missing group.
+
+    // Zero is effectively the missing group here.
+    for (auto& g : groupings) {
         ++g;
     }
     auto lost = chd.run(dense_row.get(), groupings.data());
 
     // Everything should be NaN.
-    size_t ngenes = dense_row->nrow();
     int ngroups_p1 = ngroups + 1;
-
-    for (size_t g = 0; g < ngenes; ++g) {
+    for (size_t g = 0; g < nrows; ++g) {
         for (int l2 = 1; l2 < ngroups_p1; ++l2) {
             // For the comparisons from group 0 to the others.
             size_t offset = g * ngroups_p1 * ngroups_p1 + l2;  
             EXPECT_TRUE(std::isnan(lost.cohen[offset]));
             EXPECT_TRUE(std::isnan(lost.lfc[offset]));
             EXPECT_TRUE(std::isnan(lost.delta_detected[offset]));
-            if (do_auc) {
-                EXPECT_TRUE(std::isnan(lost.auc[offset]));
-            }
+            EXPECT_TRUE(std::isnan(lost.auc[offset]));
 
             // For the comparisons in the other direction.
             offset = g * ngroups_p1 * ngroups_p1 + l2 * ngroups_p1;  
             EXPECT_TRUE(std::isnan(lost.cohen[offset]));
             EXPECT_TRUE(std::isnan(lost.lfc[offset]));
             EXPECT_TRUE(std::isnan(lost.delta_detected[offset]));
-            if (do_auc) {
-                EXPECT_TRUE(std::isnan(lost.auc[offset]));
-            }
+            EXPECT_TRUE(std::isnan(lost.auc[offset]));
         }
     }
 
     // Other metrics should be the same as usual.
-    for (size_t g = 0; g < ngenes; ++g) {
+    for (size_t g = 0; g < nrows; ++g) {
         for (int l = 0; l < ngroups; ++l) {
             size_t ref_offset = g * ngroups * ngroups + l * ngroups;  
             size_t lost_offset = g * ngroups_p1 * ngroups_p1 + (l + 1) * ngroups_p1 + 1; // skip group 0, and also the NaN in the comparison against group 0.
@@ -478,96 +463,78 @@ TEST_P(PairwiseEffectsScenarioTest, Missing) {
     }
 }
 
-TEST_P(PairwiseEffectsScenarioTest, BlockConfounded) {
-    auto NC = dense_row->ncol();
-    auto ngroups = std::get<0>(GetParam());
-    std::vector<int> groupings = create_groupings(NC, ngroups);
+TEST_F(PairwiseEffectsScenarioTest, BlockConfounded) {
+    auto ngroups = 4;
+    std::vector<int> groupings = create_groupings(ncols, ngroups);
 
     // Block is fully confounded with one group.
-    std::vector<int> blocks(NC);
-    for (size_t c = 0; c < NC; ++c) {
+    std::vector<int> blocks(ncols);
+    for (size_t c = 0; c < ncols; ++c) {
         blocks[c] = groupings[c] == 0;
     }
 
     scran::PairwiseEffects chd;
-    bool do_auc = std::get<1>(GetParam());
-    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
     auto comres = chd.run_blocked(dense_row.get(), groupings.data(), blocks.data());
 
     // First group should only be NaN's.
     size_t ngenes = dense_row->nrow();
-    for (size_t g = 0; g < ngenes; ++g) {
+    for (size_t g = 0; g < nrows; ++g) {
         for (int l2 = 1; l2 < ngroups; ++l2) {
             // For the comparisons from group 0 to the others.
             size_t offset = g * ngroups * ngroups + l2;  
             EXPECT_TRUE(std::isnan(comres.cohen[offset]));
             EXPECT_TRUE(std::isnan(comres.lfc[offset]));
             EXPECT_TRUE(std::isnan(comres.delta_detected[offset]));
-            if (do_auc) {
-                EXPECT_TRUE(std::isnan(comres.auc[offset]));
-            }
+            EXPECT_TRUE(std::isnan(comres.auc[offset]));
 
             // For the comparisons in the other direction.
             offset = g * ngroups * ngroups + l2 * ngroups;  
             EXPECT_TRUE(std::isnan(comres.cohen[offset]));
             EXPECT_TRUE(std::isnan(comres.lfc[offset]));
             EXPECT_TRUE(std::isnan(comres.delta_detected[offset]));
-            if (do_auc) {
-                EXPECT_TRUE(std::isnan(comres.auc[offset]));
-            }
+            EXPECT_TRUE(std::isnan(comres.auc[offset]));
         }
     }
 
-    if (ngroups > 2) {
-        // Excluding the group and running on the remaining samples.
-        std::vector<int> subgroups;
-        std::vector<int> keep;
-        for (size_t c = 0; c < NC; ++c) {
-            auto g = groupings[c];
-            if (g != 0) {
-                subgroups.push_back(g - 1);
-                keep.push_back(c);
-            }
+    // Excluding the confounded group and running on the remaining samples.
+    std::vector<int> subgroups;
+    std::vector<int> keep;
+    for (size_t c = 0; c < ncols; ++c) {
+        auto g = groupings[c];
+        if (g != 0) {
+            subgroups.push_back(g - 1);
+            keep.push_back(c);
         }
+    }
 
-        auto sub = tatami::make_DelayedSubset<1>(dense_row, std::move(keep));
-        auto ref = chd.run(sub.get(), subgroups.data()); 
-        int ngroups_m1 = ngroups - 1;
+    auto sub = tatami::make_DelayedSubset<1>(dense_row, std::move(keep));
+    auto ref = chd.run(sub.get(), subgroups.data()); 
+    int ngroups_m1 = ngroups - 1;
 
-        for (size_t g = 0; g < ngenes; ++g) {
-            for (int l = 0; l < ngroups_m1; ++l) {
-                size_t ref_offset = g * ngroups_m1 * ngroups_m1 + l * ngroups_m1;  
-                size_t comres_offset = g * ngroups * ngroups + (l + 1) * ngroups + 1; // skip group 0 as well as the NaN in the comparison against group 0.
+    for (size_t g = 0; g < nrows; ++g) {
+        for (int l = 0; l < ngroups_m1; ++l) {
+            size_t ref_offset = g * ngroups_m1 * ngroups_m1 + l * ngroups_m1;  
+            size_t comres_offset = g * ngroups * ngroups + (l + 1) * ngroups + 1; // skip group 0 as well as the NaN in the comparison against group 0.
 
-                EXPECT_EQ(
-                    std::vector<double>(ref.cohen.begin() + ref_offset, ref.cohen.begin() + ref_offset + ngroups_m1), 
-                    std::vector<double>(comres.cohen.begin() + comres_offset, comres.cohen.begin() + comres_offset + ngroups_m1)
-                );
+            EXPECT_EQ(
+                std::vector<double>(ref.cohen.begin() + ref_offset, ref.cohen.begin() + ref_offset + ngroups_m1), 
+                std::vector<double>(comres.cohen.begin() + comres_offset, comres.cohen.begin() + comres_offset + ngroups_m1)
+            );
 
-                EXPECT_EQ(
-                    std::vector<double>(ref.lfc.begin() + ref_offset, ref.lfc.begin() + ref_offset + ngroups_m1), 
-                    std::vector<double>(comres.lfc.begin() + comres_offset, comres.lfc.begin() + comres_offset + ngroups_m1)
-                );
+            EXPECT_EQ(
+                std::vector<double>(ref.lfc.begin() + ref_offset, ref.lfc.begin() + ref_offset + ngroups_m1), 
+                std::vector<double>(comres.lfc.begin() + comres_offset, comres.lfc.begin() + comres_offset + ngroups_m1)
+            );
 
-                EXPECT_EQ(
-                    std::vector<double>(ref.delta_detected.begin() + ref_offset, ref.delta_detected.begin() + ref_offset + ngroups_m1), 
-                    std::vector<double>(comres.delta_detected.begin() + comres_offset, comres.delta_detected.begin() + comres_offset + ngroups_m1)
-                );
+            EXPECT_EQ(
+                std::vector<double>(ref.delta_detected.begin() + ref_offset, ref.delta_detected.begin() + ref_offset + ngroups_m1), 
+                std::vector<double>(comres.delta_detected.begin() + comres_offset, comres.delta_detected.begin() + comres_offset + ngroups_m1)
+            );
 
-                EXPECT_EQ(
-                    std::vector<double>(ref.cohen.begin() + ref_offset, ref.cohen.begin() + ref_offset + ngroups_m1), 
-                    std::vector<double>(comres.cohen.begin() + comres_offset, comres.cohen.begin() + comres_offset + ngroups_m1)
-                );
-            }
+            EXPECT_EQ(
+                std::vector<double>(ref.cohen.begin() + ref_offset, ref.cohen.begin() + ref_offset + ngroups_m1), 
+                std::vector<double>(comres.cohen.begin() + comres_offset, comres.cohen.begin() + comres_offset + ngroups_m1)
+            );
         }
     }
 }
-
-INSTANTIATE_TEST_CASE_P(
-    PairwiseEffectsScenario,
-    PairwiseEffectsScenarioTest,
-    ::testing::Combine(
-        ::testing::Values(2, 3, 4, 5), // number of clusters
-        ::testing::Values(false, true) // with or without the AUC?
-    )
-);
