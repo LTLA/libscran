@@ -11,8 +11,17 @@
 #include "../utils/compare_almost_equal.h"
 #include "utils.h"
 
-class PairwiseEffectsTestCore : public DifferentialAnalysisTestCore {
+/*********************************************/
+
+class PairwiseEffectsUnblockedTest : 
+    public ::testing::TestWithParam<std::tuple<int, double, int> >, 
+    public DifferentialAnalysisTestCore
+{
 protected:
+    void SetUp() {
+        assemble();
+    }
+
     struct ReferenceResult {
         std::vector<std::vector<double> > means, detected;
         std::vector<double> paired_cohen;
@@ -52,122 +61,6 @@ protected:
         return output;
     }
 
-    template<class Result>
-    static void compare_basic(const Result& res, const Result& other) {
-        size_t ngroups = res.means.size();
-        EXPECT_EQ(other.means.size(), ngroups);
-        EXPECT_EQ(other.detected.size(), ngroups);
-        EXPECT_EQ(res.detected.size(), ngroups);
-
-        for (int l = 0; l < ngroups; ++l) {
-            EXPECT_EQ(other.means[l].size(), 1);
-            EXPECT_EQ(other.detected[l].size(), 1);
-            compare_almost_equal(res.means[l][0], other.means[l][0]);
-            compare_almost_equal(res.detected[l][0], other.detected[l][0]);
-        }
-    }
-
-    template<class Result>
-    static void compare_blocked(const Result& res, const Result& other) {
-        size_t ngroups = res.means.size();
-        EXPECT_EQ(other.means.size(), ngroups);
-        EXPECT_EQ(other.detected.size(), ngroups);
-        EXPECT_EQ(res.detected.size(), ngroups);
-
-        for (int l = 0; l < ngroups; ++l) {
-            size_t nblocks = res.means[l].size();
-            EXPECT_EQ(res.detected[l].size(), nblocks);
-            EXPECT_EQ(other.means[l].size(), nblocks);
-            EXPECT_EQ(other.detected[l].size(), nblocks);
-
-            for (int b = 0; b < nblocks; ++b) {
-                compare_almost_equal(res.means[l][b], other.means[l][b]);
-                compare_almost_equal(res.detected[l][b], other.detected[l][b]);
-            }
-        }
-    }
-
-    template<class Result>
-    static void compare_effects(const Result& res, const Result& other, bool do_auc) {
-        compare_almost_equal(res.cohen, other.cohen);
-        compare_almost_equal(res.lfc, other.lfc);
-        compare_almost_equal(res.delta_detected, other.delta_detected);
-        if (do_auc) {
-            compare_almost_equal(res.auc, other.auc);
-        }
-    }
-
-    template<class Effects>
-    static void check_effects(size_t ngenes, size_t group, const Effects& effects, bool do_auc = false, bool has_boundaries = false, double lower = 0, double upper = 0) {
-        EXPECT_EQ(effects.size(), group * group * ngenes);
-
-        for (size_t g = 0; g < ngenes; ++g) {
-            auto start = effects.data() + g * group * group;
-
-            // Diagonal effects are still zero.
-            for (size_t n = 0; n < group; ++n) {
-                EXPECT_EQ(start[n * group + n], 0);
-            }
-
-            // Check that the effects are symmetric.
-            for (size_t n = 0; n < group; ++n) {
-                for (size_t o = 0; o < n; ++o) {
-                    if (do_auc) {
-                        EXPECT_FLOAT_EQ(start[n * group + o], 1 - start[o * group + n]);
-                    } else {
-                        EXPECT_FLOAT_EQ(start[n * group + o], -start[o * group + n]);
-                    }
-                }
-            }
-
-            if (has_boundaries) {
-                for (size_t n = 0; n < group; ++n) {
-                    for (size_t o = 0; o < group; ++o) {
-                        auto current = start[n * group + o];
-                        EXPECT_TRUE(current >= lower);
-                        EXPECT_TRUE(current <= upper);
-                    }
-                }
-            }
-        }
-    }
-
-    template<class Effects>
-    void at_least_one_nonzero(size_t ngenes, size_t group, const Effects& effects, bool global = false) {
-        if (!global) {
-            for (size_t g = 0; g < ngenes; ++g) {
-                auto start = effects.data() + g * group * group;
-                bool at_least_one_nonzero = false;
-                for (size_t i = 0; i < group * group; ++i) {
-                    if (start[i] != 0) {
-                        at_least_one_nonzero = true;
-                        break;
-                    }
-                }
-                EXPECT_TRUE(at_least_one_nonzero);
-            }
-        } else {
-            bool at_least_one_nonzero = false;
-            for (size_t g = 0; g < ngenes; ++g) {
-                auto start = effects.data() + g * group * group;
-                for (size_t i = 0; i < group * group; ++i) {
-                    if (start[i] != 0) {
-                        return;
-                    }
-                }
-            }
-            EXPECT_TRUE(at_least_one_nonzero);
-        }
-    }
-};
-
-/*********************************************/
-
-class PairwiseEffectsUnblockedTest : public ::testing::TestWithParam<std::tuple<int, double, int> >, public PairwiseEffectsTestCore {
-protected:
-    void SetUp() {
-        assemble();
-    }
 };
 
 TEST_P(PairwiseEffectsUnblockedTest, Reference) {
@@ -212,7 +105,7 @@ INSTANTIATE_TEST_CASE_P(
 
 /*********************************************/
 
-class PairwiseEffectsBlockedTest : public ::testing::TestWithParam<std::tuple<int, int, int> >, public PairwiseEffectsTestCore {
+class PairwiseEffectsBlockedTest : public ::testing::TestWithParam<std::tuple<int, int, int> >, public DifferentialAnalysisTestCore {
 protected:
     static constexpr size_t nrows = 100;
     static constexpr size_t ncols = 50;
@@ -321,7 +214,7 @@ INSTANTIATE_TEST_CASE_P(
 
 /*********************************************/
 
-class PairwiseEffectsScenarioTest : public ::testing::Test, public PairwiseEffectsTestCore {
+class PairwiseEffectsScenarioTest : public ::testing::Test, public DifferentialAnalysisTestCore {
 protected:
     static constexpr size_t nrows = 100;
     static constexpr size_t ncols = 50;
