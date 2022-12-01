@@ -11,6 +11,9 @@
 
 /*********************************************/
 
+// We compare against the reference to check that the account-keeping
+// with respect to threading and threshold specification is correct.
+
 class PairwiseEffectsUnblockedTest : 
     public ::testing::TestWithParam<std::tuple<int, double, int> >, 
     public DifferentialAnalysisTestCore
