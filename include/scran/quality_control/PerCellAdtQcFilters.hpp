@@ -100,7 +100,7 @@ public:
     }
 
     /**
-     * @param n Minimum drop in the number of detected features from the median, in order to consider a cell to be of low quality.
+     * @param m Minimum drop in the number of detected features from the median, in order to consider a cell to be of low quality.
      * This should lie in $[0, 1)$.
      *
      * @return A reference to this `PerCellAdtQcFilters` object. 

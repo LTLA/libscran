@@ -114,7 +114,7 @@ public:
      * which is a reasonable outcome if those cells cannot be filtered out during upstream quality control.
      * Note that the centering process ignores zeros, see `CenterSizeFactors::set_ignore_zeros()` for more details.
      *
-     * @param s Whether to accept positive size factors only.
+     * @param z Whether to replace zero size factors with the smallest non-zero size factor.
      *
      * @return A reference to this `LogNormCounts` object.
      */

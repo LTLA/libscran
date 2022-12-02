@@ -8,6 +8,9 @@
 
 namespace scran {
 
+/**
+ * @cond
+ */
 namespace differential_analysis {
 
 template<typename Stat, typename Ls>
@@ -56,6 +59,9 @@ void compute_pairwise_simple_diff(const Stat* values, const Ls& level_size, int 
 }
 
 }
+/**
+ * @endcond
+ */
 
 }
 

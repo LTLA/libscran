@@ -27,4 +27,10 @@
 #include "utils/subset_vector.hpp"
 #include "utils/vector_to_pointers.hpp"
 
+/**
+ * @namespace scran
+ * @brief Functions for single-cell RNA-seq analyses.
+ */
+namespace scran {}
+
 #endif

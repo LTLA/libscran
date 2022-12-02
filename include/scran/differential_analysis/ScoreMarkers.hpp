@@ -295,7 +295,7 @@ public:
 
 public:
     /**
-     * @param c Which summary statistics to compute for Cohen's d.
+     * @param s Which summary statistics to compute for Cohen's d.
      *
      * This only has an effect for `run()` methods that return `Results`.
      * Otherwise, we make this decision based on the validity of the input pointers. 
@@ -308,7 +308,7 @@ public:
     }
 
     /**
-     * @param s Whether to compute Cohen's d at all.
+     * @param c Whether to compute Cohen's d at all.
      *
      * This is an alias for `set_compute_cohen()` where `c = true` is equivalent to `s = Defaults::compute_all_summaries()`
      * and `c = false` is equivalent to `s = Defaults::compute_no_summaries()`.
@@ -338,7 +338,7 @@ public:
     }
 
     /**
-     * @param c Which summary statistics to compute for the AUC.
+     * @param s Which summary statistics to compute for the AUC.
      *
      * This only has an effect for `run()` methods that return `Results`.
      * Otherwise, we make this decision based on the validity of the input pointers. 
@@ -351,7 +351,7 @@ public:
     }
 
     /**
-     * @param s Whether to compute the AUC at all.
+     * @param c Whether to compute the AUC at all.
      *
      * This is an alias for `set_compute_auc()` where `c = true` is equivalent to `s = Defaults::compute_all_summaries()`
      * and `c = false` is equivalent to `s = Defaults::compute_no_summaries()`.
@@ -381,7 +381,7 @@ public:
     }
 
     /**
-     * @param c Which summary statistics to compute for the LFC.
+     * @param s Which summary statistics to compute for the LFC.
      *
      * This only has an effect for `run()` methods that return `Results`.
      * Otherwise, we make this decision based on the validity of the input pointers. 
@@ -394,7 +394,7 @@ public:
     }
 
     /**
-     * @param s Whether to compute the LFC at all.
+     * @param c Whether to compute the LFC at all.
      *
      * This is an alias for `set_compute_lfc()` where `c = true` is equivalent to `s = Defaults::compute_all_summaries()`
      * and `c = false` is equivalent to `s = Defaults::compute_no_summaries()`.
@@ -424,7 +424,7 @@ public:
     }
 
     /**
-     * @param c Which summary statistics to compute for the delta detected.
+     * @param s Which summary statistics to compute for the delta detected.
      *
      * This only has an effect for `run()` methods that return `Results`.
      * Otherwise, we make this decision based on the validity of the input pointers. 
@@ -437,7 +437,7 @@ public:
     }
 
     /**
-     * @param s Whether to compute the delta detected at all.
+     * @param c Whether to compute the delta detected at all.
      *
      * This is an alias for `set_compute_delta_detected()` where `c = true` is equivalent to `s = Defaults::compute_all_summaries()`
      * and `c = false` is equivalent to `s = Defaults::compute_no_summaries()`.

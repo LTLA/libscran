@@ -242,6 +242,7 @@ private:
 
 public:
     /**
+     * @brief Container for the aggregation results.
      * @tparam Sum Type of the sum, should be numeric.
      * @tparam Detected Type for the number of detected cells, usually integer.
      */
