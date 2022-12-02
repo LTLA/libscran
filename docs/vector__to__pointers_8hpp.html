@@ -76,6 +76,7 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#namespaces">Namespaces</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">vector_to_pointers.hpp File Reference</div></div>
 </div><!--header-->
@@ -115,124 +116,27 @@ This graph shows which files directly or indirectly include this file:</div>
 </div>
 <p><a href="vector__to__pointers_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:namespacescran"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacescran.html">scran</a></td></tr>
+<tr class="memdesc:namespacescran"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functions for single-cell RNA-seq analyses. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ab4600cde1ede42175b03490d96949524"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:ab4600cde1ede42175b03490d96949524"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; T * &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="vector__to__pointers_8hpp.html#ab4600cde1ede42175b03490d96949524">scran::vector_to_pointers</a> (std::vector&lt; std::vector&lt; T &gt; &gt; &amp;input)</td></tr>
+<tr class="memitem:ab4600cde1ede42175b03490d96949524"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; T * &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacescran.html#ab4600cde1ede42175b03490d96949524">scran::vector_to_pointers</a> (std::vector&lt; std::vector&lt; T &gt; &gt; &amp;input)</td></tr>
 <tr class="separator:ab4600cde1ede42175b03490d96949524"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab779e5059834ccb43c97f536ba26a4ab"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:ab779e5059834ccb43c97f536ba26a4ab"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; const T * &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="vector__to__pointers_8hpp.html#ab779e5059834ccb43c97f536ba26a4ab">scran::vector_to_pointers</a> (const std::vector&lt; std::vector&lt; T &gt; &gt; &amp;input)</td></tr>
+<tr class="memitem:ab779e5059834ccb43c97f536ba26a4ab"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; const T * &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacescran.html#ab779e5059834ccb43c97f536ba26a4ab">scran::vector_to_pointers</a> (const std::vector&lt; std::vector&lt; T &gt; &gt; &amp;input)</td></tr>
 <tr class="separator:ab779e5059834ccb43c97f536ba26a4ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a701fa9241011d6c4aa5ea84e33ee62ce"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a701fa9241011d6c4aa5ea84e33ee62ce"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; T * &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="vector__to__pointers_8hpp.html#a701fa9241011d6c4aa5ea84e33ee62ce">scran::vector_to_pointers</a> (std::vector&lt; std::vector&lt; std::vector&lt; T &gt; &gt; &gt; &amp;input)</td></tr>
+<tr class="memitem:a701fa9241011d6c4aa5ea84e33ee62ce"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; T * &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacescran.html#a701fa9241011d6c4aa5ea84e33ee62ce">scran::vector_to_pointers</a> (std::vector&lt; std::vector&lt; std::vector&lt; T &gt; &gt; &gt; &amp;input)</td></tr>
 <tr class="separator:a701fa9241011d6c4aa5ea84e33ee62ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Create a vector of pointers from a vector of vectors. </p>
-</div><h2 class="groupheader">Function Documentation</h2>
-<a id="ab779e5059834ccb43c97f536ba26a4ab" name="ab779e5059834ccb43c97f536ba26a4ab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab779e5059834ccb43c97f536ba26a4ab">&#9670;&#160;</a></span>vector_to_pointers() <span class="overload">[1/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt; const T * &gt; scran::vector_to_pointers </td>
-          <td>(</td>
-          <td class="paramtype">const std::vector&lt; std::vector&lt; T &gt; &gt; &amp;&#160;</td>
-          <td class="paramname"><em>input</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Extract a vector of <code>const</code> pointers from a vector of vectors.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">T</td><td>Type of data. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">input</td><td>Vector of vector of values.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A vector of pointers to each inner vector in <code>input</code>. </dd></dl>
-
-</div>
-</div>
-<a id="a701fa9241011d6c4aa5ea84e33ee62ce" name="a701fa9241011d6c4aa5ea84e33ee62ce"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a701fa9241011d6c4aa5ea84e33ee62ce">&#9670;&#160;</a></span>vector_to_pointers() <span class="overload">[2/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt; std::vector&lt; T * &gt; &gt; scran::vector_to_pointers </td>
-          <td>(</td>
-          <td class="paramtype">std::vector&lt; std::vector&lt; std::vector&lt; T &gt; &gt; &gt; &amp;&#160;</td>
-          <td class="paramname"><em>input</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Extract a vector of vector of pointers from a vector of vectors of vectors..</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">T</td><td>Type of data. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">input</td><td>Vector of vector of vector of values.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A vector of vector of pointers to each inner vector in <code>input</code>. </dd></dl>
-
-</div>
-</div>
-<a id="ab4600cde1ede42175b03490d96949524" name="ab4600cde1ede42175b03490d96949524"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab4600cde1ede42175b03490d96949524">&#9670;&#160;</a></span>vector_to_pointers() <span class="overload">[3/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt; T * &gt; scran::vector_to_pointers </td>
-          <td>(</td>
-          <td class="paramtype">std::vector&lt; std::vector&lt; T &gt; &gt; &amp;&#160;</td>
-          <td class="paramname"><em>input</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Extract a vector of pointers from a vector of vectors. This is a convenient utility as many <b>scran</b> functions accept the former but can return the latter.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">T</td><td>Type of data. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">input</td><td>Vector of vector of values.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A vector of pointers to each inner vector in <code>input</code>. </dd></dl>
-
-</div>
-</div>
-</div><!-- contents -->
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
 Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.5

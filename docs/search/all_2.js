@@ -6,7 +6,7 @@ var searchData=
   ['centersizefactors_2ehpp_3',['CenterSizeFactors.hpp',['../CenterSizeFactors_8hpp.html',1,'']]],
   ['choosehvgs_4',['ChooseHVGs',['../classscran_1_1ChooseHVGs.html',1,'scran']]],
   ['choosehvgs_2ehpp_5',['ChooseHVGs.hpp',['../ChooseHVGs_8hpp.html',1,'']]],
-  ['clusterkmeans_6',['ClusterKmeans',['../ClusterKmeans_8hpp.html#a836b35676870dd7296db5763e317c702',1,'scran']]],
+  ['clusterkmeans_6',['ClusterKmeans',['../namespacescran.html#a836b35676870dd7296db5763e317c702',1,'scran']]],
   ['clusterkmeans_2ehpp_7',['ClusterKmeans.hpp',['../ClusterKmeans_8hpp.html',1,'']]],
   ['clustersnngraph_2ehpp_8',['ClusterSNNGraph.hpp',['../ClusterSNNGraph_8hpp.html',1,'']]],
   ['clustersnngraphleiden_9',['ClusterSNNGraphLeiden',['../classscran_1_1ClusterSNNGraphLeiden.html',1,'scran']]],
