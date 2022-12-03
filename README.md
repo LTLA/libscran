@@ -2,6 +2,7 @@
 
 ![Unit tests](https://github.com/LTLA/libscran/actions/workflows/run-tests.yaml/badge.svg)
 ![Documentation](https://github.com/LTLA/libscran/actions/workflows/doxygenate.yaml/badge.svg)
+[![Codecov](https://codecov.io/gh/LTLA/libscran/branch/master/graph/badge.svg?token=CPER7Q7FEH)](https://codecov.io/gh/LTLA/libscran)
 
 ## Overview 
 
