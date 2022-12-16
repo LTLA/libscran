@@ -1,6 +1,6 @@
 <map id="scran/quality_control/IsOutlier.hpp" name="scran/quality_control/IsOutlier.hpp">
-<area shape="rect" id="node1" title="Define outliers using a simple MAD&#45;based approach." coords="137,5,279,45"/>
-<area shape="rect" id="node2" href="$PerCellAdtQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from ADT data." coords="5,93,171,133"/>
-<area shape="rect" id="node3" href="$scran_8hpp_source.html" title=" " coords="151,181,265,207"/>
-<area shape="rect" id="node4" href="$PerCellRnaQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from RNA metrics." coords="245,93,413,133"/>
+<area shape="rect" id="node1" title="Define outliers using a simple MAD&#45;based approach." alt="" coords="137,5,279,45"/>
+<area shape="rect" id="node2" href="$PerCellAdtQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from ADT data." alt="" coords="5,93,171,133"/>
+<area shape="rect" id="node3" href="$scran_8hpp_source.html" title=" " alt="" coords="151,181,265,207"/>
+<area shape="rect" id="node4" href="$PerCellRnaQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from RNA metrics." alt="" coords="245,93,413,133"/>
 </map>

@@ -1,13 +1,13 @@
 <map id="scran/dimensionality_reduction/BlockedPCA.hpp" name="scran/dimensionality_reduction/BlockedPCA.hpp">
-<area shape="rect" id="node1" title="Compute PCA after blocking on an uninteresting factor." coords="405,5,589,45"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." coords="5,167,132,192"/>
-<area shape="rect" id="node3" title=" " coords="535,93,709,119"/>
-<area shape="rect" id="node4" title=" " coords="734,93,939,119"/>
-<area shape="rect" id="node5" title=" " coords="963,93,1062,119"/>
-<area shape="rect" id="node6" title=" " coords="156,167,251,192"/>
-<area shape="rect" id="node7" title=" " coords="414,167,473,192"/>
-<area shape="rect" id="node8" title=" " coords="1086,93,1145,119"/>
-<area shape="rect" id="node9" title=" " coords="497,167,595,192"/>
-<area shape="rect" id="node10" href="$CustomSparseMatrix_8hpp_source.html" title=" " coords="241,93,408,119"/>
-<area shape="rect" id="node11" title=" " coords="275,167,390,192"/>
+<area shape="rect" id="node1" title="Compute PCA after blocking on an uninteresting factor." alt="" coords="405,5,589,45"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,167,132,192"/>
+<area shape="rect" id="node3" title=" " alt="" coords="535,93,709,119"/>
+<area shape="rect" id="node4" title=" " alt="" coords="734,93,939,119"/>
+<area shape="rect" id="node5" title=" " alt="" coords="963,93,1062,119"/>
+<area shape="rect" id="node6" title=" " alt="" coords="156,167,251,192"/>
+<area shape="rect" id="node7" title=" " alt="" coords="414,167,473,192"/>
+<area shape="rect" id="node8" title=" " alt="" coords="1086,93,1145,119"/>
+<area shape="rect" id="node9" title=" " alt="" coords="497,167,595,192"/>
+<area shape="rect" id="node10" href="$CustomSparseMatrix_8hpp_source.html" title=" " alt="" coords="241,93,408,119"/>
+<area shape="rect" id="node11" title=" " alt="" coords="275,167,390,192"/>
 </map>

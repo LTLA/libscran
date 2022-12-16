@@ -1,11 +1,11 @@
 <map id="scran/normalization/MedianSizeFactors.hpp" name="scran/normalization/MedianSizeFactors.hpp">
-<area shape="rect" id="node1" title="Compute median&#45;based size factors." coords="251,5,412,45"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." coords="5,167,132,192"/>
-<area shape="rect" id="node3" title=" " coords="157,167,215,192"/>
-<area shape="rect" id="node4" title=" " coords="369,93,422,119"/>
-<area shape="rect" id="node5" title=" " coords="446,93,614,119"/>
-<area shape="rect" id="node6" title=" " coords="639,93,789,119"/>
-<area shape="rect" id="node7" href="$CenterSizeFactors_8hpp.html" title="Center size factors prior to normalization." coords="191,93,344,119"/>
-<area shape="rect" id="node8" title=" " coords="240,167,319,192"/>
-<area shape="rect" id="node9" title=" " coords="343,167,418,192"/>
+<area shape="rect" id="node1" title="Compute median&#45;based size factors." alt="" coords="251,5,412,45"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,167,132,192"/>
+<area shape="rect" id="node3" title=" " alt="" coords="157,167,215,192"/>
+<area shape="rect" id="node4" title=" " alt="" coords="369,93,422,119"/>
+<area shape="rect" id="node5" title=" " alt="" coords="446,93,614,119"/>
+<area shape="rect" id="node6" title=" " alt="" coords="639,93,789,119"/>
+<area shape="rect" id="node7" href="$CenterSizeFactors_8hpp.html" title="Center size factors prior to normalization." alt="" coords="191,93,344,119"/>
+<area shape="rect" id="node8" title=" " alt="" coords="240,167,319,192"/>
+<area shape="rect" id="node9" title=" " alt="" coords="343,167,418,192"/>
 </map>

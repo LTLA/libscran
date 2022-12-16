@@ -1,13 +1,13 @@
 <map id="scran/feature_selection/ModelGeneVar.hpp" name="scran/feature_selection/ModelGeneVar.hpp">
-<area shape="rect" id="node1" title="Model the per&#45;gene variance from log&#45;count data." coords="369,5,526,45"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." coords="5,181,132,207"/>
-<area shape="rect" id="node3" title=" " coords="485,101,639,126"/>
-<area shape="rect" id="node4" title=" " coords="663,101,813,126"/>
-<area shape="rect" id="node5" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." coords="106,93,221,133"/>
-<area shape="rect" id="node6" title=" " coords="157,181,215,207"/>
-<area shape="rect" id="node7" title=" " coords="837,101,991,126"/>
-<area shape="rect" id="node8" href="$FitTrendVar_8hpp.html" title="Fit a mean&#45;variance trend to log&#45;count data." coords="295,101,410,126"/>
-<area shape="rect" id="node9" title=" " coords="514,181,589,207"/>
-<area shape="rect" id="node11" title=" " coords="1015,101,1069,126"/>
-<area shape="rect" id="node10" title=" " coords="239,181,490,207"/>
+<area shape="rect" id="node1" title="Model the per&#45;gene variance from log&#45;count data." alt="" coords="369,5,526,45"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,181,132,207"/>
+<area shape="rect" id="node3" title=" " alt="" coords="485,101,639,126"/>
+<area shape="rect" id="node4" title=" " alt="" coords="663,101,813,126"/>
+<area shape="rect" id="node5" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="106,93,221,133"/>
+<area shape="rect" id="node6" title=" " alt="" coords="157,181,215,207"/>
+<area shape="rect" id="node7" title=" " alt="" coords="837,101,991,126"/>
+<area shape="rect" id="node8" href="$FitTrendVar_8hpp.html" title="Fit a mean&#45;variance trend to log&#45;count data." alt="" coords="295,101,410,126"/>
+<area shape="rect" id="node9" title=" " alt="" coords="514,181,589,207"/>
+<area shape="rect" id="node11" title=" " alt="" coords="1015,101,1069,126"/>
+<area shape="rect" id="node10" title=" " alt="" coords="239,181,490,207"/>
 </map>

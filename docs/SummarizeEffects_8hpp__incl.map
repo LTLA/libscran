@@ -1,10 +1,10 @@
 <map id="scran/differential_analysis/SummarizeEffects.hpp" name="scran/differential_analysis/SummarizeEffects.hpp">
-<area shape="rect" id="node1" title="Summarize the effect sizes from pairwise comparisons." coords="33,5,243,45"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." coords="5,181,132,207"/>
-<area shape="rect" id="node3" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." coords="34,93,149,133"/>
-<area shape="rect" id="node4" title=" " coords="157,181,215,207"/>
-<area shape="rect" id="node5" href="$summarize__comparisons_8hpp.html" title="Utilities for effect summarization." coords="224,101,415,126"/>
-<area shape="rect" id="node6" title=" " coords="239,181,314,207"/>
-<area shape="rect" id="node7" title=" " coords="339,181,407,207"/>
-<area shape="rect" id="node8" title=" " coords="431,181,490,207"/>
+<area shape="rect" id="node1" title="Summarize the effect sizes from pairwise comparisons." alt="" coords="33,5,243,45"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,181,132,207"/>
+<area shape="rect" id="node3" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="34,93,149,133"/>
+<area shape="rect" id="node4" title=" " alt="" coords="157,181,215,207"/>
+<area shape="rect" id="node5" href="$summarize__comparisons_8hpp.html" title="Utilities for effect summarization." alt="" coords="224,101,415,126"/>
+<area shape="rect" id="node6" title=" " alt="" coords="239,181,314,207"/>
+<area shape="rect" id="node7" title=" " alt="" coords="339,181,407,207"/>
+<area shape="rect" id="node8" title=" " alt="" coords="431,181,490,207"/>
 </map>

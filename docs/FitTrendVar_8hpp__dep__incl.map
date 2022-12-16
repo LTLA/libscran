@@ -1,5 +1,5 @@
 <map id="scran/feature_selection/FitTrendVar.hpp" name="scran/feature_selection/FitTrendVar.hpp">
-<area shape="rect" id="node1" title="Fit a mean&#45;variance trend to log&#45;count data." coords="63,5,220,45"/>
-<area shape="rect" id="node2" href="$ModelGeneVar_8hpp.html" title="Model the per&#45;gene variance from log&#45;count data." coords="5,93,163,133"/>
-<area shape="rect" id="node3" href="$scran_8hpp_source.html" title=" " coords="84,181,199,207"/>
+<area shape="rect" id="node1" title="Fit a mean&#45;variance trend to log&#45;count data." alt="" coords="63,5,220,45"/>
+<area shape="rect" id="node2" href="$ModelGeneVar_8hpp.html" title="Model the per&#45;gene variance from log&#45;count data." alt="" coords="5,93,163,133"/>
+<area shape="rect" id="node3" href="$scran_8hpp_source.html" title=" " alt="" coords="84,181,199,207"/>
 </map>

@@ -1,10 +1,10 @@
 <map id="scran/quality_control/IsOutlier.hpp" name="scran/quality_control/IsOutlier.hpp">
-<area shape="rect" id="node1" title="Define outliers using a simple MAD&#45;based approach." coords="275,5,417,45"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." coords="5,93,132,119"/>
-<area shape="rect" id="node3" title=" " coords="157,93,215,119"/>
-<area shape="rect" id="node4" title=" " coords="239,93,293,119"/>
-<area shape="rect" id="node5" title=" " coords="317,93,375,119"/>
-<area shape="rect" id="node6" title=" " coords="399,93,474,119"/>
-<area shape="rect" id="node7" title=" " coords="498,93,559,119"/>
-<area shape="rect" id="node8" title=" " coords="583,93,746,119"/>
+<area shape="rect" id="node1" title="Define outliers using a simple MAD&#45;based approach." alt="" coords="275,5,417,45"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,93,132,119"/>
+<area shape="rect" id="node3" title=" " alt="" coords="157,93,215,119"/>
+<area shape="rect" id="node4" title=" " alt="" coords="239,93,293,119"/>
+<area shape="rect" id="node5" title=" " alt="" coords="317,93,375,119"/>
+<area shape="rect" id="node6" title=" " alt="" coords="399,93,474,119"/>
+<area shape="rect" id="node7" title=" " alt="" coords="498,93,559,119"/>
+<area shape="rect" id="node8" title=" " alt="" coords="583,93,746,119"/>
 </map>
