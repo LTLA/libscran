@@ -82,13 +82,13 @@ public:
          * Output status.
          * A value of zero indicates that the algorithm completed successfully.
          */
-        int status;
+        int status = 0;
         
         /**
          * The level that maximizes the modularity.
          * This can be used to index a particular result in `membership` and `modularity`.
          */
-        size_t max;
+        size_t max = 0;
 
         /**
          * Each vector contains the clustering result for a particular level.
@@ -208,7 +208,7 @@ public:
          * Output status.
          * A value of zero indicates that the algorithm completed successfully.
          */
-        int status;
+        int status = 0;
         
         /**
          * Vector of length equal to the number of cells, containing 0-indexed cluster identities.
@@ -402,7 +402,7 @@ public:
          * Output status.
          * A value of zero indicates that the algorithm completed successfully.
          */
-        int status;
+        int status = 0;
         
         /**
          * Vector of length equal to the number of cells, containing 0-indexed cluster identities.
@@ -412,7 +412,7 @@ public:
         /**
          * Quality of the clustering, closely related to the modularity.
          */
-        double quality;
+        double quality = 0;
     };
 
     /**
