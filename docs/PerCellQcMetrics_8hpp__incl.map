@@ -1,0 +1,11 @@
+<map id="scran/quality_control/PerCellQcMetrics.hpp" name="scran/quality_control/PerCellQcMetrics.hpp">
+<area shape="rect" id="node1" title="Compute a variety of per&#45;cell quality control metrics from a count matrix." alt="" coords="287,5,439,45"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,181,132,207"/>
+<area shape="rect" id="node3" title=" " alt="" coords="475,181,534,207"/>
+<area shape="rect" id="node4" title=" " alt="" coords="198,101,273,126"/>
+<area shape="rect" id="node5" title=" " alt="" coords="297,101,350,126"/>
+<area shape="rect" id="node6" title=" " alt="" coords="374,101,435,126"/>
+<area shape="rect" id="node7" title=" " alt="" coords="460,101,613,126"/>
+<area shape="rect" id="node8" title=" " alt="" coords="638,101,787,126"/>
+<area shape="rect" id="node9" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="59,93,174,133"/>
+</map>
