@@ -13,6 +13,7 @@ enable_testing()
 add_executable(
     libtest 
 
+    src/quality_control/PerCellQcMetrics.cpp
     src/quality_control/PerCellRnaQcMetrics.cpp
     src/quality_control/PerCellRnaQcFilters.cpp
     src/quality_control/PerCellAdtQcFilters.cpp

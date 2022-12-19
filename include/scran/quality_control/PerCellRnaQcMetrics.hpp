@@ -1,5 +1,5 @@
-#ifndef SCRAN_PER_CELL_QC_METRICS_HPP
-#define SCRAN_PER_CELL_QC_METRICS_HPP
+#ifndef SCRAN_PER_CELL_RNA_QC_METRICS_HPP
+#define SCRAN_PER_CELL_RNA_QC_METRICS_HPP
 
 #include "../utils/macros.hpp"
 

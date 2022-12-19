@@ -18,6 +18,7 @@
 
 #include "quality_control/FilterCells.hpp"
 #include "quality_control/IsOutlier.hpp"
+#include "quality_control/PerCellQcMetrics.hpp"
 #include "quality_control/PerCellRnaQcFilters.hpp"
 #include "quality_control/PerCellRnaQcMetrics.hpp"
 #include "quality_control/PerCellAdtQcFilters.hpp"
