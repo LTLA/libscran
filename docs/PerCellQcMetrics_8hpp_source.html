@@ -506,121 +506,122 @@ $(function() {
 <div class="line"><a id="l00567" name="l00567"></a><span class="lineno">  567</span>                        <span class="keywordflow">if</span> (curmax &lt; range.value[i]) {</div>
 <div class="line"><a id="l00568" name="l00568"></a><span class="lineno">  568</span>                            curmax = range.value[i];</div>
 <div class="line"><a id="l00569" name="l00569"></a><span class="lineno">  569</span>                            <span class="keywordflow">if</span> (output.max_index) {</div>
-<div class="line"><a id="l00570" name="l00570"></a><span class="lineno">  570</span>                                output.max_index[offset] = counter;</div>
+<div class="line"><a id="l00570" name="l00570"></a><span class="lineno">  570</span>                                output.max_index[range.index[i]] = counter;</div>
 <div class="line"><a id="l00571" name="l00571"></a><span class="lineno">  571</span>                            }</div>
 <div class="line"><a id="l00572" name="l00572"></a><span class="lineno">  572</span>                        }</div>
 <div class="line"><a id="l00573" name="l00573"></a><span class="lineno">  573</span> </div>
-<div class="line"><a id="l00574" name="l00574"></a><span class="lineno">  574</span>                        <span class="keywordflow">if</span> (<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(internal_last_consecutive_nonzero[offset]) == counter) {</div>
-<div class="line"><a id="l00575" name="l00575"></a><span class="lineno">  575</span>                            <span class="keywordflow">if</span> (range.value[i] != 0) {</div>
-<div class="line"><a id="l00576" name="l00576"></a><span class="lineno">  576</span>                                ++internal_last_consecutive_nonzero[offset];</div>
-<div class="line"><a id="l00577" name="l00577"></a><span class="lineno">  577</span>                            }</div>
-<div class="line"><a id="l00578" name="l00578"></a><span class="lineno">  578</span>                        }</div>
-<div class="line"><a id="l00579" name="l00579"></a><span class="lineno">  579</span>                    }</div>
-<div class="line"><a id="l00580" name="l00580"></a><span class="lineno">  580</span>                }</div>
-<div class="line"><a id="l00581" name="l00581"></a><span class="lineno">  581</span> </div>
-<div class="line"><a id="l00582" name="l00582"></a><span class="lineno">  582</span>                <span class="keywordtype">size_t</span> nsubsets = subsets_ptr-&gt;size();</div>
-<div class="line"><a id="l00583" name="l00583"></a><span class="lineno">  583</span>                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> s = 0; s &lt; nsubsets; ++s) {</div>
-<div class="line"><a id="l00584" name="l00584"></a><span class="lineno">  584</span>                    <span class="keyword">const</span> <span class="keyword">auto</span>&amp; sub = (*subsets_ptr)[s];</div>
-<div class="line"><a id="l00585" name="l00585"></a><span class="lineno">  585</span>                    <span class="keywordflow">if</span> (sub[counter] == 0) {</div>
-<div class="line"><a id="l00586" name="l00586"></a><span class="lineno">  586</span>                        <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00587" name="l00587"></a><span class="lineno">  587</span>                    }</div>
-<div class="line"><a id="l00588" name="l00588"></a><span class="lineno">  588</span> </div>
-<div class="line"><a id="l00589" name="l00589"></a><span class="lineno">  589</span>                    <span class="keywordflow">if</span> (output.subset_total[s]) {</div>
-<div class="line"><a id="l00590" name="l00590"></a><span class="lineno">  590</span>                        <span class="keyword">auto</span>&amp; current = output.subset_total[s];</div>
-<div class="line"><a id="l00591" name="l00591"></a><span class="lineno">  591</span>                        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; range.number; ++i) {</div>
-<div class="line"><a id="l00592" name="l00592"></a><span class="lineno">  592</span>                            current[range.index[i]] += range.value[i];</div>
-<div class="line"><a id="l00593" name="l00593"></a><span class="lineno">  593</span>                        }</div>
-<div class="line"><a id="l00594" name="l00594"></a><span class="lineno">  594</span>                    }</div>
-<div class="line"><a id="l00595" name="l00595"></a><span class="lineno">  595</span> </div>
-<div class="line"><a id="l00596" name="l00596"></a><span class="lineno">  596</span>                    <span class="keywordflow">if</span> (output.subset_detected[s]) {</div>
-<div class="line"><a id="l00597" name="l00597"></a><span class="lineno">  597</span>                        <span class="keyword">auto</span>&amp; current = output.subset_detected[s];</div>
-<div class="line"><a id="l00598" name="l00598"></a><span class="lineno">  598</span>                        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; range.number; ++i) {</div>
-<div class="line"><a id="l00599" name="l00599"></a><span class="lineno">  599</span>                            current[range.index[i]] += (range.value[i] != 0);</div>
-<div class="line"><a id="l00600" name="l00600"></a><span class="lineno">  600</span>                        }</div>
-<div class="line"><a id="l00601" name="l00601"></a><span class="lineno">  601</span>                    }</div>
-<div class="line"><a id="l00602" name="l00602"></a><span class="lineno">  602</span>                }</div>
-<div class="line"><a id="l00603" name="l00603"></a><span class="lineno">  603</span> </div>
-<div class="line"><a id="l00604" name="l00604"></a><span class="lineno">  604</span>                ++counter;</div>
-<div class="line"><a id="l00605" name="l00605"></a><span class="lineno">  605</span>            }</div>
-<div class="line"><a id="l00606" name="l00606"></a><span class="lineno">  606</span> </div>
-<div class="line"><a id="l00607" name="l00607"></a><span class="lineno">  607</span>            <span class="keywordtype">void</span> finish() {</div>
-<div class="line"><a id="l00608" name="l00608"></a><span class="lineno">  608</span>                <span class="keywordflow">if</span> (output.max_count || output.max_index) {</div>
-<div class="line"><a id="l00609" name="l00609"></a><span class="lineno">  609</span>                    <span class="keyword">auto</span>* tracker = (output.max_count ? output.max_count + start : internal_max_count.data());</div>
-<div class="line"><a id="l00610" name="l00610"></a><span class="lineno">  610</span> </div>
-<div class="line"><a id="l00611" name="l00611"></a><span class="lineno">  611</span>                    <span class="comment">// Checking anything with non-positive max count.</span></div>
-<div class="line"><a id="l00612" name="l00612"></a><span class="lineno">  612</span>                    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> s = start; s &lt; end; ++s) {</div>
-<div class="line"><a id="l00613" name="l00613"></a><span class="lineno">  613</span>                        <span class="keyword">auto</span>&amp; current = tracker[s - start];</div>
-<div class="line"><a id="l00614" name="l00614"></a><span class="lineno">  614</span>                        <span class="keywordflow">if</span> (current &gt; 0) {</div>
-<div class="line"><a id="l00615" name="l00615"></a><span class="lineno">  615</span>                            <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00616" name="l00616"></a><span class="lineno">  616</span>                        }</div>
-<div class="line"><a id="l00617" name="l00617"></a><span class="lineno">  617</span> </div>
-<div class="line"><a id="l00618" name="l00618"></a><span class="lineno">  618</span>                        <span class="keyword">auto</span> last_nz = internal_last_consecutive_nonzero[s - start];</div>
-<div class="line"><a id="l00619" name="l00619"></a><span class="lineno">  619</span>                        <span class="keywordflow">if</span> (last_nz == NR) {</div>
-<div class="line"><a id="l00620" name="l00620"></a><span class="lineno">  620</span>                            <span class="keywordflow">continue</span>;</div>
-<div class="line"><a id="l00621" name="l00621"></a><span class="lineno">  621</span>                        }</div>
-<div class="line"><a id="l00622" name="l00622"></a><span class="lineno">  622</span> </div>
-<div class="line"><a id="l00623" name="l00623"></a><span class="lineno">  623</span>                        current = 0;</div>
-<div class="line"><a id="l00624" name="l00624"></a><span class="lineno">  624</span>                        <span class="keywordflow">if</span> (output.max_index) {</div>
-<div class="line"><a id="l00625" name="l00625"></a><span class="lineno">  625</span>                            output.max_index[s] = last_nz;</div>
-<div class="line"><a id="l00626" name="l00626"></a><span class="lineno">  626</span>                        }</div>
-<div class="line"><a id="l00627" name="l00627"></a><span class="lineno">  627</span>                    }</div>
-<div class="line"><a id="l00628" name="l00628"></a><span class="lineno">  628</span>                }</div>
-<div class="line"><a id="l00629" name="l00629"></a><span class="lineno">  629</span>            }</div>
-<div class="line"><a id="l00630" name="l00630"></a><span class="lineno">  630</span> </div>
-<div class="line"><a id="l00631" name="l00631"></a><span class="lineno">  631</span>            <span class="keyword">const</span> <span class="keywordtype">size_t</span> start, end;</div>
-<div class="line"><a id="l00632" name="l00632"></a><span class="lineno">  632</span>            <span class="keywordtype">size_t</span> counter = 0;</div>
-<div class="line"><a id="l00633" name="l00633"></a><span class="lineno">  633</span>            <span class="keywordtype">size_t</span> NR;</div>
-<div class="line"><a id="l00634" name="l00634"></a><span class="lineno">  634</span>            <span class="keyword">const</span> std::vector&lt;Subset&gt;* subsets_ptr;</div>
-<div class="line"><a id="l00635" name="l00635"></a><span class="lineno">  635</span>            Buffers&lt;Float, Integer&gt; output;</div>
-<div class="line"><a id="l00636" name="l00636"></a><span class="lineno">  636</span>            std::vector&lt;Float&gt; internal_max_count;</div>
-<div class="line"><a id="l00637" name="l00637"></a><span class="lineno">  637</span>            std::vector&lt;Integer&gt; internal_last_consecutive_nonzero;</div>
-<div class="line"><a id="l00638" name="l00638"></a><span class="lineno">  638</span>        };</div>
-<div class="line"><a id="l00639" name="l00639"></a><span class="lineno">  639</span>         </div>
-<div class="line"><a id="l00640" name="l00640"></a><span class="lineno">  640</span>        SparseRunning sparse_running() {</div>
-<div class="line"><a id="l00641" name="l00641"></a><span class="lineno">  641</span>            <span class="keywordflow">return</span> SparseRunning(0, NC, NR, subsets_ptr, output);</div>
-<div class="line"><a id="l00642" name="l00642"></a><span class="lineno">  642</span>        }</div>
-<div class="line"><a id="l00643" name="l00643"></a><span class="lineno">  643</span> </div>
-<div class="line"><a id="l00644" name="l00644"></a><span class="lineno">  644</span>        SparseRunning sparse_running(<span class="keywordtype">size_t</span> start, <span class="keywordtype">size_t</span> end) {</div>
-<div class="line"><a id="l00645" name="l00645"></a><span class="lineno">  645</span>            <span class="keywordflow">return</span> SparseRunning(start, end, NR, subsets_ptr, output);</div>
-<div class="line"><a id="l00646" name="l00646"></a><span class="lineno">  646</span>        }</div>
-<div class="line"><a id="l00647" name="l00647"></a><span class="lineno">  647</span>    };</div>
-<div class="line"><a id="l00648" name="l00648"></a><span class="lineno">  648</span> </div>
-<div class="line"><a id="l00649" name="l00649"></a><span class="lineno">  649</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00662" name="l00662"></a><span class="lineno">  662</span>    <span class="keyword">template</span>&lt;<span class="keyword">class</span> Matrix, <span class="keyword">typename</span> Subset = const u<span class="keywordtype">int</span>8_t*, <span class="keyword">typename</span> Float, <span class="keyword">typename</span> Integer&gt;</div>
-<div class="line"><a id="l00663" name="l00663"></a><span class="lineno"><a class="line" href="classscran_1_1PerCellQcMetrics.html#a1c541faad1c65071a6a74b880428b5b4">  663</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classscran_1_1PerCellQcMetrics.html#a1c541faad1c65071a6a74b880428b5b4">run</a>(<span class="keyword">const</span> Matrix* mat, <span class="keyword">const</span> std::vector&lt;Subset&gt;&amp; subsets, <a class="code hl_struct" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html">Buffers&lt;Float, Integer&gt;</a> output)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00664" name="l00664"></a><span class="lineno">  664</span>        <span class="keywordflow">if</span> (!output.<a class="code hl_variable" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html#abfc89c44c3c57da63654baeb3c571137">already_zeroed</a>) {</div>
-<div class="line"><a id="l00665" name="l00665"></a><span class="lineno">  665</span>            <span class="keywordtype">size_t</span> n = mat-&gt;ncol();</div>
-<div class="line"><a id="l00666" name="l00666"></a><span class="lineno">  666</span>            <span class="keyword">auto</span> check_and_fill = [&amp;](<span class="keyword">auto</span>* ptr, <span class="keyword">auto</span> value) -&gt; <span class="keywordtype">void</span> {</div>
-<div class="line"><a id="l00667" name="l00667"></a><span class="lineno">  667</span>                <span class="keywordflow">if</span> (ptr) {</div>
-<div class="line"><a id="l00668" name="l00668"></a><span class="lineno">  668</span>                    std::fill(ptr, ptr + n, value);</div>
-<div class="line"><a id="l00669" name="l00669"></a><span class="lineno">  669</span>                }</div>
-<div class="line"><a id="l00670" name="l00670"></a><span class="lineno">  670</span>            };</div>
-<div class="line"><a id="l00671" name="l00671"></a><span class="lineno">  671</span> </div>
-<div class="line"><a id="l00672" name="l00672"></a><span class="lineno">  672</span>            check_and_fill(output.<a class="code hl_variable" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html#afd4b7e0a947bc1d7ab44a794a8754eb3">total</a>, <span class="keyword">static_cast&lt;</span>Float<span class="keyword">&gt;</span>(0));</div>
-<div class="line"><a id="l00673" name="l00673"></a><span class="lineno">  673</span>            check_and_fill(output.<a class="code hl_variable" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html#af8006908051c72800f549964a91ec684">detected</a>, <span class="keyword">static_cast&lt;</span>Integer<span class="keyword">&gt;</span>(0));</div>
-<div class="line"><a id="l00674" name="l00674"></a><span class="lineno">  674</span>            check_and_fill(output.<a class="code hl_variable" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html#a1fec0a30a28025b1d2725bb908333127">max_count</a>, pick_fill_value&lt;Float&gt;());</div>
-<div class="line"><a id="l00675" name="l00675"></a><span class="lineno">  675</span>            check_and_fill(output.<a class="code hl_variable" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html#aaa9d95d1df2013dd608c542bf2007e05">max_index</a>, <span class="keyword">static_cast&lt;</span>Integer<span class="keyword">&gt;</span>(0));</div>
-<div class="line"><a id="l00676" name="l00676"></a><span class="lineno">  676</span> </div>
-<div class="line"><a id="l00677" name="l00677"></a><span class="lineno">  677</span>            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> s = 0; s &lt; subsets.size(); ++s) {</div>
-<div class="line"><a id="l00678" name="l00678"></a><span class="lineno">  678</span>                check_and_fill(output.<a class="code hl_variable" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html#ac328757bc9478d557e700110f9efa253">subset_total</a>[s], <span class="keyword">static_cast&lt;</span>Float<span class="keyword">&gt;</span>(0));</div>
-<div class="line"><a id="l00679" name="l00679"></a><span class="lineno">  679</span>                check_and_fill(output.<a class="code hl_variable" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html#a5e0fba5da33a431bc8c6a972ca055774">subset_detected</a>[s], <span class="keyword">static_cast&lt;</span>Integer<span class="keyword">&gt;</span>(0));</div>
-<div class="line"><a id="l00680" name="l00680"></a><span class="lineno">  680</span>            }</div>
-<div class="line"><a id="l00681" name="l00681"></a><span class="lineno">  681</span>        }</div>
-<div class="line"><a id="l00682" name="l00682"></a><span class="lineno">  682</span> </div>
-<div class="line"><a id="l00683" name="l00683"></a><span class="lineno">  683</span>        <span class="keywordtype">size_t</span> nr = mat-&gt;nrow(), nc = mat-&gt;ncol();</div>
-<div class="line"><a id="l00684" name="l00684"></a><span class="lineno">  684</span>        Factory fact(nr, nc, &amp;subsets, std::move(output));</div>
-<div class="line"><a id="l00685" name="l00685"></a><span class="lineno">  685</span>        tatami::apply&lt;1&gt;(mat, fact, <a class="code hl_variable" href="classscran_1_1PerCellQcMetrics.html#aa30c8e04db3e31c67aa99670b721f9ab">num_threads</a>);</div>
-<div class="line"><a id="l00686" name="l00686"></a><span class="lineno">  686</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00687" name="l00687"></a><span class="lineno">  687</span>    }</div>
-<div class="line"><a id="l00688" name="l00688"></a><span class="lineno">  688</span>};</div>
-<div class="line"><a id="l00689" name="l00689"></a><span class="lineno">  689</span> </div>
-<div class="line"><a id="l00690" name="l00690"></a><span class="lineno">  690</span>}</div>
-<div class="line"><a id="l00691" name="l00691"></a><span class="lineno">  691</span> </div>
-<div class="line"><a id="l00692" name="l00692"></a><span class="lineno">  692</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00574" name="l00574"></a><span class="lineno">  574</span>                        <span class="keyword">auto</span>&amp; last = internal_last_consecutive_nonzero[offset];</div>
+<div class="line"><a id="l00575" name="l00575"></a><span class="lineno">  575</span>                        <span class="keywordflow">if</span> (<span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(last) == counter) {</div>
+<div class="line"><a id="l00576" name="l00576"></a><span class="lineno">  576</span>                            <span class="keywordflow">if</span> (range.value[i] != 0) {</div>
+<div class="line"><a id="l00577" name="l00577"></a><span class="lineno">  577</span>                                ++last;</div>
+<div class="line"><a id="l00578" name="l00578"></a><span class="lineno">  578</span>                            }</div>
+<div class="line"><a id="l00579" name="l00579"></a><span class="lineno">  579</span>                        }</div>
+<div class="line"><a id="l00580" name="l00580"></a><span class="lineno">  580</span>                    }</div>
+<div class="line"><a id="l00581" name="l00581"></a><span class="lineno">  581</span>                }</div>
+<div class="line"><a id="l00582" name="l00582"></a><span class="lineno">  582</span> </div>
+<div class="line"><a id="l00583" name="l00583"></a><span class="lineno">  583</span>                <span class="keywordtype">size_t</span> nsubsets = subsets_ptr-&gt;size();</div>
+<div class="line"><a id="l00584" name="l00584"></a><span class="lineno">  584</span>                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> s = 0; s &lt; nsubsets; ++s) {</div>
+<div class="line"><a id="l00585" name="l00585"></a><span class="lineno">  585</span>                    <span class="keyword">const</span> <span class="keyword">auto</span>&amp; sub = (*subsets_ptr)[s];</div>
+<div class="line"><a id="l00586" name="l00586"></a><span class="lineno">  586</span>                    <span class="keywordflow">if</span> (sub[counter] == 0) {</div>
+<div class="line"><a id="l00587" name="l00587"></a><span class="lineno">  587</span>                        <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00588" name="l00588"></a><span class="lineno">  588</span>                    }</div>
+<div class="line"><a id="l00589" name="l00589"></a><span class="lineno">  589</span> </div>
+<div class="line"><a id="l00590" name="l00590"></a><span class="lineno">  590</span>                    <span class="keywordflow">if</span> (output.subset_total[s]) {</div>
+<div class="line"><a id="l00591" name="l00591"></a><span class="lineno">  591</span>                        <span class="keyword">auto</span>&amp; current = output.subset_total[s];</div>
+<div class="line"><a id="l00592" name="l00592"></a><span class="lineno">  592</span>                        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; range.number; ++i) {</div>
+<div class="line"><a id="l00593" name="l00593"></a><span class="lineno">  593</span>                            current[range.index[i]] += range.value[i];</div>
+<div class="line"><a id="l00594" name="l00594"></a><span class="lineno">  594</span>                        }</div>
+<div class="line"><a id="l00595" name="l00595"></a><span class="lineno">  595</span>                    }</div>
+<div class="line"><a id="l00596" name="l00596"></a><span class="lineno">  596</span> </div>
+<div class="line"><a id="l00597" name="l00597"></a><span class="lineno">  597</span>                    <span class="keywordflow">if</span> (output.subset_detected[s]) {</div>
+<div class="line"><a id="l00598" name="l00598"></a><span class="lineno">  598</span>                        <span class="keyword">auto</span>&amp; current = output.subset_detected[s];</div>
+<div class="line"><a id="l00599" name="l00599"></a><span class="lineno">  599</span>                        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; range.number; ++i) {</div>
+<div class="line"><a id="l00600" name="l00600"></a><span class="lineno">  600</span>                            current[range.index[i]] += (range.value[i] != 0);</div>
+<div class="line"><a id="l00601" name="l00601"></a><span class="lineno">  601</span>                        }</div>
+<div class="line"><a id="l00602" name="l00602"></a><span class="lineno">  602</span>                    }</div>
+<div class="line"><a id="l00603" name="l00603"></a><span class="lineno">  603</span>                }</div>
+<div class="line"><a id="l00604" name="l00604"></a><span class="lineno">  604</span> </div>
+<div class="line"><a id="l00605" name="l00605"></a><span class="lineno">  605</span>                ++counter;</div>
+<div class="line"><a id="l00606" name="l00606"></a><span class="lineno">  606</span>            }</div>
+<div class="line"><a id="l00607" name="l00607"></a><span class="lineno">  607</span> </div>
+<div class="line"><a id="l00608" name="l00608"></a><span class="lineno">  608</span>            <span class="keywordtype">void</span> finish() {</div>
+<div class="line"><a id="l00609" name="l00609"></a><span class="lineno">  609</span>                <span class="keywordflow">if</span> (output.max_count || output.max_index) {</div>
+<div class="line"><a id="l00610" name="l00610"></a><span class="lineno">  610</span>                    <span class="keyword">auto</span>* tracker = (output.max_count ? output.max_count + start : internal_max_count.data());</div>
+<div class="line"><a id="l00611" name="l00611"></a><span class="lineno">  611</span> </div>
+<div class="line"><a id="l00612" name="l00612"></a><span class="lineno">  612</span>                    <span class="comment">// Checking anything with non-positive max count.</span></div>
+<div class="line"><a id="l00613" name="l00613"></a><span class="lineno">  613</span>                    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> s = start; s &lt; end; ++s) {</div>
+<div class="line"><a id="l00614" name="l00614"></a><span class="lineno">  614</span>                        <span class="keyword">auto</span>&amp; current = tracker[s - start];</div>
+<div class="line"><a id="l00615" name="l00615"></a><span class="lineno">  615</span>                        <span class="keywordflow">if</span> (current &gt; 0) {</div>
+<div class="line"><a id="l00616" name="l00616"></a><span class="lineno">  616</span>                            <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00617" name="l00617"></a><span class="lineno">  617</span>                        }</div>
+<div class="line"><a id="l00618" name="l00618"></a><span class="lineno">  618</span> </div>
+<div class="line"><a id="l00619" name="l00619"></a><span class="lineno">  619</span>                        <span class="keyword">auto</span> last_nz = internal_last_consecutive_nonzero[s - start];</div>
+<div class="line"><a id="l00620" name="l00620"></a><span class="lineno">  620</span>                        <span class="keywordflow">if</span> (last_nz == NR) {</div>
+<div class="line"><a id="l00621" name="l00621"></a><span class="lineno">  621</span>                            <span class="keywordflow">continue</span>;</div>
+<div class="line"><a id="l00622" name="l00622"></a><span class="lineno">  622</span>                        }</div>
+<div class="line"><a id="l00623" name="l00623"></a><span class="lineno">  623</span> </div>
+<div class="line"><a id="l00624" name="l00624"></a><span class="lineno">  624</span>                        current = 0;</div>
+<div class="line"><a id="l00625" name="l00625"></a><span class="lineno">  625</span>                        <span class="keywordflow">if</span> (output.max_index) {</div>
+<div class="line"><a id="l00626" name="l00626"></a><span class="lineno">  626</span>                            output.max_index[s] = last_nz;</div>
+<div class="line"><a id="l00627" name="l00627"></a><span class="lineno">  627</span>                        }</div>
+<div class="line"><a id="l00628" name="l00628"></a><span class="lineno">  628</span>                    }</div>
+<div class="line"><a id="l00629" name="l00629"></a><span class="lineno">  629</span>                }</div>
+<div class="line"><a id="l00630" name="l00630"></a><span class="lineno">  630</span>            }</div>
+<div class="line"><a id="l00631" name="l00631"></a><span class="lineno">  631</span> </div>
+<div class="line"><a id="l00632" name="l00632"></a><span class="lineno">  632</span>            <span class="keyword">const</span> <span class="keywordtype">size_t</span> start, end;</div>
+<div class="line"><a id="l00633" name="l00633"></a><span class="lineno">  633</span>            <span class="keywordtype">size_t</span> counter = 0;</div>
+<div class="line"><a id="l00634" name="l00634"></a><span class="lineno">  634</span>            <span class="keywordtype">size_t</span> NR;</div>
+<div class="line"><a id="l00635" name="l00635"></a><span class="lineno">  635</span>            <span class="keyword">const</span> std::vector&lt;Subset&gt;* subsets_ptr;</div>
+<div class="line"><a id="l00636" name="l00636"></a><span class="lineno">  636</span>            Buffers&lt;Float, Integer&gt; output;</div>
+<div class="line"><a id="l00637" name="l00637"></a><span class="lineno">  637</span>            std::vector&lt;Float&gt; internal_max_count;</div>
+<div class="line"><a id="l00638" name="l00638"></a><span class="lineno">  638</span>            std::vector&lt;Integer&gt; internal_last_consecutive_nonzero;</div>
+<div class="line"><a id="l00639" name="l00639"></a><span class="lineno">  639</span>        };</div>
+<div class="line"><a id="l00640" name="l00640"></a><span class="lineno">  640</span>         </div>
+<div class="line"><a id="l00641" name="l00641"></a><span class="lineno">  641</span>        SparseRunning sparse_running() {</div>
+<div class="line"><a id="l00642" name="l00642"></a><span class="lineno">  642</span>            <span class="keywordflow">return</span> SparseRunning(0, NC, NR, subsets_ptr, output);</div>
+<div class="line"><a id="l00643" name="l00643"></a><span class="lineno">  643</span>        }</div>
+<div class="line"><a id="l00644" name="l00644"></a><span class="lineno">  644</span> </div>
+<div class="line"><a id="l00645" name="l00645"></a><span class="lineno">  645</span>        SparseRunning sparse_running(<span class="keywordtype">size_t</span> start, <span class="keywordtype">size_t</span> end) {</div>
+<div class="line"><a id="l00646" name="l00646"></a><span class="lineno">  646</span>            <span class="keywordflow">return</span> SparseRunning(start, end, NR, subsets_ptr, output);</div>
+<div class="line"><a id="l00647" name="l00647"></a><span class="lineno">  647</span>        }</div>
+<div class="line"><a id="l00648" name="l00648"></a><span class="lineno">  648</span>    };</div>
+<div class="line"><a id="l00649" name="l00649"></a><span class="lineno">  649</span> </div>
+<div class="line"><a id="l00650" name="l00650"></a><span class="lineno">  650</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00663" name="l00663"></a><span class="lineno">  663</span>    <span class="keyword">template</span>&lt;<span class="keyword">class</span> Matrix, <span class="keyword">typename</span> Subset = const u<span class="keywordtype">int</span>8_t*, <span class="keyword">typename</span> Float, <span class="keyword">typename</span> Integer&gt;</div>
+<div class="line"><a id="l00664" name="l00664"></a><span class="lineno"><a class="line" href="classscran_1_1PerCellQcMetrics.html#a1c541faad1c65071a6a74b880428b5b4">  664</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classscran_1_1PerCellQcMetrics.html#a1c541faad1c65071a6a74b880428b5b4">run</a>(<span class="keyword">const</span> Matrix* mat, <span class="keyword">const</span> std::vector&lt;Subset&gt;&amp; subsets, <a class="code hl_struct" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html">Buffers&lt;Float, Integer&gt;</a> output)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00665" name="l00665"></a><span class="lineno">  665</span>        <span class="keywordflow">if</span> (!output.<a class="code hl_variable" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html#abfc89c44c3c57da63654baeb3c571137">already_zeroed</a>) {</div>
+<div class="line"><a id="l00666" name="l00666"></a><span class="lineno">  666</span>            <span class="keywordtype">size_t</span> n = mat-&gt;ncol();</div>
+<div class="line"><a id="l00667" name="l00667"></a><span class="lineno">  667</span>            <span class="keyword">auto</span> check_and_fill = [&amp;](<span class="keyword">auto</span>* ptr, <span class="keyword">auto</span> value) -&gt; <span class="keywordtype">void</span> {</div>
+<div class="line"><a id="l00668" name="l00668"></a><span class="lineno">  668</span>                <span class="keywordflow">if</span> (ptr) {</div>
+<div class="line"><a id="l00669" name="l00669"></a><span class="lineno">  669</span>                    std::fill(ptr, ptr + n, value);</div>
+<div class="line"><a id="l00670" name="l00670"></a><span class="lineno">  670</span>                }</div>
+<div class="line"><a id="l00671" name="l00671"></a><span class="lineno">  671</span>            };</div>
+<div class="line"><a id="l00672" name="l00672"></a><span class="lineno">  672</span> </div>
+<div class="line"><a id="l00673" name="l00673"></a><span class="lineno">  673</span>            check_and_fill(output.<a class="code hl_variable" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html#afd4b7e0a947bc1d7ab44a794a8754eb3">total</a>, <span class="keyword">static_cast&lt;</span>Float<span class="keyword">&gt;</span>(0));</div>
+<div class="line"><a id="l00674" name="l00674"></a><span class="lineno">  674</span>            check_and_fill(output.<a class="code hl_variable" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html#af8006908051c72800f549964a91ec684">detected</a>, <span class="keyword">static_cast&lt;</span>Integer<span class="keyword">&gt;</span>(0));</div>
+<div class="line"><a id="l00675" name="l00675"></a><span class="lineno">  675</span>            check_and_fill(output.<a class="code hl_variable" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html#a1fec0a30a28025b1d2725bb908333127">max_count</a>, pick_fill_value&lt;Float&gt;());</div>
+<div class="line"><a id="l00676" name="l00676"></a><span class="lineno">  676</span>            check_and_fill(output.<a class="code hl_variable" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html#aaa9d95d1df2013dd608c542bf2007e05">max_index</a>, <span class="keyword">static_cast&lt;</span>Integer<span class="keyword">&gt;</span>(0));</div>
+<div class="line"><a id="l00677" name="l00677"></a><span class="lineno">  677</span> </div>
+<div class="line"><a id="l00678" name="l00678"></a><span class="lineno">  678</span>            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> s = 0; s &lt; subsets.size(); ++s) {</div>
+<div class="line"><a id="l00679" name="l00679"></a><span class="lineno">  679</span>                check_and_fill(output.<a class="code hl_variable" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html#ac328757bc9478d557e700110f9efa253">subset_total</a>[s], <span class="keyword">static_cast&lt;</span>Float<span class="keyword">&gt;</span>(0));</div>
+<div class="line"><a id="l00680" name="l00680"></a><span class="lineno">  680</span>                check_and_fill(output.<a class="code hl_variable" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html#a5e0fba5da33a431bc8c6a972ca055774">subset_detected</a>[s], <span class="keyword">static_cast&lt;</span>Integer<span class="keyword">&gt;</span>(0));</div>
+<div class="line"><a id="l00681" name="l00681"></a><span class="lineno">  681</span>            }</div>
+<div class="line"><a id="l00682" name="l00682"></a><span class="lineno">  682</span>        }</div>
+<div class="line"><a id="l00683" name="l00683"></a><span class="lineno">  683</span> </div>
+<div class="line"><a id="l00684" name="l00684"></a><span class="lineno">  684</span>        <span class="keywordtype">size_t</span> nr = mat-&gt;nrow(), nc = mat-&gt;ncol();</div>
+<div class="line"><a id="l00685" name="l00685"></a><span class="lineno">  685</span>        Factory fact(nr, nc, &amp;subsets, std::move(output));</div>
+<div class="line"><a id="l00686" name="l00686"></a><span class="lineno">  686</span>        tatami::apply&lt;1&gt;(mat, fact, <a class="code hl_variable" href="classscran_1_1PerCellQcMetrics.html#aa30c8e04db3e31c67aa99670b721f9ab">num_threads</a>);</div>
+<div class="line"><a id="l00687" name="l00687"></a><span class="lineno">  687</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00688" name="l00688"></a><span class="lineno">  688</span>    }</div>
+<div class="line"><a id="l00689" name="l00689"></a><span class="lineno">  689</span>};</div>
+<div class="line"><a id="l00690" name="l00690"></a><span class="lineno">  690</span> </div>
+<div class="line"><a id="l00691" name="l00691"></a><span class="lineno">  691</span>}</div>
+<div class="line"><a id="l00692" name="l00692"></a><span class="lineno">  692</span> </div>
+<div class="line"><a id="l00693" name="l00693"></a><span class="lineno">  693</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aclassscran_1_1PerCellQcMetrics_html"><div class="ttname"><a href="classscran_1_1PerCellQcMetrics.html">scran::PerCellQcMetrics</a></div><div class="ttdoc">Compute a variety of per-cell quality control metrics from a count matrix.</div><div class="ttdef"><b>Definition:</b> PerCellQcMetrics.hpp:46</div></div>
 <div class="ttc" id="aclassscran_1_1PerCellQcMetrics_html_a0d9583ecebdaad281480c74d09bcaa74"><div class="ttname"><a href="classscran_1_1PerCellQcMetrics.html#a0d9583ecebdaad281480c74d09bcaa74">scran::PerCellQcMetrics::compute_max_count</a></div><div class="ttdeci">bool compute_max_count</div><div class="ttdef"><b>Definition:</b> PerCellQcMetrics.hpp:177</div></div>
 <div class="ttc" id="aclassscran_1_1PerCellQcMetrics_html_a12db9e5876a7fcc4691ac68dadae2527"><div class="ttname"><a href="classscran_1_1PerCellQcMetrics.html#a12db9e5876a7fcc4691ac68dadae2527">scran::PerCellQcMetrics::compute_total</a></div><div class="ttdeci">bool compute_total</div><div class="ttdef"><b>Definition:</b> PerCellQcMetrics.hpp:167</div></div>
-<div class="ttc" id="aclassscran_1_1PerCellQcMetrics_html_a1c541faad1c65071a6a74b880428b5b4"><div class="ttname"><a href="classscran_1_1PerCellQcMetrics.html#a1c541faad1c65071a6a74b880428b5b4">scran::PerCellQcMetrics::run</a></div><div class="ttdeci">void run(const Matrix *mat, const std::vector&lt; Subset &gt; &amp;subsets, Buffers&lt; Float, Integer &gt; output) const</div><div class="ttdef"><b>Definition:</b> PerCellQcMetrics.hpp:663</div></div>
+<div class="ttc" id="aclassscran_1_1PerCellQcMetrics_html_a1c541faad1c65071a6a74b880428b5b4"><div class="ttname"><a href="classscran_1_1PerCellQcMetrics.html#a1c541faad1c65071a6a74b880428b5b4">scran::PerCellQcMetrics::run</a></div><div class="ttdeci">void run(const Matrix *mat, const std::vector&lt; Subset &gt; &amp;subsets, Buffers&lt; Float, Integer &gt; output) const</div><div class="ttdef"><b>Definition:</b> PerCellQcMetrics.hpp:664</div></div>
 <div class="ttc" id="aclassscran_1_1PerCellQcMetrics_html_a2cb4bc9e865b3593c3ac9b0c7c1935aa"><div class="ttname"><a href="classscran_1_1PerCellQcMetrics.html#a2cb4bc9e865b3593c3ac9b0c7c1935aa">scran::PerCellQcMetrics::compute_subset_total</a></div><div class="ttdeci">bool compute_subset_total</div><div class="ttdef"><b>Definition:</b> PerCellQcMetrics.hpp:187</div></div>
 <div class="ttc" id="aclassscran_1_1PerCellQcMetrics_html_a2fa5e9e13f1f96c821223bba73c08a60"><div class="ttname"><a href="classscran_1_1PerCellQcMetrics.html#a2fa5e9e13f1f96c821223bba73c08a60">scran::PerCellQcMetrics::compute_subset_detected</a></div><div class="ttdeci">bool compute_subset_detected</div><div class="ttdef"><b>Definition:</b> PerCellQcMetrics.hpp:192</div></div>
 <div class="ttc" id="aclassscran_1_1PerCellQcMetrics_html_a7448a2b16b2cdda9f595bbbb09199741"><div class="ttname"><a href="classscran_1_1PerCellQcMetrics.html#a7448a2b16b2cdda9f595bbbb09199741">scran::PerCellQcMetrics::compute_detected</a></div><div class="ttdeci">bool compute_detected</div><div class="ttdef"><b>Definition:</b> PerCellQcMetrics.hpp:172</div></div>
