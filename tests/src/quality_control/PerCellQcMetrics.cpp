@@ -3,6 +3,7 @@
 
 #include "../data/Simulator.hpp"
 #include "../utils/compare_almost_equal.h"
+#include "utils.h"
 
 #include "tatami/base/DenseMatrix.hpp"
 #include "tatami/base/DelayedSubset.hpp"
@@ -28,12 +29,6 @@ protected:
     }
 
 public:
-    static std::vector<int> to_filter (size_t nr, const std::vector<size_t>& indices) {
-        std::vector<int> keep_s(nr);
-        for (auto i : indices) { keep_s[i] = 1; }
-        return keep_s;        
-    }
-
     template<bool exact = false, class Result>
     static void compare(const Result& res, const Result& other) {
         if constexpr(exact) {
@@ -59,18 +54,6 @@ public:
             EXPECT_EQ(res.subset_detected[i], other.subset_detected[i]);
         }
     }
-
-    static std::vector<int> compute_num_detected(const tatami::NumericMatrix* matrix) {
-        auto NC = matrix->ncol();
-        std::vector<int> copy(NC);
-        for (size_t c = 0; c < NC; ++c) {
-            auto row = matrix->column(c);
-            for (auto& r : row) {
-                copy[c] += (r != 0);
-            }
-        }
-        return copy;
-    }
 };
 
 TEST_P(PerCellQcMetricsTestStandard, NoSubset) {
@@ -79,7 +62,7 @@ TEST_P(PerCellQcMetricsTestStandard, NoSubset) {
 
     {
         EXPECT_EQ(res.total, tatami::column_sums(dense_row.get()));
-        EXPECT_EQ(res.detected, compute_num_detected(dense_row.get()));
+        EXPECT_EQ(res.detected, quality_control::compute_num_detected(dense_row.get()));
     }
 
     int threads = GetParam();
@@ -100,7 +83,7 @@ TEST_P(PerCellQcMetricsTestStandard, NoSubset) {
 
 TEST_P(PerCellQcMetricsTestStandard, OneSubset) {
     std::vector<size_t> keep_i = { 0, 5, 7, 8, 9, 10, 16, 17 };
-    auto keep_s = to_filter(dense_row->nrow(), keep_i);
+    auto keep_s = quality_control::to_filter(dense_row->nrow(), keep_i);
     std::vector<const int*> subs(1, keep_s.data());
 
     scran::PerCellQcMetrics qcfun;
@@ -110,7 +93,7 @@ TEST_P(PerCellQcMetricsTestStandard, OneSubset) {
         auto ref = tatami::make_DelayedSubset<0>(dense_row, keep_i);
         auto reftotal = tatami::column_sums(ref.get());
         EXPECT_EQ(reftotal, res.subset_total[0]);
-        EXPECT_EQ(res.subset_detected[0], compute_num_detected(ref.get()));
+        EXPECT_EQ(res.subset_detected[0], quality_control::compute_num_detected(ref.get()));
     }
 
     int threads = GetParam();
@@ -132,7 +115,8 @@ TEST_P(PerCellQcMetricsTestStandard, OneSubset) {
 TEST_P(PerCellQcMetricsTestStandard, TwoSubsets) {
     std::vector<size_t> keep_i1 = { 0, 5, 7, 8, 9, 10, 16, 17 };
     std::vector<size_t> keep_i2 = { 1, 8, 2, 6, 11, 5, 19, 17 };
-    auto keep_s1 = to_filter(dense_row->nrow(), keep_i1), keep_s2 = to_filter(dense_row->nrow(), keep_i2);
+    auto keep_s1 = quality_control::to_filter(dense_row->nrow(), keep_i1);
+    auto keep_s2 = quality_control::to_filter(dense_row->nrow(), keep_i2);
     std::vector<const int*> subs = { keep_s1.data(), keep_s2.data() };
 
     scran::PerCellQcMetrics qcfun;
@@ -142,12 +126,12 @@ TEST_P(PerCellQcMetricsTestStandard, TwoSubsets) {
         auto ref1 = tatami::make_DelayedSubset<0>(dense_row, keep_i1);
         auto refprop1 = tatami::column_sums(ref1.get());
         EXPECT_EQ(refprop1, res.subset_total[0]);
-        EXPECT_EQ(res.subset_detected[0], compute_num_detected(ref1.get()));
+        EXPECT_EQ(res.subset_detected[0], quality_control::compute_num_detected(ref1.get()));
 
         auto ref2 = tatami::make_DelayedSubset<0>(dense_row, keep_i2);
         auto refprop2 = tatami::column_sums(ref2.get());
         EXPECT_EQ(refprop2, res.subset_total[1]);
-        EXPECT_EQ(res.subset_detected[1], compute_num_detected(ref2.get()));
+        EXPECT_EQ(res.subset_detected[1], quality_control::compute_num_detected(ref2.get()));
     }
 
     int threads = GetParam();
@@ -440,7 +424,7 @@ TEST(PerCellQcMetrics, FullyDisabled) {
     qcfun.compute_subset_detected = false;
 
     std::vector<size_t> keep_i = { 0, 1, 2, 3 };
-    auto keep_s = PerCellQcMetricsTestStandard::to_filter(nr, keep_i);
+    auto keep_s = quality_control::to_filter(nr, keep_i);
     std::vector<const int*> subs(1, keep_s.data());
 
     auto res = qcfun.run(&mat, subs);
@@ -449,10 +433,8 @@ TEST(PerCellQcMetrics, FullyDisabled) {
     EXPECT_TRUE(res.max_count.empty());
     EXPECT_TRUE(res.max_index.empty());
 
-    EXPECT_EQ(res.subset_total.size(), 1);
-    EXPECT_TRUE(res.subset_total[0].empty());
-    EXPECT_EQ(res.subset_detected.size(), 1);
-    EXPECT_TRUE(res.subset_detected[0].empty());
+    EXPECT_TRUE(res.subset_total.empty());
+    EXPECT_TRUE(res.subset_detected.empty());
 }
 
 TEST(PerCellQcMetrics, BufferFilling) {
@@ -491,7 +473,7 @@ TEST(PerCellQcMetrics, BufferFilling) {
     }
 
     std::vector<size_t> keep_i = { 1, 5, 7, 9, 11 };
-    auto keep_s = PerCellQcMetricsTestStandard::to_filter(nr, keep_i);
+    auto keep_s = quality_control::to_filter(nr, keep_i);
     std::vector<const int*> subs(1, keep_s.data());
      
     scran::PerCellQcMetrics qcfun;

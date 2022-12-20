@@ -64,34 +64,40 @@ public:
 
         /**
          * Total count for each cell.
+         * Empty if `PerCellQcMetrics::compute_total` is false.
          */
         std::vector<double> total;
 
         /**
          * Number of detected features in each cell.
+         * Empty if `PerCellQcMetrics::compute_detected` is false.
          */
         std::vector<int> detected;
 
         /**
          * Row index of the most-expressed feature in each cell.
          * On ties, the first feature is arbitrarily chosen.
+         * Empty if `PerCellQcMetrics::compute_max_index` is false.
          */
         std::vector<int> max_index;
 
         /**
          * Maximum count value in each cell.
+         * Empty if `PerCellQcMetrics::compute_max_count` is false.
          */
         std::vector<double> max_count;
 
         /**
          * Total count of each feature subset in each cell.
          * Each inner vector corresponds to a feature subset and is of length equal to the number of cells.
+         * Empty if there are no feature subsets or if `PerCellQcMetrics::compute_subset_total` is false.
          */
         std::vector<std::vector<double> > subset_total;
 
         /**
          * Number of detected features in each feature subset in each cell.
          * Each inner vector corresponds to a feature subset and is of length equal to the number of cells.
+         * Empty if there are no feature subsets or if `PerCellQcMetrics::compute_subset_detected` is false.
          */
         std::vector<std::vector<int> > subset_detected;
     };
@@ -141,14 +147,16 @@ public:
         /**
          * Vector of pointers of length equal to the number of feature subsets,
          * where each point is to an array of length equal to the number of cells; equivalent to `Results::subset_total`.
-         * Set any value to `NULL` to skip the calculation for the corresponding feature subset.
+         * Set any value to `NULL` to skip the calculation for the corresponding feature subset,
+         * or leave empty to skip calculations for all feature subsets.
          */
         std::vector<Float*> subset_total;
 
         /**
          * Vector of pointers of length equal to the number of feature subsets,
          * where each point is to an array of length equal to the number of cells; equivalent to `Results::subset_detected`.
-         * Set any value to `NULL` to skip the calculation for the corresponding feature subset.
+         * Set any value to `NULL` to skip the calculation for the corresponding feature subset,
+         * or leave empty to skip calculations for all feature subsets.
          */
         std::vector<Integer*> subset_detected;
 
@@ -235,18 +243,19 @@ public:
         }
 
         size_t nsubsets = subsets.size();
-        output.subset_total.resize(nsubsets);
-        buffers.subset_total.resize(nsubsets);
-        output.subset_detected.resize(nsubsets);
-        buffers.subset_detected.resize(nsubsets);
 
         if (compute_subset_total) {
+            output.subset_total.resize(nsubsets);
+            buffers.subset_total.resize(nsubsets);
             for (size_t s = 0; s < nsubsets; ++s) {
                 output.subset_total[s].resize(ncells);
                 buffers.subset_total[s] = output.subset_total[s].data();
             }
         }
+
         if (compute_subset_detected) {
+            output.subset_detected.resize(nsubsets);
+            buffers.subset_detected.resize(nsubsets);
             for (size_t s = 0; s < nsubsets; ++s) {
                 output.subset_detected[s].resize(ncells);
                 buffers.subset_detected[s] = output.subset_detected[s].data();
@@ -321,14 +330,14 @@ private:
                 for (size_t s = 0; s < nsubsets; ++s) {
                     const auto& sub = (*subsets_ptr)[s];
 
-                    if (output.subset_total[s]) {
+                    if (!output.subset_total.empty() && output.subset_total[s]) {
                         auto& current = output.subset_total[s][c];
                         for (size_t r = 0; r < NR; ++r) {
                             current += (sub[r] != 0) * ptr[r];
                         }
                     }
 
-                    if (output.subset_detected[s]) {
+                    if (!output.subset_detected.empty() && output.subset_detected[s]) {
                         auto& current = output.subset_detected[s][c];
                         for (size_t r = 0; r < NR; ++r) {
                             current += (sub[r] != 0) * (ptr[r] != 0);
@@ -417,14 +426,14 @@ private:
                 for (size_t s = 0; s < nsubsets; ++s) {
                     const auto& sub = (*subsets_ptr)[s];
 
-                    if (output.subset_total[s]) {
+                    if (!output.subset_total.empty() && output.subset_total[s]) {
                         auto& current = output.subset_total[s][c];
                         for (size_t i = 0; i < range.number; ++i) {
                             current += (sub[range.index[i]] != 0) * range.value[i];
                         }
                     }
 
-                    if (output.subset_detected[s]) {
+                    if (!output.subset_detected.empty() && output.subset_detected[s]) {
                         auto& current = output.subset_detected[s][c];
                         for (size_t i = 0; i < range.number; ++i) {
                             current += (sub[range.index[i]] != 0) * (range.value[i] != 0);
@@ -482,14 +491,14 @@ private:
                         continue;
                     }
 
-                    if (output.subset_total[s]) {
+                    if (!output.subset_total.empty() && output.subset_total[s]) {
                         auto& current = output.subset_total[s];
                         for (size_t c = 0; c < num; ++c) {
                             current[c] += ptr[c];
                         }
                     }
 
-                    if (output.subset_detected[s]) {
+                    if (!output.subset_detected.empty() && output.subset_detected[s]) {
                         auto& current = output.subset_detected[s];
                         for (size_t c = 0; c < num; ++c) {
                             current[c] += (ptr[c] != 0);
@@ -587,14 +596,14 @@ private:
                         continue;
                     }
 
-                    if (output.subset_total[s]) {
+                    if (!output.subset_total.empty() && output.subset_total[s]) {
                         auto& current = output.subset_total[s];
                         for (size_t i = 0; i < range.number; ++i) {
                             current[range.index[i]] += range.value[i];
                         }
                     }
 
-                    if (output.subset_detected[s]) {
+                    if (!output.subset_detected.empty() && output.subset_detected[s]) {
                         auto& current = output.subset_detected[s];
                         for (size_t i = 0; i < range.number; ++i) {
                             current[range.index[i]] += (range.value[i] != 0);
@@ -676,8 +685,12 @@ public:
             check_and_fill(output.max_index, static_cast<Integer>(0));
 
             for (size_t s = 0; s < subsets.size(); ++s) {
-                check_and_fill(output.subset_total[s], static_cast<Float>(0));
-                check_and_fill(output.subset_detected[s], static_cast<Integer>(0));
+                if (!output.subset_total.empty()) {
+                    check_and_fill(output.subset_total[s], static_cast<Float>(0));
+                }
+                if (!output.subset_detected.empty()) {
+                    check_and_fill(output.subset_detected[s], static_cast<Integer>(0));
+                }
             }
         }
 
