@@ -3,7 +3,11 @@
 
 #include "../utils/macros.hpp"
 
-#include "PerCellRnaQcMetrics.hpp"
+#include <vector>
+#include <limits>
+
+#include "tatami/base/Matrix.hpp"
+#include "PerCellQcMetrics.hpp"
 
 /**
  * @file PerCellAdtQcMetrics.hpp
@@ -18,39 +22,93 @@ namespace scran {
  *
  * Given a feature-by-cell ADT count matrix, this class computes several QC metrics:
  * 
- * - The total sum for each cell, which represents the efficiency of library preparation and sequencing.
- *   This is less useful as a QC metric for ADT data given that the total count may be strongly skewed by the presence or absence of a single feature.
- *   Nonetheless, we compute it, because why not.
- * - The number of detected features per cell
- *   Even though ADTs are commonly applied in situations where few features are expressed, we still expect detectable coverage of most features due to ambient contamination.
+ * - The total sum of counts for each cell, which (in theory) represents the efficiency of library preparation and sequencing.
+ *   This is less useful as a QC metric for ADT data given that the total count is strongly influenced by the actual abundance of the targeted features,
+ *   i.e., the presence of a surface protein will typically result in an order-of-magnitude increase to the total count that is independent of the cell's technical quality.
+ *   Nonetheless, we compute it for diagnostic purposes.
+ * - The number of detected features per cell.
+ *   Even though ADTs are commonly applied in situations where few features are highly abundant, we still expect detectable coverage of most features due to ambient contamination, non-specific binding or some background expression.
  *   The absence of detectable coverage indicates that library preparation or sequencing depth was suboptimal.
  * - The total sum of counts in pre-defined feature subsets.
  *   The exact interpretation depends on the nature of the subset - the most common use case involves isotype control (IgG) features.
  *   IgG antibodies should not bind to anything, so high coverage suggests that non-specific binding is a problem, e.g., due to antibody conjugates.
+ *
+ * Under the hood, this class is just a pre-configured wrapper around `PerCellQcMetrics`.
  */
 class PerCellAdtQcMetrics {
 public:
     /**
-     * @brief Default parameters for aggregation.
-     */
-    struct Defaults {
-        /**
-         * See `set_num_threads()`.
-         */
-        static constexpr int num_threads = 1;
-    };
-
-    /**
+     * Deprecated, set `num_threads` directly instead.
      * @param n Number of threads to use. 
      * @return A reference to this `PerCellAdtQcMetrics` object.
      */
-    PerCellAdtQcMetrics& set_num_threads(int n = Defaults::num_threads) {
+    PerCellAdtQcMetrics& set_num_threads(int n = 1) {
         num_threads = n;
         return *this;
     }
 
-private:
-    int num_threads = Defaults::num_threads;
+    /**
+     * Number of threads to use. 
+     */
+    int num_threads = 1;
+
+public:
+    /**
+     * @brief Buffers for direct storage of the calculated statistics.
+     * @tparam Float Floating point type to store the totals.
+     * @tparam Integer Integer type to store the counts and indices.
+     */
+    template<typename Float = double, typename Integer = int>
+    struct Buffers {
+        /**
+         * Pointer to an array of length equal to the number of cells, see `Results::sums`.
+         * Set to `NULL` to skip this calculation.
+         */
+        Float* sums = NULL;
+
+        /**
+         * Pointer to an array of length equal to the number of cells, see `Results::detected`.
+         * Set to `NULL` to skip this calculation.
+         */
+        Integer* detected = NULL;
+
+        /**
+         * Vector of pointers of length equal to the number of feature subsets.
+         * Each pointer should be to aan array of length equal to the number of cells, see `Results::subset_totals`.
+         * Set any to `NULL` to skip this calculation for that subset.
+         */
+        std::vector<Float*> subset_totals;
+    };
+
+public:
+    /**
+     * Compute the QC metrics from an ADT count matrix.
+     *
+     * @tparam Matrix Type of matrix, usually a `tatami::NumericMatrix`.
+     * @tparam Subset Pointer to a type interpretable as boolean.
+     * @tparam Float Floating point type to store the totals.
+     * @tparam Integer Integer type to store the counts and indices.
+     *
+     * @param mat Pointer to a feature-by-cells matrix containing ADT counts.
+     * @param[in] subsets Vector of pointers to arrays of length equal to `mat->nrow()`.
+     * Each array represents a feature subset and indicating whether each feature in `mat` belongs to that subset.
+     * Users can pass `{}` if no subsets are to be used. 
+     * @param[out] output `Buffers` object in which to store the output.
+     */
+    template<class Matrix, typename Subset = const uint8_t*, typename Float, typename Integer>
+    void run(const Matrix* mat, const std::vector<Subset>& subsets, Buffers<Float, Integer> output) const {
+        // Calling the general-purpose PerCellQcMetrics function.
+        PerCellQcMetrics general;
+        general.num_threads = num_threads;
+
+        PerCellQcMetrics::Buffers<Float, Integer> tmp;
+        tmp.total = output.sums;
+        tmp.detected = output.detected;
+        tmp.subset_total = output.subset_totals;
+
+        general.run(mat, subsets, std::move(tmp)); 
+        return;
+    }
 
 public:
     /**
@@ -87,11 +145,12 @@ public:
         std::vector<std::vector<double> > subset_totals;
     };
 
+public:
     /**
      * Compute the QC metrics from an ADT count matrix and return the results.
      *
      * @tparam Matrix Type of matrix, usually a `tatami::NumericMatrix`.
-     * @tparam SubPtr Pointer to a type interpretable as boolean.
+     * @tparam Subset Pointer to a type interpretable as boolean.
      *
      * @param mat Pointer to a feature-by-cells matrix containing ADT counts.
      * @param[in] subsets Vector of pointers to arrays of length equal to `mat->nrow()`.
@@ -99,46 +158,24 @@ public:
      * Users can pass `{}` if no subsets are to be used. 
      *
      * @return A `PerCellAdtQcMetrics::Results` object containing the QC metrics.
-     * Subset proportions are returned depending on the `subsets`.
+     * Subset totals are returned depending on the `subsets`.
      */
-    template<class Matrix, typename SubPtr = const uint8_t*>
-    Results run(const Matrix* mat, std::vector<SubPtr> subsets) const {
-        Results output(mat->ncol(), subsets.size());
-        run(mat, std::move(subsets), output.sums.data(), output.detected.data(), vector_to_pointers(output.subset_totals));
-        return output;
-    }
+    template<class Matrix, typename Subset = const uint8_t*>
+    Results run(const Matrix* mat, std::vector<Subset> subsets) const {
+        size_t nsubsets = subsets.size();
+        Results output(mat->ncol(), nsubsets);
 
-public:
-    /**
-     * Compute the QC metrics from an ADT count matrix.
-     *
-     * @tparam Matrix Type of matrix, usually a `tatami::NumericMatrix`.
-     * @tparam SubPtr Pointer to a type interpretable as boolean.
-     * @tparam Sum Floating-point value, to store the sums.
-     * @tparam Detected Integer value, to store the number of detected features.
-     * @tparam SubTotal Floating point value, to store the subset proportions.
-     *
-     * @param mat Pointer to a feature-by-cells matrix containing ADT counts.
-     * @param[in] subsets Vector of pointers to arrays of length equal to `mat->nrow()`.
-     * Each array represents a feature subset and indicating whether each feature in `mat` belongs to that subset.
-     * Users can pass `{}` if no subsets are to be used. 
-     * @param[out] sums Pointer to an array of length equal to the number of columns in `mat`.
-     * This is used to store the computed sums for all cells.
-     * @param[out] detected Pointer to an array of length equal to the number of columns in `mat`.
-     * This is used to store the number of detected features for all cells.
-     * @param[out] subset_totals Vector of pointers to arrays of length equal to the number of columns in `mat`.
-     * Each array corresponds to a feature subset and is used to store the total count in that subset across all cells.
-     * The vector should be of length equal to that of `subsets`.
-     * Users can pass `{}` if no subsets are used.
-     *
-     * @return `sums`, `detected`, and each array in `subset_proportions` is filled with the relevant statistics.
-     */
-    template<class Matrix, typename SubPtr = const uint8_t*, typename Sum, typename Detected, typename SubTotal>
-    void run(const Matrix* mat, const std::vector<SubPtr>& subsets, Sum* sums, Detected* detected, std::vector<SubTotal*> subset_totals) const {
-        PerCellRnaQcMetrics runner;
-        runner.set_subset_totals(true).set_num_threads(num_threads);
-        runner.run(mat, subsets, sums, detected, std::move(subset_totals));
-        return;
+        Buffers<> buffers;
+        buffers.sums = output.sums.data();
+        buffers.detected = output.detected.data();
+
+        buffers.subset_totals.resize(nsubsets);
+        for (size_t s = 0; s < nsubsets; ++s) {
+            buffers.subset_totals[s] = output.subset_totals[s].data();
+        }
+
+        run(mat, subsets, std::move(buffers));
+        return output;
     }
 };
 
