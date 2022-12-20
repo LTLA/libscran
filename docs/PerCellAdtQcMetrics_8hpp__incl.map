@@ -1,12 +1,12 @@
 <map id="scran/quality_control/PerCellAdtQcMetrics.hpp" name="scran/quality_control/PerCellAdtQcMetrics.hpp">
-<area shape="rect" id="node1" title="Compute per&#45;cell quality control metrics from an ADT count matrix." alt="" coords="521,5,693,45"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="729,255,855,280"/>
-<area shape="rect" id="node3" href="$PerCellRnaQcMetrics_8hpp_source.html" title=" " alt="" coords="287,93,457,119"/>
-<area shape="rect" id="node4" title=" " alt="" coords="8,255,67,280"/>
-<area shape="rect" id="node5" title=" " alt="" coords="165,174,240,199"/>
-<area shape="rect" id="node6" title=" " alt="" coords="264,174,317,199"/>
-<area shape="rect" id="node7" title=" " alt="" coords="341,174,403,199"/>
-<area shape="rect" id="node8" title=" " alt="" coords="427,174,581,199"/>
-<area shape="rect" id="node9" title=" " alt="" coords="605,174,755,199"/>
-<area shape="rect" id="node10" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="27,167,141,207"/>
+<area shape="rect" id="node1" title="Compute per&#45;cell quality control metrics from an ADT count matrix." alt="" coords="304,5,476,45"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="52,255,179,280"/>
+<area shape="rect" id="node3" title=" " alt="" coords="534,255,593,280"/>
+<area shape="rect" id="node4" title=" " alt="" coords="25,174,78,199"/>
+<area shape="rect" id="node5" title=" " alt="" coords="700,174,853,199"/>
+<area shape="rect" id="node6" href="$PerCellQcMetrics_8hpp.html" title="Compute a variety of per&#45;cell quality control metrics from a count matrix." alt="" coords="316,93,464,119"/>
+<area shape="rect" id="node7" title=" " alt="" coords="601,174,675,199"/>
+<area shape="rect" id="node8" title=" " alt="" coords="153,174,214,199"/>
+<area shape="rect" id="node9" title=" " alt="" coords="238,174,387,199"/>
+<area shape="rect" id="node10" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="411,167,526,207"/>
 </map>

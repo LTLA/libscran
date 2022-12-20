@@ -1,4 +1,9 @@
 <map id="scran/quality_control/PerCellQcMetrics.hpp" name="scran/quality_control/PerCellQcMetrics.hpp">
-<area shape="rect" id="node1" title="Compute a variety of per&#45;cell quality control metrics from a count matrix." alt="" coords="5,5,157,45"/>
-<area shape="rect" id="node2" href="$scran_8hpp_source.html" title=" " alt="" coords="24,93,139,119"/>
+<area shape="rect" id="node1" title="Compute a variety of per&#45;cell quality control metrics from a count matrix." alt="" coords="248,5,400,45"/>
+<area shape="rect" id="node2" href="$PerCellAdtQcMetrics_8hpp.html" title="Compute per&#45;cell quality control metrics from an ADT count matrix." alt="" coords="49,93,221,133"/>
+<area shape="rect" id="node4" href="$scran_8hpp_source.html" title=" " alt="" coords="201,269,316,295"/>
+<area shape="rect" id="node5" href="$PerCellCrisprQcMetrics_8hpp.html" title="Compute per&#45;cell quality control metrics from a CRISPR guide count matrix." alt="" coords="296,93,483,133"/>
+<area shape="rect" id="node6" href="$PerCellRnaQcMetrics_8hpp_source.html" title=" " alt="" coords="507,93,682,133"/>
+<area shape="rect" id="node3" href="$PerCellAdtQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from ADT data." alt="" coords="5,181,171,221"/>
+<area shape="rect" id="node7" href="$PerCellRnaQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from RNA metrics." alt="" coords="469,181,637,221"/>
 </map>

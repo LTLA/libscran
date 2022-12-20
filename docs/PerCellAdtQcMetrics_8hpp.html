@@ -85,22 +85,25 @@ $(function() {
 <p>Compute per-cell quality control metrics from an ADT count matrix.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="macros_8hpp_source.html">../utils/macros.hpp</a>&quot;</code><br />
-<code>#include &quot;PerCellRnaQcMetrics.hpp&quot;</code><br />
+<code>#include &lt;vector&gt;</code><br />
+<code>#include &lt;limits&gt;</code><br />
+<code>#include &quot;tatami/base/Matrix.hpp&quot;</code><br />
+<code>#include &quot;<a class="el" href="PerCellQcMetrics_8hpp_source.html">PerCellQcMetrics.hpp</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for PerCellAdtQcMetrics.hpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="PerCellAdtQcMetrics_8hpp__incl.png" border="0" usemap="#ascran_2quality__control_2PerCellAdtQcMetrics_8hpp" alt=""/></div>
 <map name="ascran_2quality__control_2PerCellAdtQcMetrics_8hpp" id="ascran_2quality__control_2PerCellAdtQcMetrics_8hpp">
-<area shape="rect" title="Compute per&#45;cell quality control metrics from an ADT count matrix." alt="" coords="521,5,693,45"/>
-<area shape="rect" href="macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="729,255,855,280"/>
-<area shape="rect" href="PerCellRnaQcMetrics_8hpp_source.html" title=" " alt="" coords="287,93,457,119"/>
-<area shape="rect" title=" " alt="" coords="8,255,67,280"/>
-<area shape="rect" title=" " alt="" coords="165,174,240,199"/>
-<area shape="rect" title=" " alt="" coords="264,174,317,199"/>
-<area shape="rect" title=" " alt="" coords="341,174,403,199"/>
-<area shape="rect" title=" " alt="" coords="427,174,581,199"/>
-<area shape="rect" title=" " alt="" coords="605,174,755,199"/>
-<area shape="rect" href="vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="27,167,141,207"/>
+<area shape="rect" title="Compute per&#45;cell quality control metrics from an ADT count matrix." alt="" coords="304,5,476,45"/>
+<area shape="rect" href="macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="52,255,179,280"/>
+<area shape="rect" title=" " alt="" coords="534,255,593,280"/>
+<area shape="rect" title=" " alt="" coords="25,174,78,199"/>
+<area shape="rect" title=" " alt="" coords="700,174,853,199"/>
+<area shape="rect" href="PerCellQcMetrics_8hpp.html" title="Compute a variety of per&#45;cell quality control metrics from a count matrix." alt="" coords="316,93,464,119"/>
+<area shape="rect" title=" " alt="" coords="601,174,675,199"/>
+<area shape="rect" title=" " alt="" coords="153,174,214,199"/>
+<area shape="rect" title=" " alt="" coords="238,174,387,199"/>
+<area shape="rect" href="vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="411,167,526,207"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -121,8 +124,8 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellAdtQcMetrics.html">scran::PerCellAdtQcMetrics</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute per-cell quality control metrics from an ADT count matrix.  <a href="classscran_1_1PerCellAdtQcMetrics.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Defaults.html">scran::PerCellAdtQcMetrics::Defaults</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default parameters for aggregation.  <a href="structscran_1_1PerCellAdtQcMetrics_1_1Defaults.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Buffers.html">scran::PerCellAdtQcMetrics::Buffers&lt; Float, Integer &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Buffers.html" title="Buffers for direct storage of the calculated statistics.">Buffers</a> for direct storage of the calculated statistics.  <a href="structscran_1_1PerCellAdtQcMetrics_1_1Buffers.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Results.html">scran::PerCellAdtQcMetrics::Results</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result store for QC metric calculations.  <a href="structscran_1_1PerCellAdtQcMetrics_1_1Results.html#details">More...</a><br /></td></tr>

@@ -78,6 +78,7 @@ $(function() {
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="classscran_1_1PerCellRnaQcMetrics-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">scran::PerCellRnaQcMetrics Class Reference</div></div>
 </div><!--header-->
@@ -90,8 +91,8 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Defaults.html">Defaults</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default parameter settings.  <a href="structscran_1_1PerCellRnaQcMetrics_1_1Defaults.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html">Buffers</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html" title="Buffers for direct storage of the calculated statistics.">Buffers</a> for direct storage of the calculated statistics.  <a href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html">Results</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result store for QC metric calculations.  <a href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html#details">More...</a><br /></td></tr>
@@ -99,111 +100,37 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ac3e8492a8ff2bf2cb983fbe729c1156b"><td class="memTemplParams" colspan="2">template&lt;class MAT , typename SUB  = const uint8_t*&gt; </td></tr>
-<tr class="memitem:ac3e8492a8ff2bf2cb983fbe729c1156b"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html#ac3e8492a8ff2bf2cb983fbe729c1156b">run</a> (const MAT *mat, std::vector&lt; SUB &gt; subsets)</td></tr>
-<tr class="separator:ac3e8492a8ff2bf2cb983fbe729c1156b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acb8adf0380200ddd7092406a86c42503"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html">PerCellRnaQcMetrics</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html#acb8adf0380200ddd7092406a86c42503">set_subset_totals</a> (bool t=<a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Defaults.html#a2c1541d56f212ed2c6dd13bf47d9b7c6">Defaults::subset_totals</a>)</td></tr>
-<tr class="separator:acb8adf0380200ddd7092406a86c42503"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad691bb338692eabbb3ccf6e45da158cc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html">PerCellRnaQcMetrics</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html#ad691bb338692eabbb3ccf6e45da158cc">set_num_threads</a> (int n=<a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Defaults.html#a31dfc260ad7e703b5998d18ef694217f">Defaults::num_threads</a>)</td></tr>
-<tr class="separator:ad691bb338692eabbb3ccf6e45da158cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0137613402c8c52a9ba523a877256e04"><td class="memTemplParams" colspan="2">template&lt;class MAT , typename SUB  = const uint8_t*, typename S , typename D , typename PROP &gt; </td></tr>
-<tr class="memitem:a0137613402c8c52a9ba523a877256e04"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html#a0137613402c8c52a9ba523a877256e04">run</a> (const MAT *mat, const std::vector&lt; SUB &gt; &amp;subsets, S *sums, D *detected, std::vector&lt; PROP &gt; subset_proportions)</td></tr>
-<tr class="separator:a0137613402c8c52a9ba523a877256e04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6eb53125d4a2b622ecb1bb928fb449c4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html#a6eb53125d4a2b622ecb1bb928fb449c4">set_num_threads</a> (int n=1)</td></tr>
+<tr class="separator:a6eb53125d4a2b622ecb1bb928fb449c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a26f85de05ad5eafc0aba28e8805b88fc"><td class="memTemplParams" colspan="2">template&lt;class Matrix , typename Subset  = const uint8_t*, typename Float , typename Integer &gt; </td></tr>
+<tr class="memitem:a26f85de05ad5eafc0aba28e8805b88fc"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html#a26f85de05ad5eafc0aba28e8805b88fc">run</a> (const Matrix *mat, const std::vector&lt; Subset &gt; &amp;subsets, <a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html">Buffers</a>&lt; Float, Integer &gt; output) const</td></tr>
+<tr class="separator:a26f85de05ad5eafc0aba28e8805b88fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8faca2fe7eb706f97a16eed085dc7fec"><td class="memTemplParams" colspan="2">template&lt;class Matrix , typename Subset  = const uint8_t*&gt; </td></tr>
+<tr class="memitem:a8faca2fe7eb706f97a16eed085dc7fec"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html#a8faca2fe7eb706f97a16eed085dc7fec">run</a> (const Matrix *mat, const std::vector&lt; Subset &gt; &amp;subsets) const</td></tr>
+<tr class="separator:a8faca2fe7eb706f97a16eed085dc7fec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:ac4e642e94af9d342ebc23fba43cb89b1"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html#ac4e642e94af9d342ebc23fba43cb89b1">num_threads</a> = 1</td></tr>
+<tr class="separator:ac4e642e94af9d342ebc23fba43cb89b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Compute typical per-cell quality control metrics from an RNA count matrix. </p>
 <p >Given a feature-by-cell RNA count matrix, this class computes several QC metrics:</p>
 <ul>
-<li>The total sum for each cell, which represents the efficiency of library preparation and sequencing. Low totals indicate that the library was not successfully captured.</li>
+<li>The total sum of counts for each cell, which represents the efficiency of library preparation and sequencing. Low totals indicate that the library was not successfully captured.</li>
 <li>The number of detected features. This also quantifies the library preparation efficiency, but with a greater focus on capturing the transcriptional complexity.</li>
-<li>The proportion of counts in pre-defined feature subsets. The exact interpretation depends on the nature of the subset - most commonly, one subset will contain all genes on the mitochondrial chromosome, where higher proportions indicate cell damage due to loss of cytoplasmic transcripts. Spike-in proportions can be interpreted in a similar manner. </li>
+<li>The proportion of counts in pre-defined feature subsets. The exact interpretation depends on the nature of the subset - most commonly, one subset will contain all genes on the mitochondrial chromosome, where higher proportions indicate cell damage due to loss of cytoplasmic transcripts. Spike-in proportions can be interpreted in a similar manner.</li>
 </ul>
+<p >This class is just a pre-configured wrapper around <code><a class="el" href="classscran_1_1PerCellQcMetrics.html" title="Compute a variety of per-cell quality control metrics from a count matrix.">PerCellQcMetrics</a></code>, with some careful division of the subset totals to obtain the subset proportions. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a0137613402c8c52a9ba523a877256e04" name="a0137613402c8c52a9ba523a877256e04"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0137613402c8c52a9ba523a877256e04">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
+<a id="a8faca2fe7eb706f97a16eed085dc7fec" name="a8faca2fe7eb706f97a16eed085dc7fec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8faca2fe7eb706f97a16eed085dc7fec">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class MAT , typename SUB  = const uint8_t*, typename S , typename D , typename PROP &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void scran::PerCellRnaQcMetrics::run </td>
-          <td>(</td>
-          <td class="paramtype">const MAT *&#160;</td>
-          <td class="paramname"><em>mat</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::vector&lt; SUB &gt; &amp;&#160;</td>
-          <td class="paramname"><em>subsets</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">S *&#160;</td>
-          <td class="paramname"><em>sums</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">D *&#160;</td>
-          <td class="paramname"><em>detected</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::vector&lt; PROP &gt;&#160;</td>
-          <td class="paramname"><em>subset_proportions</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Compute the QC metrics from an input matrix.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">MAT</td><td>Type of matrix, usually a <code>tatami::NumericMatrix</code>. </td></tr>
-    <tr><td class="paramname">SUB</td><td>Pointer to a type interpretable as boolean. </td></tr>
-    <tr><td class="paramname">S</td><td>Floating-point value, to store the sums. </td></tr>
-    <tr><td class="paramname">D</td><td>Integer value, to store the number of detected features. </td></tr>
-    <tr><td class="paramname">PROP</td><td>Floating point value, to store the subset proportions.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Pointer to a feature-by-cells matrix containing counts. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">subsets</td><td>Vector of pointers to arrays of length equal to <code>mat-&gt;nrow()</code>. Each array represents a feature subset and indicating whether each feature in <code>mat</code> belongs to that subset. Users can pass <code>{}</code> if no subsets are to be used. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">sums</td><td>Pointer to an array of length equal to the number of columns in <code>mat</code>. This is used to store the computed sums for all cells. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">detected</td><td>Pointer to an array of length equal to the number of columns in <code>mat</code>. This is used to store the number of detected features for all cells. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">subset_proportions</td><td>Vector of pointers to arrays of length equal to the number of columns in <code>mat</code>. Each array corresponds to a feature subset and is used to store the proportion of counts in that subset across all cells. The vector should be of length equal to that of <code>subsets</code>. Users can pass <code>{}</code> if no subsets are used.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd><code>sums</code>, <code>detected</code>, and each array in <code>subset_proportions</code> is filled with the relevant statistics. </dd></dl>
-
-</div>
-</div>
-<a id="ac3e8492a8ff2bf2cb983fbe729c1156b" name="ac3e8492a8ff2bf2cb983fbe729c1156b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac3e8492a8ff2bf2cb983fbe729c1156b">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;class MAT , typename SUB  = const uint8_t*&gt; </div>
+template&lt;class Matrix , typename Subset  = const uint8_t*&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -211,19 +138,19 @@ template&lt;class MAT , typename SUB  = const uint8_t*&gt; </div>
         <tr>
           <td class="memname"><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html">Results</a> scran::PerCellRnaQcMetrics::run </td>
           <td>(</td>
-          <td class="paramtype">const MAT *&#160;</td>
+          <td class="paramtype">const Matrix *&#160;</td>
           <td class="paramname"><em>mat</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::vector&lt; SUB &gt;&#160;</td>
+          <td class="paramtype">const std::vector&lt; Subset &gt; &amp;&#160;</td>
           <td class="paramname"><em>subsets</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -235,8 +162,8 @@ template&lt;class MAT , typename SUB  = const uint8_t*&gt; </div>
 <p >Compute the QC metrics from an input matrix and return the results.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">MAT</td><td>Type of matrix, usually a <code>tatami::NumericMatrix</code>. </td></tr>
-    <tr><td class="paramname">SUB</td><td>Pointer to an array of values interpretable as booleans.</td></tr>
+    <tr><td class="paramname">Matrix</td><td>Type of matrix, usually a <code>tatami::NumericMatrix</code>. </td></tr>
+    <tr><td class="paramname">Subset</td><td>Pointer to an array of values interpretable as booleans.</td></tr>
   </table>
   </dd>
 </dl>
@@ -251,8 +178,70 @@ template&lt;class MAT , typename SUB  = const uint8_t*&gt; </div>
 
 </div>
 </div>
-<a id="ad691bb338692eabbb3ccf6e45da158cc" name="ad691bb338692eabbb3ccf6e45da158cc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad691bb338692eabbb3ccf6e45da158cc">&#9670;&#160;</a></span>set_num_threads()</h2>
+<a id="a26f85de05ad5eafc0aba28e8805b88fc" name="a26f85de05ad5eafc0aba28e8805b88fc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a26f85de05ad5eafc0aba28e8805b88fc">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Matrix , typename Subset  = const uint8_t*, typename Float , typename Integer &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void scran::PerCellRnaQcMetrics::run </td>
+          <td>(</td>
+          <td class="paramtype">const Matrix *&#160;</td>
+          <td class="paramname"><em>mat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; Subset &gt; &amp;&#160;</td>
+          <td class="paramname"><em>subsets</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html">Buffers</a>&lt; Float, Integer &gt;&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Compute the QC metrics from an input matrix.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Matrix</td><td>Type of matrix, usually a <code>tatami::NumericMatrix</code>. </td></tr>
+    <tr><td class="paramname">Subset</td><td>Pointer to an array of values interpretable as booleans. </td></tr>
+    <tr><td class="paramname">Float</td><td>Floating point type to store the totals. </td></tr>
+    <tr><td class="paramname">Integer</td><td>Integer type to store the counts and indices.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Pointer to a feature-by-cells matrix containing counts. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">subsets</td><td>Vector of pointers to arrays of length equal to <code>mat-&gt;nrow()</code>. Each array represents a feature subset and indicating whether each feature in <code>mat</code> belongs to that subset. Users can pass <code>{}</code> if no subsets are to be used. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td><code><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html" title="Buffers for direct storage of the calculated statistics.">Buffers</a></code> object in which to store the output. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a6eb53125d4a2b622ecb1bb928fb449c4" name="a6eb53125d4a2b622ecb1bb928fb449c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6eb53125d4a2b622ecb1bb928fb449c4">&#9670;&#160;</a></span>set_num_threads()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -261,10 +250,10 @@ template&lt;class MAT , typename SUB  = const uint8_t*&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html">PerCellRnaQcMetrics</a> &amp; scran::PerCellRnaQcMetrics::set_num_threads </td>
+          <td class="memname">void scran::PerCellRnaQcMetrics::set_num_threads </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Defaults.html#a31dfc260ad7e703b5998d18ef694217f">Defaults::num_threads</a></code></td><td>)</td>
+          <td class="paramname"><em>n</em> = <code>1</code></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -274,7 +263,7 @@ template&lt;class MAT , typename SUB  = const uint8_t*&gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
+<p >Deprecated, set <code>num_threads</code> directly instead. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
   </table>
@@ -284,37 +273,19 @@ template&lt;class MAT , typename SUB  = const uint8_t*&gt; </div>
 
 </div>
 </div>
-<a id="acb8adf0380200ddd7092406a86c42503" name="acb8adf0380200ddd7092406a86c42503"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acb8adf0380200ddd7092406a86c42503">&#9670;&#160;</a></span>set_subset_totals()</h2>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="ac4e642e94af9d342ebc23fba43cb89b1" name="ac4e642e94af9d342ebc23fba43cb89b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4e642e94af9d342ebc23fba43cb89b1">&#9670;&#160;</a></span>num_threads</h2>
 
 <div class="memitem">
 <div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html">PerCellRnaQcMetrics</a> &amp; scran::PerCellRnaQcMetrics::set_subset_totals </td>
-          <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>t</em> = <code><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Defaults.html#a2c1541d56f212ed2c6dd13bf47d9b7c6">Defaults::subset_totals</a></code></td><td>)</td>
-          <td></td>
+          <td class="memname">int scran::PerCellRnaQcMetrics::num_threads = 1</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">t</td><td>Whether to compute the total count for each subset rather than the proportion.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html" title="Compute typical per-cell quality control metrics from an RNA count matrix.">PerCellRnaQcMetrics</a></code> object.</dd></dl>
-<p>Note that the total subset count will still be stored in the <code>subset_proportions</code> vectors or arrays in <code><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html#ac3e8492a8ff2bf2cb983fbe729c1156b">run()</a></code>; the only difference is that the division by the total count for each cell is omitted. </p>
+<p >Number of threads to use. </p>
 
 </div>
 </div>

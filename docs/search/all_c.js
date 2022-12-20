@@ -7,13 +7,14 @@ var searchData=
   ['percelladtqcfilters_2ehpp_4',['PerCellAdtQcFilters.hpp',['../PerCellAdtQcFilters_8hpp.html',1,'']]],
   ['percelladtqcmetrics_5',['PerCellAdtQcMetrics',['../classscran_1_1PerCellAdtQcMetrics.html',1,'scran']]],
   ['percelladtqcmetrics_2ehpp_6',['PerCellAdtQcMetrics.hpp',['../PerCellAdtQcMetrics_8hpp.html',1,'']]],
-  ['percellqcfilters_7',['PerCellQCFilters',['../namespacescran.html#a74f384a146e68973735bb5f772edd68e',1,'scran']]],
-  ['percellqcmetrics_8',['PerCellQCMetrics',['../namespacescran.html#a81db603935e2e1efa0b02519688e4aa8',1,'scran']]],
-  ['percellqcmetrics_9',['PerCellQcMetrics',['../classscran_1_1PerCellQcMetrics.html',1,'scran']]],
-  ['percellqcmetrics_2ehpp_10',['PerCellQcMetrics.hpp',['../PerCellQcMetrics_8hpp.html',1,'']]],
-  ['percellrnaqcfilters_11',['PerCellRnaQcFilters',['../classscran_1_1PerCellRnaQcFilters.html',1,'scran']]],
-  ['percellrnaqcfilters_2ehpp_12',['PerCellRnaQcFilters.hpp',['../PerCellRnaQcFilters_8hpp.html',1,'']]],
-  ['percellrnaqcmetrics_13',['PerCellRnaQcMetrics',['../classscran_1_1PerCellRnaQcMetrics.html',1,'scran']]],
-  ['prior_5fcount_14',['prior_count',['../structscran_1_1MedianSizeFactors_1_1Defaults.html#a909251588d34d41237a64df1dd85552c',1,'scran::MedianSizeFactors::Defaults']]],
-  ['pseudo_5fcount_15',['pseudo_count',['../structscran_1_1LogNormCounts_1_1Defaults.html#a4bd0c603b56d3194fc3dc26b310152c9',1,'scran::LogNormCounts::Defaults']]]
+  ['percellcrisprqcmetrics_7',['PerCellCrisprQcMetrics',['../classscran_1_1PerCellCrisprQcMetrics.html',1,'scran']]],
+  ['percellcrisprqcmetrics_2ehpp_8',['PerCellCrisprQcMetrics.hpp',['../PerCellCrisprQcMetrics_8hpp.html',1,'']]],
+  ['percellqcfilters_9',['PerCellQCFilters',['../namespacescran.html#a74f384a146e68973735bb5f772edd68e',1,'scran']]],
+  ['percellqcmetrics_10',['PerCellQcMetrics',['../classscran_1_1PerCellQcMetrics.html',1,'scran']]],
+  ['percellqcmetrics_2ehpp_11',['PerCellQcMetrics.hpp',['../PerCellQcMetrics_8hpp.html',1,'']]],
+  ['percellrnaqcfilters_12',['PerCellRnaQcFilters',['../classscran_1_1PerCellRnaQcFilters.html',1,'scran']]],
+  ['percellrnaqcfilters_2ehpp_13',['PerCellRnaQcFilters.hpp',['../PerCellRnaQcFilters_8hpp.html',1,'']]],
+  ['percellrnaqcmetrics_14',['PerCellRnaQcMetrics',['../classscran_1_1PerCellRnaQcMetrics.html',1,'scran']]],
+  ['prior_5fcount_15',['prior_count',['../structscran_1_1MedianSizeFactors_1_1Defaults.html#a909251588d34d41237a64df1dd85552c',1,'scran::MedianSizeFactors::Defaults']]],
+  ['pseudo_5fcount_16',['pseudo_count',['../structscran_1_1LogNormCounts_1_1Defaults.html#a4bd0c603b56d3194fc3dc26b310152c9',1,'scran::LogNormCounts::Defaults']]]
 ];
