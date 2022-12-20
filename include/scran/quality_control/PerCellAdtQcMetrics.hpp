@@ -96,7 +96,7 @@ public:
      * @param[out] output `Buffers` object in which to store the output.
      */
     template<class Matrix, typename Subset = const uint8_t*, typename Float, typename Integer>
-    void run(const Matrix* mat, const std::vector<Subset>& subsets, Buffers<Float, Integer> output) const {
+    void run(const Matrix* mat, const std::vector<Subset>& subsets, Buffers<Float, Integer>& output) const {
         // Calling the general-purpose PerCellQcMetrics function.
         PerCellQcMetrics general;
         general.num_threads = num_threads;
@@ -106,7 +106,7 @@ public:
         tmp.detected = output.detected;
         tmp.subset_total = output.subset_totals;
 
-        general.run(mat, subsets, std::move(tmp)); 
+        general.run(mat, subsets, tmp); 
         return;
     }
 
@@ -174,7 +174,7 @@ public:
             buffers.subset_totals[s] = output.subset_totals[s].data();
         }
 
-        run(mat, subsets, std::move(buffers));
+        run(mat, subsets, buffers);
         return output;
     }
 };

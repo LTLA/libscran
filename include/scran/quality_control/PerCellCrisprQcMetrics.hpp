@@ -90,7 +90,7 @@ public:
      * @param[out] output `Buffers` object in which to store the output.
      */
     template<class Matrix, typename Float, typename Integer>
-    void run(const Matrix* mat, Buffers<Float, Integer> output) const {
+    void run(const Matrix* mat, Buffers<Float, Integer>& output) const {
         size_t NC = mat->ncol();
 
         // Calling the general-purpose PerCellQcMetrics function.
@@ -110,7 +110,7 @@ public:
             tmp.total = placeholder.data();            
         }
 
-        general.run(mat, {}, std::move(tmp)); 
+        general.run(mat, {}, tmp); 
 
         // Computing the proportion safely.
         quality_control::safe_divide(NC, output.max_proportion, tmp.total);
@@ -176,7 +176,7 @@ public:
         buffers.max_proportion = output.max_proportion.data();
         buffers.max_index = output.max_index.data();
 
-        run(mat, std::move(buffers));
+        run(mat, buffers);
         return output;
     }
 };

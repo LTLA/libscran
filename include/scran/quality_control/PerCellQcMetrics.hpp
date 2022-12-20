@@ -263,7 +263,7 @@ public:
         }
 
         buffers.already_zeroed = true;
-        run(mat, std::move(subsets), std::move(buffers));
+        run(mat, subsets, buffers);
         return output;
     }
 
@@ -280,17 +280,38 @@ private:
 private:
     template<typename Subset, typename Float, typename Integer>
     struct Factory {
-        Factory(size_t nr, size_t nc, const std::vector<Subset>* subs, Buffers<Float, Integer> out) : 
-            NR(nr), NC(nc), subsets_ptr(subs), output(std::move(out)) {}
+        Factory(size_t nr, size_t nc, const std::vector<Subset>& subs, Buffers<Float, Integer>& out) : 
+            NR(nr), NC(nc), subsets(subs), output(out) {}
 
         size_t NR, NC;
-        const std::vector<Subset>* subsets_ptr;
-        Buffers<Float, Integer> output;
+        const std::vector<Subset>& subsets;
+        Buffers<Float, Integer>& output;
+
+    private:
+        std::vector<std::vector<int> > subset_indices;
 
     public:
+        void prepare_dense_direct() {
+            if (!output.subset_total.empty() || !output.subset_detected.empty()) {
+                size_t nsubsets = subsets.size();
+                subset_indices.resize(nsubsets);
+
+                for (size_t s = 0; s < nsubsets; ++s) {
+                    auto& current = subset_indices[s];
+                    const auto& source = subsets[s];
+                    for (int i = 0, end = NR; i < end; ++i) {
+                        if (source[i]) {
+                            current.push_back(i);
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
         struct DenseDirect {
-            DenseDirect(size_t nr, const std::vector<Subset>* subs, Buffers<Float, Integer> out) : 
-                NR(nr), subsets_ptr(subs), output(std::move(out)) {}
+            DenseDirect(size_t nr, const std::vector<std::vector<int> >& subs, Buffers<Float, Integer>& out) : 
+                NR(nr), subset_indices(subs), output(out) {}
 
             template<typename T>
             void compute(size_t c, const T* ptr) {
@@ -326,40 +347,39 @@ private:
                     }
                 }
 
-                size_t nsubsets = subsets_ptr->size();
+                size_t nsubsets = subset_indices.size();
                 for (size_t s = 0; s < nsubsets; ++s) {
-                    const auto& sub = (*subsets_ptr)[s];
+                    const auto& sub = subset_indices[s];
 
                     if (!output.subset_total.empty() && output.subset_total[s]) {
                         auto& current = output.subset_total[s][c];
-                        for (size_t r = 0; r < NR; ++r) {
-                            current += (sub[r] != 0) * ptr[r];
+                        for (auto r : sub) {
+                            current += ptr[r];
                         }
                     }
 
                     if (!output.subset_detected.empty() && output.subset_detected[s]) {
                         auto& current = output.subset_detected[s][c];
-                        for (size_t r = 0; r < NR; ++r) {
-                            current += (sub[r] != 0) * (ptr[r] != 0);
+                        for (auto r : sub) {
+                            current += ptr[r] != 0;
                         }
                     }
                 }
             }
 
             size_t NR;
-            const std::vector<Subset>* subsets_ptr;
-            Buffers<Float, Integer> output;
+            const std::vector<std::vector<int> >& subset_indices;
+            Buffers<Float, Integer>& output;
         };
 
         DenseDirect dense_direct() {
-            return DenseDirect(NR, subsets_ptr, output);
+            return DenseDirect(NR, subset_indices, output);
         }
 
     public:
         struct SparseDirect {
-            SparseDirect(size_t nr, const std::vector<Subset>* subs, Buffers<Float, Integer> out) : 
-                NR(nr), subsets_ptr(subs), output(std::move(out)), 
-                internal_is_nonzero(out.max_index ? nr : 0) {}
+            SparseDirect(size_t nr, const std::vector<Subset>& subs, Buffers<Float, Integer>& out) : 
+                NR(nr), subsets(subs), output(out), internal_is_nonzero(out.max_index ? nr : 0) {}
 
             template<typename T, typename IDX>
             void compute(size_t c, const tatami::SparseRange<T, IDX>& range) {
@@ -422,9 +442,9 @@ private:
                     }
                 }
 
-                size_t nsubsets = subsets_ptr->size();
+                size_t nsubsets = subsets.size();
                 for (size_t s = 0; s < nsubsets; ++s) {
-                    const auto& sub = (*subsets_ptr)[s];
+                    const auto& sub = subsets[s];
 
                     if (!output.subset_total.empty() && output.subset_total[s]) {
                         auto& current = output.subset_total[s][c];
@@ -443,19 +463,19 @@ private:
             }
 
             size_t NR;
-            const std::vector<Subset>* subsets_ptr;
-            Buffers<Float, Integer> output;
+            const std::vector<Subset>& subsets;
+            Buffers<Float, Integer>& output;
             std::vector<uint8_t> internal_is_nonzero;
         };
         
         SparseDirect sparse_direct() {
-            return SparseDirect(NR, subsets_ptr, output);
+            return SparseDirect(NR, subsets, output);
         }
 
     public:
         struct DenseRunning {
-            DenseRunning(size_t n, size_t nr, const std::vector<Subset>* subs, Buffers<Float, Integer> out) :
-                num(n), NR(nr), subsets_ptr(subs), output(std::move(out)), 
+            DenseRunning(size_t n, size_t nr, const std::vector<Subset>& subs, Buffers<Float, Integer> out) :
+                num(n), NR(nr), subsets(subs), output(std::move(out)), 
                 internal_max_count(output.max_count ? 0 : n, PerCellQcMetrics::pick_fill_value<Float>()) {}
 
             template<class T>
@@ -484,9 +504,9 @@ private:
                     }
                 }
 
-                size_t nsubsets = subsets_ptr->size();
+                size_t nsubsets = subsets.size();
                 for (size_t s = 0; s < nsubsets; ++s) {
-                    const auto& sub = (*subsets_ptr)[s];
+                    const auto& sub = subsets[s];
                     if (sub[counter] == 0) {
                         continue;
                     }
@@ -509,18 +529,16 @@ private:
                 ++counter;
             }
 
-            void finish() {}
-
             size_t counter = 0;
             size_t num;
             size_t NR;
-            const std::vector<Subset>* subsets_ptr;
+            const std::vector<Subset>& subsets;
             Buffers<Float, Integer> output;
             std::vector<Float> internal_max_count;
         };
 
         DenseRunning dense_running() {
-            return DenseRunning(NC, NR, subsets_ptr, output);
+            return DenseRunning(NC, NR, subsets, output);
         }
 
         DenseRunning dense_running(size_t start, size_t end) {
@@ -542,13 +560,13 @@ private:
                 advance(s);
             }
 
-            return DenseRunning(end - start, NR, subsets_ptr, copy);
+            return DenseRunning(end - start, NR, subsets, copy);
         }
 
     public:
         struct SparseRunning {
-            SparseRunning(size_t s, size_t e, size_t nr, const std::vector<Subset>* subs, Buffers<Float, Integer> out) :
-                start(s), end(e), NR(nr), subsets_ptr(subs), output(std::move(out)), 
+            SparseRunning(size_t s, size_t e, size_t nr, const std::vector<Subset>& subs, Buffers<Float, Integer>& out) :
+                start(s), end(e), NR(nr), subsets(subs), output(out),
                 internal_max_count(output.max_count ? 0 : e - s, PerCellQcMetrics::pick_fill_value<Float>()),
                 internal_last_consecutive_nonzero(output.max_index || output.max_count ?  e - s : 0)
                 {}
@@ -589,9 +607,9 @@ private:
                     }
                 }
 
-                size_t nsubsets = subsets_ptr->size();
+                size_t nsubsets = subsets.size();
                 for (size_t s = 0; s < nsubsets; ++s) {
-                    const auto& sub = (*subsets_ptr)[s];
+                    const auto& sub = subsets[s];
                     if (sub[counter] == 0) {
                         continue;
                     }
@@ -641,18 +659,18 @@ private:
             const size_t start, end;
             size_t counter = 0;
             size_t NR;
-            const std::vector<Subset>* subsets_ptr;
-            Buffers<Float, Integer> output;
+            const std::vector<Subset>& subsets;
+            Buffers<Float, Integer>& output;
             std::vector<Float> internal_max_count;
             std::vector<Integer> internal_last_consecutive_nonzero;
         };
          
         SparseRunning sparse_running() {
-            return SparseRunning(0, NC, NR, subsets_ptr, output);
+            return SparseRunning(0, NC, NR, subsets, output);
         }
 
         SparseRunning sparse_running(size_t start, size_t end) {
-            return SparseRunning(start, end, NR, subsets_ptr, output);
+            return SparseRunning(start, end, NR, subsets, output);
         }
     };
 
@@ -670,7 +688,7 @@ public:
      * @param[out] output A `Buffers` object in which the computed statistics are to be stored.
      */
     template<class Matrix, typename Subset = const uint8_t*, typename Float, typename Integer>
-    void run(const Matrix* mat, const std::vector<Subset>& subsets, Buffers<Float, Integer> output) const {
+    void run(const Matrix* mat, const std::vector<Subset>& subsets, Buffers<Float, Integer>& output) const {
         if (!output.already_zeroed) {
             size_t n = mat->ncol();
             auto check_and_fill = [&](auto* ptr, auto value) -> void {
@@ -695,7 +713,7 @@ public:
         }
 
         size_t nr = mat->nrow(), nc = mat->ncol();
-        Factory fact(nr, nc, &subsets, std::move(output));
+        Factory fact(nr, nc, subsets, output);
         tatami::apply<1>(mat, fact, num_threads);
         return;
     }
