@@ -10,6 +10,12 @@
 #include "utils.hpp"
 #include "ComputeMedianMad.hpp"
 
+/**
+ * @file FilterOutliers.hpp
+ *
+ * @brief Define outlier filters using a MAD-based approach.
+ */
+
 namespace scran {
 
 /**

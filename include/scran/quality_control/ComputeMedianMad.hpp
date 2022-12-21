@@ -25,6 +25,7 @@ namespace scran {
  * Pretty much as it says on the can; computes the median of an array of values first,
  * and uses the median to then compute the median absolute deviation (MAD) from that array.
  * We support calculation of medians and MADs for separate "blocks" of observations in the same array.
+ * These statistics can be used in `FilterOutliers` to obtain filter thresholds for removing outliers. 
  */
 class ComputeMedianMad {
 public:
@@ -38,7 +39,7 @@ public:
     /**
      * @brief Medians and MADs, possibly for multiple blocks.
      *
-     * Meaningful instances of this object should generally be constructed by calling the `IsOutlier::run()` methods.
+     * Meaningful instances of this object should generally be constructed by calling the `ComputeMedianMad::run()` methods.
      * Empty instances can be default-constructed as placeholders.
      */
     struct Results {
@@ -68,7 +69,7 @@ public:
         std::vector<double> mads;
 
         /**
-         * Whether the medians and MADs are computed on a (natural) log scale.
+         * Whether the medians and MADs were computed on the (natural) log-transformed values.
          */
         bool log = false;
     };
