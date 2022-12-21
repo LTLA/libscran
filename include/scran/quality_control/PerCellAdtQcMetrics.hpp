@@ -155,6 +155,7 @@ public:
         }
 
         /**
+         * @overload
          * @return A `Buffers` object with const pointers to the members of this `Results` instance.
          */
         Buffers<const double, const int> buffers() const {
