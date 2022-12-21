@@ -131,14 +131,10 @@ TEST(ComputeMedianMad, BlockTests) {
 
     // NULL blocked falls back to single-batch processing.
     {
-        auto isres_none = is.run_blocked(even_values.size(), static_cast<int*>(NULL), even_values.data());
         auto ref = is.run(even_values.size(), even_values.data());
+        std::vector<double> buffer(even_values.size());
+        auto isres_none = is.run_blocked(even_values.size(), static_cast<int*>(NULL), {}, even_values.data(), buffer.data());
         EXPECT_EQ(ref.medians, isres_none.medians);
         EXPECT_EQ(ref.mads, isres_none.mads);
-
-        std::vector<double> buffer(even_values.size());
-        auto isres_none2 = is.run_blocked(even_values.size(), static_cast<int*>(NULL), {}, even_values.data(), buffer.data());
-        EXPECT_EQ(ref.medians, isres_none2.medians);
-        EXPECT_EQ(ref.mads, isres_none2.mads);
     }
 }

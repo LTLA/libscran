@@ -63,6 +63,11 @@ public:
     /**
      * @param x Median and MAD computed from `ComputeMedianMad::run()` or `ComputeMedianMad::run_blocked()`.
      * @return Outlier filter thresholds defined in terms of MADs from the median.
+     *
+     * If `x.log` is true, the returned thresholds are defined in the original space, i.e., not log-transformed.
+     * They can be directly used for comparison to the original metrics without further exponentiation.
+     *
+     * If multiple blocks are present in `x`, one upper/lower threshold is computed for each block.
      */
     FilterThresholds run(ComputeMedianMad::Results x) const {
         size_t nblocks = x.medians.size();
