@@ -109,15 +109,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a866556855aa8bcb1a542c3e5471b0ac5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac5a80647ac6e571276699c314134d8c0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1IsOutlier.html">IsOutlier</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1IsOutlier.html#ac5a80647ac6e571276699c314134d8c0">set_min_diff</a> (double m=Defaults::min_diff)</td></tr>
 <tr class="separator:ac5a80647ac6e571276699c314134d8c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af67e9d8ab3a18f2f6366f0ab46e86acd"><td class="memTemplParams" colspan="2">template&lt;typename T , typename X &gt; </td></tr>
-<tr class="memitem:af67e9d8ab3a18f2f6366f0ab46e86acd"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1IsOutlier_1_1Thresholds.html">Thresholds</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1IsOutlier.html#af67e9d8ab3a18f2f6366f0ab46e86acd">run</a> (size_t n, const T *metrics, X *outliers, double *workspace) const</td></tr>
-<tr class="separator:af67e9d8ab3a18f2f6366f0ab46e86acd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a166b22c539e3820aa4968b1fa8e19ee3"><td class="memTemplParams" colspan="2">template&lt;typename B , typename T , typename X &gt; </td></tr>
-<tr class="memitem:a166b22c539e3820aa4968b1fa8e19ee3"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1IsOutlier_1_1Thresholds.html">Thresholds</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1IsOutlier.html#a166b22c539e3820aa4968b1fa8e19ee3">run_blocked</a> (size_t n, const B *block, const T *metrics, X *outliers, double *workspace) const</td></tr>
-<tr class="separator:a166b22c539e3820aa4968b1fa8e19ee3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2f0378a9ab48227c0297a4f0b50a6431"><td class="memTemplParams" colspan="2">template&lt;typename T , typename X &gt; </td></tr>
-<tr class="memitem:a2f0378a9ab48227c0297a4f0b50a6431"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1IsOutlier_1_1Thresholds.html">Thresholds</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1IsOutlier.html#a2f0378a9ab48227c0297a4f0b50a6431">run_blocked</a> (size_t n, const BlockIndices &amp;by_block, const T *metrics, X *outliers, double *workspace) const</td></tr>
-<tr class="separator:a2f0378a9ab48227c0297a4f0b50a6431"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a928419be57c283eb6c0ded74bc83ea8c"><td class="memTemplParams" colspan="2">template&lt;typename T , typename X &gt; </td></tr>
 <tr class="memitem:a928419be57c283eb6c0ded74bc83ea8c"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1IsOutlier_1_1Thresholds.html">Thresholds</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1IsOutlier.html#a928419be57c283eb6c0ded74bc83ea8c">run</a> (size_t n, const T *metrics, X *outliers) const</td></tr>
 <tr class="separator:a928419be57c283eb6c0ded74bc83ea8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -137,7 +128,7 @@ Public Member Functions</h2></td></tr>
 <p >We can also require a minimum difference from the sample median before considering an observation to be an outlier. This is useful in situations where the magnitude of the variance has an intuitive interpretation and avoids overly aggressive outlier marking when the MAD is low. Of course, if the threshold defined by the number of MADS exceeds this minimum difference, then the former is just used directly. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a2a3f4800b6fef733e4290da662a2f0ec" name="a2a3f4800b6fef733e4290da662a2f0ec"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2a3f4800b6fef733e4290da662a2f0ec">&#9670;&#160;</a></span>run() <span class="overload">[1/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a3f4800b6fef733e4290da662a2f0ec">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -171,7 +162,7 @@ template&lt;typename X  = uint8_t, typename T &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Identify outliers in an array of observations, see <code><a class="el" href="classscran_1_1IsOutlier.html#af67e9d8ab3a18f2f6366f0ab46e86acd">run()</a></code> for details.</p>
+<p >Identify outliers in an array of observations, see <code><a class="el" href="classscran_1_1IsOutlier.html#a928419be57c283eb6c0ded74bc83ea8c">run()</a></code> for details.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">X</td><td>Boolean type to indicate whether an observation is an outlier. </td></tr>
@@ -191,7 +182,7 @@ template&lt;typename X  = uint8_t, typename T &gt; </div>
 </div>
 </div>
 <a id="a928419be57c283eb6c0ded74bc83ea8c" name="a928419be57c283eb6c0ded74bc83ea8c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a928419be57c283eb6c0ded74bc83ea8c">&#9670;&#160;</a></span>run() <span class="overload">[2/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a928419be57c283eb6c0ded74bc83ea8c">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -231,7 +222,7 @@ template&lt;typename T , typename X &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Compute outlier thresholds from an array of observations. This is done according to the parameters specified in the various setters, i.e., <code><a class="el" href="classscran_1_1IsOutlier.html#a866556855aa8bcb1a542c3e5471b0ac5">set_nmads()</a></code>, <code><a class="el" href="classscran_1_1IsOutlier.html#a4820a444ea5163cf372fed6750b1efa4">set_lower()</a></code>, etc.</p>
+<p >Identify outliers in an array of observations. This is done according to the parameters specified in the various setters, i.e., <code><a class="el" href="classscran_1_1IsOutlier.html#a866556855aa8bcb1a542c3e5471b0ac5">set_nmads()</a></code>, <code><a class="el" href="classscran_1_1IsOutlier.html#a4820a444ea5163cf372fed6750b1efa4">set_lower()</a></code>, etc.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>Type of observation, numeric. </td></tr>
@@ -243,84 +234,16 @@ template&lt;typename T , typename X &gt; </div>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of observations. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">metrics</td><td>Pointer to an array of observations of length <code>n</code>. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">outliers</td><td>Pointer to an output array of length <code>n</code>, where the outlier identification results are to be stored. Set to <code>NULL</code> to skip outlier calls.</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">outliers</td><td>Pointer to an output array of length <code>n</code>, where the outlier identification results are to be stored.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1IsOutlier_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object containing the thresholds used to identify outliers. <code>outliers</code> is filled with the outlier calls for each observation in <code>metrics</code>, if not <code>NULL</code>. </dd></dl>
-
-</div>
-</div>
-<a id="af67e9d8ab3a18f2f6366f0ab46e86acd" name="af67e9d8ab3a18f2f6366f0ab46e86acd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af67e9d8ab3a18f2f6366f0ab46e86acd">&#9670;&#160;</a></span>run() <span class="overload">[3/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T , typename X &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structscran_1_1IsOutlier_1_1Thresholds.html">Thresholds</a> scran::IsOutlier::run </td>
-          <td>(</td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>n</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const T *&#160;</td>
-          <td class="paramname"><em>metrics</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">X *&#160;</td>
-          <td class="paramname"><em>outliers</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double *&#160;</td>
-          <td class="paramname"><em>workspace</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Compute outlier thresholds from an array of observations.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">T</td><td>Type of observation, numeric. </td></tr>
-    <tr><td class="paramname">X</td><td>Boolean type to indicate whether an observation is an outlier.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of observations. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">metrics</td><td>Pointer to an array of observations of length <code>n</code>. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">outliers</td><td>Pointer to an output array of length <code>n</code>, where the outlier identification results are to be stored. Set to <code>NULL</code> to skip outlier calls. </td></tr>
-    <tr><td class="paramdir"></td><td class="paramname">workspace</td><td>Pointer to an array of length <code>n</code>, to be used as a workspace for calculations.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1IsOutlier_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object containing the thresholds used to identify outliers. <code>outliers</code> is filled with the outlier calls for each observation in <code>metrics</code>, if not <code>NULL</code>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1IsOutlier_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object containing the thresholds used to identify outliers. <code>outliers</code> is filled with the outlier calls for each observation in <code>metrics</code>. </dd></dl>
 
 </div>
 </div>
 <a id="a1ad1a77a31a28dab8bb0a604e4d7acf2" name="a1ad1a77a31a28dab8bb0a604e4d7acf2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1ad1a77a31a28dab8bb0a604e4d7acf2">&#9670;&#160;</a></span>run_blocked() <span class="overload">[1/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ad1a77a31a28dab8bb0a604e4d7acf2">&#9670;&#160;</a></span>run_blocked() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -360,7 +283,7 @@ template&lt;typename X  = uint8_t, typename B , typename T &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Identify outliers in an array of observations with blocking, see <code><a class="el" href="classscran_1_1IsOutlier.html#a166b22c539e3820aa4968b1fa8e19ee3">run_blocked()</a></code> for details.</p>
+<p >Identify outliers in an array of observations with blocking, see <code><a class="el" href="classscran_1_1IsOutlier.html#a68ccac6c343b3292835631b13b581df0">run_blocked()</a></code> for details.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">X</td><td>Boolean type to indicate whether an observation is an outlier. </td></tr>
@@ -372,7 +295,7 @@ template&lt;typename X  = uint8_t, typename B , typename T &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of observations. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Optional pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1IsOutlier.html#a166b22c539e3820aa4968b1fa8e19ee3">run_blocked()</a></code> for details. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Optional pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1IsOutlier.html#a68ccac6c343b3292835631b13b581df0">run_blocked()</a></code> for details. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">metrics</td><td>Pointer to an array of observations of length <code>n</code>.</td></tr>
   </table>
   </dd>
@@ -382,7 +305,7 @@ template&lt;typename X  = uint8_t, typename B , typename T &gt; </div>
 </div>
 </div>
 <a id="a68ccac6c343b3292835631b13b581df0" name="a68ccac6c343b3292835631b13b581df0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a68ccac6c343b3292835631b13b581df0">&#9670;&#160;</a></span>run_blocked() <span class="overload">[2/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a68ccac6c343b3292835631b13b581df0">&#9670;&#160;</a></span>run_blocked() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -428,7 +351,7 @@ template&lt;typename B , typename T , typename X &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Identify outliers in an array of observations with blocking. Outlier detection is performed separately within each block of observations, as if <code><a class="el" href="classscran_1_1IsOutlier.html#af67e9d8ab3a18f2f6366f0ab46e86acd">run()</a></code> was called on each subset of observations with the same ID in <code>block</code>. This is occasionally useful when dealing with multi-batch datasets, see <code><a class="el" href="classscran_1_1PerCellRnaQcFilters.html#a3b8252800909a00562168f2221ebd6f9">PerCellRnaQcFilters::run()</a></code> for an example.</p>
+<p >Identify outliers in an array of observations with blocking. Outlier detection is performed separately within each block of observations, as if <code><a class="el" href="classscran_1_1IsOutlier.html#a928419be57c283eb6c0ded74bc83ea8c">run()</a></code> was called on each subset of observations with the same ID in <code>block</code>. This is occasionally useful when dealing with multi-batch datasets, see <code><a class="el" href="classscran_1_1PerCellRnaQcFilters.html#a3b8252800909a00562168f2221ebd6f9">PerCellRnaQcFilters::run()</a></code> for an example.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">B</td><td>Integer type, containing the block IDs. </td></tr>
@@ -442,162 +365,11 @@ template&lt;typename B , typename T , typename X &gt; </div>
     <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of observations. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Optional pointer to an array of block identifiers. If provided, the array should be of length equal to <code>ncells</code>. Values should be integer IDs in <picture><source srcset="form_0_dark.png" media="(prefers-color-scheme: dark)"/><img class="formulaInl" alt="$[0, N)$" src="form_0.png"/></picture> where <picture><source srcset="form_1_dark.png" media="(prefers-color-scheme: dark)"/><img class="formulaInl" alt="$N$" src="form_1.png"/></picture> is the number of blocks. If a null pointer is supplied, all observations are assumed to belong to the same block. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">metrics</td><td>Pointer to an array of observations of length <code>n</code>. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">outliers</td><td>Pointer to an output array of length <code>n</code>, where the outlier identification results are to be stored. Set to <code>NULL</code> to skip outlier calls.</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">outliers</td><td>Pointer to an output array of length <code>n</code>, where the outlier identification results are to be stored.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1IsOutlier_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object containing the thresholds used to identify outliers in each block. <code>outliers</code> is filled with the outlier calls for each observation in <code>metrics</code>, if not <code>NULL</code>. </dd></dl>
-
-</div>
-</div>
-<a id="a166b22c539e3820aa4968b1fa8e19ee3" name="a166b22c539e3820aa4968b1fa8e19ee3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a166b22c539e3820aa4968b1fa8e19ee3">&#9670;&#160;</a></span>run_blocked() <span class="overload">[3/4]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename B , typename T , typename X &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structscran_1_1IsOutlier_1_1Thresholds.html">Thresholds</a> scran::IsOutlier::run_blocked </td>
-          <td>(</td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>n</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const B *&#160;</td>
-          <td class="paramname"><em>block</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const T *&#160;</td>
-          <td class="paramname"><em>metrics</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">X *&#160;</td>
-          <td class="paramname"><em>outliers</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double *&#160;</td>
-          <td class="paramname"><em>workspace</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Compute outlier thresholds for each block in an array of observations, see <code><a class="el" href="classscran_1_1IsOutlier.html#a166b22c539e3820aa4968b1fa8e19ee3">run_blocked()</a></code> for details.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">B</td><td>Integer type, containing the block IDs. </td></tr>
-    <tr><td class="paramname">T</td><td>Type of observation, numeric. </td></tr>
-    <tr><td class="paramname">X</td><td>Boolean type to indicate whether an observation is an outlier.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of observations. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Optional pointer to an array of block identifiers. If provided, the array should be of length equal to <code>ncells</code>. Values should be integer IDs in <picture><source srcset="form_0_dark.png" media="(prefers-color-scheme: dark)"/><img class="formulaInl" alt="$[0, N)$" src="form_0.png"/></picture> where <picture><source srcset="form_1_dark.png" media="(prefers-color-scheme: dark)"/><img class="formulaInl" alt="$N$" src="form_1.png"/></picture> is the number of blocks. If a null pointer is supplied, all observations are assumed to belong to the same block. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">metrics</td><td>Pointer to an array of observations of length <code>n</code>. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">outliers</td><td>Pointer to an output array of length <code>n</code>, where the outlier identification results are to be stored. Set to <code>NULL</code> to skip outlier calls. </td></tr>
-    <tr><td class="paramdir"></td><td class="paramname">workspace</td><td>Pointer to an array of length <code>n</code>, to be used as a workspace for calculations.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1IsOutlier_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object containing the thresholds used to identify outliers per block. <code>outliers</code> is filled with the outlier calls for each observation in <code>metrics</code>, if not <code>NULL</code>. </dd></dl>
-
-</div>
-</div>
-<a id="a2f0378a9ab48227c0297a4f0b50a6431" name="a2f0378a9ab48227c0297a4f0b50a6431"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2f0378a9ab48227c0297a4f0b50a6431">&#9670;&#160;</a></span>run_blocked() <span class="overload">[4/4]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T , typename X &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structscran_1_1IsOutlier_1_1Thresholds.html">Thresholds</a> scran::IsOutlier::run_blocked </td>
-          <td>(</td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>n</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const BlockIndices &amp;&#160;</td>
-          <td class="paramname"><em>by_block</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const T *&#160;</td>
-          <td class="paramname"><em>metrics</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">X *&#160;</td>
-          <td class="paramname"><em>outliers</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double *&#160;</td>
-          <td class="paramname"><em>workspace</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Compute outlier thresholds for each block in an array of observations, see <code><a class="el" href="classscran_1_1IsOutlier.html#a166b22c539e3820aa4968b1fa8e19ee3">run_blocked()</a></code> for details.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">T</td><td>Type of observation, numeric. </td></tr>
-    <tr><td class="paramname">X</td><td>Boolean type to indicate whether an observation is an outlier.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of observations. </td></tr>
-    <tr><td class="paramdir"></td><td class="paramname">by_group</td><td>Vector of length equal to the number of blocks. Each entry is itself a vector of integers, containing the indices of the observations belonging to the corresponding block. Indices should lie in <code>[0, n)</code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">metrics</td><td>Pointer to an array of observations of length <code>n</code>. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">outliers</td><td>Pointer to an output array of length <code>n</code>, where the outlier identification results are to be stored. Set to <code>NULL</code> to skip outlier calls. </td></tr>
-    <tr><td class="paramdir"></td><td class="paramname">workspace</td><td>Pointer to an array of length <code>n</code>, to be used as a workspace for calculations.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1IsOutlier_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object containing the thresholds used to identify outliers per block. <code>outliers</code> is filled with the outlier calls for each observation in <code>metrics</code>, if not <code>NULL</code>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1IsOutlier_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object containing the thresholds used to identify outliers in each block. <code>outliers</code> is filled with the outlier calls for each observation in <code>metrics</code>. </dd></dl>
 
 </div>
 </div>
