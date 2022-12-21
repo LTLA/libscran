@@ -19,7 +19,7 @@ add_executable(
     src/quality_control/PerCellCrisprQcMetrics.cpp
     src/quality_control/PerCellRnaQcFilters.cpp
     src/quality_control/PerCellAdtQcFilters.cpp
-    src/quality_control/IsOutlier.cpp
+    src/quality_control/ComputeMedMad.cpp
     src/quality_control/FilterCells.cpp
 
     src/normalization/LogNormCounts.cpp
