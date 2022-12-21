@@ -139,3 +139,97 @@ TEST(ComputeMedMad, BlockTests) {
         EXPECT_EQ(ref.mads, isres_none.mads);
     }
 }
+
+TEST(ComputeMedMad, OutlierFilterSimple) {
+    scran::ComputeMedMad is;
+    auto stat = is.run(even_values.size(), even_values.data());
+
+    // Manual check.
+    {
+        scran::ComputeMedMad::FilterOutliers filt;
+        auto thresholds = filt.run(stat);
+        EXPECT_DOUBLE_EQ(thresholds.lower[0], stat.medians[0] - stat.mads[0] * 3);
+        EXPECT_DOUBLE_EQ(thresholds.upper[0], stat.medians[0] + stat.mads[0] * 3);
+    }
+
+    // Turns off on request.
+    {
+        scran::ComputeMedMad::FilterOutliers filt;
+        filt.lower = false;
+        filt.upper = false;
+        auto thresholds = filt.run(stat);
+
+        EXPECT_TRUE(std::isinf(thresholds.lower[0]));
+        EXPECT_TRUE(thresholds.lower[0] < 0);
+        EXPECT_TRUE(std::isinf(thresholds.upper[0]));
+        EXPECT_TRUE(thresholds.upper[0] > 0);
+    }
+
+    // Respects the minimum difference.
+    {
+        scran::ComputeMedMad::FilterOutliers filt;
+        filt.min_diff = 100;
+        auto thresholds = filt.run(stat);
+        EXPECT_DOUBLE_EQ(thresholds.lower[0], stat.medians[0] - 100);
+        EXPECT_DOUBLE_EQ(thresholds.upper[0], stat.medians[0] + 100);
+    }
+
+    // Handles blocks correctly.
+    {
+        scran::ComputeMedMad::Results stats;
+        stats.medians.push_back(1);
+        stats.mads.push_back(0.2);
+        stats.medians.push_back(2);
+        stats.mads.push_back(0.3);
+
+        scran::ComputeMedMad::FilterOutliers filt;
+        auto thresholds = filt.run(stats);
+        EXPECT_DOUBLE_EQ(thresholds.lower[0], 0.4);
+        EXPECT_DOUBLE_EQ(thresholds.upper[0], 1.6);
+        EXPECT_DOUBLE_EQ(thresholds.lower[1], 1.1);
+        EXPECT_DOUBLE_EQ(thresholds.upper[1], 2.9);
+    }
+}
+
+TEST(ComputeMedMad, OutlierFilterLogged) {
+    scran::ComputeMedMad is;
+    is.log = true;
+    auto stat = is.run(even_values.size(), even_values.data());
+
+    // Manual check.
+    {
+        scran::ComputeMedMad::FilterOutliers filt;
+        auto thresholds = filt.run(stat);
+        EXPECT_DOUBLE_EQ(thresholds.lower[0], std::exp(stat.medians[0] - stat.mads[0] * 3));
+        EXPECT_DOUBLE_EQ(thresholds.upper[0], std::exp(stat.medians[0] + stat.mads[0] * 3));
+    }
+
+    // Mostly zeros.
+    {
+        auto copy = stat;
+        copy.medians[0] = -std::numeric_limits<double>::infinity();
+        copy.mads[0] = 0;
+
+        scran::ComputeMedMad::FilterOutliers filt;
+        auto thresholds = filt.run(copy);
+        EXPECT_EQ(thresholds.lower[0], 0);
+        EXPECT_EQ(thresholds.upper[0], 0);
+    }
+}
+
+TEST(ComputeMedMad, OutlierFilterEdgeCases) {
+    scran::ComputeMedMad::Results stats;
+    stats.medians.push_back(std::numeric_limits<double>::quiet_NaN());
+    stats.mads.push_back(std::numeric_limits<double>::quiet_NaN());
+    stats.medians.push_back(std::numeric_limits<double>::infinity());
+    stats.mads.push_back(0);
+
+    scran::ComputeMedMad::FilterOutliers filt;
+    auto thresholds = filt.run(stats);
+    EXPECT_TRUE(std::isnan(thresholds.lower[0]));
+    EXPECT_TRUE(std::isnan(thresholds.upper[0]));
+    EXPECT_TRUE(std::isinf(thresholds.lower[1]));
+    EXPECT_TRUE(thresholds.lower[1] > 0);
+    EXPECT_TRUE(std::isinf(thresholds.upper[1]));
+    EXPECT_TRUE(thresholds.upper[1] > 0);
+}
