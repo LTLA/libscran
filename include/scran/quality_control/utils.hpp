@@ -1,6 +1,9 @@
 #ifndef SCRAN_QUALITY_CONTROL_UTILS_HPP
 #define SCRAN_QUALITY_CONTROL_UTILS_HPP
 
+#include <limits>
+#include <vector>
+
 namespace scran {
 
 /**
@@ -21,6 +24,16 @@ void safe_divide(size_t n, Float* top, const Float* bottom) {
             }
         }
     }
+}
+
+template<typename Float>
+bool is_less_than(Float value, Float threshold) {
+    return !std::isnan(value) && !std::isnan(threshold) && value < threshold;
+}
+
+template<typename Float>
+bool is_greater_than(Float value, Float threshold) {
+    return !std::isnan(value) && !std::isnan(threshold) && value > threshold;
 }
 
 }

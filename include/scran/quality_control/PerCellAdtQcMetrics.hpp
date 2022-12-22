@@ -62,20 +62,19 @@ public:
     struct Buffers {
         /**
          * Pointer to an array of length equal to the number of cells, see `Results::sums`.
-         * Set to `NULL` to skip this calculation.
+         * Note that this should not be `NULL`.
          */
-        Float* sums = NULL;
+        Float* sums;
 
         /**
          * Pointer to an array of length equal to the number of cells, see `Results::detected`.
-         * Set to `NULL` to skip this calculation.
+         * Note that this should not be `NULL`.
          */
-        Integer* detected = NULL;
+        Integer* detected;
 
         /**
          * Vector of pointers of length equal to the number of feature subsets.
-         * Each pointer should be to aan array of length equal to the number of cells, see `Results::subset_totals`.
-         * Set any to `NULL` to skip this calculation for that subset.
+         * Each pointer should be to an array of length equal to the number of cells, see `Results::subset_totals`.
          */
         std::vector<Float*> subset_totals;
     };
@@ -143,6 +142,39 @@ public:
          * Each inner vector corresponds to a feature subset and is of length equal to the number of cells.
          */
         std::vector<std::vector<double> > subset_totals;
+
+        /**
+         * We assume that all members have already been allocated enough memory for use with `PerCellAdtQcMetrics::run()`. 
+         *
+         * @return A `Buffers` object with appropriate pointers to the members of this `Results` instance.
+         */
+        Buffers<> buffers() {
+            Buffers<> output;
+            populate_buffers(output, *this);
+            return output;
+        }
+
+        /**
+         * @overload
+         * @return A `Buffers` object with const pointers to the members of this `Results` instance.
+         */
+        Buffers<const double, const int> buffers() const {
+            Buffers<const double, const int> output;
+            populate_buffers(output, *this);
+            return output;
+        }
+    private:
+        template<class SomeBuffer, class Results>
+        static void populate_buffers(SomeBuffer& x, Results& y) {
+            x.sums = y.sums.data();
+            x.detected = y.detected.data();
+
+            size_t nsubsets = y.subset_totals.size();
+            x.subset_totals.resize(nsubsets);
+            for (size_t s = 0; s < nsubsets; ++s) {
+                x.subset_totals[s] = y.subset_totals[s].data();
+            }
+        }
     };
 
 public:
@@ -161,19 +193,10 @@ public:
      * Subset totals are returned depending on the `subsets`.
      */
     template<class Matrix, typename Subset = const uint8_t*>
-    Results run(const Matrix* mat, std::vector<Subset> subsets) const {
+    Results run(const Matrix* mat, const std::vector<Subset>& subsets) const {
         size_t nsubsets = subsets.size();
         Results output(mat->ncol(), nsubsets);
-
-        Buffers<> buffers;
-        buffers.sums = output.sums.data();
-        buffers.detected = output.detected.data();
-
-        buffers.subset_totals.resize(nsubsets);
-        for (size_t s = 0; s < nsubsets; ++s) {
-            buffers.subset_totals[s] = output.subset_totals[s].data();
-        }
-
+        auto buffers = output.buffers();
         run(mat, subsets, buffers);
         return output;
     }

@@ -160,7 +160,42 @@ public:
          * Each inner vector corresponds to a feature subset and is of length equal to the number of cells.
          */
         std::vector<std::vector<double> > subset_proportions;
-    };
+
+    public:
+        /**
+         * We assume that all members have already been allocated enough memory for use with `PerCellRnaQcMetrics::run()`. 
+         *
+         * @return A `Buffers` object with appropriate pointers to the members of this `Results` instance.
+         */
+        Buffers<> buffers() {
+            Buffers<> output;
+            populate_buffers(output, *this);
+            return output;
+        }
+
+        /**
+         * @overload
+         * @return A `Buffers` object with const pointers to the members of this `Results` instance.
+         */
+        Buffers<const double, const int> buffers() const {
+            Buffers<const double, const int> output;
+            populate_buffers(output, *this);
+            return output;
+        }
+
+    private:
+        template<class SomeBuffer, class Results>
+        static void populate_buffers(SomeBuffer& x, Results& y) {
+            x.sums = y.sums.data();
+            x.detected = y.detected.data();
+
+            size_t nsubsets = y.subset_proportions.size();
+            x.subset_proportions.resize(nsubsets);
+            for (size_t s = 0; s < nsubsets; ++s) {
+                x.subset_proportions[s] = y.subset_proportions[s].data();
+            }
+        }
+   };
 
 public:
     /**
