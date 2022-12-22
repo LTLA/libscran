@@ -39,6 +39,7 @@ TEST_F(PerCellAdtQcMetricsTest, OneSubset) {
     std::vector<const int*> subs(1, keep_s.data());
 
     scran::PerCellAdtQcMetrics qcfun;
+    qcfun.set_num_threads(2); // just for some coverage.
     auto res = qcfun.run(mat.get(), subs);
 
     auto submat = tatami::make_DelayedSubset<0>(mat, keep_i);

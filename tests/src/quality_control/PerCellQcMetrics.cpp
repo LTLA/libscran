@@ -66,7 +66,7 @@ TEST_P(PerCellQcMetricsTestStandard, NoSubset) {
     }
 
     int threads = GetParam();
-    qcfun.num_threads = threads;
+    qcfun.set_num_threads(threads);
 
     auto res1 = qcfun.run(dense_row.get(), {});
     compare<true>(res, res1);
@@ -97,7 +97,7 @@ TEST_P(PerCellQcMetricsTestStandard, OneSubset) {
     }
 
     int threads = GetParam();
-    qcfun.num_threads = threads;
+    qcfun.set_num_threads(threads);
     
     auto res1 = qcfun.run(dense_row.get(), subs);
     compare<true>(res, res1);
@@ -135,7 +135,7 @@ TEST_P(PerCellQcMetricsTestStandard, TwoSubsets) {
     }
 
     int threads = GetParam();
-    qcfun.num_threads = threads;
+    qcfun.set_num_threads(threads);
 
     auto res1 = qcfun.run(dense_row.get(), subs);
     compare<true>(res, res1);
@@ -188,7 +188,7 @@ TEST_P(PerCellQcMetricsTestMaxed, SomeNegatives) {
     }
 
     int threads = GetParam();
-    qcfun.num_threads = threads;
+    qcfun.set_num_threads(threads);
 
     auto res1 = qcfun.run(dense_row.get(), {});
     EXPECT_EQ(res1.max_count, res.max_count);
@@ -235,7 +235,7 @@ TEST_P(PerCellQcMetricsTestMaxed, AllNegatives) {
     }
 
     int threads = GetParam();
-    qcfun.num_threads = threads;
+    qcfun.set_num_threads(threads);
 
     auto res1 = qcfun.run(dense_row.get(), {});
     EXPECT_EQ(res1.max_count, res.max_count);
@@ -273,7 +273,7 @@ TEST_P(PerCellQcMetricsTestMaxed, AllZeros) {
     }
 
     int threads = GetParam();
-    qcfun.num_threads = threads;
+    qcfun.set_num_threads(threads);
 
     auto res1 = qcfun.run(dense_row.get(), {});
     EXPECT_EQ(res1.max_count, res.max_count);
@@ -332,7 +332,7 @@ TEST_P(PerCellQcMetricsTestMaxed, StructuralZeros) {
     scran::PerCellQcMetrics qcfun;
     auto res = qcfun.run(dense_row.get(), {});
 
-    qcfun.num_threads = threads;
+    qcfun.set_num_threads(threads);
 
     auto res1 = qcfun.run(dense_row.get(), {});
     EXPECT_EQ(res1.max_count, res.max_count);
@@ -364,8 +364,8 @@ TEST_P(PerCellQcMetricsTestMaxed, OkayOnMissing) {
 
     {
         scran::PerCellQcMetrics qcfun;
-        qcfun.compute_max_count = false;
-        qcfun.num_threads = threads;
+        qcfun.set_compute_max_count(false);
+        qcfun.set_num_threads(threads);
 
         auto res1 = qcfun.run(dense_row.get(), {});
         EXPECT_TRUE(res1.max_count.empty());
@@ -385,8 +385,8 @@ TEST_P(PerCellQcMetricsTestMaxed, OkayOnMissing) {
 
     {
         scran::PerCellQcMetrics qcfun;
-        qcfun.compute_max_index = false;
-        qcfun.num_threads = threads;
+        qcfun.set_compute_max_index(false);
+        qcfun.set_num_threads(threads);
 
         auto res1 = qcfun.run(dense_row.get(), {});
         EXPECT_TRUE(res1.max_index.empty());
@@ -416,12 +416,12 @@ TEST(PerCellQcMetrics, FullyDisabled) {
     auto mat = Simulator().matrix(nr, nc);
 
     scran::PerCellQcMetrics qcfun;
-    qcfun.compute_total = false;
-    qcfun.compute_detected =false;
-    qcfun.compute_max_count = false;
-    qcfun.compute_max_index = false;
-    qcfun.compute_subset_total = false;
-    qcfun.compute_subset_detected = false;
+    qcfun.set_compute_total(false);
+    qcfun.set_compute_detected(false);
+    qcfun.set_compute_max_count(false);
+    qcfun.set_compute_max_index(false);
+    qcfun.set_compute_subset_total(false);
+    qcfun.set_compute_subset_detected(false);
 
     std::vector<size_t> keep_i = { 0, 1, 2, 3 };
     auto keep_s = quality_control::to_filter(nr, keep_i);

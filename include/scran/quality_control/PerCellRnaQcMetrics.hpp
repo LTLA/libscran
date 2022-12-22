@@ -39,18 +39,26 @@ namespace scran {
 class PerCellRnaQcMetrics {
 public:
     /**
-     * Number of threads to use. 
+     * @brief Default parameters.
      */
-    int num_threads = 1;
+    struct Defaults {
+        /**
+         * See `set_num_threads()` for details.
+         */
+        static constexpr int num_threads = 1;
+    };
 
     /**
-     * Deprecated, set `num_threads` directly instead.
      * @param n Number of threads to use.
      * @return A reference to this `PerCellRnaQcMetrics` object.
      */
-    void set_num_threads(int n = 1) {
+    PerCellRnaQcMetrics& set_num_threads(int n = Defaults::num_threads) {
         num_threads = n;
+        return *this;
     }
+
+private:
+    int num_threads = Defaults::num_threads;
 
 public:
     /**
@@ -101,7 +109,7 @@ public:
 
         // Calling the general-purpose PerCellQcMetrics function.
         PerCellQcMetrics general;
-        general.num_threads = num_threads;
+        general.set_num_threads(num_threads);
 
         PerCellQcMetrics::Buffers<Float, Integer> tmp;
         tmp.total = output.sums;

@@ -75,6 +75,7 @@ TEST_F(PerCellRnaQcMetricsTest, NASubsets) {
     std::vector<const int*> subs = { keep_s.data() };
 
     scran::PerCellRnaQcMetrics qcfun;
+    qcfun.set_num_threads(2); // just for some coverage.
     auto res = qcfun.run(dense_zero.get(), subs);
 
     EXPECT_EQ(res.sums, std::vector<double>(dense_zero->ncol()));

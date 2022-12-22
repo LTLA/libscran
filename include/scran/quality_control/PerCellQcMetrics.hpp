@@ -170,39 +170,130 @@ public:
 
 public:
     /**
-     * Whether to compute the total count for each cell.
+     * @brief Default parameters.
      */
-    bool compute_total = true;
+    struct Defaults {
+        /**
+         * See `set_compute_total()` for details.
+         */
+        static constexpr bool compute_total = true;
+
+        /**
+         * See `set_compute_detected()` for details.
+         */
+        static constexpr bool compute_detected = true;
+
+        /**
+         * See `set_compute_max_count()` for details.
+         */
+        static constexpr bool compute_max_count = true;
+
+        /**
+         * See `set_compute_max_index()` for details.
+         */
+        static constexpr bool compute_max_index = true;
+
+        /**
+         * See `set_compute_subset_total()` for details.
+         */
+        static constexpr bool compute_subset_total = true;
+
+        /**
+         * See `set_compute_subset_detected()` for details.
+         */
+        static constexpr bool compute_subset_detected = true;
+
+        /**
+         * See `set_num_threads()` for details.
+         */
+        static constexpr int num_threads = 1;
+    };
+
+private:
+    bool compute_total = Defaults::compute_total;
+    bool compute_detected = Defaults::compute_detected;
+    bool compute_max_count = Defaults::compute_max_count;
+    bool compute_max_index = Defaults::compute_max_index;
+    bool compute_subset_total = Defaults::compute_subset_total;
+    bool compute_subset_detected = Defaults::compute_subset_detected;
+    int num_threads = Defaults::num_threads;
+
+public:
+    /**
+     * @param s Whether to compute the total count for each cell.
+     * This option only affects the `run()` method that returns a `Results` object.
+     *
+     * @return Reference to this `PerCellQcMetrics` object.
+     */
+    PerCellQcMetrics& set_compute_total(bool s = Defaults::compute_total) {
+        compute_total = s;
+        return *this;        
+    }
 
     /**
-     * Whether to compute the number of detected features for each cell.
+     * @param s Whether to compute the number of detected features for each cell.
+     * This option only affects the `run()` method that returns a `Results` object.
+     *
+     * @return Reference to this `PerCellQcMetrics` object.
      */
-    bool compute_detected = true;
+    PerCellQcMetrics& set_compute_detected(bool s = Defaults::compute_detected) {
+        compute_detected = s;
+        return *this;
+    }
 
     /**
-     * Whether to compute the maximmum count for each cell.
+     * @param s Whether to compute the maximmum count for each cell.
+     * This option only affects the `run()` method that returns a `Results` object.
+     *
+     * @return Reference to this `PerCellQcMetrics` object.
      */
-    bool compute_max_count = true;
+    PerCellQcMetrics& set_compute_max_count(bool s = Defaults::compute_max_count) {
+        compute_max_count = s;
+        return *this;        
+    }
 
     /**
-     * Whether to store the index of the feature with the maximum count for each cell.
+     * @param s Whether to store the index of the feature with the maximum count for each cell.
+     * This option only affects the `run()` method that returns a `Results` object.
+     *
+     * @return Reference to this `PerCellQcMetrics` object.
      */
-    bool compute_max_index = true;
+    PerCellQcMetrics& set_compute_max_index(bool s = Defaults::compute_max_index) {
+        compute_max_index = s;
+        return *this;        
+    }
 
     /**
-     * Whether to compute the total count in each feature subset.
+     * @param s Whether to compute the total count in each feature subset.
+     * This option only affects the `run()` method that returns a `Results` object.
+     *
+     * @return Reference to this `PerCellQcMetrics` object.
      */
-    bool compute_subset_total = true;
+    PerCellQcMetrics& set_compute_subset_total(bool s = Defaults::compute_subset_total) {
+        compute_subset_total = s;
+        return *this;
+    }
 
     /**
-     * Whether to compute the number of detected features in each feature subset.
+     * @param s Whether to compute the number of detected features in each feature subset.
+     * This option only affects the `run()` method that returns a `Results` object.
+     *
+     * @return Reference to this `PerCellQcMetrics` object.
      */
-    bool compute_subset_detected = true;
+    PerCellQcMetrics& set_compute_subset_detected(bool s = Defaults::compute_subset_detected) {
+        compute_subset_detected = s;
+        return *this;
+    }
 
     /**
-     * Number of threads to use.
+     * @param n Number of threads to use.
+     *
+     * @return Reference to this `PerCellQcMetrics` object.
      */
-    int num_threads = 1;
+    PerCellQcMetrics& set_num_threads(int n = Defaults::num_threads) {
+        num_threads = n;
+        return *this;
+    }
 
 public:
     /**

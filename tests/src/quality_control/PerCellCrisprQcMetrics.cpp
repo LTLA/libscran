@@ -39,6 +39,7 @@ TEST_F(PerCellCrisprQcMetricsTest, NAMaxed) {
     auto dense_zero = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseColumnMatrix<double>(20, 5, std::move(nothing)));
 
     scran::PerCellCrisprQcMetrics qcfun;
+    qcfun.set_num_threads(2); // just for some coverage.
     auto res = qcfun.run(dense_zero.get());
 
     EXPECT_EQ(res.sums, std::vector<double>(dense_zero->ncol()));

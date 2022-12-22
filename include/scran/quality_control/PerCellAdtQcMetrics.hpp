@@ -38,19 +38,26 @@ namespace scran {
 class PerCellAdtQcMetrics {
 public:
     /**
-     * Deprecated, set `num_threads` directly instead.
+     * @brief Default parameters.
+     */
+    struct Defaults {
+        /**
+         * See `set_num_threads()` for details.
+         */
+        static constexpr int num_threads = 1;
+    };
+
+    /**
      * @param n Number of threads to use. 
      * @return A reference to this `PerCellAdtQcMetrics` object.
      */
-    PerCellAdtQcMetrics& set_num_threads(int n = 1) {
+    PerCellAdtQcMetrics& set_num_threads(int n = Defaults::num_threads) {
         num_threads = n;
         return *this;
     }
 
-    /**
-     * Number of threads to use. 
-     */
-    int num_threads = 1;
+private:
+    int num_threads = Defaults::num_threads;
 
 public:
     /**
@@ -98,7 +105,7 @@ public:
     void run(const Matrix* mat, const std::vector<Subset>& subsets, Buffers<Float, Integer>& output) const {
         // Calling the general-purpose PerCellQcMetrics function.
         PerCellQcMetrics general;
-        general.num_threads = num_threads;
+        general.set_num_threads(num_threads);
 
         PerCellQcMetrics::Buffers<Float, Integer> tmp;
         tmp.total = output.sums;
