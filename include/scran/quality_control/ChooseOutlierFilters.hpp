@@ -51,7 +51,7 @@ public:
         /**
          * See `set_min_diff()` for details.
          */
-        static constexpr double min_diff = 0.1;
+        static constexpr double min_diff = 0;
     };
 
 private:

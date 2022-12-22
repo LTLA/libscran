@@ -135,6 +135,7 @@ public:
 
     public:
         /**
+         * @tparam overwrite Whether to overwrite existing truthy entries in `output`.
          * @tparam Float Floating point type for the metrics.
          * @tparam Integer Integer for the metrics.
          * @tparam Output Boolean type for the low-quality calls.
@@ -143,16 +144,17 @@ public:
          * @param[in] buffers Pointers to arrays of length `n`, containing the per-cell ADT-derived metrics.
          * These should be comparable to the values used to create this `Thresholds` object.
          * @param[out] output Pointer to an array of length `n`, to store the low-quality calls.
-         * Values are set to 1 for low-quality cells, 0 otherwise.
+         * Values are set to `true` for low-quality cells.
+         * If `overwrite = true`, values are set to `false` for high-quality cells, otherwise the existing entry is preserved.
          *
          * Use `filter_blocked()` instead for multi-block datasets. 
          */
-        template<typename Float, typename Integer, typename Output>
+        template<bool overwrite = true, typename Float, typename Integer, typename Output>
         void filter(size_t n, const PerCellAdtQcMetrics::Buffers<Float, Integer>& buffers, Output* output) const {
             if (detected.size() != 1) {
                 throw std::runtime_error("should use filter_blocked() for multiple batches");
             }
-            filter_(n, buffers, output, [](size_t i) -> size_t { return 0; });
+            filter_<overwrite>(n, buffers, output, [](size_t i) -> size_t { return 0; });
         }
 
         /**
@@ -185,14 +187,15 @@ public:
          * @param[in] buffers Pointers to arrays of length `n`, containing the per-cell ADT-derived metrics.
          * These should be comparable to the values used to create this `Thresholds` object.
          * @param[out] output Pointer to an array of length `n`, to store the low-quality calls.
-         * Values are set to 1 for low-quality cells, 0 otherwise.
+         * Values are set to `true` for low-quality cells.
+         * If `overwrite = true`, values are set to `false` for high-quality cells, otherwise the existing entry is preserved.
          */
-        template<typename Block, typename Float, typename Integer, typename Output>
+        template<bool overwrite = true, typename Block, typename Float, typename Integer, typename Output>
         void filter_blocked(size_t n, const Block* block, const PerCellAdtQcMetrics::Buffers<Float, Integer>& buffers, Output* output) const {
             if (block) {
-                filter_(n, buffers, output, [&](size_t i) -> Block { return block[i]; });
+                filter_<overwrite>(n, buffers, output, [&](size_t i) -> Block { return block[i]; });
             } else {
-                filter(n, buffers, output);
+                filter<overwrite>(n, buffers, output);
             }
         }
 
@@ -217,7 +220,7 @@ public:
         }
 
     private:
-        template<typename Float, typename Integer, typename Output, typename Function>
+        template<bool overwrite, typename Float, typename Integer, typename Output, typename Function>
         void filter_(size_t n, const PerCellAdtQcMetrics::Buffers<Float, Integer>& buffers, Output* output, Function indexer) const {
             size_t nsubsets = subset_totals.size();
 
@@ -240,7 +243,9 @@ public:
                     continue;
                 }
 
-                output[i] = false;
+                if constexpr(overwrite) {
+                    output[i] = false;
+                }
             }
 
             return;

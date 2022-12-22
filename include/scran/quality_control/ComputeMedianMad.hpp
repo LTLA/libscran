@@ -36,7 +36,7 @@ public:
         /**
          * See `set_log()` for details.
          */
-        static constexpr bool log = true;
+        static constexpr bool log = false;
     };
 
 private:
