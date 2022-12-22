@@ -1,9 +1,10 @@
 <map id="scran/quality_control/PerCellQcMetrics.hpp" name="scran/quality_control/PerCellQcMetrics.hpp">
-<area shape="rect" id="node1" title="Compute a variety of per&#45;cell quality control metrics from a count matrix." alt="" coords="225,5,377,45"/>
-<area shape="rect" id="node2" href="$PerCellAdtQcMetrics_8hpp.html" title="Compute per&#45;cell quality control metrics from an ADT count matrix." alt="" coords="26,93,198,133"/>
+<area shape="rect" id="node1" title="Compute a variety of per&#45;cell quality control metrics from a count matrix." alt="" coords="255,5,407,45"/>
+<area shape="rect" id="node2" href="$PerCellAdtQcMetrics_8hpp.html" title="Compute per&#45;cell quality control metrics from an ADT count matrix." alt="" coords="58,93,230,133"/>
 <area shape="rect" id="node4" href="$scran_8hpp_source.html" title=" " alt="" coords="200,189,315,214"/>
-<area shape="rect" id="node5" href="$PerCellCrisprQcMetrics_8hpp.html" title="Compute per&#45;cell quality control metrics from a CRISPR guide count matrix." alt="" coords="273,93,460,133"/>
-<area shape="rect" id="node6" href="$PerCellRnaQcMetrics_8hpp_source.html" title=" " alt="" coords="485,93,659,133"/>
+<area shape="rect" id="node5" href="$PerCellCrisprQcMetrics_8hpp.html" title="Compute per&#45;cell quality control metrics from a CRISPR guide count matrix." alt="" coords="527,93,713,133"/>
+<area shape="rect" id="node7" href="$PerCellRnaQcMetrics_8hpp_source.html" title=" " alt="" coords="306,93,481,133"/>
 <area shape="rect" id="node3" href="$SuggestAdtQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from ADT&#45;derived QC metrics." alt="" coords="5,181,176,221"/>
-<area shape="rect" id="node7" href="$SuggestRnaQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from RNA&#45;derived QC metrics." alt="" coords="485,181,659,221"/>
+<area shape="rect" id="node6" href="$SuggestCrisprQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from CRISPR&#45;derived QC metrics." alt="" coords="538,181,723,221"/>
+<area shape="rect" id="node8" href="$SuggestRnaQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from RNA&#45;derived QC metrics." alt="" coords="339,181,514,221"/>
 </map>

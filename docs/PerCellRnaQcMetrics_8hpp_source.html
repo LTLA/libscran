@@ -192,24 +192,15 @@ $(function() {
 <div class="line"><a id="l00224" name="l00224"></a><span class="lineno"><a class="line" href="classscran_1_1PerCellRnaQcMetrics.html#a8faca2fe7eb706f97a16eed085dc7fec">  224</a></span>    <a class="code hl_struct" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html">Results</a> <a class="code hl_function" href="classscran_1_1PerCellRnaQcMetrics.html#a8faca2fe7eb706f97a16eed085dc7fec">run</a>(<span class="keyword">const</span> Matrix* mat, <span class="keyword">const</span> std::vector&lt;Subset&gt;&amp; subsets)<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>        <span class="keywordtype">size_t</span> nsubsets = subsets.size();</div>
 <div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        <a class="code hl_struct" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html">Results</a> output(mat-&gt;ncol(), nsubsets);</div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span> </div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        <a class="code hl_struct" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html">Buffers&lt;&gt;</a> buffers;</div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>        buffers.<a class="code hl_variable" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html#accb4910b5bbce6535ea74d472e3b434a">sums</a> = output.<a class="code hl_variable" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html#afdfcb6fa78932b05bad3dc7246013e29">sums</a>.data();</div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        buffers.<a class="code hl_variable" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html#aca7c4f85e32fab108dcf0123b4145e60">detected</a> = output.<a class="code hl_variable" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html#a8a746bf1b9490de08a6958375ca51de1">detected</a>.data();</div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span> </div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>        buffers.<a class="code hl_variable" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html#ada4c3f3bc289f397ce7e6058a2e919ca">subset_proportions</a>.resize(nsubsets);</div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> s = 0; s &lt; nsubsets; ++s) {</div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>            buffers.<a class="code hl_variable" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html#ada4c3f3bc289f397ce7e6058a2e919ca">subset_proportions</a>[s] = output.<a class="code hl_variable" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html#a27a09620eb681190cb1548ba59befb5a">subset_proportions</a>[s].data();</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        }</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span> </div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>        <a class="code hl_function" href="classscran_1_1PerCellRnaQcMetrics.html#afc280ca0d50d07bafca97204aec5d58e">run</a>(mat, subsets, buffers);</div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>        <span class="keywordflow">return</span> output;</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    }</div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>};</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span> </div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>}</div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span> </div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>        <span class="keyword">auto</span> buffers = output.<a class="code hl_function" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html#a155565c0d9a46e3e8411b8e5b98f07e8">buffers</a>();</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        <a class="code hl_function" href="classscran_1_1PerCellRnaQcMetrics.html#afc280ca0d50d07bafca97204aec5d58e">run</a>(mat, subsets, buffers);</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>        <span class="keywordflow">return</span> output;</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>    }</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>};</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span> </div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>}</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span> </div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aPerCellQcMetrics_8hpp_html"><div class="ttname"><a href="PerCellQcMetrics_8hpp.html">PerCellQcMetrics.hpp</a></div><div class="ttdoc">Compute a variety of per-cell quality control metrics from a count matrix.</div></div>
 <div class="ttc" id="aclassscran_1_1PerCellQcMetrics_html"><div class="ttname"><a href="classscran_1_1PerCellQcMetrics.html">scran::PerCellQcMetrics</a></div><div class="ttdoc">Compute a variety of per-cell quality control metrics from a count matrix.</div><div class="ttdef"><b>Definition:</b> PerCellQcMetrics.hpp:46</div></div>
 <div class="ttc" id="aclassscran_1_1PerCellQcMetrics_html_a2f5ded669fe215baf0cf3c33a6716ca2"><div class="ttname"><a href="classscran_1_1PerCellQcMetrics.html#a2f5ded669fe215baf0cf3c33a6716ca2">scran::PerCellQcMetrics::set_num_threads</a></div><div class="ttdeci">PerCellQcMetrics &amp; set_num_threads(int n=Defaults::num_threads)</div><div class="ttdef"><b>Definition:</b> PerCellQcMetrics.hpp:293</div></div>

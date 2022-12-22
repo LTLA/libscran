@@ -102,6 +102,8 @@ Classes</h2></td></tr>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:acd4ae0ce9a788e39d43b8f6bd4deacf5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ComputeMedianMad.html">ComputeMedianMad</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ComputeMedianMad.html#acd4ae0ce9a788e39d43b8f6bd4deacf5">set_log</a> (bool l=<a class="el" href="structscran_1_1ComputeMedianMad_1_1Defaults.html#a095a3632edf95f2271506ecdaed5c2d5">Defaults::log</a>)</td></tr>
 <tr class="separator:acd4ae0ce9a788e39d43b8f6bd4deacf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a045fe90e5a380bbda7c7edbb3bea94"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ComputeMedianMad.html">ComputeMedianMad</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ComputeMedianMad.html#a1a045fe90e5a380bbda7c7edbb3bea94">set_median_only</a> (bool m=<a class="el" href="structscran_1_1ComputeMedianMad_1_1Defaults.html#ab9474c93b07481e5a85d4c94f50f9327">Defaults::median_only</a>)</td></tr>
+<tr class="separator:a1a045fe90e5a380bbda7c7edbb3bea94"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a04e0171f1c90ce6eaecf90edb07434d5"><td class="memTemplParams" colspan="2">template&lt;typename Input , typename Buffer &gt; </td></tr>
 <tr class="memitem:a04e0171f1c90ce6eaecf90edb07434d5"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1ComputeMedianMad_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ComputeMedianMad.html#a04e0171f1c90ce6eaecf90edb07434d5">run</a> (size_t n, const Input *metrics, Buffer *buffer) const</td></tr>
 <tr class="separator:a04e0171f1c90ce6eaecf90edb07434d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -151,6 +153,39 @@ Static Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">l</td><td>Whether to compute the median and MAD after log-transformation of the values. This is useful for defining thresholds based on fold changes from the center. If <code>true</code>, all values are assumed to be non-negative.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ComputeMedianMad.html" title="Compute the median and MAD from an array of values.">ComputeMedianMad</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a1a045fe90e5a380bbda7c7edbb3bea94" name="a1a045fe90e5a380bbda7c7edbb3bea94"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a045fe90e5a380bbda7c7edbb3bea94">&#9670;&#160;</a></span>set_median_only()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ComputeMedianMad.html">ComputeMedianMad</a> &amp; scran::ComputeMedianMad::set_median_only </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>m</em> = <code><a class="el" href="structscran_1_1ComputeMedianMad_1_1Defaults.html#ab9474c93b07481e5a85d4c94f50f9327">Defaults::median_only</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">m</td><td>Whether to only compute the median. If true, <code><a class="el" href="structscran_1_1ComputeMedianMad_1_1Results.html#a88c52d12ebb26ba8e56dfb22d2923980">Results::mads</a></code> will be filled with NaNs.</td></tr>
   </table>
   </dd>
 </dl>
