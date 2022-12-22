@@ -172,6 +172,37 @@ public:
          * Index of the most abundant guide.
          */
         std::vector<int> max_index;
+    public:
+        /**
+         * We assume that all members have already been allocated enough memory for use with `PerCellCrisprQcMetrics::run()`. 
+         *
+         * @return A `Buffers` object with appropriate pointers to the members of this `Results` instance.
+         */
+        Buffers<> buffers() {
+            Buffers<> output;
+            populate_buffers(output, *this);
+            return output;
+        }
+
+        /**
+         * @overload
+         * @return A `Buffers` object with const pointers to the members of this `Results` instance.
+         */
+        Buffers<const double, const int> buffers() const {
+            Buffers<const double, const int> output;
+            populate_buffers(output, *this);
+            return output;
+        }
+
+    private:
+        template<class SomeBuffer, class Results>
+        static void populate_buffers(SomeBuffer& x, Results& y) {
+            x.sums = y.sums.data();
+            x.detected = y.detected.data();
+            x.max_proportion = y.max_proportion.data();
+            x.max_index = y.max_index.data();
+            return;
+        }
     };
 
 public:
@@ -187,13 +218,7 @@ public:
     template<class Matrix>
     Results run(const Matrix* mat) const {
         Results output(mat->ncol());
-
-        Buffers<> buffers;
-        buffers.sums = output.sums.data();
-        buffers.detected = output.detected.data();
-        buffers.max_proportion = output.max_proportion.data();
-        buffers.max_index = output.max_index.data();
-
+        auto buffers = output.buffers();
         run(mat, buffers);
         return output;
     }

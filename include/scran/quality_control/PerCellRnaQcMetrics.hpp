@@ -224,16 +224,7 @@ public:
     Results run(const Matrix* mat, const std::vector<Subset>& subsets) const {
         size_t nsubsets = subsets.size();
         Results output(mat->ncol(), nsubsets);
-
-        Buffers<> buffers;
-        buffers.sums = output.sums.data();
-        buffers.detected = output.detected.data();
-
-        buffers.subset_proportions.resize(nsubsets);
-        for (size_t s = 0; s < nsubsets; ++s) {
-            buffers.subset_proportions[s] = output.subset_proportions[s].data();
-        }
-
+        auto buffers = output.buffers();
         run(mat, subsets, buffers);
         return output;
     }

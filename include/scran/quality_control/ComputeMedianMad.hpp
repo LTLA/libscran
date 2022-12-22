@@ -37,10 +37,17 @@ public:
          * See `set_log()` for details.
          */
         static constexpr bool log = false;
+
+        /**
+         * See `set_median_only()` for details.
+         */
+        static constexpr bool median_only = false;
     };
 
 private:
     bool log = Defaults::log;
+
+    bool median_only = Defaults::median_only;
 
 public:
     /**
@@ -52,6 +59,17 @@ public:
      */
     ComputeMedianMad& set_log(bool l = Defaults::log) {
         log = l;
+        return *this;
+    }
+
+    /**
+     * @param m Whether to only compute the median.
+     * If true, `Results::mads` will be filled with NaNs.
+     *
+     * @return A reference to this `ComputeMedianMad` object.
+     */
+    ComputeMedianMad& set_median_only(bool m = Defaults::median_only) {
+        median_only = m;
         return *this;
     }
 
@@ -265,7 +283,7 @@ private:
         size_t halfway = n / 2;
         median = compute_median(ptr, halfway, n);
 
-        if (std::isnan(median)) {
+        if (median_only || std::isnan(median)) {
             // Giving up.
             mad = std::numeric_limits<double>::quiet_NaN();
             return;

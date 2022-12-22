@@ -36,6 +36,11 @@ bool is_greater_than(Float value, Float threshold) {
     return !std::isnan(value) && !std::isnan(threshold) && value > threshold;
 }
 
+template<typename Float>
+bool is_greater_than_or_equal_to(Float value, Float threshold) {
+    return !std::isnan(value) && !std::isnan(threshold) && value >= threshold;
+}
+
 }
 /**
  * @endcond

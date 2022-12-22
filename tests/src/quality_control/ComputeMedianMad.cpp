@@ -56,6 +56,7 @@ TEST(ComputeMedianMad, EdgeTests) {
     EXPECT_TRUE(stats.medians[0] < 0);
     EXPECT_EQ(stats.mads[0], 0);
 
+    // Filtering works correctly in this case.
     {
         auto copy = even_values;
         auto ref = is.run(copy.size(), copy.data());
@@ -66,6 +67,17 @@ TEST(ComputeMedianMad, EdgeTests) {
         EXPECT_EQ(ref.medians[0], withnan.medians[0]);
         EXPECT_EQ(ref.mads[0], withnan.mads[0]);
     }
+}
+
+TEST(ComputeMedianMad, MedianOnly) {
+    scran::ComputeMedianMad is;
+    is.set_median_only(true);
+    auto stats = is.run(even_values.size(), even_values.data());
+
+    EXPECT_FALSE(stats.log);
+    EXPECT_EQ(stats.medians.size(), 1);
+    EXPECT_FLOAT_EQ(stats.medians[0], 0.5772693750);
+    EXPECT_TRUE(std::isnan(stats.mads[0]));
 }
 
 TEST(ComputeMedianMad, LogTests) {
