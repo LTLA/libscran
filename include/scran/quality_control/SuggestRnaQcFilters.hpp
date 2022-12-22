@@ -225,19 +225,19 @@ public:
 
             for (size_t i = 0; i < n; ++i) {
                 auto b = indexer(i);
-                if (buffers.sums[i] < sums[b]) {
+                if (quality_control::is_less_than(buffers.sums[i], sums[b])) {
                     output[i] = true;
                     continue;
                 }
 
-                if (buffers.detected[i] < detected[b]) {
+                if (quality_control::is_less_than<double>(buffers.detected[i], detected[b])) {
                     output[i] = true;
                     continue;
                 }
 
                 bool fail = false;
                 for (size_t s = 0; s < nsubsets; ++s) {
-                    if (buffers.subset_proportions[s][i] > subset_proportions[s][b]) {
+                    if (quality_control::is_greater_than(buffers.subset_proportions[s][i], subset_proportions[s][b])) {
                         fail = true;
                         break;
                     }

@@ -6,6 +6,7 @@
 #include <vector>
 #include <cmath>
 
+#include "utils.hpp"
 #include "PerCellAdtQcMetrics.hpp"
 #include "ComputeMedianMad.hpp"
 #include "ChooseOutlierFilters.hpp"
@@ -226,14 +227,15 @@ public:
 
             for (size_t i = 0; i < n; ++i) {
                 auto b = indexer(i);
-                if (buffers.detected[i] < detected[b]) {
+
+                if (quality_control::is_less_than<double>(buffers.detected[i], detected[b])) {
                     output[i] = true;
                     continue;
                 }
 
                 bool fail = false;
                 for (size_t s = 0; s < nsubsets; ++s) {
-                    if (buffers.subset_totals[s][i] > subset_totals[s][b]) {
+                    if (quality_control::is_greater_than(buffers.subset_totals[s][i], subset_totals[s][b])) {
                         fail = true;
                         break;
                     }

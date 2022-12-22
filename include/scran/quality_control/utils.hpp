@@ -7,34 +7,6 @@
 namespace scran {
 
 /**
- * @brief Thresholds for QC filtering.
- */
-struct FilterThresholds {
-    /**
-     * @cond
-     */
-    FilterThresholds(size_t nblocks = 0) :
-        lower(nblocks, -std::numeric_limits<double>::infinity()),
-        upper(nblocks, std::numeric_limits<double>::infinity()) {}
-    /**
-     * @endcond
-     */
-
-    /**
-     * Vector of lower thresholds, one per batch.
-     * Cells where the relevant QC metric is below this threshold are considered to be low quality.
-     */
-    std::vector<double> lower;
-
-    /**
-     * Vector of upper thresholds, one per batch.
-     * Cells where the relevant QC metric is above this threshold are considered to be low quality.
-     */
-    std::vector<double> upper;
-
-};
-
-/**
  * @cond
  */
 namespace quality_control {
@@ -52,6 +24,16 @@ void safe_divide(size_t n, Float* top, const Float* bottom) {
             }
         }
     }
+}
+
+template<typename Float>
+bool is_less_than(Float value, Float threshold) {
+    return !std::isnan(value) && !std::isnan(threshold) && value < threshold;
+}
+
+template<typename Float>
+bool is_greater_than(Float value, Float threshold) {
+    return !std::isnan(value) && !std::isnan(threshold) && value > threshold;
 }
 
 }
