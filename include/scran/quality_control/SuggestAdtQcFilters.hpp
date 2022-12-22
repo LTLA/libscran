@@ -8,7 +8,7 @@
 
 #include "PerCellAdtQcMetrics.hpp"
 #include "ComputeMedianMad.hpp"
-#include "FilterOutliers.hpp"
+#include "ChooseOutlierFilters.hpp"
 
 /**
  * @file SuggestAdtQcFilters.hpp
@@ -32,7 +32,7 @@ namespace scran {
  * We define a threshold on each metric based on a certain number of MADs from the median.
  * This assumes that most cells in the experiment are of high (or at least acceptable) quality;
  * any outliers are indicative of low-quality cells that should be filtered out.
- * See the `FilterOutliers` class for implementation details.
+ * See the `ChooseOutlierFilters` class for implementation details.
  *
  * For the number of detected features and the total IgG counts, the outliers are defined after log-transformation of the metrics.
  * This improves resolution at low values and ensures that the defined threshold is not negative.
@@ -45,22 +45,70 @@ namespace scran {
 class SuggestAdtQcFilters {
 public:
     /**
-     * Number of MADs below the median, to define the threshold for outliers in the number of detected features.
-     * This should be non-negative.
+     * @brief Default parameters.
      */
-    double detected_num_mads = 3;
+    struct Defaults {
+        /**
+         * See `set_num_mads()` for details.
+         */
+        static constexpr double num_mads = 3;
+
+        /**
+         * See `set_min_detected_drop()` for details.
+         */
+        static constexpr double min_detected_drop = 0.1;
+    };
+
+private:
+    double detected_num_mads = Defaults::num_mads;
+    double subset_num_mads = Defaults::num_mads;
+    double min_detected_drop = Defaults::min_detected_drop;
+
+public:
+    /**
+     * @param n Number of MADs below the median, to define the threshold for outliers in the number of detected features.
+     * This should be non-negative.
+     *
+     * @return Reference to this `SuggestAdtQcFilters` object.
+     */
+    SuggestAdtQcFilters& set_detected_num_mads(double n = Defaults::num_mads) {
+        detected_num_mads = n;
+        return *this;
+    }
 
     /**
-     * Number of MADs above the median, to define the threshold for outliers in the total count for each subset.
+     * @param n Number of MADs above the median, to define the threshold for outliers in the total count for each subset.
      * This should be non-negative.
+     *
+     * @return Reference to this `SuggestAdtQcFilters` object.
      */
-    double subset_num_mads = 3;
+    SuggestAdtQcFilters& set_subset_num_mads(double n = Defaults::num_mads) {
+        subset_num_mads = n;
+        return *this;
+    }
 
     /**
-     * Minimum drop in the number of detected features from the median, in order to consider a cell to be of low quality.
+     * @param n Number of MADs from the median, overriding previous calls to `set_detected_num_mads()` and `set_subset_num_mads()`.
+     * This should be non-negative.
+     *
+     * @return Reference to this `SuggestAdtQcFilters` object.
+     */
+    SuggestAdtQcFilters& set_num_mads(double n = Defaults::num_mads) {
+        detected_num_mads= n;
+        subset_num_mads = n;
+        return *this;
+    }
+
+    /**
+     * @param m Minimum drop in the number of detected features from the median, in order to consider a cell to be of low quality.
      * This should lie in $[0, 1)$.
+     *
+     * @return Reference to this `SuggestAdtQcFilters` object.
      */
-    double min_detected_drop = 0.1;
+    SuggestAdtQcFilters& set_min_detected_drop(double m = Defaults::min_detected_drop) {
+        min_detected_drop= m;
+        return *this;
+    }
 
 public:
     /**
@@ -249,26 +297,26 @@ public:
         // Filtering on the number of detected features.
         {
             ComputeMedianMad meddler;
-            meddler.log = true;
-
-            FilterOutliers filter;
-            filter.num_mads = detected_num_mads;
-            filter.min_diff = -std::log(1 - min_detected_drop);
-            filter.upper = false;
-
+            meddler.set_log(true);
             auto detected_res = meddler.run_blocked(n, block, starts, buffers.detected, workspace.data());
+
+            ChooseOutlierFilters filter;
+            filter.set_num_mads(detected_num_mads);
+            filter.set_min_diff(-std::log(1 - min_detected_drop));
+            filter.set_upper(false);
             auto detected_filt = filter.run(std::move(detected_res));
+
             output.detected = std::move(detected_filt.lower);
         }
 
         // Filtering on the IgG subset totals.
         {
             ComputeMedianMad meddler;
-            meddler.log = true;
+            meddler.set_log(true);
 
-            FilterOutliers filter;
-            filter.num_mads = subset_num_mads;
-            filter.lower = false;
+            ChooseOutlierFilters filter;
+            filter.set_num_mads(subset_num_mads);
+            filter.set_lower(false);
 
             size_t nsubsets = buffers.subset_totals.size();
             for (size_t s = 0; s < nsubsets; ++s) {

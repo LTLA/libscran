@@ -30,10 +30,30 @@ namespace scran {
 class ComputeMedianMad {
 public:
     /**
-     * Whether to compute the median and MAD after log-transformation of the values.
-     * If `true`, all values are assumed to be non-negative.
+     * @brief Default parameters.
      */
-    bool log = false;
+    struct Defaults {
+        /**
+         * See `set_log()` for details.
+         */
+        static constexpr bool log = true;
+    };
+
+private:
+    bool log = Defaults::log;
+
+public:
+    /**
+     * @param l Whether to compute the median and MAD after log-transformation of the values.
+     * This is useful for defining thresholds based on fold changes from the center.
+     * If `true`, all values are assumed to be non-negative.
+     *
+     * @return A reference to this `ComputeMedianMad` object.
+     */
+    ComputeMedianMad& set_log(bool l = Defaults::log) {
+        log = l;
+        return *this;
+    }
 
 public:
     /**

@@ -70,7 +70,7 @@ TEST(ComputeMedianMad, EdgeTests) {
 
 TEST(ComputeMedianMad, LogTests) {
     scran::ComputeMedianMad is;
-    is.log = true;
+    is.set_log(true);
 
     auto isres = is.run(even_values.size(), even_values.data());
     EXPECT_TRUE(isres.log);

@@ -18,7 +18,7 @@ add_executable(
     src/quality_control/PerCellAdtQcMetrics.cpp
     src/quality_control/PerCellCrisprQcMetrics.cpp
     src/quality_control/ComputeMedianMad.cpp
-    src/quality_control/FilterOutliers.cpp
+    src/quality_control/ChooseOutlierFilters.cpp
     src/quality_control/SuggestRnaQcFilters.cpp
     src/quality_control/SuggestAdtQcFilters.cpp
     src/quality_control/FilterCells.cpp

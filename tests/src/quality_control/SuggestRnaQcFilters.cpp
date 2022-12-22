@@ -30,7 +30,7 @@ TEST_F(SuggestRnaQcFiltersTest, NoSubset) {
     auto thresh = filters.run(qcres);
 
     scran::ComputeMedianMad ref;
-    ref.log = true;
+    ref.set_log(true);
 
     auto sstats = ref.run(qcres.sums.size(), qcres.sums.data());
     EXPECT_DOUBLE_EQ(thresh.sums[0], std::exp(sstats.medians[0] - sstats.mads[0] * 3));
@@ -69,7 +69,7 @@ TEST_F(SuggestRnaQcFiltersTest, Blocking) {
 
     // Compare to a reference calculation.
     scran::ComputeMedianMad ref;
-    ref.log = true;
+    ref.set_log(true);
     auto refres = ref.run_blocked(qcres.sums.size(), block.data(), qcres.sums.data());
     for (size_t b = 0; b < nblocks; ++b) {
         EXPECT_DOUBLE_EQ(thresh.sums[b], std::exp(refres.medians[b] - 3 * refres.mads[b]));
@@ -82,8 +82,8 @@ TEST_F(SuggestRnaQcFiltersTest, Filters) {
     auto qcres = scran::PerCellRnaQcMetrics().run(mat.get(), std::vector<const int*>(1, keep_s.data()));
 
     scran::SuggestRnaQcFilters filters;
-    filters.detected_num_mads = 0.5;
-    filters.subset_num_mads = 0.5;
+    filters.set_detected_num_mads(0.5);
+    filters.set_subset_num_mads(0.5);
 
     // Single block.
     {

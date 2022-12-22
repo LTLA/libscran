@@ -1,16 +1,16 @@
 #include <gtest/gtest.h>
 #include "../utils/macros.h"
 
-#include "scran/quality_control/FilterOutliers.hpp"
+#include "scran/quality_control/ChooseOutlierFilters.hpp"
 
-TEST(FilterOutliers, Simple) {
+TEST(ChooseOutlierFilters, Simple) {
     scran::ComputeMedianMad::Results stat;
     stat.medians.push_back(1);
     stat.mads.push_back(0.2);
 
     // Manual check.
     {
-        scran::FilterOutliers filt;
+        scran::ChooseOutlierFilters filt;
         auto thresholds = filt.run(stat);
         EXPECT_DOUBLE_EQ(thresholds.lower[0], 0.4);
         EXPECT_DOUBLE_EQ(thresholds.upper[0], 1.6);
@@ -18,9 +18,9 @@ TEST(FilterOutliers, Simple) {
 
     // Turns off on request.
     {
-        scran::FilterOutliers filt;
-        filt.lower = false;
-        filt.upper = false;
+        scran::ChooseOutlierFilters filt;
+        filt.set_lower(false);
+        filt.set_upper(false);
         auto thresholds = filt.run(stat);
 
         EXPECT_TRUE(std::isinf(thresholds.lower[0]));
@@ -31,8 +31,8 @@ TEST(FilterOutliers, Simple) {
 
     // Respects the minimum difference.
     {
-        scran::FilterOutliers filt;
-        filt.min_diff = 100;
+        scran::ChooseOutlierFilters filt;
+        filt.set_min_diff(100);
         auto thresholds = filt.run(stat);
         EXPECT_DOUBLE_EQ(thresholds.lower[0], stat.medians[0] - 100);
         EXPECT_DOUBLE_EQ(thresholds.upper[0], stat.medians[0] + 100);
@@ -43,7 +43,7 @@ TEST(FilterOutliers, Simple) {
         stat.medians.push_back(2);
         stat.mads.push_back(0.3);
 
-        scran::FilterOutliers filt;
+        scran::ChooseOutlierFilters filt;
         auto thresholds = filt.run(stat);
         EXPECT_DOUBLE_EQ(thresholds.lower[0], 0.4);
         EXPECT_DOUBLE_EQ(thresholds.upper[0], 1.6);
@@ -52,7 +52,7 @@ TEST(FilterOutliers, Simple) {
     }
 }
 
-TEST(FilterOutliers, Logged) {
+TEST(ChooseOutlierFilters, Logged) {
     scran::ComputeMedianMad::Results stat;
     stat.medians.push_back(1);
     stat.mads.push_back(0.2);
@@ -60,7 +60,7 @@ TEST(FilterOutliers, Logged) {
 
     // Manual check.
     {
-        scran::FilterOutliers filt;
+        scran::ChooseOutlierFilters filt;
         auto thresholds = filt.run(stat);
         EXPECT_DOUBLE_EQ(thresholds.lower[0], std::exp(0.4));
         EXPECT_DOUBLE_EQ(thresholds.upper[0], std::exp(1.6));
@@ -72,21 +72,21 @@ TEST(FilterOutliers, Logged) {
         copy.medians[0] = -std::numeric_limits<double>::infinity();
         copy.mads[0] = 0;
 
-        scran::FilterOutliers filt;
+        scran::ChooseOutlierFilters filt;
         auto thresholds = filt.run(copy);
         EXPECT_EQ(thresholds.lower[0], 0);
         EXPECT_EQ(thresholds.upper[0], 0);
     }
 }
 
-TEST(FilterOutliers, EdgeCases) {
+TEST(ChooseOutlierFilters, EdgeCases) {
     scran::ComputeMedianMad::Results stats;
     stats.medians.push_back(std::numeric_limits<double>::quiet_NaN());
     stats.mads.push_back(std::numeric_limits<double>::quiet_NaN());
     stats.medians.push_back(std::numeric_limits<double>::infinity());
     stats.mads.push_back(0);
 
-    scran::FilterOutliers filt;
+    scran::ChooseOutlierFilters filt;
     auto thresholds = filt.run(stats);
     EXPECT_TRUE(std::isnan(thresholds.lower[0]));
     EXPECT_TRUE(std::isnan(thresholds.upper[0]));

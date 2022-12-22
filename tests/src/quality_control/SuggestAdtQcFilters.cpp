@@ -26,13 +26,13 @@ TEST_F(SuggestAdtQcFiltersTest, NoSubset) {
     auto qcres = scran::PerCellAdtQcMetrics().run(mat.get(), {});
 
     scran::SuggestAdtQcFilters filters;
-    filters.min_detected_drop = 0;
+    filters.set_min_detected_drop(0);
     auto res = filters.run(qcres);
     EXPECT_EQ(res.detected.size(), 1);
 
     // Reference comparison.
     scran::ComputeMedianMad meddler;
-    meddler.log = true;
+    meddler.set_log(true);
     auto comp = meddler.run(qcres.detected.size(), qcres.detected.data());
     EXPECT_DOUBLE_EQ(res.detected[0], std::exp(comp.medians[0] - 3 * comp.mads[0]));
 }
@@ -41,13 +41,13 @@ TEST_F(SuggestAdtQcFiltersTest, MinDetectedDrop) {
     auto qcres = scran::PerCellAdtQcMetrics().run(mat.get(), {});
 
     scran::SuggestAdtQcFilters filters;
-    filters.min_detected_drop = 0.9;
+    filters.set_min_detected_drop(0.9);
     auto res = filters.run(qcres);
     EXPECT_EQ(res.detected.size(), 1);
 
     // Reference comparison.
     scran::ComputeMedianMad meddler;
-    meddler.log = true;
+    meddler.set_log(true);
     auto comp = meddler.run(qcres.detected.size(), qcres.detected.data());
     EXPECT_DOUBLE_EQ(res.detected[0], std::exp(comp.medians[0]) * 0.1);
 }
@@ -64,7 +64,7 @@ TEST_F(SuggestAdtQcFiltersTest, OneSubset) {
 
     // Reference comparison.
     scran::ComputeMedianMad meddler;
-    meddler.log = true;
+    meddler.set_log(true);
     auto comp = meddler.run(qcres.subset_totals[0].size(), qcres.subset_totals[0].data());
     EXPECT_DOUBLE_EQ(res.subset_totals[0][0], std::exp(comp.medians[0] + 3 * comp.mads[0]));
 }
@@ -85,7 +85,7 @@ TEST_F(SuggestAdtQcFiltersTest, Blocking) {
 
     // Reference calculation.
     scran::ComputeMedianMad meddler;
-    meddler.log = true;
+    meddler.set_log(true);
     auto comp = meddler.run_blocked(qcres.subset_totals[0].size(), block.data(), qcres.subset_totals[0].data());
     for (size_t n = 0; n < nblocks; ++n) {
         EXPECT_DOUBLE_EQ(res.subset_totals[0][n], std::exp(comp.medians[n] + 3 * comp.mads[n]));
@@ -98,8 +98,8 @@ TEST_F(SuggestAdtQcFiltersTest, Filters) {
     auto qcres = scran::PerCellAdtQcMetrics().run(mat.get(), std::vector<const int*>(1, keep_s.data()));
 
     scran::SuggestAdtQcFilters filters;
-    filters.detected_num_mads = 0.5;
-    filters.subset_num_mads = 0.5;
+    filters.set_detected_num_mads(0.5);
+    filters.set_subset_num_mads(0.5);
 
     // Single block.
     {

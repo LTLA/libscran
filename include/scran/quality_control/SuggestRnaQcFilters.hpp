@@ -8,7 +8,7 @@
 
 #include "PerCellRnaQcMetrics.hpp"
 #include "ComputeMedianMad.hpp"
-#include "FilterOutliers.hpp"
+#include "ChooseOutlierFilters.hpp"
 
 /**
  * @file SuggestRnaQcFilters.hpp
@@ -31,7 +31,7 @@ namespace scran {
  * Outliers are defined on each metric by counting the number of MADs from the median value across all cells.
  * This assumes that most cells in the experiment are of high (or at least acceptable) quality;
  * any anomalies are indicative of low-quality cells that should be filtered out.
- * See the `FilterOutliers` class for implementation details.
+ * See the `ChooseOutlierFilters` class for implementation details.
  *
  * For the total counts and number of detected features, the outliers are defined after log-transformation of the metrics.
  * This improves resolution at low values and ensures that the defined threshold is not negative.
@@ -39,23 +39,67 @@ namespace scran {
  */
 class SuggestRnaQcFilters {
 public:
-    /**
-     * Number of MADs below the median, to define the threshold for outliers in the number of detected features.
-     * This should be non-negative.
+   /**
+     * @brief Default parameters.
      */
-    double detected_num_mads = 3;
+    struct Defaults {
+        /**
+         * See `set_num_mads()` for details.
+         */
+        static constexpr double num_mads = 3;
+    };
+
+private:
+    double detected_num_mads = Defaults::num_mads;
+    double sums_num_mads = Defaults::num_mads;
+    double subset_num_mads = Defaults::num_mads;
+
+public:
+    /**
+     * @param n Number of MADs below the median, to define the threshold for outliers in the number of detected features.
+     * This should be non-negative.
+     *
+     * @return Reference to this `SuggestRnaQcFilters` object.
+     */
+    SuggestRnaQcFilters& set_detected_num_mads(double n = Defaults::num_mads) {
+        detected_num_mads = n;
+        return *this;
+    }
 
     /**
-     * Number of MADs below the median, to define the threshold for outliers in the total count per cell.
+     * @param n Number of MADs below the median, to define the threshold for outliers in the total count per cell.
      * This should be non-negative.
+     *
+     * @return Reference to this `SuggestRnaQcFilters` object.
      */
-    double sums_num_mads = 3;
+    SuggestRnaQcFilters& set_sums_num_mads(double n = Defaults::num_mads) {
+        sums_num_mads = n;
+        return *this;
+    }
 
     /**
-     * Number of MADs above the median, to define the threshold for outliers in the subset proportions.
+     * @param n Number of MADs above the median, to define the threshold for outliers in the subset proportions.
      * This should be non-negative.
+     * 
+     * @return Reference to this `SuggestRnaQcFilters` object.
      */
-    double subset_num_mads = 3;
+    SuggestRnaQcFilters& set_subset_num_mads(double n = Defaults::num_mads) {
+        subset_num_mads = n;
+        return *this;
+    }
+
+    /**
+     * @param n Number of MADs from the median, overriding previous calls to `set_sums_num_mads()` and counterparts.
+     * This should be non-negative.
+     *
+     * @return Reference to this `SuggestRnaQcFilters` object.
+     */
+    SuggestRnaQcFilters& set_num_mads(double n = Defaults::num_mads) {
+        detected_num_mads= n;
+        subset_num_mads = n;
+        sums_num_mads = n;
+        return *this;
+    }
 
 public:
     /**
@@ -256,28 +300,28 @@ public:
         // Filtering on the total counts.
         {
             ComputeMedianMad meddler;
-            meddler.log = true;
-
-            FilterOutliers filter;
-            filter.num_mads = sums_num_mads;
-            filter.upper = false;
-
+            meddler.set_log(true);
             auto sums_res = meddler.run_blocked(n, block, starts, buffers.sums, workspace.data());
+
+            ChooseOutlierFilters filter;
+            filter.set_num_mads(sums_num_mads);
+            filter.set_upper(false);
             auto sums_filt = filter.run(std::move(sums_res));
+
             output.sums = std::move(sums_filt.lower);
         }
 
         // Filtering on the detected features.
         {
             ComputeMedianMad meddler;
-            meddler.log = true;
-
-            FilterOutliers filter;
-            filter.num_mads = sums_num_mads;
-            filter.upper = false;
-
+            meddler.set_log(true);
             auto detected_res = meddler.run_blocked(n, block, starts, buffers.detected, workspace.data());
+
+            ChooseOutlierFilters filter;
+            filter.set_num_mads(sums_num_mads);
+            filter.set_upper(false);
             auto detected_filt = filter.run(std::move(detected_res));
+
             output.detected = std::move(detected_filt.lower);
         }
 
@@ -285,9 +329,9 @@ public:
         {
             ComputeMedianMad meddler;
 
-            FilterOutliers filter;
-            filter.num_mads = subset_num_mads;
-            filter.lower = false;
+            ChooseOutlierFilters filter;
+            filter.set_num_mads(subset_num_mads);
+            filter.set_lower(false);
 
             size_t nsubsets = buffers.subset_proportions.size();
             for (size_t s = 0; s < nsubsets; ++s) {
