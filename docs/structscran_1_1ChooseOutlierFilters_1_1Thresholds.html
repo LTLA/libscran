@@ -93,9 +93,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9da2ef088b68b5964832639b3fb27a24"><td class="memTemplParams" colspan="2">template&lt;bool overwrite = true, typename Input , typename Output &gt; </td></tr>
 <tr class="memitem:a9da2ef088b68b5964832639b3fb27a24"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structscran_1_1ChooseOutlierFilters_1_1Thresholds.html#a9da2ef088b68b5964832639b3fb27a24">filter</a> (size_t n, Input *input, Output *output) const</td></tr>
 <tr class="separator:a9da2ef088b68b5964832639b3fb27a24"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a413577a7fde1113d01354448173fd45b"><td class="memTemplParams" colspan="2">template&lt;typename Output  = uint8_t, typename Input &gt; </td></tr>
-<tr class="memitem:a413577a7fde1113d01354448173fd45b"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; Output &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structscran_1_1ChooseOutlierFilters_1_1Thresholds.html#a413577a7fde1113d01354448173fd45b">filter</a> (size_t n, const Input *inputs) const</td></tr>
-<tr class="separator:a413577a7fde1113d01354448173fd45b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad69689e977f6dafaa66ceaa089927770"><td class="memTemplParams" colspan="2">template&lt;typename Output  = uint8_t, typename Input &gt; </td></tr>
+<tr class="memitem:ad69689e977f6dafaa66ceaa089927770"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; Output &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structscran_1_1ChooseOutlierFilters_1_1Thresholds.html#ad69689e977f6dafaa66ceaa089927770">filter</a> (size_t n, const Input *input) const</td></tr>
+<tr class="separator:ad69689e977f6dafaa66ceaa089927770"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adc947e6502a064baa9de27a758b405b6"><td class="memTemplParams" colspan="2">template&lt;bool overwrite = true, typename Block , typename Input , typename Output &gt; </td></tr>
 <tr class="memitem:adc947e6502a064baa9de27a758b405b6"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structscran_1_1ChooseOutlierFilters_1_1Thresholds.html#adc947e6502a064baa9de27a758b405b6">filter_blocked</a> (size_t n, const Block *block, const Input *input, Output *output) const</td></tr>
 <tr class="separator:adc947e6502a064baa9de27a758b405b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -165,7 +165,7 @@ template&lt;bool overwrite = true, typename Input , typename Output &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of observations. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">inputs</td><td>Pointer to an array of length <code>n</code>, containing the values to be filtered. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Pointer to an array of length <code>n</code>, containing the values to be filtered. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array of length <code>n</code>, to store the outlier calls. Values are set to <code>true</code> for outliers. If <code>overwrite = true</code>, values are set to <code>false</code> for non-outliers, otherwise the existing entry is preserved.</td></tr>
   </table>
   </dd>
@@ -174,8 +174,8 @@ template&lt;bool overwrite = true, typename Input , typename Output &gt; </div>
 
 </div>
 </div>
-<a id="a413577a7fde1113d01354448173fd45b" name="a413577a7fde1113d01354448173fd45b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a413577a7fde1113d01354448173fd45b">&#9670;&#160;</a></span>filter() <span class="overload">[2/2]</span></h2>
+<a id="ad69689e977f6dafaa66ceaa089927770" name="ad69689e977f6dafaa66ceaa089927770"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad69689e977f6dafaa66ceaa089927770">&#9670;&#160;</a></span>filter() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -195,7 +195,7 @@ template&lt;typename Output  = uint8_t, typename Input &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Input *&#160;</td>
-          <td class="paramname"><em>inputs</em>&#160;</td>
+          <td class="paramname"><em>input</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -219,7 +219,7 @@ template&lt;typename Output  = uint8_t, typename Input &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of observations. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">inputs</td><td>Pointer to an array of length <code>n</code>, containing the values to be filtered.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Pointer to an array of length <code>n</code>, containing the values to be filtered.</td></tr>
   </table>
   </dd>
 </dl>
@@ -287,7 +287,7 @@ template&lt;bool overwrite = true, typename Block , typename Input , typename Ou
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of cells. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length <code>n</code>, containing the block assignment for each cell. This may be <code>NULL</code>, in which case all cells are assumed to belong to the same block. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">inputs</td><td>Pointer to an array of length <code>n</code>, containing the values to be filtered. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Pointer to an array of length <code>n</code>, containing the values to be filtered. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array of length <code>n</code>, to store the outlier calls. Values are set to <code>true</code> for outliers. If <code>overwrite = true</code>, values are set to <code>false</code> for non-outliers, otherwise the existing entry is preserved. </td></tr>
   </table>
   </dd>
@@ -349,7 +349,7 @@ template&lt;typename Output  = uint8_t, typename Block , typename Input &gt; </d
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of cells. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length <code>n</code>, containing the block assignment for each cell. This may be <code>NULL</code>, in which case all cells are assumed to belong to the same block. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">inputs</td><td>Pointer to an array of length <code>n</code>, containing the values to be filtered.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Pointer to an array of length <code>n</code>, containing the values to be filtered.</td></tr>
   </table>
   </dd>
 </dl>

@@ -78,7 +78,6 @@ $(function() {
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="classscran_1_1PerCellCrisprQcMetrics-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">scran::PerCellCrisprQcMetrics Class Reference</div></div>
 </div><!--header-->
@@ -94,23 +93,23 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellCrisprQcMetrics_1_1Buffers.html">Buffers</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structscran_1_1PerCellCrisprQcMetrics_1_1Buffers.html" title="Buffers for direct storage of the calculated statistics.">Buffers</a> for direct storage of the calculated statistics.  <a href="structscran_1_1PerCellCrisprQcMetrics_1_1Buffers.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellCrisprQcMetrics_1_1Defaults.html">Defaults</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default parameters.  <a href="structscran_1_1PerCellCrisprQcMetrics_1_1Defaults.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellCrisprQcMetrics_1_1Results.html">Results</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Result store for QC metric calculations.  <a href="structscran_1_1PerCellCrisprQcMetrics_1_1Results.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:a0215003d22a8fea7afe4504ec07f7986"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1PerCellCrisprQcMetrics.html">PerCellCrisprQcMetrics</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellCrisprQcMetrics.html#a0215003d22a8fea7afe4504ec07f7986">set_num_threads</a> (int n=<a class="el" href="structscran_1_1PerCellCrisprQcMetrics_1_1Defaults.html#ac168af901cec3c246c9713421ef97802">Defaults::num_threads</a>)</td></tr>
+<tr class="separator:a0215003d22a8fea7afe4504ec07f7986"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adb20f29d39b5564461f93931d321e364"><td class="memTemplParams" colspan="2">template&lt;class Matrix , typename Float , typename Integer &gt; </td></tr>
 <tr class="memitem:adb20f29d39b5564461f93931d321e364"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellCrisprQcMetrics.html#adb20f29d39b5564461f93931d321e364">run</a> (const Matrix *mat, <a class="el" href="structscran_1_1PerCellCrisprQcMetrics_1_1Buffers.html">Buffers</a>&lt; Float, Integer &gt; &amp;output) const</td></tr>
 <tr class="separator:adb20f29d39b5564461f93931d321e364"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9a0b8c6d63ba087d843335855814feae"><td class="memTemplParams" colspan="2">template&lt;class Matrix &gt; </td></tr>
 <tr class="memitem:a9a0b8c6d63ba087d843335855814feae"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellCrisprQcMetrics_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellCrisprQcMetrics.html#a9a0b8c6d63ba087d843335855814feae">run</a> (const Matrix *mat) const</td></tr>
 <tr class="separator:a9a0b8c6d63ba087d843335855814feae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
-<tr class="memitem:a195691d107c227569c0e098922df9596"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1PerCellCrisprQcMetrics.html#a195691d107c227569c0e098922df9596">num_threads</a> = 1</td></tr>
-<tr class="separator:a195691d107c227569c0e098922df9596"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Compute per-cell quality control metrics from a CRISPR guide count matrix. </p>
@@ -122,6 +121,39 @@ Public Attributes</h2></td></tr>
 </ul>
 <p >Under the hood, this class is just a pre-configured wrapper around <code><a class="el" href="classscran_1_1PerCellQcMetrics.html" title="Compute a variety of per-cell quality control metrics from a count matrix.">PerCellQcMetrics</a></code>. with some careful division of the maximum count. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a0215003d22a8fea7afe4504ec07f7986" name="a0215003d22a8fea7afe4504ec07f7986"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0215003d22a8fea7afe4504ec07f7986">&#9670;&#160;</a></span>set_num_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1PerCellCrisprQcMetrics.html">PerCellCrisprQcMetrics</a> &amp; scran::PerCellCrisprQcMetrics::set_num_threads </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1PerCellCrisprQcMetrics_1_1Defaults.html#ac168af901cec3c246c9713421ef97802">Defaults::num_threads</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PerCellAdtQcMetrics.html" title="Compute per-cell quality control metrics from an ADT count matrix.">PerCellAdtQcMetrics</a></code> object. </dd></dl>
+
+</div>
+</div>
 <a id="adb20f29d39b5564461f93931d321e364" name="adb20f29d39b5564461f93931d321e364"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#adb20f29d39b5564461f93931d321e364">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
 
@@ -215,22 +247,6 @@ template&lt;class Matrix &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellCrisprQcMetrics_1_1Results.html" title="Result store for QC metric calculations.">PerCellCrisprQcMetrics::Results</a></code> object containing the QC metrics. </dd></dl>
-
-</div>
-</div>
-<h2 class="groupheader">Member Data Documentation</h2>
-<a id="a195691d107c227569c0e098922df9596" name="a195691d107c227569c0e098922df9596"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a195691d107c227569c0e098922df9596">&#9670;&#160;</a></span>num_threads</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">int scran::PerCellCrisprQcMetrics::num_threads = 1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Number of threads to use. </p>
 
 </div>
 </div>
