@@ -154,7 +154,7 @@ public:
          * @tparam Output Boolean type for the outlier calls.
          *
          * @param n Number of observations.
-         * @param[in] inputs Pointer to an array of length `n`, containing the values to be filtered.
+         * @param[in] input Pointer to an array of length `n`, containing the values to be filtered.
          * @param[out] output Pointer to an array of length `n`, to store the outlier calls.
          * Values are set to `true` for outliers.
          * If `overwrite = true`, values are set to `false` for non-outliers, otherwise the existing entry is preserved.
@@ -175,14 +175,14 @@ public:
          * @tparam Input Numeric type for the values.
          *
          * @param n Number of observations.
-         * @param[in] inputs Pointer to an array of length `n`, containing the values to be filtered.
+         * @param[in] input Pointer to an array of length `n`, containing the values to be filtered.
          *
          * @return Vector of outlier calls, of length equal to `n`.
          */
         template<typename Output = uint8_t, typename Input>
-        std::vector<Output> filter(size_t n, const Input* inputs) const {
+        std::vector<Output> filter(size_t n, const Input* input) const {
             std::vector<Output> output(n);
-            filter(n, inputs, output.data());
+            filter(n, input, output.data());
             return output;
         }
 
@@ -196,7 +196,7 @@ public:
          * @param n Number of cells.
          * @param[in] block Pointer to an array of length `n`, containing the block assignment for each cell.
          * This may be `NULL`, in which case all cells are assumed to belong to the same block.
-         * @param[in] inputs Pointer to an array of length `n`, containing the values to be filtered.
+         * @param[in] input Pointer to an array of length `n`, containing the values to be filtered.
          * @param[out] output Pointer to an array of length `n`, to store the outlier calls.
          * Values are set to `true` for outliers.
          * If `overwrite = true`, values are set to `false` for non-outliers, otherwise the existing entry is preserved.
@@ -220,7 +220,7 @@ public:
          * @param n Number of cells.
          * @param[in] block Pointer to an array of length `n`, containing the block assignment for each cell.
          * This may be `NULL`, in which case all cells are assumed to belong to the same block.
-         * @param[in] inputs Pointer to an array of length `n`, containing the values to be filtered.
+         * @param[in] input Pointer to an array of length `n`, containing the values to be filtered.
          *
          * @return Vector of low-quality calls, of length equal to the number of cells in `metrics`.
          */
