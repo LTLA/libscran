@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['scalebyneighbors_0',['ScaleByNeighbors',['../classscran_1_1ScaleByNeighbors.html',1,'scran']]],
-  ['scoremarkers_1',['ScoreMarkers',['../classscran_1_1ScoreMarkers.html',1,'scran']]],
-  ['summarizeeffects_2',['SummarizeEffects',['../classscran_1_1SummarizeEffects.html',1,'scran']]]
+  ['thresholds_0',['Thresholds',['../structscran_1_1ChooseOutlierFilters_1_1Thresholds.html',1,'scran::ChooseOutlierFilters::Thresholds'],['../structscran_1_1SuggestAdtQcFilters_1_1Thresholds.html',1,'scran::SuggestAdtQcFilters::Thresholds'],['../structscran_1_1SuggestRnaQcFilters_1_1Thresholds.html',1,'scran::SuggestRnaQcFilters::Thresholds']]]
 ];

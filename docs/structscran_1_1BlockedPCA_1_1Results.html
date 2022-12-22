@@ -117,18 +117,18 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="af833551b79e055463cc3b21cbf85fa20" name="af833551b79e055463cc3b21cbf85fa20"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af833551b79e055463cc3b21cbf85fa20">&#9670;&#160;</a></span>rotation</h2>
+<a id="a8fee09e9dd0e7e80728bb06be4a2912a" name="a8fee09e9dd0e7e80728bb06be4a2912a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8fee09e9dd0e7e80728bb06be4a2912a">&#9670;&#160;</a></span>variance_explained</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Eigen::MatrixXd scran::BlockedPCA::Results::rotation</td>
+          <td class="memname">Eigen::VectorXd scran::BlockedPCA::Results::variance_explained</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Rotation matrix. Each row corresponds to a feature while each column corresponds to a PC. The number of PCs is determined by <code><a class="el" href="classscran_1_1BlockedPCA.html#aaab4ee71a29b1ac787a1a135719217d4">set_rank()</a></code>. If feature filtering was performed, the number of rows is equal to the number of features remaining after filtering. </p>
+<p >Variance explained by each PC. Each entry corresponds to a column in <code>pcs</code> and is in decreasing order. </p>
 
 </div>
 </div>
@@ -147,18 +147,18 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a8fee09e9dd0e7e80728bb06be4a2912a" name="a8fee09e9dd0e7e80728bb06be4a2912a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8fee09e9dd0e7e80728bb06be4a2912a">&#9670;&#160;</a></span>variance_explained</h2>
+<a id="af833551b79e055463cc3b21cbf85fa20" name="af833551b79e055463cc3b21cbf85fa20"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af833551b79e055463cc3b21cbf85fa20">&#9670;&#160;</a></span>rotation</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Eigen::VectorXd scran::BlockedPCA::Results::variance_explained</td>
+          <td class="memname">Eigen::MatrixXd scran::BlockedPCA::Results::rotation</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Variance explained by each PC. Each entry corresponds to a column in <code>pcs</code> and is in decreasing order. </p>
+<p >Rotation matrix. Each row corresponds to a feature while each column corresponds to a PC. The number of PCs is determined by <code><a class="el" href="classscran_1_1BlockedPCA.html#aaab4ee71a29b1ac787a1a135719217d4">set_rank()</a></code>. If feature filtering was performed, the number of rows is equal to the number of features remaining after filtering. </p>
 
 </div>
 </div>

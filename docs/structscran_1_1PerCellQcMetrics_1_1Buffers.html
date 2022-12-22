@@ -115,8 +115,8 @@ struct scran::PerCellQcMetrics::Buffers&lt; Float, Integer &gt;</div><p ><a clas
   </dd>
 </dl>
 </div><h2 class="groupheader">Member Data Documentation</h2>
-<a id="abfc89c44c3c57da63654baeb3c571137" name="abfc89c44c3c57da63654baeb3c571137"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abfc89c44c3c57da63654baeb3c571137">&#9670;&#160;</a></span>already_zeroed</h2>
+<a id="afd4b7e0a947bc1d7ab44a794a8754eb3" name="afd4b7e0a947bc1d7ab44a794a8754eb3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd4b7e0a947bc1d7ab44a794a8754eb3">&#9670;&#160;</a></span>total</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -124,11 +124,11 @@ struct scran::PerCellQcMetrics::Buffers&lt; Float, Integer &gt;</div><p ><a clas
 template&lt;typename Float  = double, typename Integer  = int&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html">scran::PerCellQcMetrics::Buffers</a>&lt; Float, Integer &gt;::already_zeroed = false</td>
+          <td class="memname">Float* <a class="el" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html">scran::PerCellQcMetrics::Buffers</a>&lt; Float, Integer &gt;::total = NULL</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Whether all of the arrays in <code><a class="el" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html" title="Buffers for direct storage of the calculated statistics.">Buffers</a></code> have already been filled with zeros. (For <code><a class="el" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html#a1fec0a30a28025b1d2725bb908333127">Buffers::max_count</a></code>, this should be filled with the lowest possible value of <code>Float</code>, if expression might be negative.) </p>
+<p >Pointer to an array of length equal to the number of cells, equivalent to <code><a class="el" href="structscran_1_1PerCellQcMetrics_1_1Results.html#a58e7c4f82b9dd420a25766e027a812a3">Results::total</a></code>. Set to <code>NULL</code> to skip this calculation. </p>
 
 </div>
 </div>
@@ -149,23 +149,6 @@ template&lt;typename Float  = double, typename Integer  = int&gt; </div>
 
 </div>
 </div>
-<a id="a1fec0a30a28025b1d2725bb908333127" name="a1fec0a30a28025b1d2725bb908333127"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1fec0a30a28025b1d2725bb908333127">&#9670;&#160;</a></span>max_count</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Float  = double, typename Integer  = int&gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">Float* <a class="el" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html">scran::PerCellQcMetrics::Buffers</a>&lt; Float, Integer &gt;::max_count = NULL</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Pointer to an array of length equal to the number of cells, equivalent to <code><a class="el" href="structscran_1_1PerCellQcMetrics_1_1Results.html#a7808fa46556ba405929ef2299af7b4e6">Results::max_count</a></code>. Set to <code>NULL</code> to skip this calculation. </p>
-
-</div>
-</div>
 <a id="aaa9d95d1df2013dd608c542bf2007e05" name="aaa9d95d1df2013dd608c542bf2007e05"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aaa9d95d1df2013dd608c542bf2007e05">&#9670;&#160;</a></span>max_index</h2>
 
@@ -183,8 +166,8 @@ template&lt;typename Float  = double, typename Integer  = int&gt; </div>
 
 </div>
 </div>
-<a id="a5e0fba5da33a431bc8c6a972ca055774" name="a5e0fba5da33a431bc8c6a972ca055774"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5e0fba5da33a431bc8c6a972ca055774">&#9670;&#160;</a></span>subset_detected</h2>
+<a id="a1fec0a30a28025b1d2725bb908333127" name="a1fec0a30a28025b1d2725bb908333127"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1fec0a30a28025b1d2725bb908333127">&#9670;&#160;</a></span>max_count</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -192,11 +175,11 @@ template&lt;typename Float  = double, typename Integer  = int&gt; </div>
 template&lt;typename Float  = double, typename Integer  = int&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">std::vector&lt;Integer*&gt; <a class="el" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html">scran::PerCellQcMetrics::Buffers</a>&lt; Float, Integer &gt;::subset_detected</td>
+          <td class="memname">Float* <a class="el" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html">scran::PerCellQcMetrics::Buffers</a>&lt; Float, Integer &gt;::max_count = NULL</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Vector of pointers of length equal to the number of feature subsets, where each point is to an array of length equal to the number of cells; equivalent to <code><a class="el" href="structscran_1_1PerCellQcMetrics_1_1Results.html#a8c302144248872ab25696e1f311085fd">Results::subset_detected</a></code>. Set any value to <code>NULL</code> to skip the calculation for the corresponding feature subset, or leave empty to skip calculations for all feature subsets. </p>
+<p >Pointer to an array of length equal to the number of cells, equivalent to <code><a class="el" href="structscran_1_1PerCellQcMetrics_1_1Results.html#a7808fa46556ba405929ef2299af7b4e6">Results::max_count</a></code>. Set to <code>NULL</code> to skip this calculation. </p>
 
 </div>
 </div>
@@ -217,8 +200,8 @@ template&lt;typename Float  = double, typename Integer  = int&gt; </div>
 
 </div>
 </div>
-<a id="afd4b7e0a947bc1d7ab44a794a8754eb3" name="afd4b7e0a947bc1d7ab44a794a8754eb3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afd4b7e0a947bc1d7ab44a794a8754eb3">&#9670;&#160;</a></span>total</h2>
+<a id="a5e0fba5da33a431bc8c6a972ca055774" name="a5e0fba5da33a431bc8c6a972ca055774"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5e0fba5da33a431bc8c6a972ca055774">&#9670;&#160;</a></span>subset_detected</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -226,11 +209,28 @@ template&lt;typename Float  = double, typename Integer  = int&gt; </div>
 template&lt;typename Float  = double, typename Integer  = int&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">Float* <a class="el" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html">scran::PerCellQcMetrics::Buffers</a>&lt; Float, Integer &gt;::total = NULL</td>
+          <td class="memname">std::vector&lt;Integer*&gt; <a class="el" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html">scran::PerCellQcMetrics::Buffers</a>&lt; Float, Integer &gt;::subset_detected</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Pointer to an array of length equal to the number of cells, equivalent to <code><a class="el" href="structscran_1_1PerCellQcMetrics_1_1Results.html#a58e7c4f82b9dd420a25766e027a812a3">Results::total</a></code>. Set to <code>NULL</code> to skip this calculation. </p>
+<p >Vector of pointers of length equal to the number of feature subsets, where each point is to an array of length equal to the number of cells; equivalent to <code><a class="el" href="structscran_1_1PerCellQcMetrics_1_1Results.html#a8c302144248872ab25696e1f311085fd">Results::subset_detected</a></code>. Set any value to <code>NULL</code> to skip the calculation for the corresponding feature subset, or leave empty to skip calculations for all feature subsets. </p>
+
+</div>
+</div>
+<a id="abfc89c44c3c57da63654baeb3c571137" name="abfc89c44c3c57da63654baeb3c571137"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abfc89c44c3c57da63654baeb3c571137">&#9670;&#160;</a></span>already_zeroed</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Float  = double, typename Integer  = int&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html">scran::PerCellQcMetrics::Buffers</a>&lt; Float, Integer &gt;::already_zeroed = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Whether all of the arrays in <code><a class="el" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html" title="Buffers for direct storage of the calculated statistics.">Buffers</a></code> have already been filled with zeros. (For <code><a class="el" href="structscran_1_1PerCellQcMetrics_1_1Buffers.html#a1fec0a30a28025b1d2725bb908333127">Buffers::max_count</a></code>, this should be filled with the lowest possible value of <code>Float</code>, if expression might be negative.) </p>
 
 </div>
 </div>

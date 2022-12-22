@@ -127,33 +127,21 @@ Public Member Functions</h2></td></tr>
 </ul>
 <p >In practice, this tends to work poorly for actual single-cell data due to its sparsity. Nonetheless, we provide it here because it can be helpful for removing composition biases between clusters. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a07388a3bbfdbc6a023b6479b2012c6df" name="a07388a3bbfdbc6a023b6479b2012c6df"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a07388a3bbfdbc6a023b6479b2012c6df">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
+<a id="aa819da1b38830a8849bdf4cdd89b1994" name="aa819da1b38830a8849bdf4cdd89b1994"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa819da1b38830a8849bdf4cdd89b1994">&#9670;&#160;</a></span>set_center()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<div class="memtemplate">
-template&lt;typename Out  = double, typename T , typename IDX , typename Ref &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html">Results</a>&lt; Out &gt; scran::MedianSizeFactors::run </td>
+          <td class="memname"><a class="el" href="classscran_1_1MedianSizeFactors.html">MedianSizeFactors</a> &amp; scran::MedianSizeFactors::set_center </td>
           <td>(</td>
-          <td class="paramtype">const tatami::Matrix&lt; T, IDX &gt; *&#160;</td>
-          <td class="paramname"><em>mat</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>c</em> = <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Defaults.html#af747d883c33f4793ce28b9aade2d2ad6">Defaults::center</a></code></td><td>)</td>
           <td></td>
-          <td class="paramtype">const Ref *&#160;</td>
-          <td class="paramname"><em>ref</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -162,29 +150,87 @@ template&lt;typename Out  = double, typename T , typename IDX , typename Ref &gt
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Compute per-cell size factors against a user-supplied reference profile.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">Out</td><td>Numeric type for the size factors. </td></tr>
-    <tr><td class="paramname">T</td><td>Numeric data type of the input matrix. </td></tr>
-    <tr><td class="paramname">IDX</td><td>Integer index type of the input matrix. </td></tr>
-    <tr><td class="paramname">Ref</td><td>Numeric data type of the reference profile.</td></tr>
-  </table>
-  </dd>
-</dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes and columns should be cells. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">ref</td><td>Pointer to an array containing the reference expression profile to normalize against. This should be of length equal to the number of rows in <code>mat</code> and should contain non-negative values.</td></tr>
+    <tr><td class="paramname">c</td><td>Whether to center the size factors to have a mean of unity. This is usually desirable for interpretation of relative values.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html" title="Result of the size factor calculation.">Results</a></code> containing the size factors for each cell in <code>mat</code>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1MedianSizeFactors.html" title="Compute median-based size factors to handle composition bias.">MedianSizeFactors</a></code> object.</dd></dl>
+<p>For more control over centering, this can be set to <code>false</code> and the resulting size factors can be passed to <code><a class="el" href="classscran_1_1CenterSizeFactors.html" title="Center size factors prior to scaling normalization.">CenterSizeFactors</a></code>. </p>
+
+</div>
+</div>
+<a id="a5507419988ca1925e8f60bdc99436e51" name="a5507419988ca1925e8f60bdc99436e51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5507419988ca1925e8f60bdc99436e51">&#9670;&#160;</a></span>set_prior_count()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1MedianSizeFactors.html">MedianSizeFactors</a> &amp; scran::MedianSizeFactors::set_prior_count </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>p</em> = <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Defaults.html#a909251588d34d41237a64df1dd85552c">Defaults::prior_count</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">p</td><td>Prior count to use for shrinking median-based size factors towards their library size-based counterparts. Larger values result in more shrinkage, while a value of zero will disable shrinkage altogether.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1MedianSizeFactors.html" title="Compute median-based size factors to handle composition bias.">MedianSizeFactors</a></code> object.</dd></dl>
+<p>When using shrinkage, we add a scaled version of the reference profile to each cell before computing the ratios. The scaling of the reference profile varies for each cell and is proportional to the (relative) total count of that cell. This implicitly pushes the median-based size factor towards a value that is proportional to the library size of the cell, given that the median of the ratio of the reference against a scaled version of itself is just the scaling factor, i.e., the library size.</p>
+<p >The amount of shrinkage depends on the magnitude of the reference scaling. The prior count should be interpreted as the number of extra reads from the reference profile that is added to each cell. For example, the default of 10 means that the equivalent of 10 reads are added to each cell, distributed according to the reference profile. Increasing the prior count will increase the strength of the shrinkage as the reference profile has a greater contribution to the ratios. </p>
+
+</div>
+</div>
+<a id="a8440bf543257fe771a5db35b0e4a9bbf" name="a8440bf543257fe771a5db35b0e4a9bbf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8440bf543257fe771a5db35b0e4a9bbf">&#9670;&#160;</a></span>set_num_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1MedianSizeFactors.html">MedianSizeFactors</a> &amp; scran::MedianSizeFactors::set_num_threads </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Defaults.html#a175bd521275c0babb11e548885761700">Defaults::num_threads</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1MedianSizeFactors.html" title="Compute median-based size factors to handle composition bias.">MedianSizeFactors</a></code> object. </dd></dl>
 
 </div>
 </div>
 <a id="a14cc850dee0fe3462e3986434832fd48" name="a14cc850dee0fe3462e3986434832fd48"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a14cc850dee0fe3462e3986434832fd48">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a14cc850dee0fe3462e3986434832fd48">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -246,52 +292,8 @@ template&lt;typename T , typename IDX , typename Ref , typename Out &gt; </div>
 
 </div>
 </div>
-<a id="a1ae3787cccfaf98bba4d473856582893" name="a1ae3787cccfaf98bba4d473856582893"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1ae3787cccfaf98bba4d473856582893">&#9670;&#160;</a></span>run_with_mean() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Out  = double, typename T , typename IDX &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html">Results</a>&lt; Out &gt; scran::MedianSizeFactors::run_with_mean </td>
-          <td>(</td>
-          <td class="paramtype">const tatami::Matrix&lt; T, IDX &gt; *&#160;</td>
-          <td class="paramname"><em>mat</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Compute per-cell size factors against an average pseudo-sample constructed from the row means of the input matrix.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">Out</td><td>Numeric type for the size factors. </td></tr>
-    <tr><td class="paramname">T</td><td>Numeric data type of the input matrix. </td></tr>
-    <tr><td class="paramname">IDX</td><td>Integer index type of the input matrix.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes and columns should be cells.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html" title="Result of the size factor calculation.">Results</a></code> containing the size factors for each cell in <code>mat</code>. </dd></dl>
-
-</div>
-</div>
 <a id="a1fad66012a50b1ad4eec6bc954c3c14b" name="a1fad66012a50b1ad4eec6bc954c3c14b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1fad66012a50b1ad4eec6bc954c3c14b">&#9670;&#160;</a></span>run_with_mean() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a1fad66012a50b1ad4eec6bc954c3c14b">&#9670;&#160;</a></span>run_with_mean() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -345,21 +347,33 @@ template&lt;typename T , typename IDX , typename Out &gt; </div>
 
 </div>
 </div>
-<a id="aa819da1b38830a8849bdf4cdd89b1994" name="aa819da1b38830a8849bdf4cdd89b1994"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa819da1b38830a8849bdf4cdd89b1994">&#9670;&#160;</a></span>set_center()</h2>
+<a id="a07388a3bbfdbc6a023b6479b2012c6df" name="a07388a3bbfdbc6a023b6479b2012c6df"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07388a3bbfdbc6a023b6479b2012c6df">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename Out  = double, typename T , typename IDX , typename Ref &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1MedianSizeFactors.html">MedianSizeFactors</a> &amp; scran::MedianSizeFactors::set_center </td>
+          <td class="memname"><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html">Results</a>&lt; Out &gt; scran::MedianSizeFactors::run </td>
           <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>c</em> = <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Defaults.html#af747d883c33f4793ce28b9aade2d2ad6">Defaults::center</a></code></td><td>)</td>
+          <td class="paramtype">const tatami::Matrix&lt; T, IDX &gt; *&#160;</td>
+          <td class="paramname"><em>mat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const Ref *&#160;</td>
+          <td class="paramname"><em>ref</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -368,32 +382,44 @@ template&lt;typename T , typename IDX , typename Out &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">c</td><td>Whether to center the size factors to have a mean of unity. This is usually desirable for interpretation of relative values.</td></tr>
+<p >Compute per-cell size factors against a user-supplied reference profile.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Out</td><td>Numeric type for the size factors. </td></tr>
+    <tr><td class="paramname">T</td><td>Numeric data type of the input matrix. </td></tr>
+    <tr><td class="paramname">IDX</td><td>Integer index type of the input matrix. </td></tr>
+    <tr><td class="paramname">Ref</td><td>Numeric data type of the reference profile.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1MedianSizeFactors.html" title="Compute median-based size factors to handle composition bias.">MedianSizeFactors</a></code> object.</dd></dl>
-<p>For more control over centering, this can be set to <code>false</code> and the resulting size factors can be passed to <code><a class="el" href="classscran_1_1CenterSizeFactors.html" title="Center size factors prior to scaling normalization.">CenterSizeFactors</a></code>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes and columns should be cells. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ref</td><td>Pointer to an array containing the reference expression profile to normalize against. This should be of length equal to the number of rows in <code>mat</code> and should contain non-negative values.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html" title="Result of the size factor calculation.">Results</a></code> containing the size factors for each cell in <code>mat</code>. </dd></dl>
 
 </div>
 </div>
-<a id="a8440bf543257fe771a5db35b0e4a9bbf" name="a8440bf543257fe771a5db35b0e4a9bbf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8440bf543257fe771a5db35b0e4a9bbf">&#9670;&#160;</a></span>set_num_threads()</h2>
+<a id="a1ae3787cccfaf98bba4d473856582893" name="a1ae3787cccfaf98bba4d473856582893"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ae3787cccfaf98bba4d473856582893">&#9670;&#160;</a></span>run_with_mean() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename Out  = double, typename T , typename IDX &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1MedianSizeFactors.html">MedianSizeFactors</a> &amp; scran::MedianSizeFactors::set_num_threads </td>
+          <td class="memname"><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html">Results</a>&lt; Out &gt; scran::MedianSizeFactors::run_with_mean </td>
           <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Defaults.html#a175bd521275c0babb11e548885761700">Defaults::num_threads</a></code></td><td>)</td>
-          <td></td>
+          <td class="paramtype">const tatami::Matrix&lt; T, IDX &gt; *&#160;</td>
+          <td class="paramname"><em>mat</em></td><td>)</td>
+          <td> const</td>
         </tr>
       </table>
   </td>
@@ -402,48 +428,22 @@ template&lt;typename T , typename IDX , typename Out &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+<p >Compute per-cell size factors against an average pseudo-sample constructed from the row means of the input matrix.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Out</td><td>Numeric type for the size factors. </td></tr>
+    <tr><td class="paramname">T</td><td>Numeric data type of the input matrix. </td></tr>
+    <tr><td class="paramname">IDX</td><td>Integer index type of the input matrix.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1MedianSizeFactors.html" title="Compute median-based size factors to handle composition bias.">MedianSizeFactors</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="a5507419988ca1925e8f60bdc99436e51" name="a5507419988ca1925e8f60bdc99436e51"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5507419988ca1925e8f60bdc99436e51">&#9670;&#160;</a></span>set_prior_count()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1MedianSizeFactors.html">MedianSizeFactors</a> &amp; scran::MedianSizeFactors::set_prior_count </td>
-          <td>(</td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>p</em> = <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Defaults.html#a909251588d34d41237a64df1dd85552c">Defaults::prior_count</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">p</td><td>Prior count to use for shrinking median-based size factors towards their library size-based counterparts. Larger values result in more shrinkage, while a value of zero will disable shrinkage altogether.</td></tr>
+    <tr><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes and columns should be cells.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1MedianSizeFactors.html" title="Compute median-based size factors to handle composition bias.">MedianSizeFactors</a></code> object.</dd></dl>
-<p>When using shrinkage, we add a scaled version of the reference profile to each cell before computing the ratios. The scaling of the reference profile varies for each cell and is proportional to the (relative) total count of that cell. This implicitly pushes the median-based size factor towards a value that is proportional to the library size of the cell, given that the median of the ratio of the reference against a scaled version of itself is just the scaling factor, i.e., the library size.</p>
-<p >The amount of shrinkage depends on the magnitude of the reference scaling. The prior count should be interpreted as the number of extra reads from the reference profile that is added to each cell. For example, the default of 10 means that the equivalent of 10 reads are added to each cell, distributed according to the reference profile. Increasing the prior count will increase the strength of the shrinkage as the reference profile has a greater contribution to the ratios. </p>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html" title="Result of the size factor calculation.">Results</a></code> containing the size factors for each cell in <code>mat</code>. </dd></dl>
 
 </div>
 </div>

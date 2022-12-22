@@ -105,24 +105,6 @@ struct scran::AggregateAcrossCells::Results&lt; Sum, Detected &gt;</div><p >Cont
   </dd>
 </dl>
 </div><h2 class="groupheader">Member Data Documentation</h2>
-<a id="adfc4956b7d5dd63cd1176419d56b1643" name="adfc4956b7d5dd63cd1176419d56b1643"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adfc4956b7d5dd63cd1176419d56b1643">&#9670;&#160;</a></span>detected</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Sum , typename Detected &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt;std::vector&lt;Detected&gt; &gt; <a class="el" href="structscran_1_1AggregateAcrossCells_1_1Results.html">scran::AggregateAcrossCells::Results</a>&lt; Sum, Detected &gt;::detected</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Vector of length equal to the number of factor levels. Each inner vector is of length equal to the number of genes. Each entry contains the number of cells in the corresponding level with detected expression for the corresponding gene.</p>
-<p >If <code>computed_detected()</code> was set to <code>false</code>, this vector is empty. </p>
-
-</div>
-</div>
 <a id="ab8c27b2cd404774166ab6cd258823fd2" name="ab8c27b2cd404774166ab6cd258823fd2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab8c27b2cd404774166ab6cd258823fd2">&#9670;&#160;</a></span>sums</h2>
 
@@ -138,6 +120,24 @@ template&lt;typename Sum , typename Detected &gt; </div>
 </div><div class="memdoc">
 <p >Vector of length equal to the number of factor levels. Each inner vector is of length equal to the number of genes. Each entry contains the summed expression across all cells in the corresponding level for the corresponding gene.</p>
 <p >If <code>compute_sums()</code> was set to <code>false</code>, this vector is empty. </p>
+
+</div>
+</div>
+<a id="adfc4956b7d5dd63cd1176419d56b1643" name="adfc4956b7d5dd63cd1176419d56b1643"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adfc4956b7d5dd63cd1176419d56b1643">&#9670;&#160;</a></span>detected</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Sum , typename Detected &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::vector&lt;Detected&gt; &gt; <a class="el" href="structscran_1_1AggregateAcrossCells_1_1Results.html">scran::AggregateAcrossCells::Results</a>&lt; Sum, Detected &gt;::detected</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Vector of length equal to the number of factor levels. Each inner vector is of length equal to the number of genes. Each entry contains the number of cells in the corresponding level with detected expression for the corresponding gene.</p>
+<p >If <code>computed_detected()</code> was set to <code>false</code>, this vector is empty. </p>
 
 </div>
 </div>

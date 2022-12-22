@@ -1,0 +1,10 @@
+<map id="scran/quality_control/ComputeMedianMad.hpp" name="scran/quality_control/ComputeMedianMad.hpp">
+<area shape="rect" id="node1" title="Compute the median and MAD from an array of values." alt="" coords="248,5,417,45"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,93,132,119"/>
+<area shape="rect" id="node3" title=" " alt="" coords="177,167,235,192"/>
+<area shape="rect" id="node4" title=" " alt="" coords="407,167,461,192"/>
+<area shape="rect" id="node5" title=" " alt="" coords="303,93,362,119"/>
+<area shape="rect" id="node6" title=" " alt="" coords="386,93,461,119"/>
+<area shape="rect" id="node7" title=" " alt="" coords="485,93,546,119"/>
+<area shape="rect" id="node8" href="$utils_8hpp_source.html" title=" " alt="" coords="208,93,279,119"/>
+</map>

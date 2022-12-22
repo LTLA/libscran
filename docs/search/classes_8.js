@@ -1,6 +1,8 @@
 var searchData=
 [
-  ['mediansizefactors_0',['MedianSizeFactors',['../classscran_1_1MedianSizeFactors.html',1,'scran']]],
-  ['modelgenevar_1',['ModelGeneVar',['../classscran_1_1ModelGeneVar.html',1,'scran']]],
-  ['multibatchpca_2',['MultiBatchPCA',['../classscran_1_1MultiBatchPCA.html',1,'scran']]]
+  ['pairwiseeffects_0',['PairwiseEffects',['../classscran_1_1PairwiseEffects.html',1,'scran']]],
+  ['percelladtqcmetrics_1',['PerCellAdtQcMetrics',['../classscran_1_1PerCellAdtQcMetrics.html',1,'scran']]],
+  ['percellcrisprqcmetrics_2',['PerCellCrisprQcMetrics',['../classscran_1_1PerCellCrisprQcMetrics.html',1,'scran']]],
+  ['percellqcmetrics_3',['PerCellQcMetrics',['../classscran_1_1PerCellQcMetrics.html',1,'scran']]],
+  ['percellrnaqcmetrics_4',['PerCellRnaQcMetrics',['../classscran_1_1PerCellRnaQcMetrics.html',1,'scran']]]
 ];

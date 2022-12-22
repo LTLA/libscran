@@ -76,6 +76,7 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="structscran_1_1PerCellRnaQcMetrics_1_1Results-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">scran::PerCellRnaQcMetrics::Results Struct Reference</div></div>
@@ -87,6 +88,13 @@ $(function() {
 
 <p><code>#include &lt;<a class="el" href="PerCellRnaQcMetrics_8hpp_source.html">PerCellRnaQcMetrics.hpp</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a155565c0d9a46e3e8411b8e5b98f07e8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html">Buffers</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html#a155565c0d9a46e3e8411b8e5b98f07e8">buffers</a> ()</td></tr>
+<tr class="separator:a155565c0d9a46e3e8411b8e5b98f07e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abaf07886a60339e585b2b40492852e28"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html">Buffers</a>&lt; const double, const int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html#abaf07886a60339e585b2b40492852e28">buffers</a> () const</td></tr>
+<tr class="separator:abaf07886a60339e585b2b40492852e28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:afdfcb6fa78932b05bad3dc7246013e29"><td class="memItemLeft" align="right" valign="top">std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html#afdfcb6fa78932b05bad3dc7246013e29">sums</a></td></tr>
@@ -99,7 +107,76 @@ Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Result store for QC metric calculations. </p>
 <p >Meaningful instances of this object should generally be constructed by calling the <code><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html#afc280ca0d50d07bafca97204aec5d58e">PerCellRnaQcMetrics::run()</a></code> methods. Empty instances can be default-constructed as placeholders. </p>
-</div><h2 class="groupheader">Member Data Documentation</h2>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a155565c0d9a46e3e8411b8e5b98f07e8" name="a155565c0d9a46e3e8411b8e5b98f07e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a155565c0d9a46e3e8411b8e5b98f07e8">&#9670;&#160;</a></span>buffers() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html">Buffers</a> scran::PerCellRnaQcMetrics::Results::buffers </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >We assume that all members have already been allocated enough memory for use with <code><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html#afc280ca0d50d07bafca97204aec5d58e">PerCellRnaQcMetrics::run()</a></code>.</p>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html" title="Buffers for direct storage of the calculated statistics.">Buffers</a></code> object with appropriate pointers to the members of this <code><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html" title="Result store for QC metric calculations.">Results</a></code> instance. </dd></dl>
+
+</div>
+</div>
+<a id="abaf07886a60339e585b2b40492852e28" name="abaf07886a60339e585b2b40492852e28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abaf07886a60339e585b2b40492852e28">&#9670;&#160;</a></span>buffers() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html">Buffers</a>&lt; const double, const int &gt; scran::PerCellRnaQcMetrics::Results::buffers </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts. </p><dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html" title="Buffers for direct storage of the calculated statistics.">Buffers</a></code> object with const pointers to the members of this <code><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html" title="Result store for QC metric calculations.">Results</a></code> instance. </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="afdfcb6fa78932b05bad3dc7246013e29" name="afdfcb6fa78932b05bad3dc7246013e29"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afdfcb6fa78932b05bad3dc7246013e29">&#9670;&#160;</a></span>sums</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;double&gt; scran::PerCellRnaQcMetrics::Results::sums</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Sum of counts for each cell. </p>
+
+</div>
+</div>
 <a id="a8a746bf1b9490de08a6958375ca51de1" name="a8a746bf1b9490de08a6958375ca51de1"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8a746bf1b9490de08a6958375ca51de1">&#9670;&#160;</a></span>detected</h2>
 
@@ -127,21 +204,6 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p >Proportion of counts in each feature subset in each cell. Each inner vector corresponds to a feature subset and is of length equal to the number of cells. </p>
-
-</div>
-</div>
-<a id="afdfcb6fa78932b05bad3dc7246013e29" name="afdfcb6fa78932b05bad3dc7246013e29"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afdfcb6fa78932b05bad3dc7246013e29">&#9670;&#160;</a></span>sums</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt;double&gt; scran::PerCellRnaQcMetrics::Results::sums</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Sum of counts for each cell. </p>
 
 </div>
 </div>

@@ -117,18 +117,19 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a35d65b6f8983b6401d386c15a1c0e315" name="a35d65b6f8983b6401d386c15a1c0e315"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a35d65b6f8983b6401d386c15a1c0e315">&#9670;&#160;</a></span>rotation</h2>
+<a id="a61633ac5a85aafd4a5e79fd3ac6c2b71" name="a61633ac5a85aafd4a5e79fd3ac6c2b71"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61633ac5a85aafd4a5e79fd3ac6c2b71">&#9670;&#160;</a></span>variance_explained</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Eigen::MatrixXd scran::MultiBatchPCA::Results::rotation</td>
+          <td class="memname">Eigen::VectorXd scran::MultiBatchPCA::Results::variance_explained</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Rotation matrix. Each row corresponds to a feature while each column corresponds to a PC. The number of PCs is determined by <code><a class="el" href="classscran_1_1MultiBatchPCA.html#a3fab16457dd9c84958aa1dd6ebe0e6a7">set_rank()</a></code>. If feature filtering was performed, the number of rows is equal to the number of features remaining after filtering. </p>
+<p >Variance explained by each PC. Each entry corresponds to a column in <code>pcs</code> and is in decreasing order.</p>
+<p >Note that the absolute magnitude of the variance is quite difficult to interpret due to the weighting. We suggest dividing by <code>total_variance</code> and working with the proportion of variance explained instead. </p>
 
 </div>
 </div>
@@ -147,19 +148,18 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a61633ac5a85aafd4a5e79fd3ac6c2b71" name="a61633ac5a85aafd4a5e79fd3ac6c2b71"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a61633ac5a85aafd4a5e79fd3ac6c2b71">&#9670;&#160;</a></span>variance_explained</h2>
+<a id="a35d65b6f8983b6401d386c15a1c0e315" name="a35d65b6f8983b6401d386c15a1c0e315"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35d65b6f8983b6401d386c15a1c0e315">&#9670;&#160;</a></span>rotation</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">Eigen::VectorXd scran::MultiBatchPCA::Results::variance_explained</td>
+          <td class="memname">Eigen::MatrixXd scran::MultiBatchPCA::Results::rotation</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Variance explained by each PC. Each entry corresponds to a column in <code>pcs</code> and is in decreasing order.</p>
-<p >Note that the absolute magnitude of the variance is quite difficult to interpret due to the weighting. We suggest dividing by <code>total_variance</code> and working with the proportion of variance explained instead. </p>
+<p >Rotation matrix. Each row corresponds to a feature while each column corresponds to a PC. The number of PCs is determined by <code><a class="el" href="classscran_1_1MultiBatchPCA.html#a3fab16457dd9c84958aa1dd6ebe0e6a7">set_rank()</a></code>. If feature filtering was performed, the number of rows is equal to the number of features remaining after filtering. </p>
 
 </div>
 </div>

@@ -106,6 +106,21 @@ Public Attributes</h2></td></tr>
 <div class="textblock"><p >Result store for QC metric calculations. </p>
 <p >Meaningful instances of this object should generally be constructed by calling the <code><a class="el" href="classscran_1_1PerCellRnaQcMetrics.html#afc280ca0d50d07bafca97204aec5d58e">PerCellRnaQcMetrics::run()</a></code> methods. Empty instances can be default-constructed as placeholders. </p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a58e7c4f82b9dd420a25766e027a812a3" name="a58e7c4f82b9dd420a25766e027a812a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a58e7c4f82b9dd420a25766e027a812a3">&#9670;&#160;</a></span>total</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;double&gt; scran::PerCellQcMetrics::Results::total</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Total count for each cell. Empty if <code><a class="el" href="classscran_1_1PerCellQcMetrics.html#a12db9e5876a7fcc4691ac68dadae2527">PerCellQcMetrics::compute_total</a></code> is false. </p>
+
+</div>
+</div>
 <a id="a81e77868451cd865b0f93e5d37b3d543" name="a81e77868451cd865b0f93e5d37b3d543"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a81e77868451cd865b0f93e5d37b3d543">&#9670;&#160;</a></span>detected</h2>
 
@@ -118,21 +133,6 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p >Number of detected features in each cell. Empty if <code><a class="el" href="classscran_1_1PerCellQcMetrics.html#a7448a2b16b2cdda9f595bbbb09199741">PerCellQcMetrics::compute_detected</a></code> is false. </p>
-
-</div>
-</div>
-<a id="a7808fa46556ba405929ef2299af7b4e6" name="a7808fa46556ba405929ef2299af7b4e6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7808fa46556ba405929ef2299af7b4e6">&#9670;&#160;</a></span>max_count</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt;double&gt; scran::PerCellQcMetrics::Results::max_count</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Maximum count value in each cell. Empty if <code><a class="el" href="classscran_1_1PerCellQcMetrics.html#a0d9583ecebdaad281480c74d09bcaa74">PerCellQcMetrics::compute_max_count</a></code> is false. </p>
 
 </div>
 </div>
@@ -151,18 +151,18 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a8c302144248872ab25696e1f311085fd" name="a8c302144248872ab25696e1f311085fd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8c302144248872ab25696e1f311085fd">&#9670;&#160;</a></span>subset_detected</h2>
+<a id="a7808fa46556ba405929ef2299af7b4e6" name="a7808fa46556ba405929ef2299af7b4e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7808fa46556ba405929ef2299af7b4e6">&#9670;&#160;</a></span>max_count</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::vector&lt;std::vector&lt;int&gt; &gt; scran::PerCellQcMetrics::Results::subset_detected</td>
+          <td class="memname">std::vector&lt;double&gt; scran::PerCellQcMetrics::Results::max_count</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Number of detected features in each feature subset in each cell. Each inner vector corresponds to a feature subset and is of length equal to the number of cells. Empty if there are no feature subsets or if <code><a class="el" href="classscran_1_1PerCellQcMetrics.html#a2fa5e9e13f1f96c821223bba73c08a60">PerCellQcMetrics::compute_subset_detected</a></code> is false. </p>
+<p >Maximum count value in each cell. Empty if <code><a class="el" href="classscran_1_1PerCellQcMetrics.html#a0d9583ecebdaad281480c74d09bcaa74">PerCellQcMetrics::compute_max_count</a></code> is false. </p>
 
 </div>
 </div>
@@ -181,18 +181,18 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a58e7c4f82b9dd420a25766e027a812a3" name="a58e7c4f82b9dd420a25766e027a812a3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a58e7c4f82b9dd420a25766e027a812a3">&#9670;&#160;</a></span>total</h2>
+<a id="a8c302144248872ab25696e1f311085fd" name="a8c302144248872ab25696e1f311085fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8c302144248872ab25696e1f311085fd">&#9670;&#160;</a></span>subset_detected</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::vector&lt;double&gt; scran::PerCellQcMetrics::Results::total</td>
+          <td class="memname">std::vector&lt;std::vector&lt;int&gt; &gt; scran::PerCellQcMetrics::Results::subset_detected</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Total count for each cell. Empty if <code><a class="el" href="classscran_1_1PerCellQcMetrics.html#a12db9e5876a7fcc4691ac68dadae2527">PerCellQcMetrics::compute_total</a></code> is false. </p>
+<p >Number of detected features in each feature subset in each cell. Each inner vector corresponds to a feature subset and is of length equal to the number of cells. Empty if there are no feature subsets or if <code><a class="el" href="classscran_1_1PerCellQcMetrics.html#a2fa5e9e13f1f96c821223bba73c08a60">PerCellQcMetrics::compute_subset_detected</a></code> is false. </p>
 
 </div>
 </div>

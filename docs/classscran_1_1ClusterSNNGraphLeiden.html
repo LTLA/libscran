@@ -118,8 +118,8 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p >Leiden clustering on a shared nearest-neighbor graph. </p>
 <p >This applies Leiden clustering on a shared nearest neighbor graph. See <a href="https://igraph.org/c/doc/igraph-Community.html#igraph_community_leiden">here</a> for more details on the Leiden algorithm. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a2cca663637d4e004ba7f86de974bb89e" name="a2cca663637d4e004ba7f86de974bb89e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2cca663637d4e004ba7f86de974bb89e">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
+<a id="a63d442391967db7e1be9fbdbdfe5b735" name="a63d442391967db7e1be9fbdbdfe5b735"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a63d442391967db7e1be9fbdbdfe5b735">&#9670;&#160;</a></span>set_seed()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -128,11 +128,11 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Results.html">Results</a> scran::ClusterSNNGraphLeiden::run </td>
+          <td class="memname"><a class="el" href="classscran_1_1ClusterSNNGraphLeiden.html">ClusterSNNGraphLeiden</a> &amp; scran::ClusterSNNGraphLeiden::set_seed </td>
           <td>(</td>
-          <td class="paramtype">const BuildSNNGraph::Results &amp;&#160;</td>
-          <td class="paramname"><em>store</em></td><td>)</td>
-          <td> const</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#a9f83e589fd30c36c30c5ee5a4e9ccf8e">Defaults::seed</a></code></td><td>)</td>
+          <td></td>
         </tr>
       </table>
   </td>
@@ -141,19 +141,18 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Run the Leiden community detection algorithm on a shared nearest-neighbor graph constructed from <code>knncolle::Base</code> object.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">store</td><td>SNN graph built by <code>BuildSNNGraph::run()</code>.</td></tr>
+    <tr><td class="paramname">s</td><td>Seed for the default <b>igraph</b> random number generator.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Results.html" title="Result of the igraph leiden community detection algorithm.">Results</a></code> object containing the clustering results for all cells. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ClusterSNNGraphLeiden.html" title="Leiden clustering on a shared nearest-neighbor graph.">ClusterSNNGraphLeiden</a></code> object. </dd></dl>
 
 </div>
 </div>
-<a id="a32d29efe0e0008fd530f653ccfcbcf45" name="a32d29efe0e0008fd530f653ccfcbcf45"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a32d29efe0e0008fd530f653ccfcbcf45">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
+<a id="a620418116cb13d7d020f0e5eb1f8c011" name="a620418116cb13d7d020f0e5eb1f8c011"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a620418116cb13d7d020f0e5eb1f8c011">&#9670;&#160;</a></span>set_resolution()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -162,21 +161,11 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Results.html">Results</a> scran::ClusterSNNGraphLeiden::run </td>
+          <td class="memname"><a class="el" href="classscran_1_1ClusterSNNGraphLeiden.html">ClusterSNNGraphLeiden</a> &amp; scran::ClusterSNNGraphLeiden::set_resolution </td>
           <td>(</td>
-          <td class="paramtype">const igraph::Graph &amp;&#160;</td>
-          <td class="paramname"><em>graph</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>r</em> = <code><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#a235d41d736b35e40d0162d3eff856361">Defaults::resolution</a></code></td><td>)</td>
           <td></td>
-          <td class="paramtype">const igraph_real_t *&#160;</td>
-          <td class="paramname"><em>weights</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -185,15 +174,13 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Run the Leiden community detection algorithm on a pre-constructed shared nearest-neighbor graph as a <code>Graph</code> object.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">graph</td><td>An existing <code>igraph::Graph</code> object, typically built by <code>BuildSNNGraph::Results::to_igraph()</code>. </td></tr>
-    <tr><td class="paramname">weights</td><td>Pointer to an array of weights of length equal to the number of edges in <code>graph</code>.</td></tr>
+    <tr><td class="paramname">r</td><td>Resolution of the clustering. Larger values result in more fine-grained communities.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Results.html" title="Result of the igraph leiden community detection algorithm.">Results</a></code> object containing the clustering results for all cells. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ClusterSNNGraphLeiden.html" title="Leiden clustering on a shared nearest-neighbor graph.">ClusterSNNGraphLeiden</a></code> object. </dd></dl>
 
 </div>
 </div>
@@ -297,8 +284,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a620418116cb13d7d020f0e5eb1f8c011" name="a620418116cb13d7d020f0e5eb1f8c011"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a620418116cb13d7d020f0e5eb1f8c011">&#9670;&#160;</a></span>set_resolution()</h2>
+<a id="a2cca663637d4e004ba7f86de974bb89e" name="a2cca663637d4e004ba7f86de974bb89e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2cca663637d4e004ba7f86de974bb89e">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -307,11 +294,11 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ClusterSNNGraphLeiden.html">ClusterSNNGraphLeiden</a> &amp; scran::ClusterSNNGraphLeiden::set_resolution </td>
+          <td class="memname"><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Results.html">Results</a> scran::ClusterSNNGraphLeiden::run </td>
           <td>(</td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>r</em> = <code><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#a235d41d736b35e40d0162d3eff856361">Defaults::resolution</a></code></td><td>)</td>
-          <td></td>
+          <td class="paramtype">const BuildSNNGraph::Results &amp;&#160;</td>
+          <td class="paramname"><em>store</em></td><td>)</td>
+          <td> const</td>
         </tr>
       </table>
   </td>
@@ -320,18 +307,19 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p >Run the Leiden community detection algorithm on a shared nearest-neighbor graph constructed from <code>knncolle::Base</code> object.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">r</td><td>Resolution of the clustering. Larger values result in more fine-grained communities.</td></tr>
+    <tr><td class="paramname">store</td><td>SNN graph built by <code>BuildSNNGraph::run()</code>.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ClusterSNNGraphLeiden.html" title="Leiden clustering on a shared nearest-neighbor graph.">ClusterSNNGraphLeiden</a></code> object. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Results.html" title="Result of the igraph leiden community detection algorithm.">Results</a></code> object containing the clustering results for all cells. </dd></dl>
 
 </div>
 </div>
-<a id="a63d442391967db7e1be9fbdbdfe5b735" name="a63d442391967db7e1be9fbdbdfe5b735"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a63d442391967db7e1be9fbdbdfe5b735">&#9670;&#160;</a></span>set_seed()</h2>
+<a id="a32d29efe0e0008fd530f653ccfcbcf45" name="a32d29efe0e0008fd530f653ccfcbcf45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32d29efe0e0008fd530f653ccfcbcf45">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -340,11 +328,21 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ClusterSNNGraphLeiden.html">ClusterSNNGraphLeiden</a> &amp; scran::ClusterSNNGraphLeiden::set_seed </td>
+          <td class="memname"><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Results.html">Results</a> scran::ClusterSNNGraphLeiden::run </td>
           <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#a9f83e589fd30c36c30c5ee5a4e9ccf8e">Defaults::seed</a></code></td><td>)</td>
+          <td class="paramtype">const igraph::Graph &amp;&#160;</td>
+          <td class="paramname"><em>graph</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const igraph_real_t *&#160;</td>
+          <td class="paramname"><em>weights</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -353,13 +351,15 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+<p >Run the Leiden community detection algorithm on a pre-constructed shared nearest-neighbor graph as a <code>Graph</code> object.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">s</td><td>Seed for the default <b>igraph</b> random number generator.</td></tr>
+    <tr><td class="paramname">graph</td><td>An existing <code>igraph::Graph</code> object, typically built by <code>BuildSNNGraph::Results::to_igraph()</code>. </td></tr>
+    <tr><td class="paramname">weights</td><td>Pointer to an array of weights of length equal to the number of edges in <code>graph</code>.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ClusterSNNGraphLeiden.html" title="Leiden clustering on a shared nearest-neighbor graph.">ClusterSNNGraphLeiden</a></code> object. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ClusterSNNGraphLeiden_1_1Results.html" title="Result of the igraph leiden community detection algorithm.">Results</a></code> object containing the clustering results for all cells. </dd></dl>
 
 </div>
 </div>

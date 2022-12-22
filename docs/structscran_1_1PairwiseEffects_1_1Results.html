@@ -118,23 +118,6 @@ struct scran::PairwiseEffects::Results&lt; Stat &gt;</div><p >Pairwise effect si
 </dl>
 <p>For any given effect size, the pairwise statistics are stored in a 3-dimensional array. The first dimension is the fastest changing, is of length equal to the number of groups, and represents the first group. The second dimension is the next fastest changing, is also of length equal to the number of groups, and represents the second group. The third dimension is the slowest changing, is of length equal to the number of genes, and represents the gene. Thus, an entry $(i, j, k)$ represents the effect size of gene $k$ for group $i$ against group $j$. </p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
-<a id="aa21f4ebee6ae198df45edb489912a624" name="aa21f4ebee6ae198df45edb489912a624"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa21f4ebee6ae198df45edb489912a624">&#9670;&#160;</a></span>auc</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Stat &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt;Stat&gt; <a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html">scran::PairwiseEffects::Results</a>&lt; Stat &gt;::auc</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Vector of pairwise AUCs, to be interpreted as a 3-dimensional array. </p>
-
-</div>
-</div>
 <a id="a9d3790e1cd99eb3e0eee4e1bf3d8646f" name="a9d3790e1cd99eb3e0eee4e1bf3d8646f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9d3790e1cd99eb3e0eee4e1bf3d8646f">&#9670;&#160;</a></span>cohen</h2>
 
@@ -152,8 +135,8 @@ template&lt;typename Stat &gt; </div>
 
 </div>
 </div>
-<a id="a6d60cf2b65149ebb58f4a745728830ba" name="a6d60cf2b65149ebb58f4a745728830ba"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6d60cf2b65149ebb58f4a745728830ba">&#9670;&#160;</a></span>delta_detected</h2>
+<a id="aa21f4ebee6ae198df45edb489912a624" name="aa21f4ebee6ae198df45edb489912a624"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa21f4ebee6ae198df45edb489912a624">&#9670;&#160;</a></span>auc</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -161,11 +144,11 @@ template&lt;typename Stat &gt; </div>
 template&lt;typename Stat &gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">std::vector&lt;Stat&gt; <a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html">scran::PairwiseEffects::Results</a>&lt; Stat &gt;::delta_detected</td>
+          <td class="memname">std::vector&lt;Stat&gt; <a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html">scran::PairwiseEffects::Results</a>&lt; Stat &gt;::auc</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Vector of pairwise delta-detected, to be interpreted as a 3-dimensional array. </p>
+<p >Vector of pairwise AUCs, to be interpreted as a 3-dimensional array. </p>
 
 </div>
 </div>
@@ -183,6 +166,23 @@ template&lt;typename Stat &gt; </div>
       </table>
 </div><div class="memdoc">
 <p >Vector of pairwise log-fold changes, to be interpreted as a 3-dimensional array. </p>
+
+</div>
+</div>
+<a id="a6d60cf2b65149ebb58f4a745728830ba" name="a6d60cf2b65149ebb58f4a745728830ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6d60cf2b65149ebb58f4a745728830ba">&#9670;&#160;</a></span>delta_detected</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Stat &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;Stat&gt; <a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html">scran::PairwiseEffects::Results</a>&lt; Stat &gt;::delta_detected</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Vector of pairwise delta-detected, to be interpreted as a 3-dimensional array. </p>
 
 </div>
 </div>

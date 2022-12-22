@@ -89,9 +89,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a2fa3f1f3209d4e43ec807548e7aabf9f"><td class="memItemLeft" align="right" valign="top">Float *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Buffers.html#a2fa3f1f3209d4e43ec807548e7aabf9f">sums</a> = NULL</td></tr>
+<tr class="memitem:a2fa3f1f3209d4e43ec807548e7aabf9f"><td class="memItemLeft" align="right" valign="top">Float *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Buffers.html#a2fa3f1f3209d4e43ec807548e7aabf9f">sums</a></td></tr>
 <tr class="separator:a2fa3f1f3209d4e43ec807548e7aabf9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3bb5ca3d6006c8fde368dcd9d17b8d48"><td class="memItemLeft" align="right" valign="top">Integer *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Buffers.html#a3bb5ca3d6006c8fde368dcd9d17b8d48">detected</a> = NULL</td></tr>
+<tr class="memitem:a3bb5ca3d6006c8fde368dcd9d17b8d48"><td class="memItemLeft" align="right" valign="top">Integer *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Buffers.html#a3bb5ca3d6006c8fde368dcd9d17b8d48">detected</a></td></tr>
 <tr class="separator:a3bb5ca3d6006c8fde368dcd9d17b8d48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab0d96fac200af9a55efbcdb6fdbd712b"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Float * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Buffers.html#ab0d96fac200af9a55efbcdb6fdbd712b">subset_totals</a></td></tr>
 <tr class="separator:ab0d96fac200af9a55efbcdb6fdbd712b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -107,6 +107,23 @@ struct scran::PerCellAdtQcMetrics::Buffers&lt; Float, Integer &gt;</div><p ><a c
   </dd>
 </dl>
 </div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a2fa3f1f3209d4e43ec807548e7aabf9f" name="a2fa3f1f3209d4e43ec807548e7aabf9f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2fa3f1f3209d4e43ec807548e7aabf9f">&#9670;&#160;</a></span>sums</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Float  = double, typename Integer  = int&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">Float* <a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Buffers.html">scran::PerCellAdtQcMetrics::Buffers</a>&lt; Float, Integer &gt;::sums</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Pointer to an array of length equal to the number of cells, see <code><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Results.html#a85754ae704f8983d005b158b9c9f255c">Results::sums</a></code>. Note that this should not be <code>NULL</code>. </p>
+
+</div>
+</div>
 <a id="a3bb5ca3d6006c8fde368dcd9d17b8d48" name="a3bb5ca3d6006c8fde368dcd9d17b8d48"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3bb5ca3d6006c8fde368dcd9d17b8d48">&#9670;&#160;</a></span>detected</h2>
 
@@ -116,11 +133,11 @@ struct scran::PerCellAdtQcMetrics::Buffers&lt; Float, Integer &gt;</div><p ><a c
 template&lt;typename Float  = double, typename Integer  = int&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">Integer* <a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Buffers.html">scran::PerCellAdtQcMetrics::Buffers</a>&lt; Float, Integer &gt;::detected = NULL</td>
+          <td class="memname">Integer* <a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Buffers.html">scran::PerCellAdtQcMetrics::Buffers</a>&lt; Float, Integer &gt;::detected</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Pointer to an array of length equal to the number of cells, see <code><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Results.html#aa44a8b1b789a84882a99bd0fbe96cf00">Results::detected</a></code>. Set to <code>NULL</code> to skip this calculation. </p>
+<p >Pointer to an array of length equal to the number of cells, see <code><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Results.html#aa44a8b1b789a84882a99bd0fbe96cf00">Results::detected</a></code>. Note that this should not be <code>NULL</code>. </p>
 
 </div>
 </div>
@@ -137,24 +154,7 @@ template&lt;typename Float  = double, typename Integer  = int&gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p >Vector of pointers of length equal to the number of feature subsets. Each pointer should be to aan array of length equal to the number of cells, see <code><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Results.html#a05e3b68bf0e62febef0030cab6db681a">Results::subset_totals</a></code>. Set any to <code>NULL</code> to skip this calculation for that subset. </p>
-
-</div>
-</div>
-<a id="a2fa3f1f3209d4e43ec807548e7aabf9f" name="a2fa3f1f3209d4e43ec807548e7aabf9f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2fa3f1f3209d4e43ec807548e7aabf9f">&#9670;&#160;</a></span>sums</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Float  = double, typename Integer  = int&gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">Float* <a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Buffers.html">scran::PerCellAdtQcMetrics::Buffers</a>&lt; Float, Integer &gt;::sums = NULL</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Pointer to an array of length equal to the number of cells, see <code><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Results.html#a85754ae704f8983d005b158b9c9f255c">Results::sums</a></code>. Set to <code>NULL</code> to skip this calculation. </p>
+<p >Vector of pointers of length equal to the number of feature subsets. Each pointer should be to an array of length equal to the number of cells, see <code><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Results.html#a05e3b68bf0e62febef0030cab6db681a">Results::subset_totals</a></code>. </p>
 
 </div>
 </div>

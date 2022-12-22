@@ -1,0 +1,11 @@
+<map id="scran/quality_control/ChooseOutlierFilters.hpp" name="scran/quality_control/ChooseOutlierFilters.hpp">
+<area shape="rect" id="node1" title="Define outlier filters using a MAD&#45;based approach." alt="" coords="349,5,517,45"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="25,167,152,192"/>
+<area shape="rect" id="node3" title=" " alt="" coords="161,240,219,265"/>
+<area shape="rect" id="node4" title=" " alt="" coords="471,240,525,265"/>
+<area shape="rect" id="node5" title=" " alt="" coords="558,167,617,192"/>
+<area shape="rect" id="node6" href="$utils_8hpp_source.html" title=" " alt="" coords="463,167,533,192"/>
+<area shape="rect" id="node7" href="$ComputeMedianMad_8hpp.html" title="Compute the median and MAD from an array of values." alt="" coords="279,93,445,119"/>
+<area shape="rect" id="node8" title=" " alt="" coords="227,167,302,192"/>
+<area shape="rect" id="node9" title=" " alt="" coords="326,167,387,192"/>
+</map>

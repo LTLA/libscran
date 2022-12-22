@@ -125,6 +125,278 @@ Static Public Member Functions</h2></td></tr>
 <p >This class implements a scaling approach to equalize noise across embeddings prior to concatenation. We compute the median distance to the $k$-th nearest neighbor in each embedding; this is used as a proxy for the noise within a subpopulation containing at least $k$ cells. We then compute a scaling factor as the ratio of the medians for a "target" embedding compared to a "reference" embedding. The idea is to scale the target embedding by this factor before concatenation of matrices.</p>
 <p >This approach aims to remove differences in the magnitude of noise while preserving genuine differences in biological signal. Embedding-specific subpopulations are preserved in the concatenation, provided that the difference between subpopulations is greater than that within subpopulations. By contrast, a naive scaling based on the total variance would penalize embeddings with strong biological heterogeneity. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="acf21fb0b11f6a6f3f0c250c3b6fb4cb5" name="acf21fb0b11f6a6f3f0c250c3b6fb4cb5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf21fb0b11f6a6f3f0c250c3b6fb4cb5">&#9670;&#160;</a></span>set_neighbors()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScaleByNeighbors.html">ScaleByNeighbors</a> &amp; scran::ScaleByNeighbors::set_neighbors </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1ScaleByNeighbors_1_1Defaults.html#ac329e6e26484712b7d8fbbb46d47ae8d">Defaults::neighbors</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Number of neighbors used in the nearest neighbor search. This can be interpreted as the minimum size of each subpopulation.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScaleByNeighbors.html" title="Scale multi-modal embeddings to adjust for differences in variance.">ScaleByNeighbors</a></code> instance. </dd></dl>
+
+</div>
+</div>
+<a id="aa3847a86a6011def45566c13c633ee04" name="aa3847a86a6011def45566c13c633ee04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa3847a86a6011def45566c13c633ee04">&#9670;&#160;</a></span>set_approximate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScaleByNeighbors.html">ScaleByNeighbors</a> &amp; scran::ScaleByNeighbors::set_approximate </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>a</em> = <code><a class="el" href="structscran_1_1ScaleByNeighbors_1_1Defaults.html#a8659f7467c8c29d61c1317957e1b20b6">Defaults::approximate</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>Whether to perform an approximate neighbor search.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScaleByNeighbors.html" title="Scale multi-modal embeddings to adjust for differences in variance.">ScaleByNeighbors</a></code> instance.</dd></dl>
+<p>This parameter only has an effect when an array is passed to <code>run()</code>, otherwise the search uses the algorithm specified by the <b>knncolle</b> class. </p>
+
+</div>
+</div>
+<a id="a35f5e00b03d7d227b67e627b782b7193" name="a35f5e00b03d7d227b67e627b782b7193"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35f5e00b03d7d227b67e627b782b7193">&#9670;&#160;</a></span>set_num_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScaleByNeighbors.html">ScaleByNeighbors</a> &amp; scran::ScaleByNeighbors::set_num_threads </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1ScaleByNeighbors_1_1Defaults.html#a4aac6f0569099d41a6e51ffc9fb23064">Defaults::num_threads</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScaleByNeighbors.html" title="Scale multi-modal embeddings to adjust for differences in variance.">ScaleByNeighbors</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a61fd690cbc88b65016cef7fe4616a085" name="a61fd690cbc88b65016cef7fe4616a085"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61fd690cbc88b65016cef7fe4616a085">&#9670;&#160;</a></span>compute_distance() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::pair&lt; double, double &gt; scran::ScaleByNeighbors::compute_distance </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>ndim</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>ncells</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *&#160;</td>
+          <td class="paramname"><em>data</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">ndim</td><td>Number of dimensions in the embedding. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">ncells</td><td>Number of cells in the embedding. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">data</td><td>Pointer to an array containing the embedding matrix. This should be stored in column-major layout where each row is a dimension and each column is a cell.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pair containing the median distance to the $k$-th nearest neighbor (first) and the root-mean-squared distance across all cells (second). These values can be used in <code><a class="el" href="classscran_1_1ScaleByNeighbors.html#a0c63ae4793732b14ae902bc165e3c968">compute_scale()</a></code>. </dd></dl>
+
+</div>
+</div>
+<a id="a787ad5a20e61bd9ac930242840f72448" name="a787ad5a20e61bd9ac930242840f72448"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a787ad5a20e61bd9ac930242840f72448">&#9670;&#160;</a></span>compute_distance() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Search &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::pair&lt; double, double &gt; scran::ScaleByNeighbors::compute_distance </td>
+          <td>(</td>
+          <td class="paramtype">const Search *&#160;</td>
+          <td class="paramname"><em>search</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Search</td><td>Search index class, typically a <code>knncolle::Base</code> subclass. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">search</td><td>Search index for the embedding.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pair containing the median distance to the $k$-th nearest neighbor (first) and the root-mean-squared distance across all cells (second). These values can be used in <code><a class="el" href="classscran_1_1ScaleByNeighbors.html#a0c63ae4793732b14ae902bc165e3c968">compute_scale()</a></code>. </dd></dl>
+
+</div>
+</div>
+<a id="a0c63ae4793732b14ae902bc165e3c968" name="a0c63ae4793732b14ae902bc165e3c968"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c63ae4793732b14ae902bc165e3c968">&#9670;&#160;</a></span>compute_scale() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static std::vector&lt; double &gt; scran::ScaleByNeighbors::compute_scale </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::pair&lt; double, double &gt; &gt; &amp;&#160;</td>
+          <td class="paramname"><em>distances</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Compute the scaling factors for a group of embeddings, given the neighbor distances computed by <code><a class="el" href="classscran_1_1ScaleByNeighbors.html#a61fd690cbc88b65016cef7fe4616a085">compute_distance()</a></code>. This aims to scale each embedding so that the within-population variances are equal across embeddings. The "reference" embedding is defined as the first embedding with a non-zero RMSD; other than this requirement, the exact choice of reference has no actual impact on the relative values of the scaling factors.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">distances</td><td>Vector of distances for embeddings, as computed by <code><a class="el" href="classscran_1_1ScaleByNeighbors.html#a0c63ae4793732b14ae902bc165e3c968">compute_scale()</a></code> on each embedding.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Vector of scaling factors of length equal to that of <code>distances</code>, to be applied to each embedding. </dd></dl>
+
+</div>
+</div>
+<a id="a257b5d2f53b85a7769110c205d101be8" name="a257b5d2f53b85a7769110c205d101be8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a257b5d2f53b85a7769110c205d101be8">&#9670;&#160;</a></span>compute_scale() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static double scran::ScaleByNeighbors::compute_scale </td>
+          <td>(</td>
+          <td class="paramtype">const std::pair&lt; double, double &gt; &amp;&#160;</td>
+          <td class="paramname"><em>ref</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::pair&lt; double, double &gt; &amp;&#160;</td>
+          <td class="paramname"><em>target</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Compute the scaling factor to be applied to a target embedding relative to a reference. This aims to scale the target so that the within-population variance is equal to that of the reference.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ref</td><td>Output of <code><a class="el" href="classscran_1_1ScaleByNeighbors.html#a61fd690cbc88b65016cef7fe4616a085">compute_distance()</a></code> for the reference embedding. The first value contains the median distance while the second value contains the RMSD. </td></tr>
+    <tr><td class="paramname">target</td><td>Output of <code><a class="el" href="classscran_1_1ScaleByNeighbors.html#a61fd690cbc88b65016cef7fe4616a085">compute_distance()</a></code> for the target embedding.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A scaling factor to apply to the target embedding. Scaling all values in the target matrix by the factor will equalize the magnitude of the noise to that of the reference embedding.</dd></dl>
+<p>If either of the median distances is zero, this function automatically switches to the root-mean-square-distance to the $k$-th neighbor. The scaling factor is then defined as the ratio of the RMSDs between embeddings. If the reference RMSDs is zero, this function will return zero; if the target RMSD is zero, this function will return positive infinity. </p>
+
+</div>
+</div>
 <a id="ab2457f764f63b1a3874257b7dca97478" name="ab2457f764f63b1a3874257b7dca97478"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab2457f764f63b1a3874257b7dca97478">&#9670;&#160;</a></span>combine_scaled_embeddings()</h2>
 
@@ -196,278 +468,6 @@ template&lt;typename Embed &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd><code>output</code> is filled with the combined embeddings in column-major format. Each row corresponds to a dimension while each column corresponds to a cell. </dd></dl>
-
-</div>
-</div>
-<a id="a787ad5a20e61bd9ac930242840f72448" name="a787ad5a20e61bd9ac930242840f72448"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a787ad5a20e61bd9ac930242840f72448">&#9670;&#160;</a></span>compute_distance() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;class Search &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::pair&lt; double, double &gt; scran::ScaleByNeighbors::compute_distance </td>
-          <td>(</td>
-          <td class="paramtype">const Search *&#160;</td>
-          <td class="paramname"><em>search</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">Search</td><td>Search index class, typically a <code>knncolle::Base</code> subclass. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">search</td><td>Search index for the embedding.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Pair containing the median distance to the $k$-th nearest neighbor (first) and the root-mean-squared distance across all cells (second). These values can be used in <code><a class="el" href="classscran_1_1ScaleByNeighbors.html#a0c63ae4793732b14ae902bc165e3c968">compute_scale()</a></code>. </dd></dl>
-
-</div>
-</div>
-<a id="a61fd690cbc88b65016cef7fe4616a085" name="a61fd690cbc88b65016cef7fe4616a085"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a61fd690cbc88b65016cef7fe4616a085">&#9670;&#160;</a></span>compute_distance() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::pair&lt; double, double &gt; scran::ScaleByNeighbors::compute_distance </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>ndim</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>ncells</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const double *&#160;</td>
-          <td class="paramname"><em>data</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">ndim</td><td>Number of dimensions in the embedding. </td></tr>
-    <tr><td class="paramdir"></td><td class="paramname">ncells</td><td>Number of cells in the embedding. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">data</td><td>Pointer to an array containing the embedding matrix. This should be stored in column-major layout where each row is a dimension and each column is a cell.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Pair containing the median distance to the $k$-th nearest neighbor (first) and the root-mean-squared distance across all cells (second). These values can be used in <code><a class="el" href="classscran_1_1ScaleByNeighbors.html#a0c63ae4793732b14ae902bc165e3c968">compute_scale()</a></code>. </dd></dl>
-
-</div>
-</div>
-<a id="a257b5d2f53b85a7769110c205d101be8" name="a257b5d2f53b85a7769110c205d101be8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a257b5d2f53b85a7769110c205d101be8">&#9670;&#160;</a></span>compute_scale() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static double scran::ScaleByNeighbors::compute_scale </td>
-          <td>(</td>
-          <td class="paramtype">const std::pair&lt; double, double &gt; &amp;&#160;</td>
-          <td class="paramname"><em>ref</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const std::pair&lt; double, double &gt; &amp;&#160;</td>
-          <td class="paramname"><em>target</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Compute the scaling factor to be applied to a target embedding relative to a reference. This aims to scale the target so that the within-population variance is equal to that of the reference.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">ref</td><td>Output of <code><a class="el" href="classscran_1_1ScaleByNeighbors.html#a61fd690cbc88b65016cef7fe4616a085">compute_distance()</a></code> for the reference embedding. The first value contains the median distance while the second value contains the RMSD. </td></tr>
-    <tr><td class="paramname">target</td><td>Output of <code><a class="el" href="classscran_1_1ScaleByNeighbors.html#a61fd690cbc88b65016cef7fe4616a085">compute_distance()</a></code> for the target embedding.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A scaling factor to apply to the target embedding. Scaling all values in the target matrix by the factor will equalize the magnitude of the noise to that of the reference embedding.</dd></dl>
-<p>If either of the median distances is zero, this function automatically switches to the root-mean-square-distance to the $k$-th neighbor. The scaling factor is then defined as the ratio of the RMSDs between embeddings. If the reference RMSDs is zero, this function will return zero; if the target RMSD is zero, this function will return positive infinity. </p>
-
-</div>
-</div>
-<a id="a0c63ae4793732b14ae902bc165e3c968" name="a0c63ae4793732b14ae902bc165e3c968"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0c63ae4793732b14ae902bc165e3c968">&#9670;&#160;</a></span>compute_scale() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static std::vector&lt; double &gt; scran::ScaleByNeighbors::compute_scale </td>
-          <td>(</td>
-          <td class="paramtype">const std::vector&lt; std::pair&lt; double, double &gt; &gt; &amp;&#160;</td>
-          <td class="paramname"><em>distances</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Compute the scaling factors for a group of embeddings, given the neighbor distances computed by <code><a class="el" href="classscran_1_1ScaleByNeighbors.html#a61fd690cbc88b65016cef7fe4616a085">compute_distance()</a></code>. This aims to scale each embedding so that the within-population variances are equal across embeddings. The "reference" embedding is defined as the first embedding with a non-zero RMSD; other than this requirement, the exact choice of reference has no actual impact on the relative values of the scaling factors.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">distances</td><td>Vector of distances for embeddings, as computed by <code><a class="el" href="classscran_1_1ScaleByNeighbors.html#a0c63ae4793732b14ae902bc165e3c968">compute_scale()</a></code> on each embedding.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Vector of scaling factors of length equal to that of <code>distances</code>, to be applied to each embedding. </dd></dl>
-
-</div>
-</div>
-<a id="aa3847a86a6011def45566c13c633ee04" name="aa3847a86a6011def45566c13c633ee04"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa3847a86a6011def45566c13c633ee04">&#9670;&#160;</a></span>set_approximate()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScaleByNeighbors.html">ScaleByNeighbors</a> &amp; scran::ScaleByNeighbors::set_approximate </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>a</em> = <code><a class="el" href="structscran_1_1ScaleByNeighbors_1_1Defaults.html#a8659f7467c8c29d61c1317957e1b20b6">Defaults::approximate</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">a</td><td>Whether to perform an approximate neighbor search.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScaleByNeighbors.html" title="Scale multi-modal embeddings to adjust for differences in variance.">ScaleByNeighbors</a></code> instance.</dd></dl>
-<p>This parameter only has an effect when an array is passed to <code>run()</code>, otherwise the search uses the algorithm specified by the <b>knncolle</b> class. </p>
-
-</div>
-</div>
-<a id="acf21fb0b11f6a6f3f0c250c3b6fb4cb5" name="acf21fb0b11f6a6f3f0c250c3b6fb4cb5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acf21fb0b11f6a6f3f0c250c3b6fb4cb5">&#9670;&#160;</a></span>set_neighbors()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScaleByNeighbors.html">ScaleByNeighbors</a> &amp; scran::ScaleByNeighbors::set_neighbors </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1ScaleByNeighbors_1_1Defaults.html#ac329e6e26484712b7d8fbbb46d47ae8d">Defaults::neighbors</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">n</td><td>Number of neighbors used in the nearest neighbor search. This can be interpreted as the minimum size of each subpopulation.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScaleByNeighbors.html" title="Scale multi-modal embeddings to adjust for differences in variance.">ScaleByNeighbors</a></code> instance. </dd></dl>
-
-</div>
-</div>
-<a id="a35f5e00b03d7d227b67e627b782b7193" name="a35f5e00b03d7d227b67e627b782b7193"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a35f5e00b03d7d227b67e627b782b7193">&#9670;&#160;</a></span>set_num_threads()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScaleByNeighbors.html">ScaleByNeighbors</a> &amp; scran::ScaleByNeighbors::set_num_threads </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1ScaleByNeighbors_1_1Defaults.html#a4aac6f0569099d41a6e51ffc9fb23064">Defaults::num_threads</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScaleByNeighbors.html" title="Scale multi-modal embeddings to adjust for differences in variance.">ScaleByNeighbors</a></code> object. </dd></dl>
 
 </div>
 </div>

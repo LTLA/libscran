@@ -112,6 +112,72 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p >Multi-level clustering on a shared nearest-neighbor graph. </p>
 <p >This applies multi-level (i.e., "Louvain") clustering on a shared nearest neighbor graph. See <a href="https://igraph.org/c/doc/igraph-Community.html#igraph_community_multilevel">here</a> for more details on the multi-level algorithm. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="adf87b496fe1a83e05412c2b530625247" name="adf87b496fe1a83e05412c2b530625247"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf87b496fe1a83e05412c2b530625247">&#9670;&#160;</a></span>set_seed()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ClusterSNNGraphMultiLevel.html">ClusterSNNGraphMultiLevel</a> &amp; scran::ClusterSNNGraphMultiLevel::set_seed </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1ClusterSNNGraphMultiLevel_1_1Defaults.html#ad3584684d404d382240a908bd88df606">Defaults::seed</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>Seed for the default <b>igraph</b> random number generator.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ClusterSNNGraphMultiLevel.html" title="Multi-level clustering on a shared nearest-neighbor graph.">ClusterSNNGraphMultiLevel</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="ad8f5902012b6ee4a950123eaeee739e8" name="ad8f5902012b6ee4a950123eaeee739e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad8f5902012b6ee4a950123eaeee739e8">&#9670;&#160;</a></span>set_resolution()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ClusterSNNGraphMultiLevel.html">ClusterSNNGraphMultiLevel</a> &amp; scran::ClusterSNNGraphMultiLevel::set_resolution </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>r</em> = <code><a class="el" href="structscran_1_1ClusterSNNGraphMultiLevel_1_1Defaults.html#ac9eb6ed103b706b87b81050ac6ad4cc1">Defaults::resolution</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">r</td><td>Resolution of the clustering, must be non-negative. Lower values favor fewer, larger communities; higher values favor more, smaller communities.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ClusterSNNGraphMultiLevel.html" title="Multi-level clustering on a shared nearest-neighbor graph.">ClusterSNNGraphMultiLevel</a></code> object. </dd></dl>
+
+</div>
+</div>
 <a id="a7a6cce2bd5887f847dc4ae008334f8ed" name="a7a6cce2bd5887f847dc4ae008334f8ed"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7a6cce2bd5887f847dc4ae008334f8ed">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
 
@@ -188,72 +254,6 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ClusterSNNGraphMultiLevel_1_1Results.html" title="Result of the igraph multi-level community detection algorithm.">Results</a></code> object containing the clustering results for all cells. </dd></dl>
-
-</div>
-</div>
-<a id="ad8f5902012b6ee4a950123eaeee739e8" name="ad8f5902012b6ee4a950123eaeee739e8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad8f5902012b6ee4a950123eaeee739e8">&#9670;&#160;</a></span>set_resolution()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ClusterSNNGraphMultiLevel.html">ClusterSNNGraphMultiLevel</a> &amp; scran::ClusterSNNGraphMultiLevel::set_resolution </td>
-          <td>(</td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>r</em> = <code><a class="el" href="structscran_1_1ClusterSNNGraphMultiLevel_1_1Defaults.html#ac9eb6ed103b706b87b81050ac6ad4cc1">Defaults::resolution</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">r</td><td>Resolution of the clustering, must be non-negative. Lower values favor fewer, larger communities; higher values favor more, smaller communities.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ClusterSNNGraphMultiLevel.html" title="Multi-level clustering on a shared nearest-neighbor graph.">ClusterSNNGraphMultiLevel</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="adf87b496fe1a83e05412c2b530625247" name="adf87b496fe1a83e05412c2b530625247"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adf87b496fe1a83e05412c2b530625247">&#9670;&#160;</a></span>set_seed()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ClusterSNNGraphMultiLevel.html">ClusterSNNGraphMultiLevel</a> &amp; scran::ClusterSNNGraphMultiLevel::set_seed </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1ClusterSNNGraphMultiLevel_1_1Defaults.html#ad3584684d404d382240a908bd88df606">Defaults::seed</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>Seed for the default <b>igraph</b> random number generator.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ClusterSNNGraphMultiLevel.html" title="Multi-level clustering on a shared nearest-neighbor graph.">ClusterSNNGraphMultiLevel</a></code> object. </dd></dl>
 
 </div>
 </div>

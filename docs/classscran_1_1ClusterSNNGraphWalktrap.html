@@ -110,6 +110,39 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p >Walktrap clustering on a shared nearest-neighbor graph. </p>
 <p >This applies Walktrap clustering on a shared nearest neighbor graph. See <a href="https://igraph.org/c/doc/igraph-Community.html#igraph_community_walktrap">here</a> for more details on the Walktrap algorithm. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="abb4706b65f7909d49cd52922cd1f91af" name="abb4706b65f7909d49cd52922cd1f91af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb4706b65f7909d49cd52922cd1f91af">&#9670;&#160;</a></span>set_steps()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ClusterSNNGraphWalktrap.html">ClusterSNNGraphWalktrap</a> &amp; scran::ClusterSNNGraphWalktrap::set_steps </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1ClusterSNNGraphWalktrap_1_1Defaults.html#aefa5e58e12dcef4517fec00389e99a7a">Defaults::steps</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>Number of steps of the random walk.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ClusterSNNGraphWalktrap.html" title="Walktrap clustering on a shared nearest-neighbor graph.">ClusterSNNGraphWalktrap</a></code> object. </dd></dl>
+
+</div>
+</div>
 <a id="a8d04ffcb7d232468fea10c00f03d78f2" name="a8d04ffcb7d232468fea10c00f03d78f2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8d04ffcb7d232468fea10c00f03d78f2">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
 
@@ -186,39 +219,6 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ClusterSNNGraphWalktrap_1_1Results.html" title="Result of the igraph Walktrap community detection algorithm.">Results</a></code> object containing the clustering results for all cells. </dd></dl>
-
-</div>
-</div>
-<a id="abb4706b65f7909d49cd52922cd1f91af" name="abb4706b65f7909d49cd52922cd1f91af"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abb4706b65f7909d49cd52922cd1f91af">&#9670;&#160;</a></span>set_steps()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ClusterSNNGraphWalktrap.html">ClusterSNNGraphWalktrap</a> &amp; scran::ClusterSNNGraphWalktrap::set_steps </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1ClusterSNNGraphWalktrap_1_1Defaults.html#aefa5e58e12dcef4517fec00389e99a7a">Defaults::steps</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>Number of steps of the random walk.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ClusterSNNGraphWalktrap.html" title="Walktrap clustering on a shared nearest-neighbor graph.">ClusterSNNGraphWalktrap</a></code> object. </dd></dl>
 
 </div>
 </div>

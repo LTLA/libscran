@@ -105,8 +105,8 @@ Static Public Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Default parameter settings. </p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
-<a id="a55d321e03e94bbaca62d75eb1cc10c81" name="a55d321e03e94bbaca62d75eb1cc10c81"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a55d321e03e94bbaca62d75eb1cc10c81">&#9670;&#160;</a></span>compute_max</h2>
+<a id="a961f7e01b98c5c365773a20e32cc2ac3" name="a961f7e01b98c5c365773a20e32cc2ac3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a961f7e01b98c5c365773a20e32cc2ac3">&#9670;&#160;</a></span>num_threads</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -115,7 +115,7 @@ Static Public Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">constexpr bool scran::SummarizeEffects::Defaults::compute_max = true</td>
+          <td class="memname">constexpr int scran::SummarizeEffects::Defaults::num_threads = 1</td>
         </tr>
       </table>
   </td>
@@ -124,7 +124,30 @@ Static Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >See <code><a class="el" href="classscran_1_1SummarizeEffects.html#ac4078a63f650cbb7e538347e9c54d0ec">set_compute_max()</a></code>. </p>
+<p >See <code><a class="el" href="classscran_1_1SummarizeEffects.html#a579d507532421a29a72a4ead040f2611">set_num_threads()</a></code>. </p>
+
+</div>
+</div>
+<a id="aef011af1e9bbcd7e606b4e16307e8212" name="aef011af1e9bbcd7e606b4e16307e8212"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aef011af1e9bbcd7e606b4e16307e8212">&#9670;&#160;</a></span>compute_min</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr bool scran::SummarizeEffects::Defaults::compute_min = true</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >See <code><a class="el" href="classscran_1_1SummarizeEffects.html#a1dce14dd1e4554c724221e8525952aac">set_compute_min()</a></code>. </p>
 
 </div>
 </div>
@@ -174,8 +197,8 @@ Static Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="aef011af1e9bbcd7e606b4e16307e8212" name="aef011af1e9bbcd7e606b4e16307e8212"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aef011af1e9bbcd7e606b4e16307e8212">&#9670;&#160;</a></span>compute_min</h2>
+<a id="a55d321e03e94bbaca62d75eb1cc10c81" name="a55d321e03e94bbaca62d75eb1cc10c81"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55d321e03e94bbaca62d75eb1cc10c81">&#9670;&#160;</a></span>compute_max</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -184,7 +207,7 @@ Static Public Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">constexpr bool scran::SummarizeEffects::Defaults::compute_min = true</td>
+          <td class="memname">constexpr bool scran::SummarizeEffects::Defaults::compute_max = true</td>
         </tr>
       </table>
   </td>
@@ -193,7 +216,7 @@ Static Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >See <code><a class="el" href="classscran_1_1SummarizeEffects.html#a1dce14dd1e4554c724221e8525952aac">set_compute_min()</a></code>. </p>
+<p >See <code><a class="el" href="classscran_1_1SummarizeEffects.html#ac4078a63f650cbb7e538347e9c54d0ec">set_compute_max()</a></code>. </p>
 
 </div>
 </div>
@@ -217,29 +240,6 @@ Static Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 <p >See <code><a class="el" href="classscran_1_1SummarizeEffects.html#a1fcdfec45f1bc999eee3b749727388ca">set_compute_min_rank()</a></code>. </p>
-
-</div>
-</div>
-<a id="a961f7e01b98c5c365773a20e32cc2ac3" name="a961f7e01b98c5c365773a20e32cc2ac3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a961f7e01b98c5c365773a20e32cc2ac3">&#9670;&#160;</a></span>num_threads</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">constexpr int scran::SummarizeEffects::Defaults::num_threads = 1</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >See <code><a class="el" href="classscran_1_1SummarizeEffects.html#a579d507532421a29a72a4ead040f2611">set_num_threads()</a></code>. </p>
 
 </div>
 </div>

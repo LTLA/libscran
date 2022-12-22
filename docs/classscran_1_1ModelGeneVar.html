@@ -122,22 +122,19 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p >Compute and model the per-gene variances in log-expression data. </p>
 <p >This scans through a log-transformed normalized expression matrix (e.g., from <code><a class="el" href="classscran_1_1LogNormCounts.html" title="Compute log-normalized expression values.">LogNormCounts</a></code>) and computes per-feature means and variances. It then fits a trend to the variances with respect to the means using <code><a class="el" href="classscran_1_1FitTrendVar.html" title="Fit a mean-variance trend to log-count data.">FitTrendVar</a></code>. We assume that most genes at any given abundance are not highly variable, such that the fitted value of the trend is interpreted as the "uninteresting" variance - this is mostly attributed to technical variation like sequencing noise, but can also represent constitutive biological noise like transcriptional bursting. Under this assumption, the residual can be treated as a quantification of biologically interesting variation, and can be used to identify relevant features for downstream analyses. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a1d8a630903211ebf660d71077d4fa7d5" name="a1d8a630903211ebf660d71077d4fa7d5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1d8a630903211ebf660d71077d4fa7d5">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
+<a id="a3b8d8f0630719ce95ff45c84ac475599" name="a3b8d8f0630719ce95ff45c84ac475599"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b8d8f0630719ce95ff45c84ac475599">&#9670;&#160;</a></span>set_span() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
-<div class="memtemplate">
-template&lt;class MAT &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structscran_1_1ModelGeneVar_1_1Results.html">Results</a> scran::ModelGeneVar::run </td>
+          <td class="memname"><a class="el" href="classscran_1_1ModelGeneVar.html">ModelGeneVar</a> &amp; scran::ModelGeneVar::set_span </td>
           <td>(</td>
-          <td class="paramtype">const MAT *&#160;</td>
-          <td class="paramname"><em>mat</em></td><td>)</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -147,25 +144,80 @@ template&lt;class MAT &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Compute and model the per-feature variances from a log-expression matrix.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">MAT</td><td>Type of matrix, usually a <code>tatami::NumericMatrix</code>.</td></tr>
-  </table>
-  </dd>
-</dl>
+<p >Use the default span for the LOWESS smoother, see <a href="https://ltla.github.io/CppWeightedLowess">https://ltla.github.io/CppWeightedLowess</a> for details.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ModelGeneVar.html" title="Compute and model the per-gene variances in log-expression data.">ModelGeneVar</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="ac8785b5e665a1bb2bcd69f2d0d8ab9e3" name="ac8785b5e665a1bb2bcd69f2d0d8ab9e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8785b5e665a1bb2bcd69f2d0d8ab9e3">&#9670;&#160;</a></span>set_span() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ModelGeneVar.html">ModelGeneVar</a> &amp; scran::ModelGeneVar::set_span </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>s</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Set the span for <code><a class="el" href="classscran_1_1FitTrendVar.html" title="Fit a mean-variance trend to log-count data.">FitTrendVar</a></code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">mat</td><td>Pointer to a feature-by-cells <b>tatami</b> matrix containing log-expression values.</td></tr>
+    <tr><td class="paramname">s</td><td>Span for the smoother, as a proportion of the total number of points.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ModelGeneVar_1_1Results.html" title="Results of the variance modelling.">Results</a></code> object containing the results of the variance modelling. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ModelGeneVar.html" title="Compute and model the per-gene variances in log-expression data.">ModelGeneVar</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a4fb3af8f312e745080073bf78089a856" name="a4fb3af8f312e745080073bf78089a856"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4fb3af8f312e745080073bf78089a856">&#9670;&#160;</a></span>set_num_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ModelGeneVar.html">ModelGeneVar</a> &amp; scran::ModelGeneVar::set_num_threads </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1ModelGeneVar_1_1Defaults.html#a9ccac88ed4b0762bd8ea3528724d517f">Defaults::num_threads</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ModelGeneVar.html" title="Compute and model the per-gene variances in log-expression data.">ModelGeneVar</a></code> object. </dd></dl>
 
 </div>
 </div>
 <a id="a1175b286f29951889b512ed332dd36bf" name="a1175b286f29951889b512ed332dd36bf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1175b286f29951889b512ed332dd36bf">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a1175b286f29951889b512ed332dd36bf">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -239,62 +291,8 @@ template&lt;class MAT , typename Stat &gt; </div>
 
 </div>
 </div>
-<a id="a54ad972283cfacef63f19e9a34b810d6" name="a54ad972283cfacef63f19e9a34b810d6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a54ad972283cfacef63f19e9a34b810d6">&#9670;&#160;</a></span>run_blocked() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;class MAT , typename B &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structscran_1_1ModelGeneVar_1_1Results.html">Results</a> scran::ModelGeneVar::run_blocked </td>
-          <td>(</td>
-          <td class="paramtype">const MAT *&#160;</td>
-          <td class="paramname"><em>mat</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const B *&#160;</td>
-          <td class="paramname"><em>block</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Compute and model the per-feature variances from a log-expression matrix with blocking, see <code><a class="el" href="classscran_1_1ModelGeneVar.html#a65187021f94e03ad35cd2d4f0bc2da40">run_blocked()</a></code> for details.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">MAT</td><td>Type of matrix, usually a <code>tatami::NumericMatrix</code>. </td></tr>
-    <tr><td class="paramname">B</td><td>An integer type, to hold the block IDs.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Pointer to a feature-by-cells <b>tatami</b> matrix containing log-expression values. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1ModelGeneVar.html#a65187021f94e03ad35cd2d4f0bc2da40">run_blocked()</a></code> for details.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ModelGeneVar_1_1Results.html" title="Results of the variance modelling.">Results</a></code> object containing the results of the variance modelling. </dd></dl>
-
-</div>
-</div>
 <a id="a65187021f94e03ad35cd2d4f0bc2da40" name="a65187021f94e03ad35cd2d4f0bc2da40"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a65187021f94e03ad35cd2d4f0bc2da40">&#9670;&#160;</a></span>run_blocked() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a65187021f94e03ad35cd2d4f0bc2da40">&#9670;&#160;</a></span>run_blocked() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -376,20 +374,22 @@ template&lt;class MAT , typename B , typename Stat &gt; </div>
 
 </div>
 </div>
-<a id="a4fb3af8f312e745080073bf78089a856" name="a4fb3af8f312e745080073bf78089a856"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4fb3af8f312e745080073bf78089a856">&#9670;&#160;</a></span>set_num_threads()</h2>
+<a id="a1d8a630903211ebf660d71077d4fa7d5" name="a1d8a630903211ebf660d71077d4fa7d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d8a630903211ebf660d71077d4fa7d5">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;class MAT &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ModelGeneVar.html">ModelGeneVar</a> &amp; scran::ModelGeneVar::set_num_threads </td>
+          <td class="memname"><a class="el" href="structscran_1_1ModelGeneVar_1_1Results.html">Results</a> scran::ModelGeneVar::run </td>
           <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1ModelGeneVar_1_1Defaults.html#a9ccac88ed4b0762bd8ea3528724d517f">Defaults::num_threads</a></code></td><td>)</td>
+          <td class="paramtype">const MAT *&#160;</td>
+          <td class="paramname"><em>mat</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -399,74 +399,74 @@ template&lt;class MAT , typename B , typename Stat &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+<p >Compute and model the per-feature variances from a log-expression matrix.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">MAT</td><td>Type of matrix, usually a <code>tatami::NumericMatrix</code>.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ModelGeneVar.html" title="Compute and model the per-gene variances in log-expression data.">ModelGeneVar</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="a3b8d8f0630719ce95ff45c84ac475599" name="a3b8d8f0630719ce95ff45c84ac475599"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3b8d8f0630719ce95ff45c84ac475599">&#9670;&#160;</a></span>set_span() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ModelGeneVar.html">ModelGeneVar</a> &amp; scran::ModelGeneVar::set_span </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Use the default span for the LOWESS smoother, see <a href="https://ltla.github.io/CppWeightedLowess">https://ltla.github.io/CppWeightedLowess</a> for details.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ModelGeneVar.html" title="Compute and model the per-gene variances in log-expression data.">ModelGeneVar</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="ac8785b5e665a1bb2bcd69f2d0d8ab9e3" name="ac8785b5e665a1bb2bcd69f2d0d8ab9e3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac8785b5e665a1bb2bcd69f2d0d8ab9e3">&#9670;&#160;</a></span>set_span() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ModelGeneVar.html">ModelGeneVar</a> &amp; scran::ModelGeneVar::set_span </td>
-          <td>(</td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>s</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Set the span for <code><a class="el" href="classscran_1_1FitTrendVar.html" title="Fit a mean-variance trend to log-count data.">FitTrendVar</a></code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">s</td><td>Span for the smoother, as a proportion of the total number of points.</td></tr>
+    <tr><td class="paramname">mat</td><td>Pointer to a feature-by-cells <b>tatami</b> matrix containing log-expression values.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ModelGeneVar.html" title="Compute and model the per-gene variances in log-expression data.">ModelGeneVar</a></code> object. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ModelGeneVar_1_1Results.html" title="Results of the variance modelling.">Results</a></code> object containing the results of the variance modelling. </dd></dl>
+
+</div>
+</div>
+<a id="a54ad972283cfacef63f19e9a34b810d6" name="a54ad972283cfacef63f19e9a34b810d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54ad972283cfacef63f19e9a34b810d6">&#9670;&#160;</a></span>run_blocked() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class MAT , typename B &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structscran_1_1ModelGeneVar_1_1Results.html">Results</a> scran::ModelGeneVar::run_blocked </td>
+          <td>(</td>
+          <td class="paramtype">const MAT *&#160;</td>
+          <td class="paramname"><em>mat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const B *&#160;</td>
+          <td class="paramname"><em>block</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Compute and model the per-feature variances from a log-expression matrix with blocking, see <code><a class="el" href="classscran_1_1ModelGeneVar.html#a65187021f94e03ad35cd2d4f0bc2da40">run_blocked()</a></code> for details.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">MAT</td><td>Type of matrix, usually a <code>tatami::NumericMatrix</code>. </td></tr>
+    <tr><td class="paramname">B</td><td>An integer type, to hold the block IDs.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Pointer to a feature-by-cells <b>tatami</b> matrix containing log-expression values. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1ModelGeneVar.html#a65187021f94e03ad35cd2d4f0bc2da40">run_blocked()</a></code> for details.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ModelGeneVar_1_1Results.html" title="Results of the variance modelling.">Results</a></code> object containing the results of the variance modelling. </dd></dl>
 
 </div>
 </div>

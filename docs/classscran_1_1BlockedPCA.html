@@ -118,6 +118,138 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p >Compute PCA after blocking on an uninteresting factor. </p>
 <p >A simple batch correction method involves centering the expression of each gene in each batch to remove systematic differences between batches. The corrected values are then used in PCA to obtain a batch-corrected low-dimensional representation of the dataset. Unfortunately, naively centering the expression values will discard sparsity and reduce the computational efficiency of the PCA. To avoid these drawbacks, <code><a class="el" href="classscran_1_1BlockedPCA.html" title="Compute PCA after blocking on an uninteresting factor.">BlockedPCA</a></code> defers the centering until the matrix multiplication of the IRLBA step. This yields the same results as the naive approach but is much faster as it can take advantage of efficient sparse operations. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="aaab4ee71a29b1ac787a1a135719217d4" name="aaab4ee71a29b1ac787a1a135719217d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaab4ee71a29b1ac787a1a135719217d4">&#9670;&#160;</a></span>set_rank()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1BlockedPCA.html">BlockedPCA</a> &amp; scran::BlockedPCA::set_rank </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>r</em> = <code><a class="el" href="structscran_1_1BlockedPCA_1_1Defaults.html#a3f57557595e7081283a7ab177b7c8058">Defaults::rank</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">r</td><td>Number of PCs to compute. This should be smaller than the smaller dimension of the input matrix.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1BlockedPCA.html" title="Compute PCA after blocking on an uninteresting factor.">BlockedPCA</a></code> instance. </dd></dl>
+
+</div>
+</div>
+<a id="a8ead45b90f2330baa950279a62262912" name="a8ead45b90f2330baa950279a62262912"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8ead45b90f2330baa950279a62262912">&#9670;&#160;</a></span>set_scale()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1BlockedPCA.html">BlockedPCA</a> &amp; scran::BlockedPCA::set_scale </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1BlockedPCA_1_1Defaults.html#a07e46e180a76384576741323a456e2bf">Defaults::scale</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>Should genes be scaled to unit variance?</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1BlockedPCA.html" title="Compute PCA after blocking on an uninteresting factor.">BlockedPCA</a></code> instance. </dd></dl>
+
+</div>
+</div>
+<a id="a72c4787d4bf3345a269fa6a00e1aaa6c" name="a72c4787d4bf3345a269fa6a00e1aaa6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72c4787d4bf3345a269fa6a00e1aaa6c">&#9670;&#160;</a></span>set_transpose()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1BlockedPCA.html">BlockedPCA</a> &amp; scran::BlockedPCA::set_transpose </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>t</em> = <code><a class="el" href="structscran_1_1BlockedPCA_1_1Defaults.html#ad1782b5c77f985c57e8aa85ffd555a48">Defaults::transpose</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">t</td><td>Should the PC matrix be transposed on output? If <code>true</code>, the output PC matrix is column-major with cells in the columns, which is compatible with downstream <b>libscran</b> steps.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1BlockedPCA.html" title="Compute PCA after blocking on an uninteresting factor.">BlockedPCA</a></code> instance. </dd></dl>
+
+</div>
+</div>
+<a id="a0996bfb248a6a56f901b03877ce99c99" name="a0996bfb248a6a56f901b03877ce99c99"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0996bfb248a6a56f901b03877ce99c99">&#9670;&#160;</a></span>set_num_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1BlockedPCA.html">BlockedPCA</a> &amp; scran::BlockedPCA::set_num_threads </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1BlockedPCA_1_1Defaults.html#afea8e136a107c82c080c9cdfede04306">Defaults::num_threads</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1BlockedPCA.html" title="Compute PCA after blocking on an uninteresting factor.">BlockedPCA</a></code> instance. </dd></dl>
+
+</div>
+</div>
 <a id="a7da1c5301c74328fc6f74d5772f760f5" name="a7da1c5301c74328fc6f74d5772f760f5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7da1c5301c74328fc6f74d5772f760f5">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
 
@@ -233,138 +365,6 @@ template&lt;typename T , typename IDX , typename Block , typename X &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1BlockedPCA_1_1Results.html" title="Container for the PCA results.">Results</a></code> object containing the PCs and the variance explained. </dd></dl>
-
-</div>
-</div>
-<a id="a0996bfb248a6a56f901b03877ce99c99" name="a0996bfb248a6a56f901b03877ce99c99"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0996bfb248a6a56f901b03877ce99c99">&#9670;&#160;</a></span>set_num_threads()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1BlockedPCA.html">BlockedPCA</a> &amp; scran::BlockedPCA::set_num_threads </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1BlockedPCA_1_1Defaults.html#afea8e136a107c82c080c9cdfede04306">Defaults::num_threads</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1BlockedPCA.html" title="Compute PCA after blocking on an uninteresting factor.">BlockedPCA</a></code> instance. </dd></dl>
-
-</div>
-</div>
-<a id="aaab4ee71a29b1ac787a1a135719217d4" name="aaab4ee71a29b1ac787a1a135719217d4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaab4ee71a29b1ac787a1a135719217d4">&#9670;&#160;</a></span>set_rank()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1BlockedPCA.html">BlockedPCA</a> &amp; scran::BlockedPCA::set_rank </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>r</em> = <code><a class="el" href="structscran_1_1BlockedPCA_1_1Defaults.html#a3f57557595e7081283a7ab177b7c8058">Defaults::rank</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">r</td><td>Number of PCs to compute. This should be smaller than the smaller dimension of the input matrix.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1BlockedPCA.html" title="Compute PCA after blocking on an uninteresting factor.">BlockedPCA</a></code> instance. </dd></dl>
-
-</div>
-</div>
-<a id="a8ead45b90f2330baa950279a62262912" name="a8ead45b90f2330baa950279a62262912"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8ead45b90f2330baa950279a62262912">&#9670;&#160;</a></span>set_scale()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1BlockedPCA.html">BlockedPCA</a> &amp; scran::BlockedPCA::set_scale </td>
-          <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1BlockedPCA_1_1Defaults.html#a07e46e180a76384576741323a456e2bf">Defaults::scale</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>Should genes be scaled to unit variance?</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1BlockedPCA.html" title="Compute PCA after blocking on an uninteresting factor.">BlockedPCA</a></code> instance. </dd></dl>
-
-</div>
-</div>
-<a id="a72c4787d4bf3345a269fa6a00e1aaa6c" name="a72c4787d4bf3345a269fa6a00e1aaa6c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a72c4787d4bf3345a269fa6a00e1aaa6c">&#9670;&#160;</a></span>set_transpose()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1BlockedPCA.html">BlockedPCA</a> &amp; scran::BlockedPCA::set_transpose </td>
-          <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>t</em> = <code><a class="el" href="structscran_1_1BlockedPCA_1_1Defaults.html#ad1782b5c77f985c57e8aa85ffd555a48">Defaults::transpose</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">t</td><td>Should the PC matrix be transposed on output? If <code>true</code>, the output PC matrix is column-major with cells in the columns, which is compatible with downstream <b>libscran</b> steps.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1BlockedPCA.html" title="Compute PCA after blocking on an uninteresting factor.">BlockedPCA</a></code> instance. </dd></dl>
 
 </div>
 </div>

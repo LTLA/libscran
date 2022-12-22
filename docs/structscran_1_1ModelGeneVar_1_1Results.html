@@ -102,21 +102,6 @@ Public Attributes</h2></td></tr>
 <div class="textblock"><p ><a class="el" href="structscran_1_1ModelGeneVar_1_1Results.html" title="Results of the variance modelling.">Results</a> of the variance modelling. </p>
 <p >Meaningful instances of this object should generally be constructed by calling the <code><a class="el" href="classscran_1_1ModelGeneVar.html#a1175b286f29951889b512ed332dd36bf">ModelGeneVar::run()</a></code> methods. Empty instances can be default-constructed as placeholders. </p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
-<a id="a64a2610c001a2a71ffba3bc94df8b6a2" name="a64a2610c001a2a71ffba3bc94df8b6a2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a64a2610c001a2a71ffba3bc94df8b6a2">&#9670;&#160;</a></span>fitted</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt;std::vector&lt;double&gt; &gt; scran::ModelGeneVar::Results::fitted</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Vector of vectors of the same dimensions as <code>means</code>. Each entry contains the fitted value for each gene in each block. </p>
-
-</div>
-</div>
 <a id="a30c93b46a06b60773cfe1cbb895c4f32" name="a30c93b46a06b60773cfe1cbb895c4f32"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a30c93b46a06b60773cfe1cbb895c4f32">&#9670;&#160;</a></span>means</h2>
 
@@ -132,21 +117,6 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a943930ea88c62c5bd5828d279d6d1a50" name="a943930ea88c62c5bd5828d279d6d1a50"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a943930ea88c62c5bd5828d279d6d1a50">&#9670;&#160;</a></span>residuals</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt;std::vector&lt;double&gt; &gt; scran::ModelGeneVar::Results::residuals</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Vector of vectors of the same dimensions as <code>means</code>. Each vector contains the residual for each gene in each block. </p>
-
-</div>
-</div>
 <a id="aebc0aed5c5e50f0471766b6dc870fc58" name="aebc0aed5c5e50f0471766b6dc870fc58"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aebc0aed5c5e50f0471766b6dc870fc58">&#9670;&#160;</a></span>variances</h2>
 
@@ -159,6 +129,36 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p >Vector of vectors of the same dimensions as <code>means</code>. Each entry contains the variance for each gene in each block. </p>
+
+</div>
+</div>
+<a id="a64a2610c001a2a71ffba3bc94df8b6a2" name="a64a2610c001a2a71ffba3bc94df8b6a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64a2610c001a2a71ffba3bc94df8b6a2">&#9670;&#160;</a></span>fitted</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::vector&lt;double&gt; &gt; scran::ModelGeneVar::Results::fitted</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Vector of vectors of the same dimensions as <code>means</code>. Each entry contains the fitted value for each gene in each block. </p>
+
+</div>
+</div>
+<a id="a943930ea88c62c5bd5828d279d6d1a50" name="a943930ea88c62c5bd5828d279d6d1a50"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a943930ea88c62c5bd5828d279d6d1a50">&#9670;&#160;</a></span>residuals</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::vector&lt;double&gt; &gt; scran::ModelGeneVar::Results::residuals</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Vector of vectors of the same dimensions as <code>means</code>. Each vector contains the residual for each gene in each block. </p>
 
 </div>
 </div>

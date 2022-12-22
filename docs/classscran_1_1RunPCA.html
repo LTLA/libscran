@@ -118,137 +118,6 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p >Perform PCA on a gene-cell matrix. </p>
 <p >Principal components analysis (PCA) is a helpful technique for data compression and denoising. The idea is that the earlier PCs capture most of the systematic biological variation while the later PCs capture random technical noise. Thus, we can reduce the size of the data and eliminate noise by only using the earlier PCs for further analyses. Most practitioners will keep the first 10-50 PCs, though the exact choice is fairly arbitrary. For speed, we use the <a href="https://github.com/LTLA/CppIrlba"><b>CppIrlba</b></a> package to perform an approximate PCA. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="ad9ae75c4e5d6ed4feef25faadea32a93" name="ad9ae75c4e5d6ed4feef25faadea32a93"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad9ae75c4e5d6ed4feef25faadea32a93">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T , typename IDX &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structscran_1_1RunPCA_1_1Results.html">Results</a> scran::RunPCA::run </td>
-          <td>(</td>
-          <td class="paramtype">const tatami::Matrix&lt; T, IDX &gt; *&#160;</td>
-          <td class="paramname"><em>mat</em></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Run PCA on an input gene-by-cell matrix.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">T</td><td>Floating point type for the data. </td></tr>
-    <tr><td class="paramname">IDX</td><td>Integer type for the indices.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">mat</td><td>Pointer to the input matrix. Columns should contain cells while rows should contain genes.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1RunPCA_1_1Results.html" title="Container for the PCA results.">Results</a></code> object containing the PCs and the variance explained. </dd></dl>
-
-</div>
-</div>
-<a id="a88c07d13b1c5b726696352a067b4eced" name="a88c07d13b1c5b726696352a067b4eced"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a88c07d13b1c5b726696352a067b4eced">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T , typename IDX , typename X &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structscran_1_1RunPCA_1_1Results.html">Results</a> scran::RunPCA::run </td>
-          <td>(</td>
-          <td class="paramtype">const tatami::Matrix&lt; T, IDX &gt; *&#160;</td>
-          <td class="paramname"><em>mat</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const X *&#160;</td>
-          <td class="paramname"><em>features</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Run PCA on an input gene-by-cell matrix after filtering for genes of interest. We typically use the set of highly variable genes from <code><a class="el" href="classscran_1_1ChooseHVGs.html" title="Choose highly variable genes for downstream analyses.">ChooseHVGs</a></code>, with the aim being to improve computational efficiency and avoid random noise by removing lowly variable genes.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">T</td><td>Floating point type for the data. </td></tr>
-    <tr><td class="paramname">IDX</td><td>Integer type for the indices. </td></tr>
-    <tr><td class="paramname">X</td><td>Integer type for the feature filter.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">mat</td><td>Pointer to the input matrix. Columns should contain cells while rows should contain genes. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">features</td><td>Pointer to an array of length equal to the number of genes. Each entry treated as a boolean specifying whether the corresponding genes should be used in the PCA.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1RunPCA_1_1Results.html" title="Container for the PCA results.">Results</a></code> object containing the PCs and the variance explained. </dd></dl>
-
-</div>
-</div>
-<a id="addc4e65cd4d609bd10de4e672800e695" name="addc4e65cd4d609bd10de4e672800e695"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#addc4e65cd4d609bd10de4e672800e695">&#9670;&#160;</a></span>set_num_threads()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1RunPCA.html">RunPCA</a> &amp; scran::RunPCA::set_num_threads </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1RunPCA_1_1Defaults.html#a6a7c18f8cebd4812d0d6980c16b0f778">Defaults::num_threads</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1RunPCA.html" title="Perform PCA on a gene-cell matrix.">RunPCA</a></code> instance. </dd></dl>
-
-</div>
-</div>
 <a id="a736079c03235fca4ec6bfd7b99b0f565" name="a736079c03235fca4ec6bfd7b99b0f565"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a736079c03235fca4ec6bfd7b99b0f565">&#9670;&#160;</a></span>set_rank()</h2>
 
@@ -345,6 +214,137 @@ template&lt;typename T , typename IDX , typename X &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1RunPCA.html" title="Perform PCA on a gene-cell matrix.">RunPCA</a></code> instance. </dd></dl>
+
+</div>
+</div>
+<a id="addc4e65cd4d609bd10de4e672800e695" name="addc4e65cd4d609bd10de4e672800e695"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#addc4e65cd4d609bd10de4e672800e695">&#9670;&#160;</a></span>set_num_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1RunPCA.html">RunPCA</a> &amp; scran::RunPCA::set_num_threads </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1RunPCA_1_1Defaults.html#a6a7c18f8cebd4812d0d6980c16b0f778">Defaults::num_threads</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1RunPCA.html" title="Perform PCA on a gene-cell matrix.">RunPCA</a></code> instance. </dd></dl>
+
+</div>
+</div>
+<a id="ad9ae75c4e5d6ed4feef25faadea32a93" name="ad9ae75c4e5d6ed4feef25faadea32a93"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9ae75c4e5d6ed4feef25faadea32a93">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , typename IDX &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structscran_1_1RunPCA_1_1Results.html">Results</a> scran::RunPCA::run </td>
+          <td>(</td>
+          <td class="paramtype">const tatami::Matrix&lt; T, IDX &gt; *&#160;</td>
+          <td class="paramname"><em>mat</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Run PCA on an input gene-by-cell matrix.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>Floating point type for the data. </td></tr>
+    <tr><td class="paramname">IDX</td><td>Integer type for the indices.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">mat</td><td>Pointer to the input matrix. Columns should contain cells while rows should contain genes.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1RunPCA_1_1Results.html" title="Container for the PCA results.">Results</a></code> object containing the PCs and the variance explained. </dd></dl>
+
+</div>
+</div>
+<a id="a88c07d13b1c5b726696352a067b4eced" name="a88c07d13b1c5b726696352a067b4eced"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a88c07d13b1c5b726696352a067b4eced">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T , typename IDX , typename X &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structscran_1_1RunPCA_1_1Results.html">Results</a> scran::RunPCA::run </td>
+          <td>(</td>
+          <td class="paramtype">const tatami::Matrix&lt; T, IDX &gt; *&#160;</td>
+          <td class="paramname"><em>mat</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const X *&#160;</td>
+          <td class="paramname"><em>features</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Run PCA on an input gene-by-cell matrix after filtering for genes of interest. We typically use the set of highly variable genes from <code><a class="el" href="classscran_1_1ChooseHVGs.html" title="Choose highly variable genes for downstream analyses.">ChooseHVGs</a></code>, with the aim being to improve computational efficiency and avoid random noise by removing lowly variable genes.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>Floating point type for the data. </td></tr>
+    <tr><td class="paramname">IDX</td><td>Integer type for the indices. </td></tr>
+    <tr><td class="paramname">X</td><td>Integer type for the feature filter.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">mat</td><td>Pointer to the input matrix. Columns should contain cells while rows should contain genes. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">features</td><td>Pointer to an array of length equal to the number of genes. Each entry treated as a boolean specifying whether the corresponding genes should be used in the PCA.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1RunPCA_1_1Results.html" title="Container for the PCA results.">Results</a></code> object containing the PCs and the variance explained. </dd></dl>
 
 </div>
 </div>

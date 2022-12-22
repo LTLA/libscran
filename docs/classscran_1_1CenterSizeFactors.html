@@ -142,6 +142,128 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="ad604e87b1eb2c0e23601e6c0ee6014a4" name="ad604e87b1eb2c0e23601e6c0ee6014a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad604e87b1eb2c0e23601e6c0ee6014a4">&#9670;&#160;</a></span>validate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static bool scran::CenterSizeFactors::validate </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const T *&#160;</td>
+          <td class="paramname"><em>size_factors</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Validate size factors by checking that they are all non-zero. We also check whether any size factors are zero, which may be handled separately by callers.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>Floating-point type for the size factors.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of size factors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size_factors</td><td>Pointer to an array of non-negative size factors of length <code>n</code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Whether a size factor of zero was detected. An error is raised if a negative size factor is detected. </dd></dl>
+
+</div>
+</div>
+<a id="ac8edc812cc10eb1439d21c7d78570650" name="ac8edc812cc10eb1439d21c7d78570650"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac8edc812cc10eb1439d21c7d78570650">&#9670;&#160;</a></span>set_block_mode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1CenterSizeFactors.html">CenterSizeFactors</a> &amp; scran::CenterSizeFactors::set_block_mode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classscran_1_1CenterSizeFactors.html#a511d8d0b9259cd5e3595edb8b8573189">BlockMode</a>&#160;</td>
+          <td class="paramname"><em>b</em> = <code><a class="el" href="structscran_1_1CenterSizeFactors_1_1Defaults.html#a1b72abdcaa1fcd1bc846418e0480c2b6">Defaults::block_mode</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">b</td><td>Strategy for handling blocks in <code><a class="el" href="classscran_1_1CenterSizeFactors.html#a3fa9e4cc11073a04fdcdc7443e883234">run_blocked()</a></code>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1CenterSizeFactors.html" title="Center size factors prior to scaling normalization.">CenterSizeFactors</a></code> object.</dd></dl>
+<p>With the <code>PER_BLOCK</code> strategy, size factors are scaled separately for each block so that they have a mean of 1 within each block. The scaled size factors are identical to those obtained by separate invocations of <code><a class="el" href="classscran_1_1CenterSizeFactors.html#a9214094c2b9004094e94f14bbc435767">CenterSizeFactors::run()</a></code> on the size factors for each block. This can be desirable to ensure consistency with independent analyses of each block - otherwise, the centering would depend on the size factors across all blocks.</p>
+<p >With the <code>LOWEST</code> strategy, we compute the mean size factor for each block and we divide all size factors by the minimum mean. In effect, we downscale all blocks to match the coverage of the lowest-coverage block. This is useful for datasets with highly heterogeneous coverage of different blocks as it avoids egregious upscaling of low-coverage blocks. (By contrast, downscaling is always safe as it simply discards information across all blocks by shrinking log-fold changes towards zero at low expression.) </p>
+
+</div>
+</div>
+<a id="aef603859bb04b43b408c6a67418c69d9" name="aef603859bb04b43b408c6a67418c69d9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aef603859bb04b43b408c6a67418c69d9">&#9670;&#160;</a></span>set_ignore_zeros()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1CenterSizeFactors.html">CenterSizeFactors</a> &amp; scran::CenterSizeFactors::set_ignore_zeros </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>i</em> = <code><a class="el" href="structscran_1_1CenterSizeFactors_1_1Defaults.html#a818565bd477ef479ae6a557d54ed4a47">Defaults::ignore_zeros</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">i</td><td>Whether to ignore zeros when computing the mean size factor.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1CenterSizeFactors.html" title="Center size factors prior to scaling normalization.">CenterSizeFactors</a></code> object.</dd></dl>
+<p>While size factors of zero are generally invalid, they may occur in datasets that have not been properly filtered to remove low-quality cells. In such cases, we may wish to ignore size factors of zero so as to avoid a spurious deflation of the mean during centering. This is useful if some filtering is to be applied after normalization - by ignoring zeros now, we ensure that we get the same result as if we had removed those zeros prior to centering. </p>
+
+</div>
+</div>
 <a id="a9214094c2b9004094e94f14bbc435767" name="a9214094c2b9004094e94f14bbc435767"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9214094c2b9004094e94f14bbc435767">&#9670;&#160;</a></span>run()</h2>
 
@@ -251,128 +373,6 @@ template&lt;typename T , typename B &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Entries in <code>size_factors</code> are scaled according to the mode defined by <code><a class="el" href="classscran_1_1CenterSizeFactors.html#ac8edc812cc10eb1439d21c7d78570650">set_block_mode()</a></code>. A boolean is returned indicating whether size factors of zero were detected. </dd></dl>
-
-</div>
-</div>
-<a id="ac8edc812cc10eb1439d21c7d78570650" name="ac8edc812cc10eb1439d21c7d78570650"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac8edc812cc10eb1439d21c7d78570650">&#9670;&#160;</a></span>set_block_mode()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1CenterSizeFactors.html">CenterSizeFactors</a> &amp; scran::CenterSizeFactors::set_block_mode </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classscran_1_1CenterSizeFactors.html#a511d8d0b9259cd5e3595edb8b8573189">BlockMode</a>&#160;</td>
-          <td class="paramname"><em>b</em> = <code><a class="el" href="structscran_1_1CenterSizeFactors_1_1Defaults.html#a1b72abdcaa1fcd1bc846418e0480c2b6">Defaults::block_mode</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">b</td><td>Strategy for handling blocks in <code><a class="el" href="classscran_1_1CenterSizeFactors.html#a3fa9e4cc11073a04fdcdc7443e883234">run_blocked()</a></code>.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1CenterSizeFactors.html" title="Center size factors prior to scaling normalization.">CenterSizeFactors</a></code> object.</dd></dl>
-<p>With the <code>PER_BLOCK</code> strategy, size factors are scaled separately for each block so that they have a mean of 1 within each block. The scaled size factors are identical to those obtained by separate invocations of <code><a class="el" href="classscran_1_1CenterSizeFactors.html#a9214094c2b9004094e94f14bbc435767">CenterSizeFactors::run()</a></code> on the size factors for each block. This can be desirable to ensure consistency with independent analyses of each block - otherwise, the centering would depend on the size factors across all blocks.</p>
-<p >With the <code>LOWEST</code> strategy, we compute the mean size factor for each block and we divide all size factors by the minimum mean. In effect, we downscale all blocks to match the coverage of the lowest-coverage block. This is useful for datasets with highly heterogeneous coverage of different blocks as it avoids egregious upscaling of low-coverage blocks. (By contrast, downscaling is always safe as it simply discards information across all blocks by shrinking log-fold changes towards zero at low expression.) </p>
-
-</div>
-</div>
-<a id="aef603859bb04b43b408c6a67418c69d9" name="aef603859bb04b43b408c6a67418c69d9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aef603859bb04b43b408c6a67418c69d9">&#9670;&#160;</a></span>set_ignore_zeros()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1CenterSizeFactors.html">CenterSizeFactors</a> &amp; scran::CenterSizeFactors::set_ignore_zeros </td>
-          <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>i</em> = <code><a class="el" href="structscran_1_1CenterSizeFactors_1_1Defaults.html#a818565bd477ef479ae6a557d54ed4a47">Defaults::ignore_zeros</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">i</td><td>Whether to ignore zeros when computing the mean size factor.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1CenterSizeFactors.html" title="Center size factors prior to scaling normalization.">CenterSizeFactors</a></code> object.</dd></dl>
-<p>While size factors of zero are generally invalid, they may occur in datasets that have not been properly filtered to remove low-quality cells. In such cases, we may wish to ignore size factors of zero so as to avoid a spurious deflation of the mean during centering. This is useful if some filtering is to be applied after normalization - by ignoring zeros now, we ensure that we get the same result as if we had removed those zeros prior to centering. </p>
-
-</div>
-</div>
-<a id="ad604e87b1eb2c0e23601e6c0ee6014a4" name="ad604e87b1eb2c0e23601e6c0ee6014a4"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad604e87b1eb2c0e23601e6c0ee6014a4">&#9670;&#160;</a></span>validate()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static bool scran::CenterSizeFactors::validate </td>
-          <td>(</td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>n</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const T *&#160;</td>
-          <td class="paramname"><em>size_factors</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Validate size factors by checking that they are all non-zero. We also check whether any size factors are zero, which may be handled separately by callers.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">T</td><td>Floating-point type for the size factors.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of size factors. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">size_factors</td><td>Pointer to an array of non-negative size factors of length <code>n</code>.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Whether a size factor of zero was detected. An error is raised if a negative size factor is detected. </dd></dl>
 
 </div>
 </div>

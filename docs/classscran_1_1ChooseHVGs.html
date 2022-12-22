@@ -109,33 +109,21 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><p >Choose highly variable genes for downstream analyses. </p>
 <p >This is done by selecting the <code>top</code> number of genes with the largest values for a precomputed variance statistic. We typically use the residual from the trend as computed by <code><a class="el" href="classscran_1_1ModelGeneVar.html" title="Compute and model the per-gene variances in log-expression data.">ModelGeneVar</a></code>. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="afaa78fda6d2dfddd354b878ddabd911c" name="afaa78fda6d2dfddd354b878ddabd911c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afaa78fda6d2dfddd354b878ddabd911c">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
+<a id="aa68796b51ac32a9c0fd4451ac91d60a0" name="aa68796b51ac32a9c0fd4451ac91d60a0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa68796b51ac32a9c0fd4451ac91d60a0">&#9670;&#160;</a></span>set_top()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<div class="memtemplate">
-template&lt;typename T  = uint8_t, typename V &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::vector&lt; T &gt; scran::ChooseHVGs::run </td>
+          <td class="memname"><a class="el" href="classscran_1_1ChooseHVGs.html">ChooseHVGs</a> &amp; scran::ChooseHVGs::set_top </td>
           <td>(</td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>n</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramname"><em>t</em> = <code><a class="el" href="structscran_1_1ChooseHVGs_1_1Defaults.html#ab47b622404c5eb3ed1835518e4164bf1">Defaults::top</a></code></td><td>)</td>
           <td></td>
-          <td class="paramtype">const V *&#160;</td>
-          <td class="paramname"><em>statistic</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -144,26 +132,19 @@ template&lt;typename T  = uint8_t, typename V &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">V</td><td>Type of the variance statistic. </td></tr>
-    <tr><td class="paramname">T</td><td>Type to be used as a boolean.</td></tr>
-  </table>
-  </dd>
-</dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of genes. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">statistic</td><td>Pointer to an array of length <code>n</code> containing the per-gene variance statistics.</td></tr>
+    <tr><td class="paramname">t</td><td>The number of top genes to consider as highly variable genes.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A vector of booleans of length <code>n</code>, indicating whether each gene is to be retained. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ChooseHVGs.html" title="Choose highly variable genes for downstream analyses.">ChooseHVGs</a></code> object.</dd></dl>
+<p>The choice is more or less arbitrary and is a trade-off between capturing more biological signal at the cost of increasing noise. Values of 1000-5000 seem appropriate for most use cases. Note that increasing the number of genes will also increase the size of the subdataset to be used in downstream computation. </p>
 
 </div>
 </div>
 <a id="a8485437ec27c1b9d167fd00b38dad235" name="a8485437ec27c1b9d167fd00b38dad235"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8485437ec27c1b9d167fd00b38dad235">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a8485437ec27c1b9d167fd00b38dad235">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -222,21 +203,33 @@ template&lt;typename V , typename T &gt; </div>
 
 </div>
 </div>
-<a id="aa68796b51ac32a9c0fd4451ac91d60a0" name="aa68796b51ac32a9c0fd4451ac91d60a0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa68796b51ac32a9c0fd4451ac91d60a0">&#9670;&#160;</a></span>set_top()</h2>
+<a id="afaa78fda6d2dfddd354b878ddabd911c" name="afaa78fda6d2dfddd354b878ddabd911c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afaa78fda6d2dfddd354b878ddabd911c">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename T  = uint8_t, typename V &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ChooseHVGs.html">ChooseHVGs</a> &amp; scran::ChooseHVGs::set_top </td>
+          <td class="memname">std::vector&lt; T &gt; scran::ChooseHVGs::run </td>
           <td>(</td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>t</em> = <code><a class="el" href="structscran_1_1ChooseHVGs_1_1Defaults.html#ab47b622404c5eb3ed1835518e4164bf1">Defaults::top</a></code></td><td>)</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const V *&#160;</td>
+          <td class="paramname"><em>statistic</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -245,14 +238,21 @@ template&lt;typename V , typename T &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">t</td><td>The number of top genes to consider as highly variable genes.</td></tr>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">V</td><td>Type of the variance statistic. </td></tr>
+    <tr><td class="paramname">T</td><td>Type to be used as a boolean.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ChooseHVGs.html" title="Choose highly variable genes for downstream analyses.">ChooseHVGs</a></code> object.</dd></dl>
-<p>The choice is more or less arbitrary and is a trade-off between capturing more biological signal at the cost of increasing noise. Values of 1000-5000 seem appropriate for most use cases. Note that increasing the number of genes will also increase the size of the subdataset to be used in downstream computation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of genes. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">statistic</td><td>Pointer to an array of length <code>n</code> containing the per-gene variance statistics.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A vector of booleans of length <code>n</code>, indicating whether each gene is to be retained. </dd></dl>
 
 </div>
 </div>

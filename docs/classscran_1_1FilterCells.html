@@ -99,8 +99,62 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Filter out low-quality cells. </p>
-<p >This class removes low-quality cells from the input matrix by subsetting on the columns, typically using the filters defined in <code><a class="el" href="classscran_1_1PerCellRnaQcFilters.html" title="Create filters to identify low-quality cells from RNA-derived metrics.">PerCellRnaQcFilters</a></code> and/or <code><a class="el" href="classscran_1_1PerCellAdtQcFilters.html" title="Create filters to identify low-quality cells from ADT data.">PerCellAdtQcFilters</a></code>. It is effectively a wrapper around the <code>tatami::make_DelayedSubset</code> function. </p>
+<p >This class removes low-quality cells from the input matrix by subsetting on the columns, typically using the filters defined in <code>PerCellRnaQcFilters</code> and/or <code>PerCellAdtQcFilters</code>. It is effectively a wrapper around the <code>tatami::make_DelayedSubset</code> function. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="ab25bcb48ba406a33e0e914fa0cc6a7d9" name="ab25bcb48ba406a33e0e914fa0cc6a7d9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab25bcb48ba406a33e0e914fa0cc6a7d9">&#9670;&#160;</a></span>set_retain()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1FilterCells.html">FilterCells</a> &amp; scran::FilterCells::set_retain </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Indicate that the filtering vector specifies the cells to retain.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1FilterCells.html" title="Filter out low-quality cells.">FilterCells</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a42e3cbc0cf07393f5e6d3f992d369bf2" name="a42e3cbc0cf07393f5e6d3f992d369bf2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42e3cbc0cf07393f5e6d3f992d369bf2">&#9670;&#160;</a></span>set_discard()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1FilterCells.html">FilterCells</a> &amp; scran::FilterCells::set_discard </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Indicate that the filtering vector specifies the cells to discard.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1FilterCells.html" title="Filter out low-quality cells.">FilterCells</a></code> object. </dd></dl>
+
+</div>
+</div>
 <a id="a5dd2a40d99238d32c20bd069dff7faff" name="a5dd2a40d99238d32c20bd069dff7faff"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5dd2a40d99238d32c20bd069dff7faff">&#9670;&#160;</a></span>run()</h2>
 
@@ -153,60 +207,6 @@ template&lt;class MAT , typename IDX  = int, typename X  = uint8_t&gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A pointer to the submatrix. </dd></dl>
-
-</div>
-</div>
-<a id="a42e3cbc0cf07393f5e6d3f992d369bf2" name="a42e3cbc0cf07393f5e6d3f992d369bf2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a42e3cbc0cf07393f5e6d3f992d369bf2">&#9670;&#160;</a></span>set_discard()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1FilterCells.html">FilterCells</a> &amp; scran::FilterCells::set_discard </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Indicate that the filtering vector specifies the cells to discard.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1FilterCells.html" title="Filter out low-quality cells.">FilterCells</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="ab25bcb48ba406a33e0e914fa0cc6a7d9" name="ab25bcb48ba406a33e0e914fa0cc6a7d9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab25bcb48ba406a33e0e914fa0cc6a7d9">&#9670;&#160;</a></span>set_retain()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1FilterCells.html">FilterCells</a> &amp; scran::FilterCells::set_retain </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Indicate that the filtering vector specifies the cells to retain.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1FilterCells.html" title="Filter out low-quality cells.">FilterCells</a></code> object. </dd></dl>
 
 </div>
 </div>

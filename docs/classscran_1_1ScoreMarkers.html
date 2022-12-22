@@ -181,33 +181,21 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a5c81526daaefc33a903e6339e4e57d2e" name="a5c81526daaefc33a903e6339e4e57d2e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5c81526daaefc33a903e6339e4e57d2e">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
+<a id="a9e7f5ec97f4628bdb2a6739670614401" name="a9e7f5ec97f4628bdb2a6739670614401"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9e7f5ec97f4628bdb2a6739670614401">&#9670;&#160;</a></span>set_threshold()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<div class="memtemplate">
-template&lt;typename Stat  = double, class MAT , typename G &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html">Results</a>&lt; Stat &gt; scran::ScoreMarkers::run </td>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_threshold </td>
           <td>(</td>
-          <td class="paramtype">const MAT *&#160;</td>
-          <td class="paramname"><em>p</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>t</em> = <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#ac1138a7ec0df83d0af5d43af9bf7f14b">Defaults::threshold</a></code></td><td>)</td>
           <td></td>
-          <td class="paramtype">const G *&#160;</td>
-          <td class="paramname"><em>group</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -216,28 +204,715 @@ template&lt;typename Stat  = double, class MAT , typename G &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Score potential marker genes by computing summary statistics across pairwise comparisons between groups.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">Matrix</td><td>A <b>tatami</b> matrix class, usually a <code>NumericMatrix</code>. </td></tr>
-    <tr><td class="paramname">G</td><td>Integer type for the group assignments. </td></tr>
-    <tr><td class="paramname">Stat</td><td>Floating-point type to store the statistics.</td></tr>
-  </table>
-  </dd>
-</dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">p</td><td>Pointer to a <b>tatami</b> matrix instance. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the group assignments. These should be 0-based and consecutive.</td></tr>
+    <tr><td class="paramname">t</td><td>Threshold on the log-fold change. This should be non-negative.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code> object containing the summary statistics and the other per-group statistics. Whether particular statistics are computed depends on the configuration from <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code> and related setters. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a1608e184ef29a0d374f969cdc218ac53" name="a1608e184ef29a0d374f969cdc218ac53"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1608e184ef29a0d374f969cdc218ac53">&#9670;&#160;</a></span>set_num_threads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_num_threads </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a5239f3c203cf47a7ca4abd3fda851242">Defaults::num_threads</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a7033cf240ad63ed9360731a0b0dd5cbc" name="a7033cf240ad63ed9360731a0b0dd5cbc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7033cf240ad63ed9360731a0b0dd5cbc">&#9670;&#160;</a></span>set_cache_size()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_cache_size </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>c</em> = <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a0a887b918caa0be9523adf38ec6e892b">Defaults::cache_size</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">c</td><td>Size of the cache, in terms of the number of pairwise comparisons. Larger values speed up the comparisons at the cost of higher memory consumption.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="acc06d8f9005175502e8ff56a55dd4a7d" name="acc06d8f9005175502e8ff56a55dd4a7d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc06d8f9005175502e8ff56a55dd4a7d">&#9670;&#160;</a></span>set_compute_cohen() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_cohen </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classscran_1_1ScoreMarkers.html#a836ea0c31fa496f274943e79035314b5">ComputeSummaries</a>&#160;</td>
+          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries</a>()</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>Which summary statistics to compute for Cohen's d.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="accd5fd4f1b273131eb9bce7b59d0eb63" name="accd5fd4f1b273131eb9bce7b59d0eb63"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#accd5fd4f1b273131eb9bce7b59d0eb63">&#9670;&#160;</a></span>set_compute_cohen() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_cohen </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>c</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">c</td><td>Whether to compute Cohen's d at all.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This is an alias for <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code> where <code>c = true</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries()</a></code> and <code>c = false</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a2ce7d34d04baed541e958ac5deebfb36">Defaults::compute_no_summaries()</a></code>.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="ae552e125db5264ab1719cf12fdc318fe" name="ae552e125db5264ab1719cf12fdc318fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae552e125db5264ab1719cf12fdc318fe">&#9670;&#160;</a></span>set_compute_cohen() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_cohen </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacescran_1_1differential__analysis.html#a9651cedd1ef5f3c2631ff3d7af955b23">differential_analysis::summary</a>&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>c</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>A summary statistic of interest. </td></tr>
+    <tr><td class="paramname">c</td><td>Whether to compute the summary statistic <code>s</code> for Cohen's d.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a79b4328dcdd409b2c7156410a9cf1b93" name="a79b4328dcdd409b2c7156410a9cf1b93"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a79b4328dcdd409b2c7156410a9cf1b93">&#9670;&#160;</a></span>set_compute_auc() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_auc </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classscran_1_1ScoreMarkers.html#a836ea0c31fa496f274943e79035314b5">ComputeSummaries</a>&#160;</td>
+          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries</a>()</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>Which summary statistics to compute for the AUC.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="aa33b7936392e32122febd819b8b5b7de" name="aa33b7936392e32122febd819b8b5b7de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa33b7936392e32122febd819b8b5b7de">&#9670;&#160;</a></span>set_compute_auc() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_auc </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>c</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">c</td><td>Whether to compute the AUC at all.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This is an alias for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a79b4328dcdd409b2c7156410a9cf1b93">set_compute_auc()</a></code> where <code>c = true</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries()</a></code> and <code>c = false</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a2ce7d34d04baed541e958ac5deebfb36">Defaults::compute_no_summaries()</a></code>.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a8a05963063e92a4ac296dfa627de4503" name="a8a05963063e92a4ac296dfa627de4503"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a05963063e92a4ac296dfa627de4503">&#9670;&#160;</a></span>set_compute_auc() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_auc </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacescran_1_1differential__analysis.html#a9651cedd1ef5f3c2631ff3d7af955b23">differential_analysis::summary</a>&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>c</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>A summary statistic of interest. </td></tr>
+    <tr><td class="paramname">c</td><td>Whether to compute the summary statistic <code>s</code> for the AUC.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="aa8f0dfe45359d007ef9ae492d7e5571c" name="aa8f0dfe45359d007ef9ae492d7e5571c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa8f0dfe45359d007ef9ae492d7e5571c">&#9670;&#160;</a></span>set_compute_lfc() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_lfc </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classscran_1_1ScoreMarkers.html#a836ea0c31fa496f274943e79035314b5">ComputeSummaries</a>&#160;</td>
+          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries</a>()</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>Which summary statistics to compute for the LFC.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a5763df3dc998e92712f2fd8add1edf66" name="a5763df3dc998e92712f2fd8add1edf66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5763df3dc998e92712f2fd8add1edf66">&#9670;&#160;</a></span>set_compute_lfc() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_lfc </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>c</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">c</td><td>Whether to compute the LFC at all.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This is an alias for <code><a class="el" href="classscran_1_1ScoreMarkers.html#aa8f0dfe45359d007ef9ae492d7e5571c">set_compute_lfc()</a></code> where <code>c = true</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries()</a></code> and <code>c = false</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a2ce7d34d04baed541e958ac5deebfb36">Defaults::compute_no_summaries()</a></code>.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a8dd093b0bedf7e9b8d6d81903778ea7a" name="a8dd093b0bedf7e9b8d6d81903778ea7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8dd093b0bedf7e9b8d6d81903778ea7a">&#9670;&#160;</a></span>set_compute_lfc() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_lfc </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacescran_1_1differential__analysis.html#a9651cedd1ef5f3c2631ff3d7af955b23">differential_analysis::summary</a>&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>c</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>A summary statistic of interest. </td></tr>
+    <tr><td class="paramname">c</td><td>Whether to compute the summary statistic <code>s</code> for the LFC.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a1220483b8d4b740ead9bca8c70fa2362" name="a1220483b8d4b740ead9bca8c70fa2362"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1220483b8d4b740ead9bca8c70fa2362">&#9670;&#160;</a></span>set_compute_delta_detected() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_delta_detected </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classscran_1_1ScoreMarkers.html#a836ea0c31fa496f274943e79035314b5">ComputeSummaries</a>&#160;</td>
+          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries</a>()</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>Which summary statistics to compute for the delta detected.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a09fba4be4aae73861a38e82727519d4e" name="a09fba4be4aae73861a38e82727519d4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a09fba4be4aae73861a38e82727519d4e">&#9670;&#160;</a></span>set_compute_delta_detected() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_delta_detected </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>c</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">c</td><td>Whether to compute the delta detected at all.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This is an alias for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a1220483b8d4b740ead9bca8c70fa2362">set_compute_delta_detected()</a></code> where <code>c = true</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries()</a></code> and <code>c = false</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a2ce7d34d04baed541e958ac5deebfb36">Defaults::compute_no_summaries()</a></code>.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a519f725507ea407f7fd2a98dfc2f98c2" name="a519f725507ea407f7fd2a98dfc2f98c2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a519f725507ea407f7fd2a98dfc2f98c2">&#9670;&#160;</a></span>set_compute_delta_detected() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_delta_detected </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacescran_1_1differential__analysis.html#a9651cedd1ef5f3c2631ff3d7af955b23">differential_analysis::summary</a>&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>c</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>A summary statistic of interest. </td></tr>
+    <tr><td class="paramname">c</td><td>Whether to compute the summary statistic <code>s</code> for the delta detected.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a9da89baba3b8b60aa87530b81ec8fe9e" name="a9da89baba3b8b60aa87530b81ec8fe9e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9da89baba3b8b60aa87530b81ec8fe9e">&#9670;&#160;</a></span>set_summary_min()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_summary_min </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>s</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>Whether to compute the minimum summary statistic for any effect size.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This overrides any previous settings for the minimum from the effect-size-specific setters, e.g., <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code>. However, it can also be overridden by later calls to those setters.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="ab83ea5de6bc23dcb6e73a5c97b62babf" name="ab83ea5de6bc23dcb6e73a5c97b62babf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab83ea5de6bc23dcb6e73a5c97b62babf">&#9670;&#160;</a></span>set_summary_mean()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_summary_mean </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>s</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>Whether to compute the mean summary statistic for any effect size.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This overrides any previous settings for the mean from the effect-size-specific setters, e.g., <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code>. However, it can also be overridden by later calls to those setters.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="ae3a45151048b3aec1ab7c076470e20b5" name="ae3a45151048b3aec1ab7c076470e20b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3a45151048b3aec1ab7c076470e20b5">&#9670;&#160;</a></span>set_summary_median()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_summary_median </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>s</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>Whether to compute the median summary statistic for any effect size.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This overrides any previous settings for the median from the effect-size-specific setters, e.g., <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code>. However, it can also be overridden by later calls to those setters.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="ab3379a274da6d5edfcef09e18191e553" name="ab3379a274da6d5edfcef09e18191e553"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3379a274da6d5edfcef09e18191e553">&#9670;&#160;</a></span>set_summary_max()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_summary_max </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>s</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>Whether to compute the maximum summary statistic for any effect size.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This overrides any previous settings for the maximum from the effect-size-specific setters, e.g., <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code>. However, it can also be overridden by later calls to those setters.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a4eefc84e9355d6d45d24a6a35aea2777" name="a4eefc84e9355d6d45d24a6a35aea2777"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4eefc84e9355d6d45d24a6a35aea2777">&#9670;&#160;</a></span>set_summary_min_rank()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_summary_min_rank </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>s</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">s</td><td>Whether to compute the minimum rank summary statistic for any effect size.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This overrides any previous settings for the minimum rank from the effect-size-specific setters, e.g., <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code>. However, it can also be overridden by later calls to those setters.</p>
+<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
 
 </div>
 </div>
 <a id="a0d56c9db569b81ac49429fa9af4c4a41" name="a0d56c9db569b81ac49429fa9af4c4a41"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0d56c9db569b81ac49429fa9af4c4a41">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d56c9db569b81ac49429fa9af4c4a41">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -334,71 +1009,8 @@ template&lt;class Matrix , typename G , typename Stat &gt; </div>
 
 </div>
 </div>
-<a id="ae9f2036ba33acaca3056557f77dbebb6" name="ae9f2036ba33acaca3056557f77dbebb6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae9f2036ba33acaca3056557f77dbebb6">&#9670;&#160;</a></span>run_blocked() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Stat  = double, class MAT , typename G , typename B &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html">Results</a>&lt; Stat &gt; scran::ScoreMarkers::run_blocked </td>
-          <td>(</td>
-          <td class="paramtype">const MAT *&#160;</td>
-          <td class="paramname"><em>p</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const G *&#160;</td>
-          <td class="paramname"><em>group</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const B *&#160;</td>
-          <td class="paramname"><em>block</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">Matrix</td><td>A <b>tatami</b> matrix class, usually a <code>NumericMatrix</code>. </td></tr>
-    <tr><td class="paramname">G</td><td>Integer type for the group assignments. </td></tr>
-    <tr><td class="paramname">B</td><td>Integer type for the block assignments. </td></tr>
-    <tr><td class="paramname">Stat</td><td>Floating-point type to store the statistics.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">p</td><td>Pointer to a <b>tatami</b> matrix instance. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the group assignments. These should be 0-based and consecutive. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the blocking factor. Levels should be 0-based and consecutive.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code> object containing the summary statistics and the other per-group statistics. Whether particular statistics are computed depends on the configuration from <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code> and related setters. </dd></dl>
-
-</div>
-</div>
 <a id="a9d319660600b0cd24724b56e7ca6a4f5" name="a9d319660600b0cd24724b56e7ca6a4f5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9d319660600b0cd24724b56e7ca6a4f5">&#9670;&#160;</a></span>run_blocked() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d319660600b0cd24724b56e7ca6a4f5">&#9670;&#160;</a></span>run_blocked() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -503,133 +1115,33 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
 
 </div>
 </div>
-<a id="a7033cf240ad63ed9360731a0b0dd5cbc" name="a7033cf240ad63ed9360731a0b0dd5cbc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7033cf240ad63ed9360731a0b0dd5cbc">&#9670;&#160;</a></span>set_cache_size()</h2>
+<a id="a5c81526daaefc33a903e6339e4e57d2e" name="a5c81526daaefc33a903e6339e4e57d2e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c81526daaefc33a903e6339e4e57d2e">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename Stat  = double, class MAT , typename G &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_cache_size </td>
+          <td class="memname"><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html">Results</a>&lt; Stat &gt; scran::ScoreMarkers::run </td>
           <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>c</em> = <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a0a887b918caa0be9523adf38ec6e892b">Defaults::cache_size</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">c</td><td>Size of the cache, in terms of the number of pairwise comparisons. Larger values speed up the comparisons at the cost of higher memory consumption.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="aa33b7936392e32122febd819b8b5b7de" name="aa33b7936392e32122febd819b8b5b7de"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa33b7936392e32122febd819b8b5b7de">&#9670;&#160;</a></span>set_compute_auc() <span class="overload">[1/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_auc </td>
-          <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>c</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">c</td><td>Whether to compute the AUC at all.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>This is an alias for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a79b4328dcdd409b2c7156410a9cf1b93">set_compute_auc()</a></code> where <code>c = true</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries()</a></code> and <code>c = false</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a2ce7d34d04baed541e958ac5deebfb36">Defaults::compute_no_summaries()</a></code>.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="a79b4328dcdd409b2c7156410a9cf1b93" name="a79b4328dcdd409b2c7156410a9cf1b93"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a79b4328dcdd409b2c7156410a9cf1b93">&#9670;&#160;</a></span>set_compute_auc() <span class="overload">[2/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_auc </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classscran_1_1ScoreMarkers.html#a836ea0c31fa496f274943e79035314b5">ComputeSummaries</a>&#160;</td>
-          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries</a>()</code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>Which summary statistics to compute for the AUC.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="a8a05963063e92a4ac296dfa627de4503" name="a8a05963063e92a4ac296dfa627de4503"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8a05963063e92a4ac296dfa627de4503">&#9670;&#160;</a></span>set_compute_auc() <span class="overload">[3/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_auc </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="namespacescran_1_1differential__analysis.html#a9651cedd1ef5f3c2631ff3d7af955b23">differential_analysis::summary</a>&#160;</td>
-          <td class="paramname"><em>s</em>, </td>
+          <td class="paramtype">const MAT *&#160;</td>
+          <td class="paramname"><em>p</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>c</em>&#160;</td>
+          <td class="paramtype">const G *&#160;</td>
+          <td class="paramname"><em>group</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -638,226 +1150,59 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>A summary statistic of interest. </td></tr>
-    <tr><td class="paramname">c</td><td>Whether to compute the summary statistic <code>s</code> for the AUC.</td></tr>
+<p >Score potential marker genes by computing summary statistics across pairwise comparisons between groups.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Matrix</td><td>A <b>tatami</b> matrix class, usually a <code>NumericMatrix</code>. </td></tr>
+    <tr><td class="paramname">G</td><td>Integer type for the group assignments. </td></tr>
+    <tr><td class="paramname">Stat</td><td>Floating-point type to store the statistics.</td></tr>
   </table>
   </dd>
 </dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">p</td><td>Pointer to a <b>tatami</b> matrix instance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the group assignments. These should be 0-based and consecutive.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code> object containing the summary statistics and the other per-group statistics. Whether particular statistics are computed depends on the configuration from <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code> and related setters. </dd></dl>
 
 </div>
 </div>
-<a id="accd5fd4f1b273131eb9bce7b59d0eb63" name="accd5fd4f1b273131eb9bce7b59d0eb63"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#accd5fd4f1b273131eb9bce7b59d0eb63">&#9670;&#160;</a></span>set_compute_cohen() <span class="overload">[1/3]</span></h2>
+<a id="ae9f2036ba33acaca3056557f77dbebb6" name="ae9f2036ba33acaca3056557f77dbebb6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9f2036ba33acaca3056557f77dbebb6">&#9670;&#160;</a></span>run_blocked() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename Stat  = double, class MAT , typename G , typename B &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_cohen </td>
+          <td class="memname"><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html">Results</a>&lt; Stat &gt; scran::ScoreMarkers::run_blocked </td>
           <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>c</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">c</td><td>Whether to compute Cohen's d at all.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>This is an alias for <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code> where <code>c = true</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries()</a></code> and <code>c = false</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a2ce7d34d04baed541e958ac5deebfb36">Defaults::compute_no_summaries()</a></code>.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="acc06d8f9005175502e8ff56a55dd4a7d" name="acc06d8f9005175502e8ff56a55dd4a7d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acc06d8f9005175502e8ff56a55dd4a7d">&#9670;&#160;</a></span>set_compute_cohen() <span class="overload">[2/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_cohen </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classscran_1_1ScoreMarkers.html#a836ea0c31fa496f274943e79035314b5">ComputeSummaries</a>&#160;</td>
-          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries</a>()</code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>Which summary statistics to compute for Cohen's d.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="ae552e125db5264ab1719cf12fdc318fe" name="ae552e125db5264ab1719cf12fdc318fe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae552e125db5264ab1719cf12fdc318fe">&#9670;&#160;</a></span>set_compute_cohen() <span class="overload">[3/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_cohen </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="namespacescran_1_1differential__analysis.html#a9651cedd1ef5f3c2631ff3d7af955b23">differential_analysis::summary</a>&#160;</td>
-          <td class="paramname"><em>s</em>, </td>
+          <td class="paramtype">const MAT *&#160;</td>
+          <td class="paramname"><em>p</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>c</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>A summary statistic of interest. </td></tr>
-    <tr><td class="paramname">c</td><td>Whether to compute the summary statistic <code>s</code> for Cohen's d.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="a09fba4be4aae73861a38e82727519d4e" name="a09fba4be4aae73861a38e82727519d4e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a09fba4be4aae73861a38e82727519d4e">&#9670;&#160;</a></span>set_compute_delta_detected() <span class="overload">[1/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_delta_detected </td>
-          <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>c</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">c</td><td>Whether to compute the delta detected at all.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>This is an alias for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a1220483b8d4b740ead9bca8c70fa2362">set_compute_delta_detected()</a></code> where <code>c = true</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries()</a></code> and <code>c = false</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a2ce7d34d04baed541e958ac5deebfb36">Defaults::compute_no_summaries()</a></code>.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="a1220483b8d4b740ead9bca8c70fa2362" name="a1220483b8d4b740ead9bca8c70fa2362"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1220483b8d4b740ead9bca8c70fa2362">&#9670;&#160;</a></span>set_compute_delta_detected() <span class="overload">[2/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_delta_detected </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classscran_1_1ScoreMarkers.html#a836ea0c31fa496f274943e79035314b5">ComputeSummaries</a>&#160;</td>
-          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries</a>()</code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>Which summary statistics to compute for the delta detected.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="a519f725507ea407f7fd2a98dfc2f98c2" name="a519f725507ea407f7fd2a98dfc2f98c2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a519f725507ea407f7fd2a98dfc2f98c2">&#9670;&#160;</a></span>set_compute_delta_detected() <span class="overload">[3/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_delta_detected </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="namespacescran_1_1differential__analysis.html#a9651cedd1ef5f3c2631ff3d7af955b23">differential_analysis::summary</a>&#160;</td>
-          <td class="paramname"><em>s</em>, </td>
+          <td class="paramtype">const G *&#160;</td>
+          <td class="paramname"><em>group</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>c</em>&#160;</td>
+          <td class="paramtype">const B *&#160;</td>
+          <td class="paramname"><em>block</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -866,370 +1211,25 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>A summary statistic of interest. </td></tr>
-    <tr><td class="paramname">c</td><td>Whether to compute the summary statistic <code>s</code> for the delta detected.</td></tr>
+<p >Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Matrix</td><td>A <b>tatami</b> matrix class, usually a <code>NumericMatrix</code>. </td></tr>
+    <tr><td class="paramname">G</td><td>Integer type for the group assignments. </td></tr>
+    <tr><td class="paramname">B</td><td>Integer type for the block assignments. </td></tr>
+    <tr><td class="paramname">Stat</td><td>Floating-point type to store the statistics.</td></tr>
   </table>
   </dd>
 </dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="a5763df3dc998e92712f2fd8add1edf66" name="a5763df3dc998e92712f2fd8add1edf66"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5763df3dc998e92712f2fd8add1edf66">&#9670;&#160;</a></span>set_compute_lfc() <span class="overload">[1/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_lfc </td>
-          <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>c</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">c</td><td>Whether to compute the LFC at all.</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">p</td><td>Pointer to a <b>tatami</b> matrix instance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the group assignments. These should be 0-based and consecutive. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the blocking factor. Levels should be 0-based and consecutive.</td></tr>
   </table>
   </dd>
 </dl>
-<p>This is an alias for <code><a class="el" href="classscran_1_1ScoreMarkers.html#aa8f0dfe45359d007ef9ae492d7e5571c">set_compute_lfc()</a></code> where <code>c = true</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries()</a></code> and <code>c = false</code> is equivalent to <code>s = <a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a2ce7d34d04baed541e958ac5deebfb36">Defaults::compute_no_summaries()</a></code>.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="aa8f0dfe45359d007ef9ae492d7e5571c" name="aa8f0dfe45359d007ef9ae492d7e5571c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa8f0dfe45359d007ef9ae492d7e5571c">&#9670;&#160;</a></span>set_compute_lfc() <span class="overload">[2/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_lfc </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="classscran_1_1ScoreMarkers.html#a836ea0c31fa496f274943e79035314b5">ComputeSummaries</a>&#160;</td>
-          <td class="paramname"><em>s</em> = <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a220fdcc79f6d7c8810eacd29fbf19b09">Defaults::compute_all_summaries</a>()</code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>Which summary statistics to compute for the LFC.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="a8dd093b0bedf7e9b8d6d81903778ea7a" name="a8dd093b0bedf7e9b8d6d81903778ea7a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8dd093b0bedf7e9b8d6d81903778ea7a">&#9670;&#160;</a></span>set_compute_lfc() <span class="overload">[3/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_compute_lfc </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="namespacescran_1_1differential__analysis.html#a9651cedd1ef5f3c2631ff3d7af955b23">differential_analysis::summary</a>&#160;</td>
-          <td class="paramname"><em>s</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>c</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>A summary statistic of interest. </td></tr>
-    <tr><td class="paramname">c</td><td>Whether to compute the summary statistic <code>s</code> for the LFC.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="a1608e184ef29a0d374f969cdc218ac53" name="a1608e184ef29a0d374f969cdc218ac53"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1608e184ef29a0d374f969cdc218ac53">&#9670;&#160;</a></span>set_num_threads()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_num_threads </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#a5239f3c203cf47a7ca4abd3fda851242">Defaults::num_threads</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="ab3379a274da6d5edfcef09e18191e553" name="ab3379a274da6d5edfcef09e18191e553"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab3379a274da6d5edfcef09e18191e553">&#9670;&#160;</a></span>set_summary_max()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_summary_max </td>
-          <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>s</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>Whether to compute the maximum summary statistic for any effect size.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>This overrides any previous settings for the maximum from the effect-size-specific setters, e.g., <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code>. However, it can also be overridden by later calls to those setters.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="ab83ea5de6bc23dcb6e73a5c97b62babf" name="ab83ea5de6bc23dcb6e73a5c97b62babf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab83ea5de6bc23dcb6e73a5c97b62babf">&#9670;&#160;</a></span>set_summary_mean()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_summary_mean </td>
-          <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>s</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>Whether to compute the mean summary statistic for any effect size.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>This overrides any previous settings for the mean from the effect-size-specific setters, e.g., <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code>. However, it can also be overridden by later calls to those setters.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="ae3a45151048b3aec1ab7c076470e20b5" name="ae3a45151048b3aec1ab7c076470e20b5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae3a45151048b3aec1ab7c076470e20b5">&#9670;&#160;</a></span>set_summary_median()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_summary_median </td>
-          <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>s</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>Whether to compute the median summary statistic for any effect size.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>This overrides any previous settings for the median from the effect-size-specific setters, e.g., <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code>. However, it can also be overridden by later calls to those setters.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="a9da89baba3b8b60aa87530b81ec8fe9e" name="a9da89baba3b8b60aa87530b81ec8fe9e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9da89baba3b8b60aa87530b81ec8fe9e">&#9670;&#160;</a></span>set_summary_min()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_summary_min </td>
-          <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>s</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>Whether to compute the minimum summary statistic for any effect size.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>This overrides any previous settings for the minimum from the effect-size-specific setters, e.g., <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code>. However, it can also be overridden by later calls to those setters.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="a4eefc84e9355d6d45d24a6a35aea2777" name="a4eefc84e9355d6d45d24a6a35aea2777"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4eefc84e9355d6d45d24a6a35aea2777">&#9670;&#160;</a></span>set_summary_min_rank()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_summary_min_rank </td>
-          <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>s</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>Whether to compute the minimum rank summary statistic for any effect size.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>This overrides any previous settings for the minimum rank from the effect-size-specific setters, e.g., <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code>. However, it can also be overridden by later calls to those setters.</p>
-<p >This only has an effect for <code><a class="el" href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">run()</a></code> methods that return <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="a9e7f5ec97f4628bdb2a6739670614401" name="a9e7f5ec97f4628bdb2a6739670614401"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9e7f5ec97f4628bdb2a6739670614401">&#9670;&#160;</a></span>set_threshold()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreMarkers.html">ScoreMarkers</a> &amp; scran::ScoreMarkers::set_threshold </td>
-          <td>(</td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>t</em> = <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Defaults.html#ac1138a7ec0df83d0af5d43af9bf7f14b">Defaults::threshold</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">t</td><td>Threshold on the log-fold change. This should be non-negative.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ScoreMarkers.html" title="Score each gene as a candidate marker for each group of cells.">ScoreMarkers</a></code> object. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ScoreMarkers_1_1Results.html" title="Results of the marker scoring.">Results</a></code> object containing the summary statistics and the other per-group statistics. Whether particular statistics are computed depends on the configuration from <code><a class="el" href="classscran_1_1ScoreMarkers.html#acc06d8f9005175502e8ff56a55dd4a7d">set_compute_cohen()</a></code> and related setters. </dd></dl>
 
 </div>
 </div>

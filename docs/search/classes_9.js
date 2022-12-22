@@ -1,10 +1,6 @@
 var searchData=
 [
-  ['pairwiseeffects_0',['PairwiseEffects',['../classscran_1_1PairwiseEffects.html',1,'scran']]],
-  ['percelladtqcfilters_1',['PerCellAdtQcFilters',['../classscran_1_1PerCellAdtQcFilters.html',1,'scran']]],
-  ['percelladtqcmetrics_2',['PerCellAdtQcMetrics',['../classscran_1_1PerCellAdtQcMetrics.html',1,'scran']]],
-  ['percellcrisprqcmetrics_3',['PerCellCrisprQcMetrics',['../classscran_1_1PerCellCrisprQcMetrics.html',1,'scran']]],
-  ['percellqcmetrics_4',['PerCellQcMetrics',['../classscran_1_1PerCellQcMetrics.html',1,'scran']]],
-  ['percellrnaqcfilters_5',['PerCellRnaQcFilters',['../classscran_1_1PerCellRnaQcFilters.html',1,'scran']]],
-  ['percellrnaqcmetrics_6',['PerCellRnaQcMetrics',['../classscran_1_1PerCellRnaQcMetrics.html',1,'scran']]]
+  ['results_0',['Results',['../structscran_1_1AggregateAcrossCells_1_1Results.html',1,'scran::AggregateAcrossCells::Results&lt; Sum, Detected &gt;'],['../structscran_1_1BlockedPCA_1_1Results.html',1,'scran::BlockedPCA::Results'],['../structscran_1_1ClusterSNNGraphLeiden_1_1Results.html',1,'scran::ClusterSNNGraphLeiden::Results'],['../structscran_1_1ClusterSNNGraphMultiLevel_1_1Results.html',1,'scran::ClusterSNNGraphMultiLevel::Results'],['../structscran_1_1ClusterSNNGraphWalktrap_1_1Results.html',1,'scran::ClusterSNNGraphWalktrap::Results'],['../structscran_1_1ComputeMedianMad_1_1Results.html',1,'scran::ComputeMedianMad::Results'],['../structscran_1_1FitTrendVar_1_1Results.html',1,'scran::FitTrendVar::Results'],['../structscran_1_1GroupedSizeFactors_1_1Results.html',1,'scran::GroupedSizeFactors::Results&lt; Out &gt;'],['../structscran_1_1MedianSizeFactors_1_1Results.html',1,'scran::MedianSizeFactors::Results&lt; Out &gt;'],['../structscran_1_1ModelGeneVar_1_1Results.html',1,'scran::ModelGeneVar::Results'],['../structscran_1_1MultiBatchPCA_1_1Results.html',1,'scran::MultiBatchPCA::Results'],['../structscran_1_1PairwiseEffects_1_1Results.html',1,'scran::PairwiseEffects::Results&lt; Stat &gt;'],['../structscran_1_1PerCellAdtQcMetrics_1_1Results.html',1,'scran::PerCellAdtQcMetrics::Results'],['../structscran_1_1PerCellCrisprQcMetrics_1_1Results.html',1,'scran::PerCellCrisprQcMetrics::Results'],['../structscran_1_1PerCellQcMetrics_1_1Results.html',1,'scran::PerCellQcMetrics::Results'],['../structscran_1_1PerCellRnaQcMetrics_1_1Results.html',1,'scran::PerCellRnaQcMetrics::Results'],['../structscran_1_1RunPCA_1_1Results.html',1,'scran::RunPCA::Results'],['../structscran_1_1ScoreMarkers_1_1Results.html',1,'scran::ScoreMarkers::Results&lt; Stat &gt;']]],
+  ['resultswithmeans_1',['ResultsWithMeans',['../structscran_1_1PairwiseEffects_1_1ResultsWithMeans.html',1,'scran::PairwiseEffects']]],
+  ['runpca_2',['RunPCA',['../classscran_1_1RunPCA.html',1,'scran']]]
 ];

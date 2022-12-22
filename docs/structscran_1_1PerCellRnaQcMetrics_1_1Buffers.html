@@ -107,6 +107,23 @@ struct scran::PerCellRnaQcMetrics::Buffers&lt; Float, Integer &gt;</div><p ><a c
   </dd>
 </dl>
 </div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="accb4910b5bbce6535ea74d472e3b434a" name="accb4910b5bbce6535ea74d472e3b434a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#accb4910b5bbce6535ea74d472e3b434a">&#9670;&#160;</a></span>sums</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Float  = double, typename Integer  = int&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">Float* <a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html">scran::PerCellRnaQcMetrics::Buffers</a>&lt; Float, Integer &gt;::sums = NULL</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Pointer to an array of length equal to the number of cells, see <code><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html#afdfcb6fa78932b05bad3dc7246013e29">Results::sums</a></code>. Set to <code>NULL</code> to skip this calculation. </p>
+
+</div>
+</div>
 <a id="aca7c4f85e32fab108dcf0123b4145e60" name="aca7c4f85e32fab108dcf0123b4145e60"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aca7c4f85e32fab108dcf0123b4145e60">&#9670;&#160;</a></span>detected</h2>
 
@@ -138,23 +155,6 @@ template&lt;typename Float  = double, typename Integer  = int&gt; </div>
       </table>
 </div><div class="memdoc">
 <p >Vector of pointers of length equal to the number of feature subsets. Each pointer should be to aan array of length equal to the number of cells, see <code><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html#a27a09620eb681190cb1548ba59befb5a">Results::subset_proportions</a></code>. Set any to <code>NULL</code> to skip this calculation for that subset. </p>
-
-</div>
-</div>
-<a id="accb4910b5bbce6535ea74d472e3b434a" name="accb4910b5bbce6535ea74d472e3b434a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#accb4910b5bbce6535ea74d472e3b434a">&#9670;&#160;</a></span>sums</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Float  = double, typename Integer  = int&gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">Float* <a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Buffers.html">scran::PerCellRnaQcMetrics::Buffers</a>&lt; Float, Integer &gt;::sums = NULL</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Pointer to an array of length equal to the number of cells, see <code><a class="el" href="structscran_1_1PerCellRnaQcMetrics_1_1Results.html#afdfcb6fa78932b05bad3dc7246013e29">Results::sums</a></code>. Set to <code>NULL</code> to skip this calculation. </p>
 
 </div>
 </div>

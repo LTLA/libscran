@@ -131,39 +131,21 @@ Public Member Functions</h2></td></tr>
 <p ><code>NaN</code> effect sizes are allowed, e.g., if two groups do not exist in the same block for a blocked analysis in <code><a class="el" href="classscran_1_1PairwiseEffects.html" title="Compute pairwise effect size between groups of cells.">PairwiseEffects</a></code>. This class will ignore <code>NaN</code> values when computing each summary. If all effects are <code>NaN</code> for a particular group, the summary statistic will also be <code>NaN</code>.</p>
 <p >All choices of summary statistics are enumerated by <code><a class="el" href="namespacescran_1_1differential__analysis.html#a9651cedd1ef5f3c2631ff3d7af955b23">differential_analysis::summary</a></code>. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a422e9dfd8e19edf2716595d4b0d87a1d" name="a422e9dfd8e19edf2716595d4b0d87a1d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a422e9dfd8e19edf2716595d4b0d87a1d">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
+<a id="a579d507532421a29a72a4ead040f2611" name="a579d507532421a29a72a4ead040f2611"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a579d507532421a29a72a4ead040f2611">&#9670;&#160;</a></span>set_num_threads()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<div class="memtemplate">
-template&lt;typename Stat &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::vector&lt; std::vector&lt; std::vector&lt; Stat &gt; &gt; &gt; scran::SummarizeEffects::run </td>
+          <td class="memname"><a class="el" href="classscran_1_1SummarizeEffects.html">SummarizeEffects</a> &amp; scran::SummarizeEffects::set_num_threads </td>
           <td>(</td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>ngenes</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1SummarizeEffects_1_1Defaults.html#a961f7e01b98c5c365773a20e32cc2ac3">Defaults::num_threads</a></code></td><td>)</td>
           <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>ngroups</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Stat *&#160;</td>
-          <td class="paramname"><em>effects</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -172,95 +154,18 @@ template&lt;typename Stat &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Summarize the effect sizes for the pairwise comparisons to obtain a set of summary statistics for each gene in each group.</p>
-<p >If <code>summaries</code> is of length 0, no summaries are computed. If any of the inner vectors of <code>summaries</code> are of length 0, the corresponding summary statistic is not computed.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">Stat</td><td>Floating point type for the statistics.</td></tr>
-  </table>
-  </dd>
-</dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">ngenes</td><td>Number of genes. </td></tr>
-    <tr><td class="paramdir"></td><td class="paramname">ngroups</td><td>Number of groups. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">effects</td><td>Pointer to a 3-dimensional array containing the pairwise statistics, see <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">PairwiseEffects::Results</a></code> for details.</td></tr>
+    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A vector of vectors of vectors containing summary effects for each gene in each group. The vector is of length equal to <code>differential_analysis::n_summaries</code> (see <code><a class="el" href="namespacescran_1_1differential__analysis.html#a9651cedd1ef5f3c2631ff3d7af955b23">differential_analysis::summary</a></code>). Each inner vector corresponds to a summary statistic - i.e., minimum, mean, median, maximum and min-rank - and is of length equal to the number of groups. Each pointer corresponds to a group, and points to an array containing the associated summary statistic across all genes for that group. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1SummarizeEffects.html" title="Summarize pairwise effects into summary statistics per group.">SummarizeEffects</a></code> object. </dd></dl>
 
 </div>
 </div>
-<a id="a13302827e97fd2b05f4b421a8c2a13d1" name="a13302827e97fd2b05f4b421a8c2a13d1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a13302827e97fd2b05f4b421a8c2a13d1">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Stat &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void scran::SummarizeEffects::run </td>
-          <td>(</td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>ngenes</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>ngroups</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Stat *&#160;</td>
-          <td class="paramname"><em>effects</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::vector&lt; std::vector&lt; Stat * &gt; &gt;&#160;</td>
-          <td class="paramname"><em>summaries</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Summarize the effect sizes for the pairwise comparisons to obtain a set of summary statistics for each gene in each group.</p>
-<p >If <code>summaries</code> is of length 0, no summaries are computed. If any of the inner vectors of <code>summaries</code> are of length 0, the corresponding summary statistic is not computed.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">Stat</td><td>Floating point type for the statistics.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">ngenes</td><td>Number of genes. </td></tr>
-    <tr><td class="paramdir"></td><td class="paramname">ngroups</td><td>Number of groups. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">effects</td><td>Pointer to a 3-dimensional array containing the pairwise statistics, see <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">PairwiseEffects::Results</a></code> for details. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">summaries</td><td>Vector of vector of pointers to arrays of length equal to the number of genes. The vector should be of length equal to <code>differential_analysis::n_summaries</code> (see <code><a class="el" href="namespacescran_1_1differential__analysis.html#a9651cedd1ef5f3c2631ff3d7af955b23">differential_analysis::summary</a></code>). Each inner vector corresponds to a summary statistic - i.e., minimum, mean, median, maximum and min-rank - and should be of length equal to the number of groups. Each pointer corresponds to a group, and points to an array that is used to store the associated summary statistic across all genes for that group. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ac4078a63f650cbb7e538347e9c54d0ec" name="ac4078a63f650cbb7e538347e9c54d0ec"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac4078a63f650cbb7e538347e9c54d0ec">&#9670;&#160;</a></span>set_compute_max()</h2>
+<a id="a1dce14dd1e4554c724221e8525952aac" name="a1dce14dd1e4554c724221e8525952aac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1dce14dd1e4554c724221e8525952aac">&#9670;&#160;</a></span>set_compute_min()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -269,10 +174,10 @@ template&lt;typename Stat &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1SummarizeEffects.html">SummarizeEffects</a> &amp; scran::SummarizeEffects::set_compute_max </td>
+          <td class="memname"><a class="el" href="classscran_1_1SummarizeEffects.html">SummarizeEffects</a> &amp; scran::SummarizeEffects::set_compute_min </td>
           <td>(</td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>c</em> = <code><a class="el" href="structscran_1_1SummarizeEffects_1_1Defaults.html#a55d321e03e94bbaca62d75eb1cc10c81">Defaults::compute_max</a></code></td><td>)</td>
+          <td class="paramname"><em>c</em> = <code><a class="el" href="structscran_1_1SummarizeEffects_1_1Defaults.html#aef011af1e9bbcd7e606b4e16307e8212">Defaults::compute_min</a></code></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -284,12 +189,12 @@ template&lt;typename Stat &gt; </div>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">c</td><td>Whether to report the maximum of the pairwise effects. </td></tr>
+    <tr><td class="paramname">c</td><td>Whether to report the minimum of the pairwise effects. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1SummarizeEffects.html" title="Summarize pairwise effects into summary statistics per group.">SummarizeEffects</a></code> object.</dd></dl>
-<p>This has no effect on the <code><a class="el" href="classscran_1_1SummarizeEffects.html#a13302827e97fd2b05f4b421a8c2a13d1">run()</a></code> overload that accepts a <code>summaries</code> vector. For this method, the minimum is calculated if <code>summaries[differential_analysis::MAX]</code> is of non-zero length. </p>
+<p>This has no effect on the <code><a class="el" href="classscran_1_1SummarizeEffects.html#a13302827e97fd2b05f4b421a8c2a13d1">run()</a></code> overload that accepts a <code>summaries</code> vector. For this method, the minimum is calculated if <code>summaries[differential_analysis::MIN]</code> is of non-zero length. </p>
 
 </div>
 </div>
@@ -361,8 +266,8 @@ template&lt;typename Stat &gt; </div>
 
 </div>
 </div>
-<a id="a1dce14dd1e4554c724221e8525952aac" name="a1dce14dd1e4554c724221e8525952aac"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1dce14dd1e4554c724221e8525952aac">&#9670;&#160;</a></span>set_compute_min()</h2>
+<a id="ac4078a63f650cbb7e538347e9c54d0ec" name="ac4078a63f650cbb7e538347e9c54d0ec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4078a63f650cbb7e538347e9c54d0ec">&#9670;&#160;</a></span>set_compute_max()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -371,10 +276,10 @@ template&lt;typename Stat &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1SummarizeEffects.html">SummarizeEffects</a> &amp; scran::SummarizeEffects::set_compute_min </td>
+          <td class="memname"><a class="el" href="classscran_1_1SummarizeEffects.html">SummarizeEffects</a> &amp; scran::SummarizeEffects::set_compute_max </td>
           <td>(</td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>c</em> = <code><a class="el" href="structscran_1_1SummarizeEffects_1_1Defaults.html#aef011af1e9bbcd7e606b4e16307e8212">Defaults::compute_min</a></code></td><td>)</td>
+          <td class="paramname"><em>c</em> = <code><a class="el" href="structscran_1_1SummarizeEffects_1_1Defaults.html#a55d321e03e94bbaca62d75eb1cc10c81">Defaults::compute_max</a></code></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -386,12 +291,12 @@ template&lt;typename Stat &gt; </div>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">c</td><td>Whether to report the minimum of the pairwise effects. </td></tr>
+    <tr><td class="paramname">c</td><td>Whether to report the maximum of the pairwise effects. </td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1SummarizeEffects.html" title="Summarize pairwise effects into summary statistics per group.">SummarizeEffects</a></code> object.</dd></dl>
-<p>This has no effect on the <code><a class="el" href="classscran_1_1SummarizeEffects.html#a13302827e97fd2b05f4b421a8c2a13d1">run()</a></code> overload that accepts a <code>summaries</code> vector. For this method, the minimum is calculated if <code>summaries[differential_analysis::MIN]</code> is of non-zero length. </p>
+<p>This has no effect on the <code><a class="el" href="classscran_1_1SummarizeEffects.html#a13302827e97fd2b05f4b421a8c2a13d1">run()</a></code> overload that accepts a <code>summaries</code> vector. For this method, the minimum is calculated if <code>summaries[differential_analysis::MAX]</code> is of non-zero length. </p>
 
 </div>
 </div>
@@ -429,21 +334,45 @@ template&lt;typename Stat &gt; </div>
 
 </div>
 </div>
-<a id="a579d507532421a29a72a4ead040f2611" name="a579d507532421a29a72a4ead040f2611"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a579d507532421a29a72a4ead040f2611">&#9670;&#160;</a></span>set_num_threads()</h2>
+<a id="a13302827e97fd2b05f4b421a8c2a13d1" name="a13302827e97fd2b05f4b421a8c2a13d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13302827e97fd2b05f4b421a8c2a13d1">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename Stat &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1SummarizeEffects.html">SummarizeEffects</a> &amp; scran::SummarizeEffects::set_num_threads </td>
+          <td class="memname">void scran::SummarizeEffects::run </td>
           <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1SummarizeEffects_1_1Defaults.html#a961f7e01b98c5c365773a20e32cc2ac3">Defaults::num_threads</a></code></td><td>)</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>ngenes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>ngroups</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Stat *&#160;</td>
+          <td class="paramname"><em>effects</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; Stat * &gt; &gt;&#160;</td>
+          <td class="paramname"><em>summaries</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -452,13 +381,84 @@ template&lt;typename Stat &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+<p >Summarize the effect sizes for the pairwise comparisons to obtain a set of summary statistics for each gene in each group.</p>
+<p >If <code>summaries</code> is of length 0, no summaries are computed. If any of the inner vectors of <code>summaries</code> are of length 0, the corresponding summary statistic is not computed.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Stat</td><td>Floating point type for the statistics.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1SummarizeEffects.html" title="Summarize pairwise effects into summary statistics per group.">SummarizeEffects</a></code> object. </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">ngenes</td><td>Number of genes. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">ngroups</td><td>Number of groups. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">effects</td><td>Pointer to a 3-dimensional array containing the pairwise statistics, see <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">PairwiseEffects::Results</a></code> for details. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">summaries</td><td>Vector of vector of pointers to arrays of length equal to the number of genes. The vector should be of length equal to <code>differential_analysis::n_summaries</code> (see <code><a class="el" href="namespacescran_1_1differential__analysis.html#a9651cedd1ef5f3c2631ff3d7af955b23">differential_analysis::summary</a></code>). Each inner vector corresponds to a summary statistic - i.e., minimum, mean, median, maximum and min-rank - and should be of length equal to the number of groups. Each pointer corresponds to a group, and points to an array that is used to store the associated summary statistic across all genes for that group. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a422e9dfd8e19edf2716595d4b0d87a1d" name="a422e9dfd8e19edf2716595d4b0d87a1d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a422e9dfd8e19edf2716595d4b0d87a1d">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Stat &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; std::vector&lt; Stat &gt; &gt; &gt; scran::SummarizeEffects::run </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>ngenes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>ngroups</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Stat *&#160;</td>
+          <td class="paramname"><em>effects</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Summarize the effect sizes for the pairwise comparisons to obtain a set of summary statistics for each gene in each group.</p>
+<p >If <code>summaries</code> is of length 0, no summaries are computed. If any of the inner vectors of <code>summaries</code> are of length 0, the corresponding summary statistic is not computed.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Stat</td><td>Floating point type for the statistics.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">ngenes</td><td>Number of genes. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">ngroups</td><td>Number of groups. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">effects</td><td>Pointer to a 3-dimensional array containing the pairwise statistics, see <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">PairwiseEffects::Results</a></code> for details.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A vector of vectors of vectors containing summary effects for each gene in each group. The vector is of length equal to <code>differential_analysis::n_summaries</code> (see <code><a class="el" href="namespacescran_1_1differential__analysis.html#a9651cedd1ef5f3c2631ff3d7af955b23">differential_analysis::summary</a></code>). Each inner vector corresponds to a summary statistic - i.e., minimum, mean, median, maximum and min-rank - and is of length equal to the number of groups. Each pointer corresponds to a group, and points to an array containing the associated summary statistic across all genes for that group. </dd></dl>
 
 </div>
 </div>

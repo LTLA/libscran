@@ -132,23 +132,6 @@ struct scran::PairwiseEffects::ResultsWithMeans&lt; Stat &gt;</div><p >Pairwise 
 </dl>
 <p>See <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">Results</a></code> for more details on how to interpret the 3-dimensional effect size arrays. </p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
-<a id="afcf7738ff7acda67e0882b0095c7e62d" name="afcf7738ff7acda67e0882b0095c7e62d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afcf7738ff7acda67e0882b0095c7e62d">&#9670;&#160;</a></span>detected</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Stat &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt;std::vector&lt;std::vector&lt;Stat&gt; &gt; &gt; <a class="el" href="structscran_1_1PairwiseEffects_1_1ResultsWithMeans.html">scran::PairwiseEffects::ResultsWithMeans</a>&lt; Stat &gt;::detected</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p >Each element of <code>detected</code> corresponds to a group and is itself a vector of length equal to the number of blocks. For group <code>i</code>, each element of <code>detected[i]</code> corresponds to a block and is itself a vector of length equal to the number of genes. For block <code>j</code>, each element of <code>detected[i][j]</code> corresponds to a gene and contains the proportion of detected expression of that gene in block <code>j</code> for group <code>i</code>. </p>
-
-</div>
-</div>
 <a id="a87855adf90d0f74a2cc108fba7119255" name="a87855adf90d0f74a2cc108fba7119255"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a87855adf90d0f74a2cc108fba7119255">&#9670;&#160;</a></span>means</h2>
 
@@ -163,6 +146,23 @@ template&lt;typename Stat &gt; </div>
       </table>
 </div><div class="memdoc">
 <p >Each element of <code>means</code> corresponds to a group and is itself a vector of length equal to the number of blocks. For group <code>i</code>, each element of <code>means[i]</code> corresponds to a block and is itself a vector of length equal to the number of genes. For block <code>j</code>, each element of <code>means[i][j]</code> corresponds to a gene and contains the mean expression of that gene in block <code>j</code> for group <code>i</code>. </p>
+
+</div>
+</div>
+<a id="afcf7738ff7acda67e0882b0095c7e62d" name="afcf7738ff7acda67e0882b0095c7e62d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afcf7738ff7acda67e0882b0095c7e62d">&#9670;&#160;</a></span>detected</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Stat &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::vector&lt;std::vector&lt;Stat&gt; &gt; &gt; <a class="el" href="structscran_1_1PairwiseEffects_1_1ResultsWithMeans.html">scran::PairwiseEffects::ResultsWithMeans</a>&lt; Stat &gt;::detected</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Each element of <code>detected</code> corresponds to a group and is itself a vector of length equal to the number of blocks. For group <code>i</code>, each element of <code>detected[i]</code> corresponds to a block and is itself a vector of length equal to the number of genes. For block <code>j</code>, each element of <code>detected[i][j]</code> corresponds to a gene and contains the proportion of detected expression of that gene in block <code>j</code> for group <code>i</code>. </p>
 
 </div>
 </div>

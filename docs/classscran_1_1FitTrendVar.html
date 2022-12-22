@@ -120,8 +120,8 @@ Public Member Functions</h2></td></tr>
 <li>Extrapolate linearly from the left-most fitted value to the origin to obtain fitted values for the previously filtered genes. This is empirically justified by the observation that mean-variance trends of log-expression data are linear at very low abundances. </li>
 </ol>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a301b7e44b50b5abfffaf3d52ff6d2ac3" name="a301b7e44b50b5abfffaf3d52ff6d2ac3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a301b7e44b50b5abfffaf3d52ff6d2ac3">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
+<a id="ab1ea1a7e5c38e7d582458bc3eaba9acd" name="ab1ea1a7e5c38e7d582458bc3eaba9acd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1ea1a7e5c38e7d582458bc3eaba9acd">&#9670;&#160;</a></span>set_span()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -130,27 +130,11 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structscran_1_1FitTrendVar_1_1Results.html">Results</a> scran::FitTrendVar::run </td>
+          <td class="memname"><a class="el" href="classscran_1_1FitTrendVar.html">FitTrendVar</a> &amp; scran::FitTrendVar::set_span </td>
           <td>(</td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>n</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>s</em> = <code>WeightedLowess::WeightedLowess&lt;&gt;::Defaults::span</code></td><td>)</td>
           <td></td>
-          <td class="paramtype">const double *&#160;</td>
-          <td class="paramname"><em>mean</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const double *&#160;</td>
-          <td class="paramname"><em>variance</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -159,21 +143,121 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Run the trend fitting on the means and variances across all features.</p>
+<p >Set the span for the LOWESS smoother.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of features. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">mean</td><td>Pointer to an array of length <code>n</code>, containing the means for all features. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">variance</td><td>Pointer to an array of length <code>n</code>, containing the variances for all features.</td></tr>
+    <tr><td class="paramname">s</td><td>Span for the smoother, as a proportion of the total number of points.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1FitTrendVar_1_1Results.html" title="Results of the trend fit.">Results</a></code> object containing the fitted values and residuals of the trend. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1FitTrendVar.html" title="Fit a mean-variance trend to log-count data.">FitTrendVar</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a8e063a39488ad44d8258c7236f960673" name="a8e063a39488ad44d8258c7236f960673"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8e063a39488ad44d8258c7236f960673">&#9670;&#160;</a></span>set_minimum_mean()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1FitTrendVar.html">FitTrendVar</a> &amp; scran::FitTrendVar::set_minimum_mean </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>m</em> = <code>0.1</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Set the minimum mean log-expression, to use for filtering out low-abundance genes.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">m</td><td>Minimum value for the mean log-expression.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1FitTrendVar.html" title="Fit a mean-variance trend to log-count data.">FitTrendVar</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="ab02f22f1aa3469d92d4e35e7cb17a0db" name="ab02f22f1aa3469d92d4e35e7cb17a0db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab02f22f1aa3469d92d4e35e7cb17a0db">&#9670;&#160;</a></span>set_filter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1FitTrendVar.html">FitTrendVar</a> &amp; scran::FitTrendVar::set_filter </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>f</em> = <code>true</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Should any filtering be performed by log-expression? This may need to be disabled if <code><a class="el" href="classscran_1_1FitTrendVar.html" title="Fit a mean-variance trend to log-count data.">FitTrendVar</a></code> is not being used on statistics computed from log-expression values.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">f</td><td>Whether filtering should be performed.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1FitTrendVar.html" title="Fit a mean-variance trend to log-count data.">FitTrendVar</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="addfafdfcb8f28ad5f4669c2836aa475e" name="addfafdfcb8f28ad5f4669c2836aa475e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#addfafdfcb8f28ad5f4669c2836aa475e">&#9670;&#160;</a></span>set_transform()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1FitTrendVar.html">FitTrendVar</a> &amp; scran::FitTrendVar::set_transform </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>t</em> = <code>true</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p >Should any transformation of the variances be performed prior to LOWESS smoothing. This may need to be disabled if <code><a class="el" href="classscran_1_1FitTrendVar.html" title="Fit a mean-variance trend to log-count data.">FitTrendVar</a></code> is not being used on statistics computed from log-expression values.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">t</td><td>Whether transformation should be performed.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1FitTrendVar.html" title="Fit a mean-variance trend to log-count data.">FitTrendVar</a></code> object. </dd></dl>
 
 </div>
 </div>
 <a id="aafd6eacabda8276a8ba2aaa76d1b82c7" name="aafd6eacabda8276a8ba2aaa76d1b82c7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aafd6eacabda8276a8ba2aaa76d1b82c7">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aafd6eacabda8276a8ba2aaa76d1b82c7">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -238,8 +322,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ab02f22f1aa3469d92d4e35e7cb17a0db" name="ab02f22f1aa3469d92d4e35e7cb17a0db"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab02f22f1aa3469d92d4e35e7cb17a0db">&#9670;&#160;</a></span>set_filter()</h2>
+<a id="a301b7e44b50b5abfffaf3d52ff6d2ac3" name="a301b7e44b50b5abfffaf3d52ff6d2ac3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a301b7e44b50b5abfffaf3d52ff6d2ac3">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -248,113 +332,27 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1FitTrendVar.html">FitTrendVar</a> &amp; scran::FitTrendVar::set_filter </td>
+          <td class="memname"><a class="el" href="structscran_1_1FitTrendVar_1_1Results.html">Results</a> scran::FitTrendVar::run </td>
           <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>f</em> = <code>true</code></td><td>)</td>
-          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
         </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Should any filtering be performed by log-expression? This may need to be disabled if <code><a class="el" href="classscran_1_1FitTrendVar.html" title="Fit a mean-variance trend to log-count data.">FitTrendVar</a></code> is not being used on statistics computed from log-expression values.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">f</td><td>Whether filtering should be performed.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1FitTrendVar.html" title="Fit a mean-variance trend to log-count data.">FitTrendVar</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="a8e063a39488ad44d8258c7236f960673" name="a8e063a39488ad44d8258c7236f960673"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8e063a39488ad44d8258c7236f960673">&#9670;&#160;</a></span>set_minimum_mean()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1FitTrendVar.html">FitTrendVar</a> &amp; scran::FitTrendVar::set_minimum_mean </td>
-          <td>(</td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>m</em> = <code>0.1</code></td><td>)</td>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const double *&#160;</td>
+          <td class="paramname"><em>mean</em>, </td>
         </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Set the minimum mean log-expression, to use for filtering out low-abundance genes.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">m</td><td>Minimum value for the mean log-expression.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1FitTrendVar.html" title="Fit a mean-variance trend to log-count data.">FitTrendVar</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="ab1ea1a7e5c38e7d582458bc3eaba9acd" name="ab1ea1a7e5c38e7d582458bc3eaba9acd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab1ea1a7e5c38e7d582458bc3eaba9acd">&#9670;&#160;</a></span>set_span()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1FitTrendVar.html">FitTrendVar</a> &amp; scran::FitTrendVar::set_span </td>
-          <td>(</td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>s</em> = <code>WeightedLowess::WeightedLowess&lt;&gt;::Defaults::span</code></td><td>)</td>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const double *&#160;</td>
+          <td class="paramname"><em>variance</em>&#160;</td>
         </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Set the span for the LOWESS smoother.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">s</td><td>Span for the smoother, as a proportion of the total number of points.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1FitTrendVar.html" title="Fit a mean-variance trend to log-count data.">FitTrendVar</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="addfafdfcb8f28ad5f4669c2836aa475e" name="addfafdfcb8f28ad5f4669c2836aa475e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#addfafdfcb8f28ad5f4669c2836aa475e">&#9670;&#160;</a></span>set_transform()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1FitTrendVar.html">FitTrendVar</a> &amp; scran::FitTrendVar::set_transform </td>
-          <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>t</em> = <code>true</code></td><td>)</td>
           <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -363,14 +361,16 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Should any transformation of the variances be performed prior to LOWESS smoothing. This may need to be disabled if <code><a class="el" href="classscran_1_1FitTrendVar.html" title="Fit a mean-variance trend to log-count data.">FitTrendVar</a></code> is not being used on statistics computed from log-expression values.</p>
+<p >Run the trend fitting on the means and variances across all features.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">t</td><td>Whether transformation should be performed.</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of features. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mean</td><td>Pointer to an array of length <code>n</code>, containing the means for all features. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">variance</td><td>Pointer to an array of length <code>n</code>, containing the variances for all features.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1FitTrendVar.html" title="Fit a mean-variance trend to log-count data.">FitTrendVar</a></code> object. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1FitTrendVar_1_1Results.html" title="Results of the trend fit.">Results</a></code> object containing the fitted values and residuals of the trend. </dd></dl>
 
 </div>
 </div>

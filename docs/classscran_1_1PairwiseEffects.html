@@ -157,33 +157,21 @@ Other statistics</h1>
 <p >We report the mean log-expression of all cells in each group, as well as the proportion of cells with detectable expression in each group. These statistics are useful for quickly interpreting the differences in expression driving the effect size summaries.</p>
 <p >If blocking is involved, we compute the mean and proportion for each group in each separate blocking level. This is helpful for detecting differences in expression between batches. They can also be combined into a single statistic for each group by using the <code><a class="el" href="namespacescran.html#a1ad83ffd5170468e5c4ec082605f79e7">average_vectors()</a></code> or <code><a class="el" href="namespacescran.html#a0f0c8d5308d416b2d1f516691ee362ef">average_vectors_weighted()</a></code> functions. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="ab3a460a12027c532c1e615af44284996" name="ab3a460a12027c532c1e615af44284996"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab3a460a12027c532c1e615af44284996">&#9670;&#160;</a></span>run() <span class="overload">[1/3]</span></h2>
+<a id="a274b56d1255fece348c29f6acf511168" name="a274b56d1255fece348c29f6acf511168"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a274b56d1255fece348c29f6acf511168">&#9670;&#160;</a></span>set_threshold()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<div class="memtemplate">
-template&lt;typename Stat  = double, class Matrix , typename G &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structscran_1_1PairwiseEffects_1_1ResultsWithMeans.html">ResultsWithMeans</a>&lt; Stat &gt; scran::PairwiseEffects::run </td>
+          <td class="memname"><a class="el" href="classscran_1_1PairwiseEffects.html">PairwiseEffects</a> &amp; scran::PairwiseEffects::set_threshold </td>
           <td>(</td>
-          <td class="paramtype">const Matrix *&#160;</td>
-          <td class="paramname"><em>p</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>t</em> = <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Defaults.html#a4e73a03cee22b6ee5f949fcdf4500b46">Defaults::threshold</a></code></td><td>)</td>
           <td></td>
-          <td class="paramtype">const G *&#160;</td>
-          <td class="paramname"><em>group</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -192,65 +180,31 @@ template&lt;typename Stat  = double, class Matrix , typename G &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Score potential marker genes by computing summary statistics across pairwise comparisons between groups.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">Stat</td><td>Floating-point type to store the statistics. </td></tr>
-    <tr><td class="paramname">Matrix</td><td>A <b>tatami</b> matrix class, usually a <code>NumericMatrix</code>. </td></tr>
-    <tr><td class="paramname">G</td><td>Integer type for the group assignments.</td></tr>
-  </table>
-  </dd>
-</dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">p</td><td>Pointer to a <b>tatami</b> matrix instance. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the group assignments. Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.</td></tr>
+    <tr><td class="paramname">t</td><td>Threshold on the log-fold change. This should be non-negative.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PairwiseEffects_1_1ResultsWithMeans.html" title="Pairwise effect size results, with per-group means.">ResultsWithMeans</a></code> object is returned containing the pairwise effects, plus the mean expression and detected proportion in each group. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PairwiseEffects.html" title="Compute pairwise effect size between groups of cells.">PairwiseEffects</a></code> object. </dd></dl>
 
 </div>
 </div>
-<a id="a8566c457054312c813bf25a7293eb61b" name="a8566c457054312c813bf25a7293eb61b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8566c457054312c813bf25a7293eb61b">&#9670;&#160;</a></span>run() <span class="overload">[2/3]</span></h2>
+<a id="aaad75a6f74edb5a45914e60eaa487fb5" name="aaad75a6f74edb5a45914e60eaa487fb5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaad75a6f74edb5a45914e60eaa487fb5">&#9670;&#160;</a></span>set_num_threads()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<div class="memtemplate">
-template&lt;class Matrix , typename G , typename Stat &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html">Results</a>&lt; Stat &gt; scran::PairwiseEffects::run </td>
+          <td class="memname"><a class="el" href="classscran_1_1PairwiseEffects.html">PairwiseEffects</a> &amp; scran::PairwiseEffects::set_num_threads </td>
           <td>(</td>
-          <td class="paramtype">const Matrix *&#160;</td>
-          <td class="paramname"><em>p</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Defaults.html#a03a1691771c655ac21eb7b282123e282">Defaults::num_threads</a></code></td><td>)</td>
           <td></td>
-          <td class="paramtype">const G *&#160;</td>
-          <td class="paramname"><em>group</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::vector&lt; Stat * &gt;&#160;</td>
-          <td class="paramname"><em>means</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::vector&lt; Stat * &gt;&#160;</td>
-          <td class="paramname"><em>detected</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -259,30 +213,154 @@ template&lt;class Matrix , typename G , typename Stat &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p >Score potential marker genes by computing summary statistics across pairwise comparisons between groups.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">Matrix</td><td>A <b>tatami</b> matrix class, usually a <code>NumericMatrix</code>. </td></tr>
-    <tr><td class="paramname">G</td><td>Integer type for the group assignments. </td></tr>
-    <tr><td class="paramname">Stat</td><td>Floating-point type to store the statistics.</td></tr>
-  </table>
-  </dd>
-</dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">p</td><td>Pointer to a <b>tatami</b> matrix instance. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the group assignments. Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">means</td><td>Vector of length equal to the number of groups. Each element corresponds to a group and is a pointer to an array of length equal to the number of rows in <code>p</code>. This is used to store the mean expression of each group across all genes. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">detected</td><td>Vector of length equal to the number of groups, Each element corresponds to a group and is a pointer to an array of length equal to the number of rows in <code>p</code>. This is used to store the proportion of detected expression in each group.</td></tr>
+    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">Results</a></code> object is returned containing the pairwise effects. <code>means</code> and <code>detected</code> are filled with their corresponding statistics on output. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PairwiseEffects.html" title="Compute pairwise effect size between groups of cells.">PairwiseEffects</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a8502150c4ebec6bf8e13e6f7ef85b105" name="a8502150c4ebec6bf8e13e6f7ef85b105"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8502150c4ebec6bf8e13e6f7ef85b105">&#9670;&#160;</a></span>set_compute_cohen()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1PairwiseEffects.html">PairwiseEffects</a> &amp; scran::PairwiseEffects::set_compute_cohen </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>c</em> = <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Defaults.html#a8a0050d343bc8b2eec80ce51982f6945">Defaults::compute_cohen</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">c</td><td>Whether to compute Cohen's d.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1PairwiseEffects.html#a0097cc273de24f2159a640d2fe5de599">run()</a></code> methods that return <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PairwiseEffects.html" title="Compute pairwise effect size between groups of cells.">PairwiseEffects</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a03200aae7ecd4a67af7172d2e13f0618" name="a03200aae7ecd4a67af7172d2e13f0618"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a03200aae7ecd4a67af7172d2e13f0618">&#9670;&#160;</a></span>set_compute_auc()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1PairwiseEffects.html">PairwiseEffects</a> &amp; scran::PairwiseEffects::set_compute_auc </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>c</em> = <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Defaults.html#a909d4dc272c6ac0bec6069f5559b1962">Defaults::compute_auc</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">c</td><td>Whether to compute the AUC.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1PairwiseEffects.html#a0097cc273de24f2159a640d2fe5de599">run()</a></code> methods that return <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PairwiseEffects.html" title="Compute pairwise effect size between groups of cells.">PairwiseEffects</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a84ccf66ce778baa44e0ec226b9b469e3" name="a84ccf66ce778baa44e0ec226b9b469e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a84ccf66ce778baa44e0ec226b9b469e3">&#9670;&#160;</a></span>set_compute_lfc()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1PairwiseEffects.html">PairwiseEffects</a> &amp; scran::PairwiseEffects::set_compute_lfc </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>c</em> = <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Defaults.html#ad9a3f0f122ec6f4ab5654c691d3a8af7">Defaults::compute_lfc</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">c</td><td>Whether to compute the log-fold change.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1PairwiseEffects.html#a0097cc273de24f2159a640d2fe5de599">run()</a></code> methods that return <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PairwiseEffects.html" title="Compute pairwise effect size between groups of cells.">PairwiseEffects</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="ad0f6c3655e8abfb22092ca858bcd396f" name="ad0f6c3655e8abfb22092ca858bcd396f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0f6c3655e8abfb22092ca858bcd396f">&#9670;&#160;</a></span>set_compute_delta_detected()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1PairwiseEffects.html">PairwiseEffects</a> &amp; scran::PairwiseEffects::set_compute_delta_detected </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>c</em> = <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Defaults.html#aed4f78128bfe84cd267010020a2c4f24">Defaults::compute_delta_detected</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">c</td><td>Whether to compute the delta-detected.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>This only has an effect for <code><a class="el" href="classscran_1_1PairwiseEffects.html#a0097cc273de24f2159a640d2fe5de599">run()</a></code> methods that return <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PairwiseEffects.html" title="Compute pairwise effect size between groups of cells.">PairwiseEffects</a></code> object. </dd></dl>
 
 </div>
 </div>
 <a id="a0097cc273de24f2159a640d2fe5de599" name="a0097cc273de24f2159a640d2fe5de599"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0097cc273de24f2159a640d2fe5de599">&#9670;&#160;</a></span>run() <span class="overload">[3/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a0097cc273de24f2159a640d2fe5de599">&#9670;&#160;</a></span>run() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -377,148 +455,8 @@ template&lt;class Matrix , typename G , typename Stat &gt; </div>
 
 </div>
 </div>
-<a id="a3073bf2e693a1ba06c2f78d0c2ab3ebe" name="a3073bf2e693a1ba06c2f78d0c2ab3ebe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3073bf2e693a1ba06c2f78d0c2ab3ebe">&#9670;&#160;</a></span>run_blocked() <span class="overload">[1/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Stat  = double, class Matrix , typename G , typename B &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structscran_1_1PairwiseEffects_1_1ResultsWithMeans.html">ResultsWithMeans</a>&lt; Stat &gt; scran::PairwiseEffects::run_blocked </td>
-          <td>(</td>
-          <td class="paramtype">const Matrix *&#160;</td>
-          <td class="paramname"><em>p</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const G *&#160;</td>
-          <td class="paramname"><em>group</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const B *&#160;</td>
-          <td class="paramname"><em>block</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">Stat</td><td>Floating-point type to store the statistics. </td></tr>
-    <tr><td class="paramname">Matrix</td><td>A <b>tatami</b> matrix class, usually a <code>NumericMatrix</code>. </td></tr>
-    <tr><td class="paramname">G</td><td>Integer type for the group assignments. </td></tr>
-    <tr><td class="paramname">B</td><td>Integer type for the block assignments.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">p</td><td>Pointer to a <b>tatami</b> matrix instance. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the group assignments. Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the blocking factor. Block identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PairwiseEffects_1_1ResultsWithMeans.html" title="Pairwise effect size results, with per-group means.">ResultsWithMeans</a></code> object is returned containing the pairwise effects, plus the mean expression and detected proportion in each group and block. </dd></dl>
-
-</div>
-</div>
-<a id="a0dbb15cec4a1c39c2e70167099866589" name="a0dbb15cec4a1c39c2e70167099866589"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0dbb15cec4a1c39c2e70167099866589">&#9670;&#160;</a></span>run_blocked() <span class="overload">[2/3]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html">Results</a>&lt; Stat &gt; scran::PairwiseEffects::run_blocked </td>
-          <td>(</td>
-          <td class="paramtype">const Matrix *&#160;</td>
-          <td class="paramname"><em>p</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const G *&#160;</td>
-          <td class="paramname"><em>group</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const B *&#160;</td>
-          <td class="paramname"><em>block</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::vector&lt; std::vector&lt; Stat * &gt; &gt;&#160;</td>
-          <td class="paramname"><em>means</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::vector&lt; std::vector&lt; Stat * &gt; &gt;&#160;</td>
-          <td class="paramname"><em>detected</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p >Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">Matrix</td><td>A <b>tatami</b> matrix class, usually a <code>NumericMatrix</code>. </td></tr>
-    <tr><td class="paramname">G</td><td>Integer type for the group assignments. </td></tr>
-    <tr><td class="paramname">B</td><td>Integer type for the block assignments. </td></tr>
-    <tr><td class="paramname">Stat</td><td>Floating-point type to store the statistics.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">p</td><td>Pointer to a <b>tatami</b> matrix instance. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the group assignments. Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the blocking factor. Block identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">means</td><td>Vector of length equal to the number of groups. Each element corresponds to a group and is another vector of length equal to the number of blocks. Each entry of the inner vector is a pointer to an array of length equal to the number of rows in <code>p</code>, which is used to store the mean expression of each group across all genes. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">detected</td><td>Vector of length equal to the number of groups. Each element corresponds to a group and is another vector of length equal to the number of blocks. Each entry of the inner vector is a pointer to an array of length equal to the number of rows in <code>p</code>, which is used to store the proportion of detected expression in each group.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">Results</a></code> object is returned containing the pairwise effects. <code>means</code> and <code>detected</code> are filled with their corresponding statistics on output. </dd></dl>
-
-</div>
-</div>
 <a id="ae6787b3f65adb4dd75918afcd962014a" name="ae6787b3f65adb4dd75918afcd962014a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae6787b3f65adb4dd75918afcd962014a">&#9670;&#160;</a></span>run_blocked() <span class="overload">[3/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6787b3f65adb4dd75918afcd962014a">&#9670;&#160;</a></span>run_blocked() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -621,21 +559,45 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
 
 </div>
 </div>
-<a id="a03200aae7ecd4a67af7172d2e13f0618" name="a03200aae7ecd4a67af7172d2e13f0618"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a03200aae7ecd4a67af7172d2e13f0618">&#9670;&#160;</a></span>set_compute_auc()</h2>
+<a id="a8566c457054312c813bf25a7293eb61b" name="a8566c457054312c813bf25a7293eb61b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8566c457054312c813bf25a7293eb61b">&#9670;&#160;</a></span>run() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;class Matrix , typename G , typename Stat &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1PairwiseEffects.html">PairwiseEffects</a> &amp; scran::PairwiseEffects::set_compute_auc </td>
+          <td class="memname"><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html">Results</a>&lt; Stat &gt; scran::PairwiseEffects::run </td>
           <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>c</em> = <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Defaults.html#a909d4dc272c6ac0bec6069f5559b1962">Defaults::compute_auc</a></code></td><td>)</td>
+          <td class="paramtype">const Matrix *&#160;</td>
+          <td class="paramname"><em>p</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const G *&#160;</td>
+          <td class="paramname"><em>group</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; Stat * &gt;&#160;</td>
+          <td class="paramname"><em>means</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; Stat * &gt;&#160;</td>
+          <td class="paramname"><em>detected</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -644,32 +606,73 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">c</td><td>Whether to compute the AUC.</td></tr>
+<p >Score potential marker genes by computing summary statistics across pairwise comparisons between groups.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Matrix</td><td>A <b>tatami</b> matrix class, usually a <code>NumericMatrix</code>. </td></tr>
+    <tr><td class="paramname">G</td><td>Integer type for the group assignments. </td></tr>
+    <tr><td class="paramname">Stat</td><td>Floating-point type to store the statistics.</td></tr>
   </table>
   </dd>
 </dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1PairwiseEffects.html#a0097cc273de24f2159a640d2fe5de599">run()</a></code> methods that return <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PairwiseEffects.html" title="Compute pairwise effect size between groups of cells.">PairwiseEffects</a></code> object. </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">p</td><td>Pointer to a <b>tatami</b> matrix instance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the group assignments. Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">means</td><td>Vector of length equal to the number of groups. Each element corresponds to a group and is a pointer to an array of length equal to the number of rows in <code>p</code>. This is used to store the mean expression of each group across all genes. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">detected</td><td>Vector of length equal to the number of groups, Each element corresponds to a group and is a pointer to an array of length equal to the number of rows in <code>p</code>. This is used to store the proportion of detected expression in each group.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">Results</a></code> object is returned containing the pairwise effects. <code>means</code> and <code>detected</code> are filled with their corresponding statistics on output. </dd></dl>
 
 </div>
 </div>
-<a id="a8502150c4ebec6bf8e13e6f7ef85b105" name="a8502150c4ebec6bf8e13e6f7ef85b105"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8502150c4ebec6bf8e13e6f7ef85b105">&#9670;&#160;</a></span>set_compute_cohen()</h2>
+<a id="a0dbb15cec4a1c39c2e70167099866589" name="a0dbb15cec4a1c39c2e70167099866589"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0dbb15cec4a1c39c2e70167099866589">&#9670;&#160;</a></span>run_blocked() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1PairwiseEffects.html">PairwiseEffects</a> &amp; scran::PairwiseEffects::set_compute_cohen </td>
+          <td class="memname"><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html">Results</a>&lt; Stat &gt; scran::PairwiseEffects::run_blocked </td>
           <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>c</em> = <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Defaults.html#a8a0050d343bc8b2eec80ce51982f6945">Defaults::compute_cohen</a></code></td><td>)</td>
+          <td class="paramtype">const Matrix *&#160;</td>
+          <td class="paramname"><em>p</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const G *&#160;</td>
+          <td class="paramname"><em>group</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const B *&#160;</td>
+          <td class="paramname"><em>block</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; Stat * &gt; &gt;&#160;</td>
+          <td class="paramname"><em>means</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; Stat * &gt; &gt;&#160;</td>
+          <td class="paramname"><em>detected</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -678,32 +681,57 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">c</td><td>Whether to compute Cohen's d.</td></tr>
+<p >Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Matrix</td><td>A <b>tatami</b> matrix class, usually a <code>NumericMatrix</code>. </td></tr>
+    <tr><td class="paramname">G</td><td>Integer type for the group assignments. </td></tr>
+    <tr><td class="paramname">B</td><td>Integer type for the block assignments. </td></tr>
+    <tr><td class="paramname">Stat</td><td>Floating-point type to store the statistics.</td></tr>
   </table>
   </dd>
 </dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1PairwiseEffects.html#a0097cc273de24f2159a640d2fe5de599">run()</a></code> methods that return <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PairwiseEffects.html" title="Compute pairwise effect size between groups of cells.">PairwiseEffects</a></code> object. </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">p</td><td>Pointer to a <b>tatami</b> matrix instance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the group assignments. Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the blocking factor. Block identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">means</td><td>Vector of length equal to the number of groups. Each element corresponds to a group and is another vector of length equal to the number of blocks. Each entry of the inner vector is a pointer to an array of length equal to the number of rows in <code>p</code>, which is used to store the mean expression of each group across all genes. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">detected</td><td>Vector of length equal to the number of groups. Each element corresponds to a group and is another vector of length equal to the number of blocks. Each entry of the inner vector is a pointer to an array of length equal to the number of rows in <code>p</code>, which is used to store the proportion of detected expression in each group.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">Results</a></code> object is returned containing the pairwise effects. <code>means</code> and <code>detected</code> are filled with their corresponding statistics on output. </dd></dl>
 
 </div>
 </div>
-<a id="ad0f6c3655e8abfb22092ca858bcd396f" name="ad0f6c3655e8abfb22092ca858bcd396f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad0f6c3655e8abfb22092ca858bcd396f">&#9670;&#160;</a></span>set_compute_delta_detected()</h2>
+<a id="ab3a460a12027c532c1e615af44284996" name="ab3a460a12027c532c1e615af44284996"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3a460a12027c532c1e615af44284996">&#9670;&#160;</a></span>run() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename Stat  = double, class Matrix , typename G &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1PairwiseEffects.html">PairwiseEffects</a> &amp; scran::PairwiseEffects::set_compute_delta_detected </td>
+          <td class="memname"><a class="el" href="structscran_1_1PairwiseEffects_1_1ResultsWithMeans.html">ResultsWithMeans</a>&lt; Stat &gt; scran::PairwiseEffects::run </td>
           <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>c</em> = <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Defaults.html#aed4f78128bfe84cd267010020a2c4f24">Defaults::compute_delta_detected</a></code></td><td>)</td>
+          <td class="paramtype">const Matrix *&#160;</td>
+          <td class="paramname"><em>p</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const G *&#160;</td>
+          <td class="paramname"><em>group</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -712,32 +740,59 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">c</td><td>Whether to compute the delta-detected.</td></tr>
+<p >Score potential marker genes by computing summary statistics across pairwise comparisons between groups.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Stat</td><td>Floating-point type to store the statistics. </td></tr>
+    <tr><td class="paramname">Matrix</td><td>A <b>tatami</b> matrix class, usually a <code>NumericMatrix</code>. </td></tr>
+    <tr><td class="paramname">G</td><td>Integer type for the group assignments.</td></tr>
   </table>
   </dd>
 </dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1PairwiseEffects.html#a0097cc273de24f2159a640d2fe5de599">run()</a></code> methods that return <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PairwiseEffects.html" title="Compute pairwise effect size between groups of cells.">PairwiseEffects</a></code> object. </dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">p</td><td>Pointer to a <b>tatami</b> matrix instance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the group assignments. Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PairwiseEffects_1_1ResultsWithMeans.html" title="Pairwise effect size results, with per-group means.">ResultsWithMeans</a></code> object is returned containing the pairwise effects, plus the mean expression and detected proportion in each group. </dd></dl>
 
 </div>
 </div>
-<a id="a84ccf66ce778baa44e0ec226b9b469e3" name="a84ccf66ce778baa44e0ec226b9b469e3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a84ccf66ce778baa44e0ec226b9b469e3">&#9670;&#160;</a></span>set_compute_lfc()</h2>
+<a id="a3073bf2e693a1ba06c2f78d0c2ab3ebe" name="a3073bf2e693a1ba06c2f78d0c2ab3ebe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3073bf2e693a1ba06c2f78d0c2ab3ebe">&#9670;&#160;</a></span>run_blocked() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename Stat  = double, class Matrix , typename G , typename B &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1PairwiseEffects.html">PairwiseEffects</a> &amp; scran::PairwiseEffects::set_compute_lfc </td>
+          <td class="memname"><a class="el" href="structscran_1_1PairwiseEffects_1_1ResultsWithMeans.html">ResultsWithMeans</a>&lt; Stat &gt; scran::PairwiseEffects::run_blocked </td>
           <td>(</td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>c</em> = <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Defaults.html#ad9a3f0f122ec6f4ab5654c691d3a8af7">Defaults::compute_lfc</a></code></td><td>)</td>
+          <td class="paramtype">const Matrix *&#160;</td>
+          <td class="paramname"><em>p</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const G *&#160;</td>
+          <td class="paramname"><em>group</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const B *&#160;</td>
+          <td class="paramname"><em>block</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -746,80 +801,25 @@ template&lt;class Matrix , typename G , typename B , typename Stat &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">c</td><td>Whether to compute the log-fold change.</td></tr>
+<p >Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Stat</td><td>Floating-point type to store the statistics. </td></tr>
+    <tr><td class="paramname">Matrix</td><td>A <b>tatami</b> matrix class, usually a <code>NumericMatrix</code>. </td></tr>
+    <tr><td class="paramname">G</td><td>Integer type for the group assignments. </td></tr>
+    <tr><td class="paramname">B</td><td>Integer type for the block assignments.</td></tr>
   </table>
   </dd>
 </dl>
-<p>This only has an effect for <code><a class="el" href="classscran_1_1PairwiseEffects.html#a0097cc273de24f2159a640d2fe5de599">run()</a></code> methods that return <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">Results</a></code>. Otherwise, we make this decision based on the validity of the input pointers.</p>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PairwiseEffects.html" title="Compute pairwise effect size between groups of cells.">PairwiseEffects</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="aaad75a6f74edb5a45914e60eaa487fb5" name="aaad75a6f74edb5a45914e60eaa487fb5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaad75a6f74edb5a45914e60eaa487fb5">&#9670;&#160;</a></span>set_num_threads()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1PairwiseEffects.html">PairwiseEffects</a> &amp; scran::PairwiseEffects::set_num_threads </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Defaults.html#a03a1691771c655ac21eb7b282123e282">Defaults::num_threads</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">n</td><td>Number of threads to use. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">p</td><td>Pointer to a <b>tatami</b> matrix instance. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the group assignments. Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the blocking factor. Block identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PairwiseEffects.html" title="Compute pairwise effect size between groups of cells.">PairwiseEffects</a></code> object. </dd></dl>
-
-</div>
-</div>
-<a id="a274b56d1255fece348c29f6acf511168" name="a274b56d1255fece348c29f6acf511168"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a274b56d1255fece348c29f6acf511168">&#9670;&#160;</a></span>set_threshold()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1PairwiseEffects.html">PairwiseEffects</a> &amp; scran::PairwiseEffects::set_threshold </td>
-          <td>(</td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>t</em> = <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Defaults.html#a4e73a03cee22b6ee5f949fcdf4500b46">Defaults::threshold</a></code></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">t</td><td>Threshold on the log-fold change. This should be non-negative.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1PairwiseEffects.html" title="Compute pairwise effect size between groups of cells.">PairwiseEffects</a></code> object. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1PairwiseEffects_1_1ResultsWithMeans.html" title="Pairwise effect size results, with per-group means.">ResultsWithMeans</a></code> object is returned containing the pairwise effects, plus the mean expression and detected proportion in each group and block. </dd></dl>
 
 </div>
 </div>
