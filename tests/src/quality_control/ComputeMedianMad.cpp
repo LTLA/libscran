@@ -50,6 +50,7 @@ TEST(ComputeMedianMad, EdgeTests) {
     EXPECT_TRUE(std::isnan(stats.medians[0]));
     EXPECT_TRUE(std::isnan(stats.mads[0]));
 
+    empty.push_back(-std::numeric_limits<double>::infinity()); // add twice to keep it even.
     empty.push_back(-std::numeric_limits<double>::infinity());
     stats = is.run(empty.size(), empty.data());
     EXPECT_TRUE(std::isinf(stats.medians[0]));

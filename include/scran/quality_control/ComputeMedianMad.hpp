@@ -312,13 +312,11 @@ private:
             std::nth_element(ptr, ptr + halfway - 1, ptr + n);
             double left = *(ptr + halfway - 1);
 
-            bool inf_left = std::isinf(left);
-            bool inf_right = std::isinf(medtmp);
-            if (inf_left && inf_right) {
-                if ((inf_left < 0) != (inf_right > 0)) {
+            if (std::isinf(left) && std::isinf(medtmp)) {
+                if ((left > 0) != (medtmp > 0)) {
                     return std::numeric_limits<double>::quiet_NaN();
                 } else {
-                    return inf_left;
+                    return medtmp;
                 }
             } 
 
