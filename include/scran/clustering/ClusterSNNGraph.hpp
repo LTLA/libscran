@@ -374,7 +374,7 @@ public:
      *
      * @return A reference to this `ClusterSNNGraphLeiden` object.
      */
-    ClusterSNNGraphLeiden& set_iterations(double i = Defaults::iterations) {
+    ClusterSNNGraphLeiden& set_iterations(int i = Defaults::iterations) {
         iterations = i;
         return *this;
     }
@@ -386,7 +386,7 @@ public:
      *
      * @return A reference to this `ClusterSNNGraphLeiden` object.
      */
-    ClusterSNNGraphLeiden& set_modularity(double m = Defaults::modularity) {
+    ClusterSNNGraphLeiden& set_modularity(bool m = Defaults::modularity) {
         modularity = m;
         return *this;
     }
