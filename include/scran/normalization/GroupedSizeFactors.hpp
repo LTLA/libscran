@@ -7,7 +7,7 @@
 #include "../aggregation/AggregateAcrossCells.hpp"
 
 #include "tatami/base/DenseMatrix.hpp"
-#include "tatami/ext/ArrayView.hpp"
+#include "tatami/utils/ArrayView.hpp"
 #include "tatami/stats/sums.hpp"
 
 #include <memory>
