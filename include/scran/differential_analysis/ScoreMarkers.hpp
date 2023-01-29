@@ -28,6 +28,8 @@ namespace scran {
  */
 namespace differential_analysis {
 
+enum class CacheAction : unsigned char { SKIP, COMPUTE, CACHE };
+
 // This cache tries to store as many of the reverse effects as possible before
 // it starts evicting. Evictions are based on the principle that it is better
 // to store effects that will be re-used quickly, thus freeing up the cache for
@@ -37,8 +39,8 @@ namespace differential_analysis {
 // groups in the ScoreMarkers function.
 //
 // So, the policy is to evict cache entries when the identity of the first
-// group in the cached entry is larger than the corresponding value for the
-// incoming entry. Given that, if the cache is full, we have to throw away
+// group in the cached entry is larger than the identity of the first group for
+// the incoming entry. Given that, if the cache is full, we have to throw away
 // one of these effects anyway, I'd prefer to hold onto the one we're using
 // soon, because at least it'll be freed up rapidly.
 template<typename Stat>
@@ -59,11 +61,23 @@ public:
     int ngroups;
     int cache_size;
 
+    // 'full_set' contains all effects for the current group's comparisons to all other groups.
     std::vector<double> full_set;
-    std::vector<unsigned char> actions;
+
+    std::vector<CacheAction> actions;
+
+    // 'staging_cache' contains the set of cached effects in the other
+    // direction, i.e., all other groups compared to the current group. This is
+    // only used to avoid repeated look-ups in 'cached' while filling the
+    // effect size vectors; they will ultimately be transferred to cached after
+    // the processing for the current group is complete.
     std::vector<std::vector<Stat> > staging_cache;
+
+    // 'vector_pool' allows us to recycle effect size vectors to avoid reallocations.
     std::vector<std::vector<Stat> > vector_pool;
 
+    // 'cached' contains the cached effect size vectors from previous groups. Note
+    // that the use of a map is deliberate as we need the sorting.
     std::map<std::pair<int, int>, std::vector<Stat> > cached;
 
 public:
@@ -73,39 +87,50 @@ public:
 
 public:
     void configure(int group) {
+        // During calculation of effects, the current group (i.e., 'group') is
+        // the first group in the comparison and 'other' is the second group.
+        // However, remember that we want to cache the reverse effects, so in
+        // the cached entry, 'group' is second and 'other' is first.
         for (int other = 0; other < ngroups; ++other) {
             if (other == group) {
-                actions[other] = 0;
+                actions[other] = CacheAction::SKIP;
                 continue;
             }
 
             if (cache_size == 0) {
-                actions[other] = 1;
+                actions[other] = CacheAction::COMPUTE;
                 continue;
             }
 
-            // Impossible to be cached by a previous run, so we can skip a 
-            // look-up - however, it is a candidate to _be_ cached, possibly
-            // evicting other existing cache entries.
+            // If 'other' is later than 'group', it's a candidate to be cached,
+            // as it will be reused when the current group becomes 'other'.
             if (other > group) {
-                actions[other] = 2;
+                actions[other] = CacheAction::CACHE;
                 continue;
             }
 
-            // Need to recompute cache entries that were previously evicted.
+            // Need to recompute cache entries that were previously evicted. We
+            // do so if the cache is empty or the first group of the first cached
+            // entry has a higher index than the current group (and thus the 
+            // desired comparison's effects cannot possibly exist in the cache).
             if (cached.empty()) { 
-                actions[other] = 1;
+                actions[other] = CacheAction::COMPUTE;
                 continue;
             }
 
             const auto& front = cached.begin()->first;
-            if (front.first > group || front.second > other) { // less-thans should be impossible.
-                actions[other] = 1;
+            if (front.first > group || front.second > other) { 
+                // Technically, the second clause should be (front.first == group && front.second > other).
+                // However, less-thans should be impossible as they should have been used up during processing
+                // of previous 'group' values. Thus, equality is already implied if the first condition fails.
+                actions[other] = CacheAction::COMPUTE;
                 continue;
             }
 
-            // Transferring the cached vector to the full_set.
-            actions[other] = 0;
+            // If we got past the previous clause, this implies that the first cache entry
+            // contains the effect sizes for the desired comparison (i.e., 'group - other').
+            // We thus transfer the cached vector to the full_set.
+            actions[other] = CacheAction::SKIP;
             auto& x = cached.begin()->second;
             for (size_t i = 0, end = x.size(); i < end; ++i) {
                 full_set[other + i * ngroups] = x[i];
@@ -115,11 +140,11 @@ public:
             cached.erase(cached.begin());
         }
 
-        // Refining our choice by doing a dummy run and seeing
-        // whether eviction actually happens. If it doesn't, we won't
-        // bother caching, beause that would be a waste of memory accesses.
+        // Refining our choice of cacheable entries by doing a dummy run and
+        // seeing whether eviction actually happens. If it doesn't, we won't
+        // bother caching, because that would be a waste of memory accesses.
         for (int other = 0; other < ngroups; ++other) {
-            if (actions[other] != 2) {
+            if (actions[other] != CacheAction::CACHE) {
                 continue;
             }
 
@@ -130,11 +155,12 @@ public:
                 continue;
             }
 
+            // Looking at the last cache entry. If the first group of this
+            // entry is larger than the first group of the incoming entry, we
+            // evict it, as the incoming entry has faster reusability.
             auto it = cached.end();
             --it;
             if ((it->first).first > other) {
-                // Evict the existing entry. This is safe to do so as the
-                // evicted entry won't be used in this round anyway.
                 auto& evicted = it->second;
                 if (evicted.size()) {
                     vector_pool.emplace_back(std::move(evicted));
@@ -143,15 +169,17 @@ public:
                 prepare_staging_cache(other);
                 cached[key] = std::vector<Stat>();
             } else {
-                // No evictions, so we don't even bother computing the reverse.
-                actions[other] = 1;
+                // Otherwise, if we're not going to do any evictions, we
+                // indicate that we shouldn't even bother computing the
+                // reverse, because we're won't cache the incoming entry.
+                actions[other] = CacheAction::COMPUTE;
             }
         }
     }
 
     void transfer(int group) {
         for (int other = 0; other < ngroups; ++other) {
-            if (actions[other] != 2) {
+            if (actions[other] != CacheAction::CACHE) {
                 continue;
             }
 
@@ -757,11 +785,11 @@ private:
 
                         auto cohen_ptr = full_set.data() + gene * ngroups;
                         for (int other = 0; other < ngroups; ++other) {
-                            if (actions[other] == 0) {
+                            if (actions[other] == differential_analysis::CacheAction::SKIP) {
                                 continue;
                             }
 
-                            if (actions[other] == 1) {
+                            if (actions[other] == differential_analysis::CacheAction::COMPUTE) {
                                 cohen_ptr[other] = differential_analysis::compute_pairwise_cohens_d<false>(group, other, my_means, my_variances, level_size, ngroups, nblocks, threshold);
                                 continue;
                             }
@@ -810,13 +838,13 @@ private:
                         auto my_means = tmp_means + nlevels * gene;
                         auto lfc_ptr = full_set.data() + gene * ngroups;
                         for (int other = 0; other < ngroups; ++other) {
-                            if (actions[other] == 0) {
+                            if (actions[other] == differential_analysis::CacheAction::SKIP) {
                                 continue;
                             }
 
                             auto val = differential_analysis::compute_pairwise_simple_diff(group, other, my_means, level_size, ngroups, nblocks);
                             lfc_ptr[other] = val;
-                            if (actions[other] == 2) {
+                            if (actions[other] == differential_analysis::CacheAction::CACHE) {
                                 staging_cache[other][gene] = -val;
                             } 
                         }
@@ -861,13 +889,13 @@ private:
                         auto delta_detected_ptr = full_set.data() + gene * ngroups;
 
                         for (int other = 0; other < ngroups; ++other) {
-                            if (actions[other] == 0) {
+                            if (actions[other] == differential_analysis::CacheAction::SKIP) {
                                 continue;
                             }
 
                             auto val = differential_analysis::compute_pairwise_simple_diff(group, other, my_detected, level_size, ngroups, nblocks);
                             delta_detected_ptr[other] = val;
-                            if (actions[other] == 2) {
+                            if (actions[other] == differential_analysis::CacheAction::CACHE) {
                                 staging_cache[other][gene] = -val;
                             } 
                         }
