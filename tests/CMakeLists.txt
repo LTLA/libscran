@@ -52,6 +52,7 @@ add_executable(
 
     src/aggregation/AggregateAcrossCells.cpp
     src/aggregation/DownsampleByNeighbors.cpp
+    src/aggregation/ScoreFeatureSet.cpp
 
     src/utils/average_vectors.cpp
     src/utils/subset_vector.cpp

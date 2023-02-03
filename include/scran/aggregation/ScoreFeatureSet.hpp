@@ -66,31 +66,48 @@ private:
     int nthreads = Defaults::num_threads;
     bool scale = Defaults::scale;
 
+public:
+    ScoreFeatureSet& set_block_policy(BlockPolicy b = Defaults::block_policy) {
+        block_policy = b;
+        return *this;
+    }
+
+    ScoreFeatureSet& set_num_threads(int n = Defaults::num_threads) {
+        nthreads = n;
+        return *this;
+    }
+
+    ScoreFeatureSet& set_scale(bool s = Defaults::scale) {
+        scale = s;
+        return *this;
+    }
+
 protected:
-    std::vector<double> combine_rotation_vectors(const std::vector<Eigen::MatrixXd>& rotation, std::vector<double>& variance_explained, std::vector<double>& total_variance) const {
+    std::vector<double> combine_rotation_vectors(const std::vector<Eigen::MatrixXd>& rotation, const std::vector<double>& variance_explained, const std::vector<double>& total_variance) const {
         std::vector<double> output;
+        size_t nblocks = rotation.size();
         auto compute_var_prop = [&](int b) -> double {
             if (total_variance[b] == 0) {
                 return 0; // avoid UB upon an unfortunate div by zero.
             } else {
-                return variance_explained[b][0] / total_variance[b];
+                return variance_explained[b] / total_variance[b];
             }
         };
 
-        if (batch_policy == BatchPolicy::MAXIMUM) {
+        if (block_policy == BlockPolicy::MAXIMUM) {
             double best_var_prop = compute_var_prop(0);
             size_t best_index = 0;
 
             for (size_t b = 1; b < nblocks; ++b) {
                 double var_prop = compute_var_prop(b);
-                if (var_prop > overall_var_prop) {
+                if (var_prop > best_var_prop) {
                     best_index = b;
                     best_var_prop = var_prop;
                 }
             }
 
-            const auto& rotation = rotation[best_index];
-            output.insert(output.end(), rotation.begin(), rotation.end());
+            const auto& chosen = rotation[best_index];
+            output.insert(output.end(), chosen.data(), chosen.data() + chosen.size());
 
         } else {
             double total_var_prop = 0;
@@ -106,14 +123,14 @@ protected:
                 // as the vectors are not defined w.r.t. their sign.
                 double proj = 1;
                 if (b) {
-                    if (std::inner_product(rotation[0].begin(), rotation[0].end(), current_rotation.begin()) < 0) {
+                    if (std::inner_product(output.begin(), output.end(), current_rotation.data(), 0.0) < 0.0) {
                         proj = -1;
                     }
                 }
 
-                double mult = proj * var_proj;
+                double mult = proj * var_prop;
                 for (size_t f = 0; f < nfeatures; ++f) {
-                    output[f] += mult * current_rotation[f];
+                    output[f] += mult * current_rotation(f, 0);
                 }
             }
 
@@ -141,11 +158,12 @@ protected:
         std::vector<std::vector<double> > block_scores;
     };
 
-    template<class Inputs, class Function>
+    template<class Function>
     BlockwiseOutputs compute_blockwise_scores(
         const std::vector<Eigen::MatrixXd>& rotation, 
         const std::vector<double>& variance_explained, 
         const std::vector<double>& total_variance, 
+        const std::vector<size_t>& block_size,
         Function mult
     ) const {
         // This involves some mild copying of vectors... oh well.
@@ -154,7 +172,8 @@ protected:
 
         size_t nblocks = rotation.size();
         output.block_scores.reserve(nblocks);
-        Eigen::VectorXd rotation_as_vector(output.rotation.begin(), output.rotation.end()); 
+        Eigen::VectorXd rotation_as_vector(output.rotation.size());
+        std::copy(output.rotation.begin(), output.rotation.end(), rotation_as_vector.data()); 
 
         // We short-circuit the computation of the low-rank representation by
         // realizing that the column sum just involves taking the sum of the
@@ -173,11 +192,12 @@ protected:
         }
 
         return output;
+    }
 
 private:
     // Re-using the same two-pass philosophy from RunPCA, to save memory.
     struct BlockwiseSparseComponents {
-        BlockedSparseComponents(size_t nblocks) : ptrs(nblocks), values(nblocks), indices(nblocks) {}
+        BlockwiseSparseComponents(size_t nblocks) : ptrs(nblocks), values(nblocks), indices(nblocks) {}
         std::vector<std::vector<size_t> > ptrs;
         std::vector<std::vector<double> > values;
         std::vector<std::vector<int> > indices;
@@ -194,8 +214,9 @@ private:
         const std::vector<size_t>& reverse_block_map
     ) const {
 
+        size_t NC = mat->ncol();
         size_t num_features = which_features.size();
-        BlockedSparseComponents output(nblocks);
+        BlockwiseSparseComponents output(nblocks);
         auto& ptrs = output.ptrs;
         for (size_t b = 0; b < nblocks; ++b) {
             ptrs.resize(num_features + 1);
@@ -216,9 +237,9 @@ private:
 
 #ifndef SCRAN_CUSTOM_PARALLEL
                 #pragma omp for
-                for (size_t f = 0; f < num_features; ++r) {
+                for (size_t f = 0; f < num_features; ++f) {
 #else
-                for (size_t f = start; f < end; ++r) {
+                for (size_t f = start; f < end; ++f) {
 #endif
 
                     size_t r = which_features[f];
@@ -239,6 +260,7 @@ private:
 
         auto& values = output.values;
         auto& indices = output.indices;
+        size_t NR = mat->nrow();
 
         /*** Second round, to populate the vectors. ***/
         {
@@ -247,34 +269,39 @@ private:
                 for (size_t r = 0; r < NR; ++r) {
                     curptrs[r + 1] += curptrs[r];
                 }
-                values[b].resize(ptrs.back());
-                indices[b].resize(ptrs.back());
+                values[b].resize(curptrs.back());
+                indices[b].resize(curptrs.back());
             }
-            auto ptr_copy = ptr;
+            auto ptr_copy = ptrs;
 
 #ifndef SCRAN_CUSTOM_PARALLEL
             #pragma omp parallel num_threads(nthreads)
             {
 #else
-            SCRAN_CUSTOM_PARALLEL(NR, [&](size_t start, size_t end) -> void {
+            SCRAN_CUSTOM_PARALLEL(num_features, [&](size_t start, size_t end) -> void {
 #endif            
 
                 auto wrk = mat->new_workspace(true);
+                std::vector<double> xbuffer(NC);
+                std::vector<int> ibuffer(NC);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
                 #pragma omp for
-                for (size_t r = 0; r < NR; ++r) {
+                for (size_t f = 0; f < num_features; ++f) {
 #else
-                for (size_t r = start; r < end; ++r) {
+                for (size_t f = start; f < end; ++f) {
 #endif
 
+                    size_t r = which_features[f];
                     size_t r2 = reverse_feature_map[r];
-                    auto range = mat->sparse_row(which_features[r], xbuffer.data(), ibuffer.data(), wrk.get());
+                    auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data(), wrk.get());
+
                     for (size_t i = 0; i < range.number; ++i) {
-                        auto b = block[range.index[i]];
+                        auto c = range.index[i];
+                        auto b = block[c];
                         auto& offset = ptr_copy[b][r2];
                         values[b][offset] = range.value[i];
-                        indices[b][offset] = reverse_block_map[range.index[i]]];
+                        indices[b][offset] = reverse_block_map[c];
                         ++offset;
                     }
 
@@ -287,6 +314,8 @@ private:
             }, nthreads);
 #endif
         }
+
+        return output;
     }
 
     template<typename T, typename IDX, typename X, typename B>
@@ -300,10 +329,11 @@ private:
         const std::vector<size_t>& reverse_block_map 
     ) const {
 
+        auto NR = mat->nrow();
         auto NC = mat->ncol();
-        size_t num_features = which_features.size();
-        size_t first_feature = (num_features ? 0 : which_features.front());
-        size_t last_feature = (num_features ? 0 : which_features.back() + 1);
+        size_t nfeatures = which_features.size();
+        size_t first_feature = (nfeatures ? 0 : which_features.front());
+        size_t last_feature = (nfeatures ? 0 : which_features.back() + 1);
         size_t gap_size = last_feature - first_feature;
 
         /*** First round, to fetch the number of zeros in each row. ***/
@@ -324,7 +354,7 @@ private:
                 if (startcol < endcol) {
                     std::vector<std::vector<size_t> > nonzeros_per_row(nblocks);
                     for (size_t b = 0; b < nblocks; ++b) {
-                        nonzeroes_per_row[b].resize(num_features);
+                        nonzeros_per_row[b].resize(nfeatures);
                     }
 
                     std::vector<double> xbuffer(gap_size);
@@ -366,14 +396,14 @@ private:
         }
 
         /*** Second round, to populate the vectors. ***/
-        BlockedSparseComponents output(nblocks);
+        BlockwiseSparseComponents output(nblocks);
         {
             auto& ptrs = output.ptrs;
             auto& values = output.values;
             auto& indices = output.indices;
 
             for (size_t b = 0; b < nblocks; ++b) {
-                ptrs.resize(num_features + 1);
+                ptrs.resize(nfeatures + 1);
                 size_t total_nzeros = 0;
                 const auto& nonzeros_per_block = nonzeros_per_row[b];
                 auto& block_ptrs = ptrs[b];
@@ -470,28 +500,32 @@ private:
             auto& A = all_matrices.back();
             A.fill_direct(std::move(values), std::move(indices), std::move(ptrs));
 
-            auto& rotation = rotation[b];
+            auto& current_rotation = rotation[b];
             Eigen::MatrixXd pcs;
             Eigen::VectorXd d;
 
             irlba::EigenThreadScope t(nthreads);
-            irlba::Centered<decltype(emat)> centered(&A, &center_v);
+            irlba::Centered<std::remove_reference<decltype(A)>::type> centered(&A, &center_v);
             if (scale) {
                 irlba::Scaled<decltype(centered)> scaled(&centered, &scale_v);
-                irb.run(scaled, pcs, rotation, d);
+                irb.run(scaled, pcs, current_rotation, d);
             } else {
-                irb.run(centered, pcs, rotation, d);
+                irb.run(centered, pcs, current_rotation, d);
             }
 
-            variance_explained[b] = d[0] / static_cast<double>(emat.rows() - 1);
+            variance_explained[b] = d[0] / static_cast<double>(A.rows() - 1);
         }
 
-        return compute_blockwise_scores(rotation, variance_explained, total_variance, 
+        return compute_blockwise_scores(
+            rotation, 
+            variance_explained, 
+            total_variance, 
+            block_size,
             [&](size_t b, Eigen::VectorXd& rotation_as_vector, Eigen::VectorXd& scores) -> void {
                 irlba::EigenThreadScope t(nthreads);
-                irlba::Centered<decltype(emat)> centered(all_matrices[b], &(center_v[b]));
+                irlba::Centered<std::remove_reference<decltype(all_matrices[b])>::type> centered(&all_matrices[b], &(centers[b]));
                 if (scale) {
-                    irlba::Scaled<decltype(centered)> scaled(&centered, &(scale_v[b]));
+                    irlba::Scaled<decltype(centered)> scaled(&centered, &(scales[b]));
                     scaled.multiply(rotation_as_vector, scores);
                 } else {
                     centered.multiply(rotation_as_vector, scores);
@@ -504,6 +538,7 @@ private:
     template<typename T, typename IDX, typename X, typename B>
     std::vector<Eigen::MatrixXd> core_dense_row(
         const tatami::Matrix<T, IDX>* mat, 
+        const X* features,
         const std::vector<size_t>& which_features,
         const std::vector<size_t>& reverse_feature_map, 
         const B* block, 
@@ -552,12 +587,13 @@ private:
         }, nthreads);
 #endif
 
-        return output;
+        return outputs;
     }
 
     template<typename T, typename IDX, typename X, typename B>
     std::vector<Eigen::MatrixXd> core_dense_column(
         const tatami::Matrix<T, IDX>* mat, 
+        const X* features,
         const std::vector<size_t>& which_features,
         const std::vector<size_t>& reverse_feature_map, 
         const B* block, 
@@ -575,8 +611,8 @@ private:
             outputs.emplace_back(block_size[b], nfeatures);
         }
 
-        size_t first_feature = (num_features ? 0 : which_features.front());
-        size_t last_feature = (num_features ? 0 : which_features.back() + 1);
+        size_t first_feature = (nfeatures ? 0 : which_features.front());
+        size_t last_feature = (nfeatures ? 0 : which_features.back() + 1);
         size_t gap_size = last_feature - first_feature;
 
         // Splitting by row this time, to avoid false sharing across threads.
@@ -591,7 +627,7 @@ private:
 #endif
 
             size_t startrow = first_feature + rows_per_thread * t, endrow = std::min(startrow + rows_per_thread, last_feature);
-            if (startcol < endcol) {
+            if (startrow < endrow) {
                 auto wrk = mat->new_workspace(false);
                 std::vector<double> buffer(endrow - startrow);
 
@@ -616,7 +652,7 @@ private:
         }, nthreads);
 #endif
 
-        return output;
+        return outputs;
     }
 
     BlockwiseOutputs dense_core(size_t num_features, const std::vector<size_t>& block_size, std::vector<Eigen::MatrixXd> all_matrices) const {
@@ -630,7 +666,7 @@ private:
 
         for (size_t b = 0; b < nblocks; ++b) {
             auto& emat = all_matrices[b];
-            total_variance[b] = pca_utils::center_and_scale_by_dense_column(emat, scale, total_var, nthreads);
+            total_variance[b] = pca_utils::center_and_scale_by_dense_column(emat, scale, nthreads);
 
             Eigen::MatrixXd pcs;
             Eigen::VectorXd d;
@@ -640,7 +676,11 @@ private:
             variance_explained[b] = d[0] / static_cast<double>(emat.rows() - 1);
         }
 
-        return compute_blockwise_scores(rotation, variance_explained, total_variance, 
+        return compute_blockwise_scores(
+            rotation, 
+            variance_explained, 
+            total_variance, 
+            block_size,
             [&](size_t b, Eigen::VectorXd& rotation_as_vector, Eigen::VectorXd& scores) -> void {
                 irlba::EigenThreadScope t(nthreads);
                 scores = all_matrices[b] * rotation_as_vector;
@@ -667,8 +707,8 @@ public:
         std::vector<double> weights;
     };
 
-    template<typename T, typename IDX, typename X>
-    void run(const tatami::Matrix<T, IDX>* mat, const X* features, const B* block) const {
+    template<typename T, typename IDX, typename X, typename B>
+    Results run(const tatami::Matrix<T, IDX>* mat, const X* features, const B* block) const {
         auto NR = mat->nrow();
         auto NC = mat->nrow();
 
@@ -699,7 +739,7 @@ public:
         }
 
         BlockwiseOutputs temp;
-        if (mat->is_sparse()) {
+        if (mat->sparse()) {
             if (mat->prefer_rows()) {
                 auto components = core_sparse_row(mat, features, which_features, reverse_feature_map, block, block_size.size(), reverse_block_map);
                 temp = sparse_core(which_features.size(), block_size, std::move(components));
@@ -709,10 +749,10 @@ public:
             }
         } else {
             if (mat->prefer_rows()) {
-                auto matrices = core_dense_row(mat, features, which_features, reverse_feature_map, block, block_size.size(), reverse_block_map);
+                auto matrices = core_dense_row(mat, features, which_features, reverse_feature_map, block, block_size, reverse_block_map);
                 temp = dense_core(which_features.size(), block_size, std::move(matrices));
             } else {
-                auto matrices = core_dense_column(mat, features, which_features, reverse_feature_map, block, block_size.size(), reverse_block_map);
+                auto matrices = core_dense_column(mat, features, which_features, reverse_feature_map, block, block_size, reverse_block_map);
                 temp = dense_core(which_features.size(), block_size, std::move(matrices));
             }
         }
@@ -724,7 +764,7 @@ public:
         if (nblocks > 1) {
             size_t NC = mat->ncol();
             output.scores.resize(NC);
-            std::vector<int> positions();
+            std::vector<int> positions(block_size.size());
             for (size_t c = 0; c < NC; ++c) {
                 auto b = block[c];
                 auto& pos = positions[b];
@@ -736,7 +776,13 @@ public:
         }
 
         return output;
-   }
+    }
+
+    template<typename T, typename IDX, typename X>
+    Results run(const tatami::Matrix<T, IDX>* mat, const X* features) const {
+        std::vector<uint8_t> dummy_block(mat->ncol());
+        return run(mat, features, dummy_block.data());
+    }
 };
 
 }
