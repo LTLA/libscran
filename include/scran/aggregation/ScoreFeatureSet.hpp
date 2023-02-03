@@ -118,8 +118,17 @@ protected:
             }
 
             if (total_var_prop) {
-                for (size_t f = 0; f < nfeatures; ++f) {
-                    output[f] /= total_var_prop;
+                double l2 = 0;
+                for (auto& x : output) {
+                    x /= total_var_prop;
+                    l2 += x * x;
+                }
+
+                if (l2 > 0) { // convert to unit vector
+                    l2 = std::sqrt(l2);
+                    for (auto& x : output) {
+                        x /= l2;
+                    }
                 }
             }
         }
@@ -133,7 +142,12 @@ protected:
     };
 
     template<class Inputs, class Function>
-    BlockwiseOutputs compute_blockwise_scores(const std::vector<Eigen::MatrixXd>& rotation, const std::vector<double>& variance_explained, const std::vector<double>& total_variance, Function mult) const {
+    BlockwiseOutputs compute_blockwise_scores(
+        const std::vector<Eigen::MatrixXd>& rotation, 
+        const std::vector<double>& variance_explained, 
+        const std::vector<double>& total_variance, 
+        Function mult
+    ) const {
         // This involves some mild copying of vectors... oh well.
         BlockwiseOutputs output;
         output.rotation = combine_rotation_vectors(rotation, variance_explained, total_variance);
@@ -142,10 +156,20 @@ protected:
         output.block_scores.reserve(nblocks);
         Eigen::VectorXd rotation_as_vector(output.rotation.begin(), output.rotation.end()); 
 
+        // We short-circuit the computation of the low-rank representation by
+        // realizing that the column sum just involves taking the sum of the
+        // rotation vector and multiplying it by the components.
+        double pre_colsum = std::accumulate(output.rotation.begin(), output.rotation.end(), 0.0);
+
         for (size_t b = 0; b < nblocks; ++b) {
             Eigen::VectorXd scores(block_size[b]);
             mult(b, rotation_as_vector, scores);
-            output.block_scores[b].insert(output.block_scores[b].end(), scores.begin(), scores.end());
+
+            auto& out = output.block_scores[b];
+            out.reserve(scores.size());
+            for (auto x : scores) {
+                out.push_back(x * pre_colsum);
+            }
         }
 
         return output;
