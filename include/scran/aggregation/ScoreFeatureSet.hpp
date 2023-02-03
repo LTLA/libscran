@@ -203,23 +203,15 @@ private:
         std::vector<std::vector<int> > indices;
     };
 
-    template<typename T, typename IDX, typename X, typename B>
-    BlockwiseSparseComponents core_sparse_row(
-        const tatami::Matrix<T, IDX>* mat, 
-        const X* features, 
-        const std::vector<size_t>& which_features,
-        const std::vector<size_t>& reverse_feature_map, 
-        const B* block, 
-        size_t nblocks,
-        const std::vector<size_t>& reverse_block_map
-    ) const {
-
+    template<typename T, typename IDX, typename B>
+    BlockwiseSparseComponents core_sparse_row(const tatami::Matrix<T, IDX>* mat, const B* block, size_t nblocks, const std::vector<size_t>& reverse_block_map) const {
         size_t NC = mat->ncol();
-        size_t num_features = which_features.size();
+        size_t NR = mat->nrow();
+
         BlockwiseSparseComponents output(nblocks);
         auto& ptrs = output.ptrs;
         for (size_t b = 0; b < nblocks; ++b) {
-            ptrs.resize(num_features + 1);
+            ptrs.resize(NR + 1);
         }
 
         /*** First round, to fetch the number of zeros in each row. ***/
@@ -228,7 +220,7 @@ private:
             #pragma omp parallel num_threads(nthreads)
             {
 #else
-            SCRAN_CUSTOM_PARALLEL(num_features, [&](size_t start, size_t end) -> void {
+            SCRAN_CUSTOM_PARALLEL(NR, [&](size_t start, size_t end) -> void {
 #endif            
 
                 std::vector<double> xbuffer(NC);
@@ -237,16 +229,14 @@ private:
 
 #ifndef SCRAN_CUSTOM_PARALLEL
                 #pragma omp for
-                for (size_t f = 0; f < num_features; ++f) {
+                for (size_t r = 0; r < NR; ++r) {
 #else
-                for (size_t f = start; f < end; ++f) {
+                for (size_t r = start; r < end; ++r) {
 #endif
 
-                    size_t r = which_features[f];
-                    size_t index = reverse_feature_map[r] + 1;
                     auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data(), wrk.get());
                     for (size_t i = 0; i < range.number; ++i) {
-                        ++(ptrs[block[range.index[i]]][index]);
+                        ++(ptrs[block[range.index[i]]][r + 1]);
                     }
 
 #ifndef SCRAN_CUSTOM_PARALLEL
@@ -260,7 +250,6 @@ private:
 
         auto& values = output.values;
         auto& indices = output.indices;
-        size_t NR = mat->nrow();
 
         /*** Second round, to populate the vectors. ***/
         {
@@ -278,7 +267,7 @@ private:
             #pragma omp parallel num_threads(nthreads)
             {
 #else
-            SCRAN_CUSTOM_PARALLEL(num_features, [&](size_t start, size_t end) -> void {
+            SCRAN_CUSTOM_PARALLEL(NR, [&](size_t start, size_t end) -> void {
 #endif            
 
                 auto wrk = mat->new_workspace(true);
@@ -287,24 +276,20 @@ private:
 
 #ifndef SCRAN_CUSTOM_PARALLEL
                 #pragma omp for
-                for (size_t f = 0; f < num_features; ++f) {
+                for (size_t r = 0; r < NR; ++r) {
 #else
-                for (size_t f = start; f < end; ++f) {
+                for (size_t r = start; r < end; ++r) {
 #endif
 
-                    size_t r = which_features[f];
-                    size_t r2 = reverse_feature_map[r];
                     auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data(), wrk.get());
-
                     for (size_t i = 0; i < range.number; ++i) {
                         auto c = range.index[i];
                         auto b = block[c];
-                        auto& offset = ptr_copy[b][r2];
+                        auto& offset = ptr_copy[b][r];
                         values[b][offset] = range.value[i];
                         indices[b][offset] = reverse_block_map[c];
                         ++offset;
                     }
-
 
 #ifndef SCRAN_CUSTOM_PARALLEL
                 }
@@ -318,23 +303,10 @@ private:
         return output;
     }
 
-    template<typename T, typename IDX, typename X, typename B>
-    BlockwiseSparseComponents core_sparse_column(
-        const tatami::Matrix<T, IDX>* mat, 
-        const X* features, 
-        const std::vector<size_t>& which_features,
-        const std::vector<size_t>& reverse_feature_map, 
-        const B* block, 
-        size_t nblocks,
-        const std::vector<size_t>& reverse_block_map 
-    ) const {
-
+    template<typename T, typename IDX, typename B>
+    BlockwiseSparseComponents core_sparse_column(const tatami::Matrix<T, IDX>* mat, const B* block, size_t nblocks, const std::vector<size_t>& reverse_block_map) const {
         auto NR = mat->nrow();
         auto NC = mat->ncol();
-        size_t nfeatures = which_features.size();
-        size_t first_feature = (nfeatures ? 0 : which_features.front());
-        size_t last_feature = (nfeatures ? 0 : which_features.back() + 1);
-        size_t gap_size = last_feature - first_feature;
 
         /*** First round, to fetch the number of zeros in each row. ***/
         std::vector<std::vector<size_t> > nonzeros_per_row;
@@ -354,20 +326,18 @@ private:
                 if (startcol < endcol) {
                     std::vector<std::vector<size_t> > nonzeros_per_row(nblocks);
                     for (size_t b = 0; b < nblocks; ++b) {
-                        nonzeros_per_row[b].resize(nfeatures);
+                        nonzeros_per_row[b].resize(NR);
                     }
 
-                    std::vector<double> xbuffer(gap_size);
-                    std::vector<int> ibuffer(gap_size);
+                    std::vector<double> xbuffer(NR);
+                    std::vector<int> ibuffer(NR);
                     auto wrk = mat->new_workspace(false);
 
                     for (size_t c = startcol; c < endcol; ++c) {
-                        auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data(), first_feature, last_feature, wrk.get());
+                        auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data(), wrk.get());
                         auto& current = nonzeros_per_row[block[c]];
                         for (size_t i = 0; i < range.number; ++i) {
-                            if (features[i]) {
-                                ++(current[reverse_feature_map[range.index[i]]]);
-                            }
+                            ++(current[range.index[i]]);
                         }
                     }
 
@@ -403,7 +373,7 @@ private:
             auto& indices = output.indices;
 
             for (size_t b = 0; b < nblocks; ++b) {
-                ptrs.resize(nfeatures + 1);
+                ptrs.resize(NR + 1);
                 size_t total_nzeros = 0;
                 const auto& nonzeros_per_block = nonzeros_per_row[b];
                 auto& block_ptrs = ptrs[b];
@@ -416,7 +386,7 @@ private:
             }
 
             // Splitting by row this time, because columnar extraction can't be done safely.
-            size_t rows_per_thread = std::ceil(static_cast<double>(gap_size) / nthreads);
+            size_t rows_per_thread = std::ceil(static_cast<double>(NR) / nthreads);
             auto ptr_copy = ptrs;
 
 #ifndef SCRAN_CUSTOM_PARALLEL
@@ -427,7 +397,7 @@ private:
             for (int t = start; t < end; ++t) {
 #endif
 
-                size_t startrow = first_feature + rows_per_thread * t, endrow = std::min(startrow + rows_per_thread, last_feature);
+                size_t startrow = rows_per_thread * t, endrow = std::min(startrow + rows_per_thread, NR);
                 if (startrow < endrow) {
                     auto wrk = mat->new_workspace(false);
                     std::vector<double> xbuffer(endrow - startrow);
@@ -443,13 +413,10 @@ private:
 
                         for (size_t i = 0; i < range.number; ++i) {
                             auto r = range.index[i];
-                            if (features[r]) {
-                                auto r2 = reverse_feature_map[r];
-                                auto& offset = block_ptr_copy[r2];
-                                block_values[offset] = range.value[i];
-                                block_indices[offset] = blocked_c;
-                                ++offset;
-                            }
+                            auto& offset = block_ptr_copy[r];
+                            block_values[offset] = range.value[i];
+                            block_indices[offset] = blocked_c;
+                            ++offset;
                         }
                     }
                 }
@@ -535,25 +502,22 @@ private:
     }
 
 private:
-    template<typename T, typename IDX, typename X, typename B>
+    template<typename T, typename IDX, typename B>
     std::vector<Eigen::MatrixXd> core_dense_row(
         const tatami::Matrix<T, IDX>* mat, 
-        const X* features,
-        const std::vector<size_t>& which_features,
-        const std::vector<size_t>& reverse_feature_map, 
         const B* block, 
         const std::vector<size_t>& block_size,
         const std::vector<size_t>& reverse_block_map 
     ) const {
 
-        size_t nfeatures = which_features.size();
         size_t nblocks = block_size.size();
         size_t NC = mat->ncol();
+        size_t NR = mat->nrow();
 
         std::vector<Eigen::MatrixXd> outputs;
         outputs.reserve(nblocks);
         for (size_t b = 0; b < nblocks; ++b) {
-            outputs.emplace_back(block_size[b], nfeatures);
+            outputs.emplace_back(block_size[b], NR);
         }
 
 #ifndef SCRAN_CUSTOM_PARALLEL
@@ -563,20 +527,17 @@ private:
             auto work = mat->new_workspace(true);
 
             #pragma omp for
-            for (int f = 0; f < nfeatures; ++f) {
+            for (int r = 0; r < NR; ++r) {
 #else
-        SCRAN_CUSTOM_PARALLEL(nfeatures, [&](int start, int end) -> void {
+        SCRAN_CUSTOM_PARALLEL(NR, [&](int start, int end) -> void {
             std::vector<double> buffer(NC);
             auto wrk = mat->new_workspace(true);
-            for (int f = start; f < end; ++f) {
+            for (int r = start; r < end; ++r) {
 #endif
 
-                size_t r = which_features[f];
-                size_t r2 = reverse_feature_map[r];
                 auto ptr = mat->row(r, buffer.data(), wrk.get());
                 for (size_t c = 0; c < NC; ++c) {
-                    auto b = block[c];
-                    outputs[b](reverse_block_map[c], r2) = ptr[c];
+                    outputs[block[c]](reverse_block_map[c], r) = ptr[c];
                 }
 
 #ifndef SCRAN_CUSTOM_PARALLEL
@@ -590,33 +551,26 @@ private:
         return outputs;
     }
 
-    template<typename T, typename IDX, typename X, typename B>
+    template<typename T, typename IDX, typename B>
     std::vector<Eigen::MatrixXd> core_dense_column(
         const tatami::Matrix<T, IDX>* mat, 
-        const X* features,
-        const std::vector<size_t>& which_features,
-        const std::vector<size_t>& reverse_feature_map, 
         const B* block, 
         const std::vector<size_t>& block_size,
         const std::vector<size_t>& reverse_block_map 
     ) const {
 
-        size_t nfeatures = which_features.size();
         size_t nblocks = block_size.size();
         size_t NC = mat->ncol();
+        size_t NR = mat->nrow();
 
         std::vector<Eigen::MatrixXd> outputs;
         outputs.reserve(nblocks);
         for (size_t b = 0; b < nblocks; ++b) {
-            outputs.emplace_back(block_size[b], nfeatures);
+            outputs.emplace_back(block_size[b], NR);
         }
 
-        size_t first_feature = (nfeatures ? 0 : which_features.front());
-        size_t last_feature = (nfeatures ? 0 : which_features.back() + 1);
-        size_t gap_size = last_feature - first_feature;
-
         // Splitting by row this time, to avoid false sharing across threads.
-        size_t rows_per_thread = std::ceil(static_cast<double>(gap_size) / nthreads);
+        size_t rows_per_thread = std::ceil(static_cast<double>(NR) / nthreads);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
         #pragma omp parallel for num_threads(nthreads)
@@ -626,7 +580,7 @@ private:
         for (int t = start; t < end; ++t) {
 #endif
 
-            size_t startrow = first_feature + rows_per_thread * t, endrow = std::min(startrow + rows_per_thread, last_feature);
+            size_t startrow = rows_per_thread * t, endrow = std::min(startrow + rows_per_thread, NR);
             if (startrow < endrow) {
                 auto wrk = mat->new_workspace(false);
                 std::vector<double> buffer(endrow - startrow);
@@ -638,9 +592,7 @@ private:
                     auto& current = outputs[b];
 
                     for (size_t r = startrow; r < endrow; ++r) {
-                        if (features[r]) {
-                            current(c2, reverse_feature_map[r]) = ptr[r - startrow];
-                        }
+                        current(c2, r) = ptr[r - startrow];
                     }
                 }
             }
@@ -709,19 +661,20 @@ public:
 
     template<typename T, typename IDX, typename X, typename B>
     Results run(const tatami::Matrix<T, IDX>* mat, const X* features, const B* block) const {
-        auto NR = mat->nrow();
-        auto NC = mat->nrow();
-
-        std::vector<size_t> reverse_feature_map(NR);
-        std::vector<size_t> which_features;
+        std::shared_ptr<const tatami::Matrix<T, IDX> > subsetted;
         {
+            size_t NR = mat->nrow();
+            std::vector<size_t> which_features;
             for (size_t r = 0; r < NR; ++r) {
                 if (features[r]) {
-                    reverse_feature_map[r] = which_features.size();
                     which_features.push_back(r);
                 }
             }
+            subsetted = tatami::make_DelayedSubset<0>(tatami::wrap_shared_ptr(mat), std::move(which_features));
         }
+
+        auto NR = subsetted->nrow();
+        auto NC = subsetted->nrow();
 
         std::vector<size_t> reverse_block_map(NC);
         std::vector<size_t> block_size;
@@ -739,21 +692,21 @@ public:
         }
 
         BlockwiseOutputs temp;
-        if (mat->sparse()) {
-            if (mat->prefer_rows()) {
-                auto components = core_sparse_row(mat, features, which_features, reverse_feature_map, block, block_size.size(), reverse_block_map);
-                temp = sparse_core(which_features.size(), block_size, std::move(components));
+        if (subsetted->sparse()) {
+            if (subsetted->prefer_rows()) {
+                auto components = core_sparse_row(subsetted, block, block_size.size(), reverse_block_map);
+                temp = sparse_core(NR, block_size, std::move(components));
             } else {
-                auto components = core_sparse_column(mat, features, which_features, reverse_feature_map, block, block_size.size(), reverse_block_map);
-                temp = sparse_core(which_features.size(), block_size, std::move(components));
+                auto components = core_sparse_column(subsetted, block, block_size.size(), reverse_block_map);
+                temp = sparse_core(NR, block_size, std::move(components));
             }
         } else {
-            if (mat->prefer_rows()) {
-                auto matrices = core_dense_row(mat, features, which_features, reverse_feature_map, block, block_size, reverse_block_map);
-                temp = dense_core(which_features.size(), block_size, std::move(matrices));
+            if (subsetted->prefer_rows()) {
+                auto subsettedrices = core_dense_row(subsetted, block, block_size, reverse_block_map);
+                temp = dense_core(NR, block_size, std::move(subsettedrices));
             } else {
-                auto matrices = core_dense_column(mat, features, which_features, reverse_feature_map, block, block_size, reverse_block_map);
-                temp = dense_core(which_features.size(), block_size, std::move(matrices));
+                auto subsettedrices = core_dense_column(subsetted, block, block_size, reverse_block_map);
+                temp = dense_core(NR, block_size, std::move(subsettedrices));
             }
         }
 
@@ -762,7 +715,6 @@ public:
         size_t nblocks = temp.block_scores.size();
 
         if (nblocks > 1) {
-            size_t NC = mat->ncol();
             output.scores.resize(NC);
             std::vector<int> positions(block_size.size());
             for (size_t c = 0; c < NC; ++c) {

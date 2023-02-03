@@ -355,7 +355,6 @@ inline double center_and_scale_by_dense_column(Eigen::MatrixXd& mat, bool scale,
     return std::accumulate(variances.begin(), variances.end(), 0.0);
 }
 
-
 }
 
 }
