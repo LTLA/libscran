@@ -183,6 +183,7 @@ private:
         std::vector<std::vector<int> > indices;
     };
 
+    template<typename T, typename IDX, typename X, typename B>
     BlockwiseSparseComponents core_sparse_row(
         const tatami::Matrix<T, IDX>* mat, 
         const X* features, 
@@ -288,6 +289,7 @@ private:
         }
     }
 
+    template<typename T, typename IDX, typename X, typename B>
     BlockwiseSparseComponents core_sparse_column(
         const tatami::Matrix<T, IDX>* mat, 
         const X* features, 
@@ -499,6 +501,7 @@ private:
     }
 
 private:
+    template<typename T, typename IDX, typename X, typename B>
     std::vector<Eigen::MatrixXd> core_dense_row(
         const tatami::Matrix<T, IDX>* mat, 
         const std::vector<size_t>& which_features,
@@ -528,14 +531,14 @@ private:
             for (int f = 0; f < nfeatures; ++f) {
 #else
         SCRAN_CUSTOM_PARALLEL(nfeatures, [&](int start, int end) -> void {
-            std::vector<double> work(NC);
-            auto work = mat->new_workspace(true);
+            std::vector<double> buffer(NC);
+            auto wrk = mat->new_workspace(true);
             for (int f = start; f < end; ++f) {
 #endif
 
                 size_t r = which_features[f];
                 size_t r2 = reverse_feature_map[r];
-                auto ptr = mat->row(r, work.data());    
+                auto ptr = mat->row(r, buffer.data(), wrk.get());
                 for (size_t c = 0; c < NC; ++c) {
                     auto b = block[c];
                     outputs[b](reverse_block_map[c], r2) = ptr[c];
@@ -552,7 +555,8 @@ private:
         return output;
     }
 
-    std::vector<Eigen::MatrixXd> core_dense_row(
+    template<typename T, typename IDX, typename X, typename B>
+    std::vector<Eigen::MatrixXd> core_dense_column(
         const tatami::Matrix<T, IDX>* mat, 
         const std::vector<size_t>& which_features,
         const std::vector<size_t>& reverse_feature_map, 
@@ -568,46 +572,49 @@ private:
         std::vector<Eigen::MatrixXd> outputs;
         outputs.reserve(nblocks);
         for (size_t b = 0; b < nblocks; ++b) {
-            outputs.emplace_back(nfeatures, block_size[b]);
+            outputs.emplace_back(block_size[b], nfeatures);
         }
 
         size_t first_feature = (num_features ? 0 : which_features.front());
         size_t last_feature = (num_features ? 0 : which_features.back() + 1);
         size_t gap_size = last_feature - first_feature;
 
-#ifndef SCRAN_CUSTOM_PARALLEL
-        #pragma omp parallel num_threads(nthreads)
-        {
-            std::vector<double> work(gap_size);
-            auto work = mat->new_workspace(false);
+        // Splitting by row this time, to avoid false sharing across threads.
+        size_t rows_per_thread = std::ceil(static_cast<double>(gap_size) / nthreads);
 
-            #pragma omp for
-            for (int c = 0; c < NC; ++c) {
+#ifndef SCRAN_CUSTOM_PARALLEL
+        #pragma omp parallel for num_threads(nthreads)
+        for (int t = 0; t < nthreads; ++t) {
 #else
-        SCRAN_CUSTOM_PARALLEL(NC, [&](int start, int end) -> void {
-            std::vector<double> work(gap_size);
-            auto work = mat->new_workspace(false);
-            for (int c = start; c < end; ++c) {
+        SCRAN_CUSTOM_PARALLEL(nthreads, [&](int start, int end) -> void { // Trivial allocation of one job per thread.
+        for (int t = start; t < end; ++t) {
 #endif
 
-                auto ptr = mat->column(c, first_feature, last_feature, work.data());    
-                auto& current_mat = outputs[block[c]];
-                auto current_col = reverse_block_map[c];
-                for (auto r : which_features) {
-                    current(reverse_feature_map[r], current_col) = ptr[r - first_feature];
+            size_t startrow = first_feature + rows_per_thread * t, endrow = std::min(startrow + rows_per_thread, last_feature);
+            if (startcol < endcol) {
+                auto wrk = mat->new_workspace(false);
+                std::vector<double> buffer(endrow - startrow);
+
+                for (size_t c = 0; c < NC; ++c) {
+                    auto ptr = mat->column(c, buffer.data(), startrow, endrow, wrk.get());
+                    auto b = block[c];
+                    auto c2 = reverse_block_map[c];
+                    auto& current = outputs[b];
+
+                    for (size_t r = startrow; r < endrow; ++r) {
+                        if (features[r]) {
+                            current(c2, reverse_feature_map[r]) = ptr[r - startrow];
+                        }
+                    }
                 }
+            }
 
 #ifndef SCRAN_CUSTOM_PARALLEL
-            }
         }
 #else
-            }
+        }
         }, nthreads);
 #endif
-
-        for (size_t b = 0; b < nblocks; ++b) {
-            outputs[b].adjointInPlace();
-        }
 
         return output;
     }
@@ -702,10 +709,10 @@ public:
             }
         } else {
             if (mat->prefer_rows()) {
-                auto matrices = core_dense_row(mat, which_features, reverse_feature_map, block, block_size.size(), reverse_block_map);
+                auto matrices = core_dense_row(mat, features, which_features, reverse_feature_map, block, block_size.size(), reverse_block_map);
                 temp = dense_core(which_features.size(), block_size, std::move(matrices));
             } else {
-                auto matrices = core_dense_column(mat, which_features, reverse_feature_map, block, block_size.size(), reverse_block_map);
+                auto matrices = core_dense_column(mat, features, which_features, reverse_feature_map, block, block_size.size(), reverse_block_map);
                 temp = dense_core(which_features.size(), block_size, std::move(matrices));
             }
         }
