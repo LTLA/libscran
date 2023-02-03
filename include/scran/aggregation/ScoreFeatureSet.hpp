@@ -409,7 +409,7 @@ private:
         return output;
     }
 
-    BlockwiseOutputs sparse_core_internal(size_t num_features, const std::vector<size_t>& block_size, BlockwiseSparseComponents& components) const {
+    BlockwiseOutputs sparse_core(size_t num_features, const std::vector<size_t>& block_size, BlockwiseSparseComponents components) const {
         size_t nblocks = block_size.size();
         std::vector<Eigen::MatrixXd> rotation(nblocks);
         std::vector<double> variance_explained(nblocks);
@@ -588,7 +588,7 @@ private:
         return output;
     }
 
-    BlockwiseOutputs dense_core_internal(size_t num_features, const std::vector<size_t>& block_size, std::vector<Eigen::MatrixXd>& all_matrices) const {
+    BlockwiseOutputs dense_core(size_t num_features, const std::vector<size_t>& block_size, std::vector<Eigen::MatrixXd> all_matrices) const {
         size_t nblocks = block_size.size();
         std::vector<Eigen::MatrixXd> rotation(nblocks);
         std::vector<double> variance_explained(nblocks);
@@ -671,18 +671,18 @@ public:
         if (mat->is_sparse()) {
             if (mat->prefer_rows()) {
                 auto components = core_sparse_row(mat, features, which_features, reverse_feature_map, block, block_size.size(), reverse_block_map);
-                return sparse_core_internal(which_features.size(), block_size, components);
+                temp = sparse_core(which_features.size(), block_size, std::move(components));
             } else {
                 auto components = core_sparse_column(mat, features, which_features, reverse_feature_map, block, block_size.size(), reverse_block_map);
-                return sparse_core_internal(which_features.size(), block_size, components);
+                temp = sparse_core(which_features.size(), block_size, std::move(components));
             }
         } else {
             if (mat->prefer_rows()) {
                 auto matrices = core_dense_row(mat, which_features, reverse_feature_map, block, block_size.size(), reverse_block_map);
-                temp = dense_core_internal(which_features.size(), block_size, components);
+                temp = dense_core(which_features.size(), block_size, std::move(matrices));
             } else {
                 auto matrices = core_dense_column(mat, which_features, reverse_feature_map, block, block_size.size(), reverse_block_map);
-                return dense_core_internal(which_features.size(), block_size, components);
+                temp = dense_core(which_features.size(), block_size, std::move(matrices));
             }
         }
 
