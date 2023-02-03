@@ -241,7 +241,7 @@ private:
         std::vector<size_t> ptrs = pca_utils::fill_transposed_compressed_sparse_vectors(mat, values, indices, nthreads); // row-major filling.
 
         size_t NR = mat->nrow(), NC = mat->ncol();
-        pca_utils::compute_mean_and_variance_from_sparse_components(NR, NC, values, indices, ptrs, center_v, scale_v, total_var, nthreads); // row-major calculations.
+        pca_utils::compute_mean_and_variance_from_sparse_components(NR, NC, values, indices, ptrs, center_v, scale_v, nthreads); // row-major calculations.
         pca_utils::set_scale(scale, scale_v, total_var);
 
         pca_utils::CustomSparseMatrix A(NC, NR, nthreads); // transposed; we want genes in the columns.

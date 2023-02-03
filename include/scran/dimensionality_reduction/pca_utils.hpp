@@ -342,6 +342,7 @@ inline double center_and_scale_by_dense_column(Eigen::MatrixXd& mat, bool scale,
         for (size_t r = 0; r < NR; ++r) {
             ptr[r] -= results.first;
         }
+
         apply_scale(scale, results.second, NR, ptr, variances[c]);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
@@ -351,7 +352,7 @@ inline double center_and_scale_by_dense_column(Eigen::MatrixXd& mat, bool scale,
     }, nthreads);
 #endif
     
-    return;
+    return std::accumulate(variances.begin(), variances.end(), 0.0);
 }
 
 
