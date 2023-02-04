@@ -101,7 +101,7 @@ TEST_P(ScoreFeatureSetSingleBlockTest, Reference) {
     auto seed = std::get<0>(param) * 2; // changing the seed a little.
     auto nthreads = std::get<1>(param);
 
-    int ngenes = 1011;
+    int ngenes = 1211;
     int ncells = 101;
     load(ngenes, ncells, seed);
 
@@ -311,3 +311,174 @@ TEST_F(CombineRotationVectorsTest, Maximum) {
         compare_almost_equal(observed, expected);
     }
 }
+
+/******************************************************
+ ******************************************************/
+
+class ScoreFeatureSetMultiBlockTest : public ::testing::TestWithParam<std::tuple<int, int, int> >, public ScoreFeatureSetTestCore {
+protected:
+    static std::vector<int> spawn_blocks(int nblocks, int ncells, int seed) {
+        std::vector<int> block(ncells);
+        std::mt19937_64 rng(seed * 99);
+        for (int c = 0; c < ncells; ++c) {
+            block[c] = rng() % nblocks;
+        }
+        return block;
+    }
+
+    static std::vector<double> compute_scores(const tatami::NumericMatrix* mat, const std::vector<double>& weights, const std::vector<int>& which_features) {
+        auto ncells = mat->ncol();
+        auto nselected = which_features.size();
+
+        std::vector<double> scores(ncells);
+        double precol = std::accumulate(weights.begin(), weights.end(), 0.0);
+        for (int c = 0; c < ncells; ++c) {
+            auto col = mat->column(c);
+            for (int s = 0; s < nselected; ++s) {
+                scores[c] += weights[s] * col[which_features[s]];
+            }
+            scores[c] *= precol;
+        }
+
+        return scores;
+    }
+};
+
+TEST_P(ScoreFeatureSetMultiBlockTest, Consistency) {
+    auto param = GetParam();
+    auto seed = std::get<0>(param);
+    auto nblocks = std::get<1>(param);
+    auto nthreads = std::get<2>(param);
+
+    int ngenes = 2010;
+    int ncells = 151;
+    load(ngenes, ncells, seed);
+    auto block = spawn_blocks(nblocks, ncells, seed);
+    auto features = spawn_features(ngenes, seed);
+
+    scran::ScoreFeatureSet scorer;
+    auto ref = scorer.run(dense_row.get(), features.data(), block.data());
+    EXPECT_EQ(ref.weights.size(), std::accumulate(features.begin(), features.end(), 0));
+    EXPECT_EQ(ref.scores.size(), ncells);
+
+    if (nthreads > 1) {
+        scorer.set_num_threads(nthreads);
+        auto par = scorer.run(dense_row.get(), features.data(), block.data());
+        EXPECT_EQ(ref.weights, par.weights);
+        EXPECT_EQ(ref.scores, par.scores);
+    }
+
+    auto res2 = scorer.run(dense_column.get(), features.data(), block.data());
+    compare_almost_equal(ref.weights, res2.weights);
+    compare_almost_equal(ref.scores, res2.scores);
+
+    auto res3 = scorer.run(sparse_row.get(), features.data(), block.data());
+    compare_almost_equal(ref.weights, res3.weights);
+    compare_almost_equal(ref.scores, res3.scores);
+
+    auto res4 = scorer.run(sparse_column.get(), features.data(), block.data());
+    compare_almost_equal(ref.weights, res4.weights);
+    compare_almost_equal(ref.scores, res4.scores);
+}
+
+TEST_P(ScoreFeatureSetMultiBlockTest, Reference) {
+    auto param = GetParam();
+    auto seed = std::get<0>(param) * 2; // changing the seed a little.
+    auto nblocks = std::get<1>(param);
+    auto nthreads = std::get<2>(param);
+
+    int ngenes = 911;
+    int ncells = 201;
+    load(ngenes, ncells, seed);
+    auto block = spawn_blocks(nblocks, ncells, seed);
+    auto features = spawn_features(ngenes, seed);
+
+    std::vector<int> which_features;
+    for (int f = 0; f < ngenes; ++f) {
+        if (features[f]) {
+            which_features.push_back(f);
+        }
+    }
+    auto nselected = which_features.size();
+
+    // Reference calculation, with averaging.
+    std::vector<ReferenceResults> results;
+    results.reserve(nblocks);
+    for (int b = 0; b < nblocks; ++b) {
+        std::vector<int> subset;
+        for (int c = 0; c < ncells; ++c) {
+            if (b == block[c]) {
+                subset.push_back(c);
+            }
+        }
+
+        auto sub = tatami::make_DelayedSubset<1>(dense_column, std::move(subset));
+        results.push_back(reference(sub.get(), features.data()));
+        EXPECT_EQ(results.back().weights.size(), nselected);
+    }
+
+    std::vector<double> weights(nselected);
+    double total_prop = 0;
+    for (int b = 0; b < nblocks; ++b) {
+        auto proj = std::inner_product(results[b].weights.begin(), results[b].weights.end(), weights.begin(), 0.0);
+        double multiplier = (proj < 0 ? -1 : 1) * results[b].prop_var;
+        total_prop += results[b].prop_var;
+        for (int s = 0; s < nselected; ++s) {
+            weights[s] += results[b].weights[s] * multiplier;
+        }
+    }
+
+    double l2 = 0;
+    for (auto& w : weights) {
+        w /= total_prop;
+        l2 += w * w;
+    }
+
+    l2 = std::sqrt(l2);
+    for (auto& w : weights) {
+        w /= l2;
+    }
+
+    // Comparing to our actual thing.
+    scran::ScoreFeatureSet scorer;
+    scorer.set_num_threads(nthreads);
+
+    {
+        scorer.set_block_policy(scran::ScoreFeatureSet::BlockPolicy::AVERAGE);
+        auto obs = scorer.run(sparse_column.get(), features.data());
+        compare_almost_equal(obs.weights, weights);
+
+//        auto scores = compute_scores(dense_column.get(), weights, which_features);
+//        compare_almost_equal(obs.scores, scores);
+    }
+
+    // Maximium also gets a run.
+    {
+        scorer.set_block_policy(scran::ScoreFeatureSet::BlockPolicy::MAXIMUM);
+        auto obs = scorer.run(sparse_column.get(), features.data());
+
+        size_t chosen = 0; 
+        for (int b = 1; b < nblocks; ++b) {
+            std::cout << results[b].prop_var << std::endl;
+            if (results[b].prop_var > results[chosen].prop_var) {
+                chosen = b;
+            }
+        }
+        compare_almost_equal(obs.weights, results[chosen].weights);
+
+//        auto scores = compute_scores(dense_column.get(), weights, which_features);
+//        compare_almost_equal(obs.scores, scores);
+    }
+}
+
+INSTANTIATE_TEST_CASE_P(
+    ScoreFeatureSetMultiBlock,
+    ScoreFeatureSetMultiBlockTest,
+    ::testing::Combine(
+        ::testing::Values(455, 5444, 67777), // seeds
+        ::testing::Values(2, 3, 4), // number of blocks
+        ::testing::Values(1, 3) // number of threads
+    )
+);
+
+
