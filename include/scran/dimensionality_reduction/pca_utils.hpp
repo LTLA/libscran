@@ -59,7 +59,7 @@ inline void set_scale(bool scale, Eigen::VectorXd& scale_v, double& total_var) {
                 s = std::sqrt(s);
                 ++total_var;
             } else {
-                s = 1;
+                s = 1; // avoid division by zero.
             }
         }
     } else {
@@ -290,8 +290,8 @@ inline void compute_mean_and_variance_from_sparse_components(
     const std::vector<double>& values,
     const std::vector<int>& indices,
     const std::vector<size_t>& ptrs,
-    Eigen::VectorXd& center_v,
-    Eigen::VectorXd& scale_v,
+    Eigen::VectorXd& centers,
+    Eigen::VectorXd& variances,
     int nthreads
 ) {
 
@@ -310,8 +310,8 @@ inline void compute_mean_and_variance_from_sparse_components(
         range.index = indices.data() + offset;
 
         auto results = tatami::stats::variances::compute_direct(range, NC);
-        center_v.coeffRef(r) = results.first;
-        scale_v.coeffRef(r) = results.second;
+        centers.coeffRef(r) = results.first;
+        variances.coeffRef(r) = results.second;
 
 #ifndef SCRAN_CUSTOM_PARALLEL
     }
@@ -323,12 +323,11 @@ inline void compute_mean_and_variance_from_sparse_components(
     return;
 }
 
-// Compute mean and variance from column-major matrix
-inline double center_and_scale_by_dense_column(Eigen::MatrixXd& mat, bool scale, int nthreads) {
+// Compute mean and variance from column-major matrix.
+inline void compute_mean_and_variance_from_dense_columns(const Eigen::MatrixXd& mat, Eigen::VectorXd& centers, Eigen::VectorXd& variances, int nthreads) {
     size_t NC = mat.cols();
     size_t NR = mat.rows();
-    double* ptr = mat.data();
-    std::vector<double> variances(NC);
+    const double* ptr = mat.data();
 
 #ifndef SCRAN_CUSTOM_PARALLEL
     #pragma omp parallel for num_threads(nthreads)
@@ -340,11 +339,8 @@ inline double center_and_scale_by_dense_column(Eigen::MatrixXd& mat, bool scale,
 
         auto curptr = ptr + NR * c;
         auto results = tatami::stats::variances::compute_direct(curptr, NR);
-        for (size_t r = 0; r < NR; ++r) {
-            curptr[r] -= results.first;
-        }
-
-        apply_scale(scale, results.second, NR, curptr, variances[c]);
+        centers[c] = results.first;
+        variances[c] = results.second;
 
 #ifndef SCRAN_CUSTOM_PARALLEL
     }
@@ -352,8 +348,42 @@ inline double center_and_scale_by_dense_column(Eigen::MatrixXd& mat, bool scale,
     }
     }, nthreads);
 #endif
-    
-    return std::accumulate(variances.begin(), variances.end(), 0.0);
+
+    return;
+}
+
+inline void center_and_scale_dense_columns(Eigen::MatrixXd& mat, const Eigen::VectorXd& centers, bool use_scale, const Eigen::VectorXd& scale, int nthreads) {
+    size_t NC = mat.cols();
+    size_t NR = mat.rows();
+    double* ptr = mat.data();
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+    #pragma omp parallel for num_threads(nthreads)
+    for (size_t c = 0; c < NC; ++c) {
+#else
+    SCRAN_CUSTOM_PARALLEL(NC, [&](size_t first, size_t last) -> void {
+    for (size_t c = first; c < last; ++c) {
+#endif
+
+        auto curptr = ptr + NR * c;
+        auto center = centers[c];
+        for (size_t r = 0; r < NR; ++r) {
+            curptr[r] -= center;
+        }
+
+        if (use_scale) {
+            for (size_t r = 0; r < NR; ++r) {
+                // set_scale should avoid division by zero.
+                curptr[r] /= scale[r];
+            }
+        }
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+    }
+#else
+    }
+    }, nthreads);
+#endif
 }
 
 }

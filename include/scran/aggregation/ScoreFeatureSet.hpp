@@ -154,7 +154,9 @@ protected:
         const std::vector<Eigen::MatrixXd>& rotation, 
         const std::vector<double>& variance_explained, 
         const std::vector<size_t>& block_size,
-        Function mult
+        Function mult,
+        const std::vector<Eigen::VectorXd>& centers,
+        const std::vector<Eigen::VectorXd>& scales 
     ) const {
         // This involves some mild copying of vectors... oh well.
         BlockwiseOutputs output;
@@ -165,19 +167,41 @@ protected:
         Eigen::VectorXd rotation_as_vector(output.rotation.size());
         std::copy(output.rotation.begin(), output.rotation.end(), rotation_as_vector.data()); 
 
-        // We short-circuit the computation of the low-rank representation by
-        // realizing that the column sum just involves taking the sum of the
-        // rotation vector and multiplying it by the components.
-        double pre_colsum = std::accumulate(output.rotation.begin(), output.rotation.end(), 0.0);
+        /* The low-rank representation is defined as (using R syntax here):
+         * 
+         * L = outer(R, P) * S + C
+         * 
+         * where P is the per-cell coordinates, R is the rotation vector, S is the scaling vector and C is the centering vector.
+         * Our aim is to take the column sums of this matrix, so:
+         *
+         * colSums(L) = sum(R * S) * P + sum(C)
+         *
+         * sum(R * S) is called the 'pre-column sum', and is block-specific when 'scale = true'.
+         */
+
+        double pre_colsum;
+        if (!scale) {
+            pre_colsum = std::accumulate(output.rotation.begin(), output.rotation.end(), 0.0);
+        }
 
         for (size_t b = 0; b < nblocks; ++b) {
-            Eigen::VectorXd scores(block_size[b]);
-            mult(b, rotation_as_vector, scores);
+            size_t cur_cells = block_size[b];
+            Eigen::VectorXd scores(cur_cells);
+            {
+                irlba::EigenThreadScope t(nthreads);
+                mult(b, rotation_as_vector, scores);
+            }
+
+            const auto& curcenter = centers[b];
+            auto to_add = std::accumulate(curcenter.data(), curcenter.data() + curcenter.size(), 0.0);
+            if (scale) {
+                pre_colsum = std::inner_product(output.rotation.begin(), output.rotation.end(), scales[b].data(), 0.0);
+            }
 
             auto& out = output.block_scores[b];
             out.reserve(scores.size());
             for (auto x : scores) {
-                out.push_back(x * pre_colsum);
+                out.push_back(x * pre_colsum + to_add);
             }
         }
 
@@ -188,7 +212,7 @@ protected:
         if (total_var == 0 || nr < 2) {
             return 0; 
         } else {
-            return d[0] / static_cast<double>(nr - 1) / total_var;
+            return d[0] * d[0] / static_cast<double>(nr - 1) / total_var;
         }
     }
 
@@ -458,7 +482,7 @@ private:
             auto& scale_v = scales.back();
             pca_utils::compute_mean_and_variance_from_sparse_components(num_features, block_size[b], values, indices, ptrs, center_v, scale_v, nthreads);
 
-            double total_var = -1;
+            double total_var = 0;
             pca_utils::set_scale(scale, scale_v, total_var);
 
             all_matrices.emplace_back(block_size[b], num_features, nthreads); // transposed; we want genes in the columns.
@@ -485,16 +509,18 @@ private:
             rotation, 
             variance_explained, 
             block_size,
-            [&](size_t b, Eigen::VectorXd& rotation_as_vector, Eigen::VectorXd& scores) -> void {
-                irlba::EigenThreadScope t(nthreads);
-                irlba::Centered<std::remove_reference<decltype(all_matrices[b])>::type> centered(&all_matrices[b], &(centers[b]));
+            [&](size_t b, const Eigen::VectorXd& rotation_as_vector, Eigen::VectorXd& scores) -> void {
+                const auto& A = all_matrices[b];
+                irlba::Centered<std::remove_reference<decltype(A)>::type> centered(&A, &centers[b]);
                 if (scale) {
-                    irlba::Scaled<decltype(centered)> scaled(&centered, &(scales[b]));
+                    irlba::Scaled<decltype(centered)> scaled(&centered, &scales[b]);
                     scaled.multiply(rotation_as_vector, scores);
                 } else {
                     centered.multiply(rotation_as_vector, scores);
                 }
-            }
+            },
+            centers,
+            scales
         );
     }
 
@@ -521,7 +547,7 @@ private:
         #pragma omp parallel num_threads(nthreads)
         {
             std::vector<double> buffer(NC);
-            auto work = mat->new_workspace(true);
+            auto wrk = mat->new_workspace(true);
 
             #pragma omp for
             for (int r = 0; r < NR; ++r) {
@@ -607,6 +633,8 @@ private:
     BlockwiseOutputs dense_core(size_t num_features, const std::vector<size_t>& block_size, std::vector<Eigen::MatrixXd> all_matrices) const {
         size_t nblocks = block_size.size();
         std::vector<Eigen::MatrixXd> rotation(nblocks);
+        std::vector<Eigen::VectorXd> centers(nblocks);
+        std::vector<Eigen::VectorXd> scales(nblocks);
         std::vector<double> variance_explained(nblocks);
 
         irlba::Irlba irb;
@@ -614,7 +642,13 @@ private:
 
         for (size_t b = 0; b < nblocks; ++b) {
             auto& emat = all_matrices[b];
-            auto total_var = pca_utils::center_and_scale_by_dense_column(emat, scale, nthreads);
+            centers[b].resize(num_features);
+            scales[b].resize(num_features);
+            pca_utils::compute_mean_and_variance_from_dense_columns(emat, centers[b], scales[b], nthreads);
+
+            double total_var = 0;
+            pca_utils::set_scale(scale, scales[b], total_var);
+            pca_utils::center_and_scale_dense_columns(emat, centers[b], scale, scales[b], nthreads);
 
             Eigen::MatrixXd pcs;
             Eigen::VectorXd d;
@@ -628,10 +662,11 @@ private:
             rotation, 
             variance_explained, 
             block_size,
-            [&](size_t b, Eigen::VectorXd& rotation_as_vector, Eigen::VectorXd& scores) -> void {
-                irlba::EigenThreadScope t(nthreads);
-                scores = all_matrices[b] * rotation_as_vector;
-            }
+            [&](size_t b, const Eigen::VectorXd& rotation_as_vector, Eigen::VectorXd& scores) -> void {
+                scores = all_matrices[b] * rotation_as_vector; 
+            },
+            centers,
+            scales
         );
     }
 

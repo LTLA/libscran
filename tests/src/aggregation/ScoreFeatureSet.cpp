@@ -36,21 +36,36 @@ protected:
         double prop_var;
     };
 
-    static ReferenceResults reference(const tatami::NumericMatrix* mat, const unsigned char* features) {
+    static ReferenceResults reference(const tatami::NumericMatrix* mat, const unsigned char* features, bool scale = false) {
         scran::RunPCA runner;
         runner.set_rank(1);
+        runner.set_scale(scale);
         auto res = runner.run(mat, features);
 
         ReferenceResults output;
         output.weights.insert(output.weights.end(), res.rotation.data(), res.rotation.data() + res.rotation.size());
         output.scores.insert(output.scores.end(), res.pcs.data(), res.pcs.data() + res.pcs.size());
+        output.prop_var = res.variance_explained[0] / res.total_variance;
 
-        auto precol = std::accumulate(output.weights.begin(), output.weights.end(), 0.0);
-        for (auto& x : output.scores) {
-            x *= precol;
+        // Adjusting the scores to convert them into low-rank colsums.
+        auto rowsums = tatami::row_sums(mat);
+        auto rowvars = tatami::row_variances(mat);
+        double precol = 0;
+        double to_add = 0;
+        int f = 0;
+        for (size_t r = 0; r < mat->nrow(); ++r) {
+            if (features[r]) {
+                to_add += rowsums[r] / mat->ncol();
+                precol += (scale ? std::sqrt(rowvars[r]) : 1) * output.weights[f];
+                ++f;
+            }
         }
 
-        output.prop_var = res.variance_explained[0] / res.total_variance;
+        for (auto& x : output.scores) {
+            x *= precol;
+            x += to_add;
+        }
+
         return output;
     }
 };
@@ -326,18 +341,45 @@ protected:
         return block;
     }
 
-    static std::vector<double> compute_scores(const tatami::NumericMatrix* mat, const std::vector<double>& weights, const std::vector<int>& which_features) {
+    static std::vector<double> compute_scores(
+        const tatami::NumericMatrix* mat, 
+        const std::vector<double>& weights, 
+        const std::vector<int>& which_features, 
+        const std::vector<int>& block,
+        const std::vector<std::vector<double> >& centers,
+        bool use_scale,
+        const std::vector<std::vector<double> >& scales)
+    {
         auto ncells = mat->ncol();
         auto nselected = which_features.size();
 
+        std::vector<double> to_add(centers.size());
+        for (size_t c = 0; c < centers.size(); ++c) {
+            to_add[c] = std::accumulate(centers[c].begin(), centers[c].end(), 0.0);
+        }
+
+        std::vector<double> precol(scales.size());
+        if (use_scale) {
+            for (size_t c = 0; c < scales.size(); ++c) {
+                precol[c] = std::inner_product(weights.begin(), weights.end(), scales[c].begin(), 0.0);
+            }
+        } else {
+            double sum = std::accumulate(weights.begin(), weights.end(), 0.0);
+            std::fill(precol.begin(), precol.end(), sum);
+        }
+
         std::vector<double> scores(ncells);
-        double precol = std::accumulate(weights.begin(), weights.end(), 0.0);
         for (int c = 0; c < ncells; ++c) {
             auto col = mat->column(c);
+            auto b = block[c];
+
             for (int s = 0; s < nselected; ++s) {
-                scores[c] += weights[s] * col[which_features[s]];
+                auto f = which_features[s];
+                scores[c] += weights[s] * (col[f] - centers[b][s]) / (use_scale ? scales[b][s] : 1);
             }
-            scores[c] *= precol;
+
+            scores[c] *= precol[b];
+            scores[c] += to_add[b];
         }
 
         return scores;
@@ -403,6 +445,9 @@ TEST_P(ScoreFeatureSetMultiBlockTest, Reference) {
 
     // Reference calculation, with averaging.
     std::vector<ReferenceResults> results;
+    std::vector<std::vector<double> > centers;
+    std::vector<std::vector<double> > scales;
+
     results.reserve(nblocks);
     for (int b = 0; b < nblocks; ++b) {
         std::vector<int> subset;
@@ -413,6 +458,17 @@ TEST_P(ScoreFeatureSetMultiBlockTest, Reference) {
         }
 
         auto sub = tatami::make_DelayedSubset<1>(dense_column, std::move(subset));
+
+        auto all_rs = tatami::row_sums(sub.get());
+        auto all_rv = tatami::row_variances(sub.get());
+        std::vector<double> sub_rs, sub_rv;
+        for (auto f : which_features) {
+            sub_rs.push_back(all_rs[f] / sub->ncol());
+            sub_rv.push_back(std::sqrt(all_rv[f]));
+        }
+        centers.push_back(sub_rs);
+        scales.push_back(sub_rv);
+
         results.push_back(reference(sub.get(), features.data()));
         EXPECT_EQ(results.back().weights.size(), nselected);
     }
@@ -445,7 +501,7 @@ TEST_P(ScoreFeatureSetMultiBlockTest, Reference) {
 
     {
         scorer.set_block_policy(scran::ScoreFeatureSet::BlockPolicy::AVERAGE);
-        auto obs = scorer.run(sparse_column.get(), features.data());
+        auto obs = scorer.run(sparse_column.get(), features.data(), block.data());
         compare_almost_equal(obs.weights, weights);
 
 //        auto scores = compute_scores(dense_column.get(), weights, which_features);
@@ -455,19 +511,18 @@ TEST_P(ScoreFeatureSetMultiBlockTest, Reference) {
     // Maximium also gets a run.
     {
         scorer.set_block_policy(scran::ScoreFeatureSet::BlockPolicy::MAXIMUM);
-        auto obs = scorer.run(sparse_column.get(), features.data());
+        auto obs = scorer.run(sparse_row.get(), features.data(), block.data());
 
         size_t chosen = 0; 
         for (int b = 1; b < nblocks; ++b) {
-            std::cout << results[b].prop_var << std::endl;
             if (results[b].prop_var > results[chosen].prop_var) {
                 chosen = b;
             }
         }
         compare_almost_equal(obs.weights, results[chosen].weights);
 
-//        auto scores = compute_scores(dense_column.get(), weights, which_features);
-//        compare_almost_equal(obs.scores, scores);
+        auto scores = compute_scores(dense_column.get(), obs.weights, which_features, block, centers, false, scales);
+        compare_almost_equal(obs.scores, scores);
     }
 }
 
@@ -476,7 +531,7 @@ INSTANTIATE_TEST_CASE_P(
     ScoreFeatureSetMultiBlockTest,
     ::testing::Combine(
         ::testing::Values(455, 5444, 67777), // seeds
-        ::testing::Values(2, 3, 4), // number of blocks
+        ::testing::Values(1, 2, 3, 4), // number of blocks
         ::testing::Values(1, 3) // number of threads
     )
 );
