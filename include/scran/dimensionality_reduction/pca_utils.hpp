@@ -338,12 +338,13 @@ inline double center_and_scale_by_dense_column(Eigen::MatrixXd& mat, bool scale,
     for (size_t c = first; c < last; ++c) {
 #endif
 
-        auto results = tatami::stats::variances::compute_direct(ptr + NR * c, NR);
+        auto curptr = ptr + NR * c;
+        auto results = tatami::stats::variances::compute_direct(curptr, NR);
         for (size_t r = 0; r < NR; ++r) {
-            ptr[r] -= results.first;
+            curptr[r] -= results.first;
         }
 
-        apply_scale(scale, results.second, NR, ptr, variances[c]);
+        apply_scale(scale, results.second, NR, curptr, variances[c]);
 
 #ifndef SCRAN_CUSTOM_PARALLEL
     }

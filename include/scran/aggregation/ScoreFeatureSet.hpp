@@ -83,23 +83,16 @@ public:
     }
 
 protected:
-    std::vector<double> combine_rotation_vectors(const std::vector<Eigen::MatrixXd>& rotation, const std::vector<double>& variance_explained, const std::vector<double>& total_variance) const {
+    std::vector<double> combine_rotation_vectors(const std::vector<Eigen::MatrixXd>& rotation, const std::vector<double>& variance_explained) const {
         std::vector<double> output;
         size_t nblocks = rotation.size();
-        auto compute_var_prop = [&](int b) -> double {
-            if (total_variance[b] == 0) {
-                return 0; // avoid UB upon an unfortunate div by zero.
-            } else {
-                return variance_explained[b] / total_variance[b];
-            }
-        };
 
         if (block_policy == BlockPolicy::MAXIMUM) {
-            double best_var_prop = compute_var_prop(0);
+            double best_var_prop = variance_explained[0];
             size_t best_index = 0;
 
             for (size_t b = 1; b < nblocks; ++b) {
-                double var_prop = compute_var_prop(b);
+                double var_prop = variance_explained[b];
                 if (var_prop > best_var_prop) {
                     best_index = b;
                     best_var_prop = var_prop;
@@ -116,16 +109,14 @@ protected:
 
             for (size_t b = 0; b < nblocks; ++b) {
                 const auto& current_rotation = rotation[b];
-                double var_prop = compute_var_prop(b);
+                double var_prop = variance_explained[b];
                 total_var_prop += var_prop;
 
                 // Deciding whether we need to flip the rotation vector or not,
                 // as the vectors are not defined w.r.t. their sign.
                 double proj = 1;
-                if (b) {
-                    if (std::inner_product(output.begin(), output.end(), current_rotation.data(), 0.0) < 0.0) {
-                        proj = -1;
-                    }
+                if (b && std::inner_product(output.begin(), output.end(), current_rotation.data(), 0.0) < 0.0) {
+                    proj = -1;
                 }
 
                 double mult = proj * var_prop;
@@ -162,16 +153,15 @@ protected:
     BlockwiseOutputs compute_blockwise_scores(
         const std::vector<Eigen::MatrixXd>& rotation, 
         const std::vector<double>& variance_explained, 
-        const std::vector<double>& total_variance, 
         const std::vector<size_t>& block_size,
         Function mult
     ) const {
         // This involves some mild copying of vectors... oh well.
         BlockwiseOutputs output;
-        output.rotation = combine_rotation_vectors(rotation, variance_explained, total_variance);
+        output.rotation = combine_rotation_vectors(rotation, variance_explained);
 
         size_t nblocks = rotation.size();
-        output.block_scores.reserve(nblocks);
+        output.block_scores.resize(nblocks);
         Eigen::VectorXd rotation_as_vector(output.rotation.size());
         std::copy(output.rotation.begin(), output.rotation.end(), rotation_as_vector.data()); 
 
@@ -194,6 +184,14 @@ protected:
         return output;
     }
 
+    static double compute_variance_explained(const Eigen::VectorXd& d, size_t nr, double total_var) {
+        if (total_var == 0 || nr < 2) {
+            return 0; 
+        } else {
+            return d[0] / static_cast<double>(nr - 1) / total_var;
+        }
+    }
+
 private:
     // Re-using the same two-pass philosophy from RunPCA, to save memory.
     struct BlockwiseSparseComponents {
@@ -211,7 +209,7 @@ private:
         BlockwiseSparseComponents output(nblocks);
         auto& ptrs = output.ptrs;
         for (size_t b = 0; b < nblocks; ++b) {
-            ptrs.resize(NR + 1);
+            ptrs[b].resize(NR + 1);
         }
 
         /*** First round, to fetch the number of zeros in each row. ***/
@@ -373,7 +371,7 @@ private:
             auto& indices = output.indices;
 
             for (size_t b = 0; b < nblocks; ++b) {
-                ptrs.resize(NR + 1);
+                ptrs[b].resize(NR + 1);
                 size_t total_nzeros = 0;
                 const auto& nonzeros_per_block = nonzeros_per_row[b];
                 auto& block_ptrs = ptrs[b];
@@ -460,7 +458,7 @@ private:
             auto& scale_v = scales.back();
             pca_utils::compute_mean_and_variance_from_sparse_components(num_features, block_size[b], values, indices, ptrs, center_v, scale_v, nthreads);
 
-            double& total_var = total_variance[b];
+            double total_var = -1;
             pca_utils::set_scale(scale, scale_v, total_var);
 
             all_matrices.emplace_back(block_size[b], num_features, nthreads); // transposed; we want genes in the columns.
@@ -480,13 +478,12 @@ private:
                 irb.run(centered, pcs, current_rotation, d);
             }
 
-            variance_explained[b] = d[0] / static_cast<double>(A.rows() - 1);
+            variance_explained[b] = compute_variance_explained(d, A.rows(), total_var);
         }
 
         return compute_blockwise_scores(
             rotation, 
             variance_explained, 
-            total_variance, 
             block_size,
             [&](size_t b, Eigen::VectorXd& rotation_as_vector, Eigen::VectorXd& scores) -> void {
                 irlba::EigenThreadScope t(nthreads);
@@ -523,7 +520,7 @@ private:
 #ifndef SCRAN_CUSTOM_PARALLEL
         #pragma omp parallel num_threads(nthreads)
         {
-            std::vector<double> work(NC);
+            std::vector<double> buffer(NC);
             auto work = mat->new_workspace(true);
 
             #pragma omp for
@@ -611,27 +608,25 @@ private:
         size_t nblocks = block_size.size();
         std::vector<Eigen::MatrixXd> rotation(nblocks);
         std::vector<double> variance_explained(nblocks);
-        std::vector<double> total_variance(nblocks);
 
         irlba::Irlba irb;
         irb.set_number(1);
 
         for (size_t b = 0; b < nblocks; ++b) {
             auto& emat = all_matrices[b];
-            total_variance[b] = pca_utils::center_and_scale_by_dense_column(emat, scale, nthreads);
+            auto total_var = pca_utils::center_and_scale_by_dense_column(emat, scale, nthreads);
 
             Eigen::MatrixXd pcs;
             Eigen::VectorXd d;
             irlba::EigenThreadScope t(nthreads);
             irb.run(emat, pcs, rotation[b], d);
 
-            variance_explained[b] = d[0] / static_cast<double>(emat.rows() - 1);
+            variance_explained[b] = compute_variance_explained(d, emat.rows(), total_var);
         }
 
         return compute_blockwise_scores(
             rotation, 
             variance_explained, 
-            total_variance, 
             block_size,
             [&](size_t b, Eigen::VectorXd& rotation_as_vector, Eigen::VectorXd& scores) -> void {
                 irlba::EigenThreadScope t(nthreads);
@@ -674,7 +669,7 @@ public:
         }
 
         auto NR = subsetted->nrow();
-        auto NC = subsetted->nrow();
+        auto NC = subsetted->ncol();
 
         std::vector<size_t> reverse_block_map(NC);
         std::vector<size_t> block_size;
@@ -694,19 +689,19 @@ public:
         BlockwiseOutputs temp;
         if (subsetted->sparse()) {
             if (subsetted->prefer_rows()) {
-                auto components = core_sparse_row(subsetted, block, block_size.size(), reverse_block_map);
+                auto components = core_sparse_row(subsetted.get(), block, block_size.size(), reverse_block_map);
                 temp = sparse_core(NR, block_size, std::move(components));
             } else {
-                auto components = core_sparse_column(subsetted, block, block_size.size(), reverse_block_map);
+                auto components = core_sparse_column(subsetted.get(), block, block_size.size(), reverse_block_map);
                 temp = sparse_core(NR, block_size, std::move(components));
             }
         } else {
             if (subsetted->prefer_rows()) {
-                auto subsettedrices = core_dense_row(subsetted, block, block_size, reverse_block_map);
-                temp = dense_core(NR, block_size, std::move(subsettedrices));
+                auto matrices = core_dense_row(subsetted.get(), block, block_size, reverse_block_map);
+                temp = dense_core(NR, block_size, std::move(matrices));
             } else {
-                auto subsettedrices = core_dense_column(subsetted, block, block_size, reverse_block_map);
-                temp = dense_core(NR, block_size, std::move(subsettedrices));
+                auto matrices = core_dense_column(subsetted.get(), block, block_size, reverse_block_map);
+                temp = dense_core(NR, block_size, std::move(matrices));
             }
         }
 
