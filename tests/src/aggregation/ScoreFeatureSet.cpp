@@ -11,7 +11,7 @@
 class ScoreFeatureSetTestCore {
 protected:
     std::shared_ptr<tatami::NumericMatrix> sparse_column, sparse_row, dense_row, dense_column;
-        
+
     void load(int nr, int nc, int seed) {
         Simulator sim;
         sim.seed = seed;
@@ -52,18 +52,19 @@ protected:
         auto rowvars = tatami::row_variances(mat);
         double precol = 0;
         double to_add = 0;
-        int f = 0;
+        int fcount = 0;
         for (size_t r = 0; r < mat->nrow(); ++r) {
             if (features[r]) {
                 to_add += rowsums[r] / mat->ncol();
-                precol += (scale ? std::sqrt(rowvars[r]) : 1) * output.weights[f];
-                ++f;
+                precol += (scale ? std::sqrt(rowvars[r]) : 1) * output.weights[fcount];
+                ++fcount;
             }
         }
 
         for (auto& x : output.scores) {
             x *= precol;
             x += to_add;
+            x /= fcount;
         }
 
         return output;
@@ -385,6 +386,7 @@ protected:
 
             scores[c] *= precol[b];
             scores[c] += to_add[b];
+            scores[c] /= nselected;
         }
 
         return scores;
@@ -571,7 +573,7 @@ TEST_F(ScoreFeatureSetOtherTest, EdgeCaseGenes) {
     {
         std::vector<unsigned char> features(ngenes);
         features[3] = 1;
-        
+
         auto obs = scorer.run(dense_row.get(), features.data());
         EXPECT_EQ(obs.weights.size(), 1);
         EXPECT_EQ(obs.weights[0], 1);
@@ -579,7 +581,7 @@ TEST_F(ScoreFeatureSetOtherTest, EdgeCaseGenes) {
     }
 }
 
-TEST_F(ScoreFeatureSetOtherTest, EdgeCaseBatch) {
+TEST_F(ScoreFeatureSetOtherTest, EdgeCaseBlock) {
     int ngenes = 1011;
     std::vector<unsigned char> features = spawn_features(ngenes, /* seed */ 43);
     size_t nfeatures = std::accumulate(features.begin(), features.end(), 0);
@@ -620,6 +622,76 @@ TEST_F(ScoreFeatureSetOtherTest, EdgeCaseBatch) {
         auto ref = scorer.run(dense_column.get(), features.data());
         EXPECT_EQ(obs.weights, ref.weights);
         EXPECT_EQ(obs.scores, ref.scores);
+    }
+}
+
+TEST_F(ScoreFeatureSetOtherTest, ScoreSanityCheck) {
+    int ngenes = 1011;
+    int ncells = 101;
+    int seed = 9876521;
+    load(ngenes, ncells, seed);
+    std::vector<unsigned char> features = spawn_features(ngenes, seed);
+
+    // Shifting everything up in one batch. This should manifest as a
+    // corresponding shift in the scores for that batch. 
+    {
+        auto added = tatami::make_DelayedIsometricOp(sparse_column, tatami::DelayedAddScalarHelper(5.6));
+        auto combined = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{ sparse_row, added });
+
+        scran::ScoreFeatureSet scorer;
+        auto ref = scorer.run(dense_row.get(), features.data());
+
+        std::vector<int> batch(ncells * 2);
+        std::fill(batch.begin() + ncells, batch.end(), 1);
+        auto obs = scorer.run(combined.get(), features.data(), batch.data());
+
+        compare_almost_equal(ref.weights, obs.weights);
+        std::vector<double> first_half(obs.scores.begin(), obs.scores.begin() + ncells);
+        compare_almost_equal(first_half, ref.scores);
+
+        std::vector<double> second_half(obs.scores.begin() + ncells, obs.scores.end());
+        for (auto& s : second_half) { s -= 5.6; }
+        compare_almost_equal(second_half, first_half);
+    }
+
+    // Scaling everything up in one batch. This should manifest as a
+    // corresponding scaling in the scores for that batch, regardless
+    // of whether set_scale is true or not.
+    {
+        auto scaled = tatami::make_DelayedIsometricOp(sparse_column, tatami::DelayedMultiplyScalarHelper(1.5));
+        auto combined = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{ sparse_row, scaled });
+        std::vector<int> batch(ncells * 2);
+        std::fill(batch.begin() + ncells, batch.end(), 1);
+
+        // Without scaling.
+        scran::ScoreFeatureSet scorer;
+        {
+            auto ref = scorer.run(dense_row.get(), features.data());
+            auto obs = scorer.run(combined.get(), features.data(), batch.data());
+
+            compare_almost_equal(ref.weights, obs.weights);
+            std::vector<double> first_half(obs.scores.begin(), obs.scores.begin() + ncells);
+            compare_almost_equal(first_half, ref.scores);
+
+            std::vector<double> second_half(obs.scores.begin() + ncells, obs.scores.end());
+            for (auto& s : second_half) { s /= 1.5; }
+            compare_almost_equal(second_half, first_half);
+        }
+
+        // Again, with scaling.
+        scorer.set_scale(true);
+        {
+            auto ref = scorer.run(dense_row.get(), features.data());
+            auto obs = scorer.run(combined.get(), features.data(), batch.data());
+
+            compare_almost_equal(ref.weights, obs.weights);
+            std::vector<double> first_half(obs.scores.begin(), obs.scores.begin() + ncells);
+            compare_almost_equal(first_half, ref.scores);
+
+            std::vector<double> second_half(obs.scores.begin() + ncells, obs.scores.end());
+            for (auto& s : second_half) { s /= 1.5; }
+            compare_almost_equal(second_half, first_half);
+        }
     }
 }
 

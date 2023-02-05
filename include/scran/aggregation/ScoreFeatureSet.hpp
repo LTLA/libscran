@@ -18,7 +18,7 @@ namespace scran {
 /**
  * @brief Compute per-cell scores for a given feature set.
  *
- * Per-cell scores are defined as the column sums of the rank-1 approximation of the input matrix for the subset of features in the set.
+ * Per-cell scores are defined as the column means of the rank-1 approximation of the input matrix for the subset of features in the set.
  * The central idea here is that the primary activity of the feature set can be quantified by the largest component of variance amongst its features.
  * (If this was not the case, one could argue that this feature set is not well-suited to capture the biology attributed to it.)
  * In effect, the rotation vector define weights for all features in the set, focusing on genes that contribute to the primary activity.
@@ -781,6 +781,10 @@ public:
             }
         } else {
             output.scores = std::move(temp.block_scores[0]);
+        }
+
+        for (auto& s : output.scores) {
+            s /= NR; // no need to protect against NR = 0, as we caught that above.
         }
 
         return output;
