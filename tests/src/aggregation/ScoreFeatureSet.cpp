@@ -547,4 +547,79 @@ INSTANTIATE_TEST_CASE_P(
     )
 );
 
+/******************************************************
+ ******************************************************/
+
+class ScoreFeatureSetOtherTest : public ::testing::Test, public ScoreFeatureSetTestCore {};
+
+TEST_F(ScoreFeatureSetOtherTest, EdgeCaseGenes) {
+    int ngenes = 1011;
+    int ncells = 101;
+    load(ngenes, ncells, /* seed */ 42);
+
+    scran::ScoreFeatureSet scorer;
+
+    // No features at all.
+    {
+        std::vector<unsigned char> features(ngenes);
+        auto obs = scorer.run(dense_row.get(), features.data());
+        EXPECT_TRUE(obs.weights.empty());
+        EXPECT_EQ(obs.scores, std::vector<double>(ncells));
+    }
+
+    // Single feature.
+    {
+        std::vector<unsigned char> features(ngenes);
+        features[3] = 1;
+        
+        auto obs = scorer.run(dense_row.get(), features.data());
+        EXPECT_EQ(obs.weights.size(), 1);
+        EXPECT_EQ(obs.weights[0], 1);
+        EXPECT_EQ(obs.scores, dense_row->row(3));
+    }
+}
+
+TEST_F(ScoreFeatureSetOtherTest, EdgeCaseBatch) {
+    int ngenes = 1011;
+    std::vector<unsigned char> features = spawn_features(ngenes, /* seed */ 43);
+    size_t nfeatures = std::accumulate(features.begin(), features.end(), 0);
+
+    // Empty dataset.
+    {
+        load(ngenes, 0, /* seed */ 44);
+        scran::ScoreFeatureSet scorer;
+        auto obs = scorer.run(dense_row.get(), features.data());
+        EXPECT_EQ(obs.weights, std::vector<double>(nfeatures));
+        EXPECT_TRUE(obs.scores.empty());
+    }
+
+    // 1-length batches lead to an all-zero rotation vector.
+    {
+        int ncells = 234;
+        load(ngenes, ncells, /* seed */ 45);
+        std::vector<int> block(ncells);
+        std::iota(block.begin(), block.end(), 0);
+
+        scran::ScoreFeatureSet scorer;
+        auto obs = scorer.run(dense_row.get(), features.data(), block.data());
+        EXPECT_EQ(obs.weights, std::vector<double>(nfeatures));
+
+        // Same behavior in the sparse case.
+        auto sobs = scorer.run(sparse_column.get(), features.data(), block.data());
+        EXPECT_EQ(sobs.weights, std::vector<double>(nfeatures));
+    }
+
+    // Zero length batches are ignored.
+    {
+        int ncells = 99;
+        load(ngenes, ncells, /* seed */ 45);
+        std::vector<int> block(ncells, 2); // 0 and 1 are now zero-length.
+
+        scran::ScoreFeatureSet scorer;
+        auto obs = scorer.run(dense_column.get(), features.data(), block.data());
+        auto ref = scorer.run(dense_column.get(), features.data());
+        EXPECT_EQ(obs.weights, ref.weights);
+        EXPECT_EQ(obs.scores, ref.scores);
+    }
+}
 

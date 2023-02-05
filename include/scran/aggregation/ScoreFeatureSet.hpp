@@ -458,7 +458,6 @@ private:
         size_t nblocks = block_size.size();
         std::vector<Eigen::MatrixXd> rotation(nblocks);
         std::vector<double> variance_explained(nblocks);
-        std::vector<double> total_variance(nblocks);
 
         irlba::Irlba irb;
         irb.set_number(1);
@@ -490,19 +489,26 @@ private:
             A.fill_direct(std::move(values), std::move(indices), std::move(ptrs));
 
             auto& current_rotation = rotation[b];
-            Eigen::MatrixXd pcs;
-            Eigen::VectorXd d;
+            if (block_size[b] >= 2) {
+                Eigen::MatrixXd pcs;
+                Eigen::VectorXd d;
 
-            irlba::EigenThreadScope t(nthreads);
-            irlba::Centered<std::remove_reference<decltype(A)>::type> centered(&A, &center_v);
-            if (scale) {
-                irlba::Scaled<decltype(centered)> scaled(&centered, &scale_v);
-                irb.run(scaled, pcs, current_rotation, d);
+                irlba::EigenThreadScope t(nthreads);
+                irlba::Centered<std::remove_reference<decltype(A)>::type> centered(&A, &center_v);
+                if (scale) {
+                    irlba::Scaled<decltype(centered)> scaled(&centered, &scale_v);
+                    irb.run(scaled, pcs, current_rotation, d);
+                } else {
+                    irb.run(centered, pcs, current_rotation, d);
+                }
+
+                variance_explained[b] = compute_variance_explained(d, A.rows(), total_var);
             } else {
-                irb.run(centered, pcs, current_rotation, d);
+                // PCA is not defined here, so just make up whatever.
+                current_rotation.resize(num_features, 1);
+                current_rotation.fill(0);
+                variance_explained[b] = 0;
             }
-
-            variance_explained[b] = compute_variance_explained(d, A.rows(), total_var);
         }
 
         return compute_blockwise_scores(
@@ -650,12 +656,18 @@ private:
             pca_utils::set_scale(scale, scales[b], total_var);
             pca_utils::center_and_scale_dense_columns(emat, centers[b], scale, scales[b], nthreads);
 
-            Eigen::MatrixXd pcs;
-            Eigen::VectorXd d;
-            irlba::EigenThreadScope t(nthreads);
-            irb.run(emat, pcs, rotation[b], d);
-
-            variance_explained[b] = compute_variance_explained(d, emat.rows(), total_var);
+            if (block_size[b] >= 2) {
+                Eigen::MatrixXd pcs;
+                Eigen::VectorXd d;
+                irlba::EigenThreadScope t(nthreads);
+                irb.run(emat, pcs, rotation[b], d);
+                variance_explained[b] = compute_variance_explained(d, emat.rows(), total_var);
+            } else {
+                // PCA is not defined here, so just make up whatever.
+                rotation[b].resize(num_features, 1);
+                rotation[b].fill(0);
+                variance_explained[b] = 0;
+            }
         }
 
         return compute_blockwise_scores(
@@ -705,6 +717,20 @@ public:
 
         auto NR = subsetted->nrow();
         auto NC = subsetted->ncol();
+        if (NR == 0) {
+            Results output;
+            output.scores.resize(NC);
+            return output;
+        } else if (NR == 1) {
+            Results output;
+            output.weights.push_back(1);
+            output.scores = subsetted->row(0);
+            return output;
+        } else if (NC == 0) {
+            Results output;
+            output.weights.resize(NR);
+            return output;
+        }
 
         std::vector<size_t> reverse_block_map(NC);
         std::vector<size_t> block_size;
