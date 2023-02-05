@@ -1,13 +1,12 @@
 <map id="scran/dimensionality_reduction/RunPCA.hpp" name="scran/dimensionality_reduction/RunPCA.hpp">
-<area shape="rect" id="node1" title="Perform PCA on a gene&#45;by&#45;cell matrix." alt="" coords="417,5,577,45"/>
+<area shape="rect" id="node1" title="Perform PCA on a gene&#45;by&#45;cell matrix." alt="" coords="391,5,551,45"/>
 <area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,167,132,192"/>
-<area shape="rect" id="node3" title=" " alt="" coords="535,93,709,119"/>
-<area shape="rect" id="node4" title=" " alt="" coords="734,93,939,119"/>
-<area shape="rect" id="node5" title=" " alt="" coords="963,93,1062,119"/>
-<area shape="rect" id="node6" title=" " alt="" coords="156,167,251,192"/>
-<area shape="rect" id="node7" title=" " alt="" coords="414,167,473,192"/>
-<area shape="rect" id="node8" title=" " alt="" coords="1086,93,1145,119"/>
-<area shape="rect" id="node9" title=" " alt="" coords="497,167,595,192"/>
-<area shape="rect" id="node10" href="$CustomSparseMatrix_8hpp_source.html" title=" " alt="" coords="241,93,408,119"/>
-<area shape="rect" id="node11" title=" " alt="" coords="275,167,390,192"/>
+<area shape="rect" id="node3" title=" " alt="" coords="534,93,657,119"/>
+<area shape="rect" id="node4" title=" " alt="" coords="681,93,779,119"/>
+<area shape="rect" id="node5" title=" " alt="" coords="156,167,251,192"/>
+<area shape="rect" id="node6" title=" " alt="" coords="414,167,473,192"/>
+<area shape="rect" id="node7" title=" " alt="" coords="803,93,862,119"/>
+<area shape="rect" id="node8" title=" " alt="" coords="497,167,595,192"/>
+<area shape="rect" id="node9" href="$CustomSparseMatrix_8hpp_source.html" title=" " alt="" coords="241,93,408,119"/>
+<area shape="rect" id="node10" title=" " alt="" coords="275,167,390,192"/>
 </map>
