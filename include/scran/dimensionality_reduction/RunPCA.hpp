@@ -236,55 +236,40 @@ public:
 private:
     template<typename T, typename IDX> 
     pca_utils::CustomSparseMatrix create_custom_sparse_matrix(const tatami::Matrix<T, IDX>* mat, Eigen::VectorXd& center_v, Eigen::VectorXd& scale_v, double& total_var) const {
-        std::vector<double> values;
-        std::vector<int> indices;
-        std::vector<size_t> ptrs = pca_utils::fill_transposed_compressed_sparse_vectors(mat, values, indices, nthreads); // row-major filling.
+        auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major filling.
+        auto& ptrs = extracted.ptrs;
+        auto& values = extracted.values;
+        auto& indices = extracted.indices;
 
         size_t NR = mat->nrow(), NC = mat->ncol();
         pca_utils::compute_mean_and_variance_from_sparse_components(NR, NC, values, indices, ptrs, center_v, scale_v, nthreads); // row-major calculations.
         pca_utils::set_scale(scale, scale_v, total_var);
 
         pca_utils::CustomSparseMatrix A(NC, NR, nthreads); // transposed; we want genes in the columns.
-
 #ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
         if (use_eigen) {
             A.use_eigen();
         }
 #endif
-
         A.fill_direct(std::move(values), std::move(indices), std::move(ptrs));
+
         return A;
     }
 
 private:
     template<typename T, typename IDX> 
     Eigen::MatrixXd create_eigen_matrix_dense(const tatami::Matrix<T, IDX>* mat, double& total_var) const {
-        size_t NR = mat->nrow(), NC = mat->ncol();
-        total_var = 0;
+        auto mat = pca_utils::extract_dense_for_pca(mat, nthreads); // get a column-major matrix with genes in columns.
+        size_t NC = mat.cols();
 
-        Eigen::MatrixXd output(NC, NR); // transposed.
-        std::vector<double> xbuffer(NC);
-        double* outIt = output.data();
+        Eigen::VectorXd center_v(NC);
+        Eigen::VectorXd scale_v(NC);
+        pca_utils::compute_mean_and_variance_from_dense_columns(mat, center_v, scale, scale_v, nthreads);
+        pca_utils::set_scale(scale, scale_v, total_var);
+        pca_utils::center_and_scale_dense_columns(mat, center_v, scale, scale_v, nthreads);
 
-#ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::RunPCA", "Preparing the input matrix");
-#endif
-
-        for (size_t r = 0; r < NR; ++r, outIt += NC) {
-            auto ptr = mat->row_copy(r, outIt);
-            auto stats = tatami::stats::variances::compute_direct(outIt, NC);
-
-            auto copy = outIt;
-            for (size_t c = 0; c < NC; ++c, ++copy) {
-                *copy -= stats.first;
-            }
-
-            pca_utils::apply_scale(scale, stats.second, NC, outIt, total_var);
-        }
-
-        return output;
+        return extracted;
     }
-
 };
 
 }

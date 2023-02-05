@@ -738,20 +738,11 @@ public:
      */
     template<typename T, typename IDX, typename X, typename Block>
     Results run(const tatami::Matrix<T, IDX>* mat, const X* features, const Block* block) const {
-        std::shared_ptr<const tatami::Matrix<T, IDX> > subsetted;
-        {
-            size_t NR = mat->nrow();
-            std::vector<size_t> which_features;
-            for (size_t r = 0; r < NR; ++r) {
-                if (features[r]) {
-                    which_features.push_back(r);
-                }
-            }
-            subsetted = tatami::make_DelayedSubset<0>(tatami::wrap_shared_ptr(mat), std::move(which_features));
-        }
-
+        std::shared_ptr<const tatami::Matrix<T, IDX> > subsetted = pca_utils::subset_matrix_by_features(mat, features);
         auto NR = subsetted->nrow();
         auto NC = subsetted->ncol();
+
+        // Catching edge cases.
         if (NR == 0) {
             Results output;
             output.scores.resize(NC);
