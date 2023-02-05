@@ -36,7 +36,7 @@ protected:
         double prop_var;
     };
 
-    static ReferenceResults reference(const tatami::NumericMatrix* mat, const unsigned char* features, bool scale = false) {
+    static ReferenceResults reference(const tatami::NumericMatrix* mat, const unsigned char* features, bool scale) {
         scran::RunPCA runner;
         runner.set_rank(1);
         runner.set_scale(scale);
@@ -73,12 +73,13 @@ protected:
 /******************************************************
  ******************************************************/
 
-class ScoreFeatureSetSingleBlockTest : public ::testing::TestWithParam<std::tuple<int, int> >, public ScoreFeatureSetTestCore {};
+class ScoreFeatureSetSingleBlockTest : public ::testing::TestWithParam<std::tuple<int, bool, int> >, public ScoreFeatureSetTestCore {};
 
 TEST_P(ScoreFeatureSetSingleBlockTest, Consistency) {
     auto param = GetParam();
     auto seed = std::get<0>(param);
-    auto nthreads = std::get<1>(param);
+    auto scale = std::get<1>(param);
+    auto nthreads = std::get<2>(param);
 
     int ngenes = 1011;
     int ncells = 101;
@@ -86,6 +87,7 @@ TEST_P(ScoreFeatureSetSingleBlockTest, Consistency) {
 
     std::vector<unsigned char> features = spawn_features(ngenes, seed);
     scran::ScoreFeatureSet scorer;
+    scorer.set_scale(scale);
 
     auto ref = scorer.run(dense_row.get(), features.data());
     EXPECT_EQ(ref.weights.size(), std::accumulate(features.begin(), features.end(), 0));
@@ -114,17 +116,19 @@ TEST_P(ScoreFeatureSetSingleBlockTest, Consistency) {
 TEST_P(ScoreFeatureSetSingleBlockTest, Reference) {
     auto param = GetParam();
     auto seed = std::get<0>(param) * 2; // changing the seed a little.
-    auto nthreads = std::get<1>(param);
+    auto scale = std::get<1>(param);
+    auto nthreads = std::get<2>(param);
 
     int ngenes = 1211;
     int ncells = 101;
     load(ngenes, ncells, seed);
 
     std::vector<unsigned char> features = spawn_features(ngenes, seed);
-    auto ref = reference(sparse_column.get(), features.data());
+    auto ref = reference(sparse_column.get(), features.data(), scale);
 
     scran::ScoreFeatureSet scorer;
     scorer.set_num_threads(nthreads);
+    scorer.set_scale(scale);
 
     {
         scorer.set_block_policy(scran::ScoreFeatureSet::BlockPolicy::AVERAGE);
@@ -146,6 +150,7 @@ INSTANTIATE_TEST_CASE_P(
     ScoreFeatureSetSingleBlockTest,
     ::testing::Combine(
         ::testing::Values(1999, 28888, 377777), // seeds
+        ::testing::Values(false, true), // with or without scaling
         ::testing::Values(1, 3) // number of threads
     )
 );
@@ -330,7 +335,7 @@ TEST_F(CombineRotationVectorsTest, Maximum) {
 /******************************************************
  ******************************************************/
 
-class ScoreFeatureSetMultiBlockTest : public ::testing::TestWithParam<std::tuple<int, int, int> >, public ScoreFeatureSetTestCore {
+class ScoreFeatureSetMultiBlockTest : public ::testing::TestWithParam<std::tuple<int, int, bool, int> >, public ScoreFeatureSetTestCore {
 protected:
     static std::vector<int> spawn_blocks(int nblocks, int ncells, int seed) {
         std::vector<int> block(ncells);
@@ -390,7 +395,8 @@ TEST_P(ScoreFeatureSetMultiBlockTest, Consistency) {
     auto param = GetParam();
     auto seed = std::get<0>(param);
     auto nblocks = std::get<1>(param);
-    auto nthreads = std::get<2>(param);
+    auto scale = std::get<2>(param);
+    auto nthreads = std::get<3>(param);
 
     int ngenes = 2010;
     int ncells = 151;
@@ -399,6 +405,8 @@ TEST_P(ScoreFeatureSetMultiBlockTest, Consistency) {
     auto features = spawn_features(ngenes, seed);
 
     scran::ScoreFeatureSet scorer;
+    scorer.set_scale(scale);
+
     auto ref = scorer.run(dense_row.get(), features.data(), block.data());
     EXPECT_EQ(ref.weights.size(), std::accumulate(features.begin(), features.end(), 0));
     EXPECT_EQ(ref.scores.size(), ncells);
@@ -427,7 +435,8 @@ TEST_P(ScoreFeatureSetMultiBlockTest, Reference) {
     auto param = GetParam();
     auto seed = std::get<0>(param) * 2; // changing the seed a little.
     auto nblocks = std::get<1>(param);
-    auto nthreads = std::get<2>(param);
+    auto scale = std::get<2>(param);
+    auto nthreads = std::get<3>(param);
 
     int ngenes = 911;
     int ncells = 201;
@@ -469,7 +478,7 @@ TEST_P(ScoreFeatureSetMultiBlockTest, Reference) {
         centers.push_back(sub_rs);
         scales.push_back(sub_rv);
 
-        results.push_back(reference(sub.get(), features.data()));
+        results.push_back(reference(sub.get(), features.data(), scale));
         EXPECT_EQ(results.back().weights.size(), nselected);
     }
 
@@ -498,14 +507,15 @@ TEST_P(ScoreFeatureSetMultiBlockTest, Reference) {
     // Comparing to our actual thing.
     scran::ScoreFeatureSet scorer;
     scorer.set_num_threads(nthreads);
+    scorer.set_scale(scale);
 
     {
         scorer.set_block_policy(scran::ScoreFeatureSet::BlockPolicy::AVERAGE);
         auto obs = scorer.run(sparse_column.get(), features.data(), block.data());
         compare_almost_equal(obs.weights, weights);
 
-//        auto scores = compute_scores(dense_column.get(), weights, which_features);
-//        compare_almost_equal(obs.scores, scores);
+        auto scores = compute_scores(dense_column.get(), weights, which_features, block, centers, scale, scales);
+        compare_almost_equal(obs.scores, scores);
     }
 
     // Maximium also gets a run.
@@ -521,7 +531,7 @@ TEST_P(ScoreFeatureSetMultiBlockTest, Reference) {
         }
         compare_almost_equal(obs.weights, results[chosen].weights);
 
-        auto scores = compute_scores(dense_column.get(), obs.weights, which_features, block, centers, false, scales);
+        auto scores = compute_scores(dense_column.get(), obs.weights, which_features, block, centers, scale, scales);
         compare_almost_equal(obs.scores, scores);
     }
 }
@@ -530,8 +540,9 @@ INSTANTIATE_TEST_CASE_P(
     ScoreFeatureSetMultiBlock,
     ScoreFeatureSetMultiBlockTest,
     ::testing::Combine(
-        ::testing::Values(455, 5444, 67777), // seeds
+        ::testing::Values(455, 5444), // seeds
         ::testing::Values(1, 2, 3, 4), // number of blocks
+        ::testing::Values(false, true), // with or without scaling
         ::testing::Values(1, 3) // number of threads
     )
 );

@@ -366,15 +366,16 @@ inline void center_and_scale_dense_columns(Eigen::MatrixXd& mat, const Eigen::Ve
 #endif
 
         auto curptr = ptr + NR * c;
-        auto center = centers[c];
+        auto mean = centers[c];
         for (size_t r = 0; r < NR; ++r) {
-            curptr[r] -= center;
+            curptr[r] -= mean;
         }
 
         if (use_scale) {
+            auto sd = scale[c];
             for (size_t r = 0; r < NR; ++r) {
                 // set_scale should avoid division by zero.
-                curptr[r] /= scale[r];
+                curptr[r] /= sd;
             }
         }
 
