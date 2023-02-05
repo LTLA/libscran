@@ -67,22 +67,37 @@ private:
     bool scale = Defaults::scale;
 
 public:
+    /**
+     * @param b Policy to use when combining rotation vectors from multiple blocks.
+     * @return A reference to this `ScoreFeatureSet` instance.
+     */
     ScoreFeatureSet& set_block_policy(BlockPolicy b = Defaults::block_policy) {
         block_policy = b;
         return *this;
     }
 
+    /**
+     * @param n Number of threads to use.
+     * @return A reference to this `ScoreFeatureSet` object.
+     */
     ScoreFeatureSet& set_num_threads(int n = Defaults::num_threads) {
         nthreads = n;
         return *this;
     }
 
+    /**
+     * @param s Whether to scale each block so that its features have unit variance.
+     * @return A reference to this `ScoreFeatureSet` object.
+     */
     ScoreFeatureSet& set_scale(bool s = Defaults::scale) {
         scale = s;
         return *this;
     }
 
 protected:
+    /**
+     * @cond
+     */
     std::vector<double> combine_rotation_vectors(const std::vector<Eigen::MatrixXd>& rotation, const std::vector<double>& variance_explained) const {
         std::vector<double> output;
         size_t nblocks = rotation.size();
@@ -215,6 +230,9 @@ protected:
             return d[0] * d[0] / static_cast<double>(nr - 1) / total_var;
         }
     }
+    /**
+     * @endcond
+     */
 
 private:
     // Re-using the same two-pass philosophy from RunPCA, to save memory.
@@ -684,7 +702,7 @@ private:
 
 public:
     /**
-     * Feature set scoring results.
+     * @brief Feature set scoring results.
      */
     struct Results {
         /**
@@ -694,15 +712,32 @@ public:
         std::vector<double> scores;
 
         /**
-         * Vector of weights of length equal to the number of features.
+         * Vector of weights of length equal to the number of features in the set.
          * Each entry contains the weight of each successive feature in the feature set.
          * Weights may be negative.
          */
         std::vector<double> weights;
     };
 
-    template<typename T, typename IDX, typename X, typename B>
-    Results run(const tatami::Matrix<T, IDX>* mat, const X* features, const B* block) const {
+    /**
+     * @tparam T Floating point type for the data.
+     * @tparam IDX Integer type for the indices.
+     * @tparam X Integer type for the feature filter.
+     * @tparam Block Integer type for the block assignments.
+     *
+     * @param[in] mat Pointer to the input matrix.
+     * Columns should contain cells while rows should contain genes.
+     * @param[in] features Pointer to an array of length equal to the number of rows in `mat`, specifying the features in the set of interest.
+     * Non-zero values indicate that the corresponding row is part of the feature set.
+     * @param[in] block Pointer to an array of length equal to the number of columns in `mat`.
+     * This should contain the blocking factor as 0-based block assignments 
+     * (i.e., for `n` blocks, block identities should run from 0 to `n-1` with at least one entry for each block.)
+     * If this is `NULL`, all cells are assumed to belong to the same block.
+     *
+     * @return A `Results` object containing the per-cell scores and per-feature weights.
+     */
+    template<typename T, typename IDX, typename X, typename Block>
+    Results run(const tatami::Matrix<T, IDX>* mat, const X* features, const Block* block) const {
         std::shared_ptr<const tatami::Matrix<T, IDX> > subsetted;
         {
             size_t NR = mat->nrow();
@@ -730,6 +765,12 @@ public:
             Results output;
             output.weights.resize(NR);
             return output;
+        }
+
+        std::vector<Block> dummy_block;
+        if (block == NULL) {
+            dummy_block.resize(mat->ncol());
+            block = dummy_block.data();
         }
 
         std::vector<size_t> reverse_block_map(NC);
@@ -790,10 +831,23 @@ public:
         return output;
     }
 
+    /**
+     * An overload of `run()` where all cells are assumed to belong to the same block.
+     * 
+     * @tparam T Floating point type for the data.
+     * @tparam IDX Integer type for the indices.
+     * @tparam X Integer type for the feature filter.
+     *
+     * @param[in] mat Pointer to the input matrix.
+     * Columns should contain cells while rows should contain genes.
+     * @param[in] features Pointer to an array of length equal to the number of rows in `mat`, specifying the features in the set of interest.
+     * Non-zero values indicate that the corresponding row is part of the feature set.
+     *
+     * @return A `Results` object containing the per-cell scores and per-feature weights.
+     */
     template<typename T, typename IDX, typename X>
     Results run(const tatami::Matrix<T, IDX>* mat, const X* features) const {
-        std::vector<uint8_t> dummy_block(mat->ncol());
-        return run(mat, features, dummy_block.data());
+        return run(mat, features, static_cast<unsigned char*>(NULL));
     }
 };
 
