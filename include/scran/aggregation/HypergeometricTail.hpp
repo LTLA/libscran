@@ -226,7 +226,9 @@ public:
      * @param num_white Number of white balls in the pot.
      * @param num_black Number of black balls in the plot.
      * @param num_drawn Number of balls that were drawn from the pot.
-     * @return Probability of drawing a number of white balls less than or equal to `drawn_white`.
+     *
+     * @return Probability of drawing a number of white balls greater than than or equal to `drawn_white`, if `set_upper_tail()` is set to true.
+     * Otherwise, the probability of drawing a number less than or equal to `drawn_white` is returned.
      */
     double run(int drawn_white, int num_white, int num_black, int num_drawn) const {
         return core(drawn_white, num_white, num_black, num_drawn, NULL);
@@ -242,7 +244,8 @@ public:
      * @param num_drawn Number of balls that were drawn from the pot.
      * @param cache A `Cache` object, typically constructed with `new_cache()`.
      *
-     * @return Probability of drawing a number of white balls less than or equal to `drawn_white`.
+     * @return Probability of drawing a number of white balls greater than than or equal to `drawn_white`, if `set_upper_tail()` is set to true.
+     * Otherwise, the probability of drawing a number less than or equal to `drawn_white` is returned.
      */
     double run(int drawn_white, int num_white, int num_black, int num_drawn, Cache& cache) const {
         return core(drawn_white, num_white, num_black, num_drawn, &cache);

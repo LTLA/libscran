@@ -5,6 +5,7 @@
 
 #include "aggregation/AggregateAcrossCells.hpp"
 #include "aggregation/HypergeometricTail.hpp"
+#include "aggregation/ScoreFeatureSet.hpp"
 
 #include "clustering/BuildSNNGraph.hpp"
 #include "clustering/ClusterKmeans.hpp"

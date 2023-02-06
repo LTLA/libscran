@@ -13,6 +13,11 @@
 #include "../dimensionality_reduction/pca_utils.hpp"
 #include "../dimensionality_reduction/CustomSparseMatrix.hpp"
 
+/**
+ * @file ScoreFeatureSet.hpp
+ * @brief Compute per-cell scores for a feature set.
+ */
+
 namespace scran {
 
 /**
