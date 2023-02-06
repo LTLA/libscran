@@ -236,22 +236,14 @@ protected:
 
 private:
     // Re-using the same two-pass philosophy from RunPCA, to save memory.
-    struct BlockwiseSparseComponents {
-        BlockwiseSparseComponents(size_t nblocks) : ptrs(nblocks), values(nblocks), indices(nblocks) {}
-        std::vector<std::vector<size_t> > ptrs;
-        std::vector<std::vector<double> > values;
-        std::vector<std::vector<int> > indices;
-    };
-
     template<typename T, typename IDX, typename B>
-    BlockwiseSparseComponents core_sparse_row(const tatami::Matrix<T, IDX>* mat, const B* block, size_t nblocks, const std::vector<size_t>& reverse_block_map) const {
+    std::vector<pca_utils::SparseComponents> core_sparse_row(const tatami::Matrix<T, IDX>* mat, const B* block, size_t nblocks, const std::vector<size_t>& reverse_block_map) const {
         size_t NC = mat->ncol();
         size_t NR = mat->nrow();
 
-        BlockwiseSparseComponents output(nblocks);
-        auto& ptrs = output.ptrs;
+        std::vector<pca_utils::SparseComponents> output(nblocks);
         for (size_t b = 0; b < nblocks; ++b) {
-            ptrs[b].resize(NR + 1);
+            output[b].ptrs.resize(NR + 1);
         }
 
         /*** First round, to fetch the number of zeros in each row. ***/
@@ -276,7 +268,7 @@ private:
 
                     auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data(), wrk.get());
                     for (size_t i = 0; i < range.number; ++i) {
-                        ++(ptrs[block[range.index[i]]][r + 1]);
+                        ++(output[block[range.index[i]]].ptrs[r + 1]);
                     }
 
 #ifndef SCRAN_CUSTOM_PARALLEL
@@ -288,20 +280,20 @@ private:
 #endif
         }
 
-        auto& values = output.values;
-        auto& indices = output.indices;
-
         /*** Second round, to populate the vectors. ***/
         {
+            std::vector<std::vector<size_t> > ptr_copy;
+            ptr_copy.reserve(nblocks);
+
             for (size_t b = 0; b < nblocks; ++b) {
-                auto& curptrs = ptrs[b];
+                auto& curptrs = output[b].ptrs;
                 for (size_t r = 0; r < NR; ++r) {
                     curptrs[r + 1] += curptrs[r];
                 }
-                values[b].resize(curptrs.back());
-                indices[b].resize(curptrs.back());
+                ptr_copy.push_back(curptrs);
+                output[b].values.resize(curptrs.back());
+                output[b].indices.resize(curptrs.back());
             }
-            auto ptr_copy = ptrs;
 
 #ifndef SCRAN_CUSTOM_PARALLEL
             #pragma omp parallel num_threads(nthreads)
@@ -326,8 +318,8 @@ private:
                         auto c = range.index[i];
                         auto b = block[c];
                         auto& offset = ptr_copy[b][r];
-                        values[b][offset] = range.value[i];
-                        indices[b][offset] = reverse_block_map[c];
+                        output[b].values[offset] = range.value[i];
+                        output[b].indices[offset] = reverse_block_map[c];
                         ++offset;
                     }
 
@@ -344,7 +336,7 @@ private:
     }
 
     template<typename T, typename IDX, typename B>
-    BlockwiseSparseComponents core_sparse_column(const tatami::Matrix<T, IDX>* mat, const B* block, size_t nblocks, const std::vector<size_t>& reverse_block_map) const {
+    std::vector<pca_utils::SparseComponents> core_sparse_column(const tatami::Matrix<T, IDX>* mat, const B* block, size_t nblocks, const std::vector<size_t>& reverse_block_map) const {
         auto NR = mat->nrow();
         auto NC = mat->ncol();
 
@@ -406,28 +398,29 @@ private:
         }
 
         /*** Second round, to populate the vectors. ***/
-        BlockwiseSparseComponents output(nblocks);
+        std::vector<pca_utils::SparseComponents> output(nblocks);
         {
-            auto& ptrs = output.ptrs;
-            auto& values = output.values;
-            auto& indices = output.indices;
+            std::vector<std::vector<size_t> > ptr_copy;
+            ptr_copy.reserve(nblocks);
 
             for (size_t b = 0; b < nblocks; ++b) {
-                ptrs[b].resize(NR + 1);
+                auto& block_ptrs = output[b].ptrs;
+                block_ptrs.resize(NR + 1);
+
                 size_t total_nzeros = 0;
                 const auto& nonzeros_per_block = nonzeros_per_row[b];
-                auto& block_ptrs = ptrs[b];
                 for (size_t r = 0; r < NR; ++r) {
                     total_nzeros += nonzeros_per_block[r];
                     block_ptrs[r + 1] = total_nzeros;
                 }
-                values[b].resize(total_nzeros);
-                indices[b].resize(total_nzeros);
+                ptr_copy.push_back(block_ptrs);
+
+                output[b].values.resize(total_nzeros);
+                output[b].indices.resize(total_nzeros);
             }
 
             // Splitting by row this time, because columnar extraction can't be done safely.
             size_t rows_per_thread = std::ceil(static_cast<double>(NR) / nthreads);
-            auto ptr_copy = ptrs;
 
 #ifndef SCRAN_CUSTOM_PARALLEL
             #pragma omp parallel for num_threads(nthreads)
@@ -446,8 +439,8 @@ private:
                     for (size_t c = 0; c < NC; ++c) {
                         auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data(), startrow, endrow, wrk.get());
                         size_t b = block[c];
-                        auto& block_values = values[b];
-                        auto& block_indices = indices[b];
+                        auto& block_values = output[b].values;
+                        auto& block_indices = output[b].indices;
                         auto& block_ptr_copy = ptr_copy[b];
                         auto blocked_c = reverse_block_map[c];
 
@@ -472,7 +465,7 @@ private:
         return output;
     }
 
-    BlockwiseOutputs sparse_core(size_t num_features, const std::vector<size_t>& block_size, BlockwiseSparseComponents components) const {
+    BlockwiseOutputs sparse_core(size_t num_features, const std::vector<size_t>& block_size, std::vector<pca_utils::SparseComponents> components) const {
         size_t nblocks = block_size.size();
         std::vector<Eigen::MatrixXd> rotation(nblocks);
         std::vector<double> variance_explained(nblocks);
@@ -489,9 +482,9 @@ private:
         scales.reserve(nblocks);
 
         for (size_t b = 0; b < nblocks; ++b) {
-            auto& values = components.values[b];
-            auto& indices = components.indices[b];
-            auto& ptrs = components.ptrs[b];
+            auto& values = components[b].values;
+            auto& indices = components[b].indices;
+            auto& ptrs = components[b].ptrs;
 
             centers.emplace_back(num_features);
             auto& center_v = centers.back();
