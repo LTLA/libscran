@@ -1,0 +1,13 @@
+<map id="scran/aggregation/ScoreFeatureSet.hpp" name="scran/aggregation/ScoreFeatureSet.hpp">
+<area shape="rect" id="node1" title="Compute per&#45;cell scores for a feature set." alt="" coords="359,5,565,45"/>
+<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,181,132,207"/>
+<area shape="rect" id="node3" title=" " alt="" coords="462,101,537,126"/>
+<area shape="rect" id="node4" title=" " alt="" coords="157,181,215,207"/>
+<area shape="rect" id="node5" title=" " alt="" coords="561,101,683,126"/>
+<area shape="rect" id="node6" title=" " alt="" coords="707,101,806,126"/>
+<area shape="rect" id="node7" title=" " alt="" coords="501,181,596,207"/>
+<area shape="rect" id="node8" title=" " alt="" coords="831,93,1005,133"/>
+<area shape="rect" id="node9" href="$CustomSparseMatrix_8hpp_source.html" title=" " alt="" coords="212,93,387,133"/>
+<area shape="rect" id="node10" title=" " alt="" coords="362,181,477,207"/>
+<area shape="rect" id="node11" title=" " alt="" coords="239,181,338,207"/>
+</map>
