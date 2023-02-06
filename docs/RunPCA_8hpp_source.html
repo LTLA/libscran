@@ -200,73 +200,58 @@ $(function() {
 <div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>        <span class="keywordflow">if</span> (!features) {</div>
 <div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>            run(mat, output.<a class="code hl_variable" href="structscran_1_1RunPCA_1_1Results.html#a5b510e222583dac52065c6e1427e123d">pcs</a>, output.<a class="code hl_variable" href="structscran_1_1RunPCA_1_1Results.html#af2c6bb8eeb103385002992d0386ccd32">rotation</a>, output.<a class="code hl_variable" href="structscran_1_1RunPCA_1_1Results.html#a008ce24b1636d65c60de2062a170d810">variance_explained</a>, output.<a class="code hl_variable" href="structscran_1_1RunPCA_1_1Results.html#a2581e8d363f03cb4f8dcddb3f509c798">total_variance</a>);</div>
 <div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span><span class="preprocessor">#ifdef SCRAN_LOGGER</span></div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>            SCRAN_LOGGER(<span class="stringliteral">&quot;RunPCA&quot;</span>, <span class="stringliteral">&quot;Subsetting to features of interest&quot;</span>);</div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>            <span class="keyword">auto</span> subsetted = pca_utils::subset_matrix_by_features(mat, features);</div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>            run(subsetted.get(), output.<a class="code hl_variable" href="structscran_1_1RunPCA_1_1Results.html#a5b510e222583dac52065c6e1427e123d">pcs</a>, output.<a class="code hl_variable" href="structscran_1_1RunPCA_1_1Results.html#af2c6bb8eeb103385002992d0386ccd32">rotation</a>, output.<a class="code hl_variable" href="structscran_1_1RunPCA_1_1Results.html#a008ce24b1636d65c60de2062a170d810">variance_explained</a>, output.<a class="code hl_variable" href="structscran_1_1RunPCA_1_1Results.html#a2581e8d363f03cb4f8dcddb3f509c798">total_variance</a>);</div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>        }</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>            <span class="keyword">auto</span> subsetted = pca_utils::subset_matrix_by_features(mat, features);</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>            run(subsetted.get(), output.<a class="code hl_variable" href="structscran_1_1RunPCA_1_1Results.html#a5b510e222583dac52065c6e1427e123d">pcs</a>, output.<a class="code hl_variable" href="structscran_1_1RunPCA_1_1Results.html#af2c6bb8eeb103385002992d0386ccd32">rotation</a>, output.<a class="code hl_variable" href="structscran_1_1RunPCA_1_1Results.html#a008ce24b1636d65c60de2062a170d810">variance_explained</a>, output.<a class="code hl_variable" href="structscran_1_1RunPCA_1_1Results.html#a2581e8d363f03cb4f8dcddb3f509c798">total_variance</a>);</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        }</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span> </div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        <span class="keywordflow">return</span> output;</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>    }</div>
 <div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span> </div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        <span class="keywordflow">return</span> output;</div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    }</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span> </div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> IDX&gt; </div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    pca_utils::CustomSparseMatrix create_custom_sparse_matrix(<span class="keyword">const</span> tatami::Matrix&lt;T, IDX&gt;* mat, Eigen::VectorXd&amp; center_v, Eigen::VectorXd&amp; scale_v, <span class="keywordtype">double</span>&amp; total_var)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        std::vector&lt;double&gt; values;</div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>        std::vector&lt;int&gt; indices;</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>        std::vector&lt;size_t&gt; ptrs = pca_utils::fill_transposed_compressed_sparse_vectors(mat, values, indices, nthreads); <span class="comment">// row-major filling.</span></div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>        <span class="keywordtype">size_t</span> NR = mat-&gt;nrow(), NC = mat-&gt;ncol();</div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>        pca_utils::compute_mean_and_variance_from_sparse_components(NR, NC, values, indices, ptrs, center_v, scale_v, nthreads); <span class="comment">// row-major calculations.</span></div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>        pca_utils::set_scale(scale, scale_v, total_var);</div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span> </div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>        pca_utils::CustomSparseMatrix A(NC, NR, nthreads); <span class="comment">// transposed; we want genes in the columns.</span></div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span> </div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span><span class="preprocessor">#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX</span></div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>        <span class="keywordflow">if</span> (use_eigen) {</div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>            A.use_eigen();</div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>        }</div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> IDX&gt; </div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    pca_utils::CustomSparseMatrix create_custom_sparse_matrix(<span class="keyword">const</span> tatami::Matrix&lt;T, IDX&gt;* mat, Eigen::VectorXd&amp; center_v, Eigen::VectorXd&amp; scale_v, <span class="keywordtype">double</span>&amp; total_var)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        <span class="keyword">auto</span> extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); <span class="comment">// row-major extraction.</span></div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>        <span class="keyword">auto</span>&amp; ptrs = extracted.ptrs;</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>        <span class="keyword">auto</span>&amp; values = extracted.values;</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        <span class="keyword">auto</span>&amp; indices = extracted.indices;</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span> </div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>        <span class="keywordtype">size_t</span> NR = mat-&gt;nrow(), NC = mat-&gt;ncol();</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>        pca_utils::compute_mean_and_variance_from_sparse_components(NR, NC, values, indices, ptrs, center_v, scale_v, nthreads); <span class="comment">// row-major calculations.</span></div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>        total_var = pca_utils::process_scale_vector(scale, scale_v);</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span> </div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>        <span class="comment">// Actually creating a sparse matrix. Again, note that this is</span></div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>        <span class="comment">// transposed; we want genes in the columns.</span></div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>        pca_utils::CustomSparseMatrix A(NC, NR, nthreads); </div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span><span class="preprocessor">#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX</span></div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>        <span class="keywordflow">if</span> (use_eigen) {</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>            A.use_eigen();</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>        }</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>        A.fill_direct(std::move(values), std::move(indices), std::move(ptrs));</div>
 <div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span> </div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        A.fill_direct(std::move(values), std::move(indices), std::move(ptrs));</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>        <span class="keywordflow">return</span> A;</div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>    }</div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span> </div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> IDX&gt; </div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    Eigen::MatrixXd create_eigen_matrix_dense(<span class="keyword">const</span> tatami::Matrix&lt;T, IDX&gt;* mat, <span class="keywordtype">double</span>&amp; total_var)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>        <span class="keywordtype">size_t</span> NR = mat-&gt;nrow(), NC = mat-&gt;ncol();</div>
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>        total_var = 0;</div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span> </div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>        Eigen::MatrixXd output(NC, NR); <span class="comment">// transposed.</span></div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>        std::vector&lt;double&gt; xbuffer(NC);</div>
-<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>        <span class="keywordtype">double</span>* outIt = output.data();</div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span> </div>
-<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span><span class="preprocessor">#ifdef SCRAN_LOGGER</span></div>
-<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>        SCRAN_LOGGER(<span class="stringliteral">&quot;scran::RunPCA&quot;</span>, <span class="stringliteral">&quot;Preparing the input matrix&quot;</span>);</div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span> </div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> r = 0; r &lt; NR; ++r, outIt += NC) {</div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>            <span class="keyword">auto</span> ptr = mat-&gt;row_copy(r, outIt);</div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>            <span class="keyword">auto</span> stats = tatami::stats::variances::compute_direct(outIt, NC);</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        <span class="keywordflow">return</span> A;</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>    }</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> IDX&gt; </div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>    Eigen::MatrixXd create_eigen_matrix_dense(<span class="keyword">const</span> tatami::Matrix&lt;T, IDX&gt;* mat, <span class="keywordtype">double</span>&amp; total_var)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>        <span class="keyword">auto</span> emat = pca_utils::extract_dense_for_pca(mat, nthreads); <span class="comment">// get a column-major matrix with genes in columns.</span></div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>        <span class="keywordtype">size_t</span> NC = emat.cols();</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span> </div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>        Eigen::VectorXd center_v(NC);</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>        Eigen::VectorXd scale_v(NC);</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>        pca_utils::compute_mean_and_variance_from_dense_columns(emat, center_v, scale_v, nthreads);</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span> </div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>        total_var = pca_utils::process_scale_vector(scale, scale_v);</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>        pca_utils::center_and_scale_dense_columns(emat, center_v, scale, scale_v, nthreads);</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span> </div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>        <span class="keywordflow">return</span> emat;</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>    }</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>};</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span> </div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>}</div>
 <div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span> </div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>            <span class="keyword">auto</span> copy = outIt;</div>
-<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> c = 0; c &lt; NC; ++c, ++copy) {</div>
-<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>                *copy -= stats.first;</div>
-<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>            }</div>
-<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span> </div>
-<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>            pca_utils::apply_scale(scale, stats.second, NC, outIt, total_var);</div>
-<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>        }</div>
-<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span> </div>
-<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>        <span class="keywordflow">return</span> output;</div>
-<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>    }</div>
-<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span> </div>
-<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>};</div>
-<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span> </div>
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>}</div>
-<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span> </div>
-<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aclassscran_1_1RunPCA_html"><div class="ttname"><a href="classscran_1_1RunPCA.html">scran::RunPCA</a></div><div class="ttdoc">Perform PCA on a gene-cell matrix.</div><div class="ttdef"><b>Definition:</b> RunPCA.hpp:33</div></div>
 <div class="ttc" id="aclassscran_1_1RunPCA_html_a6cb07ef5a77b9255320ec477c70d4f4c"><div class="ttname"><a href="classscran_1_1RunPCA.html#a6cb07ef5a77b9255320ec477c70d4f4c">scran::RunPCA::set_transpose</a></div><div class="ttdeci">RunPCA &amp; set_transpose(bool t=Defaults::transpose)</div><div class="ttdef"><b>Definition:</b> RunPCA.hpp:97</div></div>
 <div class="ttc" id="aclassscran_1_1RunPCA_html_a6d39126e34713d4cb843d24b8969708b"><div class="ttname"><a href="classscran_1_1RunPCA.html#a6d39126e34713d4cb843d24b8969708b">scran::RunPCA::set_scale</a></div><div class="ttdeci">RunPCA &amp; set_scale(bool s=Defaults::scale)</div><div class="ttdef"><b>Definition:</b> RunPCA.hpp:86</div></div>
