@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include "../utils/macros.h"
 
+#include "../utils/compare_almost_equal.h"
+#include "../data/Simulator.hpp"
 #include "tatami/base/CompressedSparseMatrix.hpp"
 #include "tatami/utils/convert_to_sparse.hpp"
 
@@ -9,7 +11,7 @@
 #include <vector>
 #include <random>
 
-class FillCompressedSparseTest : public ::testing::TestWithParam<std::tuple<int, int, int> > {
+class ExtractForPcaTest : public ::testing::TestWithParam<std::tuple<int, int, int> > {
 protected:
     std::shared_ptr<tatami::NumericMatrix> sparse_row, sparse_column;
 
@@ -50,37 +52,172 @@ protected:
     int nthreads;
 };
 
-TEST_P(FillCompressedSparseTest, Basic) {
+TEST_P(ExtractForPcaTest, Sparse) {
     auto param = GetParam();
     assemble(param);
 
     {
-        std::vector<double> values2;
-        std::vector<int> indices2;
-        std::vector<size_t> ptrs2 = scran::pca_utils::fill_transposed_compressed_sparse_vectors(sparse_row.get(), values2, indices2, nthreads);
-
-        EXPECT_EQ(values, values2);
-        EXPECT_EQ(indices, indices2);
-        EXPECT_EQ(ptrs, ptrs2);
+        auto extracted = scran::pca_utils::extract_sparse_for_pca(sparse_row.get(), nthreads);
+        EXPECT_EQ(values, extracted.values);
+        EXPECT_EQ(indices, extracted.indices);
+        EXPECT_EQ(ptrs, extracted.ptrs);
     }
 
     {
-        std::vector<double> values2;
-        std::vector<int> indices2;
-        std::vector<size_t> ptrs2 = scran::pca_utils::fill_transposed_compressed_sparse_vectors(sparse_column.get(), values2, indices2, nthreads);
+        auto extracted = scran::pca_utils::extract_sparse_for_pca(sparse_column.get(), nthreads);
+        EXPECT_EQ(values, extracted.values);
+        EXPECT_EQ(indices, extracted.indices);
+        EXPECT_EQ(ptrs, extracted.ptrs);
+    }
+}
 
-        EXPECT_EQ(values, values2);
-        EXPECT_EQ(indices, indices2);
-        EXPECT_EQ(ptrs, ptrs2);
+TEST_P(ExtractForPcaTest, Dense) {
+    auto param = GetParam();
+    assemble(param);
+
+    {
+        auto extracted = scran::pca_utils::extract_dense_for_pca(sparse_row.get(), nthreads);
+
+        size_t NR = extracted.rows(), NC = extracted.cols();
+        EXPECT_EQ(NR, sparse_row->ncol());
+        EXPECT_EQ(NC, sparse_row->nrow());
+
+        for (size_t r = 0; r < NR; ++r) {
+            auto row = extracted.row(r);
+            EXPECT_EQ(std::vector<double>(row.begin(), row.end()), sparse_row->column(r));
+        }
+    }
+
+    {
+        auto extracted = scran::pca_utils::extract_dense_for_pca(sparse_column.get(), nthreads);
+
+        size_t NR = extracted.rows(), NC = extracted.cols();
+        EXPECT_EQ(NR, sparse_row->ncol());
+        EXPECT_EQ(NC, sparse_row->nrow());
+
+        for (size_t r = 0; r < NR; ++r) {
+            auto row = extracted.row(r);
+            EXPECT_EQ(std::vector<double>(row.begin(), row.end()), sparse_row->column(r));
+        }
     }
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    FillCompressedSparse,
-    FillCompressedSparseTest,
+    ExtractForPca,
+    ExtractForPcaTest,
     ::testing::Combine(
         ::testing::Values(12, 56, 123), // rows
         ::testing::Values(19, 47, 98), // columns
         ::testing::Values(1, 3) // number of threads
     )
 );
+
+/********************************************
+ ********************************************/
+
+class MeanVarPcaCalculationsTest : public ::testing::TestWithParam<int> {};
+
+TEST_P(MeanVarPcaCalculationsTest, DenseCheck) {
+    auto nthreads = GetParam();
+    size_t NR = 99;
+    size_t NC = 101;
+
+    Simulator sim;
+    auto mat = sim.matrix(NR, NC);
+    auto extracted = scran::pca_utils::extract_dense_for_pca(&mat, nthreads);
+
+    // Check that the mean and variance calculations are correct.
+    Eigen::VectorXd center_v(NR);
+    Eigen::VectorXd scale_v(NR);
+    scran::pca_utils::compute_mean_and_variance_from_dense_columns(extracted, center_v, scale_v, nthreads);
+
+    auto means = tatami::row_sums(&mat);
+    for (auto& x : means) {
+        x /= NC;
+    }
+    compare_almost_equal(means, std::vector<double>(center_v.begin(), center_v.end()));
+
+    auto refvar = tatami::row_variances(&mat);
+    compare_almost_equal(refvar, std::vector<double>(scale_v.begin(), scale_v.end()));
+
+    // Check that processing works with centering only.
+    {
+        double total = scran::pca_utils::process_scale_vector(false, scale_v);
+        EXPECT_EQ(total, std::accumulate(refvar.begin(), refvar.end(), 0.0));
+
+        auto matcopy = extracted;
+        scran::pca_utils::center_and_scale_dense_columns(matcopy, center_v, false, scale_v, nthreads);
+
+        Eigen::VectorXd center_v2(NR);
+        Eigen::VectorXd scale_v2(NR);
+        scran::pca_utils::compute_mean_and_variance_from_dense_columns(matcopy, center_v2, scale_v2, nthreads);
+
+        compare_almost_equal(std::vector<double>(NR), std::vector<double>(center_v2.begin(), center_v2.end()));
+        compare_almost_equal(refvar, std::vector<double>(scale_v2.begin(), scale_v2.end()));
+    }
+
+    // Check that processing works with centering and scaling.
+    {
+        double total = scran::pca_utils::process_scale_vector(true, scale_v);
+        EXPECT_EQ(total, NR);
+
+        auto matcopy = extracted;
+        scran::pca_utils::center_and_scale_dense_columns(matcopy, center_v, true, scale_v, nthreads);
+
+        Eigen::VectorXd center_v2(NR);
+        Eigen::VectorXd scale_v2(NR);
+        scran::pca_utils::compute_mean_and_variance_from_dense_columns(matcopy, center_v2, scale_v2, nthreads);
+
+        compare_almost_equal(std::vector<double>(NR), std::vector<double>(center_v2.begin(), center_v2.end()));
+        compare_almost_equal(std::vector<double>(NR, 1), std::vector<double>(scale_v2.begin(), scale_v2.end()));
+    }
+}
+
+TEST_P(MeanVarPcaCalculationsTest, SparseCheck) {
+    auto nthreads = GetParam();
+    size_t NR = 59;
+    size_t NC = 251;
+
+    Simulator sim;
+    auto mat = sim.matrix(NR, NC);
+    auto smat = tatami::convert_to_sparse(&mat, 1);
+    auto extracted = scran::pca_utils::extract_sparse_for_pca(smat.get(), nthreads);
+
+    // Check that the mean and variance calculations are correct.
+    Eigen::VectorXd center_v(NR);
+    Eigen::VectorXd scale_v(NR);
+    scran::pca_utils::compute_mean_and_variance_from_sparse_components(NR, NC, extracted.values, extracted.indices, extracted.ptrs, center_v, scale_v, nthreads);
+
+    auto means = tatami::row_sums(smat.get());
+    for (auto& x : means) {
+        x /= NC;
+    }
+    compare_almost_equal(means, std::vector<double>(center_v.begin(), center_v.end()));
+
+    auto refvar = tatami::row_variances(smat.get());
+    compare_almost_equal(refvar, std::vector<double>(scale_v.begin(), scale_v.end()));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    MeanVarPcaCalculations,
+    MeanVarPcaCalculationsTest,
+    ::testing::Values(1, 3) // number of threads
+);
+
+/********************************************
+ ********************************************/
+
+TEST(ProcessScaleVectorTest, EdgeCases) {
+    Eigen::VectorXd scale_v(5);
+    scale_v.fill(0);
+    scale_v[0] = 1;
+    scale_v[1] = 2;
+    scale_v[2] = 3;
+
+    EXPECT_EQ(scran::pca_utils::process_scale_vector(false, scale_v), 6); // not mutating; just returns the total variance.
+
+    EXPECT_EQ(scran::pca_utils::process_scale_vector(true, scale_v), 3); // mutating, and returns the total number of non-zero variances.
+
+    std::vector<double> expected { 1, std::sqrt(2), std::sqrt(3), 1, 1 }; // takes the square root, and fills in zeros with 1's.
+    EXPECT_EQ(std::vector<double>(scale_v.begin(), scale_v.end()), expected);
+}
