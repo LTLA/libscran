@@ -223,9 +223,6 @@ public:
         if (!features) {
             run(mat, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         } else {
-#ifdef SCRAN_LOGGER
-            SCRAN_LOGGER("RunPCA", "Subsetting to features of interest");
-#endif
             auto subsetted = pca_utils::subset_matrix_by_features(mat, features);
             run(subsetted.get(), output.pcs, output.rotation, output.variance_explained, output.total_variance);
         }
@@ -236,16 +233,18 @@ public:
 private:
     template<typename T, typename IDX> 
     pca_utils::CustomSparseMatrix create_custom_sparse_matrix(const tatami::Matrix<T, IDX>* mat, Eigen::VectorXd& center_v, Eigen::VectorXd& scale_v, double& total_var) const {
-        auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major filling.
+        auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major extraction.
         auto& ptrs = extracted.ptrs;
         auto& values = extracted.values;
         auto& indices = extracted.indices;
 
         size_t NR = mat->nrow(), NC = mat->ncol();
         pca_utils::compute_mean_and_variance_from_sparse_components(NR, NC, values, indices, ptrs, center_v, scale_v, nthreads); // row-major calculations.
-        pca_utils::set_scale(scale, scale_v, total_var);
+        total_var = pca_utils::variance_to_scale(scale, scale_v);
 
-        pca_utils::CustomSparseMatrix A(NC, NR, nthreads); // transposed; we want genes in the columns.
+        // Actually creating a sparse matrix. Again, note that this is
+        // transposed; we want genes in the columns.
+        pca_utils::CustomSparseMatrix A(NC, NR, nthreads); 
 #ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
         if (use_eigen) {
             A.use_eigen();
@@ -259,16 +258,17 @@ private:
 private:
     template<typename T, typename IDX> 
     Eigen::MatrixXd create_eigen_matrix_dense(const tatami::Matrix<T, IDX>* mat, double& total_var) const {
-        auto mat = pca_utils::extract_dense_for_pca(mat, nthreads); // get a column-major matrix with genes in columns.
-        size_t NC = mat.cols();
+        auto emat = pca_utils::extract_dense_for_pca(mat, nthreads); // get a column-major matrix with genes in columns.
+        size_t NC = emat.cols();
 
         Eigen::VectorXd center_v(NC);
         Eigen::VectorXd scale_v(NC);
-        pca_utils::compute_mean_and_variance_from_dense_columns(mat, center_v, scale, scale_v, nthreads);
-        pca_utils::set_scale(scale, scale_v, total_var);
-        pca_utils::center_and_scale_dense_columns(mat, center_v, scale, scale_v, nthreads);
+        pca_utils::compute_mean_and_variance_from_dense_columns(emat, center_v, scale_v, nthreads);
 
-        return extracted;
+        total_var = pca_utils::variance_to_scale(scale, scale_v);
+        pca_utils::center_and_scale_dense_columns(emat, center_v, scale, scale_v, nthreads);
+
+        return emat;
     }
 };
 

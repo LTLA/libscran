@@ -388,24 +388,18 @@ public:
 private:
     template<typename T, typename IDX, typename Batch> 
     pca_utils::CustomSparseMatrix create_custom_sparse_matrix(const tatami::Matrix<T, IDX>* mat, 
-        Eigen::VectorXd& mean_v, 
+        Eigen::VectorXd& center_v, 
         Eigen::VectorXd& scale_v, 
         const Batch* batch,
         const std::vector<int>& batch_size,
         double& total_var) 
     const {
+
         size_t NR = mat->nrow(), NC = mat->ncol();
-        pca_utils::CustomSparseMatrix A(NC, NR, nthreads); // transposed; we want genes in the columns.
-
-#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
-        if (use_eigen) {
-            A.use_eigen();
-        }
-#endif
-
-        std::vector<double> values;
-        std::vector<int> indices;
-        std::vector<size_t> ptrs = pca_utils::fill_transposed_compressed_sparse_vectors(mat, values, indices, nthreads);
+        auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major extraction.
+        auto& ptrs = extracted.ptrs;
+        auto& values = extracted.values;
+        auto& indices = extracted.indices;
 
         // Computing grand means and variances with weights.
         {
@@ -442,10 +436,13 @@ private:
                         ++batch_count[b];
                     }
 
-                    double& grand_mean = mean_v[r];
+                    double& grand_mean = center_v[r];
                     grand_mean = 0;
                     for (size_t b = 0; b < nbatchs; ++b) {
-                        grand_mean += batch_means[b] / batch_size[b];
+                        auto bsize = batch_size[b];
+                        if (bsize) {
+                            grand_mean += batch_means[b] / bsize;
+                        }
                     }
                     grand_mean /= nbatchs;
 
@@ -462,8 +459,10 @@ private:
 
                     for (size_t i = 0; i < num_entries; ++i) {
                         double diff = value_ptr[i] - grand_mean;
-                        auto b = batch[index_ptr[i]];
-                        proxyvar += diff * diff / batch_size[b];
+                        auto bsize = batch_size[batch[index_ptr[i]]];
+                        if (bsize) {
+                            proxyvar += diff * diff / bsize;
+                        }
                     }
 
 #ifndef SCRAN_CUSTOM_PARALLEL
@@ -474,10 +473,19 @@ private:
             }, nthreads);
 #endif
 
-            pca_utils::set_scale(scale, scale_v, total_var);
+            total_var = pca_utils::variance_to_scale(scale, scale_v);
         }
 
+        // Actually filling the sparse matrix. Note that this is transposed
+        // because we want genes in the columns.
+        pca_utils::CustomSparseMatrix A(NC, NR, nthreads); 
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+        if (use_eigen) {
+            A.use_eigen();
+        }
+#endif
         A.fill_direct(std::move(values), std::move(indices), std::move(ptrs));
+
         return A;
     }
 
@@ -485,48 +493,72 @@ private:
     template<typename T, typename IDX, typename Batch> 
     Eigen::MatrixXd create_eigen_matrix_dense(
         const tatami::Matrix<T, IDX>* mat, 
-        Eigen::VectorXd& mean_v, 
+        Eigen::VectorXd& center_v, 
         Eigen::VectorXd& scale_v, 
         const Batch* batch,
         const std::vector<int>& batch_size,
         double& total_var) 
     const {
-        size_t NR = mat->nrow(), NC = mat->ncol();
-        total_var = 0;
 
-        Eigen::MatrixXd output(NC, NR); // transposed.
-        std::vector<double> xbuffer(NC);
-        double* outIt = output.data();
+        // Extract a column-major matrix with genes in columns.
+        auto emat = pca_utils::extract_dense_for_pca(mat, nthreads); 
 
+        // Looping across genes (i.e., columns) to fill center_v and scale_v.
+        size_t NC = emat.cols(), NR = emat.rows();
         size_t nbatchs = batch_size.size();
-        std::vector<double> mean_buffer(nbatchs);
 
-        for (size_t r = 0; r < NR; ++r, outIt += NC) {
-            auto ptr = mat->row_copy(r, outIt);
-
-            std::fill(mean_buffer.begin(), mean_buffer.end(), 0);
+#ifndef SCRAN_CUSTOM_PARALLEL
+        #pragma omp parallel num_threads(nthreads)
+        {
+            std::vector<double> mean_buffer(nbatchs);
+            #pragma omp for
             for (size_t c = 0; c < NC; ++c) {
-                mean_buffer[batch[c]] += ptr[c];
-            }
-            double& grand_mean = mean_v[r];
-            grand_mean = 0;
-            for (size_t b = 0; b < nbatchs; ++b) {
-                grand_mean += mean_buffer[b] / batch_size[b];
-            }
-            grand_mean /= nbatchs; 
+#else
+        SCRAN_CUSTOM_PARALLEL(NC, [&](size_t first, size_t last) -> void {
+            std::vector<double> mean_buffer(nbatchs);
+            for (size_t c = first; c < last; ++c) {
+#endif
 
-            // We don't actually compute the batchwise variance, but instead
-            // the weighted sum of squared deltas, which is what PCA actually sees.
-            double& proxyvar = scale_v[r];
-            proxyvar = 0;
-            for (size_t c = 0; c < NC; ++c) {
-                double diff = outIt[c] - grand_mean;
-                proxyvar += diff * diff / batch_size[batch[c]];
+                auto ptr = emat.data() + c * NR;
+                std::fill(mean_buffer.begin(), mean_buffer.end(), 0.0);
+                for (size_t r = 0; r < NR; ++r) {
+                    mean_buffer[batch[r]] += ptr[r];
+                }
+
+                double& grand_mean = center_v[c];
+                grand_mean = 0;
+                int non_empty_batches = 0;
+                for (size_t b = 0; b < nbatchs; ++b) {
+                    const auto& bsize = batch_size[b];
+                    if (bsize) {
+                        grand_mean += mean_buffer[b] / bsize;
+                        ++non_empty_batches;
+                    }
+                }
+                grand_mean /= non_empty_batches;
+
+                // We don't actually compute the batchwise variance, but instead
+                // the weighted sum of squared deltas, which is what PCA actually sees.
+                double& proxyvar = scale_v[c];
+                proxyvar = 0;
+                for (size_t r = 0; r < NR; ++r) {
+                    const auto& bsize = batch_size[batch[r]];
+                    if (bsize) {
+                        double diff = ptr[r] - grand_mean;
+                        proxyvar += diff * diff / bsize;
+                    }
+                }
+
+#ifndef SCRAN_CUSTOM_PARALLEL
             }
         }
+#else
+            }
+        }, nthreads);
+#endif
 
-        pca_utils::set_scale(scale, scale_v, total_var);
-        return output;
+        total_var = pca_utils::variance_to_scale(scale, scale_v);
+        return emat;
     }
 };
 

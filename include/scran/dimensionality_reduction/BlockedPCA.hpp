@@ -322,18 +322,12 @@ private:
         const std::vector<int>& block_size, 
         double& total_var) 
     const {
+
         size_t NR = mat->nrow(), NC = mat->ncol();
-        pca_utils::CustomSparseMatrix A(NC, NR, nthreads); // transposed; we want genes in the columns.
-
-#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
-        if (use_eigen) {
-            A.use_eigen();
-        }
-#endif
-
-        std::vector<double> values;
-        std::vector<int> indices;
-        std::vector<size_t> ptrs = pca_utils::fill_transposed_compressed_sparse_vectors(mat, values, indices, nthreads);
+        auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major filling.
+        auto& ptrs = extracted.ptrs;
+        auto& values = extracted.values;
+        auto& indices = extracted.indices;
 
         // Computing block-specific means and variances.
         {
@@ -391,10 +385,17 @@ private:
             }, nthreads);
 #endif
 
-            pca_utils::set_scale(scale, scale_v, total_var);
+            total_var = pca_utils::variance_to_scale(scale, scale_v);
         }
 
+        pca_utils::CustomSparseMatrix A(NC, NR, nthreads); // transposed; we want genes in the columns.
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+        if (use_eigen) {
+            A.use_eigen();
+        }
+#endif
         A.fill_direct(std::move(values), std::move(indices), std::move(ptrs));
+
         return A;
     }
 
@@ -406,57 +407,87 @@ private:
         const std::vector<int>& block_size, 
         double& total_var) 
     const {
-        size_t NR = mat->nrow(), NC = mat->ncol();
-        total_var = 0;
 
-        Eigen::MatrixXd output(NC, NR); // transposed.
-        std::vector<double> xbuffer(NC);
-        double* outIt = output.data();
+        auto emat = pca_utils::extract_dense_for_pca(mat, nthreads); // get a column-major matrix with genes in columns.
 
+        // Compute mean and variance of each block.
+        size_t NR = emat.rows(), NC = emat.cols();
         int nblocks = block_size.size();
-        std::vector<double> mean_buffer(nblocks);
+        Eigen::VectorXd scale_v(NC);
 
-#ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::RunPCA", "Preparing the input matrix");
+#ifndef SCRAN_CUSTOM_PARALLEL
+        #pragma omp parallel num_threads(nthreads)
+        {
+            std::vector<double> mean_buffer(nblocks);
+            #pragma omp for
+            for (size_t c = 0; c < NC; ++c) {
+#else
+        SCRAN_CUSTOM_PARALLEL(NC, [&](size_t first, size_t last) -> void {
+            std::vector<double> mean_buffer(nblocks);
+            for (size_t c = first; c < last; ++c) {
 #endif
 
-        for (size_t r = 0; r < NR; ++r, outIt += NC) {
-            auto ptr = mat->row_copy(r, outIt);
-
-            // Compute the means of each block.
-            std::fill(mean_buffer.begin(), mean_buffer.end(), 0);
-            {
-                auto copy = outIt;
-                auto bcopy = block;
-                for (size_t c = 0; c < NC; ++c, ++copy, ++bcopy) {
-                    mean_buffer[*bcopy] += *copy;
+                auto ptr = emat.data() + c * NR;
+                std::fill(mean_buffer.begin(), mean_buffer.end(), 0);
+                for (size_t r = 0; r < NR; ++r) {
+                    mean_buffer[block[r]] += ptr[r];
                 }
-            }
-            for (int b = 0; b < nblocks; ++b) {
-                if (block_size[b]) {
-                    mean_buffer[b] /= block_size[b];
-                }
-            }
 
-            // We don't actually compute the blockwise variance, but instead
-            // the squared sum of deltas, which is what PCA actually sees.
-            double proxyvar = 0;
-            {
-                auto copy = outIt;
-                auto bcopy = block;
-                for (size_t c = 0; c < NC; ++c, ++copy, ++bcopy) {
-                    *copy -= mean_buffer[*bcopy];
-                    proxyvar += *copy * *copy;
+                for (int b = 0; b < nblocks; ++b) {
+                    const auto& bsize = block_size[b];
+                    if (bsize) {
+                        mean_buffer[b] /= bsize;
+                    }
                 }
-                proxyvar /= NC - 1;
-            }
 
-            pca_utils::apply_scale(scale, proxyvar, NC, outIt, total_var);
+                // We don't actually compute the blockwise variance, but
+                // instead the squared sum of deltas from each block's means,
+                // divided by the degrees of freedom as if there weren't any
+                // blocks... as this is what PCA actually sees.
+                double& proxyvar = scale_v[c];
+                proxyvar = 0;
+                for (size_t r = 0; r < NR; ++r) {
+                    auto& current = ptr[r];
+                    current -= mean_buffer[block[r]]; // centering happens here!
+                    proxyvar += current * current;
+                }
+                proxyvar /= NR - 1;
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+            }
+        }
+#else
+            }
+        }, nthreads);
+#endif
+
+        total_var = pca_utils::variance_to_scale(scale, scale_v);
+
+        if (scale) {
+#ifndef SCRAN_CUSTOM_PARALLEL
+            #pragma omp parallel for num_threads(nthreads)
+            for (size_t c = 0; c < NC; ++c) {
+#else
+            SCRAN_CUSTOM_PARALLEL(NC, [&](size_t first, size_t last) -> void {
+            for (size_t c = first; c < last; ++c) {
+#endif
+
+                auto ptr = emat.data() + c * NR;
+                auto sd = scale_v[c];
+                for (size_t r = 0; r < NR; ++r) {
+                    ptr[r] /= sd; // variance_to_scale() should already protect against div-by-zero.
+                }
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+            }
+#else
+            }
+            }, nthreads);
+#endif
         }
 
-        return output;
+        return emat;
     }
-
 };
 
 }

@@ -55,23 +55,17 @@ TEST_P(FillCompressedSparseTest, Basic) {
     assemble(param);
 
     {
-        std::vector<double> values2;
-        std::vector<int> indices2;
-        std::vector<size_t> ptrs2 = scran::pca_utils::fill_transposed_compressed_sparse_vectors(sparse_row.get(), values2, indices2, nthreads);
-
-        EXPECT_EQ(values, values2);
-        EXPECT_EQ(indices, indices2);
-        EXPECT_EQ(ptrs, ptrs2);
+        auto extracted = scran::pca_utils::extract_sparse_for_pca(sparse_row.get(), nthreads);
+        EXPECT_EQ(values, extracted.values);
+        EXPECT_EQ(indices, extracted.indices);
+        EXPECT_EQ(ptrs, extracted.ptrs);
     }
 
     {
-        std::vector<double> values2;
-        std::vector<int> indices2;
-        std::vector<size_t> ptrs2 = scran::pca_utils::fill_transposed_compressed_sparse_vectors(sparse_column.get(), values2, indices2, nthreads);
-
-        EXPECT_EQ(values, values2);
-        EXPECT_EQ(indices, indices2);
-        EXPECT_EQ(ptrs, ptrs2);
+        auto extracted = scran::pca_utils::extract_sparse_for_pca(sparse_column.get(), nthreads);
+        EXPECT_EQ(values, extracted.values);
+        EXPECT_EQ(indices, extracted.indices);
+        EXPECT_EQ(ptrs, extracted.ptrs);
     }
 }
 

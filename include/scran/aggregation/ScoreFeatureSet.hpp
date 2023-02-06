@@ -498,9 +498,7 @@ private:
             scales.emplace_back(num_features);
             auto& scale_v = scales.back();
             pca_utils::compute_mean_and_variance_from_sparse_components(num_features, block_size[b], values, indices, ptrs, center_v, scale_v, nthreads);
-
-            double total_var = 0;
-            pca_utils::set_scale(scale, scale_v, total_var);
+            double total_var = pca_utils::variance_to_scale(scale, scale_v);
 
             all_matrices.emplace_back(block_size[b], num_features, nthreads); // transposed; we want genes in the columns.
             auto& A = all_matrices.back();
@@ -671,7 +669,7 @@ private:
             pca_utils::compute_mean_and_variance_from_dense_columns(emat, centers[b], scales[b], nthreads);
 
             double total_var = 0;
-            pca_utils::set_scale(scale, scales[b], total_var);
+            total_var = pca_utils::variance_to_scale(scale, scales[b]);
             pca_utils::center_and_scale_dense_columns(emat, centers[b], scale, scales[b], nthreads);
 
             if (block_size[b] >= 2) {
