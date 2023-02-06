@@ -29,7 +29,7 @@ inline void clean_up(size_t NC, Eigen::MatrixXd& U, Eigen::VectorXd& D) {
     return;
 }
 
-inline double variance_to_scale(bool scale, Eigen::VectorXd& scale_v) {
+inline double process_scale_vector(bool scale, Eigen::VectorXd& scale_v) {
     if (scale) {
         double total_var = 0;
         for (auto& s : scale_v) {
@@ -149,7 +149,7 @@ inline void center_and_scale_dense_columns(Eigen::MatrixXd& mat, const Eigen::Ve
         if (use_scale) {
             auto sd = scale[c];
             for (size_t r = 0; r < NR; ++r) {
-                // variance_to_scale should already protect against division by zero.
+                // process_scale_vector should already protect against division by zero.
                 curptr[r] /= sd;
             }
         }

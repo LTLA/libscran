@@ -473,7 +473,7 @@ private:
             }, nthreads);
 #endif
 
-            total_var = pca_utils::variance_to_scale(scale, scale_v);
+            total_var = pca_utils::process_scale_vector(scale, scale_v);
         }
 
         // Actually filling the sparse matrix. Note that this is transposed
@@ -557,7 +557,7 @@ private:
         }, nthreads);
 #endif
 
-        total_var = pca_utils::variance_to_scale(scale, scale_v);
+        total_var = pca_utils::process_scale_vector(scale, scale_v);
         return emat;
     }
 };

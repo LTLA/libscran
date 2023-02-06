@@ -240,7 +240,7 @@ private:
 
         size_t NR = mat->nrow(), NC = mat->ncol();
         pca_utils::compute_mean_and_variance_from_sparse_components(NR, NC, values, indices, ptrs, center_v, scale_v, nthreads); // row-major calculations.
-        total_var = pca_utils::variance_to_scale(scale, scale_v);
+        total_var = pca_utils::process_scale_vector(scale, scale_v);
 
         // Actually creating a sparse matrix. Again, note that this is
         // transposed; we want genes in the columns.
@@ -265,7 +265,7 @@ private:
         Eigen::VectorXd scale_v(NC);
         pca_utils::compute_mean_and_variance_from_dense_columns(emat, center_v, scale_v, nthreads);
 
-        total_var = pca_utils::variance_to_scale(scale, scale_v);
+        total_var = pca_utils::process_scale_vector(scale, scale_v);
         pca_utils::center_and_scale_dense_columns(emat, center_v, scale, scale_v, nthreads);
 
         return emat;

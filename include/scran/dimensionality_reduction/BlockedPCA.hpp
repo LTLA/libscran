@@ -385,7 +385,7 @@ private:
             }, nthreads);
 #endif
 
-            total_var = pca_utils::variance_to_scale(scale, scale_v);
+            total_var = pca_utils::process_scale_vector(scale, scale_v);
         }
 
         pca_utils::CustomSparseMatrix A(NC, NR, nthreads); // transposed; we want genes in the columns.
@@ -461,7 +461,7 @@ private:
         }, nthreads);
 #endif
 
-        total_var = pca_utils::variance_to_scale(scale, scale_v);
+        total_var = pca_utils::process_scale_vector(scale, scale_v);
 
         if (scale) {
 #ifndef SCRAN_CUSTOM_PARALLEL
@@ -475,7 +475,7 @@ private:
                 auto ptr = emat.data() + c * NR;
                 auto sd = scale_v[c];
                 for (size_t r = 0; r < NR; ++r) {
-                    ptr[r] /= sd; // variance_to_scale() should already protect against div-by-zero.
+                    ptr[r] /= sd; // process_scale_vector() should already protect against div-by-zero.
                 }
 
 #ifndef SCRAN_CUSTOM_PARALLEL
