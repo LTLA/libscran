@@ -1,4 +1,10 @@
 var searchData=
 [
-  ['thresholds_0',['Thresholds',['../structscran_1_1ChooseOutlierFilters_1_1Thresholds.html',1,'scran::ChooseOutlierFilters::Thresholds'],['../structscran_1_1SuggestAdtQcFilters_1_1Thresholds.html',1,'scran::SuggestAdtQcFilters::Thresholds'],['../structscran_1_1SuggestCrisprQcFilters_1_1Thresholds.html',1,'scran::SuggestCrisprQcFilters::Thresholds'],['../structscran_1_1SuggestRnaQcFilters_1_1Thresholds.html',1,'scran::SuggestRnaQcFilters::Thresholds']]]
+  ['scalebyneighbors_0',['ScaleByNeighbors',['../classscran_1_1ScaleByNeighbors.html',1,'scran']]],
+  ['scorefeatureset_1',['ScoreFeatureSet',['../classscran_1_1ScoreFeatureSet.html',1,'scran']]],
+  ['scoremarkers_2',['ScoreMarkers',['../classscran_1_1ScoreMarkers.html',1,'scran']]],
+  ['suggestadtqcfilters_3',['SuggestAdtQcFilters',['../classscran_1_1SuggestAdtQcFilters.html',1,'scran']]],
+  ['suggestcrisprqcfilters_4',['SuggestCrisprQcFilters',['../classscran_1_1SuggestCrisprQcFilters.html',1,'scran']]],
+  ['suggestrnaqcfilters_5',['SuggestRnaQcFilters',['../classscran_1_1SuggestRnaQcFilters.html',1,'scran']]],
+  ['summarizeeffects_6',['SummarizeEffects',['../classscran_1_1SummarizeEffects.html',1,'scran']]]
 ];

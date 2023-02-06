@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['lognormcounts_0',['LogNormCounts',['../classscran_1_1LogNormCounts.html',1,'scran']]]
+  ['hypergeometrictail_0',['HypergeometricTail',['../classscran_1_1HypergeometricTail.html',1,'scran']]]
 ];
