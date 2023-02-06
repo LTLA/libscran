@@ -4,6 +4,8 @@
 #include "utils/macros.hpp"
 
 #include "aggregation/AggregateAcrossCells.hpp"
+#include "aggregation/HypergeometricTail.hpp"
+
 #include "clustering/BuildSNNGraph.hpp"
 #include "clustering/ClusterKmeans.hpp"
 #include "clustering/ClusterSNNGraph.hpp"
