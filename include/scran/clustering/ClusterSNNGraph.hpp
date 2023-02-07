@@ -123,8 +123,9 @@ public:
      * @return A `Results` object containing the clustering results for all cells.
      */
     Results run(const igraph::Graph& graph, const igraph_real_t* weights) const {
-        igraph::Vector membership_holder, modularity_holder;
-        igraph::Matrix memberships_holder;
+        igraph::IntegerVector membership_holder;
+        igraph::RealVector modularity_holder;
+        igraph::IntegerMatrix memberships_holder;
         igraph::RNGScope rngs(seed);
 
         auto& modularity = modularity_holder.vector;
@@ -148,7 +149,7 @@ public:
             }
 
             size_t ncells = igraph_vcount(graph.get_graph());
-            size_t nlevels = igraph_matrix_nrow(&memberships);
+            size_t nlevels = igraph_matrix_int_nrow(&memberships);
             output.membership.resize(nlevels);
             
             for (size_t i = 0; i < nlevels; ++i) {
@@ -248,8 +249,9 @@ public:
      * @return A `Results` object containing the clustering results for all cells.
      */
     Results run(const igraph::Graph& graph, const igraph_real_t* weights) const {
-        igraph::Matrix merges_holder;
-        igraph::Vector modularity_holder, membership_holder;
+        igraph::IntegerMatrix merges_holder;
+        igraph::RealVector modularity_holder;
+        igraph::IntegerVector membership_holder;
 
         auto& modularity = modularity_holder.vector;
         auto& membership = membership_holder.vector;
@@ -269,7 +271,7 @@ public:
                 output.modularity[i] = VECTOR(modularity)[i];
             }
 
-            size_t nmerges = igraph_matrix_nrow(&merges);
+            size_t nmerges = igraph_matrix_int_nrow(&merges);
             output.merges.resize(nmerges);
             for (size_t i = 0; i < nmerges; ++i) {
                 output.merges[i].first = MATRIX(merges, i, 0);
@@ -435,7 +437,7 @@ public:
      * @return A `Results` object containing the clustering results for all cells.
      */
     Results run(const igraph::Graph& graph, const igraph_real_t* weights) const {
-        igraph::Vector membership_holder;
+        igraph::IntegerVector membership_holder;
         auto& membership = membership_holder.vector;
         igraph_integer_t nb_clusters;
         igraph_real_t quality;
@@ -449,28 +451,18 @@ public:
         igraph_vector_view(&weight_view, weights, nedges);
 
         if (!modularity) {
-            for (int i = 0; i < iterations; ++i) {
-                output.status = igraph_community_leiden(graph.get_graph(), &weight_view, NULL, resolution, beta, (i > 0), &membership, &nb_clusters, &quality);
-                if (output.status) {
-                    break;
-                }
-            }
+            output.status = igraph_community_leiden(graph.get_graph(), &weight_view, NULL, resolution, beta, false, iterations, &membership, &nb_clusters, &quality);
         } else {
-            // Based on https://igraph.org/c/doc/igraph-Community.html#igraph_community_leiden.
-            // Copying the adjustment of igraph::cluster_leiden in the R package. 
-            igraph::Vector strength_holder(igraph_vcount(graph.get_graph()));
+            // More-or-less translated from igraph::cluster_leiden in the R package,
+            // but with the iterations moved into igraph_community_leiden itself.
+            igraph::RealVector strength_holder(igraph_vcount(graph.get_graph()));
             auto& strength = strength_holder.vector;
             igraph_strength(graph.get_graph(), &strength, igraph_vss_all(), IGRAPH_ALL, 1, &weight_view);
 
             double total_weights = std::accumulate(weights, weights + nedges, 0.0);
-            double mod_resolution = resolution / (2 * total_weights);
+            double mod_resolution = resolution / total_weights;
 
-            for (int i = 0; i < iterations; ++i) {
-                output.status = igraph_community_leiden(graph.get_graph(), &weight_view, &strength, mod_resolution, beta, (i > 0), &membership, &nb_clusters, &quality);
-                if (output.status) {
-                    break;
-                }
-            }
+            output.status = igraph_community_leiden(graph.get_graph(), &weight_view, &strength, mod_resolution, beta, false, iterations, &membership, &nb_clusters, &quality);
         }
 
         if (!output.status) {

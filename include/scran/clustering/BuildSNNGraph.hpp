@@ -144,7 +144,7 @@ public:
          * Vector of paired indices defining the edges between cells.
          * The number of edges is half the length of `edges`, where `edges[2*i]` and `edges[2*i+1]` define the vertices for edge `i`.
          */
-        std::vector<igraph_real_t> edges;
+        std::vector<igraph_integer_t> edges;
 
         /**
          * Vector of weights for the edges.
@@ -159,8 +159,8 @@ public:
          * @return An undirected graph created from `edges`.
          */
         igraph::Graph to_igraph() const {
-            igraph_vector_t edge_view;
-            igraph_vector_view(&edge_view, edges.data(), edges.size());
+            igraph_vector_int_t edge_view;
+            igraph_vector_int_view(&edge_view, edges.data(), edges.size());
             return igraph::Graph(&edge_view, ncells, /* directed = */ false);
         }
     };

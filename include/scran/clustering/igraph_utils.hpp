@@ -52,70 +52,124 @@ struct RNGScope {
     bool active = true;
 };
 
-struct Vector {
+/*****************************************************
+ *****************************************************/
+
+template<class Overlord>
+struct Vector_ {
 private:
-    static void try_copy(igraph_vector_t& dest, const igraph_vector_t& source, bool source_active) {
+    static void try_copy(typename Overlord::Vector& dest, const typename Overlord::Vector& source, bool source_active) {
         if (source_active) {
-            if (igraph_vector_copy(&dest, &source)) {
-                throw std::runtime_error("failed to copy igraph vector of size " + std::to_string(igraph_vector_size(&source)));
+            if (Overlord::copy(dest, source)) {
+                throw std::runtime_error("failed to copy igraph vector of size " + std::to_string(Overlord::size(source)));
             }
         }
     }
 
-    static void try_destroy(igraph_vector_t& vector, bool active) {
+    static void try_destroy(typename Overlord::Vector& vector, bool active) {
         if (active) {
-            igraph_vector_destroy(&vector);
+            Overlord::destroy(vector);
         }
     }
 
 public:
-    Vector(size_t size = 0) {
-        if (igraph_vector_init(&vector, size)) {
+    Vector_(size_t size = 0) {
+        if (Overlord::initialize(vector, size)) {
             throw std::runtime_error("failed to initialize igraph vector of size " + std::to_string(size));
         }
     }
     
-    // Just deleting the methods here, because the Vector 
+    // Just deleting the methods here, because the Vector_ 
     // is strictly internal and we don't do any of these.
-    Vector(const Vector& other) = delete;
-    Vector& operator=(const Vector& other) = delete;
-    Vector(Vector&& other) = delete;
-    Vector& operator=(Vector&& other) = delete;
+    Vector_(const Vector_& other) = delete;
+    Vector_& operator=(const Vector_& other) = delete;
+    Vector_(Vector_&& other) = delete;
+    Vector_& operator=(Vector_&& other) = delete;
 
-    ~Vector() {
+    ~Vector_() {
         try_destroy(vector, active);
     }
 
-    igraph_vector_t vector;
+    typename Overlord::Vector vector;
     bool active = true;
 };
 
-struct Matrix {
-    Matrix(size_t nrows = 0, size_t ncols = 0) {
-        if (igraph_matrix_init(&matrix, nrows, ncols)) {
+struct IntegerVectorOverlord {
+    typedef igraph_vector_int_t Vector;
+
+    static igraph_error_t copy(igraph_vector_int_t& dest, const igraph_vector_int_t& source) {
+        return igraph_vector_int_init_copy(&dest, &source);
+    }
+
+    static void destroy(igraph_vector_int_t& x) {
+        return igraph_vector_int_destroy(&x);
+    }
+
+    static igraph_integer_t size(igraph_vector_int_t& x) {
+        return igraph_vector_int_size(&x);
+    }
+
+    static igraph_error_t initialize(igraph_vector_int_t& x, size_t size) {
+        return igraph_vector_int_init(&x, size);
+    }
+};
+
+using IntegerVector = Vector_<IntegerVectorOverlord>;
+
+struct RealVectorOverlord {
+    typedef igraph_vector_t Vector;
+
+    static igraph_error_t copy(igraph_vector_t& dest, const igraph_vector_t& source) {
+        return igraph_vector_init_copy(&dest, &source);
+    }
+
+    static void destroy(igraph_vector_t& x) {
+        return igraph_vector_destroy(&x);
+    }
+
+    static igraph_integer_t size(igraph_vector_t& x) {
+        return igraph_vector_size(&x);
+    }
+
+    static igraph_error_t initialize(igraph_vector_t& x, size_t size) {
+        return igraph_vector_init(&x, size);
+    }
+};
+
+using RealVector = Vector_<RealVectorOverlord>;
+
+/*****************************************************
+ *****************************************************/
+
+struct IntegerMatrix {
+    IntegerMatrix(size_t nrows = 0, size_t ncols = 0) {
+        if (igraph_matrix_int_init(&matrix, nrows, ncols)) {
             throw std::runtime_error("failed to initialize igraph " + std::to_string(nrows) + "x" + std::to_string(ncols) + " matrix");
         }
     }
 
     // Just deleting the methods here, because the Matrix
     // is strictly internal and we don't do any of these.
-    Matrix(const Matrix& other) = delete;
-    Matrix& operator=(const Matrix& other) = delete;
-    Matrix(Matrix&& other) = delete;
-    Matrix& operator=(Matrix&& other) = delete;
+    IntegerMatrix(const IntegerMatrix& other) = delete;
+    IntegerMatrix& operator=(const IntegerMatrix& other) = delete;
+    IntegerMatrix(IntegerMatrix&& other) = delete;
+    IntegerMatrix& operator=(IntegerMatrix&& other) = delete;
 
-    ~Matrix() {
+    ~IntegerMatrix() {
         if (active) {
-            igraph_matrix_destroy(&matrix);
+            igraph_matrix_int_destroy(&matrix);
         }
     }
 
-    igraph_matrix_t matrix;
+    igraph_matrix_int_t matrix;
     bool active = true;
 };
 /**
  * @endcond
  */
+
+/*****************************************************
+ *****************************************************/
 
 /**
  * @brief Wrapper around the `igraph_t` class from **igraph**.
@@ -142,9 +196,9 @@ public:
      */
     Graph() : active(false) {}
 
-    Graph(const Vector& edges, size_t nvertices, bool directed) : Graph(&(edges.vector), nvertices, directed) {} 
+    Graph(const IntegerVector& edges, size_t nvertices, bool directed) : Graph(&(edges.vector), nvertices, directed) {} 
 
-    Graph(const igraph_vector_t* edges, size_t nvertices, bool directed) { 
+    Graph(const igraph_vector_int_t* edges, size_t nvertices, bool directed) { 
         if (igraph_create(&graph, edges, nvertices, directed)) {
             throw std::runtime_error("failed to initialize igraph's graph object"); 
         }
