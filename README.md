@@ -19,26 +19,26 @@ The example below demonstrates how to use **libscran** to run a standard analysi
 ```cpp
 #include "scran/scran.hpp"
 
-// Loading the data from an (unzipped) MatrixMarket file.
-auto mat = tatami::MatrixMarket::load_sparse_matrix(path);
+// Loading the data from an unzipped MatrixMarket file.
+auto mat = tatami::MatrixMarket::load_sparse_matrix_from_file(path);
 
 // Filtering out low-quality cells. 
 auto qc_res = scran::PerCellRnaQcMetrics().run(mat.get(), { /* mito subset definitions go here */ });
-auto qc_filters = scran::PerCellRnaQcFilters().run(qc_res);
-auto filtered = scran::FilterCells().run(mat, qc_filters.overall_filter.data());
+auto qc_filters = scran::SuggestRnaQcFilters().run(qc_res);
+auto is_low_quality = qc_filters.filter(qc_res);
+auto filtered = scran::FilterCells().run(mat, is_low_quality.data());
 
 // Computing log-normalized expression values, re-using the total count from the QC step.
-auto size_factors = scran::subset_vector<false>(qc_res.sums, qc_filters.overall_filter.data());
+auto size_factors = scran::subset_vector<false>(qc_res.sums, is_low_quality.data());
 auto normalized = scran::LogNormCounts().run(filtered, std::move(size_factors));
 
 // Identifying highly variable genes from the residuals from the first (and only) batch.
 auto var_res = scran::ModelGeneVar().run(normalized.get());
 auto keep = scran::ChooseHVGs().run(var_res.residuals[0].size(), var_res.residuals[0].data());
 
-// Performing a PCA on the HVGs. We transpose the output so cells are columns again.
+// Performing a PCA on the HVGs. 
 int npcs = 20;
 auto pca_res = scran::RunPCA().set_rank(npcs).run(normalized.get(), keep.data());
-pca_res.pcs.adjointInPlace();
 
 // Performing clustering.
 auto graph = scran::BuildSNNGraph().run(npcs, pca_res.pcs.cols(), pca_res.pcs.data());
@@ -107,8 +107,9 @@ Run the minimal pipeline:
 ```sh
 time example/gallery/minimal example/data/filtered_gene_bc_matrices/GRCh38/matrix.mtx
 
-## Detected 10 clusters in 'example/data/filtered_gene_bc_matrices/GRCh38/matrix.mtx'
-## 
+## Detected 11 clusters in 'example/data/filtered_gene_bc_matrices/GRCh38/matrix.mtx'
+## Sizes are 937, 534, 1018, 37, 135, 384, 537, 225, 190, 123, 191
+##
 ## real	0m2.340s
 ## user	0m9.613s
 ## sys	0m0.104s

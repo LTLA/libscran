@@ -20,12 +20,12 @@
 #include "normalization/LogNormCounts.hpp"
 
 #include "quality_control/FilterCells.hpp"
-#include "quality_control/IsOutlier.hpp"
-#include "quality_control/PerCellQcMetrics.hpp"
-#include "quality_control/PerCellRnaQcFilters.hpp"
+#include "quality_control/SuggestRnaQcFilters.hpp"
 #include "quality_control/PerCellRnaQcMetrics.hpp"
-#include "quality_control/PerCellAdtQcFilters.hpp"
+#include "quality_control/SuggestAdtQcFilters.hpp"
 #include "quality_control/PerCellAdtQcMetrics.hpp"
+#include "quality_control/SuggestCrisprQcFilters.hpp"
+#include "quality_control/PerCellCrisprQcMetrics.hpp"
 
 #include "utils/average_vectors.hpp"
 #include "utils/subset_vector.hpp"
