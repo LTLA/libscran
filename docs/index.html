@@ -81,26 +81,26 @@ $(function() {
 <p>The example below demonstrates how to use <b>libscran</b> to run a standard analysis of single-cell RNA-seq data.</p>
 <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;scran/scran.hpp&quot;</span></div>
 <div class="line"> </div>
-<div class="line"><span class="comment">// Loading the data from an (unzipped) MatrixMarket file.</span></div>
-<div class="line"><span class="keyword">auto</span> mat = tatami::MatrixMarket::load_sparse_matrix(path);</div>
+<div class="line"><span class="comment">// Loading the data from an unzipped MatrixMarket file.</span></div>
+<div class="line"><span class="keyword">auto</span> mat = tatami::MatrixMarket::load_sparse_matrix_from_file(path);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Filtering out low-quality cells. </span></div>
 <div class="line"><span class="keyword">auto</span> qc_res = <a class="code hl_class" href="classscran_1_1PerCellRnaQcMetrics.html">scran::PerCellRnaQcMetrics</a>().<a class="code hl_function" href="classscran_1_1PerCellRnaQcMetrics.html#afc280ca0d50d07bafca97204aec5d58e">run</a>(mat.get(), { <span class="comment">/* mito subset definitions go here */</span> });</div>
-<div class="line"><span class="keyword">auto</span> qc_filters = scran::PerCellRnaQcFilters().run(qc_res);</div>
-<div class="line"><span class="keyword">auto</span> filtered = <a class="code hl_class" href="classscran_1_1FilterCells.html">scran::FilterCells</a>().<a class="code hl_function" href="classscran_1_1FilterCells.html#a5dd2a40d99238d32c20bd069dff7faff">run</a>(mat, qc_filters.overall_filter.data());</div>
+<div class="line"><span class="keyword">auto</span> qc_filters = <a class="code hl_class" href="classscran_1_1SuggestRnaQcFilters.html">scran::SuggestRnaQcFilters</a>().<a class="code hl_function" href="classscran_1_1SuggestRnaQcFilters.html#a4fe13f22af3b265a86a1bb4591b698d8">run</a>(qc_res);</div>
+<div class="line"><span class="keyword">auto</span> is_low_quality = qc_filters.<a class="code hl_function" href="structscran_1_1SuggestRnaQcFilters_1_1Thresholds.html#ac11ca51389fcae64d36a24325677393f">filter</a>(qc_res);</div>
+<div class="line"><span class="keyword">auto</span> filtered = <a class="code hl_class" href="classscran_1_1FilterCells.html">scran::FilterCells</a>().<a class="code hl_function" href="classscran_1_1FilterCells.html#a5dd2a40d99238d32c20bd069dff7faff">run</a>(mat, is_low_quality.data());</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Computing log-normalized expression values, re-using the total count from the QC step.</span></div>
-<div class="line"><span class="keyword">auto</span> size_factors = scran::subset_vector&lt;false&gt;(qc_res.sums, qc_filters.overall_filter.data());</div>
+<div class="line"><span class="keyword">auto</span> size_factors = scran::subset_vector&lt;false&gt;(qc_res.sums, is_low_quality.data());</div>
 <div class="line"><span class="keyword">auto</span> normalized = <a class="code hl_class" href="classscran_1_1LogNormCounts.html">scran::LogNormCounts</a>().<a class="code hl_function" href="classscran_1_1LogNormCounts.html#adff2220b45c6931d41883290524f4aca">run</a>(filtered, std::move(size_factors));</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Identifying highly variable genes from the residuals from the first (and only) batch.</span></div>
 <div class="line"><span class="keyword">auto</span> var_res = <a class="code hl_class" href="classscran_1_1ModelGeneVar.html">scran::ModelGeneVar</a>().<a class="code hl_function" href="classscran_1_1ModelGeneVar.html#a1175b286f29951889b512ed332dd36bf">run</a>(normalized.get());</div>
 <div class="line"><span class="keyword">auto</span> keep = <a class="code hl_class" href="classscran_1_1ChooseHVGs.html">scran::ChooseHVGs</a>().<a class="code hl_function" href="classscran_1_1ChooseHVGs.html#a8485437ec27c1b9d167fd00b38dad235">run</a>(var_res.residuals[0].size(), var_res.residuals[0].data());</div>
 <div class="line"> </div>
-<div class="line"><span class="comment">// Performing a PCA on the HVGs. We transpose the output so cells are columns again.</span></div>
+<div class="line"><span class="comment">// Performing a PCA on the HVGs. </span></div>
 <div class="line"><span class="keywordtype">int</span> npcs = 20;</div>
 <div class="line"><span class="keyword">auto</span> pca_res = <a class="code hl_class" href="classscran_1_1RunPCA.html">scran::RunPCA</a>().<a class="code hl_function" href="classscran_1_1RunPCA.html#a736079c03235fca4ec6bfd7b99b0f565">set_rank</a>(npcs).run(normalized.get(), keep.data());</div>
-<div class="line">pca_res.pcs.adjointInPlace();</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Performing clustering.</span></div>
 <div class="line"><span class="keyword">auto</span> graph = scran::BuildSNNGraph().run(npcs, pca_res.pcs.cols(), pca_res.pcs.data());</div>
@@ -125,7 +125,10 @@ $(function() {
 <div class="ttc" id="aclassscran_1_1RunPCA_html_a736079c03235fca4ec6bfd7b99b0f565"><div class="ttname"><a href="classscran_1_1RunPCA.html#a736079c03235fca4ec6bfd7b99b0f565">scran::RunPCA::set_rank</a></div><div class="ttdeci">RunPCA &amp; set_rank(int r=Defaults::rank)</div><div class="ttdef"><b>Definition:</b> RunPCA.hpp:76</div></div>
 <div class="ttc" id="aclassscran_1_1ScoreMarkers_html"><div class="ttname"><a href="classscran_1_1ScoreMarkers.html">scran::ScoreMarkers</a></div><div class="ttdoc">Score each gene as a candidate marker for each group of cells.</div><div class="ttdef"><b>Definition:</b> ScoreMarkers.hpp:232</div></div>
 <div class="ttc" id="aclassscran_1_1ScoreMarkers_html_a0d56c9db569b81ac49429fa9af4c4a41"><div class="ttname"><a href="classscran_1_1ScoreMarkers.html#a0d56c9db569b81ac49429fa9af4c4a41">scran::ScoreMarkers::run</a></div><div class="ttdeci">void run(const Matrix *p, const G *group, std::vector&lt; Stat * &gt; means, std::vector&lt; Stat * &gt; detected, std::vector&lt; std::vector&lt; Stat * &gt; &gt; cohen, std::vector&lt; std::vector&lt; Stat * &gt; &gt; auc, std::vector&lt; std::vector&lt; Stat * &gt; &gt; lfc, std::vector&lt; std::vector&lt; Stat * &gt; &gt; delta_detected) const</div><div class="ttdef"><b>Definition:</b> ScoreMarkers.hpp:617</div></div>
+<div class="ttc" id="aclassscran_1_1SuggestRnaQcFilters_html"><div class="ttname"><a href="classscran_1_1SuggestRnaQcFilters.html">scran::SuggestRnaQcFilters</a></div><div class="ttdoc">Create filters to identify low-quality cells from RNA-derived QC metrics.</div><div class="ttdef"><b>Definition:</b> SuggestRnaQcFilters.hpp:40</div></div>
+<div class="ttc" id="aclassscran_1_1SuggestRnaQcFilters_html_a4fe13f22af3b265a86a1bb4591b698d8"><div class="ttname"><a href="classscran_1_1SuggestRnaQcFilters.html#a4fe13f22af3b265a86a1bb4591b698d8">scran::SuggestRnaQcFilters::run</a></div><div class="ttdeci">Thresholds run(size_t n, const PerCellRnaQcMetrics::Buffers&lt; Float, Integer &gt; &amp;buffers) const</div><div class="ttdef"><b>Definition:</b> SuggestRnaQcFilters.hpp:270</div></div>
 <div class="ttc" id="astructscran_1_1ClusterSNNGraphMultiLevel_1_1Results_html_a27434f77a03c488270b68c08e5105e80"><div class="ttname"><a href="structscran_1_1ClusterSNNGraphMultiLevel_1_1Results.html#a27434f77a03c488270b68c08e5105e80">scran::ClusterSNNGraphMultiLevel::Results::membership</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; int &gt; &gt; membership</div><div class="ttdef"><b>Definition:</b> ClusterSNNGraph.hpp:97</div></div>
+<div class="ttc" id="astructscran_1_1SuggestRnaQcFilters_1_1Thresholds_html_ac11ca51389fcae64d36a24325677393f"><div class="ttname"><a href="structscran_1_1SuggestRnaQcFilters_1_1Thresholds.html#ac11ca51389fcae64d36a24325677393f">scran::SuggestRnaQcFilters::Thresholds::filter</a></div><div class="ttdeci">void filter(size_t n, const PerCellRnaQcMetrics::Buffers&lt; Float, Integer &gt; &amp;buffers, Output *output) const</div><div class="ttdef"><b>Definition:</b> SuggestRnaQcFilters.hpp:151</div></div>
 </div><!-- fragment --><p>Each class represents a step in the analysis and has tunable parameters, e.g., <code>RunPCA::set_rank</code> to set the number of PCs. See the <a href="https://ltla.github.io/libscran/">reference documentation</a> for more details.</p>
 <h1>Available functions</h1>
 <p>Most of the functions are motivated by the theory in the <a href="https://bioconductor.org/books/release/OSCA/"><b>Orchestrating single-cell analysis with Bioconductor</b> book</a>.</p>
@@ -147,8 +150,9 @@ $(function() {
 </div><!-- fragment --><p>Run the minimal pipeline:</p>
 <div class="fragment"><div class="line">time example/gallery/minimal example/data/filtered_gene_bc_matrices/GRCh38/matrix.mtx</div>
 <div class="line"> </div>
-<div class="line">## Detected 10 clusters in &#39;example/data/filtered_gene_bc_matrices/GRCh38/matrix.mtx&#39;</div>
-<div class="line">## </div>
+<div class="line">## Detected 11 clusters in &#39;example/data/filtered_gene_bc_matrices/GRCh38/matrix.mtx&#39;</div>
+<div class="line">## Sizes are 937, 534, 1018, 37, 135, 384, 537, 225, 190, 123, 191</div>
+<div class="line">##</div>
 <div class="line">## real 0m2.340s</div>
 <div class="line">## user 0m9.613s</div>
 <div class="line">## sys  0m0.104s</div>

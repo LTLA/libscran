@@ -2,6 +2,7 @@
 <area shape="rect" id="node1" title="Compute the median and MAD from an array of values." alt="" coords="247,5,417,45"/>
 <area shape="rect" id="node2" href="$ChooseOutlierFilters_8hpp.html" title="Define outlier filters using a MAD&#45;based approach." alt="" coords="188,93,356,133"/>
 <area shape="rect" id="node3" href="$SuggestAdtQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from ADT&#45;derived QC metrics." alt="" coords="5,181,176,221"/>
-<area shape="rect" id="node4" href="$SuggestCrisprQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from CRISPR&#45;derived QC metrics." alt="" coords="201,181,386,221"/>
-<area shape="rect" id="node5" href="$SuggestRnaQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from RNA&#45;derived QC metrics." alt="" coords="410,181,585,221"/>
+<area shape="rect" id="node5" href="$SuggestCrisprQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from CRISPR&#45;derived QC metrics." alt="" coords="201,181,386,221"/>
+<area shape="rect" id="node6" href="$SuggestRnaQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from RNA&#45;derived QC metrics." alt="" coords="410,181,585,221"/>
+<area shape="rect" id="node4" href="$scran_8hpp_source.html" title=" " alt="" coords="236,269,351,295"/>
 </map>

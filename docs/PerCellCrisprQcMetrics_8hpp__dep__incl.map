@@ -1,4 +1,5 @@
 <map id="scran/quality_control/PerCellCrisprQcMetrics.hpp" name="scran/quality_control/PerCellCrisprQcMetrics.hpp">
-<area shape="rect" id="node1" title="Compute per&#45;cell quality control metrics from a CRISPR guide count matrix." alt="" coords="5,5,192,45"/>
-<area shape="rect" id="node2" href="$SuggestCrisprQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from CRISPR&#45;derived QC metrics." alt="" coords="6,93,191,133"/>
+<area shape="rect" id="node1" title="Compute per&#45;cell quality control metrics from a CRISPR guide count matrix." alt="" coords="70,5,257,45"/>
+<area shape="rect" id="node2" href="$SuggestCrisprQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from CRISPR&#45;derived QC metrics." alt="" coords="5,93,191,133"/>
+<area shape="rect" id="node3" href="$scran_8hpp_source.html" title=" " alt="" coords="106,181,221,207"/>
 </map>
