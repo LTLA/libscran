@@ -93,25 +93,45 @@ public:
     }
 
 private:
-    // This computes the CDF by manually summing the probability masses after
-    // factorizing out choose(num_black, num_drawn) / choose(num_black + num_white, num_drawn) 
-    static double compute_step(int k, int num_white, int num_black, int num_drawn) {
-        return static_cast<double>(num_white - k + 1) * static_cast<double>(num_drawn - k + 1) / static_cast<double>(k) / static_cast<double>(num_black - num_drawn + k);
+    // Using Stirling's approximation compute choose(num_black, num_drawn) / choose(num_black + num_white, num_drawn).
+    static double stirling(double x) {
+        return x * std::log(x) - x + 0.5 * std::log(2 * 3.14159265358979323846 * x);
     }
 
+private:
+    /*
+     * Computing the cumulative sum after factorizing out choose(num_white + num_black, num_drawn), obviously.
+     *
+     * If num_drawn < num_black, we also factorize out choose(num_black, num_drawn), so that we can compute the series by simply increasing 'k'.
+     * This avoids the need to do two passes where the first pass computes choose(num_black, num_drawn - drawn_white) and the second pass handles the summation.
+     *
+     * Otherwise, we factorize out choose(num_white, num_drawn - num_black), which is the first non-zero probability mass in the series.
+     * This reduces the size of the summed terms to avoid overflow, and is reflected in 'start > 1'.
+     * 
+     * We can check the accuracy of our calculations with:
+     * sum(choose(num_white, 0:drawn_white) * choose(num_black, num_drawn - 0:drawn_white)) / max(choose(num_white, num_drawn - num_black), choose(num_black, num_drawn)) - 1
+     */
     static long double compute_cumulative(int drawn_white, int num_white, int num_black, int num_drawn) {
-        // Using long double for some extra precision.
+        // We use long double for some extra precision here.
         long double probability = 1;
-        long double cumulative = 0; // need to add 1, but we'll do this in compute_tail_probability() to make use of the more precise log1p.
 
-        for (int k = 1; k <= drawn_white; ++k) {
-            probability *= compute_step(k, num_white, num_black, num_drawn);
+        // We need to add 1 for the starting probability, but we'll do this in compute_tail_probability() to make use of the more precise log1p.
+        long double cumulative = 0; 
+
+        int start = num_drawn - num_black + 1;
+        if (start <= 0) {
+            start = 1;
+        }
+
+        for (int k = start; k <= drawn_white; ++k) {
+            probability *= static_cast<double>(num_white - k + 1) * static_cast<double>(num_drawn - k + 1) / static_cast<double>(k) / static_cast<double>(num_black - num_drawn + k);
             cumulative += probability;
         }
 
         return cumulative;
     }
 
+private:
     static void compute_cumulative(int drawn_white, int num_white, int num_black, int num_drawn, Cache& cache) {
         auto& probability = cache.probability;
         auto& cumulative = cache.cumulative;
@@ -128,24 +148,49 @@ private:
             k = 0;
         }
 
+        cumulative.reserve(drawn_white + 1);
+
+        // Same logic as above, but we now store the probability at each step.
         while (k < drawn_white) {
             ++k;
-            probability *= compute_step(k, num_white, num_black, num_drawn);
-            cumulative.push_back(cumulative.back() + probability);
+            if (num_drawn - k < num_black) {
+                probability *= static_cast<double>(num_white - k + 1) * static_cast<double>(num_drawn - k + 1) / static_cast<double>(k) / static_cast<double>(num_black - num_drawn + k);
+                cumulative.push_back(cumulative.back() + probability);
+            } else {
+                cumulative.push_back(0);
+            }
         }
     }
 
-    // Using Stirling's approximation compute choose(num_black, num_drawn) / choose(num_black + num_white, num_drawn).
-    static double stirling(double x) {
-        return x * std::log(x) - x + 0.5 * std::log(2 * 3.14159265358979323846 * x);
+    static double compute_log_scale(int num_white, int num_black, int num_drawn) {
+        int num_total = num_white + num_black;
+        if (num_black > num_drawn) {
+            // Approximates lchoose(num_black, num_drawn) - lchoose(num_total, num_drawn).
+            return stirling(num_black) - stirling(num_black - num_drawn)
+                - (stirling(num_total) - stirling(num_total - num_drawn));
+        } else if (num_drawn > num_black) {
+            // Approximates lchoose(num_white, num_drawn - num_black) - lchoose(num_total, num_drawn).
+            return stirling(num_white) - stirling(num_drawn - num_black)
+                - (stirling(num_total) - stirling(num_drawn));
+        } else {
+            // Approximates -lchoose(num_total, num_drawn).
+            return -(stirling(num_total) - stirling(num_total - num_drawn) - stirling(num_drawn));
+        }
     }
 
-    static double compute_log_scale(int num_white, int num_black, int num_drawn) {
-        // None of these numbers should be zero, as core() should already handle edge cases.
-        return stirling(num_black)
-            + stirling(num_white + num_black - num_drawn)
-            - stirling(num_white + num_black)
-            - stirling(num_black - num_drawn);
+private:
+    static double invert_tail_log(double val) {
+        // Logic from https://github.com/SurajGupta/r-source/blob/master/src/nmath/dpq.h;
+        // if 'lp' is close to zero, exp(lp) will be close to 1, and thus the precision of
+        // expm1 is more important. If 'lp' is large and negative, exp(lp) will be close to
+        // zero, and thus the precision of log1p is more important.
+        if (val > -std::log(2)) {
+            auto p = -std::expm1(val);
+            return (p > 0 ? std::log(p) : -std::numeric_limits<double>::infinity());
+        } else {
+            auto p = -std::exp(val);
+            return (p > -1 ? std::log1p(p) : -std::numeric_limits<double>::infinity());
+        }
     }
 
     double compute_tail_probability(long double cumulative, double scale, bool do_lower) const {
@@ -154,17 +199,7 @@ private:
             if (do_lower) {
                 return lp;
             } else {
-                // Logic from https://github.com/SurajGupta/r-source/blob/master/src/nmath/dpq.h;
-                // if 'lp' is close to zero, exp(lp) will be close to 1, and thus the precision of
-                // expm1 is more important. If 'lp' is large and negative, exp(lp) will be close to
-                // zero, and thus the precision of log1p is more important.
-                if (lp > -std::log(2)) {
-                    auto p = -std::expm1(lp);
-                    return (p > 0 ? std::log(p) : -std::numeric_limits<double>::infinity());
-                } else {
-                    auto p = -std::exp(lp);
-                    return (p > -1 ? std::log1p(p) : -std::numeric_limits<double>::infinity());
-                }
+                return invert_tail_log(lp);
             }
         } else {
             auto p = (1 + cumulative) * std::exp(scale);
@@ -180,8 +215,9 @@ private:
         }
     }
 
+private:
     double core(int drawn_white, int num_white, int num_black, int num_drawn, Cache* cache) const {
-        if (drawn_white <= 0) {
+        if (drawn_white <= 0 || drawn_white < num_drawn - num_black) {
             return edge_handler(!upper_tail);
         } else if (drawn_white >= num_drawn || drawn_white >= num_white) {
             return edge_handler(upper_tail);
