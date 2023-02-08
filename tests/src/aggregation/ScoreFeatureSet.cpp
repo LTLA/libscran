@@ -409,26 +409,26 @@ TEST_P(ScoreFeatureSetMultiBlockTest, Consistency) {
     scran::ScoreFeatureSet scorer;
     scorer.set_scale(scale);
 
-    auto ref = scorer.run(dense_row.get(), features.data(), block.data());
+    auto ref = scorer.run_blocked(dense_row.get(), features.data(), block.data());
     EXPECT_EQ(ref.weights.size(), std::accumulate(features.begin(), features.end(), 0));
     EXPECT_EQ(ref.scores.size(), ncells);
 
     if (nthreads > 1) {
         scorer.set_num_threads(nthreads);
-        auto par = scorer.run(dense_row.get(), features.data(), block.data());
+        auto par = scorer.run_blocked(dense_row.get(), features.data(), block.data());
         EXPECT_EQ(ref.weights, par.weights);
         EXPECT_EQ(ref.scores, par.scores);
     }
 
-    auto res2 = scorer.run(dense_column.get(), features.data(), block.data());
+    auto res2 = scorer.run_blocked(dense_column.get(), features.data(), block.data());
     compare_almost_equal(ref.weights, res2.weights);
     compare_almost_equal(ref.scores, res2.scores);
 
-    auto res3 = scorer.run(sparse_row.get(), features.data(), block.data());
+    auto res3 = scorer.run_blocked(sparse_row.get(), features.data(), block.data());
     compare_almost_equal(ref.weights, res3.weights);
     compare_almost_equal(ref.scores, res3.scores);
 
-    auto res4 = scorer.run(sparse_column.get(), features.data(), block.data());
+    auto res4 = scorer.run_blocked(sparse_column.get(), features.data(), block.data());
     compare_almost_equal(ref.weights, res4.weights);
     compare_almost_equal(ref.scores, res4.scores);
 }
@@ -513,7 +513,7 @@ TEST_P(ScoreFeatureSetMultiBlockTest, Reference) {
 
     {
         scorer.set_block_policy(scran::ScoreFeatureSet::BlockPolicy::AVERAGE);
-        auto obs = scorer.run(sparse_column.get(), features.data(), block.data());
+        auto obs = scorer.run_blocked(sparse_column.get(), features.data(), block.data());
         compare_almost_equal(obs.weights, weights);
 
         auto scores = compute_scores(dense_column.get(), weights, which_features, block, centers, scale, scales);
@@ -523,7 +523,7 @@ TEST_P(ScoreFeatureSetMultiBlockTest, Reference) {
     // Maximium also gets a run.
     {
         scorer.set_block_policy(scran::ScoreFeatureSet::BlockPolicy::MAXIMUM);
-        auto obs = scorer.run(sparse_row.get(), features.data(), block.data());
+        auto obs = scorer.run_blocked(sparse_row.get(), features.data(), block.data());
 
         size_t chosen = 0; 
         for (int b = 1; b < nblocks; ++b) {
@@ -603,11 +603,11 @@ TEST_F(ScoreFeatureSetOtherTest, EdgeCaseBlock) {
         std::iota(block.begin(), block.end(), 0);
 
         scran::ScoreFeatureSet scorer;
-        auto obs = scorer.run(dense_row.get(), features.data(), block.data());
+        auto obs = scorer.run_blocked(dense_row.get(), features.data(), block.data());
         EXPECT_EQ(obs.weights, std::vector<double>(nfeatures));
 
         // Same behavior in the sparse case.
-        auto sobs = scorer.run(sparse_column.get(), features.data(), block.data());
+        auto sobs = scorer.run_blocked(sparse_column.get(), features.data(), block.data());
         EXPECT_EQ(sobs.weights, std::vector<double>(nfeatures));
     }
 
@@ -618,7 +618,7 @@ TEST_F(ScoreFeatureSetOtherTest, EdgeCaseBlock) {
         std::vector<int> block(ncells, 2); // 0 and 1 are now zero-length.
 
         scran::ScoreFeatureSet scorer;
-        auto obs = scorer.run(dense_column.get(), features.data(), block.data());
+        auto obs = scorer.run_blocked(dense_column.get(), features.data(), block.data());
         auto ref = scorer.run(dense_column.get(), features.data());
         EXPECT_EQ(obs.weights, ref.weights);
         EXPECT_EQ(obs.scores, ref.scores);
@@ -643,7 +643,7 @@ TEST_F(ScoreFeatureSetOtherTest, ScoreSanityCheck) {
 
         std::vector<int> batch(ncells * 2);
         std::fill(batch.begin() + ncells, batch.end(), 1);
-        auto obs = scorer.run(combined.get(), features.data(), batch.data());
+        auto obs = scorer.run_blocked(combined.get(), features.data(), batch.data());
 
         compare_almost_equal(ref.weights, obs.weights);
         std::vector<double> first_half(obs.scores.begin(), obs.scores.begin() + ncells);
@@ -667,7 +667,7 @@ TEST_F(ScoreFeatureSetOtherTest, ScoreSanityCheck) {
         scran::ScoreFeatureSet scorer;
         {
             auto ref = scorer.run(dense_row.get(), features.data());
-            auto obs = scorer.run(combined.get(), features.data(), batch.data());
+            auto obs = scorer.run_blocked(combined.get(), features.data(), batch.data());
 
             compare_almost_equal(ref.weights, obs.weights);
             std::vector<double> first_half(obs.scores.begin(), obs.scores.begin() + ncells);
@@ -682,7 +682,7 @@ TEST_F(ScoreFeatureSetOtherTest, ScoreSanityCheck) {
         scorer.set_scale(true);
         {
             auto ref = scorer.run(dense_row.get(), features.data());
-            auto obs = scorer.run(combined.get(), features.data(), batch.data());
+            auto obs = scorer.run_blocked(combined.get(), features.data(), batch.data());
 
             compare_almost_equal(ref.weights, obs.weights);
             std::vector<double> first_half(obs.scores.begin(), obs.scores.begin() + ncells);
