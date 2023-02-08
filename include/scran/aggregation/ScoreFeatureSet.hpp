@@ -732,7 +732,7 @@ public:
      * @return A `Results` object containing the per-cell scores and per-feature weights.
      */
     template<typename T, typename IDX, typename X, typename Block>
-    Results run(const tatami::Matrix<T, IDX>* mat, const X* features, const Block* block) const {
+    Results run_blocked(const tatami::Matrix<T, IDX>* mat, const X* features, const Block* block) const {
         std::shared_ptr<const tatami::Matrix<T, IDX> > subsetted = pca_utils::subset_matrix_by_features(mat, features);
         auto NR = subsetted->nrow();
         auto NC = subsetted->ncol();
@@ -833,7 +833,7 @@ public:
      */
     template<typename T, typename IDX, typename X>
     Results run(const tatami::Matrix<T, IDX>* mat, const X* features) const {
-        return run(mat, features, static_cast<unsigned char*>(NULL));
+        return run_blocked(mat, features, static_cast<unsigned char*>(NULL));
     }
 };
 
