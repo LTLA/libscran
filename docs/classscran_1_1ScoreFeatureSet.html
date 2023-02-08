@@ -113,9 +113,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a5c2999a41031be48d138dbf5cedd2c36"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6892c7b954ddd7ca056b94ae772fc309"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ScoreFeatureSet.html">ScoreFeatureSet</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ScoreFeatureSet.html#a6892c7b954ddd7ca056b94ae772fc309">set_scale</a> (bool s=<a class="el" href="structscran_1_1ScoreFeatureSet_1_1Defaults.html#ad6b829970b884c66a0e81df6d169caef">Defaults::scale</a>)</td></tr>
 <tr class="separator:a6892c7b954ddd7ca056b94ae772fc309"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a98c55ad1fb1e82af214cde3f1ad36c06"><td class="memTemplParams" colspan="2">template&lt;typename T , typename IDX , typename X , typename Block &gt; </td></tr>
-<tr class="memitem:a98c55ad1fb1e82af214cde3f1ad36c06"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1ScoreFeatureSet_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ScoreFeatureSet.html#a98c55ad1fb1e82af214cde3f1ad36c06">run</a> (const tatami::Matrix&lt; T, IDX &gt; *mat, const X *features, const Block *block) const</td></tr>
-<tr class="separator:a98c55ad1fb1e82af214cde3f1ad36c06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a094fa78564a7c646578d92ebdf5a299e"><td class="memTemplParams" colspan="2">template&lt;typename T , typename IDX , typename X , typename Block &gt; </td></tr>
+<tr class="memitem:a094fa78564a7c646578d92ebdf5a299e"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1ScoreFeatureSet_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ScoreFeatureSet.html#a094fa78564a7c646578d92ebdf5a299e">run_blocked</a> (const tatami::Matrix&lt; T, IDX &gt; *mat, const X *features, const Block *block) const</td></tr>
+<tr class="separator:a094fa78564a7c646578d92ebdf5a299e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab59f4fa36aed91e44dc3bf03ebd678a8"><td class="memTemplParams" colspan="2">template&lt;typename T , typename IDX , typename X &gt; </td></tr>
 <tr class="memitem:ab59f4fa36aed91e44dc3bf03ebd678a8"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1ScoreFeatureSet_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ScoreFeatureSet.html#ab59f4fa36aed91e44dc3bf03ebd678a8">run</a> (const tatami::Matrix&lt; T, IDX &gt; *mat, const X *features) const</td></tr>
 <tr class="separator:ab59f4fa36aed91e44dc3bf03ebd678a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -252,8 +252,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a98c55ad1fb1e82af214cde3f1ad36c06" name="a98c55ad1fb1e82af214cde3f1ad36c06"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a98c55ad1fb1e82af214cde3f1ad36c06">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
+<a id="a094fa78564a7c646578d92ebdf5a299e" name="a094fa78564a7c646578d92ebdf5a299e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a094fa78564a7c646578d92ebdf5a299e">&#9670;&#160;</a></span>run_blocked()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -264,7 +264,7 @@ template&lt;typename T , typename IDX , typename X , typename Block &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structscran_1_1ScoreFeatureSet_1_1Results.html">Results</a> scran::ScoreFeatureSet::run </td>
+          <td class="memname"><a class="el" href="structscran_1_1ScoreFeatureSet_1_1Results.html">Results</a> scran::ScoreFeatureSet::run_blocked </td>
           <td>(</td>
           <td class="paramtype">const tatami::Matrix&lt; T, IDX &gt; *&#160;</td>
           <td class="paramname"><em>mat</em>, </td>
@@ -315,7 +315,7 @@ template&lt;typename T , typename IDX , typename X , typename Block &gt; </div>
 </div>
 </div>
 <a id="ab59f4fa36aed91e44dc3bf03ebd678a8" name="ab59f4fa36aed91e44dc3bf03ebd678a8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab59f4fa36aed91e44dc3bf03ebd678a8">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ab59f4fa36aed91e44dc3bf03ebd678a8">&#9670;&#160;</a></span>run()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -349,7 +349,7 @@ template&lt;typename T , typename IDX , typename X &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>An overload of <code><a class="el" href="classscran_1_1ScoreFeatureSet.html#a98c55ad1fb1e82af214cde3f1ad36c06">run()</a></code> where all cells are assumed to belong to the same block.</p>
+<p>An overload of <code><a class="el" href="classscran_1_1ScoreFeatureSet.html#ab59f4fa36aed91e44dc3bf03ebd678a8">run()</a></code> where all cells are assumed to belong to the same block.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>Floating point type for the data. </td></tr>
