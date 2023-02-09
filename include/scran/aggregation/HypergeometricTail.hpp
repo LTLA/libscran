@@ -115,7 +115,8 @@ private:
         // We use long double for some extra precision here.
         long double probability = 1;
 
-        // We need to add 1 for the starting probability, but we'll do this in compute_tail_probability() to make use of the more precise log1p.
+        // We need to add 1 for the starting term after our factorizations, 
+        // but we'll do this in compute_tail_probability() to make use of the more precise log1p.
         long double cumulative = 0; 
 
         int start = num_drawn - num_black + 1;
@@ -217,6 +218,11 @@ private:
 
 private:
     double core(int drawn_white, int num_white, int num_black, int num_drawn, Cache* cache) const {
+        // Subtracting 1 to include the PMF of 'drawn_white' in the upper tail calculations.
+        if (upper_tail) {
+            --drawn_white;
+        }
+
         if (drawn_white <= 0 || drawn_white < num_drawn - num_black) {
             return edge_handler(!upper_tail);
         } else if (drawn_white >= num_drawn || drawn_white >= num_white) {
