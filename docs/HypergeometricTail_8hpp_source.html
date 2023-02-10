@@ -252,69 +252,68 @@ $(function() {
 <div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span> </div>
 <div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span><span class="keyword">private</span>:</div>
 <div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>    <span class="keywordtype">double</span> core(<span class="keywordtype">int</span> drawn_white, <span class="keywordtype">int</span> num_white, <span class="keywordtype">int</span> num_black, <span class="keywordtype">int</span> num_drawn, Cache* cache)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>        <span class="keywordflow">if</span> (drawn_white &lt;= 0 || drawn_white &lt; num_drawn - num_black) {</div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>            <span class="keywordflow">return</span> edge_handler(!upper_tail);</div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (drawn_white &gt;= num_drawn || drawn_white &gt;= num_white) {</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>            <span class="keywordflow">return</span> edge_handler(upper_tail);</div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>        }</div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span> </div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>        <span class="comment">// Subtracting 1 to include the PMF of &#39;drawn_white&#39; in the upper tail calculations.</span></div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        <span class="comment">// This is safe as drawn_white &gt; 0 at this point.</span></div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>        <span class="keywordflow">if</span> (upper_tail) {</div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>            --drawn_white;</div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>        }</div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span> </div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        <span class="comment">// Flipping the tails to avoid having to calculate large summations.</span></div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        <span class="comment">// While more efficient, the real reason is that it avoids having to</span></div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        <span class="comment">// subtract large sums from 1 when computing upper tails, which could</span></div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        <span class="comment">// result in catastrophic cancellation. </span></div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>        <span class="keywordtype">bool</span> do_lower = !upper_tail;</div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>        <span class="keywordflow">if</span> (drawn_white * (num_white + num_black) &gt; num_drawn * num_white) { </div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>            <span class="keyword">auto</span> tmp = num_white;</div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>            num_white = num_black;</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>            num_black = tmp;</div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>            drawn_white = num_drawn - drawn_white - 1;</div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>            do_lower = !do_lower;</div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>        }</div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span> </div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>        <span class="keywordflow">if</span> (cache == NULL) {</div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>            <span class="keywordtype">double</span> logscale = compute_log_scale(num_white, num_black, num_drawn);</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>            <span class="keyword">auto</span> cum = compute_cumulative(drawn_white, num_white, num_black, num_drawn);</div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>            <span class="keywordflow">return</span> compute_tail_probability(cum, logscale, do_lower);</div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>        }</div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span> </div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>        <span class="comment">// Picking up from cached values if we can.</span></div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>        compute_cumulative(drawn_white, num_white, num_black, num_drawn, *cache);</div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span> </div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        <span class="keywordtype">double</span>&amp; logscale = cache-&gt;scale;</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>        <span class="keywordflow">if</span> (!(num_white == cache-&gt;num_white &amp;&amp; num_black == cache-&gt;num_black &amp;&amp; num_drawn == cache-&gt;num_drawn)) {</div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>            logscale = compute_log_scale(num_white, num_black, num_drawn);</div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>            cache-&gt;num_white = num_white;</div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>            cache-&gt;num_black = num_black;</div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>            cache-&gt;num_drawn = num_drawn;</div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>        }</div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span> </div>
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>        <span class="keywordflow">return</span> compute_tail_probability(cache-&gt;cumulative[drawn_white], cache-&gt;scale, do_lower);</div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>    }</div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span> </div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno"><a class="line" href="classscran_1_1HypergeometricTail.html#a7a290c27f5fb897687f7ab220fe0987e">  276</a></span>    <span class="keywordtype">double</span> <a class="code hl_function" href="classscran_1_1HypergeometricTail.html#a7a290c27f5fb897687f7ab220fe0987e">run</a>(<span class="keywordtype">int</span> drawn_white, <span class="keywordtype">int</span> num_white, <span class="keywordtype">int</span> num_black, <span class="keywordtype">int</span> num_drawn)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>        <span class="keywordflow">return</span> core(drawn_white, num_white, num_black, num_drawn, NULL);</div>
-<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>    }</div>
-<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span> </div>
-<div class="line"><a id="l00293" name="l00293"></a><span class="lineno"><a class="line" href="classscran_1_1HypergeometricTail.html#a8c829f4e221740369e579fad463a2a17">  293</a></span>    <span class="keywordtype">double</span> <a class="code hl_function" href="classscran_1_1HypergeometricTail.html#a8c829f4e221740369e579fad463a2a17">run</a>(<span class="keywordtype">int</span> drawn_white, <span class="keywordtype">int</span> num_white, <span class="keywordtype">int</span> num_black, <span class="keywordtype">int</span> num_drawn, <a class="code hl_struct" href="structscran_1_1HypergeometricTail_1_1Cache.html">Cache</a>&amp; cache)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>        <span class="keywordflow">return</span> core(drawn_white, num_white, num_black, num_drawn, &amp;cache);</div>
-<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>    }</div>
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>};</div>
-<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span> </div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>}</div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span> </div>
-<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>        <span class="comment">// Subtracting 1 to include the PMF of &#39;drawn_white&#39; in the upper tail calculations.</span></div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>        <span class="keywordflow">if</span> (upper_tail) {</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>            --drawn_white;</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>        }</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span> </div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        <span class="keywordflow">if</span> (drawn_white &lt;= 0 || drawn_white &lt; num_drawn - num_black) {</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>            <span class="keywordflow">return</span> edge_handler(!upper_tail);</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (drawn_white &gt;= num_drawn || drawn_white &gt;= num_white) {</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>            <span class="keywordflow">return</span> edge_handler(upper_tail);</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        }</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span> </div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>        <span class="comment">// Flipping the tails to avoid having to calculate large summations.</span></div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        <span class="comment">// While more efficient, the real reason is that it avoids having to</span></div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        <span class="comment">// subtract large sums from 1 when computing upper tails, which could</span></div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        <span class="comment">// result in catastrophic cancellation. </span></div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        <span class="keywordtype">bool</span> do_lower = !upper_tail;</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>        <span class="keywordflow">if</span> (drawn_white * (num_white + num_black) &gt; num_drawn * num_white) { </div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>            <span class="keyword">auto</span> tmp = num_white;</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>            num_white = num_black;</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>            num_black = tmp;</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>            drawn_white = num_drawn - drawn_white - 1;</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>            do_lower = !do_lower;</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>        }</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span> </div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>        <span class="keywordflow">if</span> (cache == NULL) {</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>            <span class="keywordtype">double</span> logscale = compute_log_scale(num_white, num_black, num_drawn);</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>            <span class="keyword">auto</span> cum = compute_cumulative(drawn_white, num_white, num_black, num_drawn);</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>            <span class="keywordflow">return</span> compute_tail_probability(cum, logscale, do_lower);</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>        }</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span> </div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>        <span class="comment">// Picking up from cached values if we can.</span></div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>        compute_cumulative(drawn_white, num_white, num_black, num_drawn, *cache);</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span> </div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>        <span class="keywordtype">double</span>&amp; logscale = cache-&gt;scale;</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        <span class="keywordflow">if</span> (!(num_white == cache-&gt;num_white &amp;&amp; num_black == cache-&gt;num_black &amp;&amp; num_drawn == cache-&gt;num_drawn)) {</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>            logscale = compute_log_scale(num_white, num_black, num_drawn);</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>            cache-&gt;num_white = num_white;</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>            cache-&gt;num_black = num_black;</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>            cache-&gt;num_drawn = num_drawn;</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>        }</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span> </div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>        <span class="keywordflow">return</span> compute_tail_probability(cache-&gt;cumulative[drawn_white], cache-&gt;scale, do_lower);</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>    }</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span> </div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno"><a class="line" href="classscran_1_1HypergeometricTail.html#a7a290c27f5fb897687f7ab220fe0987e">  275</a></span>    <span class="keywordtype">double</span> <a class="code hl_function" href="classscran_1_1HypergeometricTail.html#a7a290c27f5fb897687f7ab220fe0987e">run</a>(<span class="keywordtype">int</span> drawn_white, <span class="keywordtype">int</span> num_white, <span class="keywordtype">int</span> num_black, <span class="keywordtype">int</span> num_drawn)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>        <span class="keywordflow">return</span> core(drawn_white, num_white, num_black, num_drawn, NULL);</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>    }</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span> </div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno"><a class="line" href="classscran_1_1HypergeometricTail.html#a8c829f4e221740369e579fad463a2a17">  292</a></span>    <span class="keywordtype">double</span> <a class="code hl_function" href="classscran_1_1HypergeometricTail.html#a8c829f4e221740369e579fad463a2a17">run</a>(<span class="keywordtype">int</span> drawn_white, <span class="keywordtype">int</span> num_white, <span class="keywordtype">int</span> num_black, <span class="keywordtype">int</span> num_drawn, <a class="code hl_struct" href="structscran_1_1HypergeometricTail_1_1Cache.html">Cache</a>&amp; cache)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>        <span class="keywordflow">return</span> core(drawn_white, num_white, num_black, num_drawn, &amp;cache);</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>    }</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>};</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span> </div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>}</div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span> </div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aclassscran_1_1HypergeometricTail_html"><div class="ttname"><a href="classscran_1_1HypergeometricTail.html">scran::HypergeometricTail</a></div><div class="ttdoc">Compute hypergeometric tail probabilities.</div><div class="ttdef"><b>Definition:</b> HypergeometricTail.hpp:24</div></div>
 <div class="ttc" id="aclassscran_1_1HypergeometricTail_html_a07c9554abdae516b34183d399df37275"><div class="ttname"><a href="classscran_1_1HypergeometricTail.html#a07c9554abdae516b34183d399df37275">scran::HypergeometricTail::set_log</a></div><div class="ttdeci">HypergeometricTail &amp; set_log(bool l=Defaults::log)</div><div class="ttdef"><b>Definition:</b> HypergeometricTail.hpp:50</div></div>
 <div class="ttc" id="aclassscran_1_1HypergeometricTail_html_a6f0d0e592bbda71551c2772232c13047"><div class="ttname"><a href="classscran_1_1HypergeometricTail.html#a6f0d0e592bbda71551c2772232c13047">scran::HypergeometricTail::set_upper_tail</a></div><div class="ttdeci">HypergeometricTail &amp; set_upper_tail(bool u=Defaults::upper_tail)</div><div class="ttdef"><b>Definition:</b> HypergeometricTail.hpp:60</div></div>
-<div class="ttc" id="aclassscran_1_1HypergeometricTail_html_a7a290c27f5fb897687f7ab220fe0987e"><div class="ttname"><a href="classscran_1_1HypergeometricTail.html#a7a290c27f5fb897687f7ab220fe0987e">scran::HypergeometricTail::run</a></div><div class="ttdeci">double run(int drawn_white, int num_white, int num_black, int num_drawn) const</div><div class="ttdef"><b>Definition:</b> HypergeometricTail.hpp:276</div></div>
-<div class="ttc" id="aclassscran_1_1HypergeometricTail_html_a8c829f4e221740369e579fad463a2a17"><div class="ttname"><a href="classscran_1_1HypergeometricTail.html#a8c829f4e221740369e579fad463a2a17">scran::HypergeometricTail::run</a></div><div class="ttdeci">double run(int drawn_white, int num_white, int num_black, int num_drawn, Cache &amp;cache) const</div><div class="ttdef"><b>Definition:</b> HypergeometricTail.hpp:293</div></div>
+<div class="ttc" id="aclassscran_1_1HypergeometricTail_html_a7a290c27f5fb897687f7ab220fe0987e"><div class="ttname"><a href="classscran_1_1HypergeometricTail.html#a7a290c27f5fb897687f7ab220fe0987e">scran::HypergeometricTail::run</a></div><div class="ttdeci">double run(int drawn_white, int num_white, int num_black, int num_drawn) const</div><div class="ttdef"><b>Definition:</b> HypergeometricTail.hpp:275</div></div>
+<div class="ttc" id="aclassscran_1_1HypergeometricTail_html_a8c829f4e221740369e579fad463a2a17"><div class="ttname"><a href="classscran_1_1HypergeometricTail.html#a8c829f4e221740369e579fad463a2a17">scran::HypergeometricTail::run</a></div><div class="ttdeci">double run(int drawn_white, int num_white, int num_black, int num_drawn, Cache &amp;cache) const</div><div class="ttdef"><b>Definition:</b> HypergeometricTail.hpp:292</div></div>
 <div class="ttc" id="aclassscran_1_1HypergeometricTail_html_ab610e0ec788607e9a34c22294dad3163"><div class="ttname"><a href="classscran_1_1HypergeometricTail.html#ab610e0ec788607e9a34c22294dad3163">scran::HypergeometricTail::new_cache</a></div><div class="ttdeci">Cache new_cache()</div><div class="ttdef"><b>Definition:</b> HypergeometricTail.hpp:91</div></div>
 <div class="ttc" id="anamespacescran_html"><div class="ttname"><a href="namespacescran.html">scran</a></div><div class="ttdoc">Functions for single-cell RNA-seq analyses.</div><div class="ttdef"><b>Definition:</b> AggregateAcrossCells.hpp:17</div></div>
 <div class="ttc" id="astructscran_1_1HypergeometricTail_1_1Cache_html"><div class="ttname"><a href="structscran_1_1HypergeometricTail_1_1Cache.html">scran::HypergeometricTail::Cache</a></div><div class="ttdoc">Cached statistics for re-use across run() calls.</div><div class="ttdef"><b>Definition:</b> HypergeometricTail.hpp:69</div></div>
