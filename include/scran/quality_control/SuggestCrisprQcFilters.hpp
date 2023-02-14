@@ -30,23 +30,23 @@ namespace scran {
  *   or that the cell was not transfected with any guide construct,
  *   or that the cell failed to express that guide construct.
  *
- * Defining a threshold on the maximum count is somewhat tricky as unsuccessful transfection is not uncommon.
- * This results in a large subpopulation with low maximum counts, inflating the MAD and compromising the threshold calculation.
+ * Directly defining a threshold on the maximum count is somewhat tricky as unsuccessful transfection is not uncommon.
+ * This often results in a large subpopulation with low maximum counts, inflating the MAD and compromising the threshold calculation.
  * Instead, we use the following approach:
  *
  * 1. Compute the median of the proportion of counts in the most abundant guide (i.e., the maximum proportion),
  * 2. Subset the cells to only those with maximum proportions above the median,
  * 3. Define a threshold for low outliers on the log-transformed maximum count within the subset.
  *
- * This assumes that most cells were successfully transfected with a single guide construct and have high maximum proportions;
- * in contrast, unsuccessful cells will be dominated by ambient contamination and have low proportions.
- * Taking the subset above the median will aggressively enrich for successful transfections and high-quality cells.
- * From there, we can apply the usual outlier detection methods, with log-transformation to avoid a negative threshold.
+ * This assumes that over 50% of cells were successfully transfected with a single guide construct and have high maximum proportions.
+ * In contrast, unsuccessful transfections will be dominated by ambient contamination and have low proportions.
+ * By taking the subset above the median proportion, we remove all of the unsuccessful transfections and enrich for mostly-high-quality cells.
+ * From there, we can apply the usual outlier detection methods on the maximum count, with log-transformation to avoid a negative threshold.
  *
  * Keep in mind that the maximum proportion is only used to define the subset for threshold calculation.
  * Once the maximum count threshold is computed, they are applied to all cells, regardless of their maximum proportions.
- * This ensures that we do not remove cells transfected with multiple guides.
- * Such cells are not necessarily uninteresting, e.g., for examining interaction effects,
+ * This allows us to recover good cells that would have been filtered out by our aggressive median subset.
+ * It also ensures that we do not remove cells transfected with multiple guides - such cells are not necessarily uninteresting, e.g., for examining interaction effects,
  * so we will err on the side of caution and leave them in.
  */
 class SuggestCrisprQcFilters {
