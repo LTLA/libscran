@@ -17,11 +17,8 @@ void safe_divide(size_t n, Float* top, const Float* bottom) {
         if (bottom[c]) {
             top[c] /= bottom[c];
         } else {
-            if constexpr(std::numeric_limits<Float>::has_quiet_NaN) {
-                top[c] = std::numeric_limits<Float>::quiet_NaN();
-            } else {
-                top[c] = 0;
-            }
+            static_assert(std::numeric_limits<Float>::has_quiet_NaN, "NaN support is required");
+            top[c] = std::numeric_limits<Float>::quiet_NaN();
         }
     }
 }

@@ -59,6 +59,35 @@ TEST_F(SuggestCrisprQcFiltersTest, EdgeCase) {
     EXPECT_DOUBLE_EQ(filt.max_count[0], std::exp(ref.medians[0] - ref.mads[0] * 3));
 }
 
+TEST_F(SuggestCrisprQcFiltersTest, EdgeCaseZeros) {
+    // All-zero cells do not participate at any step; NA proportions are
+    // implicitly removed during the median calculation and the subsetting to
+    // define the thresholds, and the NA sums are removed during the filtering.
+    size_t NR = 5, NC = 105;
+    std::vector<double> buffer(NR * NC);
+    std::mt19937_64 rng(1234567);
+    size_t nempty = 4;
+
+    for (size_t c = nempty; c < NC; ++c) {
+        double y = 100 + rng() % 2000;
+        buffer[c * NR + rng() % NR] = y;
+    }
+
+    tatami::DenseColumnMatrix<double, int> mat(NR, NC, buffer);
+    auto qcres = scran::PerCellCrisprQcMetrics().run(&mat);
+    auto filt = scran::SuggestCrisprQcFilters().run(qcres);
+    auto fres = filt.filter(qcres);
+
+    tatami::DenseColumnMatrix<double, int> mat2(NR, NC - nempty, std::vector<double>(buffer.begin() + NR * nempty, buffer.end()));
+    auto qcres2 = scran::PerCellCrisprQcMetrics().run(&mat2);
+    auto filt2 = scran::SuggestCrisprQcFilters().run(qcres2);
+    auto fres2 = filt2.filter(qcres2);
+
+    EXPECT_EQ(filt.max_count, filt2.max_count);
+    EXPECT_EQ(std::vector<uint8_t>(fres.begin() + nempty, fres.end()), fres2);
+    EXPECT_EQ(std::vector<uint8_t>(fres.begin(), fres.begin() + nempty), std::vector<uint8_t>(nempty));
+}
+
 TEST_F(SuggestCrisprQcFiltersTest, Blocking) {
     auto qcres = scran::PerCellCrisprQcMetrics().run(mat.get());
 
