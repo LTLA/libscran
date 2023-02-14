@@ -119,14 +119,14 @@ Public Member Functions</h2></td></tr>
 <ul>
 <li>A low maximum count. This indicates that library preparation or sequencing was suboptimal, or that the cell was not transfected with any guide construct, or that the cell failed to express that guide construct.</li>
 </ul>
-<p>Defining a threshold on the maximum count is somewhat tricky as unsuccessful transfection is not uncommon. This results in a large subpopulation with low maximum counts, inflating the MAD and compromising the threshold calculation. Instead, we use the following approach:</p>
+<p>Directly defining a threshold on the maximum count is somewhat tricky as unsuccessful transfection is not uncommon. This often results in a large subpopulation with low maximum counts, inflating the MAD and compromising the threshold calculation. Instead, we use the following approach:</p>
 <ol type="1">
 <li>Compute the median of the proportion of counts in the most abundant guide (i.e., the maximum proportion),</li>
 <li>Subset the cells to only those with maximum proportions above the median,</li>
 <li>Define a threshold for low outliers on the log-transformed maximum count within the subset.</li>
 </ol>
-<p>This assumes that most cells were successfully transfected with a single guide construct and have high maximum proportions; in contrast, unsuccessful cells will be dominated by ambient contamination and have low proportions. Taking the subset above the median will aggressively enrich for successful transfections and high-quality cells. From there, we can apply the usual outlier detection methods, with log-transformation to avoid a negative threshold.</p>
-<p>Keep in mind that the maximum proportion is only used to define the subset for threshold calculation. Once the maximum count threshold is computed, they are applied to all cells, regardless of their maximum proportions. This ensures that we do not remove cells transfected with multiple guides. Such cells are not necessarily uninteresting, e.g., for examining interaction effects, so we will err on the side of caution and leave them in. </p>
+<p>This assumes that over 50% of cells were successfully transfected with a single guide construct and have high maximum proportions. In contrast, unsuccessful transfections will be dominated by ambient contamination and have low proportions. By taking the subset above the median proportion, we remove all of the unsuccessful transfections and enrich for mostly-high-quality cells. From there, we can apply the usual outlier detection methods on the maximum count, with log-transformation to avoid a negative threshold.</p>
+<p>Keep in mind that the maximum proportion is only used to define the subset for threshold calculation. Once the maximum count threshold is computed, they are applied to all cells, regardless of their maximum proportions. This allows us to recover good cells that would have been filtered out by our aggressive median subset. It also ensures that we do not remove cells transfected with multiple guides - such cells are not necessarily uninteresting, e.g., for examining interaction effects, so we will err on the side of caution and leave them in. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a7655a9639ef9da450f802a7503cbdc6a" name="a7655a9639ef9da450f802a7503cbdc6a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7655a9639ef9da450f802a7503cbdc6a">&#9670;&#160;</a></span>set_num_mads()</h2>
