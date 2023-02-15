@@ -180,7 +180,7 @@ public:
          *   ratio_{ij} = (y_{ij} + ref_i * extra_j) / ref_i
          *              = (y_{ij} / ref_i) + extra_j
          *
-         * which means that:
+         * which means that the "shrunken" size factor is:
          *
          *   median(ratio_{ij}) = median(y_{ij} / ref_i) + extra_j
          *
@@ -201,21 +201,24 @@ public:
          * relative abundance in the reference profile, while t_j / T
          * represents the library size factor that we are shrinking towards.
          *
-         * The addition of S_j means that the shrunken size factor is slightly
-         * too big to normalize against the reference. Assume that the
-         * unshrunken size factor captures the true scaling x_j for j against
-         * the reference, in which case the shrunken size factor would be:
+         * The addition of extra_j means that the shrunken size factor is
+         * slightly too big to normalize against the reference. To adjust for
+         * this, consider some hypothetical position-invariant function f()
+         * such that f(y_{ij} / ref_i) yields the true size factor x_j. In this
+         * case, our shrunken size factor can be written as
          *
-         *   shrunk_j = median(ratio_{ij}) = x_j + extra_j
+         *   f(ratio_{ij}) = x_j + extra_j
          * 
-         * To get shrunk_j = x_j, we need to divide it by:
+         * To correct our shrunken size factor to x_j, we need to divide it by:
          *
          *   (x_j + extra_j) / x_j = 1 + (extra_j / x_j)
          * 
          * As an approximation, we assume x_j =~ t_j / R, i.e., library size
-         * normalization against the reference. This allows us to simplify to:
+         * normalization against the reference. This simplifies the correction:
          *
          *   1 + (p / T)
+         *
+         * which is what we apply to our actual median-based shrunken factor.
          */
         if (prior_count && NR && NC) {
             const auto& sums = fact.sums;
