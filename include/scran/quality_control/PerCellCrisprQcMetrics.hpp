@@ -73,25 +73,21 @@ public:
     struct Buffers {
         /**
          * Pointer to an array of length equal to the number of cells, see `Results::sums`.
-         * Set to `NULL` to skip this calculation.
          */
         Float* sums = NULL;
 
         /**
          * Pointer to an array of length equal to the number of cells, see `Results::detected`.
-         * Set to `NULL` to skip this calculation.
          */
         Integer* detected = NULL;
 
         /**
          * Pointer to an array of length equal to the number of cells, see `Results::max_proportion`.
-         * Set to `NULL` to skip this calculation.
          */
         Float* max_proportion = NULL;
 
         /**
          * Pointer to an array of length equal to the number of cells, see `Results::max_index`.
-         * Set to `NULL` to skip this calculation.
          */
         Integer* max_index = NULL;
     };
@@ -106,6 +102,7 @@ public:
      *
      * @param mat Pointer to a feature-by-cells matrix containing CRISPR guide counts.
      * @param[out] output `Buffers` object in which to store the output.
+     * All pointers should be set to non-`NULL` values.
      */
     template<class Matrix, typename Float, typename Integer>
     void run(const Matrix* mat, Buffers<Float, Integer>& output) const {

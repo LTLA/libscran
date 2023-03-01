@@ -69,15 +69,13 @@ public:
     struct Buffers {
         /**
          * Pointer to an array of length equal to the number of cells, see `Results::sums`.
-         * Note that this should not be `NULL`.
          */
-        Float* sums;
+        Float* sums = NULL;
 
         /**
          * Pointer to an array of length equal to the number of cells, see `Results::detected`.
-         * Note that this should not be `NULL`.
          */
-        Integer* detected;
+        Integer* detected = NULL;
 
         /**
          * Vector of pointers of length equal to the number of feature subsets.
@@ -100,6 +98,7 @@ public:
      * Each array represents a feature subset and indicating whether each feature in `mat` belongs to that subset.
      * Users can pass `{}` if no subsets are to be used. 
      * @param[out] output `Buffers` object in which to store the output.
+     * All pointers should be set to non-`NULL` values.
      */
     template<class Matrix, typename Subset = const uint8_t*, typename Float, typename Integer>
     void run(const Matrix* mat, const std::vector<Subset>& subsets, Buffers<Float, Integer>& output) const {

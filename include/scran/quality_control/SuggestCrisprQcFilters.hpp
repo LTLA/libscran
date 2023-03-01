@@ -102,6 +102,7 @@ public:
          * @param n Number of cells.
          * @param[in] buffers Pointers to arrays of length `n`, containing the per-cell CRISPR-derived metrics.
          * These should be comparable to the values used to create this `Thresholds` object.
+         * Only `max_proportion` and `sums` are used; `detected` is ignored and does not need to be set.
          * @param[out] output Pointer to an array of length `n`, to store the low-quality calls.
          * Values are set to `true` for low-quality cells.
          * If `overwrite = true`, values are set to `false` for high-quality cells, otherwise the existing entry is preserved.
@@ -123,12 +124,13 @@ public:
          *
          * @param metrics Collection of arrays of per-cell CRISPR metrics.
          * These should be comparable to the values used to create this `Thresholds` object.
+         * Only `max_proportion` and `sums` are used; `detected` is ignored and does not need to be set.
          *
          * @return Vector of low-quality calls, of length equal to the number of cells in `metrics`.
          */
         template<typename Output = uint8_t>
         std::vector<Output> filter(const PerCellCrisprQcMetrics::Results& metrics) const {
-            std::vector<Output> output(metrics.detected.size());
+            std::vector<Output> output(metrics.sums.size());
             filter(output.size(), metrics.buffers(), output.data());
             return output;
         }
@@ -145,6 +147,7 @@ public:
          * This may be `NULL`, in which case all cells are assumed to belong to the same block.
          * @param[in] buffers Pointers to arrays of length `n`, containing the per-cell CRISPR-derived metrics.
          * These should be comparable to the values used to create this `Thresholds` object.
+         * Only `max_proportion` and `sums` are used; `detected` is ignored and does not need to be set.
          * @param[out] output Pointer to an array of length `n`, to store the low-quality calls.
          * Values are set to `true` for low-quality cells.
          * If `overwrite = true`, values are set to `false` for high-quality cells, otherwise the existing entry is preserved.
@@ -166,6 +169,7 @@ public:
          *
          * @param metrics Collection of arrays of per-cell CRISPR metrics.
          * These should be comparable to the values used to create this `Thresholds` object.
+         * Only `max_proportion` and `sums` are used; `detected` is ignored and does not need to be set.
          * @param[in] block Pointer to an array of length `n`, containing the block assignment for each cell.
          * This may be `NULL`, in which case all cells are assumed to belong to the same block.
          *
@@ -173,7 +177,7 @@ public:
          */
         template<typename Output = uint8_t, typename Block>
         std::vector<Output> filter_blocked(const PerCellCrisprQcMetrics::Results& metrics, const Block* block) const {
-            std::vector<Output> output(metrics.detected.size());
+            std::vector<Output> output(metrics.sums.size());
             filter_blocked(output.size(), block, metrics.buffers(), output.data());
             return output;
         }
@@ -234,6 +238,7 @@ public:
      * @param[in] block Pointer to an array of length `n`, containing the block assignments for each cell.
      * This may be `NULL`, in which case all cells are assumed to belong to the same block.
      * @param[in] buffers Pointers to arrays of length `n`, containing the per-cell CRISPR-derived metrics.
+     * Only `max_proportion` and `sums` are used; `detected` is ignored and does not need to be set.
      *
      * @return Filtering thresholds for each metric in each block.
      */
@@ -305,6 +310,7 @@ public:
      * @tparam Block Integer type for the block assignments.
      *
      * @param metrics Collection of arrays of length equal to the number of cells, containing the per-cell CRISPR-derived metrics.
+     * Only `max_proportion` and `sums` are used; `detected` is ignored and does not need to be set.
      * @param[in] block Pointer to an array of length equal to the number of cells, containing the block assignments for each cell.
      * This may be `NULL`, in which case all cells are assumed to belong to the same block.
      *

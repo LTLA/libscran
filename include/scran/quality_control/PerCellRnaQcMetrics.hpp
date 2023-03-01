@@ -70,20 +70,17 @@ public:
     struct Buffers {
         /**
          * Pointer to an array of length equal to the number of cells, see `Results::sums`.
-         * Set to `NULL` to skip this calculation.
          */
         Float* sums = NULL;
 
         /**
          * Pointer to an array of length equal to the number of cells, see `Results::detected`.
-         * Set to `NULL` to skip this calculation.
          */
         Integer* detected = NULL;
 
         /**
          * Vector of pointers of length equal to the number of feature subsets.
-         * Each pointer should be to aan array of length equal to the number of cells, see `Results::subset_proportions`.
-         * Set any to `NULL` to skip this calculation for that subset.
+         * Each entry should point to an array of length equal to the number of cells, see `Results::subset_proportions`.
          */
         std::vector<Float*> subset_proportions;
     };
@@ -102,6 +99,7 @@ public:
      * Each array represents a feature subset and indicating whether each feature in `mat` belongs to that subset.
      * Users can pass `{}` if no subsets are to be used. 
      * @param[out] output `Buffers` object in which to store the output.
+     * All pointers should be set to non-`NULL` values.
      */
     template<class Matrix, typename Subset = const uint8_t*, typename Float, typename Integer>
     void run(const Matrix* mat, const std::vector<Subset>& subsets, Buffers<Float, Integer>& output) const {
