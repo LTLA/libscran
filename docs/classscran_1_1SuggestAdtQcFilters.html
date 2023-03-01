@@ -401,7 +401,7 @@ template&lt;typename Block , typename Float , typename Integer &gt; </div>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of cells. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length <code>n</code>, containing the block assignments for each cell. This may be <code>NULL</code>, in which case all cells are assumed to belong to the same block. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">buffers</td><td>Pointers to arrays of length <code>n</code>, containing the per-cell ADT-derived metrics.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">buffers</td><td>Pointers to arrays of length <code>n</code>, containing the per-cell ADT-derived metrics. Only <code>detected</code> and <code>subset_totals</code> are used; <code>sums</code> does not need to be set.</td></tr>
   </table>
   </dd>
 </dl>
@@ -452,7 +452,7 @@ template&lt;typename Block &gt; </div>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">metrics</td><td>Collection of arrays of length equal to the number of cells, containing the per-cell ADT-derived metrics. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">metrics</td><td>Collection of arrays of length equal to the number of cells, containing the per-cell ADT-derived metrics. Only <code>detected</code> and <code>subset_totals</code> are used; <code>sums</code> does not need to be set. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of cells, containing the block assignments for each cell. This may be <code>NULL</code>, in which case all cells are assumed to belong to the same block.</td></tr>
   </table>
   </dd>

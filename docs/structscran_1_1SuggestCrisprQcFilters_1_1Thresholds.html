@@ -165,7 +165,7 @@ template&lt;bool overwrite = true, typename Float , typename Integer , typename 
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of cells. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">buffers</td><td>Pointers to arrays of length <code>n</code>, containing the per-cell CRISPR-derived metrics. These should be comparable to the values used to create this <code><a class="el" href="structscran_1_1SuggestCrisprQcFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">buffers</td><td>Pointers to arrays of length <code>n</code>, containing the per-cell CRISPR-derived metrics. These should be comparable to the values used to create this <code><a class="el" href="structscran_1_1SuggestCrisprQcFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object. Only <code>max_proportion</code> and <code>sums</code> are used; <code>detected</code> is ignored and does not need to be set. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array of length <code>n</code>, to store the low-quality calls. Values are set to <code>true</code> for low-quality cells. If <code>overwrite = true</code>, values are set to <code>false</code> for high-quality cells, otherwise the existing entry is preserved.</td></tr>
   </table>
   </dd>
@@ -208,7 +208,7 @@ template&lt;typename Output  = uint8_t&gt; </div>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">metrics</td><td>Collection of arrays of per-cell CRISPR metrics. These should be comparable to the values used to create this <code><a class="el" href="structscran_1_1SuggestCrisprQcFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object.</td></tr>
+    <tr><td class="paramname">metrics</td><td>Collection of arrays of per-cell CRISPR metrics. These should be comparable to the values used to create this <code><a class="el" href="structscran_1_1SuggestCrisprQcFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object. Only <code>max_proportion</code> and <code>sums</code> are used; <code>detected</code> is ignored and does not need to be set.</td></tr>
   </table>
   </dd>
 </dl>
@@ -276,7 +276,7 @@ template&lt;bool overwrite = true, typename Block , typename Float , typename In
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of cells. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length <code>n</code>, containing the block assignment for each cell. This may be <code>NULL</code>, in which case all cells are assumed to belong to the same block. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">buffers</td><td>Pointers to arrays of length <code>n</code>, containing the per-cell CRISPR-derived metrics. These should be comparable to the values used to create this <code><a class="el" href="structscran_1_1SuggestCrisprQcFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">buffers</td><td>Pointers to arrays of length <code>n</code>, containing the per-cell CRISPR-derived metrics. These should be comparable to the values used to create this <code><a class="el" href="structscran_1_1SuggestCrisprQcFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object. Only <code>max_proportion</code> and <code>sums</code> are used; <code>detected</code> is ignored and does not need to be set. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array of length <code>n</code>, to store the low-quality calls. Values are set to <code>true</code> for low-quality cells. If <code>overwrite = true</code>, values are set to <code>false</code> for high-quality cells, otherwise the existing entry is preserved. </td></tr>
   </table>
   </dd>
@@ -329,7 +329,7 @@ template&lt;typename Output  = uint8_t, typename Block &gt; </div>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">metrics</td><td>Collection of arrays of per-cell CRISPR metrics. These should be comparable to the values used to create this <code><a class="el" href="structscran_1_1SuggestCrisprQcFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">metrics</td><td>Collection of arrays of per-cell CRISPR metrics. These should be comparable to the values used to create this <code><a class="el" href="structscran_1_1SuggestCrisprQcFilters_1_1Thresholds.html" title="Thresholds to define outliers on each metric.">Thresholds</a></code> object. Only <code>max_proportion</code> and <code>sums</code> are used; <code>detected</code> is ignored and does not need to be set. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length <code>n</code>, containing the block assignment for each cell. This may be <code>NULL</code>, in which case all cells are assumed to belong to the same block.</td></tr>
   </table>
   </dd>

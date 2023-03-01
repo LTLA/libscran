@@ -209,7 +209,7 @@ template&lt;class Matrix , typename Subset  = const uint8_t*, typename Float , t
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Pointer to a feature-by-cells matrix containing ADT counts. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">subsets</td><td>Vector of pointers to arrays of length equal to <code>mat-&gt;nrow()</code>. Each array represents a feature subset and indicating whether each feature in <code>mat</code> belongs to that subset. Users can pass <code>{}</code> if no subsets are to be used. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td><code><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Buffers.html" title="Buffers for direct storage of the calculated statistics.">Buffers</a></code> object in which to store the output. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td><code><a class="el" href="structscran_1_1PerCellAdtQcMetrics_1_1Buffers.html" title="Buffers for direct storage of the calculated statistics.">Buffers</a></code> object in which to store the output. All pointers should be set to non-<code>NULL</code> values. </td></tr>
   </table>
   </dd>
 </dl>
