@@ -214,6 +214,38 @@ TEST_P(MultiBatchPCABasicTest, Basic) {
         EXPECT_EQ(ref.pcs.rows(), rank);
         EXPECT_EQ(ref.pcs.cols(), dense_row->ncol());
 
+        auto drealized = runner.test_realize(dense_row.get(), block.data());
+        EXPECT_EQ(drealized.rows(), dense_row->ncol()); // transposed.
+        EXPECT_EQ(drealized.cols(), dense_row->nrow());
+
+        auto srealized = runner.test_realize(sparse_column.get(), block.data()); // Check for consistency with sparse realization.
+        EXPECT_EQ(srealized.rows(), dense_row->ncol()); 
+        EXPECT_EQ(srealized.cols(), dense_row->nrow());
+
+        double total_var = 0;
+        for (size_t c = 0; c < drealized.cols(); ++c) {
+            auto dcol = drealized.col(c);
+            auto dss = dcol.squaredNorm();
+            total_var += dss;
+
+            auto scol = srealized.col(c);
+            EXPECT_FLOAT_EQ(dss, scol.squaredNorm()); 
+
+            // Note that this matrix isn't centered if batches aren't balanced; 
+            // this is a bit unusual for PCA, but it's fine, as we think about 
+            // weights with respect to the gene-gene covariance matrix anyway,
+            // and the SVD is just a treated as an eigendecomposition of that.
+            if (dense_row->ncol() % nblocks == 0) {
+                EXPECT_TRUE(std::abs(dcol.sum()) < 0.000000001);
+                EXPECT_TRUE(std::abs(scol.sum()) < 0.000000001);
+            }
+        }
+
+        EXPECT_FLOAT_EQ(ref.total_variance, total_var); // checking the variance calculations are consistent.
+        if (scale) {
+            EXPECT_FLOAT_EQ(ref.total_variance, dense_row->nrow());
+        }
+
     } else {
         // Results should be EXACTLY the same with parallelization.
         auto res1 = runner.run(dense_row.get(), block.data());
@@ -268,19 +300,21 @@ TEST_P(MultiBatchPCAMoreTest, BalancedBlock) {
     ref.set_scale(scale).set_rank(rank);
     auto res2 = ref.run(dense_row.get());
 
-    // Only relative values make sense with the various scaling effects.
+    // Only relative variances make sense with the various scaling effects.
     for (auto& p : res1.variance_explained) { p /= res1.total_variance; }
     for (auto& p : res2.variance_explained) { p /= res2.total_variance; }
 
+    // Need to adjust for global differences in scale; using the Frobenius norm
+    // (always positive) to safely compute the scaling factor.
+    if (scale) { 
+        double mult = res1.pcs.norm() / res2.pcs.norm();
+        res1.pcs /= mult;
+    }
+
     if (dense_row->ncol() % nblocks == 0) { // balanced blocks.
-        if (scale) { // need to adjust for global differences in scale. 
-            double mult = res1.pcs(0,0) / res2.pcs(0,0);
-            res1.pcs /= mult;
-        }
-        expect_equal_pcs(res1.pcs, res2.pcs);
         expect_equal_vectors(res1.variance_explained, res2.variance_explained);
-    } else {
-        // check that blocking actually has an effect.
+        expect_equal_pcs(res1.pcs, res2.pcs);
+    } else { // check that blocking actually has an effect.
         EXPECT_TRUE(std::abs(res1.pcs(0,0) - res2.pcs(0,0)) > 1e-8);
         EXPECT_TRUE(std::abs(res1.variance_explained[0] - res2.variance_explained[0]) > 1e-8);
     }
@@ -313,6 +347,40 @@ TEST_P(MultiBatchPCAMoreTest, DuplicatedBlocks) {
     expect_equal_pcs(res1.pcs, res2.pcs.leftCols(res1.pcs.cols()));
     expect_equal_vectors(res1.variance_explained, res2.variance_explained);
     EXPECT_FLOAT_EQ(res1.total_variance, res2.total_variance);
+}
+
+TEST_P(MultiBatchPCAMoreTest, SubsetTest) {
+    assemble(GetParam());
+
+    std::vector<int> subset(dense_row->nrow());
+    std::vector<double> buffer(dense_row->ncol());
+    std::vector<double> submatrix;
+    auto it = sparse_matrix.begin();
+
+    size_t sub_nrows = 0;
+    for (size_t i = 0; i < subset.size(); ++i) {
+        subset[i] = i%2;
+        if (subset[i]) {
+            auto ptr = dense_row->row(i, buffer.data());
+            submatrix.insert(submatrix.end(), ptr, ptr + dense_row->ncol());
+            ++sub_nrows;
+        }
+    }
+
+    scran::MultiBatchPCA runner;
+    runner.set_scale(scale).set_rank(rank);
+
+    auto block = generate_blocks(dense_row->ncol(), 3);
+    auto out = runner.run(dense_row.get(), block.data(), subset.data());
+    EXPECT_EQ(out.variance_explained.size(), rank);
+
+    // Manually subsetting.
+    auto mat = std::shared_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double, int>(sub_nrows, dense_row->ncol(), std::move(submatrix)));
+    auto ref = runner.run(mat.get(), block.data());
+
+    expect_equal_pcs(ref.pcs, out.pcs);
+    expect_equal_vectors(ref.variance_explained, out.variance_explained);
+    EXPECT_FLOAT_EQ(out.total_variance, ref.total_variance);
 }
 
 INSTANTIATE_TEST_SUITE_P(

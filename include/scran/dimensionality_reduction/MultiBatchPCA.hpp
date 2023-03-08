@@ -191,32 +191,53 @@ public:
 #endif
 
 private:
-    template<class Matrix>
-    void reapply(const Matrix& emat, 
-        const Eigen::VectorXd& center_v, 
-        const Eigen::VectorXd& scale_v, 
-        Eigen::MatrixXd& pcs, 
-        Eigen::MatrixXd& rotation,
-        Eigen::VectorXd& variance_explained)
-    const {
-        // Dividing by the scaling factor to mimic the division of 'emat'
-        // by the scaling factor (after centering).
-        auto rIt = rotation.data();
-        for (size_t i = 0, iend = rotation.cols(); i < iend; ++i) {
-            auto sIt = scale_v.data();
-            for (size_t j = 0, jend = rotation.rows(); j < jend; ++j, ++rIt, ++sIt) {
-                (*rIt) /= *sIt;
-            }
+    template<typename Batch>
+    static Eigen::VectorXd compute_weights(size_t NC, const Batch* batch, const std::vector<int>& batch_size) {
+        Eigen::VectorXd weights(NC);
+        for (size_t i = 0; i < NC; ++i) {
+            weights[i] = 1/std::sqrt(static_cast<double>(batch_size[batch[i]]));
         }
-
-        reapply(emat, center_v, pcs, rotation, variance_explained);
+        return weights;
     }
 
-    template<class Matrix>
+public:
+#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
+    template<typename T, typename IDX, typename Batch>
+    Eigen::MatrixXd test_realize(const tatami::Matrix<T, IDX>* mat, const Batch* batch) const {
+        const size_t NC = mat->ncol();
+        auto batch_size = block_sizes(NC, batch); 
+        auto weights = compute_weights(NC, batch, batch_size);
+
+        Eigen::VectorXd center_v(mat->nrow());
+        Eigen::VectorXd scale_v(mat->nrow());
+
+        auto executor = [&](const auto& emat) -> Eigen::MatrixXd {
+            MultiBatchEigenMatrix<typename std::remove_reference<decltype(emat)>::type> thing(&emat, &weights, &center_v);
+            if (scale) {
+                irlba::Scaled<decltype(thing)> scaled(&thing, &scale_v); 
+                return scaled.realize();
+            } else {
+                return thing.realize();
+            }
+        };
+
+        double total_var = 0; // dummy value.
+        if (mat->sparse()) {
+            auto emat = create_custom_sparse_matrix(mat, center_v, scale_v, batch, batch_size, total_var);
+            return executor(emat);
+        } else {
+            auto emat = create_eigen_matrix_dense(mat, center_v, scale_v, batch, batch_size, total_var);
+            return executor(emat);
+        }
+    }
+#endif
+
+private:
+    template<class Matrix, class Rotation>
     void reapply(const Matrix& emat,
         const Eigen::VectorXd& center_v, 
         Eigen::MatrixXd& pcs, 
-        const Eigen::MatrixXd& rotation,
+        const Rotation& rotation,
         Eigen::VectorXd& variance_explained)
     const {
         if constexpr(irlba::has_multiply_method<Matrix>::value) {
@@ -247,14 +268,8 @@ private:
     template<typename T, typename IDX, typename Batch>
     void run(const tatami::Matrix<T, IDX>* mat, const Batch* batch, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
         const size_t NC = mat->ncol();
-        const auto& batch_size = block_sizes(NC, batch); 
-        const size_t nbatchs = batch_size.size();
-
-        // Computing weights.
-        Eigen::VectorXd weights(NC);
-        for (size_t i = 0; i < NC; ++i) {
-            weights[i] = 1/std::sqrt(static_cast<double>(batch_size[batch[i]]));
-        }
+        auto batch_size = block_sizes(NC, batch); 
+        auto weights = compute_weights(NC, batch, batch_size);
 
         Eigen::VectorXd center_v(mat->nrow());
         Eigen::VectorXd scale_v(mat->nrow());
@@ -270,7 +285,11 @@ private:
             MultiBatchEigenMatrix<typename std::remove_reference<decltype(emat)>::type> thing(&emat, &weights, &center_v);
             if (scale) {
                 irb.run(irlba::Scaled<decltype(thing)>(&thing, &scale_v), pcs, rotation, variance_explained);
-                reapply(emat, center_v, scale_v, pcs, rotation, variance_explained);
+
+                // Dividing the rotation vectors by the scaling factor to mimic
+                // the division of 'emat' by the scaling factor (after centering). 
+                Eigen::MatrixXd temp = rotation.array().colwise() / scale_v.array();
+                reapply(emat, center_v, pcs, temp, variance_explained);
             } else {
                 irb.run(thing, pcs, rotation, variance_explained);
                 reapply(emat, center_v, pcs, rotation, variance_explained);
