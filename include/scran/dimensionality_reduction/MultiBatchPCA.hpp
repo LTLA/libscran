@@ -11,7 +11,6 @@
 #include <cmath>
 
 #include "pca_utils.hpp"
-#include "CustomSparseMatrix.hpp"
 #include "../utils/block_indices.hpp"
 
 /**
@@ -183,13 +182,6 @@ public:
         return *this;
     }
 
-#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
-    MultiBatchPCA& set_use_eigen(bool e = false) {
-        use_eigen = true;
-        return *this;
-    }
-#endif
-
 private:
     template<typename Batch>
     static Eigen::VectorXd compute_weights(size_t NC, const Batch* batch, const std::vector<int>& batch_size) {
@@ -240,11 +232,60 @@ private:
         const Rotation& rotation,
         Eigen::VectorXd& variance_explained)
     const {
-        if constexpr(irlba::has_multiply_method<Matrix>::value) {
+        if constexpr(!std::is_same<Matrix, pca_utils::SparseMatrix>::value) {
             pcs.noalias() = emat * rotation;
         } else {
-            pcs.resize(emat.rows(), rotation.cols());
-            emat.multiply(rotation, pcs);
+            size_t nvec = pcs.cols();
+            size_t nrow = emat.rows();
+            size_t ncol = emat.cols();
+
+            Eigen::MatrixXd transposed(nvec, nrow); // using a transposed version for more cache efficiency.
+            transposed.setZero();
+
+            const auto& x = emat.get_values();
+            const auto& i = emat.get_indices();
+            const auto& p = emat.get_pointers();
+
+            if (nthreads == 1) {
+                Eigen::VectorXd multipliers(nvec);
+                for (size_t c = 0; c < ncol; ++c) {
+                    multipliers.noalias() = rotation.row(c);
+                    auto start = p[c], end = p[c + 1];
+                    for (size_t s = start; s < end; ++s) {
+                        transposed.col(i[s]).noalias() += x[s] * multipliers;
+                    }
+                }
+            } else {
+                const auto& row_nonzero_starts = emat.get_secondary_nonzero_starts();
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+                #pragma omp parallel for num_threads(nthreads)
+                for (int t = 0; t < nthreads; ++t) {
+#else
+                SCRAN_CUSTOM_PARALLEL(nthreads, [&](int first, int last) -> void {
+                for (int t = first; t < last; ++t) {
+#endif
+
+                    const auto& starts = row_nonzero_starts[t];
+                    const auto& ends = row_nonzero_starts[t + 1];
+                    Eigen::VectorXd multipliers(nvec);
+                    for (size_t c = 0; c < ncol; ++c) {
+                        multipliers.noalias() = rotation.row(c);
+                        auto start = starts[c], end = ends[c];
+                        for (size_t s = start; s < end; ++s) {
+                            transposed.col(i[s]).noalias() += x[s] * multipliers;
+                        }
+                    }
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+                }
+#else
+                }
+                }, nthreads);
+#endif
+            }
+
+            pcs.noalias() = transposed.adjoint();
         }
 
         // Effective centering because I don't want to modify 'emat'.
@@ -406,7 +447,7 @@ public:
 
 private:
     template<typename T, typename IDX, typename Batch> 
-    pca_utils::CustomSparseMatrix create_custom_sparse_matrix(const tatami::Matrix<T, IDX>* mat, 
+    pca_utils::SparseMatrix create_custom_sparse_matrix(const tatami::Matrix<T, IDX>* mat, 
         Eigen::VectorXd& center_v, 
         Eigen::VectorXd& scale_v, 
         const Batch* batch,
@@ -497,15 +538,7 @@ private:
 
         // Actually filling the sparse matrix. Note that this is transposed
         // because we want genes in the columns.
-        pca_utils::CustomSparseMatrix A(NC, NR, nthreads); 
-#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
-        if (use_eigen) {
-            A.use_eigen();
-        }
-#endif
-        A.fill_direct(std::move(values), std::move(indices), std::move(ptrs));
-
-        return A;
+        return pca_utils::SparseMatrix(NC, NR, std::move(values), std::move(indices), std::move(ptrs), nthreads);
     }
 
 private:

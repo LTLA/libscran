@@ -66,7 +66,6 @@ TEST(BlockedMatrixTest, CustomSparse) {
     size_t NR = 30, NC = 10, NB = 3;
     auto block = generate_blocks(NR, NB);
 
-    scran::pca_utils::CustomSparseMatrix thing(NR, NC, 1);  
     std::vector<double> values;
     std::vector<int> indices;
     std::vector<size_t> ptrs(NC + 1);
@@ -100,7 +99,7 @@ TEST(BlockedMatrixTest, CustomSparse) {
         }
     }
 
-    thing.fill_direct(std::move(values), std::move(indices), std::move(ptrs));
+    scran::pca_utils::SparseMatrix thing(NR, NC, std::move(values), std::move(indices), std::move(ptrs), 1);
     scran::BlockedEigenMatrix<decltype(thing), int> blocked(&thing, block.data(), &centers);
     auto realized = blocked.realize();
 
@@ -169,30 +168,19 @@ protected:
 
 /******************************************/
 
-class BlockedPCABasicTest : public ::testing::TestWithParam<std::tuple<bool, int, int, int, bool> >, public BlockedPCATestCore {};
+class BlockedPCABasicTest : public ::testing::TestWithParam<std::tuple<bool, int, int, int> >, public BlockedPCATestCore {};
 
 TEST_P(BlockedPCABasicTest, Basic) {
     auto param = GetParam();
     assemble(param);
     int nthreads = std::get<3>(param);
-    auto use_eigen = std::get<4>(param);
 
     scran::BlockedPCA runner;
     runner.set_scale(scale).set_rank(rank);
     auto block = generate_blocks(dense_row->ncol(), nblocks);
     auto ref = runner.run(dense_row.get(), block.data());
 
-    runner.set_use_eigen(use_eigen);
-    runner.set_num_threads(nthreads);
-
-    if (use_eigen) {
-        // Results should be similar with Eigen matrices.
-        auto res1 = runner.run(dense_row.get(), block.data());
-        expect_equal_pcs(ref.pcs, res1.pcs);
-        expect_equal_vectors(ref.variance_explained, res1.variance_explained);
-        EXPECT_FLOAT_EQ(ref.total_variance, res1.total_variance);
-
-    } else if (nthreads == 1) {
+    if (nthreads == 1) {
         EXPECT_EQ(ref.pcs.rows(), rank);
         EXPECT_EQ(ref.pcs.cols(), dense_row->ncol());
         EXPECT_EQ(ref.variance_explained.size(), rank);
@@ -234,6 +222,8 @@ TEST_P(BlockedPCABasicTest, Basic) {
         }
 
     } else {
+        runner.set_num_threads(nthreads);
+
         // Results should be EXACTLY the same with parallelization.
         auto res1 = runner.run(dense_row.get(), block.data());
         EXPECT_EQ(ref.pcs, res1.pcs);
@@ -265,8 +255,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(false, true), // to scale or not to scale?
         ::testing::Values(2, 3, 4), // number of PCs to obtain
         ::testing::Values(1, 2, 3), // number of blocks
-        ::testing::Values(1, 3), // number of threads
-        ::testing::Values(false, true) // use Eigen for testing?
+        ::testing::Values(1, 3) // number of threads
     )
 );
 
