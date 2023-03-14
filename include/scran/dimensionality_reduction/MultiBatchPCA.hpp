@@ -136,10 +136,6 @@ private:
     int rank = Defaults::rank;
     int nthreads = Defaults::num_threads;
 
-#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
-    bool use_eigen = false;
-#endif
-
 public:
     /**
      * @param r Number of PCs to compute.

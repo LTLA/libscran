@@ -130,10 +130,6 @@ private:
     int rank = Defaults::rank;
     int nthreads = Defaults::num_threads;
 
-#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
-    bool use_eigen = false;
-#endif
-
 public:
     /**
      * @param r Number of PCs to compute.
@@ -175,13 +171,6 @@ public:
         nthreads = n;
         return *this;
     }
-
-#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
-    BlockedPCA& set_use_eigen(bool e = false) {
-        use_eigen = true;
-        return *this;
-    }
-#endif
 
 private:
     template<typename T, typename IDX, typename Block>
