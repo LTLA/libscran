@@ -34,29 +34,18 @@ protected:
 
 /******************************************/
 
-class RunPCABasicTest : public ::testing::TestWithParam<std::tuple<bool, int, int, bool> >, public RunPCATestCore {};
+class RunPCABasicTest : public ::testing::TestWithParam<std::tuple<bool, int, int> >, public RunPCATestCore {};
 
 TEST_P(RunPCABasicTest, Test) {
     auto param = GetParam();
     assemble(param);
     auto threads = std::get<2>(param);
-    auto use_eigen = std::get<3>(param);
 
     scran::RunPCA runner;
     runner.set_scale(scale).set_rank(rank);
     auto ref = runner.run(dense_row.get());
 
-    runner.set_num_threads(threads);
-    runner.set_use_eigen(use_eigen);
-
-    if (use_eigen) {
-        // Results should be similar with Eigen matrices.
-        auto res1 = runner.run(dense_row.get());
-        expect_equal_pcs(ref.pcs, res1.pcs);
-        expect_equal_vectors(ref.variance_explained, res1.variance_explained);
-        EXPECT_FLOAT_EQ(ref.total_variance, res1.total_variance);
-
-    } else if (threads == 1) {
+    if (threads == 1) {
         EXPECT_EQ(ref.variance_explained.size(), rank);
         EXPECT_EQ(ref.pcs.rows(), rank);
         EXPECT_EQ(ref.pcs.cols(), dense_row->ncol());
@@ -94,7 +83,10 @@ TEST_P(RunPCABasicTest, Test) {
         }
 
     } else {
+        runner.set_num_threads(threads);
+
         // Results should be EXACTLY the same with parallelization.
+
         auto res1 = runner.run(dense_row.get());
         EXPECT_EQ(ref.pcs, res1.pcs);
         EXPECT_EQ(ref.variance_explained, res1.variance_explained);
@@ -124,8 +116,7 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Combine(
         ::testing::Values(false, true), // to scale or not to scale?
         ::testing::Values(2, 3, 4), // number of PCs to obtain
-        ::testing::Values(1, 3), // number of threads
-        ::testing::Values(false, true) // use Eigen for testing?
+        ::testing::Values(1, 3) // number of threads
     )
 );
 

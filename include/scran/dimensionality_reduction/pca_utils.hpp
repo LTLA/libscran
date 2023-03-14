@@ -9,6 +9,7 @@
 
 #include "tatami/tatami.hpp"
 #include "Eigen/Dense"
+#include "irlba/parallel.hpp"
 
 namespace scran {
 
@@ -164,6 +165,8 @@ inline void center_and_scale_dense_columns(Eigen::MatrixXd& mat, const Eigen::Ve
 
 /************************************************
  ************************************************/
+
+typedef irlba::ParallelSparseMatrix<> SparseMatrix;
 
 struct SparseComponents {
     std::vector<size_t> ptrs;

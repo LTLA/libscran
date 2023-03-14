@@ -13,7 +13,6 @@
 #include <cmath>
 
 #include "pca_utils.hpp"
-#include "CustomSparseMatrix.hpp"
 
 /**
  * @file BlockedPCA.hpp
@@ -145,10 +144,6 @@ private:
     int rank = Defaults::rank;
     int nthreads = Defaults::num_threads;
 
-#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
-    bool use_eigen = false;
-#endif
-
 public:
     /**
      * @param r Number of PCs to compute.
@@ -190,13 +185,6 @@ public:
         nthreads = n;
         return *this;
     }
-
-#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
-    BlockedPCA& set_use_eigen(bool e = false) {
-        use_eigen = true;
-        return *this;
-    }
-#endif
 
 private:
     template<typename T, typename IDX, typename Block>
@@ -329,7 +317,7 @@ public:
 
 private:
     template<typename T, typename IDX, typename Block> 
-    pca_utils::CustomSparseMatrix create_custom_sparse_matrix(const tatami::Matrix<T, IDX>* mat, 
+    pca_utils::SparseMatrix create_custom_sparse_matrix(const tatami::Matrix<T, IDX>* mat, 
         Eigen::MatrixXd& center_m, 
         Eigen::VectorXd& scale_v, 
         const Block* block, 
@@ -402,15 +390,14 @@ private:
             total_var = pca_utils::process_scale_vector(scale, scale_v);
         }
 
-        pca_utils::CustomSparseMatrix A(NC, NR, nthreads); // transposed; we want genes in the columns.
-#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
-        if (use_eigen) {
-            A.use_eigen();
-        }
-#endif
-        A.fill_direct(std::move(values), std::move(indices), std::move(ptrs));
-
-        return A;
+        return pca_utils::SparseMatrix(
+            NC, // NC => number of rows, i.e., it's transposed as we want genes in the columns.
+            NR,
+            std::move(values), 
+            std::move(indices), 
+            std::move(ptrs),
+            nthreads
+        );
     }
 
 private:

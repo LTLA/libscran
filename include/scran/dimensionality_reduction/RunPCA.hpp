@@ -11,7 +11,6 @@
 #include <cmath>
 
 #include "pca_utils.hpp"
-#include "CustomSparseMatrix.hpp"
 
 /**
  * @file RunPCA.hpp
@@ -62,10 +61,6 @@ private:
     int rank = Defaults::rank;
     int nthreads = Defaults::num_threads;
 
-#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
-    bool use_eigen = false;
-#endif
-
 public:
     /**
      * @param r Number of PCs to compute.
@@ -107,13 +102,6 @@ public:
         nthreads = n;
         return *this;
     }
-
-#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
-    RunPCA& set_use_eigen(bool e = false) {
-        use_eigen = true;
-        return *this;
-    }
-#endif
 
 private:
     template<typename T, typename IDX>
@@ -232,7 +220,7 @@ public:
 
 private:
     template<typename T, typename IDX> 
-    pca_utils::CustomSparseMatrix create_custom_sparse_matrix(const tatami::Matrix<T, IDX>* mat, Eigen::VectorXd& center_v, Eigen::VectorXd& scale_v, double& total_var) const {
+    pca_utils::SparseMatrix create_custom_sparse_matrix(const tatami::Matrix<T, IDX>* mat, Eigen::VectorXd& center_v, Eigen::VectorXd& scale_v, double& total_var) const {
         auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major extraction.
         auto& ptrs = extracted.ptrs;
         auto& values = extracted.values;
@@ -244,15 +232,7 @@ private:
 
         // Actually creating a sparse matrix. Again, note that this is
         // transposed; we want genes in the columns.
-        pca_utils::CustomSparseMatrix A(NC, NR, nthreads); 
-#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
-        if (use_eigen) {
-            A.use_eigen();
-        }
-#endif
-        A.fill_direct(std::move(values), std::move(indices), std::move(ptrs));
-
-        return A;
+        return pca_utils::SparseMatrix(NC, NR, std::move(values), std::move(indices), std::move(ptrs), nthreads);
     }
 
 private:
