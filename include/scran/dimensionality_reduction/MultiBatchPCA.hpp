@@ -35,7 +35,7 @@ public:
     typedef irlba::WrappedWorkspace<Matrix> Workspace;
 
     Workspace workspace() const {
-        return mat->workspace();
+        return irlba::wrapped_workspace(mat);
     }
 
     template<class Right>
@@ -52,13 +52,13 @@ public:
 
 public:
     struct AdjointWorkspace {
-        AdjointWorkspace(size_t n, irlba::WrappedWorkspace<Matrix> c) : combined(nblocks), child(std::move(c)) {}
+        AdjointWorkspace(size_t n, irlba::WrappedAdjointWorkspace<Matrix> c) : combined(n), child(std::move(c)) {}
         Eigen::VectorXd combined;
-        irlba::WrappedWorkspace<Matrix> child;
+        irlba::WrappedAdjointWorkspace<Matrix> child;
     };
 
     AdjointWorkspace adjoint_workspace() const {
-        return Workspace(weights.size(), mat->adjoint_workspace());
+        return AdjointWorkspace(weights->size(), irlba::wrapped_adjoint_workspace(mat));
     }
 
     template<class Right>
@@ -67,7 +67,7 @@ public:
 
         irlba::wrapped_adjoint_multiply(mat, work.combined, work.child, output);
 
-        double sum = combined.sum();
+        double sum = work.combined.sum();
         for (Eigen::Index i = 0; i < output.size(); ++i) {
             output.coeffRef(i) -= means->coeff(i) * sum;
         }
@@ -76,12 +76,7 @@ public:
 
 public:
     Eigen::MatrixXd realize() const {
-        Eigen::MatrixXd output;
-        if constexpr(irlba::has_realize_method<Matrix>::value) {
-            output = mat->realize();
-        } else {
-            output = Eigen::MatrixXd(*mat);
-        }
+        Eigen::MatrixXd output = irlba::wrapped_realize(mat);
 
         for (Eigen::Index c = 0; c < output.cols(); ++c) {
             for (Eigen::Index r = 0; r < output.rows(); ++r) {

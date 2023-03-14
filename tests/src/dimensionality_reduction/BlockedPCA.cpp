@@ -43,7 +43,9 @@ TEST(BlockedMatrixTest, EigenDense) {
         }
 
         Eigen::VectorXd prod1(NR);
-        blocked.multiply(rhs, prod1);
+        auto wrk = blocked.workspace();
+        blocked.multiply(rhs, wrk, prod1);
+
         Eigen::MatrixXd prod2 = realized * rhs;
         compare_almost_equal(prod1, prod2);
     }
@@ -56,7 +58,9 @@ TEST(BlockedMatrixTest, EigenDense) {
         }
 
         Eigen::VectorXd tprod1(NC);
-        blocked.adjoint_multiply(rhs, tprod1);
+        auto wrk = blocked.adjoint_workspace();
+        blocked.adjoint_multiply(rhs, wrk, tprod1);
+
         Eigen::MatrixXd tprod2 = realized.adjoint() * rhs;
         compare_almost_equal(tprod1, tprod2);
     }
@@ -123,7 +127,9 @@ TEST(BlockedMatrixTest, CustomSparse) {
         }
 
         Eigen::VectorXd prod1(NR);
-        blocked.multiply(rhs, prod1);
+        auto wrk = blocked.workspace();
+        blocked.multiply(rhs, wrk, prod1);
+
         Eigen::MatrixXd prod2 = realized * rhs;
         compare_almost_equal(prod1, prod2);
     }
@@ -136,7 +142,9 @@ TEST(BlockedMatrixTest, CustomSparse) {
         }
 
         Eigen::VectorXd tprod1(NC);
-        blocked.adjoint_multiply(rhs, tprod1);
+        auto wrk = blocked.adjoint_workspace();
+        blocked.adjoint_multiply(rhs, wrk, tprod1);
+
         Eigen::MatrixXd tprod2 = realized.adjoint() * rhs;
         compare_almost_equal(tprod1, tprod2);
     }
