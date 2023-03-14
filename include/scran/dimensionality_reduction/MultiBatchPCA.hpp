@@ -32,13 +32,16 @@ struct MultiBatchEigenMatrix {
     auto rows() const { return mat->rows(); }
     auto cols() const { return mat->cols(); }
 
+public:
+    typedef irlba::WrappedWorkspace<Matrix> Workspace;
+
+    Workspace workspace() const {
+        return mat->workspace();
+    }
+
     template<class Right>
-    void multiply(const Right& rhs, Eigen::VectorXd& output) const {
-        if constexpr(irlba::has_multiply_method<Matrix>::value) {
-            output.noalias() = *mat * rhs;
-        } else {
-            mat->multiply(rhs, output);
-        }
+    void multiply(const Right& rhs, Workspace& work, Eigen::VectorXd& output) const {
+        irlba::wrapped_multiply(mat, rhs, work, output);
 
         double sub = means->dot(rhs);
         for (Eigen::Index i = 0; i < output.size(); ++i) {
@@ -48,15 +51,22 @@ struct MultiBatchEigenMatrix {
         }
     }
 
-    template<class Right>
-    void adjoint_multiply(const Right& rhs, Eigen::VectorXd& output) const {
-        Eigen::VectorXd combined = weights->cwiseProduct(rhs);
+public:
+    struct AdjointWorkspace {
+        AdjointWorkspace(size_t n, irlba::WrappedWorkspace<Matrix> c) : combined(nblocks), child(std::move(c)) {}
+        Eigen::VectorXd combined;
+        irlba::WrappedWorkspace<Matrix> child;
+    };
 
-        if constexpr(irlba::has_adjoint_multiply_method<Matrix>::value) {
-            output.noalias() = mat->adjoint() * combined;
-        } else {
-            mat->adjoint_multiply(combined, output);
-        }
+    AdjointWorkspace adjoint_workspace() const {
+        return Workspace(weights.size(), mat->adjoint_workspace());
+    }
+
+    template<class Right>
+    void adjoint_multiply(const Right& rhs, AdjointWorkspace& work, Eigen::VectorXd& output) const {
+        work.combined.noalias() = weights->cwiseProduct(rhs);
+
+        irlba::wrapped_adjoint_multiply(mat, work.combined, work.child, output);
 
         double sum = combined.sum();
         for (Eigen::Index i = 0; i < output.size(); ++i) {
@@ -65,6 +75,7 @@ struct MultiBatchEigenMatrix {
         return;
     }
 
+public:
     Eigen::MatrixXd realize() const {
         Eigen::MatrixXd output;
         if constexpr(irlba::has_realize_method<Matrix>::value) {
