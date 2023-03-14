@@ -11,7 +11,6 @@
 #include "Eigen/Dense"
 
 #include "../dimensionality_reduction/pca_utils.hpp"
-#include "../dimensionality_reduction/CustomSparseMatrix.hpp"
 
 /**
  * @file ScoreFeatureSet.hpp
@@ -479,7 +478,7 @@ private:
         irb.set_number(1);
 
         // Running through and computing the rotation vectors.
-        std::vector<pca_utils::CustomSparseMatrix> all_matrices;
+        std::vector<pca_utils::SparseMatrix> all_matrices;
         all_matrices.reserve(nblocks);
         std::vector<Eigen::VectorXd> centers;
         centers.reserve(nblocks);
@@ -498,9 +497,15 @@ private:
             pca_utils::compute_mean_and_variance_from_sparse_components(num_features, block_size[b], values, indices, ptrs, center_v, scale_v, nthreads);
             double total_var = pca_utils::process_scale_vector(scale, scale_v);
 
-            all_matrices.emplace_back(block_size[b], num_features, nthreads); // transposed; we want genes in the columns.
-            auto& A = all_matrices.back();
-            A.fill_direct(std::move(values), std::move(indices), std::move(ptrs));
+            all_matrices.emplace_back(
+                block_size[b], // transposed; we want genes in the columns.
+                num_features, 
+                std::move(values), 
+                std::move(indices), 
+                std::move(ptrs),
+                nthreads
+            );
+            const auto& A = all_matrices.back();
 
             auto& current_rotation = rotation[b];
             if (block_size[b] >= 2) {
