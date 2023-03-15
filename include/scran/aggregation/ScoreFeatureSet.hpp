@@ -539,9 +539,11 @@ private:
                 irlba::Centered<std::remove_reference<decltype(A)>::type> centered(&A, &centers[b]);
                 if (scale) {
                     irlba::Scaled<decltype(centered)> scaled(&centered, &scales[b]);
-                    scaled.multiply(rotation_as_vector, scores);
+                    auto wrk = scaled.workspace();
+                    scaled.multiply(rotation_as_vector, wrk, scores);
                 } else {
-                    centered.multiply(rotation_as_vector, scores);
+                    auto wrk = centered.workspace();
+                    centered.multiply(rotation_as_vector, wrk, scores);
                 }
             },
             centers,

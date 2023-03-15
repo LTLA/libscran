@@ -47,7 +47,9 @@ TEST(MultiBatchMatrixTest, EigenDense) {
         }
 
         Eigen::VectorXd prod1(NR);
-        batched.multiply(rhs, prod1);
+        auto wrk = batched.workspace();
+        batched.multiply(rhs, wrk, prod1);
+
         Eigen::VectorXd prod2 = realized * rhs;
         compare_almost_equal(prod1, prod2);
     }
@@ -60,7 +62,9 @@ TEST(MultiBatchMatrixTest, EigenDense) {
         }
 
         Eigen::VectorXd tprod1(NC);
-        batched.adjoint_multiply(rhs, tprod1);
+        auto wrk = batched.adjoint_workspace();
+        batched.adjoint_multiply(rhs, wrk, tprod1);
+
         Eigen::VectorXd tprod2 = realized.adjoint() * rhs;
         compare_almost_equal(tprod1, tprod2);
     }
@@ -129,7 +133,9 @@ TEST(MultiBatchMatrixTest, CustomSparse) {
         }
 
         Eigen::VectorXd prod1(NR);
-        batched.multiply(rhs, prod1);
+        auto wrk = batched.workspace();
+        batched.multiply(rhs, wrk, prod1);
+
         Eigen::VectorXd prod2 = realized * rhs;
         compare_almost_equal(prod1, prod2);
     }
@@ -142,7 +148,9 @@ TEST(MultiBatchMatrixTest, CustomSparse) {
         }
 
         Eigen::VectorXd tprod1(NC);
-        batched.adjoint_multiply(rhs, tprod1);
+        auto wrk = batched.adjoint_workspace();
+        batched.adjoint_multiply(rhs, wrk, tprod1);
+
         Eigen::VectorXd tprod2 = realized.adjoint() * rhs;
         compare_almost_equal(tprod1, tprod2);
     }

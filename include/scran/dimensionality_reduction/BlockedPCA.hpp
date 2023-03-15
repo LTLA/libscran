@@ -32,46 +32,55 @@ struct BlockedEigenMatrix {
     auto rows() const { return mat->rows(); }
     auto cols() const { return mat->cols(); }
 
-    template<class Right>
-    void multiply(const Right& rhs, Eigen::VectorXd& output) const {
-        if constexpr(irlba::has_multiply_method<Matrix>::value) {
-            output.noalias() = (*mat) * rhs;
-        } else {
-            mat->multiply(rhs, output);
-        }
+public:
+    struct Workspace {
+        Workspace(size_t nblocks, irlba::WrappedWorkspace<Matrix> c) : sub(nblocks), child(std::move(c)) {}
+        Eigen::VectorXd sub;
+        irlba::WrappedWorkspace<Matrix> child;
+    };
 
-        Eigen::VectorXd sub = (*means) * rhs;
+    Workspace workspace() const {
+        return Workspace(means->rows(), irlba::wrapped_workspace(mat));
+    }
+
+    template<class Right>
+    void multiply(const Right& rhs, Workspace& work, Eigen::VectorXd& output) const {
+        irlba::wrapped_multiply(mat, rhs, work.child, output);
+
+        work.sub.noalias() = (*means) * rhs;
         for (Eigen::Index i = 0; i < output.size(); ++i) {
-            output.coeffRef(i) -= sub.coeff(block[i]);
+            output.coeffRef(i) -= work.sub.coeff(block[i]);
         }
         return;
+    }
+
+public:
+    struct AdjointWorkspace {
+        AdjointWorkspace(size_t nblocks, irlba::WrappedAdjointWorkspace<Matrix> c) : aggr(nblocks), child(std::move(c)) {}
+        Eigen::VectorXd aggr;
+        irlba::WrappedWorkspace<Matrix> child;
+    };
+
+    AdjointWorkspace adjoint_workspace() const {
+        return AdjointWorkspace(means->rows(), irlba::wrapped_adjoint_workspace(mat));
     }
 
     template<class Right>
-    void adjoint_multiply(const Right& rhs, Eigen::VectorXd& output) const {
-        if constexpr(irlba::has_adjoint_multiply_method<Matrix>::value) {
-            output.noalias() = mat->adjoint() * rhs;
-        } else {
-            mat->adjoint_multiply(rhs, output);
-        }
+    void adjoint_multiply(const Right& rhs, AdjointWorkspace& work, Eigen::VectorXd& output) const {
+        irlba::wrapped_adjoint_multiply(mat, rhs, work.child, output);
 
-        Eigen::VectorXd aggr(means->rows());
-        aggr.setZero();
+        work.aggr.setZero();
         for (Eigen::Index i = 0; i < rhs.size(); ++i) {
-            aggr.coeffRef(block[i]) += rhs.coeff(i); 
+            work.aggr.coeffRef(block[i]) += rhs.coeff(i); 
         }
 
-        output.noalias() -= means->adjoint() * aggr;
+        output.noalias() -= means->adjoint() * work.aggr;
         return;
     }
 
+public:
     Eigen::MatrixXd realize() const {
-        Eigen::MatrixXd output;
-        if constexpr(irlba::has_realize_method<Matrix>::value) {
-            output = mat->realize();
-        } else {
-            output = Eigen::MatrixXd(*mat);
-        }
+        Eigen::MatrixXd output = irlba::wrapped_realize(mat);
 
         for (Eigen::Index c = 0; c < output.cols(); ++c) {
             for (Eigen::Index r = 0; r < output.rows(); ++r) {

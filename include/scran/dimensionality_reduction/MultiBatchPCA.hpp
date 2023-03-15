@@ -31,13 +31,16 @@ struct MultiBatchEigenMatrix {
     auto rows() const { return mat->rows(); }
     auto cols() const { return mat->cols(); }
 
+public:
+    typedef irlba::WrappedWorkspace<Matrix> Workspace;
+
+    Workspace workspace() const {
+        return irlba::wrapped_workspace(mat);
+    }
+
     template<class Right>
-    void multiply(const Right& rhs, Eigen::VectorXd& output) const {
-        if constexpr(irlba::has_multiply_method<Matrix>::value) {
-            output.noalias() = *mat * rhs;
-        } else {
-            mat->multiply(rhs, output);
-        }
+    void multiply(const Right& rhs, Workspace& work, Eigen::VectorXd& output) const {
+        irlba::wrapped_multiply(mat, rhs, work, output);
 
         double sub = means->dot(rhs);
         for (Eigen::Index i = 0; i < output.size(); ++i) {
@@ -47,30 +50,33 @@ struct MultiBatchEigenMatrix {
         }
     }
 
+public:
+    struct AdjointWorkspace {
+        AdjointWorkspace(size_t n, irlba::WrappedAdjointWorkspace<Matrix> c) : combined(n), child(std::move(c)) {}
+        Eigen::VectorXd combined;
+        irlba::WrappedAdjointWorkspace<Matrix> child;
+    };
+
+    AdjointWorkspace adjoint_workspace() const {
+        return AdjointWorkspace(weights->size(), irlba::wrapped_adjoint_workspace(mat));
+    }
+
     template<class Right>
-    void adjoint_multiply(const Right& rhs, Eigen::VectorXd& output) const {
-        Eigen::VectorXd combined = weights->cwiseProduct(rhs);
+    void adjoint_multiply(const Right& rhs, AdjointWorkspace& work, Eigen::VectorXd& output) const {
+        work.combined.noalias() = weights->cwiseProduct(rhs);
 
-        if constexpr(irlba::has_adjoint_multiply_method<Matrix>::value) {
-            output.noalias() = mat->adjoint() * combined;
-        } else {
-            mat->adjoint_multiply(combined, output);
-        }
+        irlba::wrapped_adjoint_multiply(mat, work.combined, work.child, output);
 
-        double sum = combined.sum();
+        double sum = work.combined.sum();
         for (Eigen::Index i = 0; i < output.size(); ++i) {
             output.coeffRef(i) -= means->coeff(i) * sum;
         }
         return;
     }
 
+public:
     Eigen::MatrixXd realize() const {
-        Eigen::MatrixXd output;
-        if constexpr(irlba::has_realize_method<Matrix>::value) {
-            output = mat->realize();
-        } else {
-            output = Eigen::MatrixXd(*mat);
-        }
+        Eigen::MatrixXd output = irlba::wrapped_realize(mat);
 
         for (Eigen::Index c = 0; c < output.cols(); ++c) {
             for (Eigen::Index r = 0; r < output.rows(); ++r) {
