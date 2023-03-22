@@ -18,7 +18,7 @@ namespace scran {
  *
  * This computes the tail probabilities for the hypergeometric distribution.
  * It is intended for use in quantifying feature set enrichment in marker lists.
- * The white balls are the features in the set, the black balls are all other features, and the drawing process involves picking the top N markers;
+ * The "successes" are the features in the set, the "failures" are all other features, and the drawing process typically involves picking the top N markers;
  * our aim is to compute the p-value for enrichment of features in the set among the top markers.
  */
 class HypergeometricTail {
@@ -53,8 +53,10 @@ public:
     }
 
     /**
-     * @param u Whether to report the upper tail.
-     * If `false`, the lower tail is returned.
+     * @param u Whether to report the upper tail, including the probability mass of the observed number of drawn white balls.
+     * This allows the tail probability to be directly used as the p-value for testing enrichment.
+     * If `false`, the lower tail is returned, again including the probability mass of `drawn_inside`.
+     *
      * @return A reference to this `HypergeometricTail` instance.
      */
     HypergeometricTail& set_upper_tail(bool u = Defaults::upper_tail) {
@@ -62,121 +64,45 @@ public:
         return *this;
     }
 
-public:
-    /**
-     * @brief Cached statistics for re-use across `run()` calls.
-     */
-    struct Cache {
-        /**
-         * @cond
-         */
-        int drawn_white = 0;
-        int num_white = 0;
-        int num_black = 0;
-        int num_drawn = 0;
-
-        std::vector<long double> cumulative;
-        long double probability = 0;
-        double scale = 0;
-        /**
-         * @endcond
-         */
-    };
-
-    /**
-     * Create a new cache for use in `run()`.
-     *
-     * @return A new `Cache` instance.
-     */
-    Cache new_cache() {
-        return Cache();
-    }
-
-private:
-    // Using Stirling's approximation compute choose(num_black, num_drawn) / choose(num_black + num_white, num_drawn).
-    static double stirling(double x) {
-        return x * std::log(x) - x + 0.5 * std::log(2 * 3.14159265358979323846 * x);
-    }
-
 private:
     /*
-     * Computing the cumulative sum after factorizing out choose(num_white + num_black, num_drawn), obviously.
-     *
-     * If num_drawn < num_black, we also factorize out choose(num_black, num_drawn), so that we can compute the series by simply increasing 'k'.
-     * This avoids the need to do two passes where the first pass computes choose(num_black, num_drawn - drawn_white) and the second pass handles the summation.
-     *
-     * Otherwise, we factorize out choose(num_white, num_drawn - num_black), which is the first non-zero probability mass in the series.
-     * This reduces the size of the summed terms to avoid overflow, and is reflected in 'start > 1'.
+     * Computing the cumulative sum after factorizing out the probability mass at drawn_inside.
+     * This allows us to do one pass from k to 0 to compute the probability.
      * 
      * We can check the accuracy of our calculations with:
-     * sum(choose(num_white, 0:drawn_white) * choose(num_black, num_drawn - 0:drawn_white)) / max(choose(num_white, num_drawn - num_black), choose(num_black, num_drawn)) - 1
+     * sum(choose(num_inside, 0:drawn_inside) * choose(num_outside, num_drawn - 0:drawn_inside)) / max(choose(num_inside, num_drawn - num_outside), choose(num_outside, num_drawn)) - 1
      */
-    static long double compute_cumulative(int drawn_white, int num_white, int num_black, int num_drawn) {
-        // We use long double for some extra precision here.
+    static long double compute_cumulative(int drawn_inside, int num_inside, int num_outside, int num_drawn) {
+        // Improved precision for this step, possibly involving small probabilities.
         long double probability = 1;
 
-        // We need to add 1 for the starting term after our factorizations, 
+        // We need to add 1 for the probability mass at drawn_inside,
         // but we'll do this in compute_tail_probability() to make use of the more precise log1p.
         long double cumulative = 0; 
 
-        int start = num_drawn - num_black + 1;
-        if (start <= 0) {
-            start = 1;
-        }
-
-        for (int k = start; k <= drawn_white; ++k) {
-            probability *= static_cast<double>(num_white - k + 1) * static_cast<double>(num_drawn - k + 1) / static_cast<double>(k) / static_cast<double>(num_black - num_drawn + k);
+        for (int k = drawn_inside; k > 0 && probability > 0; --k) {
+            probability *= static_cast<double>(k) * static_cast<double>(num_outside - num_drawn + k) / static_cast<double>(num_inside - k + 1) / static_cast<double>(num_drawn - k + 1);
             cumulative += probability;
         }
 
         return cumulative;
     }
 
-private:
-    static void compute_cumulative(int drawn_white, int num_white, int num_black, int num_drawn, Cache& cache) {
-        auto& probability = cache.probability;
-        auto& cumulative = cache.cumulative;
-        auto& k = cache.drawn_white;
-
-        if (num_white == cache.num_white && num_black == cache.num_black && num_drawn == cache.num_drawn) {
-            if (k >= drawn_white) {
-                return;
-            }
+    // Using Ramanujan's approximation rather than R's complicated thing. 
+    // Check out https://www.johndcook.com/blog/2012/09/25/ramanujans-factorial-approximation/.
+    static double lfactorial(double x) {
+        if (x == 0) {
+            return 0;
         } else {
-            cumulative.clear();
-            cumulative.push_back(0);
-            probability = 1;
-            k = 0;
-        }
-
-        cumulative.reserve(drawn_white + 1);
-
-        // Same logic as above, but we now store the probability at each step.
-        while (k < drawn_white) {
-            ++k;
-            if (num_drawn - k < num_black) {
-                probability *= static_cast<double>(num_white - k + 1) * static_cast<double>(num_drawn - k + 1) / static_cast<double>(k) / static_cast<double>(num_black - num_drawn + k);
-                cumulative.push_back(cumulative.back() + probability);
-            } else {
-                cumulative.push_back(0);
-            }
+            return 1.0/6.0 * std::log(x * (1 + 4 * x * (1 + 2 * x)) + 1.0/30.0) + x * std::log(x) - x + 0.5 * std::log(3.14159265358979323846);
         }
     }
 
-    static double compute_log_scale(int num_white, int num_black, int num_drawn) {
-        int num_total = num_white + num_black;
-        if (num_black > num_drawn) {
-            // Approximates lchoose(num_black, num_drawn) - lchoose(num_total, num_drawn).
-            return stirling(num_black) - stirling(num_black - num_drawn)
-                - (stirling(num_total) - stirling(num_total - num_drawn));
-        } else if (num_drawn > num_black) {
-            // Approximates lchoose(num_white, num_drawn - num_black) - lchoose(num_total, num_drawn).
-            return stirling(num_white) - stirling(num_drawn - num_black)
-                - (stirling(num_total) - stirling(num_drawn));
-        } else {
-            // Approximates -lchoose(num_total, num_drawn).
-            return -(stirling(num_total) - stirling(num_total - num_drawn) - stirling(num_drawn));
-        }
+    static double compute_probability_mass(int drawn_inside, int num_inside, int num_outside, int num_drawn) {
+        int num_total = num_inside + num_outside;
+        return lfactorial(num_inside) - lfactorial(drawn_inside) - lfactorial(num_inside - drawn_inside) // lchoose(num_inside, drawn_inside)
+            + lfactorial(num_outside) - lfactorial(num_drawn - drawn_inside) - lfactorial(num_outside - num_drawn + drawn_inside) // lchoose(num_outside, num_drawn - drawn_inside)
+            - lfactorial(num_total) + lfactorial(num_drawn) + lfactorial(num_total - num_drawn); // -lchoose(num_total, num_drawn)
     }
 
 private:
@@ -217,80 +143,48 @@ private:
     }
 
 private:
-    double core(int drawn_white, int num_white, int num_black, int num_drawn, Cache* cache) const {
-        // Subtracting 1 to include the PMF of 'drawn_white' in the upper tail calculations.
+    double core(int drawn_inside, int num_inside, int num_outside, int num_drawn) const {
+        // Subtracting 1 to include the PMF of 'drawn_inside' in the upper tail calculations.
         if (upper_tail) {
-            --drawn_white;
+            --drawn_inside;
         }
 
-        if (drawn_white <= 0 || drawn_white < num_drawn - num_black) {
+        if (drawn_inside <= 0 || drawn_inside < num_drawn - num_outside) {
             return edge_handler(!upper_tail);
-        } else if (drawn_white >= num_drawn || drawn_white >= num_white) {
+        } else if (drawn_inside >= num_drawn || drawn_inside >= num_inside) {
             return edge_handler(upper_tail);
         }
 
         // Flipping the tails to avoid having to calculate large summations.
-        // While more efficient, the real reason is that it avoids having to
-        // subtract large sums from 1 when computing upper tails, which could
-        // result in catastrophic cancellation. 
+        // This it avoids having to subtract large sums from 1 when computing
+        // upper tails, which could result in catastrophic cancellation. It can
+        // also sometimes improve efficiency by summing over the smaller tail. 
         bool do_lower = !upper_tail;
-        if (drawn_white * (num_white + num_black) > num_drawn * num_white) { 
-            auto tmp = num_white;
-            num_white = num_black;
-            num_black = tmp;
-            drawn_white = num_drawn - drawn_white - 1;
+        if (drawn_inside * (num_inside + num_outside) > num_drawn * num_inside) { 
+            auto tmp = num_inside;
+            num_inside = num_outside;
+            num_outside = tmp;
+            drawn_inside = num_drawn - drawn_inside - 1;
             do_lower = !do_lower;
         }
 
-        if (cache == NULL) {
-            double logscale = compute_log_scale(num_white, num_black, num_drawn);
-            auto cum = compute_cumulative(drawn_white, num_white, num_black, num_drawn);
-            return compute_tail_probability(cum, logscale, do_lower);
-        }
-
-        // Picking up from cached values if we can.
-        compute_cumulative(drawn_white, num_white, num_black, num_drawn, *cache);
-
-        double& logscale = cache->scale;
-        if (!(num_white == cache->num_white && num_black == cache->num_black && num_drawn == cache->num_drawn)) {
-            logscale = compute_log_scale(num_white, num_black, num_drawn);
-            cache->num_white = num_white;
-            cache->num_black = num_black;
-            cache->num_drawn = num_drawn;
-        }
-
-        return compute_tail_probability(cache->cumulative[drawn_white], cache->scale, do_lower);
+        double logscale = compute_probability_mass(drawn_inside, num_inside, num_outside, num_drawn);
+        auto cum = compute_cumulative(drawn_inside, num_inside, num_outside, num_drawn);
+        return compute_tail_probability(cum, logscale, do_lower);
     }
 
 public:
     /**
-     * @param drawn_white Number of white balls that were drawn.
-     * @param num_white Number of white balls in the pot.
-     * @param num_black Number of black balls in the plot.
-     * @param num_drawn Number of balls that were drawn from the pot.
+     * @param drawn_inside Number of genes inside the set that were drawn.
+     * @param num_inside Total number of genes in the set.
+     * @param num_outside Total number of genes outside the set.
+     * @param num_drawn Number of genes that were drawn.
      *
-     * @return Probability of drawing a number of white balls greater than than or equal to `drawn_white`, if `set_upper_tail()` is set to true.
-     * Otherwise, the probability of drawing a number less than or equal to `drawn_white` is returned.
+     * @return Probability of randomly drawing at least `drawn_inside` genes from the set, if `set_upper_tail()` is set to true.
+     * Otherwise, the probability of randomly drawing no more than `drawn_inside` genes from the set is returned.
      */
-    double run(int drawn_white, int num_white, int num_black, int num_drawn) const {
-        return core(drawn_white, num_white, num_black, num_drawn, NULL);
-    }
-
-    /**
-     * This re-uses cached intermediate values for the cumulative probability if all inputs other than `drawn_white` are the same.
-     * For greatest efficiency, it is best to group calls to `run()` such that `drawn_white` is the fastest-changing value and other inputs are constant, allowing the cache to be effectively re-used.
-     *
-     * @param drawn_white Number of white balls that were drawn.
-     * @param num_white Number of white balls in the pot.
-     * @param num_black Number of black balls in the plot.
-     * @param num_drawn Number of balls that were drawn from the pot.
-     * @param cache A `Cache` object, typically constructed with `new_cache()`.
-     *
-     * @return Probability of drawing a number of white balls greater than than or equal to `drawn_white`, if `set_upper_tail()` is set to true.
-     * Otherwise, the probability of drawing a number less than or equal to `drawn_white` is returned.
-     */
-    double run(int drawn_white, int num_white, int num_black, int num_drawn, Cache& cache) const {
-        return core(drawn_white, num_white, num_black, num_drawn, &cache);
+    double run(int drawn_inside, int num_inside, int num_outside, int num_drawn) const {
+        return core(drawn_inside, num_inside, num_outside, num_drawn);
     }
 };
 
