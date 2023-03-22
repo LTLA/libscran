@@ -1,5 +1,5 @@
-<map id="scran/aggregation/ScoreFeatureSet.hpp" name="scran/aggregation/ScoreFeatureSet.hpp">
-<area shape="rect" id="node1" title="Compute per&#45;cell scores for a feature set." alt="" coords="296,5,503,45"/>
+<map id="scran/feature_set_enrichment/ScoreFeatureSet.hpp" name="scran/feature_set_enrichment/ScoreFeatureSet.hpp">
+<area shape="rect" id="node1" title="Compute per&#45;cell scores for a feature set." alt="" coords="302,5,497,45"/>
 <area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,101,132,126"/>
 <area shape="rect" id="node3" title=" " alt="" coords="157,101,231,126"/>
 <area shape="rect" id="node4" title=" " alt="" coords="255,101,314,126"/>

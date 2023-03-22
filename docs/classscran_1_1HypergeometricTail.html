@@ -91,7 +91,7 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1HypergeometricTail_1_1Cache.html">Cache</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cached statistics for re-use across <code><a class="el" href="classscran_1_1HypergeometricTail.html#a7a290c27f5fb897687f7ab220fe0987e">run()</a></code> calls.  <a href="structscran_1_1HypergeometricTail_1_1Cache.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cached statistics for re-use across <code><a class="el" href="classscran_1_1HypergeometricTail.html#a5c087b3b851e9402bb7d4a3c3ea84f6a">run()</a></code> calls.  <a href="structscran_1_1HypergeometricTail_1_1Cache.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1HypergeometricTail_1_1Defaults.html">Defaults</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default parameters.  <a href="structscran_1_1HypergeometricTail_1_1Defaults.html#details">More...</a><br /></td></tr>
@@ -105,14 +105,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a6f0d0e592bbda71551c2772232c13047"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab610e0ec788607e9a34c22294dad3163"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1HypergeometricTail_1_1Cache.html">Cache</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1HypergeometricTail.html#ab610e0ec788607e9a34c22294dad3163">new_cache</a> ()</td></tr>
 <tr class="separator:ab610e0ec788607e9a34c22294dad3163"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7a290c27f5fb897687f7ab220fe0987e"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1HypergeometricTail.html#a7a290c27f5fb897687f7ab220fe0987e">run</a> (int drawn_white, int num_white, int num_black, int num_drawn) const</td></tr>
-<tr class="separator:a7a290c27f5fb897687f7ab220fe0987e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8c829f4e221740369e579fad463a2a17"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1HypergeometricTail.html#a8c829f4e221740369e579fad463a2a17">run</a> (int drawn_white, int num_white, int num_black, int num_drawn, <a class="el" href="structscran_1_1HypergeometricTail_1_1Cache.html">Cache</a> &amp;cache) const</td></tr>
-<tr class="separator:a8c829f4e221740369e579fad463a2a17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c087b3b851e9402bb7d4a3c3ea84f6a"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1HypergeometricTail.html#a5c087b3b851e9402bb7d4a3c3ea84f6a">run</a> (int drawn_inside, int num_inside, int num_outside, int num_drawn) const</td></tr>
+<tr class="separator:a5c087b3b851e9402bb7d4a3c3ea84f6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Compute hypergeometric tail probabilities. </p>
-<p>This computes the tail probabilities for the hypergeometric distribution. It is intended for use in quantifying feature set enrichment in marker lists. The white balls are the features in the set, the black balls are all other features, and the drawing process involves picking the top N markers; our aim is to compute the p-value for enrichment of features in the set among the top markers. </p>
+<p>This computes the tail probabilities for the hypergeometric distribution. It is intended for use in quantifying feature set enrichment in marker lists. The "successes" are the features in the set, the "failures" are all other features, and the drawing process typically involves picking the top N markers; our aim is to compute the p-value for enrichment of features in the set among the top markers. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a07c9554abdae516b34183d399df37275" name="a07c9554abdae516b34183d399df37275"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a07c9554abdae516b34183d399df37275">&#9670;&#160;</a></span>set_log()</h2>
@@ -172,7 +170,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">u</td><td>Whether to report the upper tail. If <code>false</code>, the lower tail is returned. </td></tr>
+    <tr><td class="paramname">u</td><td>Whether to report the upper tail, including the probability mass of the observed number of drawn white balls. This allows the tail probability to be directly used as the p-value for testing enrichment. If <code>false</code>, the lower tail is returned, again including the probability mass of <code>drawn_inside</code>.</td></tr>
   </table>
   </dd>
 </dl>
@@ -202,13 +200,13 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Create a new cache for use in <code><a class="el" href="classscran_1_1HypergeometricTail.html#a7a290c27f5fb897687f7ab220fe0987e">run()</a></code>.</p>
+<p>Create a new cache for use in <code><a class="el" href="classscran_1_1HypergeometricTail.html#a5c087b3b851e9402bb7d4a3c3ea84f6a">run()</a></code>.</p>
 <dl class="section return"><dt>Returns</dt><dd>A new <code><a class="el" href="structscran_1_1HypergeometricTail_1_1Cache.html" title="Cached statistics for re-use across run() calls.">Cache</a></code> instance. </dd></dl>
 
 </div>
 </div>
-<a id="a7a290c27f5fb897687f7ab220fe0987e" name="a7a290c27f5fb897687f7ab220fe0987e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7a290c27f5fb897687f7ab220fe0987e">&#9670;&#160;</a></span>run() <span class="overload">[1/2]</span></h2>
+<a id="a5c087b3b851e9402bb7d4a3c3ea84f6a" name="a5c087b3b851e9402bb7d4a3c3ea84f6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5c087b3b851e9402bb7d4a3c3ea84f6a">&#9670;&#160;</a></span>run()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -220,19 +218,19 @@ Public Member Functions</h2></td></tr>
           <td class="memname">double scran::HypergeometricTail::run </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>drawn_white</em>, </td>
+          <td class="paramname"><em>drawn_inside</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>num_white</em>, </td>
+          <td class="paramname"><em>num_inside</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>num_black</em>, </td>
+          <td class="paramname"><em>num_outside</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -254,85 +252,19 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">drawn_white</td><td>Number of white balls that were drawn. </td></tr>
-    <tr><td class="paramname">num_white</td><td>Number of white balls in the pot. </td></tr>
-    <tr><td class="paramname">num_black</td><td>Number of black balls in the plot. </td></tr>
-    <tr><td class="paramname">num_drawn</td><td>Number of balls that were drawn from the pot.</td></tr>
+    <tr><td class="paramname">drawn_inside</td><td>Number of genes inside the set that were drawn. </td></tr>
+    <tr><td class="paramname">num_inside</td><td>Total number of genes in the set. </td></tr>
+    <tr><td class="paramname">num_outside</td><td>Total number of genes outside the set. </td></tr>
+    <tr><td class="paramname">num_drawn</td><td>Number of genes that were drawn.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Probability of drawing a number of white balls greater than than or equal to <code>drawn_white</code>, if <code><a class="el" href="classscran_1_1HypergeometricTail.html#a6f0d0e592bbda71551c2772232c13047">set_upper_tail()</a></code> is set to true. Otherwise, the probability of drawing a number less than or equal to <code>drawn_white</code> is returned. </dd></dl>
-
-</div>
-</div>
-<a id="a8c829f4e221740369e579fad463a2a17" name="a8c829f4e221740369e579fad463a2a17"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8c829f4e221740369e579fad463a2a17">&#9670;&#160;</a></span>run() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">double scran::HypergeometricTail::run </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>drawn_white</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>num_white</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>num_black</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>num_drawn</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="structscran_1_1HypergeometricTail_1_1Cache.html">Cache</a> &amp;&#160;</td>
-          <td class="paramname"><em>cache</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>This re-uses cached intermediate values for the cumulative probability if all inputs other than <code>drawn_white</code> are the same. For greatest efficiency, it is best to group calls to <code><a class="el" href="classscran_1_1HypergeometricTail.html#a7a290c27f5fb897687f7ab220fe0987e">run()</a></code> such that <code>drawn_white</code> is the fastest-changing value and other inputs are constant, allowing the cache to be effectively re-used.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">drawn_white</td><td>Number of white balls that were drawn. </td></tr>
-    <tr><td class="paramname">num_white</td><td>Number of white balls in the pot. </td></tr>
-    <tr><td class="paramname">num_black</td><td>Number of black balls in the plot. </td></tr>
-    <tr><td class="paramname">num_drawn</td><td>Number of balls that were drawn from the pot. </td></tr>
-    <tr><td class="paramname">cache</td><td>A <code><a class="el" href="structscran_1_1HypergeometricTail_1_1Cache.html" title="Cached statistics for re-use across run() calls.">Cache</a></code> object, typically constructed with <code><a class="el" href="classscran_1_1HypergeometricTail.html#ab610e0ec788607e9a34c22294dad3163">new_cache()</a></code>.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Probability of drawing a number of white balls greater than than or equal to <code>drawn_white</code>, if <code><a class="el" href="classscran_1_1HypergeometricTail.html#a6f0d0e592bbda71551c2772232c13047">set_upper_tail()</a></code> is set to true. Otherwise, the probability of drawing a number less than or equal to <code>drawn_white</code> is returned. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Probability of randomly drawing at least <code>drawn_inside</code> genes from the set, if <code><a class="el" href="classscran_1_1HypergeometricTail.html#a6f0d0e592bbda71551c2772232c13047">set_upper_tail()</a></code> is set to true. Otherwise, the probability of randomly drawing no more than <code>drawn_inside</code> genes from the set is returned. </dd></dl>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>scran/aggregation/<a class="el" href="HypergeometricTail_8hpp_source.html">HypergeometricTail.hpp</a></li>
+<li>scran/feature_set_enrichment/<a class="el" href="HypergeometricTail_8hpp_source.html">HypergeometricTail.hpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

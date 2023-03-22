@@ -1,4 +1,4 @@
-<map id="scran/aggregation/HypergeometricTail.hpp" name="scran/aggregation/HypergeometricTail.hpp">
-<area shape="rect" id="node1" title="Compute hypergeometric tail probabilities." alt="" coords="5,5,225,45"/>
-<area shape="rect" id="node2" href="$scran_8hpp_source.html" title=" " alt="" coords="58,93,173,119"/>
+<map id="scran/feature_set_enrichment/HypergeometricTail.hpp" name="scran/feature_set_enrichment/HypergeometricTail.hpp">
+<area shape="rect" id="node1" title="Compute hypergeometric tail probabilities." alt="" coords="5,5,200,45"/>
+<area shape="rect" id="node2" href="$scran_8hpp_source.html" title=" " alt="" coords="45,93,160,119"/>
 </map>
