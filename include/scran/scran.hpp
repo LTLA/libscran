@@ -4,6 +4,7 @@
 #include "utils/macros.hpp"
 
 #include "aggregation/AggregateAcrossCells.hpp"
+#include "aggregation/DownsampleByNeighbors.hpp"
 
 #include "feature_set_enrichment/HypergeometricTail.hpp"
 #include "feature_set_enrichment/ScoreFeatureSet.hpp"
