@@ -4,7 +4,7 @@
 #include "../utils/compare_almost_equal.h"
 #include "../data/Simulator.hpp"
 
-#include "scran/aggregation/ScoreFeatureSet.hpp"
+#include "scran/feature_set_enrichment/ScoreFeatureSet.hpp"
 #include "scran/dimensionality_reduction/RunPCA.hpp"
 #include "aarand/aarand.hpp"
 

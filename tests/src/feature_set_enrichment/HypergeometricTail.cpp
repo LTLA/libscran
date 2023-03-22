@@ -2,7 +2,7 @@
 #include "../utils/macros.h"
 
 #include "../utils/compare_almost_equal.h"
-#include "scran/aggregation/HypergeometricTail.hpp"
+#include "scran/feature_set_enrichment/HypergeometricTail.hpp"
 
 TEST(HypergeometricTail, Basic) {
     scran::HypergeometricTail hyper;
