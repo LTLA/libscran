@@ -1,4 +1,5 @@
 #include "scran/scran.hpp"
+#include "Eigen/Sparse"
 #include <iostream>
 #include <random>
 #include <chrono>
@@ -48,11 +49,11 @@ int main(int argc, char * argv[]) {
 
     tatami::CompressedSparseColumnMatrix<double, int> mat(nr, nc, std::move(values), std::move(indices), std::move(ptrs));
 
-    // Running the PCA, with and without Eigen.
-    scran::RunPCA runner;
-    runner.set_num_threads(nthreads);
-
+    // Running the PCA using the default irlba::ParallelSparseMatrix.
     {
+        scran::RunPCA runner;
+        runner.set_num_threads(nthreads);
+
         auto start = std::chrono::high_resolution_clock::now();
         auto outcustom = runner.run(&mat);
         auto stop = std::chrono::high_resolution_clock::now();
@@ -60,13 +61,47 @@ int main(int argc, char * argv[]) {
         std::cout << "Custom: " << duration.count() * 1.0 / 1000.0 << " (first var = " << outcustom.variance_explained[0] << ")" << std::endl;
     }
 
-    runner.set_use_eigen(true);
-    {
+    // Doing it with Eigen, including the centering and the extraction/transformation time for consistency.
+    {   
+        irlba::Irlba runner2;
+        runner2.set_number(scran::RunPCA::Defaults::rank);
+
         auto start = std::chrono::high_resolution_clock::now();
-        auto outeigen = runner.run(&mat);
+        auto extracted = scran::pca_utils::extract_sparse_for_pca(&mat, nthreads); // row-major extraction.
+        auto& ptrs = extracted.ptrs;
+        auto& values = extracted.values;
+        auto& indices = extracted.indices;
+
+        Eigen::SparseMatrix<double> spmat(nc, nr); // transposed (features in the columns).
+        {
+            std::vector<int> column_nonzeros(nr); // transposed
+            for (size_t c = 0; c < nr; ++c) {
+                column_nonzeros[c] = ptrs[c+1] - ptrs[c];
+            }
+            spmat.reserve(column_nonzeros);
+
+            auto xIt = values.begin();
+            auto iIt = indices.begin();
+            for (size_t c = 0; c < nr; ++c) { // transposed
+                size_t n = column_nonzeros[c];
+                for (size_t i = 0; i < n; ++i, ++xIt, ++iIt) {
+                    spmat.insert(*iIt, c) = *xIt;
+                }
+            }
+            spmat.makeCompressed();
+        }
+
+        Eigen::VectorXd center_v(nr), scale_v(nr);
+        scran::pca_utils::compute_mean_and_variance_from_sparse_components(nr, nc, values, indices, ptrs, center_v, scale_v, nthreads); // row-major calculations.
+
+        irlba::EigenThreadScope scope(nthreads);
+        irlba::Centered centered(&spmat, &center_v); 
+        auto outeigen = runner2.run(centered);
+
         auto stop = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-        std::cout << "Eigen: " << duration.count() * 1.0 / 1000.0 << " (first var = " << outeigen.variance_explained[0] << ")" << std::endl;
+
+        std::cout << "Eigen: " << duration.count() * 1.0 / 1000.0 << " (first D = " << outeigen.D[0] * outeigen.D[0] / (nc - 1) << ")" << std::endl;
     }
 
     return 0;
