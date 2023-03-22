@@ -64,6 +64,39 @@ public:
         return *this;
     }
 
+public: // only exported for testing.
+    /**
+     * @cond
+     */
+    static double lfactorial(int x) {
+        // Computing it exactly for small numbers, to avoid unnecessarily
+        // large relative inaccuracy from the approximation. Threshold of
+        // 12 is chosen more-or-less arbitrarily... but 12! is the largest
+        // value that can be represented by a 32-bit int, if that helps.
+        switch(x) {
+            case 0: case 1: return 0;
+            case 2: return std::log(2.0); 
+            case 3: return std::log(6.0); 
+            case 4: return std::log(24.0); 
+            case 5: return std::log(120.0); 
+            case 6: return std::log(720.0); 
+            case 7: return std::log(5040.0); 
+            case 8: return std::log(40320.0); 
+            case 9: return std::log(362880.0); 
+            case 10: return std::log(3628800.0); 
+            case 11: return std::log(39916800.0); 
+            case 12: return std::log(479001600.0); 
+        }
+
+        // For large numbers, using Ramanujan's approximation rather than R's complicated thing. 
+        // Check out https://www.johndcook.com/blog/2012/09/25/ramanujans-factorial-approximation/.
+        double y = x;
+        return 1.0/6.0 * std::log(y * (1 + 4 * y * (1 + 2 * y)) + 1.0/30.0) + y * std::log(y) - y + 0.5 * std::log(3.14159265358979323846);
+    }
+    /**
+     * @endcond
+     */
+
 private:
     /*
      * Computing the cumulative sum after factorizing out the probability mass at drawn_inside.
@@ -86,16 +119,6 @@ private:
         }
 
         return cumulative;
-    }
-
-    // Using Ramanujan's approximation rather than R's complicated thing. 
-    // Check out https://www.johndcook.com/blog/2012/09/25/ramanujans-factorial-approximation/.
-    static double lfactorial(double x) {
-        if (x == 0) {
-            return 0;
-        } else {
-            return 1.0/6.0 * std::log(x * (1 + 4 * x * (1 + 2 * x)) + 1.0/30.0) + x * std::log(x) - x + 0.5 * std::log(3.14159265358979323846);
-        }
     }
 
     static double compute_probability_mass(int drawn_inside, int num_inside, int num_outside, int num_drawn) {

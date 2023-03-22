@@ -4,6 +4,26 @@
 #include "../utils/compare_almost_equal.h"
 #include "scran/feature_set_enrichment/HypergeometricTail.hpp"
 
+TEST(HypergeometricTail, LogFactorial) {
+    EXPECT_EQ(0, scran::HypergeometricTail::lfactorial(0));
+
+    std::vector<double> exact { 1 };
+    for (int i = 1; i <= 12; ++i) {
+        exact.push_back(exact.back() * i);
+        EXPECT_EQ(std::log(exact.back()), scran::HypergeometricTail::lfactorial(i));
+    }
+
+    double sofar = std::log(exact.back());
+    int counter = exact.size() - 1;
+    for (int i = 100; i <= 1000; i += 50) {
+        while (counter < i) {
+            ++counter;
+            sofar += std::log(counter);
+        }
+        compare_almost_equal(sofar, scran::HypergeometricTail::lfactorial(i));
+    }
+}
+
 TEST(HypergeometricTail, Basic) {
     scran::HypergeometricTail hyper;
 
