@@ -125,7 +125,7 @@ Public Member Functions</h2></td></tr>
 <li>The row means are used as the default reference, instead of the geometric mean. This avoids problems with reference values of zero in sparse data.</li>
 <li>The median-based size factors are slightly shrunk towards the library size-derived factors. This ensures that the reported factors are never zero.</li>
 </ul>
-<p>In practice, this tends to work poorly for actual single-cell data due to its sparsity. Nonetheless, we provide it here because it can be helpful for removing composition biases between clusters. </p>
+<p>In practice, this tends to work poorly for actual single-cell data due to its sparsity. Nonetheless, we provide it here because it can be helpful for removing composition biases between clusters based on their averaged pseudo-bulk profiles. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="aa819da1b38830a8849bdf4cdd89b1994" name="aa819da1b38830a8849bdf4cdd89b1994"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa819da1b38830a8849bdf4cdd89b1994">&#9670;&#160;</a></span>set_center()</h2>
@@ -191,8 +191,8 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1MedianSizeFactors.html" title="Compute median-based size factors to handle composition bias.">MedianSizeFactors</a></code> object.</dd></dl>
-<p>When using shrinkage, we add a scaled version of the reference profile to each cell before computing the ratios. The scaling of the reference profile varies for each cell and is proportional to the (relative) total count of that cell. This implicitly pushes the median-based size factor towards a value that is proportional to the library size of the cell, given that the median of the ratio of the reference against a scaled version of itself is just the scaling factor, i.e., the library size.</p>
-<p>The amount of shrinkage depends on the magnitude of the reference scaling. The prior count should be interpreted as the number of extra reads from the reference profile that is added to each cell. For example, the default of 10 means that the equivalent of 10 reads are added to each cell, distributed according to the reference profile. Increasing the prior count will increase the strength of the shrinkage as the reference profile has a greater contribution to the ratios. </p>
+<p>When using shrinkage, we add a scaled version of the reference profile to each expression profile before computing the ratios. The scaling of the reference profile varies for each profile and is proportional to the (relative) total count of that profile. This implicitly pushes the median-based size factor towards a value that is proportional to the library size of the profile, given that the median of the ratio of the reference against a scaled version of itself is just the scaling factor, i.e., the library size.</p>
+<p>The amount of shrinkage depends on the magnitude of the reference scaling. The prior count should be interpreted as the number of extra reads from the reference profile that is added to each profile. For example, the default of 10 means that the equivalent of 10 reads are added to each profile, distributed according to the reference profile. Increasing the prior count will increase the strength of the shrinkage as the reference profile has a greater contribution to the ratios. </p>
 
 </div>
 </div>
@@ -270,7 +270,7 @@ template&lt;typename T , typename IDX , typename Ref , typename Out &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Compute per-cell size factors against a user-supplied reference profile.</p>
+<p>Compute per-column size factors against a user-supplied reference profile.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>Numeric data type of the input matrix. </td></tr>
@@ -282,13 +282,13 @@ template&lt;typename T , typename IDX , typename Ref , typename Out &gt; </div>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes and columns should be cells. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes; columns may be cells, but are more typically some kind of aggregated pseudo-bulk profile. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">ref</td><td>Pointer to an array containing the reference expression profile to normalize against. This should be of length equal to the number of rows in <code>mat</code> and should contain non-negative values. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array to use to store the output size factors. This should be of length equal to the number of columns in <code>mat</code>.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><code>output</code> is filled with the size factors for each cell in <code>mat</code>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><code>output</code> is filled with the size factors for each column in <code>mat</code>. </dd></dl>
 
 </div>
 </div>
@@ -327,7 +327,7 @@ template&lt;typename T , typename IDX , typename Out &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Compute per-cell size factors against an average pseudo-sample constructed from the row means of the input matrix.</p>
+<p>Compute per-column size factors against an average pseudo-sample constructed from the row means of the input matrix.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>Numeric data type of the input matrix. </td></tr>
@@ -338,12 +338,12 @@ template&lt;typename T , typename IDX , typename Out &gt; </div>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes and columns should be cells. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes; columns may be cells, but are more typically some kind of aggregated pseudo-bulk profile. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array to use to store the output size factors. This should be of length equal to the number of columns in <code>mat</code>.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><code>output</code> is filled with the size factors for each cell in <code>mat</code>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><code>output</code> is filled with the size factors for each column in <code>mat</code>. </dd></dl>
 
 </div>
 </div>
@@ -382,7 +382,7 @@ template&lt;typename Out  = double, typename T , typename IDX , typename Ref &gt
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Compute per-cell size factors against a user-supplied reference profile.</p>
+<p>Compute per-column size factors against a user-supplied reference profile.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Out</td><td>Numeric type for the size factors. </td></tr>
@@ -394,12 +394,12 @@ template&lt;typename Out  = double, typename T , typename IDX , typename Ref &gt
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes and columns should be cells. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes; columns may be cells, but are more typically some kind of aggregated pseudo-bulk profile. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">ref</td><td>Pointer to an array containing the reference expression profile to normalize against. This should be of length equal to the number of rows in <code>mat</code> and should contain non-negative values.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html" title="Result of the size factor calculation.">Results</a></code> containing the size factors for each cell in <code>mat</code>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html" title="Result of the size factor calculation.">Results</a></code> containing the size factors for each column in <code>mat</code>. </dd></dl>
 
 </div>
 </div>
@@ -428,7 +428,7 @@ template&lt;typename Out  = double, typename T , typename IDX &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Compute per-cell size factors against an average pseudo-sample constructed from the row means of the input matrix.</p>
+<p>Compute per-column size factors against an average pseudo-sample constructed from the row means of the input matrix.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Out</td><td>Numeric type for the size factors. </td></tr>
@@ -439,11 +439,11 @@ template&lt;typename Out  = double, typename T , typename IDX &gt; </div>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes and columns should be cells.</td></tr>
+    <tr><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes; columns may be cells, but are more typically some kind of aggregated pseudo-bulk profile.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html" title="Result of the size factor calculation.">Results</a></code> containing the size factors for each cell in <code>mat</code>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1MedianSizeFactors_1_1Results.html" title="Result of the size factor calculation.">Results</a></code> containing the size factors for each column in <code>mat</code>. </dd></dl>
 
 </div>
 </div>
