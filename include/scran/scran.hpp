@@ -19,7 +19,11 @@
 #include "feature_selection/ChooseHVGs.hpp"
 #include "feature_selection/FitTrendVar.hpp"
 #include "feature_selection/ModelGeneVar.hpp"
+
 #include "normalization/LogNormCounts.hpp"
+#include "normalization/GroupedSizeFactors.hpp"
+#include "normalization/MedianSizeFactors.hpp"
+#include "normalization/CenterSizeFactors.hpp"
 
 #include "quality_control/FilterCells.hpp"
 #include "quality_control/SuggestRnaQcFilters.hpp"
