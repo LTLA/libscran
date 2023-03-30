@@ -30,7 +30,7 @@ namespace scran {
  *   This ensures that the reported factors are never zero.
  *
  * In practice, this tends to work poorly for actual single-cell data due to its sparsity.
- * Nonetheless, we provide it here because it can be helpful for removing composition biases between clusters.
+ * Nonetheless, we provide it here because it can be helpful for removing composition biases between clusters based on their averaged pseudo-bulk profiles.
  */
 class MedianSizeFactors {
 public:
@@ -73,14 +73,14 @@ public:
      *
      * @return A reference to this `MedianSizeFactors` object.
      *
-     * When using shrinkage, we add a scaled version of the reference profile to each cell before computing the ratios.
-     * The scaling of the reference profile varies for each cell and is proportional to the (relative) total count of that cell.
-     * This implicitly pushes the median-based size factor towards a value that is proportional to the library size of the cell,
+     * When using shrinkage, we add a scaled version of the reference profile to each expression profile before computing the ratios.
+     * The scaling of the reference profile varies for each profile and is proportional to the (relative) total count of that profile.
+     * This implicitly pushes the median-based size factor towards a value that is proportional to the library size of the profile,
      * given that the median of the ratio of the reference against a scaled version of itself is just the scaling factor, i.e., the library size.
      *
      * The amount of shrinkage depends on the magnitude of the reference scaling.
-     * The prior count should be interpreted as the number of extra reads from the reference profile that is added to each cell.
-     * For example, the default of 10 means that the equivalent of 10 reads are added to each cell, distributed according to the reference profile.
+     * The prior count should be interpreted as the number of extra reads from the reference profile that is added to each profile.
+     * For example, the default of 10 means that the equivalent of 10 reads are added to each profile, distributed according to the reference profile.
      * Increasing the prior count will increase the strength of the shrinkage as the reference profile has a greater contribution to the ratios.
      */
     MedianSizeFactors& set_prior_count(double p = Defaults::prior_count) {
@@ -150,7 +150,7 @@ private:
 
 public:
     /**
-     * Compute per-cell size factors against a user-supplied reference profile.
+     * Compute per-column size factors against a user-supplied reference profile.
      *
      * @tparam T Numeric data type of the input matrix.
      * @tparam IDX Integer index type of the input matrix.
@@ -158,13 +158,13 @@ public:
      * @tparam Out Numeric data type of the output vector.
      *
      * @param mat Matrix containing non-negative expression data, usually counts.
-     * Rows should be genes and columns should be cells.
+     * Rows should be genes; columns may be cells, but are more typically some kind of aggregated pseudo-bulk profile.
      * @param[in] ref Pointer to an array containing the reference expression profile to normalize against.
      * This should be of length equal to the number of rows in `mat` and should contain non-negative values.
      * @param[out] output Pointer to an array to use to store the output size factors.
      * This should be of length equal to the number of columns in `mat`.
      *
-     * @return `output` is filled with the size factors for each cell in `mat`.
+     * @return `output` is filled with the size factors for each column in `mat`.
      */
     template<typename T, typename IDX, typename Ref, typename Out>
     void run(const tatami::Matrix<T, IDX>* mat, const Ref* ref, Out* output) const {
@@ -175,7 +175,7 @@ public:
         /* Mild squeezing towards library size-derived factors. Basically,
          * we're adding a scaled version of the reference profile to each
          * column, before normalizing against the reference profile. Given gene
-         * i and cell j:
+         * i and column j:
          *
          *   ratio_{ij} = (y_{ij} + ref_i * extra_j) / ref_i
          *              = (y_{ij} / ref_i) + extra_j
@@ -203,9 +203,11 @@ public:
          *
          * The addition of extra_j means that the shrunken size factor is
          * slightly too big to normalize against the reference. To adjust for
-         * this, consider some hypothetical position-invariant function f()
-         * such that f(y_{ij} / ref_i) yields the true size factor x_j. In this
-         * case, our shrunken size factor can be written as
+         * this, imagine that we have some unknown position-invariant function
+         * f() such that E[f(y_{ij} / ref_i)] yields the true size factor x_j.
+         * For example, f() would be the mean if there wasn't any differential
+         * expression between columns; or the median, if the counts were large
+         * enough. Our shrunken size factor can then be written as
          *
          *   f(ratio_{ij}) = x_j + extra_j
          * 
@@ -213,12 +215,16 @@ public:
          *
          *   (x_j + extra_j) / x_j = 1 + (extra_j / x_j)
          * 
-         * As an approximation, we assume x_j =~ t_j / R, i.e., library size
-         * normalization against the reference. This simplifies the correction:
+         * Of course, we don't actually know x_j, so we need to approximate by
+         * assuming x_j =~ t_j / R, i.e., library size normalization against
+         * the reference. This simplifies the correction:
          *
          *   1 + (p / T)
          *
-         * which is what we apply to our actual median-based shrunken factor.
+         * which is what we use to divide our median-based shrunken factor.
+         * It's not exactly correct but it be good enough when T >> p, and
+         * it at least ensures that the normalization is accurate in the
+         * simplest case where the only difference is due to library size.
          */
         if (prior_count && NR && NC) {
             const auto& sums = fact.sums;
@@ -246,18 +252,18 @@ public:
     }
 
     /**
-     * Compute per-cell size factors against an average pseudo-sample constructed from the row means of the input matrix.
+     * Compute per-column size factors against an average pseudo-sample constructed from the row means of the input matrix.
      *
      * @tparam T Numeric data type of the input matrix.
      * @tparam IDX Integer index type of the input matrix.
      * @tparam Out Numeric data type of the output vector.
      *
      * @param mat Matrix containing non-negative expression data, usually counts.
-     * Rows should be genes and columns should be cells.
+     * Rows should be genes; columns may be cells, but are more typically some kind of aggregated pseudo-bulk profile.
      * @param[out] output Pointer to an array to use to store the output size factors.
      * This should be of length equal to the number of columns in `mat`.
      *
-     * @return `output` is filled with the size factors for each cell in `mat`.
+     * @return `output` is filled with the size factors for each column in `mat`.
      */
     template<typename T, typename IDX, typename Out>
     void run_with_mean(const tatami::Matrix<T, IDX>* mat, Out* output) const {
@@ -289,14 +295,14 @@ public:
          */
 
         /**
-         * Vector of length equal to the number of cells,
-         * containing the size factor for each cell.
+         * Vector of length equal to the number of columns,
+         * containing the size factor for each column.
          */
         std::vector<Out> factors;
     };
 
     /**
-     * Compute per-cell size factors against a user-supplied reference profile.
+     * Compute per-column size factors against a user-supplied reference profile.
      *
      * @tparam Out Numeric type for the size factors.
      * @tparam T Numeric data type of the input matrix.
@@ -304,11 +310,11 @@ public:
      * @tparam Ref Numeric data type of the reference profile.
      *
      * @param mat Matrix containing non-negative expression data, usually counts.
-     * Rows should be genes and columns should be cells.
+     * Rows should be genes; columns may be cells, but are more typically some kind of aggregated pseudo-bulk profile.
      * @param[in] ref Pointer to an array containing the reference expression profile to normalize against.
      * This should be of length equal to the number of rows in `mat` and should contain non-negative values.
      *
-     * @return A `Results` containing the size factors for each cell in `mat`.
+     * @return A `Results` containing the size factors for each column in `mat`.
      */
     template<typename Out = double, typename T, typename IDX, typename Ref>
     Results<Out> run(const tatami::Matrix<T, IDX>* mat, const Ref* ref) const {
@@ -318,16 +324,16 @@ public:
     }
 
     /**
-     * Compute per-cell size factors against an average pseudo-sample constructed from the row means of the input matrix.
+     * Compute per-column size factors against an average pseudo-sample constructed from the row means of the input matrix.
      *
      * @tparam Out Numeric type for the size factors.
      * @tparam T Numeric data type of the input matrix.
      * @tparam IDX Integer index type of the input matrix.
      *
      * @param mat Matrix containing non-negative expression data, usually counts.
-     * Rows should be genes and columns should be cells.
+     * Rows should be genes; columns may be cells, but are more typically some kind of aggregated pseudo-bulk profile.
      *
-     * @return A `Results` containing the size factors for each cell in `mat`.
+     * @return A `Results` containing the size factors for each column in `mat`.
      */
     template<typename Out = double, typename T, typename IDX>
     Results<Out> run_with_mean(const tatami::Matrix<T, IDX>* mat) const {
