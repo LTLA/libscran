@@ -1,5 +1,5 @@
 <map id="scran/aggregation/AggregateAcrossCells.hpp" name="scran/aggregation/AggregateAcrossCells.hpp">
-<area shape="rect" id="node1" title="Aggregate expression values across cells." alt="" coords="78,5,266,45"/>
+<area shape="rect" id="node1" title="Aggregate expression values across cells." alt="" coords="55,5,243,45"/>
 <area shape="rect" id="node2" href="$GroupedSizeFactors_8hpp.html" title="Compute size factors for groups of cells." alt="" coords="5,93,173,133"/>
-<area shape="rect" id="node3" href="$scran_8hpp_source.html" title=" " alt="" coords="197,101,312,126"/>
+<area shape="rect" id="node3" href="$scran_8hpp_source.html" title=" " alt="" coords="92,181,207,207"/>
 </map>
