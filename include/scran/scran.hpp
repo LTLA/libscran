@@ -24,6 +24,7 @@
 #include "normalization/GroupedSizeFactors.hpp"
 #include "normalization/MedianSizeFactors.hpp"
 #include "normalization/CenterSizeFactors.hpp"
+#include "normalization/ChoosePseudoCount.hpp"
 
 #include "quality_control/FilterCells.hpp"
 #include "quality_control/SuggestRnaQcFilters.hpp"

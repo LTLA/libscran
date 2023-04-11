@@ -28,6 +28,8 @@ add_executable(
     src/normalization/CenterSizeFactors.cpp
     src/normalization/MedianSizeFactors.cpp
     src/normalization/GroupedSizeFactors.cpp
+    src/normalization/ChoosePseudoCount.cpp
+
     src/feature_selection/ModelGeneVar.cpp
     src/feature_selection/FitTrendVar.cpp
     src/feature_selection/ChooseHVGs.cpp
