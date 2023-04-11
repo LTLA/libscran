@@ -50,20 +50,42 @@ TEST_F(LogNormCountsTester, Simple) {
 
 TEST_F(LogNormCountsTester, AnotherPseudo) {
     scran::LogNormCounts lnc;
-    auto lognormed = lnc.set_pseudo_count(1.5).run(mat, sf);
+    lnc.set_pseudo_count(1.5);
+    lnc.set_sparse_addition(false);
+
+    auto lognormed = lnc.run(mat, sf);
 
     // Reference calculation.
+    auto copy = sf;
     scran::CenterSizeFactors cen;
-    cen.run(sf.size(), sf.data());
+    cen.run(copy.size(), copy.data());
 
-    for (size_t i = 0; i < mat->ncol(); ++i) {
-        auto output = lognormed->column(i);
-        auto output2 = mat->column(i);
-        for (auto& o : output2) {
-            o = std::log(o/sf[i] + 1.5)/std::log(2);
+    {
+        for (size_t i = 0; i < mat->ncol(); ++i) {
+            auto output = lognormed->column(i);
+            auto output2 = mat->column(i);
+            for (auto& o : output2) {
+                o = std::log(o/copy[i] + 1.5)/std::log(2);
+            }
+            EXPECT_EQ(output, output2);
         }
-        EXPECT_EQ(output, output2);
     }
+
+    // Reference calculation.
+    lnc.set_sparse_addition(true);
+
+    {
+        auto lognormed2 = lnc.run(mat, sf);
+        for (size_t i = 0; i < mat->ncol(); ++i) {
+            auto output = lognormed2->column(i);
+            auto output2 = mat->column(i);
+            for (auto& o : output2) {
+                o = std::log1p(o/(copy[i]*1.5))/std::log(2);
+            }
+            EXPECT_EQ(output, output2);
+        }
+    }
+
 }
 
 TEST_F(LogNormCountsTester, Block) {

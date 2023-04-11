@@ -42,6 +42,11 @@ public:
         static constexpr double pseudo_count = 1;
 
         /**
+         * See `set_sparse_addition()` for more details.
+         */
+        static constexpr bool sparse_addition = true;
+
+        /**
          * See `set_center()` for more details.
          */
         static constexpr bool center = true;
@@ -59,6 +64,7 @@ public:
 
 private:
     double pseudo_count = Defaults::pseudo_count;
+    bool sparse_addition = Defaults::sparse_addition;
     bool center = Defaults::center;
     bool handle_zeros = Defaults::handle_zeros;
     int nthreads = Defaults::num_threads;
@@ -68,6 +74,8 @@ public:
     /** 
      * Set the pseudo-count for the log-transformation.
      * This avoids problems with undefined values at zero counts.
+     * Larger pseudo-counts will shrink the log-expression values towards zero such that the dataset variance is driven more by high-abundance genes;
+     * this is occasionally useful to mitigate biases introduced by log-expression at low counts.
      *
      * @param p Pseudo-count, should be a positive number.
      *
@@ -75,6 +83,20 @@ public:
      */
     LogNormCounts& set_pseudo_count (double p = Defaults::pseudo_count) {
         pseudo_count = p;
+        return *this;
+    }
+
+    /** 
+     * Naive addition of a non-unity pseudo-count will break sparsity.
+     * This can be avoided by instead dividing the normalized expression values by the pseudo-count and then applying the usual `log1p` transformation.
+     * However, the resulting values can not be interpreted on the scale of log-counts.
+     *
+     * @param e Whether to use an effective pseudo-count that avoids breaking sparsity.
+     *
+     * @return A reference to this `LogNormCounts` object.
+     */
+    LogNormCounts& set_sparse_addition(bool a = Defaults::sparse_addition) {
+        sparse_addition = a;
         return *this;
     }
 
@@ -214,9 +236,15 @@ public:
             }
         }
 
+        if (sparse_addition && pseudo_count != 1) {
+            for (auto& d : size_factors) {
+                d *= pseudo_count;
+            }
+        }
+
         auto div = tatami::make_DelayedIsometricOp(mat, tatami::make_DelayedDivideVectorHelper<true, 1>(std::move(size_factors)));
 
-        if (pseudo_count == 1) {
+        if (pseudo_count == 1 || sparse_addition) {
             return tatami::make_DelayedIsometricOp(div, tatami::DelayedLog1pHelper(2.0));
         } else {
             auto add = tatami::make_DelayedIsometricOp(div, tatami::DelayedAddScalarHelper<double>(pseudo_count));
