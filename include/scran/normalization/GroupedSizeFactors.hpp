@@ -113,7 +113,7 @@ public:
      * @return `output` is filled with the size factors for all cells in `mat`.
      */
     template<typename T, typename IDX, typename Group, typename Out>
-    void run(const tatami::Matrix<T, IDX>* mat, const Group* group, Out* output) {
+    void run(const tatami::Matrix<T, IDX>* mat, const Group* group, Out* output) const {
         run_internal(mat, group, false, output);
     }
 
@@ -137,13 +137,13 @@ public:
      * @return `output` is filled with the size factors for all cells in `mat`.
      */
     template<typename T, typename IDX, typename Group, typename Out>
-    void run(const tatami::Matrix<T, IDX>* mat, const Group* group, size_t reference, Out* output) {
+    void run(const tatami::Matrix<T, IDX>* mat, const Group* group, size_t reference, Out* output) const {
         run_internal(mat, group, reference, output);
     }
 
 private:
     template<typename T, typename IDX, typename Group, typename Ref, typename Out>
-    void run_internal(const tatami::Matrix<T, IDX>* mat, const Group* group, Ref reference, Out* output) {
+    void run_internal(const tatami::Matrix<T, IDX>* mat, const Group* group, Ref reference, Out* output) const {
         size_t NR = mat->nrow(), NC = mat->ncol();
         if (!NC) {
             return;
@@ -248,7 +248,7 @@ public:
      * @return A `Results` object is returned containing the size factors.
      */
     template<typename Out = double, typename T, typename IDX, typename Group>
-    Results<Out> run(const tatami::Matrix<T, IDX>* mat, const Group* group) {
+    Results<Out> run(const tatami::Matrix<T, IDX>* mat, const Group* group) const {
         Results<Out> output(mat->ncol());
         run(mat, group, output.factors.data());
         return output;
@@ -271,7 +271,7 @@ public:
      * @return A `Results` object is returned containing the size factors.
      */
     template<typename Out = double, typename T, typename IDX, typename Group>
-    Results<Out> run(const tatami::Matrix<T, IDX>* mat, const Group* group, size_t reference) {
+    Results<Out> run(const tatami::Matrix<T, IDX>* mat, const Group* group, size_t reference) const {
         Results<Out> output(mat->ncol());
         run(mat, group, reference, output.factors.data());
         return output;

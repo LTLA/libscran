@@ -171,7 +171,7 @@ public:
      * @return A pointer to a matrix of log-transformed and normalized values.
      */
     template<class MAT, class V>
-    std::shared_ptr<MAT> run(std::shared_ptr<MAT> mat, V size_factors) {
+    std::shared_ptr<MAT> run(std::shared_ptr<MAT> mat, V size_factors) const {
         return run_blocked(std::move(mat), std::move(size_factors), static_cast<int*>(NULL));
     }
 
@@ -194,7 +194,7 @@ public:
      * @return A pointer to a matrix of log-transformed and normalized values.
      */
     template<class MAT, class V, typename B>
-    std::shared_ptr<MAT> run_blocked(std::shared_ptr<MAT> mat, V size_factors, const B* block) {
+    std::shared_ptr<MAT> run_blocked(std::shared_ptr<MAT> mat, V size_factors, const B* block) const {
         // One might ask why we don't require a pointer for size_factors here.
         // It's because size_factors need to be moved into the Delayed operation
         // anyway, so we might as well ask the user to construct a vector for us.
@@ -264,7 +264,7 @@ public:
      * @return A pointer to a matrix of log-transformed and normalized values.
      */
     template<class MAT>
-    std::shared_ptr<MAT> run(std::shared_ptr<MAT> mat) {
+    std::shared_ptr<MAT> run(std::shared_ptr<MAT> mat) const {
         auto size_factors = tatami::column_sums(mat.get(), nthreads);
         return run_blocked(std::move(mat), std::move(size_factors), static_cast<int*>(NULL));
     }
@@ -282,7 +282,7 @@ public:
      * @return A pointer to a matrix of log-transformed and normalized values.
      */
     template<class MAT, typename B>
-    std::shared_ptr<MAT> run_blocked(std::shared_ptr<MAT> mat, const B* block) {
+    std::shared_ptr<MAT> run_blocked(std::shared_ptr<MAT> mat, const B* block) const {
         auto size_factors = tatami::column_sums(mat.get(), nthreads);
         return run_blocked(mat, std::move(size_factors), block);
     }
