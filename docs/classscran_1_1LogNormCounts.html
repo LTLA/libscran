@@ -98,6 +98,8 @@ Classes</h2></td></tr>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:aee1bffa7e408c11cb003d3bef341af09"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#aee1bffa7e408c11cb003d3bef341af09">set_pseudo_count</a> (double p=<a class="el" href="structscran_1_1LogNormCounts_1_1Defaults.html#a4bd0c603b56d3194fc3dc26b310152c9">Defaults::pseudo_count</a>)</td></tr>
 <tr class="separator:aee1bffa7e408c11cb003d3bef341af09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a065e76faa8ff3e4939ab586673d69ce2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#a065e76faa8ff3e4939ab586673d69ce2">set_sparse_addition</a> (bool a=<a class="el" href="structscran_1_1LogNormCounts_1_1Defaults.html#a96f69b9c59677755aec1d9c3278837fb">Defaults::sparse_addition</a>)</td></tr>
+<tr class="separator:a065e76faa8ff3e4939ab586673d69ce2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a17ed316546081423d2c920aac8e657a3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#a17ed316546081423d2c920aac8e657a3">set_center</a> (bool c=<a class="el" href="structscran_1_1LogNormCounts_1_1Defaults.html#aeb75e212cc28f620391082fc735e7341">Defaults::center</a>)</td></tr>
 <tr class="separator:a17ed316546081423d2c920aac8e657a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a37c8c824927e9404598628d479338544"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#a37c8c824927e9404598628d479338544">set_block_mode</a> (<a class="el" href="classscran_1_1CenterSizeFactors.html#a511d8d0b9259cd5e3595edb8b8573189">CenterSizeFactors::BlockMode</a> b=<a class="el" href="structscran_1_1CenterSizeFactors_1_1Defaults.html#a1b72abdcaa1fcd1bc846418e0480c2b6">CenterSizeFactors::Defaults::block_mode</a>)</td></tr>
@@ -146,10 +148,44 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Set the pseudo-count for the log-transformation. This avoids problems with undefined values at zero counts.</p>
+<p>Set the pseudo-count for the log-transformation. This avoids problems with undefined values at zero counts. Larger pseudo-counts will shrink the log-expression values towards zero such that the dataset variance is driven more by high-abundance genes; this is occasionally useful to mitigate biases introduced by log-expression at low counts.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">p</td><td>Pseudo-count, should be a positive number.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1LogNormCounts.html" title="Compute log-normalized expression values.">LogNormCounts</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a065e76faa8ff3e4939ab586673d69ce2" name="a065e76faa8ff3e4939ab586673d69ce2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a065e76faa8ff3e4939ab586673d69ce2">&#9670;&#160;</a></span>set_sparse_addition()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp; scran::LogNormCounts::set_sparse_addition </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>a</em> = <code><a class="el" href="structscran_1_1LogNormCounts_1_1Defaults.html#a96f69b9c59677755aec1d9c3278837fb">Defaults::sparse_addition</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Naive addition of a non-unity pseudo-count will break sparsity. This can be avoided by instead dividing the normalized expression values by the pseudo-count and then applying the usual <code>log1p</code> transformation. However, the resulting values can not be interpreted on the scale of log-counts.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">e</td><td>Whether to use an effective pseudo-count that avoids breaking sparsity.</td></tr>
   </table>
   </dd>
 </dl>
