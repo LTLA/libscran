@@ -45,6 +45,5 @@ var searchData=
   ['computemedianmad_42',['ComputeMedianMad',['../classscran_1_1ComputeMedianMad.html',1,'scran']]],
   ['computemedianmad_2ehpp_43',['ComputeMedianMad.hpp',['../ComputeMedianMad_8hpp.html',1,'']]],
   ['computesummaries_44',['ComputeSummaries',['../classscran_1_1ScoreMarkers.html#a836ea0c31fa496f274943e79035314b5',1,'scran::ScoreMarkers']]],
-  ['configure_5fchoose_5fpseudo_5fcount_45',['configure_choose_pseudo_count',['../classscran_1_1LogNormCounts.html#a946c72f7a929b4f4dd11130111ced1a8',1,'scran::LogNormCounts']]],
-  ['counts_46',['counts',['../structscran_1_1AggregateAcrossCells_1_1Combinations.html#aff25c122a815de09258f468ab4c03d70',1,'scran::AggregateAcrossCells::Combinations']]]
+  ['counts_45',['counts',['../structscran_1_1AggregateAcrossCells_1_1Combinations.html#aff25c122a815de09258f468ab4c03d70',1,'scran::AggregateAcrossCells::Combinations']]]
 ];
