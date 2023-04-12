@@ -108,6 +108,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a4f72920b0712ca25dab1577a4558a2ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a61dca9e53795b77524e79bd3aaa8b0d0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#a61dca9e53795b77524e79bd3aaa8b0d0">set_num_threads</a> (int n=<a class="el" href="structscran_1_1LogNormCounts_1_1Defaults.html#a18d8cbec5037430b2ac7e5a76e6b6d97">Defaults::num_threads</a>)</td></tr>
 <tr class="separator:a61dca9e53795b77524e79bd3aaa8b0d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adac1cf3781421591bb1337d12b9ae9eb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#adac1cf3781421591bb1337d12b9ae9eb">set_choose_pseudo_count</a> (bool c=<a class="el" href="structscran_1_1LogNormCounts_1_1Defaults.html#a53c44f0ab479e87a88dd43ad850f7690">Defaults::choose_pseudo_count</a>)</td></tr>
+<tr class="separator:adac1cf3781421591bb1337d12b9ae9eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a946c72f7a929b4f4dd11130111ced1a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ChoosePseudoCount.html">ChoosePseudoCount</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#a946c72f7a929b4f4dd11130111ced1a8">configure_choose_pseudo_count</a> ()</td></tr>
+<tr class="separator:a946c72f7a929b4f4dd11130111ced1a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae49fea6cb86c25b647606ec7518d8ba6"><td class="memTemplParams" colspan="2">template&lt;class MAT , class V &gt; </td></tr>
 <tr class="memitem:ae49fea6cb86c25b647606ec7518d8ba6"><td class="memTemplItemLeft" align="right" valign="top">std::shared_ptr&lt; MAT &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#ae49fea6cb86c25b647606ec7518d8ba6">run</a> (std::shared_ptr&lt; MAT &gt; mat, V size_factors) const</td></tr>
 <tr class="separator:ae49fea6cb86c25b647606ec7518d8ba6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -148,7 +152,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Set the pseudo-count for the log-transformation. This avoids problems with undefined values at zero counts. Larger pseudo-counts will shrink the log-expression values towards zero such that the dataset variance is driven more by high-abundance genes; this is occasionally useful to mitigate biases introduced by log-expression at low counts.</p>
+<p>Set the pseudo-count to add to the normalized expression values prior to the log-transformation. Larger pseudo-counts will shrink the log-expression values towards zero such that the dataset variance is driven more by high-abundance genes; this is occasionally useful to mitigate biases introduced by log-expression at low counts. See also <code><a class="el" href="classscran_1_1LogNormCounts.html#adac1cf3781421591bb1337d12b9ae9eb">set_choose_pseudo_count()</a></code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">p</td><td>Pseudo-count, should be a positive number.</td></tr>
@@ -326,6 +330,65 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1LogNormCounts.html" title="Compute log-normalized expression values.">LogNormCounts</a></code> object.</dd></dl>
 <p>Parallelization is only performed to compute size factors, so this method only has an effect if <code>size_factors</code> are not passed to <code><a class="el" href="classscran_1_1LogNormCounts.html#ae49fea6cb86c25b647606ec7518d8ba6">run()</a></code>. </p>
+
+</div>
+</div>
+<a id="adac1cf3781421591bb1337d12b9ae9eb" name="adac1cf3781421591bb1337d12b9ae9eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adac1cf3781421591bb1337d12b9ae9eb">&#9670;&#160;</a></span>set_choose_pseudo_count()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp; scran::LogNormCounts::set_choose_pseudo_count </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>c</em> = <code><a class="el" href="structscran_1_1LogNormCounts_1_1Defaults.html#a53c44f0ab479e87a88dd43ad850f7690">Defaults::choose_pseudo_count</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">c</td><td>Whether to automatically choose an appropriate pseudo-count based on the (centered) size factors. See <code><a class="el" href="classscran_1_1ChoosePseudoCount.html" title="Choose a pseudo-count for log-transformation.">ChoosePseudoCount</a></code> for details.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1LogNormCounts.html" title="Compute log-normalized expression values.">LogNormCounts</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a946c72f7a929b4f4dd11130111ced1a8" name="a946c72f7a929b4f4dd11130111ced1a8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a946c72f7a929b4f4dd11130111ced1a8">&#9670;&#160;</a></span>configure_choose_pseudo_count()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ChoosePseudoCount.html">ChoosePseudoCount</a> &amp; scran::LogNormCounts::configure_choose_pseudo_count </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>Reference to a <code><a class="el" href="classscran_1_1ChoosePseudoCount.html" title="Choose a pseudo-count for log-transformation.">ChoosePseudoCount</a></code> object, for non-default parameter specification when <code><a class="el" href="classscran_1_1LogNormCounts.html#adac1cf3781421591bb1337d12b9ae9eb">set_choose_pseudo_count()</a></code> is set to <code>true</code>. </dd></dl>
 
 </div>
 </div>
