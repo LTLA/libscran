@@ -11,6 +11,7 @@
 #include "tatami/stats/sums.hpp"
 
 #include "CenterSizeFactors.hpp"
+#include "ChoosePseudoCount.hpp"
 #include "../utils/block_indices.hpp"
 
 /**
@@ -47,6 +48,11 @@ public:
         static constexpr bool sparse_addition = true;
 
         /**
+         * See `set_choose_pseudo_count()` for more details.
+         */
+        static constexpr bool choose_pseudo_count = false;
+
+        /**
          * See `set_center()` for more details.
          */
         static constexpr bool center = true;
@@ -65,17 +71,21 @@ public:
 private:
     double pseudo_count = Defaults::pseudo_count;
     bool sparse_addition = Defaults::sparse_addition;
-    bool center = Defaults::center;
     bool handle_zeros = Defaults::handle_zeros;
     int nthreads = Defaults::num_threads;
+
+    bool center = Defaults::center;
     CenterSizeFactors centerer;
+
+    bool choose_pseudo_count = Defaults::choose_pseudo_count;
+    ChoosePseudoCount pseudo_chooser;
 
 public:
     /** 
-     * Set the pseudo-count for the log-transformation.
-     * This avoids problems with undefined values at zero counts.
+     * Set the pseudo-count to add to the normalized expression values prior to the log-transformation.
      * Larger pseudo-counts will shrink the log-expression values towards zero such that the dataset variance is driven more by high-abundance genes;
      * this is occasionally useful to mitigate biases introduced by log-expression at low counts.
+     * See also `set_choose_pseudo_count()`.
      *
      * @param p Pseudo-count, should be a positive number.
      *
@@ -158,6 +168,48 @@ public:
     }
 
 public:
+    /** 
+     * @param c Whether to automatically choose an appropriate pseudo-count based on the (centered) size factors.
+     * See `ChoosePseudoCount` for details.
+     *
+     * @return A reference to this `LogNormCounts` object.
+     */
+    LogNormCounts& set_choose_pseudo_count(bool c = Defaults::choose_pseudo_count) {
+        choose_pseudo_count = c;
+        return *this;
+    }
+
+    /** 
+     * @param m See `ChoosePseudoCount::set_max_bias()` for details.
+     *
+     * @return A reference to this `LogNormCounts` object.
+     */
+    LogNormCounts& set_max_bias(double m = ChoosePseudoCount::Defaults::max_bias) {
+        pseudo_chooser.set_max_bias(m);
+        return *this;
+    }
+
+    /** 
+     * @param q See `ChoosePseudoCount::set_quantile()` for details.
+     *
+     * @return A reference to this `LogNormCounts` object.
+     */
+    LogNormCounts& set_quantile(double q = ChoosePseudoCount::Defaults::quantile) {
+        pseudo_chooser.set_quantile(q);
+        return *this;
+    }
+
+    /** 
+     * @param m See `ChoosePseudoCount::set_min_value()` for details.
+     *
+     * @return A reference to this `LogNormCounts` object.
+     */
+    LogNormCounts& set_min_value(double m = ChoosePseudoCount::Defaults::min_value) {
+        pseudo_chooser.set_min_value(m);
+        return *this;
+    }
+
+public:
     /**
      * Compute log-normalized expression values from an input matrix.
      * To avoid copying the data, this is done in a delayed manner using the `DelayedIsometricOp` class from the **tatami** package.
@@ -236,18 +288,24 @@ public:
             }
         }
 
-        if (sparse_addition && pseudo_count != 1) {
+        double current_pseudo = pseudo_count;
+        if (choose_pseudo_count) {
+            current_pseudo = pseudo_chooser.run(size_factors.size(), size_factors.data());
+        }
+
+        if (sparse_addition && current_pseudo != 1) {
             for (auto& d : size_factors) {
-                d *= pseudo_count;
+                d *= current_pseudo;
             }
+            current_pseudo = 1; // effectively 1 now.
         }
 
         auto div = tatami::make_DelayedIsometricOp(mat, tatami::make_DelayedDivideVectorHelper<true, 1>(std::move(size_factors)));
 
-        if (pseudo_count == 1 || sparse_addition) {
+        if (current_pseudo == 1) {
             return tatami::make_DelayedIsometricOp(div, tatami::DelayedLog1pHelper(2.0));
         } else {
-            auto add = tatami::make_DelayedIsometricOp(div, tatami::DelayedAddScalarHelper<double>(pseudo_count));
+            auto add = tatami::make_DelayedIsometricOp(div, tatami::DelayedAddScalarHelper<double>(current_pseudo));
             return tatami::make_DelayedIsometricOp(add, tatami::DelayedLogHelper(2.0));
         }
     }

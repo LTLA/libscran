@@ -86,6 +86,25 @@ TEST_F(LogNormCountsTester, AnotherPseudo) {
         }
     }
 
+    // Trying with a non-default pseudo-count.
+    lnc.set_choose_pseudo_count(true);
+    lnc.set_min_value(2);
+
+    {
+        double expected = scran::ChoosePseudoCount().set_min_value(2).run(copy.size(), copy.data());
+
+        auto lognormed2 = lnc.run(mat, sf);
+        for (size_t i = 0; i < mat->ncol(); ++i) {
+            auto output = lognormed2->column(i);
+            auto output2 = mat->column(i);
+            for (auto& o : output2) {
+                o = std::log1p(o/(copy[i]*expected))/std::log(2);
+            }
+            EXPECT_EQ(output, output2);
+        }
+    }
+
+
 }
 
 TEST_F(LogNormCountsTester, Block) {
