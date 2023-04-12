@@ -43,6 +43,9 @@ namespace scran {
  * Cells are only considered to be low quality if the difference in the number of detected features from the median is greater than a certain percentage.
  * By default, the number must drop by at least 10% from the median.
  * This avoids overly aggressive filtering when the MAD is zero due to the discrete nature of this statistic in datasets with few tags.
+ *
+ * For datasets with multiple blocks, `SuggestAdtQcFilters::run_blocked()` will compute block-specific thresholds for each metric.
+ * See comments in `SuggestRnaQcFilters` for more details.
  */
 class SuggestAdtQcFilters {
 public:

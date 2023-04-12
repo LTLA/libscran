@@ -36,6 +36,13 @@ namespace scran {
  * For the total counts and number of detected features, the outliers are defined after log-transformation of the metrics.
  * This improves resolution at low values and ensures that the defined threshold is not negative.
  * Note that all thresholds are still reported on the original scale, so no further exponentiation is required.
+ *
+ * For datasets with multiple blocks, `SuggestRnaQcFilters::run_blocked()` will compute block-specific thresholds for each metric.
+ * This assumes that differences in the metric distributions between blocks are driven by uninteresting technical causes (e.g., differences in sequencing depth);
+ * variable thresholds can adapt to each block's distribution for effective removal of outliers.
+ * However, if the differences in the distributions between blocks are primarily driven by biology,
+ * it may be preferable to ignore the blocking factor and use `SuggestRnaQcFilters::run()` on the entire dataset instead.
+ * This ensures that the same filter thresholds are consistently used for easier comparisons across blocks.
  */
 class SuggestRnaQcFilters {
 public:

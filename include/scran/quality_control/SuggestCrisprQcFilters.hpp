@@ -48,6 +48,9 @@ namespace scran {
  * This allows us to recover good cells that would have been filtered out by our aggressive median subset.
  * It also ensures that we do not remove cells transfected with multiple guides - such cells are not necessarily uninteresting, e.g., for examining interaction effects,
  * so we will err on the side of caution and leave them in.
+ *
+ * For datasets with multiple blocks, `SuggestCrisprQcFilters::run_blocked()` will compute block-specific thresholds for the maximum count.
+ * See comments in `SuggestRnaQcFilters` for more details.
  */
 class SuggestCrisprQcFilters {
 public:
