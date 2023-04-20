@@ -87,7 +87,7 @@ inline void compute_pairwise_auc(PairedStore& input, const std::vector<int>& num
     // Filling in the other side.
     for (size_t l = 1; l < ngroups; ++l) { // startinf rom 1, see above.
         for (size_t g = 0; g < l; ++g) {
-            int prod = totals[l] * totals[g];
+            double prod = static_cast<double>(totals[l]) * static_cast<double>(totals[g]);
             outputs[g][l] = prod - outputs[l][g];
 
             if (normalize) {
