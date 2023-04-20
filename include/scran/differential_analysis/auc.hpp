@@ -79,7 +79,9 @@ inline void compute_pairwise_auc(PairedStore& input, const std::vector<int>& num
         less_than[l] += num_zeros[l];
     }
 
-    // Values > 0.
+    // Values > 0. We expect that all values in 'input' are already non-zero;
+    // any zeros should have been moved into the 'num_zeros' already, e.g.,
+    // as done in the ComplexPerRowFactory::compute() method.
     while (pos != input.size()) {
         inner_loop(pos);
     }
@@ -184,6 +186,8 @@ inline void compute_pairwise_auc(PairedStore& input, const std::vector<int>& num
 
     // Adding the contribution of zeros (in terms of the things they're greater than).
     // This effectively replicates the inner_loop but accounts for lots of zeros.
+    // Again, we expect that all values in 'input' are already non-zero;
+    // any zeros should have been moved into the 'num_zeros' already.
     {
         while (comp != input.size() && input[comp].first < -threshold) {
             ++less_than[input[comp].second];
