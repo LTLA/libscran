@@ -34,8 +34,9 @@ inline void compute_pairwise_auc(PairedStore& input, const std::vector<int>& num
         }
 
         if (tied) {
-            ++equal[current.second]; // self.
-            for (size_t l = 1; l < ngroups; ++l) {
+            ++equal[current.second]; // contribution of the current (tied) observation.
+
+            for (size_t l = 1; l < ngroups; ++l) { // starting from 1 as zero has no work for the g < l condition anyway.
                 if (equal[l]) {
                     auto outptr = outputs[l];
                     for (size_t g = 0; g < l; ++g) {
@@ -64,8 +65,8 @@ inline void compute_pairwise_auc(PairedStore& input, const std::vector<int>& num
         inner_loop(pos);
     }
 
-    // Values == 0.
-    for (size_t l = 0; l < ngroups; ++l) {
+    // Values == 0. 
+    for (size_t l = 1; l < ngroups; ++l) { // starting from 1, see above.
         if (num_zeros[l]) {
             auto outptr = outputs[l];
             for (size_t g = 0; g < l; ++g) {
@@ -84,7 +85,7 @@ inline void compute_pairwise_auc(PairedStore& input, const std::vector<int>& num
     }
 
     // Filling in the other side.
-    for (size_t l = 0; l < ngroups; ++l) {
+    for (size_t l = 1; l < ngroups; ++l) { // startinf rom 1, see above.
         for (size_t g = 0; g < l; ++g) {
             int prod = totals[l] * totals[g];
             outputs[g][l] = prod - outputs[l][g];
