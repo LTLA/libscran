@@ -45,6 +45,7 @@ TEST_P(ModelGeneVarTest, UnblockedStats) {
             EXPECT_TRUE(f > 0);
         }
         for (auto f : res.residuals[0]) {
+            std::cout << f<< std::endl;
             EXPECT_TRUE(f != 0);
         }
 

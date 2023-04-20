@@ -34,7 +34,7 @@ namespace scran {
 class FitTrendVar {
 public:
     /**
-     * @brief Parameter defaults.
+     * @brief Parameter defaults for trend fitting.
      */
     struct Defaults {
         /**
