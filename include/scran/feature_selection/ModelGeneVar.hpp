@@ -48,6 +48,10 @@ private:
     double span = FitTrendVar::Defaults::span;
     double min_mean = FitTrendVar::Defaults::minimum_mean;
 
+    bool use_fixed_width = FitTrendVar::Defaults::use_fixed_width;
+    bool fixed_width = FitTrendVar::Defaults::fixed_width;
+    int minimum_window_count = FitTrendVar::Defaults::minimum_window_count;
+
 public:
     /** 
      * @param s See `FitTrendVar::set_span()` for more details.
@@ -66,6 +70,36 @@ public:
      */
     ModelGeneVar& set_minimum_mean(double m = FitTrendVar::Defaults::minimum_mean) {
         min_mean = m;
+        return *this;
+    }
+
+    /**
+     * @param u See `FitTrendVar::set_use_fixed_width()` for more details.
+     *
+     * @return A reference to this `ModelGeneVar` object.
+     */
+    ModelGeneVar& set_use_fixed_width(bool u = FitTrendVar::Defaults::use_fixed_width) {
+        use_fixed_width = u;
+        return *this;
+    }
+
+    /**
+     * @param f See `FitTrendVar::set_fixed_width()` for more details.
+     *
+     * @return A reference to this `ModelGeneVar` object.
+     */
+    ModelGeneVar& set_fixed_width(double f = FitTrendVar::Defaults::fixed_width) {
+        fixed_width = f;
+        return *this;
+    }
+
+    /**
+     * @param c See `FitTrendVar::set_minimum_window_count()` for more details.
+     *
+     * @return A reference to this `ModelGeneVar` object.
+     */
+    ModelGeneVar& set_minimum_window_count(int c = FitTrendVar::Defaults::minimum_window_count) {
+        minimum_window_count = c; 
         return *this;
     }
 
@@ -147,6 +181,9 @@ public:
         FitTrendVar fit;
         fit.set_span(span);
         fit.set_minimum_mean(min_mean);
+        fit.set_use_fixed_width(use_fixed_width);
+        fit.set_fixed_width(fixed_width);
+        fit.set_minimum_window_count(minimum_window_count);
 
         for (size_t b = 0; b < block_size.size(); ++b) {
             if (block_size[b] >= 2) {
