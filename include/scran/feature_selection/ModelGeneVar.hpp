@@ -43,25 +43,29 @@ public:
         static constexpr int num_threads = 1;
     };
 
+private:
+    int num_threads = Defaults::num_threads;
+    double span = FitTrendVar::Defaults::span;
+    double min_mean = FitTrendVar::Defaults::minimum_mean;
+
+public:
     /** 
-     * Use the default span for the LOWESS smoother, see https://ltla.github.io/CppWeightedLowess for details.
+     * @param s See `FitTrendVar::set_span()` for more details.
      *
      * @return A reference to this `ModelGeneVar` object.
      */
-    ModelGeneVar& set_span() {
-        fit.set_span();
+    ModelGeneVar& set_span(double s = FitTrendVar::Defaults::span) {
+        span = s;
         return *this;
     }
 
     /** 
-     * Set the span for `FitTrendVar`.
-     *
-     * @param s Span for the smoother, as a proportion of the total number of points.
+     * @param m See `FitTrendVar::set_minimum_mean()` for more details.
      *
      * @return A reference to this `ModelGeneVar` object.
      */
-    ModelGeneVar& set_span(double s) {
-        fit.set_span(s);
+    ModelGeneVar& set_minimum_mean(double m = FitTrendVar::Defaults::minimum_mean) {
+        min_mean = m;
         return *this;
     }
 
@@ -90,7 +94,7 @@ public:
      * @return `means`, `variances`, `fitted` and `residuals` are filled with the relevant statistics.
      */
     template<class MAT, typename Stat> 
-    void run(const MAT* mat, Stat* means, Stat* variances, Stat* fitted, Stat* residuals) {
+    void run(const MAT* mat, Stat* means, Stat* variances, Stat* fitted, Stat* residuals) const {
         run_blocked(mat, static_cast<int*>(NULL), std::vector<Stat*>{means}, std::vector<Stat*>{variances}, std::vector<Stat*>{fitted}, std::vector<Stat*>{residuals});
         return;
     }
@@ -122,13 +126,9 @@ public:
      * @return `means`, `variances`, `fitted` and `residuals` are filled with the relevant statistics.
      */
     template<class MAT, typename B, typename Stat>
-    void run_blocked(const MAT* mat, const B* block, std::vector<Stat*> means, std::vector<Stat*> variances, std::vector<Stat*> fitted, std::vector<Stat*> residuals) {
+    void run_blocked(const MAT* mat, const B* block, std::vector<Stat*> means, std::vector<Stat*> variances, std::vector<Stat*> fitted, std::vector<Stat*> residuals) const {
         size_t NR = mat->nrow(), NC = mat->ncol();
         std::vector<int> block_size(means.size());
-
-#ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::ModelGeneVar", "Estimating mean and variance of each gene");
-#endif
 
         if (block) {
             auto copy = block;
@@ -144,9 +144,9 @@ public:
         }
 
         // Applying the trend fit to each block.
-#ifdef SCRAN_LOGGER
-        SCRAN_LOGGER("scran::ModelGeneVar", "Fitting a mean-variance trend across genes");
-#endif
+        FitTrendVar fit;
+        fit.set_span(span);
+        fit.set_minimum_mean(min_mean);
 
         for (size_t b = 0; b < block_size.size(); ++b) {
             if (block_size[b] >= 2) {
@@ -216,7 +216,7 @@ public:
      * @return A `Results` object containing the results of the variance modelling.
      */
     template<class MAT>
-    Results run(const MAT* mat) {
+    Results run(const MAT* mat) const {
         Results output(mat->nrow(), 1);
         run(mat, output.means[0].data(), output.variances[0].data(), output.fitted[0].data(), output.residuals[0].data());
         return output;
@@ -234,7 +234,7 @@ public:
      * @return A `Results` object containing the results of the variance modelling.
      */
     template<class MAT, typename B>
-    Results run_blocked(const MAT* mat, const B* block) {
+    Results run_blocked(const MAT* mat, const B* block) const {
         int nblocks = 1;
         if (block) {
             if (mat->ncol()) {
@@ -254,10 +254,6 @@ public:
         run_blocked(mat, block, std::move(mean_ptr), std::move(var_ptr), std::move(fit_ptr), std::move(resid_ptr));
         return output;
     }
-    
-private:
-    FitTrendVar fit;
-    int num_threads = Defaults::num_threads;
 };
 
 }

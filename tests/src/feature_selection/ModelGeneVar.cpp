@@ -44,9 +44,12 @@ TEST_P(ModelGeneVarTest, UnblockedStats) {
         for (auto f : res.fitted[0]) {
             EXPECT_TRUE(f > 0);
         }
+
+        int nonzero = 0; 
         for (auto f : res.residuals[0]) {
-            EXPECT_TRUE(f != 0);
+            nonzero += (f != 0);
         }
+        EXPECT_TRUE(nonzero > 0); // there is at least one non-zero residual; but we can't expect this of everyone.
 
         compare_almost_equal(res.variances[0], tatami::row_variances(dense_row.get()));
 
