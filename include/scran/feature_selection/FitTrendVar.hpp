@@ -60,7 +60,7 @@ public:
         /**
          * See `set_use_fixed_width()` for details.
          */
-        static constexpr double use_fixed_width = 1;
+        static constexpr bool use_fixed_width = false;
 
         /**
          * See `set_fixed_width()` for details.

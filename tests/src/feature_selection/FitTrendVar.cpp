@@ -79,12 +79,14 @@ TEST(FitTrendVarTester, FixedMode) {
 
     EXPECT_NE(output.residuals, foutput.residuals);
 
-    // They eventually converge when both widths are at their maximum.
+    // They eventually converge when both all window widths are at their maximum;
+    // either because of a large span, or because we need to get a minimum number of counts. 
     ftv.set_minimum_window_count();
     ftv.set_fixed_width();
     foutput = ftv.run(x.size(), x.data(), y.data());
 
     ftv.set_use_fixed_width();
+    ftv.set_span(1);
     output = ftv.run(x.size(), x.data(), y.data());
 
     EXPECT_EQ(output.residuals, foutput.residuals);
