@@ -33,6 +33,32 @@ namespace scran {
  */
 class FitTrendVar {
 public:
+    /**
+     * @brief Parameter defaults.
+     */
+    struct Defaults {
+        /**
+         * See `set_minimum_mean()` for details.
+         */
+        static constexpr double minimum_mean = 0.1;
+
+        /**
+         * See `set_filter()` for details.
+         */
+        static constexpr bool filter = true;
+
+        /**
+         * See `set_transform()` for details.
+         */
+        static constexpr bool transform = true;
+
+        /**
+         * See `set_span()` for details.
+         */
+        static constexpr double span = 0.3;
+    };
+
+public:
     /** 
      * Set the span for the LOWESS smoother.
      *
@@ -40,8 +66,8 @@ public:
      *
      * @return A reference to this `FitTrendVar` object.
      */
-    FitTrendVar& set_span(double s = WeightedLowess::WeightedLowess<>::Defaults::span) {
-        smoother.set_span(s);
+    FitTrendVar& set_span(double s = Defaults::span) {
+        span = s;
         return *this;
     }
 
@@ -52,7 +78,7 @@ public:
      *
      * @return A reference to this `FitTrendVar` object.
      */
-    FitTrendVar& set_minimum_mean(double m = 0.1) {
+    FitTrendVar& set_minimum_mean(double m = Defaults::minimum_mean) {
         min_mean = m;
         return *this;
     }
@@ -65,7 +91,7 @@ public:
      *
      * @return A reference to this `FitTrendVar` object.
      */
-    FitTrendVar& set_filter(bool f = true) {
+    FitTrendVar& set_filter(bool f = Defaults::filter) {
         filter = f;
         return *this;
     }
@@ -78,12 +104,17 @@ public:
      *
      * @return A reference to this `FitTrendVar` object.
      */
-    FitTrendVar& set_transform(bool t = true) {
+    FitTrendVar& set_transform(bool t = Defaults::transform) {
         transform = t;
         return *this;
     }
 
 private:
+    double span = Defaults::span;
+    double min_mean = Defaults::minimum_mean;
+    bool filter = Defaults::filter;
+    bool transform = Defaults::transform;
+
     static double quad(double x) {
         return x*x*x*x;
     }
@@ -100,9 +131,8 @@ public:
      * 
      * @return `fitted` and `residuals` are filled with the fitted values and residuals of the trend.
      */
-    void run(size_t n, const double* mean, const double* variance, double* fitted, double* residuals) {
-        xbuffer.resize(n);
-        ybuffer.resize(n);
+    void run(size_t n, const double* mean, const double* variance, double* fitted, double* residuals) const {
+        std::vector<double> xbuffer(n), ybuffer(n);
 
         size_t counter = 0;
         for (size_t i = 0; i < n; ++i) {
@@ -126,8 +156,10 @@ public:
         size_t left_index = std::min_element(xbuffer.begin(), xbuffer.begin() + counter) - xbuffer.begin();
         double left_x = xbuffer[left_index];
 
-        fbuffer.resize(counter);
-        rbuffer.resize(counter);
+        WeightedLowess::WeightedLowess<> smoother;
+        smoother.set_span(span);
+
+        std::vector<double> fbuffer(counter), rbuffer(counter);
         smoother.run(counter, xbuffer.data(), ybuffer.data(), NULL, fbuffer.data(), rbuffer.data());
 
         // Identifying the left-most fitted value.
@@ -184,19 +216,11 @@ public:
      * 
      * @return A `Results` object containing the fitted values and residuals of the trend.
      */
-    Results run(size_t n, const double* mean, const double* variance) {
+    Results run(size_t n, const double* mean, const double* variance) const {
         Results output(n);
         run(n, mean, variance, output.fitted.data(), output.residuals.data());
         return output;
     }
-
-private:
-    double min_mean = 0.1;
-    bool filter = true;
-    bool transform = true;
-
-    WeightedLowess::WeightedLowess<> smoother;
-    std::vector<double> xbuffer, ybuffer, rbuffer, fbuffer;
 };
 
 }
