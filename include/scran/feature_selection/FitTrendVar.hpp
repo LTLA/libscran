@@ -56,13 +56,29 @@ public:
          * See `set_span()` for details.
          */
         static constexpr double span = 0.3;
+
+        /**
+         * See `set_use_fixed_width()` for details.
+         */
+        static constexpr double use_fixed_width = 1;
+
+        /**
+         * See `set_fixed_width()` for details.
+         */
+        static constexpr double fixed_width = 1;
+
+        /**
+         * See `set_minimum_window_count()` for details.
+         */
+        static constexpr int minimum_window_count = 200;
     };
 
 public:
     /** 
-     * Set the span for the LOWESS smoother.
+     * Set the span for the LOWESS smoother as a proportion of the total number of points.
+     * This is only used if `set_use_fixed_width()` is set to false.
      *
-     * @param s Span for the smoother, as a proportion of the total number of points.
+     * @param s Span for the smoother.
      *
      * @return A reference to this `FitTrendVar` object.
      */
@@ -109,11 +125,57 @@ public:
         return *this;
     }
 
+    /**
+     * Should a fixed-width constraint be applied to the LOWESS smoother?
+     * This forces each window to be a minimum width (see `fixed_width()`) and avoids problems with large differences in density.
+     * For example, the default smoother performs poorly at high abundances where there are few genes.
+     *
+     * @param u Whether to apply fixed-width constraints.
+     *
+     * @return A reference to this `FitTrendVar` object.
+     */
+    FitTrendVar& set_use_fixed_width(bool u = Defaults::use_fixed_width) {
+        use_fixed_width = u;
+        return *this;
+    }
+
+    /**
+     * Define the width of the window to use when `set_use_fixed_width()` is set to true.
+     * This should be relative to the range of `mean` values in `run()`;
+     * the default value is chosen based on the typical range in single-cell RNA-seq data.
+     *
+     * @param f Fixed width of the window.
+     *
+     * @return A reference to this `FitTrendVar` object.
+     */
+    FitTrendVar& set_fixed_width(double f = Defaults::fixed_width) {
+        fixed_width = f;
+        return *this;
+    }
+
+    /**
+     * Define the minimum number of observations in each window when `set_use_fixed_width()` is set to true.
+     * This ensures that each window contains at least a given number of observations;
+     * if it does not, it is extended using the standard LOWESS logic until the minimum number is achieved.
+     *
+     * @param c Minimum number of observations in the window.
+     *
+     * @return A reference to this `FitTrendVar` object.
+     */
+    FitTrendVar& set_minimum_window_count(int c = Defaults::minimum_window_count) {
+        minimum_window_count = c; 
+        return *this;
+    }
+
 private:
     double span = Defaults::span;
     double min_mean = Defaults::minimum_mean;
     bool filter = Defaults::filter;
     bool transform = Defaults::transform;
+
+    bool use_fixed_width = Defaults::use_fixed_width;
+    bool fixed_width = Defaults::fixed_width;
+    int minimum_window_count = Defaults::minimum_window_count;
 
     static double quad(double x) {
         return x*x*x*x;
@@ -157,7 +219,13 @@ public:
         double left_x = xbuffer[left_index];
 
         WeightedLowess::WeightedLowess<> smoother;
-        smoother.set_span(span);
+        if (use_fixed_width) {
+            smoother.set_span(minimum_window_count);
+            smoother.set_span_as_proportion(false);
+            smoother.set_min_width(fixed_width);
+        } else {
+            smoother.set_span(span);
+        }
 
         std::vector<double> fbuffer(counter), rbuffer(counter);
         smoother.run(counter, xbuffer.data(), ybuffer.data(), NULL, fbuffer.data(), rbuffer.data());
