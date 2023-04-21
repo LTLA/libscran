@@ -18,9 +18,10 @@ var searchData=
   ['min_5fdiff_15',['min_diff',['../structscran_1_1ChooseOutlierFilters_1_1Defaults.html#ad4d2c7e8721165f20da60c34c95becc5',1,'scran::ChooseOutlierFilters::Defaults']]],
   ['min_5fvalue_16',['min_value',['../structscran_1_1ChoosePseudoCount_1_1Defaults.html#a41f4c1003ef9d4bd088f61d1dfee40fa',1,'scran::ChoosePseudoCount::Defaults']]],
   ['minimum_5fmean_17',['minimum_mean',['../structscran_1_1FitTrendVar_1_1Defaults.html#a34486e740e69ef045edb53603852f4e5',1,'scran::FitTrendVar::Defaults']]],
-  ['modelgenevar_18',['ModelGeneVar',['../classscran_1_1ModelGeneVar.html',1,'scran']]],
-  ['modelgenevar_2ehpp_19',['ModelGeneVar.hpp',['../ModelGeneVar_8hpp.html',1,'']]],
-  ['modularity_20',['modularity',['../structscran_1_1ClusterSNNGraphMultiLevel_1_1Results.html#ad24f154bae449495590393bdb2ff59fc',1,'scran::ClusterSNNGraphMultiLevel::Results::modularity()'],['../structscran_1_1ClusterSNNGraphWalktrap_1_1Results.html#a54659717e5be3972357d5fd4680894d9',1,'scran::ClusterSNNGraphWalktrap::Results::modularity()'],['../structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#ac1bf98a6de928de8b786643942768deb',1,'scran::ClusterSNNGraphLeiden::Defaults::modularity()']]],
-  ['multibatchpca_21',['MultiBatchPCA',['../classscran_1_1MultiBatchPCA.html',1,'scran']]],
-  ['multibatchpca_2ehpp_22',['MultiBatchPCA.hpp',['../MultiBatchPCA_8hpp.html',1,'']]]
+  ['minimum_5fwindow_5fcount_18',['minimum_window_count',['../structscran_1_1FitTrendVar_1_1Defaults.html#ac17dc9c3a9866f92227fe9454a02bc90',1,'scran::FitTrendVar::Defaults']]],
+  ['modelgenevar_19',['ModelGeneVar',['../classscran_1_1ModelGeneVar.html',1,'scran']]],
+  ['modelgenevar_2ehpp_20',['ModelGeneVar.hpp',['../ModelGeneVar_8hpp.html',1,'']]],
+  ['modularity_21',['modularity',['../structscran_1_1ClusterSNNGraphMultiLevel_1_1Results.html#ad24f154bae449495590393bdb2ff59fc',1,'scran::ClusterSNNGraphMultiLevel::Results::modularity()'],['../structscran_1_1ClusterSNNGraphWalktrap_1_1Results.html#a54659717e5be3972357d5fd4680894d9',1,'scran::ClusterSNNGraphWalktrap::Results::modularity()'],['../structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#ac1bf98a6de928de8b786643942768deb',1,'scran::ClusterSNNGraphLeiden::Defaults::modularity()']]],
+  ['multibatchpca_22',['MultiBatchPCA',['../classscran_1_1MultiBatchPCA.html',1,'scran']]],
+  ['multibatchpca_2ehpp_23',['MultiBatchPCA.hpp',['../MultiBatchPCA_8hpp.html',1,'']]]
 ];
