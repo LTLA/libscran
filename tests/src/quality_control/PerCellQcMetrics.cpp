@@ -5,11 +5,7 @@
 #include "../utils/compare_almost_equal.h"
 #include "utils.h"
 
-#include "tatami/base/DenseMatrix.hpp"
-#include "tatami/base/DelayedSubset.hpp"
-#include "tatami/utils/convert_to_dense.hpp"
-#include "tatami/utils/convert_to_sparse.hpp"
-#include "tatami/stats/sums.hpp"
+#include "tatami/tatami.hpp"
 
 #include "scran/quality_control/PerCellQcMetrics.hpp"
 
@@ -76,7 +72,7 @@ TEST_P(PerCellQcMetricsTestStandard, NoSubset) {
 
     auto res3 = qcfun.run(sparse_row.get(), {});
     compare(res, res3);
-    
+
     auto res4 = qcfun.run(sparse_column.get(), {});
     compare(res, res3);
 }
