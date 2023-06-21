@@ -47,9 +47,11 @@ TEST_P(AggregateAcrossCellsTest, Basics) {
     if (nthreads == 1) {
         // Running cursory checks on the metrics.
         size_t ngenes = dense_row->nrow();
+        auto ext = dense_row->dense_row();
+
         for (size_t g = 0; g < ngenes; ++g) {
             std::vector<double> buf(dense_row->ncol());
-            auto ptr = dense_row->row(g, buf.data());
+            auto ptr = ext->fetch(g, buf.data());
 
             for (int l = 0; l < ngroups; ++l) {
                 double cursum = 0, curdetected = 0;

@@ -3,8 +3,7 @@
 
 #include <vector>
 #include <random>
-#include "tatami/base/Matrix.hpp"
-#include "tatami/base/DenseMatrix.hpp"
+#include "tatami/tatami.hpp"
 
 struct Simulator {
     double lower = -10;

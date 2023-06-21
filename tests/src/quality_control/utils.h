@@ -16,8 +16,9 @@ inline std::vector<int> to_filter (size_t nr, const std::vector<size_t>& indices
 inline std::vector<int> compute_num_detected(const tatami::NumericMatrix* matrix) {
     auto NC = matrix->ncol();
     std::vector<int> copy(NC);
+    auto ext = matrix->dense_column();
     for (size_t c = 0; c < NC; ++c) {
-        auto row = matrix->column(c);
+        auto row = ext->fetch(c);
         for (auto& r : row) {
             copy[c] += (r != 0);
         }
