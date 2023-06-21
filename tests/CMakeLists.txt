@@ -14,15 +14,15 @@ add_executable(
     libtest 
 
     src/quality_control/PerCellQcMetrics.cpp
-    #    src/quality_control/PerCellRnaQcMetrics.cpp
-    #    src/quality_control/PerCellAdtQcMetrics.cpp
-    #    src/quality_control/PerCellCrisprQcMetrics.cpp
-    #    src/quality_control/ComputeMedianMad.cpp
-    #    src/quality_control/ChooseOutlierFilters.cpp
-    #    src/quality_control/SuggestRnaQcFilters.cpp
-    #    src/quality_control/SuggestAdtQcFilters.cpp
-    #    src/quality_control/SuggestCrisprQcFilters.cpp
-    #    src/quality_control/FilterCells.cpp
+    src/quality_control/PerCellRnaQcMetrics.cpp
+    src/quality_control/PerCellAdtQcMetrics.cpp
+    src/quality_control/PerCellCrisprQcMetrics.cpp
+    src/quality_control/ComputeMedianMad.cpp
+    src/quality_control/ChooseOutlierFilters.cpp
+    src/quality_control/SuggestRnaQcFilters.cpp
+    src/quality_control/SuggestAdtQcFilters.cpp
+    src/quality_control/SuggestCrisprQcFilters.cpp
+    src/quality_control/FilterCells.cpp
 
     #    src/normalization/LogNormCounts.cpp
     #    src/normalization/CenterSizeFactors.cpp

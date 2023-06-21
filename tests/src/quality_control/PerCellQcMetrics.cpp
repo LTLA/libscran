@@ -126,7 +126,7 @@ TEST_P(PerCellQcMetricsTestStandard, TwoSubsets) {
 
         auto ref2 = tatami::make_DelayedSubset<0>(dense_row, keep_i2);
         auto refprop2 = tatami::column_sums(ref2.get());
-        EXPECT_EQ(refprop2, res.subset_total[1]);
+        compare_almost_equal(refprop2, res.subset_total[1]); // keep_i2 is scrambled, so exact equality can't be expected upon summation.
         EXPECT_EQ(res.subset_detected[1], quality_control::compute_num_detected(ref2.get()));
     }
 

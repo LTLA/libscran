@@ -4,11 +4,7 @@
 #include "../data/Simulator.hpp"
 #include "utils.h"
 
-#include "tatami/base/DenseMatrix.hpp"
-#include "tatami/base/DelayedSubset.hpp"
-#include "tatami/utils/convert_to_dense.hpp"
-#include "tatami/utils/convert_to_sparse.hpp"
-#include "tatami/stats/sums.hpp"
+#include "tatami/tatami.hpp"
 
 #include "scran/quality_control/PerCellRnaQcMetrics.hpp"
 
