@@ -4,11 +4,7 @@
 #include "../data/data.h"
 #include "compare_pcs.h"
 
-#include "tatami/base/Matrix.hpp"
-#include "tatami/base/DenseMatrix.hpp"
-#include "tatami/utils/convert_to_dense.hpp"
-#include "tatami/utils/convert_to_sparse.hpp"
-#include "tatami/stats/variances.hpp"
+#include "tatami/tatami.hpp"
 
 #include "scran/dimensionality_reduction/RunPCA.hpp"
 
@@ -133,10 +129,11 @@ TEST_P(RunPCAMoreTest, Subset) {
     auto it = sparse_matrix.begin();
 
     size_t sub_nrows = 0;
+    auto ext = dense_row->dense_row();
     for (size_t i = 0; i < subset.size(); ++i) {
         subset[i] = i%2;
         if (subset[i]) {
-            auto ptr = dense_row->row(i, buffer.data());
+            auto ptr = ext->fetch(i, buffer.data());
             submatrix.insert(submatrix.end(), ptr, ptr + dense_row->ncol());
             ++sub_nrows;
         }

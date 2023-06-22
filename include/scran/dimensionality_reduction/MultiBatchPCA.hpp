@@ -1,8 +1,7 @@
 #ifndef SCRAN_MULTI_BATCH_PCA
 #define SCRAN_MULTI_BATCH_PCA
 
-#include "tatami/stats/variances.hpp"
-#include "tatami/base/DelayedSubset.hpp"
+#include "tatami/tatami.hpp"
 
 #include "irlba/irlba.hpp"
 #include "Eigen/Dense"

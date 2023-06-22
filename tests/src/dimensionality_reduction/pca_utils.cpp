@@ -3,8 +3,8 @@
 
 #include "../utils/compare_almost_equal.h"
 #include "../data/Simulator.hpp"
-#include "tatami/base/CompressedSparseMatrix.hpp"
-#include "tatami/utils/convert_to_sparse.hpp"
+
+#include "tatami/tatami.hpp"
 
 #include "scran/dimensionality_reduction/pca_utils.hpp"
 
@@ -82,9 +82,10 @@ TEST_P(ExtractForPcaTest, Dense) {
         EXPECT_EQ(NR, sparse_row->ncol());
         EXPECT_EQ(NC, sparse_row->nrow());
 
+        auto ext = sparse_row->dense_column();
         for (size_t r = 0; r < NR; ++r) {
             auto row = extracted.row(r);
-            EXPECT_EQ(std::vector<double>(row.begin(), row.end()), sparse_row->column(r));
+            EXPECT_EQ(std::vector<double>(row.begin(), row.end()), ext->fetch(r));
         }
     }
 
@@ -95,9 +96,10 @@ TEST_P(ExtractForPcaTest, Dense) {
         EXPECT_EQ(NR, sparse_row->ncol());
         EXPECT_EQ(NC, sparse_row->nrow());
 
+        auto ext = sparse_row->dense_column();
         for (size_t r = 0; r < NR; ++r) {
             auto row = extracted.row(r);
-            EXPECT_EQ(std::vector<double>(row.begin(), row.end()), sparse_row->column(r));
+            EXPECT_EQ(std::vector<double>(row.begin(), row.end()), ext->fetch(r));
         }
     }
 }
