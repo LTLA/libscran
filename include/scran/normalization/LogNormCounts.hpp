@@ -7,8 +7,7 @@
 #include <vector>
 #include <numeric>
 
-#include "tatami/base/DelayedIsometricOp.hpp"
-#include "tatami/stats/sums.hpp"
+#include "tatami/tatami.hpp"
 
 #include "CenterSizeFactors.hpp"
 #include "ChoosePseudoCount.hpp"
@@ -300,13 +299,14 @@ public:
             current_pseudo = 1; // effectively 1 now.
         }
 
-        auto div = tatami::make_DelayedIsometricOp(mat, tatami::make_DelayedDivideVectorHelper<true, 1>(std::move(size_factors)));
+        typedef typename MAT::value_type Value_;
+        auto div = tatami::make_DelayedUnaryIsometricOp(std::move(mat), tatami::make_DelayedDivideVectorHelper<true, 1, Value_>(std::move(size_factors)));
 
         if (current_pseudo == 1) {
-            return tatami::make_DelayedIsometricOp(div, tatami::DelayedLog1pHelper(2.0));
+            return tatami::make_DelayedUnaryIsometricOp(std::move(div), tatami::DelayedLog1pHelper<Value_>(2.0));
         } else {
-            auto add = tatami::make_DelayedIsometricOp(div, tatami::DelayedAddScalarHelper<double>(current_pseudo));
-            return tatami::make_DelayedIsometricOp(add, tatami::DelayedLogHelper(2.0));
+            auto add = tatami::make_DelayedUnaryIsometricOp(std::move(div), tatami::make_DelayedAddScalarHelper<Value_>(current_pseudo));
+            return tatami::make_DelayedUnaryIsometricOp(std::move(add), tatami::DelayedLogHelper<Value_>(2.0));
         }
     }
 

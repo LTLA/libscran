@@ -24,11 +24,11 @@ add_executable(
     src/quality_control/SuggestCrisprQcFilters.cpp
     src/quality_control/FilterCells.cpp
 
-    #    src/normalization/LogNormCounts.cpp
-    #    src/normalization/CenterSizeFactors.cpp
-    #    src/normalization/MedianSizeFactors.cpp
-    #    src/normalization/GroupedSizeFactors.cpp
-    #    src/normalization/ChoosePseudoCount.cpp
+    src/normalization/LogNormCounts.cpp
+    src/normalization/CenterSizeFactors.cpp
+    src/normalization/MedianSizeFactors.cpp
+    src/normalization/GroupedSizeFactors.cpp
+    src/normalization/ChoosePseudoCount.cpp
 
     #    src/feature_selection/ModelGeneVar.cpp
     #    src/feature_selection/FitTrendVar.cpp

@@ -4,8 +4,7 @@
 #include "../data/data.h"
 #include "../utils/compare_vectors.h"
 
-#include "tatami/base/DenseMatrix.hpp"
-#include "tatami/stats/sums.hpp"
+#include "tatami/tatami.hpp"
 
 #include "scran/normalization/LogNormCounts.hpp"
 
@@ -38,9 +37,12 @@ TEST_F(LogNormCountsTester, Simple) {
     scran::CenterSizeFactors cen;
     cen.run(sf.size(), sf.data());
 
+    auto lext = lognormed->dense_column();
+    auto mext = mat->dense_column();
+
     for (size_t i = 0; i < mat->ncol(); ++i) {
-        auto output = lognormed->column(i);
-        auto output2 = mat->column(i);
+        auto output = lext->fetch(i);
+        auto output2 = mext->fetch(i);
         for (auto& o : output2) {
             o = std::log1p(o/sf[i])/std::log(2);
         }
@@ -49,21 +51,21 @@ TEST_F(LogNormCountsTester, Simple) {
 }
 
 TEST_F(LogNormCountsTester, AnotherPseudo) {
-    scran::LogNormCounts lnc;
-    lnc.set_pseudo_count(1.5);
-    lnc.set_sparse_addition(false);
-
-    auto lognormed = lnc.run(mat, sf);
-
-    // Reference calculation.
     auto copy = sf;
     scran::CenterSizeFactors cen;
     cen.run(copy.size(), copy.data());
 
+    scran::LogNormCounts lnc;
+    lnc.set_pseudo_count(1.5);
+    lnc.set_sparse_addition(false);
     {
+        auto lognormed = lnc.run(mat, sf);
+        auto lext = lognormed->dense_column();
+        auto mext = mat->dense_column();
+
         for (size_t i = 0; i < mat->ncol(); ++i) {
-            auto output = lognormed->column(i);
-            auto output2 = mat->column(i);
+            auto output = lext->fetch(i);
+            auto output2 = mext->fetch(i);
             for (auto& o : output2) {
                 o = std::log(o/copy[i] + 1.5)/std::log(2);
             }
@@ -71,14 +73,15 @@ TEST_F(LogNormCountsTester, AnotherPseudo) {
         }
     }
 
-    // Reference calculation.
     lnc.set_sparse_addition(true);
-
     {
-        auto lognormed2 = lnc.run(mat, sf);
+        auto lognormed = lnc.run(mat, sf);
+        auto lext = lognormed->dense_column();
+        auto mext = mat->dense_column();
+
         for (size_t i = 0; i < mat->ncol(); ++i) {
-            auto output = lognormed2->column(i);
-            auto output2 = mat->column(i);
+            auto output = lext->fetch(i);
+            auto output2 = mext->fetch(i);
             for (auto& o : output2) {
                 o = std::log1p(o/(copy[i]*1.5))/std::log(2);
             }
@@ -93,18 +96,19 @@ TEST_F(LogNormCountsTester, AnotherPseudo) {
     {
         double expected = scran::ChoosePseudoCount().set_min_value(2).run(copy.size(), copy.data());
 
-        auto lognormed2 = lnc.run(mat, sf);
+        auto lognormed = lnc.run(mat, sf);
+        auto lext = lognormed->dense_column();
+        auto mext = mat->dense_column();
+
         for (size_t i = 0; i < mat->ncol(); ++i) {
-            auto output = lognormed2->column(i);
-            auto output2 = mat->column(i);
+            auto output = lext->fetch(i);
+            auto output2 = mext->fetch(i);
             for (auto& o : output2) {
                 o = std::log1p(o/(copy[i]*expected))/std::log(2);
             }
             EXPECT_EQ(output, output2);
         }
     }
-
-
 }
 
 TEST_F(LogNormCountsTester, Block) {
@@ -120,9 +124,12 @@ TEST_F(LogNormCountsTester, Block) {
     cen.set_block_mode(scran::CenterSizeFactors::PER_BLOCK);
     cen.run_blocked(sf.size(), sf.data(), block.data());
 
+    auto lext = lognormed->dense_column();
+    auto mext = mat->dense_column();
+
     for (size_t i = 0; i < mat->ncol(); ++i) {
-        auto output = lognormed->column(i);
-        auto output2 = mat->column(i);
+        auto output = lext->fetch(i);
+        auto output2 = mext->fetch(i);
         for (auto& o : output2) {
             o = std::log1p(o/sf[i])/std::log(2);
         }
@@ -135,10 +142,12 @@ TEST_F(LogNormCountsTester, NoCenter) {
     lnc.set_center(false);
     auto lognormed = lnc.run(mat, sf);
 
-    // Reference calculation.
+    auto lext = lognormed->dense_column();
+    auto mext = mat->dense_column();
+
     for (size_t i = 0; i < mat->ncol(); ++i) {
-        auto output = lognormed->column(i);
-        auto output2 = mat->column(i);
+        auto output = lext->fetch(i);
+        auto output2 = mext->fetch(i);
         for (auto& o : output2) {
             o = std::log1p(o/sf[i])/std::log(2);
         }
@@ -148,24 +157,35 @@ TEST_F(LogNormCountsTester, NoCenter) {
 
 TEST_F(LogNormCountsTester, SelfCompute) {
     scran::LogNormCounts lnc;
-    auto lognormed = lnc.run(mat);
-    auto ref = lnc.run(mat, sf);
 
-    for (size_t i = 0; i < mat->ncol(); ++i) {
-        auto out1 = lognormed->column(i);
-        auto out2 = ref->column(i);
-        EXPECT_EQ(out1, out2);
+    {
+        auto lognormed = lnc.run(mat);
+        auto ref = lnc.run(mat, sf);
+
+        auto lext = lognormed->dense_column();
+        auto rext = ref->dense_column();
+
+        for (size_t i = 0; i < mat->ncol(); ++i) {
+            auto out1 = lext->fetch(i);
+            auto out2 = rext->fetch(i);
+            EXPECT_EQ(out1, out2);
+        }
     }
 
     // Creating blocks.
-    std::vector<int> block = create_block(mat->ncol());
-    auto lognormed2 = lnc.run_blocked(mat, block.data());
-    auto ref2 = lnc.run_blocked(mat, sf, block.data());
+    {
+        std::vector<int> block = create_block(mat->ncol());
+        auto lognormed = lnc.run_blocked(mat, block.data());
+        auto ref = lnc.run_blocked(mat, sf, block.data());
 
-    for (size_t i = 0; i < mat->ncol(); ++i) {
-        auto out1 = lognormed2->column(i);
-        auto out2 = ref2->column(i);
-        EXPECT_EQ(out1, out2);
+        auto lext = lognormed->dense_column();
+        auto rext = ref->dense_column();
+
+        for (size_t i = 0; i < mat->ncol(); ++i) {
+            auto out1 = lext->fetch(i);
+            auto out2 = rext->fetch(i);
+            EXPECT_EQ(out1, out2);
+        }
     }
 }
 
@@ -187,9 +207,12 @@ TEST_F(LogNormCountsTester, NonStrict) {
     // No division, effectively; all zeroes set to 1.
     {
         auto lognormed = lnc.run(mat, empty);
+        auto lext = lognormed->dense_column();
+        auto mext = mat->dense_column();
+
         for (size_t i = 0; i < mat->ncol(); ++i) {
-            auto output = lognormed->column(i);
-            auto output2 = mat->column(i);
+            auto output = lext->fetch(i);
+            auto output2 = mext->fetch(i);
             for (auto& o : output2) {
                 o = std::log1p(o)/std::log(2);
             }
@@ -203,9 +226,12 @@ TEST_F(LogNormCountsTester, NonStrict) {
 
     {
         auto lognormed = lnc.run(mat, empty);
+        auto lext = lognormed->dense_column();
+        auto mext = mat->dense_column();
+
         for (size_t i = 0; i < mat->ncol(); ++i) {
-            auto output = lognormed->column(i);
-            auto output2 = mat->column(i);
+            auto output = lext->fetch(i);
+            auto output2 = mext->fetch(i);
 
             // Uses 0.5 as the fill-in, which is the smallest non-zero.
             auto sf = (i <= 1 ? empty[i] : 0.5) / center;
