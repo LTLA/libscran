@@ -4,12 +4,7 @@
 #include "../data/data.h"
 #include "../utils/compare_almost_equal.h"
 
-#include "tatami/base/DenseMatrix.hpp"
-#include "tatami/base/DelayedSubset.hpp"
-#include "tatami/utils/convert_to_dense.hpp"
-#include "tatami/utils/convert_to_sparse.hpp"
-#include "tatami/stats/sums.hpp"
-#include "tatami/stats/variances.hpp"
+#include "tatami/tatami.hpp"
 
 #include "scran/feature_selection/ModelGeneVar.hpp"
 
