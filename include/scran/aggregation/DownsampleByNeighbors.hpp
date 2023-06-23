@@ -281,8 +281,8 @@ public:
         #pragma omp parallel for num_threads(nthreads)
         for (size_t i = 0; i < nobs; ++i) {
 #else
-        SCRAN_CUSTOM_PARALLEL(nobs, [&](size_t first, size_t last) -> void {
-        for (size_t i = first; i < last; ++i) {
+        SCRAN_CUSTOM_PARALLEL([&](size_t, size_t start, size_t length) -> void {
+        for (size_t i = start, end = start + length; i < end; ++i) {
 #endif
 
             neighbors[i] = index->find_nearest_neighbors(i, num_neighbors);
@@ -291,7 +291,7 @@ public:
         }
 #else
         }
-        }, nthreads);
+        }, nobs, nthreads);
 #endif
 
         return run(neighbors, assigned);

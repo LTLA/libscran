@@ -705,8 +705,7 @@ private:
         bool skipped;
         std::vector<Stat_> auc_buffer;
 
-        template<typename Index_>
-        Stat_* prepare_auc_buffer(Index_ gene, Index_ ngroups) { 
+        Stat_* prepare_auc_buffer(size_t gene, size_t ngroups) { 
             return auc_buffer.data() + gene * ngroups * ngroups;
         }
     };
@@ -752,18 +751,18 @@ private:
             for (int group = 0; group < ngroups; ++group) {
                 cache.configure(group, full_set);
 
-                tatami::parallelize([&](size_t, Index_ start, Index_ length) -> void {
+                tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
                     size_t in_offset = nlevels * start;
                     auto my_means = tmp_means + in_offset;
                     auto my_variances = tmp_variances + in_offset;
 
-                    auto& actions = cache.actions;
+                    const auto& actions = cache.actions;
                     auto& staging_cache = cache.staging_cache;
 
                     auto cohen_ptr = full_set.data() + start * ngroups;
                     std::vector<double> effect_buffer(ngroups);
 
-                    for (Index_ gene = start, end = start + length; gene < end; ++gene, my_means += nlevels, my_variances += nlevels, cohen_ptr += ngroups) {
+                    for (size_t gene = start, end = start + length; gene < end; ++gene, my_means += nlevels, my_variances += nlevels, cohen_ptr += ngroups) {
                         for (int other = 0; other < ngroups; ++other) {
                             if (actions[other] == differential_analysis::CacheAction::SKIP) {
                                 continue;
@@ -796,16 +795,16 @@ private:
             for (int group = 0; group < ngroups; ++group) {
                 cache.configure(group, full_set);
 
-                tatami::parallelize([&](size_t, Index_ start, Index_ length) -> void {
+                tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
                     auto my_means = tmp_means + nlevels * start;
 
-                    auto& actions = cache.actions;
+                    const auto& actions = cache.actions;
                     auto& staging_cache = cache.staging_cache;
 
                     auto lfc_ptr = full_set.data() + start * ngroups;
                     std::vector<double> effect_buffer(ngroups);
 
-                    for (Index_ gene = start, end = start + length; gene < end; ++gene, my_means += nlevels, lfc_ptr += ngroups) {
+                    for (size_t gene = start, end = start + length; gene < end; ++gene, my_means += nlevels, lfc_ptr += ngroups) {
                         for (int other = 0; other < ngroups; ++other) {
                             if (actions[other] == differential_analysis::CacheAction::SKIP) {
                                 continue;
@@ -835,16 +834,16 @@ private:
             for (int group = 0; group < ngroups; ++group) {
                 cache.configure(group, full_set);
 
-                tatami::parallelize([&](size_t, Index_ start, Index_ length) -> void {
+                tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
                     auto my_detected = tmp_detected + nlevels * start;
 
-                    auto& actions = cache.actions;
+                    const auto& actions = cache.actions;
                     auto& staging_cache = cache.staging_cache;
 
                     auto delta_detected_ptr = full_set.data() + start * ngroups;
                     std::vector<double> effect_buffer(ngroups);
 
-                    for (Index_ gene = start, end = start + length; gene < end; ++gene, my_detected += nlevels, delta_detected_ptr += ngroups) {
+                    for (size_t gene = start, end = start + length; gene < end; ++gene, my_detected += nlevels, delta_detected_ptr += ngroups) {
                         for (int other = 0; other < ngroups; ++other) {
                             if (actions[other] == differential_analysis::CacheAction::SKIP) {
                                 continue;

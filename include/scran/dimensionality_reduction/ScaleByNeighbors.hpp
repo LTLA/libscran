@@ -129,19 +129,12 @@ public:
         size_t nobs = search->nobs();
         std::vector<double> dist(nobs);
 
-#ifndef SCRAN_CUSTOM_PARALLEL
-        #pragma omp parallel for num_threads(nthreads)
-        for (size_t i = 0; i < nobs; ++i) {
-#else
-        SCRAN_CUSTOM_PARALLEL(nobs, [&](size_t start, size_t end) -> void {
-        for (size_t i = start; i < end; ++i) {
-#endif
-            auto neighbors = search->find_nearest_neighbors(i, num_neighbors);
-            dist[i] = neighbors.back().second;
-        }
-#ifdef SCRAN_CUSTOM_PARALLEL
-        }, nthreads);
-#endif
+        tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
+            for (size_t i = start, end = start + length; i < end; ++i) {
+                auto neighbors = search->find_nearest_neighbors(i, num_neighbors);
+                dist[i] = neighbors.back().second;
+            }
+        }, nobs, nthreads);
 
         double med = tatami::stats::compute_median<double>(dist.data(), nobs);
         double rmsd = 0;

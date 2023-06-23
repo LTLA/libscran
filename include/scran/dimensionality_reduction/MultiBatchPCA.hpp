@@ -263,7 +263,7 @@ private:
                 #pragma omp parallel for num_threads(nthreads)
                 for (int t = 0; t < nthreads; ++t) {
 #else
-                SCRAN_CUSTOM_PARALLEL(nthreads, [&](int first, int last) -> void {
+                SCRAN_CUSTOM_PARALLEL([&](size_t, int first, int last) -> void {
                 for (int t = first; t < last; ++t) {
 #endif
 
@@ -282,7 +282,7 @@ private:
                 }
 #else
                 }
-                }, nthreads);
+                }, nthreads, nthreads);
 #endif
             }
 
@@ -462,80 +462,58 @@ private:
         auto& values = extracted.values;
         auto& indices = extracted.indices;
 
-        // Computing grand means and variances with weights.
-        {
+        tatami::parallelize([&](size_t, IDX start, IDX length) -> void {
             size_t nbatchs = batch_size.size();
+            std::vector<double> batch_means(nbatchs);
+            std::vector<int> batch_count(nbatchs);
 
-#ifndef SCRAN_CUSTOM_PARALLEL
-            #pragma omp parallel num_threads(nthreads)
-            {
-#else
-            SCRAN_CUSTOM_PARALLEL(NR, [&](size_t first, size_t last) -> void {
-#endif
+            for (IDX r = start, end = start + length; r < end; ++r) {
+                auto offset = ptrs[r];
+                size_t num_entries = ptrs[r+1] - offset;
+                auto value_ptr = values.data() + offset;
+                auto index_ptr = indices.data() + offset;
 
-                std::vector<double> batch_means(nbatchs);
-                std::vector<int> batch_count(nbatchs);
+                // Computing the grand mean across all batchs.
+                std::fill(batch_means.begin(), batch_means.end(), 0);
+                std::fill(batch_count.begin(), batch_count.end(), 0);
+                for (size_t i = 0; i < num_entries; ++i) {
+                    auto b = batch[index_ptr[i]];
+                    batch_means[b] += value_ptr[i];
+                    ++batch_count[b];
+                }
 
-#ifndef SCRAN_CUSTOM_PARALLEL
-                #pragma omp for
-                for (size_t r = 0; r < NR; ++r) {
-#else
-                for (size_t r = first; r < last; ++r) {
-#endif
-
-                    auto offset = ptrs[r];
-                    size_t num_entries = ptrs[r+1] - offset;
-                    auto value_ptr = values.data() + offset;
-                    auto index_ptr = indices.data() + offset;
-
-                    // Computing the grand mean across all batchs.
-                    std::fill(batch_means.begin(), batch_means.end(), 0);
-                    std::fill(batch_count.begin(), batch_count.end(), 0);
-                    for (size_t i = 0; i < num_entries; ++i) {
-                        auto b = batch[index_ptr[i]];
-                        batch_means[b] += value_ptr[i];
-                        ++batch_count[b];
+                double& grand_mean = center_v[r];
+                grand_mean = 0;
+                for (size_t b = 0; b < nbatchs; ++b) {
+                    auto bsize = batch_size[b];
+                    if (bsize) {
+                        grand_mean += batch_means[b] / bsize;
                     }
+                }
+                grand_mean /= nbatchs;
 
-                    double& grand_mean = center_v[r];
-                    grand_mean = 0;
-                    for (size_t b = 0; b < nbatchs; ++b) {
-                        auto bsize = batch_size[b];
-                        if (bsize) {
-                            grand_mean += batch_means[b] / bsize;
-                        }
+                // Computing pseudo-variances where each batch's contribution
+                // is weighted inversely proportional to its size. This aims to
+                // match up with the variances used in the PCA but not the
+                // variances of the output components (where weightings are not used).
+                double& proxyvar = scale_v[r];
+                proxyvar = 0;
+                for (size_t b = 0; b < nbatchs; ++b) {
+                    double zero_sum = (batch_size[b] - batch_count[b]) * grand_mean * grand_mean;
+                    proxyvar += zero_sum / batch_size[b];
+                }
+
+                for (size_t i = 0; i < num_entries; ++i) {
+                    double diff = value_ptr[i] - grand_mean;
+                    auto bsize = batch_size[batch[index_ptr[i]]];
+                    if (bsize) {
+                        proxyvar += diff * diff / bsize;
                     }
-                    grand_mean /= nbatchs;
-
-                    // Computing pseudo-variances where each batch's contribution
-                    // is weighted inversely proportional to its size. This aims to
-                    // match up with the variances used in the PCA but not the
-                    // variances of the output components (where weightings are not used).
-                    double& proxyvar = scale_v[r];
-                    proxyvar = 0;
-                    for (size_t b = 0; b < nbatchs; ++b) {
-                        double zero_sum = (batch_size[b] - batch_count[b]) * grand_mean * grand_mean;
-                        proxyvar += zero_sum / batch_size[b];
-                    }
-
-                    for (size_t i = 0; i < num_entries; ++i) {
-                        double diff = value_ptr[i] - grand_mean;
-                        auto bsize = batch_size[batch[index_ptr[i]]];
-                        if (bsize) {
-                            proxyvar += diff * diff / bsize;
-                        }
-                    }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
                 }
             }
-#else
-                }
-            }, nthreads);
-#endif
+        }, NR, nthreads);
 
-            total_var = pca_utils::process_scale_vector(scale, scale_v);
-        }
+        total_var = pca_utils::process_scale_vector(scale, scale_v);
 
         // Actually filling the sparse matrix. Note that this is transposed
         // because we want genes in the columns.
@@ -560,18 +538,9 @@ private:
         size_t NC = emat.cols(), NR = emat.rows();
         size_t nbatchs = batch_size.size();
 
-#ifndef SCRAN_CUSTOM_PARALLEL
-        #pragma omp parallel num_threads(nthreads)
-        {
+        tatami::parallelize([&](size_t, IDX start, IDX length) -> void {
             std::vector<double> mean_buffer(nbatchs);
-            #pragma omp for
-            for (size_t c = 0; c < NC; ++c) {
-#else
-        SCRAN_CUSTOM_PARALLEL(NC, [&](size_t first, size_t last) -> void {
-            std::vector<double> mean_buffer(nbatchs);
-            for (size_t c = first; c < last; ++c) {
-#endif
-
+            for (size_t c = start, end = start + length; c < end; ++c) {
                 auto ptr = emat.data() + c * NR;
                 std::fill(mean_buffer.begin(), mean_buffer.end(), 0.0);
                 for (size_t r = 0; r < NR; ++r) {
@@ -601,14 +570,8 @@ private:
                         proxyvar += diff * diff / bsize;
                     }
                 }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
             }
-        }
-#else
-            }
-        }, nthreads);
-#endif
+        }, NR, nthreads);
 
         total_var = pca_utils::process_scale_vector(scale, scale_v);
         return emat;

@@ -324,8 +324,7 @@ private:
 
         Stat_* auc;
 
-        template<typename Index_>
-        Stat_* prepare_auc_buffer(Index_  gene, Index_ ngroups) { 
+        Stat_* prepare_auc_buffer(size_t gene, size_t ngroups) { 
             return auc + gene * ngroups * ngroups;
         }
     };

@@ -107,18 +107,18 @@ private:
 
     template<bool sparse_, bool auc_, typename Data_, typename Index_, typename Level_, typename Group_, typename Block_, class State_, class Overlord_>
     void by_row(const tatami::Matrix<Data_, Index_>* p, const Level_* level, const std::vector<int>& level_size, const Group_* group, Index_ ngroups, const Block_* block, Index_ nblocks, State_& state, Overlord_& overlord) const {
-        tatami::parallelize([&](size_t, Index_ start, Index_ length) -> void {
+        tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
             auto NC = p->ncol();
             std::vector<Data_> vbuffer(NC);
             typename std::conditional<sparse_, std::vector<Index_>, Index_>::type ibuffer(NC);
-            auto ext = tatami::consecutive_extractor<true, sparse_>(p, start, length);
+            auto ext = tatami::consecutive_extractor<true, sparse_>(p, static_cast<Index_>(start), static_cast<Index_>(length));
 
             // AUC-only object.
             typename std::conditional<auc_, AucBundle, DummyBundle>::type auc_info(ngroups, nblocks, level_size);
 
             size_t nlevels = level_size.size();
-            auto offset = nlevels * start;
-            for (Index_ r = start, end = r + length; r < end; ++r, offset += nlevels) {
+            size_t offset = nlevels * start;
+            for (size_t r = start, end = start + length; r < end; ++r, offset += nlevels) {
                 auto mptr = state.means.data() + offset;
                 auto vptr = state.variances.data() + offset;
                 auto dptr = state.detected.data() + offset;
@@ -225,11 +225,11 @@ private:
     void by_column(const tatami::Matrix<Data_, Index_>* p, const Level_* level, const std::vector<int>& level_size, State_& state) const {
         size_t nlevels = level_size.size();
 
-        tatami::parallelize([&](size_t, Index_ start, Index_ length) -> void {
+        tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
             auto NC = p->ncol();
             std::vector<Data_> vbuffer(length);
             typename std::conditional<sparse_, std::vector<Index_>, Index_>::type ibuffer(length);
-            auto ext = tatami::consecutive_extractor<false, sparse_>(p, 0, NC, start, length);
+            auto ext = tatami::consecutive_extractor<false, sparse_>(p, 0, NC, static_cast<Index_>(start), static_cast<Index_>(length));
 
             std::vector<std::vector<double> > tmp_means(nlevels), tmp_vars(nlevels), tmp_detected(nlevels);
             for (size_t l = 0; l < nlevels; ++ l) {
@@ -253,7 +253,7 @@ private:
                     }
                 } else {
                     auto range = ext->fetch(c, vbuffer.data(), ibuffer.data());
-                    tatami::stats::variances::compute_running(range, mptr, vptr, dptr, tmp_counts[b], /* skip_zeros = */ true, /* subtract = */ start);
+                    tatami::stats::variances::compute_running(range, mptr, vptr, dptr, tmp_counts[b], /* skip_zeros = */ true, /* subtract = */ static_cast<Index_>(start));
                 }
             }
 
