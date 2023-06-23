@@ -1,9 +1,7 @@
 #include <gtest/gtest.h>
 #include "../utils/macros.h"
 
-#include "tatami/base/Matrix.hpp"
-#include "tatami/base/DelayedBind.hpp"
-#include "tatami/base/DelayedSubset.hpp"
+#include "tatami/tatami.hpp"
 #include "scran/differential_analysis/ScoreMarkers.hpp"
 #include "scran/differential_analysis/PairwiseEffects.hpp"
 #include "scran/differential_analysis/SummarizeEffects.hpp"

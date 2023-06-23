@@ -1,9 +1,8 @@
 #include <gtest/gtest.h>
 #include "../utils/macros.h"
 
-#include "tatami/base/Matrix.hpp"
-#include "tatami/base/DelayedBind.hpp"
-#include "tatami/base/DelayedSubset.hpp"
+#include "tatami/tatami.hpp"
+
 #include "scran/differential_analysis/PairwiseEffects.hpp"
 
 #include "../utils/compare_almost_equal.h"
@@ -34,7 +33,7 @@ protected:
     static ReferenceResult simple_reference(const tatami::NumericMatrix* mat, const int* group, int ngroups, double threshold) {
         size_t ngenes = mat->nrow();
 
-        scran::differential_analysis::EffectsCalculator runner(1, threshold);
+        scran::differential_analysis::MatrixCalculator runner(1, threshold);
         EffectsOverlord ova(true, ngenes, ngroups);
         auto state = runner.run(mat, group, ngroups, ova);
 

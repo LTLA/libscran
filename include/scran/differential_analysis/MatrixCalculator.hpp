@@ -106,7 +106,7 @@ private:
     };
 
     template<bool sparse_, bool auc_, typename Data_, typename Index_, typename Level_, typename Group_, typename Block_, class State_, class Overlord_>
-    void by_row(const tatami::Matrix<Data_, Index_>* p, const Level_* level, const std::vector<int>& level_size, const Group_* group, size_t ngroups, const Block_* block, size_t nblocks, State_& state, Overlord_& overlord) const {
+    void by_row(const tatami::Matrix<Data_, Index_>* p, const Level_* level, const std::vector<int>& level_size, const Group_* group, Index_ ngroups, const Block_* block, Index_ nblocks, State_& state, Overlord_& overlord) const {
         tatami::parallelize([&](size_t, Index_ start, Index_ length) -> void {
             auto NC = p->ncol();
             std::vector<Data_> vbuffer(NC);
@@ -284,7 +284,7 @@ private:
 
 private:
     template<typename Data_, typename Index_, typename Level_, typename Group_, typename Block_, class Overlord_>
-    State core(const tatami::Matrix<Data_, Index_>* p, const Level_* level, std::vector<int> level_size, const Group_* group, size_t ngroups, const Block_* block, size_t nblocks, Overlord_& overlord) const {
+    State core(const tatami::Matrix<Data_, Index_>* p, const Level_* level, std::vector<int> level_size, const Group_* group, Index_ ngroups, const Block_* block, Index_ nblocks, Overlord_& overlord) const {
         auto ngenes = p->nrow();
         size_t nlevels = level_size.size();
         State state(static_cast<size_t>(ngenes) * nlevels);

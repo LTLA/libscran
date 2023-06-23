@@ -3,13 +3,13 @@
 
 #include "../utils/macros.hpp"
 
-#include "Factory.hpp"
+#include "MatrixCalculator.hpp"
 #include "cohens_d.hpp"
 #include "simple_diff.hpp"
 #include "summarize_comparisons.hpp"
 #include "../utils/vector_to_pointers.hpp"
 
-#include "tatami/stats/apply.hpp"
+#include "tatami/tatami.hpp"
 
 #include <array>
 #include <map>
@@ -45,11 +45,10 @@ enum class CacheAction : unsigned char { SKIP, COMPUTE, CACHE };
 // soon, because at least it'll be freed up rapidly.
 template<typename Stat>
 struct EffectsCacher {
-    EffectsCacher(size_t ngenes_, int ngroups_, int cache_size_) :
-        ngenes(ngenes_),
-        ngroups(ngroups_),
-        cache_size(cache_size_),
-        full_set(ngroups * ngenes),
+    EffectsCacher(size_t nge, int ngr, int cs) :
+        ngenes(nge),
+        ngroups(ngr),
+        cache_size(cs),
         actions(ngroups),
         staging_cache(ngroups)
     {
@@ -60,9 +59,6 @@ public:
     size_t ngenes;
     int ngroups;
     int cache_size;
-
-    // 'full_set' contains all effects for the current group's comparisons to all other groups.
-    std::vector<double> full_set;
 
     std::vector<CacheAction> actions;
 
@@ -86,7 +82,7 @@ public:
     }
 
 public:
-    void configure(int group) {
+    void configure(int group, std::vector<double>& full_set) {
         // During calculation of effects, the current group (i.e., 'group') is
         // the first group in the comparison and 'other' is the second group.
         // However, remember that we want to cache the reverse effects, so in
@@ -628,8 +624,9 @@ public:
         Overlord<Stat> overlord(p->nrow(), ngroups, auc.empty());
         auto state = runner.run(p, group, ngroups, overlord);
 
-        process_simple_effects(state, means, detected, cohen, lfc, delta_detected);
-        summarize_auc(state, auc, overlord.auc_buffer);
+        auto ngenes = p->nrow();
+        process_simple_effects(ngenes, ngroups, 1, state, means, detected, cohen, lfc, delta_detected);
+        summarize_auc(ngenes, ngroups, state, auc, overlord.auc_buffer);
     }
 
     /**
@@ -689,54 +686,45 @@ public:
             }
         }
 
-        process_simple_effects(state, means2, detected2, cohen, lfc, delta_detected);
-        summarize_auc(state, auc, overlord.auc_buffer);
+        auto ngenes = p->nrow();
+        process_simple_effects(ngenes, ngroups, nblocks, state, means2, detected2, cohen, lfc, delta_detected);
+        summarize_auc(ngenes, ngroups, state, auc, overlord.auc_buffer);
     }
 
 private:
-    template<typename Stat>
+    template<typename Stat_>
     class Overlord {
     public:
-        Overlord(size_t nr, int ng, bool skip_auc) : skipped(skip_auc), auc_buffer(skip_auc ? 0 : nr * ng * ng) {}
+        template<typename Index_>
+        Overlord(Index_ nr, Index_ ng, bool skip_auc) : skipped(skip_auc), auc_buffer(skip_auc ? 0 : nr * ng * ng) {}
 
         bool needs_auc() const {
             return !skipped;
         }
 
         bool skipped;
-        std::vector<Stat> auc_buffer;
+        std::vector<Stat_> auc_buffer;
 
-        struct ComplexWorker {
-            ComplexWorker(Stat* auc_) : auc(auc_) {}
-            Stat* auc;
-
-            Stat* prepare_auc_buffer(size_t gene, int ngroups) { 
-                return auc + gene * ngroups * ngroups;
-            }
-
-            // No-op, because it's copied straight into the auc_buffer.
-            void consume_auc_buffer(size_t, int, const double*) {}
-        };
-
-        ComplexWorker complex_worker() {
-            return ComplexWorker(this->auc_buffer.data());
+        template<typename Index_>
+        Stat_* prepare_auc_buffer(Index_ gene, Index_ ngroups) { 
+            return auc_buffer.data() + gene * ngroups * ngroups;
         }
     };
 
-    template<typename Stat>
+    template<typename Index_, typename Stat_>
     void process_simple_effects(
+        Index_ ngenes, 
+        Index_ ngroups,
+        Index_ nblocks,
         const differential_analysis::MatrixCalculator::State& state, 
-        std::vector<Stat*>& means,
-        std::vector<Stat*>& detected,
-        std::vector<std::vector<Stat*> >& cohen,
-        std::vector<std::vector<Stat*> >& lfc,
-        std::vector<std::vector<Stat*> >& delta_detected) 
+        std::vector<Stat_*>& means,
+        std::vector<Stat_*>& detected,
+        std::vector<std::vector<Stat_*> >& cohen,
+        std::vector<std::vector<Stat_*> >& lfc,
+        std::vector<std::vector<Stat_*> >& delta_detected) 
     const {
-        auto ngenes = state.ngenes;
         const auto& level_size = state.level_size;
         auto nlevels = level_size.size();
-        auto ngroups = state.ngroups;
-        auto nblocks = state.nblocks;
         const auto* tmp_means = state.means.data();
         const auto* tmp_variances = state.variances.data();
         const auto* tmp_detected = state.detected.data();
@@ -756,34 +744,26 @@ private:
         // Looping over each group and computing the various summaries. We do this on
         // a per-group basis to avoid having to store the full group-by-group matrix of
         // effect sizes that we would otherwise need as input to SummarizeEffects.
-        differential_analysis::EffectsCacher<Stat> cache(ngenes, ngroups, cache_size);
-        auto& full_set = cache.full_set;
-        auto& actions = cache.actions;
-        auto& staging_cache = cache.staging_cache;
+        differential_analysis::EffectsCacher<Stat_> cache(ngenes, ngroups, cache_size);
+        std::vector<double> full_set(ngroups * ngenes);
 
         if (cohen.size()) {
             cache.clear();
-
             for (int group = 0; group < ngroups; ++group) {
-                cache.configure(group);
+                cache.configure(group, full_set);
 
-#ifndef SCRAN_CUSTOM_PARALLEL
-                #pragma omp parallel num_threads(nthreads)
-                {
+                tatami::parallelize([&](size_t, Index_ start, Index_ length) -> void {
+                    size_t in_offset = nlevels * start;
+                    auto my_means = tmp_means + in_offset;
+                    auto my_variances = tmp_variances + in_offset;
+
+                    auto& actions = cache.actions;
+                    auto& staging_cache = cache.staging_cache;
+
+                    auto cohen_ptr = full_set.data() + start * ngroups;
                     std::vector<double> effect_buffer(ngroups);
-                    #pragma omp for
-                    for (size_t gene = 0; gene < ngenes; ++gene) {
-#else
-                SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
-                    std::vector<double> effect_buffer(ngroups);
-                    for (size_t gene = start; gene < end; ++gene) {
-#endif
 
-                        size_t in_offset = nlevels * gene;
-                        auto my_means = tmp_means + in_offset;
-                        auto my_variances = tmp_variances + in_offset;
-
-                        auto cohen_ptr = full_set.data() + gene * ngroups;
+                    for (Index_ gene = start, end = start + length; gene < end; ++gene, my_means += nlevels, my_variances += nlevels, cohen_ptr += ngroups) {
                         for (int other = 0; other < ngroups; ++other) {
                             if (actions[other] == differential_analysis::CacheAction::SKIP) {
                                 continue;
@@ -800,14 +780,8 @@ private:
                         }
 
                         differential_analysis::summarize_comparisons(ngroups, cohen_ptr, group, gene, cohen, effect_buffer);
-
-#ifndef SCRAN_CUSTOM_PARALLEL
                     }
-                }
-#else
-                    }
-                }, nthreads);
-#endif
+                }, ngenes, nthreads);
 
                 if (cohen[differential_analysis::summary::MIN_RANK].size()) {
                     differential_analysis::compute_min_rank(ngenes, ngroups, group, full_set.data(), cohen[differential_analysis::summary::MIN_RANK][group], nthreads);
@@ -819,24 +793,19 @@ private:
 
         if (lfc.size()) {
             cache.clear();
-
             for (int group = 0; group < ngroups; ++group) {
-                cache.configure(group);
+                cache.configure(group, full_set);
 
-#ifndef SCRAN_CUSTOM_PARALLEL
-                #pragma omp parallel num_threads(nthreads)
-                {
-                    std::vector<double> effect_buffer(ngroups);
-                    #pragma omp for
-                    for (size_t gene = 0; gene < ngenes; ++gene) {
-#else
-                SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
-                    std::vector<double> effect_buffer(ngroups);
-                    for (size_t gene = start; gene < end; ++gene) {
-#endif
+                tatami::parallelize([&](size_t, Index_ start, Index_ length) -> void {
+                    auto my_means = tmp_means + nlevels * start;
 
-                        auto my_means = tmp_means + nlevels * gene;
-                        auto lfc_ptr = full_set.data() + gene * ngroups;
+                    auto& actions = cache.actions;
+                    auto& staging_cache = cache.staging_cache;
+
+                    auto lfc_ptr = full_set.data() + start * ngroups;
+                    std::vector<double> effect_buffer(ngroups);
+
+                    for (Index_ gene = start, end = start + length; gene < end; ++gene, my_means += nlevels, lfc_ptr += ngroups) {
                         for (int other = 0; other < ngroups; ++other) {
                             if (actions[other] == differential_analysis::CacheAction::SKIP) {
                                 continue;
@@ -850,14 +819,8 @@ private:
                         }
 
                         differential_analysis::summarize_comparisons(ngroups, lfc_ptr, group, gene, lfc, effect_buffer);
-
-#ifndef SCRAN_CUSTOM_PARALLEL
                     }
-                }
-#else
-                    }
-                }, nthreads);
-#endif
+                }, ngenes, nthreads);
 
                 if (lfc[differential_analysis::summary::MIN_RANK].size()) {
                     differential_analysis::compute_min_rank(ngenes, ngroups, group, full_set.data(), lfc[differential_analysis::summary::MIN_RANK][group], nthreads);
@@ -869,25 +832,19 @@ private:
 
         if (delta_detected.size()) {
             cache.clear();
-
             for (int group = 0; group < ngroups; ++group) {
-                cache.configure(group);
+                cache.configure(group, full_set);
 
-#ifndef SCRAN_CUSTOM_PARALLEL
-                #pragma omp parallel num_threads(nthreads)
-                {
+                tatami::parallelize([&](size_t, Index_ start, Index_ length) -> void {
+                    auto my_detected = tmp_detected + nlevels * start;
+
+                    auto& actions = cache.actions;
+                    auto& staging_cache = cache.staging_cache;
+
+                    auto delta_detected_ptr = full_set.data() + start * ngroups;
                     std::vector<double> effect_buffer(ngroups);
-                    #pragma omp for
-                    for (size_t gene = 0; gene < ngenes; ++gene) {
-#else
-                SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
-                    std::vector<double> effect_buffer(ngroups);
-                    for (size_t gene = start; gene < end; ++gene) {
-#endif
 
-                        auto my_detected = tmp_detected + gene * nlevels;
-                        auto delta_detected_ptr = full_set.data() + gene * ngroups;
-
+                    for (Index_ gene = start, end = start + length; gene < end; ++gene, my_detected += nlevels, delta_detected_ptr += ngroups) {
                         for (int other = 0; other < ngroups; ++other) {
                             if (actions[other] == differential_analysis::CacheAction::SKIP) {
                                 continue;
@@ -901,14 +858,8 @@ private:
                         }
 
                         differential_analysis::summarize_comparisons(ngroups, delta_detected_ptr, group, gene, delta_detected, effect_buffer);
-
-#ifndef SCRAN_CUSTOM_PARALLEL
                     }
-                }
-#else
-                    }
-                }, nthreads);
-#endif
+                }, ngenes, nthreads);
 
                 if (delta_detected[differential_analysis::summary::MIN_RANK].size()) {
                     differential_analysis::compute_min_rank(ngenes, ngroups, group, full_set.data(), delta_detected[differential_analysis::summary::MIN_RANK][group], nthreads);
@@ -919,16 +870,16 @@ private:
         }
     }
 
-    template<typename Stat>
+    template<typename Index_, typename Stat_>
     void summarize_auc(
+        Index_ ngenes, 
+        Index_ ngroups,
         const differential_analysis::MatrixCalculator::State& state, 
-        std::vector<std::vector<Stat*> >& auc,
-        std::vector<Stat>& auc_buffer) 
+        std::vector<std::vector<Stat_*> >& auc,
+        std::vector<Stat_>& auc_buffer) 
     const {
         // If we need the min-rank AUCs, there's no choice but to hold everything in memory.
         if (auc.size()) {
-            auto ngenes = state.ngenes;
-            auto ngroups = state.ngroups;
             differential_analysis::summarize_comparisons(ngenes, ngroups, auc_buffer.data(), auc, nthreads);
             if (auc[differential_analysis::summary::MIN_RANK].size()) {
                 differential_analysis::compute_min_rank(ngenes, ngroups, auc_buffer.data(), auc[differential_analysis::summary::MIN_RANK], nthreads);
