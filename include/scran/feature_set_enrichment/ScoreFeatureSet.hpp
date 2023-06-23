@@ -242,8 +242,8 @@ private:
     // Re-using the same two-pass philosophy from RunPCA, to save memory.
     template<typename T, typename IDX, typename B>
     std::vector<pca_utils::SparseComponents> core_sparse_row(const tatami::Matrix<T, IDX>* mat, const B* block, size_t nblocks, const std::vector<size_t>& reverse_block_map) const {
-        size_t NC = mat->ncol();
-        size_t NR = mat->nrow();
+        IDX NC = mat->ncol();
+        IDX NR = mat->nrow();
 
         std::vector<pca_utils::SparseComponents> output(nblocks);
         for (size_t b = 0; b < nblocks; ++b) {
@@ -251,141 +251,89 @@ private:
         }
 
         /*** First round, to fetch the number of zeros in each row. ***/
-        {
-#ifndef SCRAN_CUSTOM_PARALLEL
-            #pragma omp parallel num_threads(nthreads)
-            {
-#else
-            SCRAN_CUSTOM_PARALLEL(NR, [&](size_t start, size_t end) -> void {
-#endif            
+        tatami::parallelize([&](size_t, IDX start, IDX length) -> void {
+            tatami::Options opt;
+            opt.sparse_extract_value = false;
+            opt.sparse_ordered_index = false;
+            auto ext = tatami::consecutive_extractor<true, true>(mat, start, length, opt);
 
-                std::vector<double> xbuffer(NC);
-                std::vector<int> ibuffer(NC);
-                auto wrk = mat->new_workspace(true);
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-                #pragma omp for
-                for (size_t r = 0; r < NR; ++r) {
-#else
-                for (size_t r = start; r < end; ++r) {
-#endif
-
-                    auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data(), wrk.get());
-                    for (size_t i = 0; i < range.number; ++i) {
-                        ++(output[block[range.index[i]]].ptrs[r + 1]);
-                    }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
+            std::vector<IDX> ibuffer(NC);
+            for (IDX r = 0, end = start + length; r < end; ++r) {
+                auto range = ext->fetch(r, NULL, ibuffer.data());
+                for (size_t i = 0; i < range.number; ++i) {
+                    ++(output[block[range.index[i]]].ptrs[r + 1]);
                 }
             }
-#else
-                }
-            }, nthreads);
-#endif
-        }
+        }, NR, nthreads);
 
         /*** Second round, to populate the vectors. ***/
-        {
-            std::vector<std::vector<size_t> > ptr_copy;
-            ptr_copy.reserve(nblocks);
+        std::vector<std::vector<size_t> > ptr_copy;
+        ptr_copy.reserve(nblocks);
 
-            for (size_t b = 0; b < nblocks; ++b) {
-                auto& curptrs = output[b].ptrs;
-                for (size_t r = 0; r < NR; ++r) {
-                    curptrs[r + 1] += curptrs[r];
-                }
-                ptr_copy.push_back(curptrs);
-                output[b].values.resize(curptrs.back());
-                output[b].indices.resize(curptrs.back());
+        for (size_t b = 0; b < nblocks; ++b) {
+            auto& curptrs = output[b].ptrs;
+            for (size_t r = 0; r < NR; ++r) {
+                curptrs[r + 1] += curptrs[r];
             }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-            #pragma omp parallel num_threads(nthreads)
-            {
-#else
-            SCRAN_CUSTOM_PARALLEL(NR, [&](size_t start, size_t end) -> void {
-#endif            
-
-                auto wrk = mat->new_workspace(true);
-                std::vector<double> xbuffer(NC);
-                std::vector<int> ibuffer(NC);
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-                #pragma omp for
-                for (size_t r = 0; r < NR; ++r) {
-#else
-                for (size_t r = start; r < end; ++r) {
-#endif
-
-                    auto range = mat->sparse_row(r, xbuffer.data(), ibuffer.data(), wrk.get());
-                    for (size_t i = 0; i < range.number; ++i) {
-                        auto c = range.index[i];
-                        auto b = block[c];
-                        auto& offset = ptr_copy[b][r];
-                        output[b].values[offset] = range.value[i];
-                        output[b].indices[offset] = reverse_block_map[c];
-                        ++offset;
-                    }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-                }
-            }
-#else
-                }
-            }, nthreads);
-#endif
+            ptr_copy.push_back(curptrs);
+            output[b].values.resize(curptrs.back());
+            output[b].indices.resize(curptrs.back());
         }
+
+        tatami::parallelize([&](size_t, IDX start, IDX length) -> void {
+            std::vector<T> xbuffer(NC);
+            std::vector<IDX> ibuffer(NC);
+            auto ext = tatami::consecutive_extractor<true, true>(mat, start, length);
+
+            for (IDX r = start, end = start + length; r < end; ++r) {
+                auto range = ext->fetch(r, xbuffer.data(), ibuffer.data());
+                for (size_t i = 0; i < range.number; ++i) {
+                    auto c = range.index[i];
+                    auto b = block[c];
+                    auto& offset = ptr_copy[b][r];
+                    output[b].values[offset] = range.value[i];
+                    output[b].indices[offset] = reverse_block_map[c];
+                    ++offset;
+                }
+            }
+        }, NR, nthreads);
 
         return output;
     }
 
     template<typename T, typename IDX, typename B>
     std::vector<pca_utils::SparseComponents> core_sparse_column(const tatami::Matrix<T, IDX>* mat, const B* block, size_t nblocks, const std::vector<size_t>& reverse_block_map) const {
-        auto NR = mat->nrow();
-        auto NC = mat->ncol();
+        IDX NR = mat->nrow();
+        IDX NC = mat->ncol();
+        std::cout << "FOO" << std::endl;
 
         /*** First round, to fetch the number of zeros in each row. ***/
         std::vector<std::vector<size_t> > nonzeros_per_row;
         {
-            size_t cols_per_thread = std::ceil(static_cast<double>(NC) / nthreads);
             std::vector<std::vector<std::vector<size_t> > > threaded_nonzeros_per_row(nthreads);
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-            #pragma omp parallel for num_threads(nthreads)
-            for (int t = 0; t < nthreads; ++t) {
-#else
-            SCRAN_CUSTOM_PARALLEL(nthreads, [&](int start, int end) -> void { // Trivial allocation of one job per thread.
-            for (int t = start; t < end; ++t) {
-#endif
-
-                size_t startcol = cols_per_thread * t, endcol = std::min(startcol + cols_per_thread, NC);
-                if (startcol < endcol) {
-                    std::vector<std::vector<size_t> > nonzeros_per_row(nblocks);
-                    for (size_t b = 0; b < nblocks; ++b) {
-                        nonzeros_per_row[b].resize(NR);
-                    }
-
-                    std::vector<double> xbuffer(NR);
-                    std::vector<int> ibuffer(NR);
-                    auto wrk = mat->new_workspace(false);
-
-                    for (size_t c = startcol; c < endcol; ++c) {
-                        auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data(), wrk.get());
-                        auto& current = nonzeros_per_row[block[c]];
-                        for (size_t i = 0; i < range.number; ++i) {
-                            ++(current[range.index[i]]);
-                        }
-                    }
-
-                    threaded_nonzeros_per_row[t] = std::move(nonzeros_per_row);
+            for (auto& x : threaded_nonzeros_per_row) {
+                x.resize(nblocks);
+                for (auto& current : x) {
+                    current.resize(NR);
                 }
+            }
 
-#ifndef SCRAN_CUSTOM_PARALLEL
-            }
-#else
-            }
-            }, nthreads);
-#endif
+            tatami::parallelize([&](size_t t, IDX start, IDX length) -> void {
+                tatami::Options opt;
+                opt.sparse_extract_value = false;
+                opt.sparse_ordered_index = false;
+                auto wrk = tatami::consecutive_extractor<false, true>(mat, start, length, opt);
+
+                std::vector<IDX> ibuffer(NR);
+                auto& nonzeros_per_row = threaded_nonzeros_per_row[t];
+                for (size_t c = start, end = start + length; c < end; ++c) {
+                    auto range = wrk->fetch(c, NULL, ibuffer.data());
+                    auto& current = nonzeros_per_row[block[c]];
+                    for (size_t i = 0; i < range.number; ++i) {
+                        ++(current[range.index[i]]);
+                    }
+                }
+            }, NC, nthreads);
 
             // There had better be at least one thread!
             nonzeros_per_row = std::move(threaded_nonzeros_per_row[0]);
@@ -400,71 +348,52 @@ private:
                 }
             }
         }
+        std::cout << "LAUNCHING!" << std::endl;
 
         /*** Second round, to populate the vectors. ***/
         std::vector<pca_utils::SparseComponents> output(nblocks);
-        {
-            std::vector<std::vector<size_t> > ptr_copy;
-            ptr_copy.reserve(nblocks);
+        std::vector<std::vector<size_t> > ptr_copy;
+        ptr_copy.reserve(nblocks);
 
-            for (size_t b = 0; b < nblocks; ++b) {
-                auto& block_ptrs = output[b].ptrs;
-                block_ptrs.resize(NR + 1);
+        for (size_t b = 0; b < nblocks; ++b) {
+            auto& block_ptrs = output[b].ptrs;
+            block_ptrs.resize(NR + 1);
 
-                size_t total_nzeros = 0;
-                const auto& nonzeros_per_block = nonzeros_per_row[b];
-                for (size_t r = 0; r < NR; ++r) {
-                    total_nzeros += nonzeros_per_block[r];
-                    block_ptrs[r + 1] = total_nzeros;
-                }
-                ptr_copy.push_back(block_ptrs);
-
-                output[b].values.resize(total_nzeros);
-                output[b].indices.resize(total_nzeros);
+            size_t total_nzeros = 0;
+            const auto& nonzeros_per_block = nonzeros_per_row[b];
+            for (size_t r = 0; r < NR; ++r) {
+                total_nzeros += nonzeros_per_block[r];
+                block_ptrs[r + 1] = total_nzeros;
             }
+            ptr_copy.push_back(block_ptrs);
 
-            // Splitting by row this time, because columnar extraction can't be done safely.
-            size_t rows_per_thread = std::ceil(static_cast<double>(NR) / nthreads);
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-            #pragma omp parallel for num_threads(nthreads)
-            for (int t = 0; t < nthreads; ++t) {
-#else
-            SCRAN_CUSTOM_PARALLEL(nthreads, [&](int start, int end) -> void { // Trivial allocation of one job per thread.
-            for (int t = start; t < end; ++t) {
-#endif
-
-                size_t startrow = rows_per_thread * t, endrow = std::min(startrow + rows_per_thread, NR);
-                if (startrow < endrow) {
-                    auto wrk = mat->new_workspace(false);
-                    std::vector<double> xbuffer(endrow - startrow);
-                    std::vector<int> ibuffer(endrow - startrow);
-
-                    for (size_t c = 0; c < NC; ++c) {
-                        auto range = mat->sparse_column(c, xbuffer.data(), ibuffer.data(), startrow, endrow, wrk.get());
-                        size_t b = block[c];
-                        auto& block_values = output[b].values;
-                        auto& block_indices = output[b].indices;
-                        auto& block_ptr_copy = ptr_copy[b];
-                        auto blocked_c = reverse_block_map[c];
-
-                        for (size_t i = 0; i < range.number; ++i) {
-                            auto r = range.index[i];
-                            auto& offset = block_ptr_copy[r];
-                            block_values[offset] = range.value[i];
-                            block_indices[offset] = blocked_c;
-                            ++offset;
-                        }
-                    }
-                }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-            }
-#else
-            }
-            }, nthreads);
-#endif
+            output[b].values.resize(total_nzeros);
+            output[b].indices.resize(total_nzeros);
         }
+
+        tatami::parallelize([&](size_t, IDX start, IDX length) -> void {
+            std::vector<T> xbuffer(length);
+            std::vector<IDX> ibuffer(length);
+            auto wrk = tatami::consecutive_extractor<false, true>(mat, 0, NC, start, length);
+
+            for (size_t c = 0; c < NC; ++c) {
+                size_t b = block[c];
+                auto& block_values = output[b].values;
+                auto& block_indices = output[b].indices;
+                auto& block_ptr_copy = ptr_copy[b];
+                auto blocked_c = reverse_block_map[c];
+
+                auto range = wrk->fetch(c, xbuffer.data(), ibuffer.data());
+                for (size_t i = 0; i < range.number; ++i) {
+                    auto r = range.index[i];
+                    auto& offset = block_ptr_copy[r];
+                    block_values[offset] = range.value[i];
+                    block_indices[offset] = blocked_c;
+                    ++offset;
+                }
+            }
+        }, NR, nthreads);
+        std::cout << "DONE!" << std::endl;
 
         return output;
     }
@@ -561,8 +490,8 @@ private:
     ) const {
 
         size_t nblocks = block_size.size();
-        size_t NC = mat->ncol();
-        size_t NR = mat->nrow();
+        IDX NC = mat->ncol();
+        IDX NR = mat->nrow();
 
         std::vector<Eigen::MatrixXd> outputs;
         outputs.reserve(nblocks);
@@ -570,33 +499,17 @@ private:
             outputs.emplace_back(block_size[b], NR);
         }
 
-#ifndef SCRAN_CUSTOM_PARALLEL
-        #pragma omp parallel num_threads(nthreads)
-        {
-            std::vector<double> buffer(NC);
-            auto wrk = mat->new_workspace(true);
+        tatami::parallelize([&](size_t, IDX start, IDX length) -> void {
+            auto ext = tatami::consecutive_extractor<true, false>(mat, start, length);
+            std::vector<T> buffer(NC);
 
-            #pragma omp for
-            for (int r = 0; r < NR; ++r) {
-#else
-        SCRAN_CUSTOM_PARALLEL(NR, [&](int start, int end) -> void {
-            std::vector<double> buffer(NC);
-            auto wrk = mat->new_workspace(true);
-            for (int r = start; r < end; ++r) {
-#endif
-
-                auto ptr = mat->row(r, buffer.data(), wrk.get());
+            for (IDX r = start, end = start + length; r < end; ++r) {
+                auto ptr = ext->fetch(r, buffer.data());
                 for (size_t c = 0; c < NC; ++c) {
                     outputs[block[c]](reverse_block_map[c], r) = ptr[c];
                 }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
             }
-        }
-#else
-            }
-        }, nthreads);
-#endif
+        }, NR, nthreads);
 
         return outputs;
     }
@@ -610,8 +523,8 @@ private:
     ) const {
 
         size_t nblocks = block_size.size();
-        size_t NC = mat->ncol();
-        size_t NR = mat->nrow();
+        IDX NC = mat->ncol();
+        IDX NR = mat->nrow();
 
         std::vector<Eigen::MatrixXd> outputs;
         outputs.reserve(nblocks);
@@ -619,40 +532,21 @@ private:
             outputs.emplace_back(block_size[b], NR);
         }
 
-        // Splitting by row this time, to avoid false sharing across threads.
-        size_t rows_per_thread = std::ceil(static_cast<double>(NR) / nthreads);
+        tatami::parallelize([&](size_t, IDX start, IDX length) -> void {
+            auto ext = tatami::consecutive_extractor<false, false>(mat, 0, NC, start, length);
+            std::vector<T> buffer(NC);
 
-#ifndef SCRAN_CUSTOM_PARALLEL
-        #pragma omp parallel for num_threads(nthreads)
-        for (int t = 0; t < nthreads; ++t) {
-#else
-        SCRAN_CUSTOM_PARALLEL(nthreads, [&](int start, int end) -> void { // Trivial allocation of one job per thread.
-        for (int t = start; t < end; ++t) {
-#endif
+            for (size_t c = 0; c < NC; ++c) {
+                auto b = block[c];
+                auto c2 = reverse_block_map[c];
+                auto& current = outputs[b];
 
-            size_t startrow = rows_per_thread * t, endrow = std::min(startrow + rows_per_thread, NR);
-            if (startrow < endrow) {
-                auto wrk = mat->new_workspace(false);
-                std::vector<double> buffer(endrow - startrow);
-
-                for (size_t c = 0; c < NC; ++c) {
-                    auto ptr = mat->column(c, buffer.data(), startrow, endrow, wrk.get());
-                    auto b = block[c];
-                    auto c2 = reverse_block_map[c];
-                    auto& current = outputs[b];
-
-                    for (size_t r = startrow; r < endrow; ++r) {
-                        current(c2, r) = ptr[r - startrow];
-                    }
+                auto ptr = ext->fetch(c, buffer.data());
+                for (size_t r = 0; r < length; ++r) {
+                    current(c2, r + start) = ptr[r];
                 }
             }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-        }
-#else
-        }
-        }, nthreads);
-#endif
+        }, NR, nthreads);
 
         return outputs;
     }
@@ -752,7 +646,7 @@ public:
         } else if (NR == 1) {
             Results output;
             output.weights.push_back(1);
-            output.scores = subsetted->row(0);
+            output.scores = subsetted->dense_row()->fetch(0);
             return output;
         } else if (NC == 0) {
             Results output;
@@ -784,19 +678,27 @@ public:
         BlockwiseOutputs temp;
         if (subsetted->sparse()) {
             if (subsetted->prefer_rows()) {
+                std::cout << "SPARSE BY ROW" << std::endl;
                 auto components = core_sparse_row(subsetted.get(), block, block_size.size(), reverse_block_map);
                 temp = sparse_core(NR, block_size, std::move(components));
+                std::cout << "done" << std::endl;
             } else {
+                std::cout << "SPARSE BY COLUMN" << std::endl;
                 auto components = core_sparse_column(subsetted.get(), block, block_size.size(), reverse_block_map);
                 temp = sparse_core(NR, block_size, std::move(components));
+                std::cout << "done" << std::endl;
             }
         } else {
             if (subsetted->prefer_rows()) {
+                std::cout << "DENSE BY ROW" << std::endl;
                 auto matrices = core_dense_row(subsetted.get(), block, block_size, reverse_block_map);
                 temp = dense_core(NR, block_size, std::move(matrices));
+                std::cout << "done" << std::endl;
             } else {
+                std::cout << "DENSE BY COLUMN" << std::endl;
                 auto matrices = core_dense_column(subsetted.get(), block, block_size, reverse_block_map);
                 temp = dense_core(NR, block_size, std::move(matrices));
+                std::cout << "done" << std::endl;
             }
         }
 

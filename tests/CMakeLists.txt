@@ -54,7 +54,7 @@ add_executable(
     src/aggregation/AggregateAcrossCells.cpp
     src/aggregation/DownsampleByNeighbors.cpp
 
-    #   src/feature_set_enrichment/ScoreFeatureSet.cpp
+    src/feature_set_enrichment/ScoreFeatureSet.cpp
     src/feature_set_enrichment/HypergeometricTail.cpp
 
     src/utils/average_vectors.cpp
