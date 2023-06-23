@@ -305,7 +305,6 @@ private:
     std::vector<pca_utils::SparseComponents> core_sparse_column(const tatami::Matrix<T, IDX>* mat, const B* block, size_t nblocks, const std::vector<size_t>& reverse_block_map) const {
         IDX NR = mat->nrow();
         IDX NC = mat->ncol();
-        std::cout << "FOO" << std::endl;
 
         /*** First round, to fetch the number of zeros in each row. ***/
         std::vector<std::vector<size_t> > nonzeros_per_row;
@@ -348,7 +347,6 @@ private:
                 }
             }
         }
-        std::cout << "LAUNCHING!" << std::endl;
 
         /*** Second round, to populate the vectors. ***/
         std::vector<pca_utils::SparseComponents> output(nblocks);
@@ -393,7 +391,6 @@ private:
                 }
             }
         }, NR, nthreads);
-        std::cout << "DONE!" << std::endl;
 
         return output;
     }
@@ -534,7 +531,7 @@ private:
 
         tatami::parallelize([&](size_t, IDX start, IDX length) -> void {
             auto ext = tatami::consecutive_extractor<false, false>(mat, 0, NC, start, length);
-            std::vector<T> buffer(NC);
+            std::vector<T> buffer(NR);
 
             for (size_t c = 0; c < NC; ++c) {
                 auto b = block[c];
@@ -678,27 +675,19 @@ public:
         BlockwiseOutputs temp;
         if (subsetted->sparse()) {
             if (subsetted->prefer_rows()) {
-                std::cout << "SPARSE BY ROW" << std::endl;
                 auto components = core_sparse_row(subsetted.get(), block, block_size.size(), reverse_block_map);
                 temp = sparse_core(NR, block_size, std::move(components));
-                std::cout << "done" << std::endl;
             } else {
-                std::cout << "SPARSE BY COLUMN" << std::endl;
                 auto components = core_sparse_column(subsetted.get(), block, block_size.size(), reverse_block_map);
                 temp = sparse_core(NR, block_size, std::move(components));
-                std::cout << "done" << std::endl;
             }
         } else {
             if (subsetted->prefer_rows()) {
-                std::cout << "DENSE BY ROW" << std::endl;
                 auto matrices = core_dense_row(subsetted.get(), block, block_size, reverse_block_map);
                 temp = dense_core(NR, block_size, std::move(matrices));
-                std::cout << "done" << std::endl;
             } else {
-                std::cout << "DENSE BY COLUMN" << std::endl;
                 auto matrices = core_dense_column(subsetted.get(), block, block_size, reverse_block_map);
                 temp = dense_core(NR, block_size, std::move(matrices));
-                std::cout << "done" << std::endl;
             }
         }
 
