@@ -2,7 +2,7 @@
 
 #include "../utils/macros.h"
 
-#include "scran/differential_analysis/Factory.hpp"
+#include "scran/differential_analysis/MatrixCalculator.hpp"
 #include "tatami/tatami.hpp"
 
 #include "utils.h"
@@ -10,12 +10,12 @@
 
 /*******************************************************/
 
-class DifferentialAnalysisEffectsCalculatorEdgeCaseTest : 
+class DifferentialAnalysisMatrixCalculatorEdgeCaseTest : 
     public DifferentialAnalysisTestCore,
     public ::testing::Test
 {};
 
-TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, Simple) {
+TEST_F(DifferentialAnalysisMatrixCalculatorEdgeCaseTest, Simple) {
     size_t ncols = 18;
     size_t ngroups = 5;
     auto groups = create_groupings(ncols, ngroups);
@@ -29,7 +29,7 @@ TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, Simple) {
     }
     tatami::DenseRowMatrix<double, int> mat(nrows, ncols, std::move(mat_buffer));
 
-    scran::differential_analysis::EffectsCalculator runner(1, 0);
+    scran::differential_analysis::MatrixCalculator runner(1, 0);
     EffectsOverlord ova(true, nrows, ngroups);
     auto state = runner.run(&mat, groups.data(), ngroups, ova);
 
@@ -73,7 +73,7 @@ TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, Simple) {
     }
 }
 
-TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, AllZeros) {
+TEST_F(DifferentialAnalysisMatrixCalculatorEdgeCaseTest, AllZeros) {
     size_t ncols = 21;
     size_t ngroups = 5;
     auto groups = create_groupings(ncols, ngroups);
@@ -82,7 +82,7 @@ TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, AllZeros) {
     std::vector<double> mat_buffer(ncols * nrows);
     tatami::DenseRowMatrix<double, int> mat(nrows, ncols, std::move(mat_buffer));
 
-    scran::differential_analysis::EffectsCalculator runner(1, 0);
+    scran::differential_analysis::MatrixCalculator runner(1, 0);
     EffectsOverlord ova(true, nrows, ngroups);
     auto state = runner.run(&mat, groups.data(), ngroups, ova);
 
@@ -100,7 +100,7 @@ TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, AllZeros) {
     EXPECT_EQ(ova.store, expected);
 }
 
-TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, MissingGroup) {
+TEST_F(DifferentialAnalysisMatrixCalculatorEdgeCaseTest, MissingGroup) {
     size_t ncols = 17;
     size_t ngroups = 3;
 
@@ -115,7 +115,7 @@ TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, MissingGroup) {
     size_t nrows = 13;
     assemble(nrows, ncols);
 
-    scran::differential_analysis::EffectsCalculator runner(1, 0);
+    scran::differential_analysis::MatrixCalculator runner(1, 0);
     EffectsOverlord ova(true, nrows, ngroups);
     auto state = runner.run(dense_row.get(), groups.data(), ngroups, ova);
 
@@ -150,7 +150,7 @@ TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, MissingGroup) {
     }
 }
 
-TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, MissingBlock) {
+TEST_F(DifferentialAnalysisMatrixCalculatorEdgeCaseTest, MissingBlock) {
     size_t ncols = 19;
     size_t ngroups = 3;
     auto groups = create_groupings(ncols, ngroups);
@@ -161,7 +161,7 @@ TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, MissingBlock) {
     size_t nrows = 21;
     assemble(nrows, ncols);
 
-    scran::differential_analysis::EffectsCalculator runner(1, 0);
+    scran::differential_analysis::MatrixCalculator runner(1, 0);
     EffectsOverlord ova_state(true, nrows, ngroups);
     auto state = runner.run_blocked(dense_row.get(), groups.data(), ngroups, blocks.data(), nblocks, ova_state);
 
@@ -190,7 +190,7 @@ TEST_F(DifferentialAnalysisEffectsCalculatorEdgeCaseTest, MissingBlock) {
 
 /*******************************************************/
 
-class DifferentialAnalysisEffectsCalculatorUnblockedTest : 
+class DifferentialAnalysisMatrixCalculatorUnblockedTest : 
     public DifferentialAnalysisTestCore,
     public ::testing::TestWithParam<std::tuple<int, bool, int> >
 {
@@ -203,7 +203,7 @@ protected:
     }
 };
 
-TEST_P(DifferentialAnalysisEffectsCalculatorUnblockedTest, Manual) {
+TEST_P(DifferentialAnalysisMatrixCalculatorUnblockedTest, Manual) {
     auto param = GetParam();
     auto ngroups = std::get<0>(param);
     bool do_auc = std::get<1>(param);
@@ -211,7 +211,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorUnblockedTest, Manual) {
 
     auto groups = create_groupings(ncols, ngroups);
 
-    scran::differential_analysis::EffectsCalculator runner(nthreads, 0);
+    scran::differential_analysis::MatrixCalculator runner(nthreads, 0);
     EffectsOverlord ova(do_auc, nrows, ngroups);
     auto state = runner.run(dense_row.get(), groups.data(), ngroups, ova);
 
@@ -219,9 +219,10 @@ TEST_P(DifferentialAnalysisEffectsCalculatorUnblockedTest, Manual) {
     std::vector<double> means(nrows * ngroups), detected(nrows * ngroups);
     std::vector<double> aucs(do_auc ? nrows * ngroups * ngroups : 0);
 
+    auto ext = dense_row->dense_row();
+    std::vector<double> buf(ncols);
     for (size_t g = 0; g < nrows; ++g) {
-        std::vector<double> buf(ncols);
-        auto ptr = dense_row->row(g, buf.data());
+        auto ptr = ext->fetch(g, buf.data());
 
         for (int c = 0; c < buf.size(); ++c) {
             size_t offset = g * ngroups + groups[c];
@@ -257,7 +258,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorUnblockedTest, Manual) {
     }
 }
 
-TEST_P(DifferentialAnalysisEffectsCalculatorUnblockedTest, Consistency) {
+TEST_P(DifferentialAnalysisMatrixCalculatorUnblockedTest, Consistency) {
     auto param = GetParam();
     auto ngroups = std::get<0>(param);
     bool do_auc = std::get<1>(param);
@@ -265,15 +266,11 @@ TEST_P(DifferentialAnalysisEffectsCalculatorUnblockedTest, Consistency) {
 
     auto groups = create_groupings(ncols, ngroups);
 
-    scran::differential_analysis::EffectsCalculator runner(nthreads, 0);
+    scran::differential_analysis::MatrixCalculator runner(nthreads, 0);
     EffectsOverlord ova(do_auc, nrows, ngroups);
     auto state = runner.run(dense_row.get(), groups.data(), ngroups, ova);
 
     // Checking the various helper statistics.
-    EXPECT_EQ(state.ngroups, ngroups);
-    EXPECT_EQ(state.nblocks, 1);
-    EXPECT_EQ(state.ngenes, nrows);
-
     std::vector<int> num_per_group(ngroups);
     for (size_t i = 0; i < ncols; ++i) {
         ++num_per_group[groups[i]];
@@ -282,7 +279,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorUnblockedTest, Consistency) {
 
     // Checking aganst the single-core case.
     if (nthreads > 1) {
-        scran::differential_analysis::EffectsCalculator runner(1, 0);
+        scran::differential_analysis::MatrixCalculator runner(1, 0);
         EffectsOverlord ova1(do_auc, nrows, ngroups);
         auto state1 = runner.run(dense_row.get(), groups.data(), ngroups, ova1);
         EXPECT_EQ(state.means, state1.means);
@@ -318,7 +315,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorUnblockedTest, Consistency) {
     EXPECT_EQ(ova.store, ova4.store);
 }
 
-TEST_P(DifferentialAnalysisEffectsCalculatorUnblockedTest, SingleBlock) {
+TEST_P(DifferentialAnalysisMatrixCalculatorUnblockedTest, SingleBlock) {
     auto param = GetParam();
     auto ngroups = std::get<0>(param);
     bool do_auc = std::get<1>(param);
@@ -326,7 +323,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorUnblockedTest, SingleBlock) {
 
     auto groups = create_groupings(ncols, ngroups);
 
-    scran::differential_analysis::EffectsCalculator runner(nthreads, 0);
+    scran::differential_analysis::MatrixCalculator runner(nthreads, 0);
     EffectsOverlord ova(do_auc, nrows, ngroups);
     auto state = runner.run(dense_row.get(), groups.data(), ngroups, ova);
 
@@ -346,8 +343,8 @@ TEST_P(DifferentialAnalysisEffectsCalculatorUnblockedTest, SingleBlock) {
 }
 
 INSTANTIATE_TEST_CASE_P(
-    DifferentialAnalysisEffectsCalculatorUnblocked,
-    DifferentialAnalysisEffectsCalculatorUnblockedTest,
+    DifferentialAnalysisMatrixCalculatorUnblocked,
+    DifferentialAnalysisMatrixCalculatorUnblockedTest,
     ::testing::Combine(
         ::testing::Values(2, 3, 5, 7), // number of clusters
         ::testing::Values(false, true), // with or without the AUC?
@@ -357,7 +354,7 @@ INSTANTIATE_TEST_CASE_P(
 
 /*******************************************************/
 
-class DifferentialAnalysisEffectsCalculatorBlockedTest : 
+class DifferentialAnalysisMatrixCalculatorBlockedTest : 
     public DifferentialAnalysisTestCore,
     public ::testing::TestWithParam<std::tuple<int, int, bool, int> >
 {
@@ -370,7 +367,7 @@ protected:
     }
 };
 
-TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Consistency) {
+TEST_P(DifferentialAnalysisMatrixCalculatorBlockedTest, Consistency) {
     auto param = GetParam();
     auto ngroups = std::get<0>(param);
     auto nblocks = std::get<1>(param);
@@ -380,15 +377,11 @@ TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Consistency) {
     auto groups = create_groupings(ncols, ngroups);
     auto blocks = create_blocks(ncols, nblocks);
 
-    scran::differential_analysis::EffectsCalculator runner(nthreads, 0);
+    scran::differential_analysis::MatrixCalculator runner(nthreads, 0);
     EffectsOverlord ova(do_auc, nrows, ngroups);
     auto state = runner.run_blocked(dense_row.get(), groups.data(), ngroups, blocks.data(), nblocks, ova);
 
     // Checking the various helper statistics.
-    EXPECT_EQ(state.ngroups, ngroups);
-    EXPECT_EQ(state.nblocks, nblocks);
-    EXPECT_EQ(state.ngenes, nrows);
-
     std::vector<int> num_per_group(ngroups * nblocks);
     for (size_t i = 0; i < ncols; ++i) {
         ++num_per_group[groups[i] * nblocks + blocks[i]];
@@ -397,7 +390,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Consistency) {
 
     // Checking aganst the single-core case.
     if (nthreads > 1) {
-        scran::differential_analysis::EffectsCalculator runner(1, 0);
+        scran::differential_analysis::MatrixCalculator runner(1, 0);
         EffectsOverlord ova1(do_auc, nrows, ngroups);
         auto state1 = runner.run_blocked(dense_row.get(), groups.data(), ngroups, blocks.data(), nblocks, ova1);
         EXPECT_EQ(state.means, state1.means);
@@ -433,7 +426,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Consistency) {
     EXPECT_EQ(ova.store, ova4.store);
 }
 
-TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Subsetted) {
+TEST_P(DifferentialAnalysisMatrixCalculatorBlockedTest, Subsetted) {
     auto param = GetParam();
     auto ngroups = std::get<0>(param);
     auto nblocks = std::get<1>(param);
@@ -443,7 +436,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Subsetted) {
     auto groups = create_groupings(ncols, ngroups);
     auto blocks = create_blocks(ncols, nblocks);
 
-    scran::differential_analysis::EffectsCalculator runner(nthreads, 0);
+    scran::differential_analysis::MatrixCalculator runner(nthreads, 0);
 
     std::vector<double> means(ngroups * nblocks * nrows);
     std::vector<double> variances(means.size());
@@ -481,7 +474,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Subsetted) {
     EXPECT_EQ(detected, state.detected);
 }
 
-TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Duplicates) {
+TEST_P(DifferentialAnalysisMatrixCalculatorBlockedTest, Duplicates) {
     auto param = GetParam();
     auto ngroups = std::get<0>(param);
     auto nblocks = std::get<1>(param);
@@ -489,7 +482,7 @@ TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Duplicates) {
     auto nthreads = std::get<3>(param);
 
     auto groups0 = create_groupings(ncols, ngroups);
-    scran::differential_analysis::EffectsCalculator runner(nthreads, 0);
+    scran::differential_analysis::MatrixCalculator runner(nthreads, 0);
     EffectsOverlord ova(do_auc, nrows, ngroups);
     auto ref = runner.run(dense_row.get(), groups0.data(), ngroups, ova);
 
@@ -505,8 +498,6 @@ TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Duplicates) {
 
     EffectsOverlord ova2(do_auc, nrows, ngroups);
     auto state2 = runner.run_blocked(mat.get(), groups.data(), ngroups, blocks.data(), nblocks, ova2);
-    EXPECT_EQ(state2.ngroups, ngroups);
-    EXPECT_EQ(state2.nblocks, nblocks);
     EXPECT_EQ(ova.store, ova2.store);
 
     // Also checking the various statistics.
@@ -529,8 +520,8 @@ TEST_P(DifferentialAnalysisEffectsCalculatorBlockedTest, Duplicates) {
 }
 
 INSTANTIATE_TEST_CASE_P(
-    DifferentialAnalysisEffectsCalculatorBlocked,
-    DifferentialAnalysisEffectsCalculatorBlockedTest,
+    DifferentialAnalysisMatrixCalculatorBlocked,
+    DifferentialAnalysisMatrixCalculatorBlockedTest,
     ::testing::Combine(
         ::testing::Values(2, 3, 5), // number of clusters
         ::testing::Values(2, 3), // number of blocks
@@ -541,7 +532,7 @@ INSTANTIATE_TEST_CASE_P(
 
 /*******************************************************/
 
-class DifferentialAnalysisEffectsCalculatorThresholdTest : 
+class DifferentialAnalysisMatrixCalculatorThresholdTest : 
     public DifferentialAnalysisTestCore,
     public ::testing::Test
 {
@@ -554,15 +545,15 @@ protected:
     }
 };
 
-TEST_F(DifferentialAnalysisEffectsCalculatorThresholdTest, Smaller) {
+TEST_F(DifferentialAnalysisMatrixCalculatorThresholdTest, Smaller) {
     int ngroups = 2;
     auto groups = create_groupings(ncols, ngroups);
 
-    scran::differential_analysis::EffectsCalculator runner0(1, 0);
+    scran::differential_analysis::MatrixCalculator runner0(1, 0);
     EffectsOverlord ova0(true, nrows, ngroups);
     auto state0 = runner0.run(dense_row.get(), groups.data(), ngroups, ova0);
 
-    scran::differential_analysis::EffectsCalculator runner1(1, 1);
+    scran::differential_analysis::MatrixCalculator runner1(1, 1);
     EffectsOverlord ova1(true, nrows, ngroups);
     auto state1 = runner1.run(dense_row.get(), groups.data(), ngroups, ova1);
 
@@ -585,12 +576,12 @@ TEST_F(DifferentialAnalysisEffectsCalculatorThresholdTest, Smaller) {
     EXPECT_NE(ova0.store, ova1.store);
 }
 
-TEST_F(DifferentialAnalysisEffectsCalculatorThresholdTest, Zeroed) {
+TEST_F(DifferentialAnalysisMatrixCalculatorThresholdTest, Zeroed) {
     int ngroups = 2;
     auto groups = create_groupings(ncols, ngroups);
 
     // Using a huge threshold should force all AUCs to zero.
-    scran::differential_analysis::EffectsCalculator runner(1, 1000);
+    scran::differential_analysis::MatrixCalculator runner(1, 1000);
     EffectsOverlord ova(true, nrows, ngroups);
     auto state = runner.run(dense_row.get(), groups.data(), ngroups, ova);
     EXPECT_EQ(ova.store, std::vector<double>(ngroups * ngroups * nrows));

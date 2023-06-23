@@ -622,7 +622,7 @@ public:
         std::vector<std::vector<Stat*> > lfc,
         std::vector<std::vector<Stat*> > delta_detected) 
     const {
-        differential_analysis::EffectsCalculator runner(nthreads, threshold);
+        differential_analysis::MatrixCalculator runner(nthreads, threshold);
 
         int ngroups = means.size();
         Overlord<Stat> overlord(p->nrow(), ngroups, auc.empty());
@@ -672,7 +672,7 @@ public:
         std::vector<std::vector<Stat*> > lfc,
         std::vector<std::vector<Stat*> > delta_detected) 
     const {
-        differential_analysis::EffectsCalculator runner(nthreads, threshold);
+        differential_analysis::MatrixCalculator runner(nthreads, threshold);
 
         int ngroups = means.size();
         int nblocks = (ngroups ? means[0].size() : 0); // no blocks = no groups.
@@ -725,7 +725,7 @@ private:
 
     template<typename Stat>
     void process_simple_effects(
-        const differential_analysis::EffectsCalculator::State& state, 
+        const differential_analysis::MatrixCalculator::State& state, 
         std::vector<Stat*>& means,
         std::vector<Stat*>& detected,
         std::vector<std::vector<Stat*> >& cohen,
@@ -921,7 +921,7 @@ private:
 
     template<typename Stat>
     void summarize_auc(
-        const differential_analysis::EffectsCalculator::State& state, 
+        const differential_analysis::MatrixCalculator::State& state, 
         std::vector<std::vector<Stat*> >& auc,
         std::vector<Stat>& auc_buffer) 
     const {

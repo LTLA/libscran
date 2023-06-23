@@ -239,7 +239,7 @@ public:
         Stat* delta_detected) 
     const {
         int ngroups = means.size();
-        differential_analysis::EffectsCalculator runner(nthreads, threshold);
+        differential_analysis::MatrixCalculator runner(nthreads, threshold);
         Overlord overlord(auc);
         auto state = runner.run(p, group, ngroups, overlord);
         process_simple_effects(state, means, detected, cohen, lfc, delta_detected);
@@ -305,7 +305,7 @@ public:
             }
         }
 
-        differential_analysis::EffectsCalculator runner(nthreads, threshold);
+        differential_analysis::MatrixCalculator runner(nthreads, threshold);
         Overlord overlord(auc);
         auto state = runner.run_blocked(p, group, ngroups, block, nblocks, overlord);
         process_simple_effects(state, means2, detected2, cohen, lfc, delta_detected);
@@ -341,7 +341,7 @@ private:
 
     template<typename Stat>
     void process_simple_effects(
-        const differential_analysis::EffectsCalculator::State& state, 
+        const differential_analysis::MatrixCalculator::State& state, 
         std::vector<Stat*>& means, 
         std::vector<Stat*>& detected, 
         Stat* cohen, 
