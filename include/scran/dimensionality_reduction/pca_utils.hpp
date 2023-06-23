@@ -194,6 +194,9 @@ SparseComponents sparse_by_column(const tatami::Matrix<T, IDX>* mat, int nthread
 
     /*** First round, to fetch the number of zeros in each row. ***/
     std::vector<std::vector<size_t> > threaded_nonzeros_per_row(nthreads);
+    for (auto& nonzeros : threaded_nonzeros_per_row) {
+        nonzeros.resize(NR);
+    }
 
     tatami::parallelize([&](size_t t, IDX start, IDX length) -> void {
         tatami::Options opt;
@@ -203,8 +206,6 @@ SparseComponents sparse_by_column(const tatami::Matrix<T, IDX>* mat, int nthread
 
         std::vector<IDX> ibuffer(NR);
         auto& nonzeros = threaded_nonzeros_per_row[t];
-        nonzeros.resize(NR);
-
         for (IDX c = start, end = start + length; c < end; ++c) {
             auto range = ext->fetch(c, NULL, ibuffer.data());
             for (IDX j = 0; j < range.number; ++j) {
