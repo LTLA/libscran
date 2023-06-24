@@ -49,8 +49,8 @@ void irlba_parallelize_(int nthreads, Function fun) {
         // This loop should be trivial if f + 1== l when nthreads == njobs.
         // Nonetheless, we still have a loop just in case the arbitrary
         // scheduling does wacky things. 
-        for (size_t i = f; i < l; ++i) {
-            fun(i);
+        for (size_t i = 0; i < l; ++i) {
+            fun(f + i);
         }
     }, nthreads, nthreads);
 }
