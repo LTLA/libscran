@@ -258,7 +258,7 @@ private:
             auto ext = tatami::consecutive_extractor<true, true>(mat, start, length, opt);
 
             std::vector<IDX> ibuffer(NC);
-            for (IDX r = 0, end = start + length; r < end; ++r) {
+            for (IDX r = start, end = start + length; r < end; ++r) {
                 auto range = ext->fetch(r, NULL, ibuffer.data());
                 for (size_t i = 0; i < range.number; ++i) {
                     ++(output[block[range.index[i]]].ptrs[r + 1]);

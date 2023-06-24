@@ -352,35 +352,22 @@ private:
 
             size_t squared = ngroups * ngroups;
             size_t out_offset = start * squared;
-            if (cohen) {
-                cohen += out_offset;
-            }
-            if (delta_detected) {
-                delta_detected += out_offset;
-            }
-            if (lfc) {
-                lfc += out_offset;
-            }
-
-            for (Index_ gene = start, end = start + length; gene < end; ++gene) {
+            for (Index_ gene = start, end = start + length; gene < end; ++gene, out_offset += squared) {
                 for (size_t l = 0; l < nlevels; ++l) {
                     means[l][gene] = tmp_means[l];
                     detected[l][gene] = tmp_detected[l];
                 }
 
                 if (cohen != NULL) {
-                    differential_analysis::compute_pairwise_cohens_d(tmp_means, tmp_variances, level_size, ngroups, nblocks, threshold, cohen);
-                    cohen += squared;
+                    differential_analysis::compute_pairwise_cohens_d(tmp_means, tmp_variances, level_size, ngroups, nblocks, threshold, cohen + out_offset);
                 }
 
                 if (delta_detected != NULL) {
-                    differential_analysis::compute_pairwise_simple_diff(tmp_detected, level_size, ngroups, nblocks, delta_detected);
-                    delta_detected += squared;
+                    differential_analysis::compute_pairwise_simple_diff(tmp_detected, level_size, ngroups, nblocks, delta_detected + out_offset);
                 }
 
                 if (lfc != NULL) {
-                    differential_analysis::compute_pairwise_simple_diff(tmp_means, level_size, ngroups, nblocks, lfc);
-                    lfc += squared;
+                    differential_analysis::compute_pairwise_simple_diff(tmp_means, level_size, ngroups, nblocks, lfc + out_offset);
                 }
 
                 tmp_means += nlevels;
@@ -407,8 +394,7 @@ public:
         /**
          * @cond
          */
-        template<typename Index_>
-        Results(Index_ ngenes, Index_ ngroups, bool do_cohen, bool do_auc, bool do_lfc, bool do_delta) {
+        Results(size_t ngenes, size_t ngroups, bool do_cohen, bool do_auc, bool do_lfc, bool do_delta) {
             size_t nelements = ngenes * ngroups * ngroups;
             if (do_cohen) {
                 cohen.resize(nelements);
@@ -472,7 +458,7 @@ public:
     template<typename Data_, typename Index_, typename Group_, typename Stat_>
     Results<Stat_> run(const tatami::Matrix<Data_, Index_>* p, const Group_* group, std::vector<Stat_*> means, std::vector<Stat_*> detected) const {
         auto ngroups = means.size();
-        Results<Stat_> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); 
+        Results<Stat_> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected);
         run(
             p, 
             group, 
@@ -482,7 +468,7 @@ public:
             harvest_pointer(res.auc, do_auc),
             harvest_pointer(res.lfc, do_lfc),
             harvest_pointer(res.delta_detected, do_delta_detected)
-        );
+        );        
         return res; 
     }
 
@@ -547,8 +533,7 @@ public:
         /**
          * @cond
          */
-        template<typename Index_>
-        ResultsWithMeans(Index_ ngenes, Index_ ngroups, Index_ nblocks, bool do_cohen, bool do_auc, bool do_lfc, bool do_delta) :
+        ResultsWithMeans(size_t ngenes, size_t ngroups, size_t nblocks, bool do_cohen, bool do_auc, bool do_lfc, bool do_delta) :
             Results<Stat_>(ngenes, ngroups, do_cohen, do_auc, do_lfc, do_delta), means(ngroups), detected(ngroups) 
         {
             for (size_t g = 0; g < ngroups; ++g) {
