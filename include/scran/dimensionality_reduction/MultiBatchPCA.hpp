@@ -263,8 +263,8 @@ private:
                 #pragma omp parallel for num_threads(nthreads)
                 for (int t = 0; t < nthreads; ++t) {
 #else
-                SCRAN_CUSTOM_PARALLEL([&](size_t, int first, int last) -> void {
-                for (int t = first; t < last; ++t) {
+                SCRAN_CUSTOM_PARALLEL([&](size_t, int start, int length) -> void {
+                for (int t = start, end = start + length; t < end; ++t) {
 #endif
 
                     const auto& starts = row_nonzero_starts[t];
@@ -538,7 +538,7 @@ private:
         size_t NC = emat.cols(), NR = emat.rows();
         size_t nbatchs = batch_size.size();
 
-        tatami::parallelize([&](size_t, IDX start, IDX length) -> void {
+        tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
             std::vector<double> mean_buffer(nbatchs);
             for (size_t c = start, end = start + length; c < end; ++c) {
                 auto ptr = emat.data() + c * NR;
@@ -571,7 +571,7 @@ private:
                     }
                 }
             }
-        }, NR, nthreads);
+        }, NC, nthreads);
 
         total_var = pca_utils::process_scale_vector(scale, scale_v);
         return emat;
