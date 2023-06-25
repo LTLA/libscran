@@ -388,13 +388,13 @@ private:
             }
         }
 
-        tatami::parallelize([&](size_t, Index_ s, Index_ l) {
+        tatami::parallelize([&](size_t, Index_ start, Index_ length) {
             auto NR = mat->nrow();
-            auto ext = tatami::consecutive_extractor<false, false>(mat, s, l);
+            auto ext = tatami::consecutive_extractor<false, false>(mat, start, length);
             std::vector<Data_> vbuffer(NR);
+            bool do_max = output.max_index || output.max_count;
 
-            for (Index_ c0 = 0; c0 < l; ++c0) {
-                auto c = s + c0;
+            for (Index_ c = start, end = start + length; c < end; ++c) {
                 auto ptr = ext->fetch(c, vbuffer.data());
 
                 if (output.total) {
@@ -409,7 +409,7 @@ private:
                     output.detected[c] = count;
                 }
 
-                if (output.max_index || output.max_count) {
+                if (do_max) {
                     auto max_count = PerCellQcMetrics::pick_fill_value<Float_>();
                     Integer_ max_index = 0;
                     for (Index_ r = 0; r < NR; ++r) {
@@ -455,16 +455,17 @@ private:
     void compute_direct_sparse(const tatami::Matrix<Data_, Index_>* mat, const std::vector<Subset_>& subsets, Buffers<Float_, Integer_>& output) const {
         tatami::Options opt;
         opt.sparse_ordered_index = false;
-        std::vector<unsigned char> internal_is_nonzero(output.max_index ? mat->nrow() : 0);
 
-        tatami::parallelize([&](size_t, Index_ s, Index_ l) {
+        tatami::parallelize([&](size_t, Index_ start, Index_ length) {
             auto NR = mat->nrow();
-            auto ext = tatami::consecutive_extractor<false, true>(mat, s, l, opt);
+            auto ext = tatami::consecutive_extractor<false, true>(mat, start, length, opt);
             std::vector<Data_> vbuffer(NR);
             std::vector<Index_> ibuffer(NR);
 
-            for (Index_ c0 = 0; c0 < l; ++c0) {
-                auto c = s + c0;
+            bool do_max = output.max_index || output.max_count;
+            std::vector<unsigned char> internal_is_nonzero(output.max_index ? NR : 0);
+
+            for (Index_ c = start, end = start + length; c < end; ++c) {
                 auto range = ext->fetch(c, vbuffer.data(), ibuffer.data());
 
                 if (output.total) {
@@ -479,7 +480,7 @@ private:
                     output.detected[c] = current;
                 }
 
-                if (output.max_index || output.max_count) {
+                if (do_max) {
                     auto max_count = PerCellQcMetrics::pick_fill_value<Float_>();
                     Integer_ max_index = 0;
                     for (Index_ i = 0; i < range.number; ++i) {
@@ -552,7 +553,8 @@ private:
             auto NR = mat->nrow();
             auto ext = tatami::consecutive_extractor<true, false>(mat, 0, NR, start, len);
             std::vector<Data_> vbuffer(len);
-            std::vector<Float_> internal_max_count(!output.max_count ? len : 0);
+            bool do_max = output.max_index || output.max_count;
+            std::vector<Float_> internal_max_count(do_max && !output.max_count ? len : 0);
 
             for (Index_ r = 0; r < NR; ++r) {
                 auto ptr = ext->fetch(r, vbuffer.data());
@@ -571,7 +573,7 @@ private:
                     }
                 }
 
-                if (output.max_count || output.max_index) {
+                if (do_max) {
                     auto outmc = (output.max_count ? output.max_count + start : internal_max_count.data());
 
                     if (r == 0) {
@@ -625,10 +627,11 @@ private:
         opt.sparse_ordered_index = false;
 
         Index_ NC = mat->ncol();
-        std::vector<Float_> internal_max_count(!output.max_count ? NC : 0);
-        std::vector<Integer_> internal_last_consecutive_nonzero(NC);
+        bool do_max = output.max_index || output.max_count;
+        std::vector<Float_> internal_max_count(do_max && !output.max_count ? NC : 0);
+        std::vector<Integer_> internal_last_consecutive_nonzero(do_max ? NC : 0);
 
-        tatami::parallelize([&](size_t, Index_ start, Index_ len) {
+        tatami::parallelize([&](size_t t, Index_ start, Index_ len) {
             auto NR = mat->nrow();
             auto ext = tatami::consecutive_extractor<true, true>(mat, 0, NR, start, len, opt);
             std::vector<Data_> vbuffer(len);
@@ -649,7 +652,7 @@ private:
                     }
                 }
 
-                if (output.max_count || output.max_index) {
+                if (do_max) {
                     auto outmc = (output.max_count ? output.max_count : internal_max_count.data());
 
                     for (Index_ i = 0; i < range.number; ++i) {
@@ -696,7 +699,7 @@ private:
             }
         }, NC, num_threads);
 
-        if (output.max_count || output.max_index) {
+        if (do_max) {
             auto outmc = (output.max_count ? output.max_count : internal_max_count.data());
             auto NR = mat->nrow();
 
