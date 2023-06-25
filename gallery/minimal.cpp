@@ -1,5 +1,6 @@
 #include "scran/scran.hpp"
-#include "tatami/ext/MatrixMarket.hpp"
+#include "eminem/eminem.hpp"
+#include "tatami/tatami.hpp"
 #include <iostream>
 
 int main(int argc, char * argv[]) {
@@ -9,7 +10,29 @@ int main(int argc, char * argv[]) {
     }
 
     // Loading the data from an unzipped MatrixMarket file.
-    auto mat = tatami::MatrixMarket::load_sparse_matrix_from_file(argv[1]);
+    // TODO: move to a tatami extension.
+    std::shared_ptr<tatami::NumericMatrix> mat;
+
+    {
+        eminem::TextFileParser parser(argv[1]);
+        parser.scan_preamble();
+        int NR = parser.get_nrows(), NC = parser.get_ncols();
+        std::vector<int> values(parser.get_nlines()), rows(parser.get_nlines()), columns(parser.get_nlines());
+
+        if (parser.get_banner().field != eminem::Field::INTEGER) {
+            std::cerr << "Expected an integer Matrix Market file" << std::endl;
+            return 1;
+        }
+
+        parser.scan_integer([&](int r, int c, int v) -> void {
+            values.push_back(v);
+            rows.push_back(r - 1);
+            columns.push_back(c - 1);
+        });
+
+        auto ptr = tatami::compress_sparse_triplets<false>(NR, NC, values, rows, columns);
+        mat.reset(new tatami::CompressedSparseColumnMatrix<double, int, decltype(values)>(NR, NC, std::move(values), std::move(rows), std::move(ptr)));
+    }
 
     // Filtering out low-quality cells. 
     auto qc_res = scran::PerCellRnaQcMetrics().run(mat.get(), { /* mito subset definitions go here */ });
