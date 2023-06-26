@@ -4,12 +4,12 @@ target_link_libraries(minimal scran)
 
 include(FetchContent)
 FetchContent_Declare(
-  eminem 
-  GIT_REPOSITORY https://github.com/tatami-inc/eminem
-  GIT_TAG 1f1bbcbe8935cdda9f6beab97109075d62597063
+  tatami_mtx
+  GIT_REPOSITORY https://github.com/tatami-inc/tatami_mtx
+  GIT_TAG ecc2654dce7bbb87fbaea60efe9cbe57a7972d42
 )
-FetchContent_MakeAvailable(eminem)
-target_link_libraries(minimal eminem)
+FetchContent_MakeAvailable(tatami_mtx)
+target_link_libraries(minimal tatami_mtx)
 
 target_compile_options(minimal PUBLIC -O2)
 find_package(OpenMP)
