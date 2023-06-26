@@ -620,11 +620,11 @@ public:
     const {
         differential_analysis::MatrixCalculator runner(nthreads, threshold);
 
-        int ngroups = means.size();
-        Overlord<Stat> overlord(p->nrow(), ngroups, auc.empty());
+        size_t ngenes = p->nrow();
+        size_t ngroups = means.size();
+        Overlord<Stat> overlord(ngenes, ngroups, auc.empty());
         auto state = runner.run(p, group, ngroups, overlord);
 
-        auto ngenes = p->nrow();
         process_simple_effects(ngenes, ngroups, 1, state, means, detected, cohen, lfc, delta_detected);
         summarize_auc(ngenes, ngroups, state, auc, overlord.auc_buffer);
     }
@@ -671,9 +671,10 @@ public:
     const {
         differential_analysis::MatrixCalculator runner(nthreads, threshold);
 
-        int ngroups = means.size();
-        int nblocks = (ngroups ? means[0].size() : 0); // no blocks = no groups.
-        Overlord<Stat> overlord(p->nrow(), ngroups, auc.empty());
+        size_t ngenes = p->nrow();
+        size_t ngroups = means.size();
+        size_t nblocks = (ngroups ? means[0].size() : 0); // no blocks = no groups.
+        Overlord<Stat> overlord(ngenes, ngroups, auc.empty());
         auto state = runner.run_blocked(p, group, ngroups, block, nblocks, overlord);
 
         int ncombos = ngroups * nblocks;
@@ -686,7 +687,6 @@ public:
             }
         }
 
-        auto ngenes = p->nrow();
         process_simple_effects(ngenes, ngroups, nblocks, state, means2, detected2, cohen, lfc, delta_detected);
         summarize_auc(ngenes, ngroups, state, auc, overlord.auc_buffer);
     }
@@ -695,8 +695,7 @@ private:
     template<typename Stat_>
     class Overlord {
     public:
-        template<typename Index_>
-        Overlord(Index_ nr, Index_ ng, bool skip_auc) : skipped(skip_auc), auc_buffer(skip_auc ? 0 : nr * ng * ng) {}
+        Overlord(size_t nr, size_t ng, bool skip_auc) : skipped(skip_auc), auc_buffer(skip_auc ? 0 : nr * ng * ng) {}
 
         bool needs_auc() const {
             return !skipped;
@@ -710,11 +709,11 @@ private:
         }
     };
 
-    template<typename Index_, typename Stat_>
+    template<typename Stat_>
     void process_simple_effects(
-        Index_ ngenes, 
-        Index_ ngroups,
-        Index_ nblocks,
+        size_t ngenes, // using size_t consistently here, to eliminate integer overflow bugs when computing products.
+        size_t ngroups,
+        size_t nblocks,
         const differential_analysis::MatrixCalculator::State& state, 
         std::vector<Stat_*>& means,
         std::vector<Stat_*>& detected,
@@ -869,10 +868,10 @@ private:
         }
     }
 
-    template<typename Index_, typename Stat_>
+    template<typename Stat_>
     void summarize_auc(
-        Index_ ngenes, 
-        Index_ ngroups,
+        size_t ngenes, 
+        size_t ngroups,
         const differential_analysis::MatrixCalculator::State& state, 
         std::vector<std::vector<Stat_*> >& auc,
         std::vector<Stat_>& auc_buffer) 

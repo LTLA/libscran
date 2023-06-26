@@ -456,7 +456,7 @@ private:
         double& total_var) 
     const {
 
-        size_t NR = mat->nrow(), NC = mat->ncol();
+        auto NR = mat->nrow(), NC = mat->ncol();
         auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major extraction.
         auto& ptrs = extracted.ptrs;
         auto& values = extracted.values;

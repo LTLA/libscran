@@ -329,11 +329,11 @@ private:
         }
     };
 
-    template<typename Index_, typename Stat_>
+    template<typename Stat_>
     void process_simple_effects(
-        Index_ ngenes,
-        Index_ ngroups,
-        Index_ nblocks,
+        size_t ngenes, // using size_t consistently here, to avoid integer overflow bugs when computing products.
+        size_t ngroups,
+        size_t nblocks,
         const differential_analysis::MatrixCalculator::State& state, 
         std::vector<Stat_*>& means, 
         std::vector<Stat_*>& detected, 
@@ -342,9 +342,9 @@ private:
         Stat_* delta_detected) 
     const {
         const auto& level_size = state.level_size;
-        auto nlevels = level_size.size();
+        size_t nlevels = level_size.size();
 
-        tatami::parallelize([&](size_t, Index_ start, Index_ length) -> void {
+        tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
             auto in_offset = nlevels * start;
             const auto* tmp_means = state.means.data() + in_offset;
             const auto* tmp_variances = state.variances.data() + in_offset;
@@ -352,7 +352,7 @@ private:
 
             size_t squared = ngroups * ngroups;
             size_t out_offset = start * squared;
-            for (Index_ gene = start, end = start + length; gene < end; ++gene, out_offset += squared) {
+            for (size_t gene = start, end = start + length; gene < end; ++gene, out_offset += squared) {
                 for (size_t l = 0; l < nlevels; ++l) {
                     means[l][gene] = tmp_means[l];
                     detected[l][gene] = tmp_detected[l];
@@ -457,7 +457,7 @@ public:
      */
     template<typename Data_, typename Index_, typename Group_, typename Stat_>
     Results<Stat_> run(const tatami::Matrix<Data_, Index_>* p, const Group_* group, std::vector<Stat_*> means, std::vector<Stat_*> detected) const {
-        auto ngroups = means.size();
+        size_t ngroups = means.size();
         Results<Stat_> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected);
         run(
             p, 
@@ -504,7 +504,7 @@ public:
             return run(p, group, fetch_first(means), fetch_first(detected));
         }
 
-        auto ngroups = means.size();
+        size_t ngroups = means.size();
         Results<Stat_> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); 
         run_blocked(
             p,
@@ -580,7 +580,7 @@ public:
      */
     template<typename Stat_ = double, typename Data_ = double, typename Index_ = int, typename Group_ = int>
     ResultsWithMeans<Stat_> run(const tatami::Matrix<Data_, Index_>* p, const Group_* group) {
-        auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
+        auto ngroups = static_cast<size_t>(*std::max_element(group, group + p->ncol())) + 1;
         ResultsWithMeans<Stat_> res(p->nrow(), ngroups, 1, do_cohen, do_auc, do_lfc, do_delta_detected); 
         run(
             p, 
@@ -618,8 +618,8 @@ public:
             return run(p, group);
         }
 
-        auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
-        auto nblocks = *std::max_element(block, block + p->ncol()) + 1;
+        size_t ngroups = static_cast<size_t>(*std::max_element(group, group + p->ncol())) + 1;
+        size_t nblocks = static_cast<size_t>(*std::max_element(block, block + p->ncol())) + 1;
         ResultsWithMeans<Stat_> res(p->nrow(), ngroups, nblocks, do_cohen, do_auc, do_lfc, do_delta_detected); 
         run_blocked(
             p,

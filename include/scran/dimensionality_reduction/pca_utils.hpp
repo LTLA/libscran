@@ -153,7 +153,7 @@ namespace extract_for_pca_internal {
 template<typename T, typename IDX>
 SparseComponents sparse_by_row(const tatami::Matrix<T, IDX>* mat, int nthreads) {
     SparseComponents output;
-    size_t NR = mat->nrow(), NC = mat->ncol();
+    auto NR = mat->nrow(), NC = mat->ncol();
     auto& ptrs = output.ptrs;
     ptrs.resize(NR + 1);
 
@@ -190,7 +190,7 @@ SparseComponents sparse_by_row(const tatami::Matrix<T, IDX>* mat, int nthreads) 
 
 template<typename T, typename IDX>
 SparseComponents sparse_by_column(const tatami::Matrix<T, IDX>* mat, int nthreads) {
-    IDX NR = mat->nrow(), NC = mat->ncol();
+    auto NR = mat->nrow(), NC = mat->ncol();
 
     /*** First round, to fetch the number of zeros in each row. ***/
     std::vector<std::vector<size_t> > threaded_nonzeros_per_row(nthreads);
@@ -278,7 +278,7 @@ namespace extract_for_pca_internal {
 
 template<typename T, typename IDX>
 Eigen::MatrixXd dense_by_row(const tatami::Matrix<T, IDX>* mat, int nthreads) {
-    IDX NR = mat->nrow(), NC = mat->ncol();
+    auto NR = mat->nrow(), NC = mat->ncol();
     Eigen::MatrixXd output(NC, NR); // transposed, we want our genes in the columns.
     auto ptr = output.data();
 
@@ -294,7 +294,7 @@ Eigen::MatrixXd dense_by_row(const tatami::Matrix<T, IDX>* mat, int nthreads) {
 
 template<typename T, typename IDX>
 Eigen::MatrixXd dense_by_column(const tatami::Matrix<T, IDX>* mat, int nthreads) {
-    IDX NR = mat->nrow(), NC = mat->ncol();
+    auto NR = mat->nrow(), NC = mat->ncol();
     Eigen::MatrixXd output(NC, NR); // transposed, we want our genes in the columns.
 
     tatami::parallelize([&](size_t, IDX start, IDX length) -> void {

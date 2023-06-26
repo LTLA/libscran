@@ -121,7 +121,7 @@ public:
      */
     template<typename T, typename IDX, typename Ref, typename Out>
     void run(const tatami::Matrix<T, IDX>* mat, const Ref* ref, Out* output) const {
-        size_t NR = mat->nrow(), NC = mat->ncol();
+        auto NR = mat->nrow(), NC = mat->ncol();
 
         std::vector<T> sums(NC);
         tatami::parallelize([&](size_t, IDX start, IDX length) -> void {

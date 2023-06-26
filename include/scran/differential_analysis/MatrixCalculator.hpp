@@ -6,6 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include <limits>
+#include <type_traits>
 
 #include "../utils/vector_to_pointers.hpp"
 #include "../feature_selection/blocked_variances.hpp"
@@ -61,7 +62,7 @@ public:
         size_t ncombos = ngroups * nblocks;
         std::vector<int> combos(p->ncol());
         std::vector<int> combo_size(ncombos);
-        for (size_t i = 0; i < combos.size(); ++i) {
+        for (size_t i = 0, end = combos.size(); i < end; ++i) {
             combos[i] = group[i] * nblocks + block[i];
             ++(combo_size[combos[i]]);
         }
@@ -106,12 +107,24 @@ private:
     };
 
     template<bool sparse_, bool auc_, typename Data_, typename Index_, typename Level_, typename Group_, typename Block_, class State_, class Overlord_>
-    void by_row(const tatami::Matrix<Data_, Index_>* p, const Level_* level, const std::vector<int>& level_size, const Group_* group, Index_ ngroups, const Block_* block, Index_ nblocks, State_& state, Overlord_& overlord) const {
+    void by_row(
+        const tatami::Matrix<Data_, Index_>* p, 
+        const Level_* level, 
+        const std::vector<int>& level_size, 
+        const Group_* group, 
+        size_t ngroups, 
+        const Block_* block, 
+        size_t nblocks, 
+        State_& state, 
+        Overlord_& overlord) 
+    const {
+        // Using size_t consistently in this file, so as to avoid bugs with
+        // integer overflow for 'Index_' when computing matrix products.
         tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
-            auto NC = p->ncol();
+            size_t NC = p->ncol();
             std::vector<Data_> vbuffer(NC);
-            typename std::conditional<sparse_, std::vector<Index_>, Index_>::type ibuffer(NC);
-            auto ext = tatami::consecutive_extractor<true, sparse_>(p, static_cast<Index_>(start), static_cast<Index_>(length));
+            typename std::conditional<sparse_, std::vector<Index_>, size_t>::type ibuffer(NC);
+            auto ext = tatami::consecutive_extractor<true, sparse_, Data_, Index_>(p, start, length);
 
             // AUC-only object.
             typename std::conditional<auc_, AucBundle, DummyBundle>::type auc_info(ngroups, nblocks, level_size);
@@ -140,7 +153,7 @@ private:
                             p.clear();
                         }
 
-                        for (Index_ c = 0; c < NC; ++c) {
+                        for (size_t c = 0; c < NC; ++c) {
                             auto b = block[c];
                             auto g = group[c];
                             if (ptr[c]) {
@@ -183,7 +196,7 @@ private:
                     }
                 }
             }
-        }, p->nrow(), num_threads);
+        }, static_cast<size_t>(p->nrow()), num_threads);
     }
 
     static void process_auc_for_rows(size_t ngroups, size_t nblocks, double threshold, AucBundle& bundle, double* output) {
@@ -226,10 +239,10 @@ private:
         size_t nlevels = level_size.size();
 
         tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
-            auto NC = p->ncol();
+            size_t NC = p->ncol();
             std::vector<Data_> vbuffer(length);
-            typename std::conditional<sparse_, std::vector<Index_>, Index_>::type ibuffer(length);
-            auto ext = tatami::consecutive_extractor<false, sparse_>(p, 0, NC, static_cast<Index_>(start), static_cast<Index_>(length));
+            typename std::conditional<sparse_, std::vector<Index_>, size_t>::type ibuffer(length);
+            auto ext = tatami::consecutive_extractor<false, sparse_, Data_, Index_>(p, 0, NC, start, length);
 
             std::vector<std::vector<double> > tmp_means(nlevels), tmp_vars(nlevels), tmp_detected(nlevels);
             for (size_t l = 0; l < nlevels; ++ l) {
@@ -239,7 +252,7 @@ private:
             }
             std::vector<int> tmp_counts(nlevels);
 
-            for (Index_ c = 0; c < NC; ++c) {
+            for (size_t c = 0; c < NC; ++c) {
                 auto b = level[c];
                 auto mptr = tmp_means[b].data();
                 auto vptr = tmp_vars[b].data();
@@ -248,7 +261,7 @@ private:
                 if constexpr(!sparse_) {
                     auto ptr = ext->fetch(c, vbuffer.data());
                     tatami::stats::variances::compute_running(ptr, length, mptr, vptr, tmp_counts[b]);
-                    for (Index_ j = 0; j < length; ++j, ++dptr) {
+                    for (size_t j = 0; j < length; ++j, ++dptr) {
                         *dptr += (ptr[j] != 0);
                     }
                 } else {
@@ -268,13 +281,12 @@ private:
             transpose_for_column(tmp_means, state.means.data(), start, length);
             transpose_for_column(tmp_vars, state.variances.data(), start, length);
             transpose_for_column(tmp_detected, state.detected.data(), start, length);
-        }, p->nrow(), num_threads);
+        }, static_cast<size_t>(p->nrow()), num_threads);
     }
 
-    template<typename Index_>
-    static void transpose_for_column(const std::vector<std::vector<double> >& source, double* sink, Index_ start, Index_ length) {
+    static void transpose_for_column(const std::vector<std::vector<double> >& source, double* sink, size_t start, size_t length) {
         size_t nlevels = source.size();
-        for (Index_ r = 0; r < length; ++r) {
+        for (size_t r = 0; r < length; ++r) {
             auto output = sink + (r + start) * nlevels;
             for (size_t l = 0; l < nlevels; ++l, ++output) {
                 *output = source[l][r];
@@ -284,7 +296,16 @@ private:
 
 private:
     template<typename Data_, typename Index_, typename Level_, typename Group_, typename Block_, class Overlord_>
-    State core(const tatami::Matrix<Data_, Index_>* p, const Level_* level, std::vector<int> level_size, const Group_* group, Index_ ngroups, const Block_* block, Index_ nblocks, Overlord_& overlord) const {
+    State core(
+        const tatami::Matrix<Data_, Index_>* p, 
+        const Level_* level, 
+        std::vector<int> level_size, 
+        const Group_* group, 
+        size_t ngroups, 
+        const Block_* block, 
+        size_t nblocks, 
+        Overlord_& overlord) 
+    const {
         auto ngenes = p->nrow();
         size_t nlevels = level_size.size();
         State state(static_cast<size_t>(ngenes) * nlevels);
@@ -321,7 +342,7 @@ private:
         // Dividing through to get the actual detected proportions.
         // Don't bother parallelizing this, given how simple it is.
         auto dptr = state.detected.data();
-        for (Index_ gene = 0; gene < ngenes; ++gene) {
+        for (size_t gene = 0; gene < ngenes; ++gene) {
             size_t in_offset = gene * nlevels;
             for (size_t l = 0; l < nlevels; ++l, ++dptr) {
                 if (level_size[l]) {
