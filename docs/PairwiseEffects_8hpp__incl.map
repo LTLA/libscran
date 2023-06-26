@@ -1,11 +1,35 @@
 <map id="scran/differential_analysis/PairwiseEffects.hpp" name="scran/differential_analysis/PairwiseEffects.hpp">
-<area shape="rect" id="node1" title="Compute pairwise effect sizes between groups of cells." alt="" coords="199,5,394,45"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,181,132,207"/>
-<area shape="rect" id="node3" title=" " alt="" coords="313,101,403,126"/>
-<area shape="rect" id="node4" title=" " alt="" coords="427,101,529,126"/>
-<area shape="rect" id="node5" href="$simple__diff_8hpp_source.html" title=" " alt="" coords="181,101,289,126"/>
-<area shape="rect" id="node8" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="42,93,157,133"/>
-<area shape="rect" id="node9" title=" " alt="" coords="554,101,703,126"/>
-<area shape="rect" id="node6" title=" " alt="" coords="157,181,215,207"/>
-<area shape="rect" id="node7" title=" " alt="" coords="239,181,293,207"/>
+<area shape="rect" id="Node000001" title="Compute pairwise effect sizes between groups of cells." alt="" coords="233,5,426,46"/>
+<area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="18,256,144,282"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="232,38,169,46,106,58,54,75,35,85,22,96,14,108,9,129,12,160,28,207,40,227,56,244,52,248,36,230,23,209,6,161,3,128,9,106,18,92,32,80,52,70,105,53,168,41,232,32"/>
+<area shape="rect" id="Node000003" href="$MatrixCalculator_8hpp_source.html" title=" " alt="" coords="313,94,452,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="345,45,368,80,364,83,340,48"/>
+<area shape="rect" id="Node000008" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="219,168,333,208"/>
+<area shape="poly" id="edge19_Node000001_Node000008" title=" " alt="" coords="323,47,304,95,286,154,281,153,299,93,318,45"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="883,175,1005,201"/>
+<area shape="poly" id="edge20_Node000001_Node000011" title=" " alt="" coords="370,44,465,92,490,106,515,117,568,132,613,140,692,147,772,151,872,165,888,168,887,174,871,170,771,156,691,152,612,145,567,137,514,122,487,111,463,96,368,49"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="527,94,628,120"/>
+<area shape="poly" id="edge14_Node000001_Node000012" title=" " alt="" coords="392,44,526,86,524,92,390,49"/>
+<area shape="rect" id="Node000013" href="$simple__diff_8hpp_source.html" title=" " alt="" coords="32,94,139,120"/>
+<area shape="poly" id="edge15_Node000001_Node000013" title=" " alt="" coords="269,49,137,92,136,86,267,44"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="333,123,273,142,209,170,109,249,106,245,207,165,271,137,332,118"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="247,256,305,282"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="383,121,371,162,347,210,329,231,308,249,305,245,325,228,343,207,366,160,378,119"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="408,175,482,201"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="394,118,429,162,424,165,390,122"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="91,175,143,201"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="331,123,251,143,163,170,158,172,156,167,162,165,250,138,329,118"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="506,175,587,201"/>
+<area shape="poly" id="edge7_Node000003_Node000007" title=" " alt="" coords="409,118,510,166,508,171,407,123"/>
+<area shape="poly" id="edge8_Node000003_Node000008" title=" " alt="" coords="368,122,315,161,312,157,365,118"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="612,168,769,208"/>
+<area shape="poly" id="edge11_Node000003_Node000009" title=" " alt="" coords="431,118,600,161,599,166,429,123"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="793,175,860,201"/>
+<area shape="poly" id="edge12_Node000003_Node000010" title=" " alt="" coords="452,115,645,142,782,165,788,167,787,172,781,170,644,147,452,120"/>
+<area shape="poly" id="edge13_Node000003_Node000011" title=" " alt="" coords="453,115,471,117,672,137,760,146,872,165,888,168,887,174,871,170,759,152,672,142,470,122,452,120"/>
+<area shape="poly" id="edge9_Node000008_Node000002" title=" " alt="" coords="228,211,125,253,123,248,226,206"/>
+<area shape="poly" id="edge10_Node000008_Node000004" title=" " alt="" coords="279,209,279,241,273,241,273,209"/>
+<area shape="poly" id="edge16_Node000013_Node000002" title=" " alt="" coords="72,122,53,142,37,169,33,188,37,207,47,227,60,244,56,247,42,230,32,209,27,188,32,167,48,139,69,118"/>
+<area shape="poly" id="edge17_Node000013_Node000004" title=" " alt="" coords="83,121,72,162,72,186,81,207,104,223,144,238,233,258,232,263,142,243,102,228,76,210,67,187,66,162,77,119"/>
+<area shape="poly" id="edge18_Node000013_Node000006" title=" " alt="" coords="93,119,109,160,104,162,88,121"/>
 </map>

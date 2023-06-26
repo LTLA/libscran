@@ -1,4 +1,5 @@
 <map id="scran/feature_set_enrichment/ScoreFeatureSet.hpp" name="scran/feature_set_enrichment/ScoreFeatureSet.hpp">
-<area shape="rect" id="node1" title="Compute per&#45;cell scores for a feature set." alt="" coords="5,5,200,45"/>
-<area shape="rect" id="node2" href="$scran_8hpp_source.html" title=" " alt="" coords="45,93,160,119"/>
+<area shape="rect" id="Node000001" title="Compute per&#45;cell scores for a feature set." alt="" coords="5,5,199,46"/>
+<area shape="rect" id="Node000002" href="$scran_8hpp_source.html" title=" " alt="" coords="45,94,159,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,61,105,93,99,93,99,61"/>
 </map>

@@ -1,4 +1,5 @@
 <map id="scran/dimensionality_reduction/BlockedPCA.hpp" name="scran/dimensionality_reduction/BlockedPCA.hpp">
-<area shape="rect" id="node1" title="Compute PCA after blocking on an uninteresting factor." alt="" coords="5,5,189,45"/>
-<area shape="rect" id="node2" href="$scran_8hpp_source.html" title=" " alt="" coords="40,93,155,119"/>
+<area shape="rect" id="Node000001" title="Compute PCA after blocking on an uninteresting factor." alt="" coords="5,5,189,46"/>
+<area shape="rect" id="Node000002" href="$scran_8hpp_source.html" title=" " alt="" coords="40,94,154,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,61,100,93,94,93,94,61"/>
 </map>

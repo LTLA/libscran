@@ -1,9 +1,20 @@
 <map id="scran/clustering/ClusterSNNGraph.hpp" name="scran/clustering/ClusterSNNGraph.hpp">
-<area shape="rect" id="node1" title="Identify clusters of cells from a shared nearest&#45;neighbor graph." alt="" coords="141,5,300,45"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="13,240,140,265"/>
-<area shape="rect" id="node3" href="$BuildSNNGraph_8hpp_source.html" title=" " alt="" coords="98,93,237,119"/>
-<area shape="rect" id="node4" title=" " alt="" coords="187,240,254,265"/>
-<area shape="rect" id="node5" href="$igraph__utils_8hpp.html" title="Utilities for manipulating igraph data structures." alt="" coords="21,167,133,192"/>
-<area shape="rect" id="node6" title=" " alt="" coords="311,93,370,119"/>
-<area shape="rect" id="node7" title=" " alt="" coords="394,93,469,119"/>
+<area shape="rect" id="Node000001" title="Identify clusters of cells from a shared nearest&#45;neighbor graph." alt="" coords="142,5,300,46"/>
+<area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="14,241,140,267"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,49,115,68,72,93,36,127,22,147,11,169,8,181,11,192,26,213,45,231,41,235,22,217,6,194,3,181,6,167,17,144,32,123,69,89,112,63,155,44"/>
+<area shape="rect" id="Node000003" href="$BuildSNNGraph_8hpp_source.html" title=" " alt="" coords="98,94,237,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="210,48,186,83,182,80,205,45"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="188,241,254,267"/>
+<area shape="poly" id="edge10_Node000001_Node000004" title=" " alt="" coords="234,45,251,93,254,130,250,167,234,228,228,227,245,166,249,130,246,95,229,47"/>
+<area shape="rect" id="Node000005" href="$igraph__utils_8hpp.html" title="Utilities for manipulating igraph data structures." alt="" coords="21,168,132,193"/>
+<area shape="poly" id="edge11_Node000001_Node000005" title=" " alt="" coords="152,49,116,68,88,95,77,124,76,154,71,153,72,123,84,93,113,64,149,44"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="312,94,369,120"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="252,44,312,83,309,88,249,49"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="393,94,467,120"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="274,44,386,86,384,91,272,49"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="169,121,163,155,147,195,129,217,109,234,105,230,125,213,142,192,158,154,164,120"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="174,119,214,226,209,228,169,121"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="154,122,105,161,101,156,150,118"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="79,194,79,226,74,226,74,194"/>
+<area shape="poly" id="edge7_Node000005_Node000004" title=" " alt="" coords="102,191,184,232,182,237,100,196"/>
 </map>

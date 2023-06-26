@@ -1,8 +1,13 @@
 <map id="scran/utils/average_vectors.hpp" name="scran/utils/average_vectors.hpp">
-<area shape="rect" id="node1" title="Average parallel elements across vectors." alt="" coords="163,5,295,45"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,93,95,119"/>
-<area shape="rect" id="node3" title=" " alt="" coords="119,93,178,119"/>
-<area shape="rect" id="node4" title=" " alt="" coords="202,93,255,119"/>
-<area shape="rect" id="node5" title=" " alt="" coords="279,93,354,119"/>
-<area shape="rect" id="node6" title=" " alt="" coords="378,93,437,119"/>
+<area shape="rect" id="Node000001" title="Average parallel elements across vectors." alt="" coords="160,5,291,46"/>
+<area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,94,94,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,49,91,90,88,85,180,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="118,94,176,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="208,48,171,85,167,81,204,45"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="199,94,252,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="228,46,228,79,223,79,223,46"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="276,94,351,120"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="249,44,291,82,288,86,245,48"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="374,94,432,120"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="271,44,364,85,361,90,269,49"/>
 </map>

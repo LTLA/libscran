@@ -1,7 +1,13 @@
 <map id="scran/quality_control/ChooseOutlierFilters.hpp" name="scran/quality_control/ChooseOutlierFilters.hpp">
-<area shape="rect" id="node1" title="Define outlier filters using a MAD&#45;based approach." alt="" coords="209,5,377,45"/>
-<area shape="rect" id="node2" href="$SuggestAdtQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from ADT&#45;derived QC metrics." alt="" coords="5,93,176,133"/>
-<area shape="rect" id="node4" href="$SuggestCrisprQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from CRISPR&#45;derived QC metrics." alt="" coords="201,93,386,133"/>
-<area shape="rect" id="node5" href="$SuggestRnaQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from RNA&#45;derived QC metrics." alt="" coords="410,93,585,133"/>
-<area shape="rect" id="node3" href="$scran_8hpp_source.html" title=" " alt="" coords="236,181,351,207"/>
+<area shape="rect" id="Node000001" title="Define outlier filters using a MAD&#45;based approach." alt="" coords="208,5,376,46"/>
+<area shape="rect" id="Node000002" href="$SuggestAdtQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from ADT&#45;derived QC metrics." alt="" coords="5,94,176,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="234,55,137,96,135,91,232,50"/>
+<area shape="rect" id="Node000004" href="$SuggestCrisprQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from CRISPR&#45;derived QC metrics." alt="" coords="200,94,384,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="295,61,295,94,289,94,289,61"/>
+<area shape="rect" id="Node000005" href="$SuggestRnaQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from RNA&#45;derived QC metrics." alt="" coords="408,94,581,135"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="352,50,449,91,447,96,350,55"/>
+<area shape="rect" id="Node000003" href="$scran_8hpp_source.html" title=" " alt="" coords="235,183,349,208"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="155,138,262,180,260,185,153,143"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="295,150,295,182,289,182,289,150"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="431,143,324,185,322,180,430,138"/>
 </map>

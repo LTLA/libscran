@@ -1,13 +1,26 @@
 <map id="scran/feature_selection/ModelGeneVar.hpp" name="scran/feature_selection/ModelGeneVar.hpp">
-<area shape="rect" id="node1" title="Model the per&#45;gene variance from log&#45;count data." alt="" coords="369,5,526,45"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,181,132,207"/>
-<area shape="rect" id="node3" title=" " alt="" coords="485,101,639,126"/>
-<area shape="rect" id="node4" title=" " alt="" coords="663,101,813,126"/>
-<area shape="rect" id="node5" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="106,93,221,133"/>
-<area shape="rect" id="node6" title=" " alt="" coords="157,181,215,207"/>
-<area shape="rect" id="node7" title=" " alt="" coords="837,101,991,126"/>
-<area shape="rect" id="node8" href="$FitTrendVar_8hpp.html" title="Fit a mean&#45;variance trend to log&#45;count data." alt="" coords="295,101,410,126"/>
-<area shape="rect" id="node9" title=" " alt="" coords="514,181,589,207"/>
-<area shape="rect" id="node11" title=" " alt="" coords="1015,101,1069,126"/>
-<area shape="rect" id="node10" title=" " alt="" coords="239,181,490,207"/>
+<area shape="rect" id="Node000001" title="Model the per&#45;gene variance from log&#45;count data." alt="" coords="321,5,477,46"/>
+<area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,183,132,208"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="321,38,190,59,132,76,111,85,96,96,84,112,77,130,71,168,65,167,71,129,79,109,92,92,108,81,131,71,189,54,320,32"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="485,102,607,127"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="434,44,514,91,512,96,431,49"/>
+<area shape="rect" id="Node000004" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="107,94,220,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="347,49,231,91,230,86,345,44"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="156,183,213,208"/>
+<area shape="poly" id="edge13_Node000001_Node000005" title=" " alt="" coords="361,49,323,70,285,96,241,135,206,173,202,169,237,131,282,92,320,66,358,44"/>
+<area shape="rect" id="Node000006" href="$FitTrendVar_8hpp.html" title="Fit a mean&#45;variance trend to log&#45;count data." alt="" coords="296,102,409,127"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="391,48,368,90,363,87,386,45"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="510,183,584,208"/>
+<area shape="poly" id="edge12_Node000001_Node000007" title=" " alt="" coords="413,45,440,87,476,133,520,172,516,176,472,137,435,90,408,48"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="631,102,784,127"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="470,44,651,94,649,100,469,49"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="808,102,860,127"/>
+<area shape="poly" id="edge14_Node000001_Node000010" title=" " alt="" coords="478,31,628,51,714,68,797,91,801,93,799,98,796,97,712,73,627,56,477,36"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="141,137,96,175,92,171,138,133"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="171,134,180,168,175,169,166,136"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="309,130,127,181,125,176,308,125"/>
+<area shape="poly" id="edge9_Node000006_Node000005" title=" " alt="" coords="328,130,224,178,222,174,325,125"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="383,125,505,174,503,179,381,130"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="237,183,487,208"/>
+<area shape="poly" id="edge10_Node000006_Node000008" title=" " alt="" coords="357,127,361,167,356,168,351,128"/>
 </map>

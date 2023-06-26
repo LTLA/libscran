@@ -1,4 +1,5 @@
 <map id="scran/quality_control/SuggestAdtQcFilters.hpp" name="scran/quality_control/SuggestAdtQcFilters.hpp">
-<area shape="rect" id="node1" title="Create filters to identify low&#45;quality cells from ADT&#45;derived QC metrics." alt="" coords="5,5,176,45"/>
-<area shape="rect" id="node2" href="$scran_8hpp_source.html" title=" " alt="" coords="33,93,148,119"/>
+<area shape="rect" id="Node000001" title="Create filters to identify low&#45;quality cells from ADT&#45;derived QC metrics." alt="" coords="5,5,176,46"/>
+<area shape="rect" id="Node000002" href="$scran_8hpp_source.html" title=" " alt="" coords="34,94,147,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,61,93,93,88,93,88,61"/>
 </map>

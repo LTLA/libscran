@@ -1,4 +1,5 @@
 <map id="scran/quality_control/SuggestCrisprQcFilters.hpp" name="scran/quality_control/SuggestCrisprQcFilters.hpp">
-<area shape="rect" id="node1" title="Create filters to identify low&#45;quality cells from CRISPR&#45;derived QC metrics." alt="" coords="5,5,191,45"/>
-<area shape="rect" id="node2" href="$scran_8hpp_source.html" title=" " alt="" coords="41,93,155,119"/>
+<area shape="rect" id="Node000001" title="Create filters to identify low&#45;quality cells from CRISPR&#45;derived QC metrics." alt="" coords="5,5,190,46"/>
+<area shape="rect" id="Node000002" href="$scran_8hpp_source.html" title=" " alt="" coords="41,94,154,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,61,100,93,95,93,95,61"/>
 </map>

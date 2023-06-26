@@ -1,12 +1,26 @@
 <map id="scran/quality_control/PerCellAdtQcMetrics.hpp" name="scran/quality_control/PerCellAdtQcMetrics.hpp">
-<area shape="rect" id="node1" title="Compute per&#45;cell quality control metrics from an ADT count matrix." alt="" coords="304,5,476,45"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="52,255,179,280"/>
-<area shape="rect" id="node3" title=" " alt="" coords="534,255,593,280"/>
-<area shape="rect" id="node4" title=" " alt="" coords="25,174,78,199"/>
-<area shape="rect" id="node5" title=" " alt="" coords="700,174,853,199"/>
-<area shape="rect" id="node6" href="$PerCellQcMetrics_8hpp.html" title="Compute a variety of per&#45;cell quality control metrics from a count matrix." alt="" coords="316,93,464,119"/>
-<area shape="rect" id="node7" title=" " alt="" coords="601,174,675,199"/>
-<area shape="rect" id="node8" title=" " alt="" coords="153,174,214,199"/>
-<area shape="rect" id="node9" title=" " alt="" coords="238,174,387,199"/>
-<area shape="rect" id="node10" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="411,167,526,207"/>
+<area shape="rect" id="Node000001" title="Compute per&#45;cell quality control metrics from an ADT count matrix." alt="" coords="154,5,326,46"/>
+<area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="51,256,178,282"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,49,132,68,87,93,45,127,28,147,14,169,8,188,14,207,35,231,63,248,60,252,32,235,10,210,3,188,10,167,24,144,42,123,84,89,129,63,173,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="505,256,562,282"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="326,24,411,33,457,42,504,55,550,74,592,98,629,128,660,166,667,188,660,210,643,229,622,244,577,262,575,257,620,239,639,225,655,207,662,188,655,169,625,132,589,102,547,79,502,60,456,47,410,38,326,29"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="24,175,77,201"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="216,49,156,96,75,167,72,163,153,92,213,44"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="337,94,489,120"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="284,44,375,85,372,90,282,49"/>
+<area shape="rect" id="Node000006" href="$PerCellQcMetrics_8hpp.html" title="Compute a variety of per&#45;cell quality control metrics from a count matrix." alt="" coords="166,94,314,120"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="243,46,243,79,237,79,237,46"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="208,123,173,141,142,169,132,186,125,205,118,242,113,241,120,204,127,184,138,166,170,137,205,118"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="313,118,434,141,483,154,510,166,522,183,530,202,536,241,531,242,525,204,518,185,506,170,481,159,432,146,312,123"/>
+<area shape="poly" id="edge9_Node000006_Node000004" title=" " alt="" coords="212,123,97,170,91,173,89,168,95,165,210,118"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="571,175,645,201"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="314,117,427,137,553,165,562,168,561,173,551,170,426,142,313,122"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="152,175,213,201"/>
+<area shape="poly" id="edge10_Node000006_Node000008" title=" " alt="" coords="233,122,202,164,198,161,229,119"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="237,175,358,201"/>
+<area shape="poly" id="edge11_Node000006_Node000009" title=" " alt="" coords="251,119,282,161,278,164,247,122"/>
+<area shape="rect" id="Node000010" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="382,168,495,208"/>
+<area shape="poly" id="edge12_Node000006_Node000010" title=" " alt="" coords="272,118,376,159,375,164,270,123"/>
+<area shape="poly" id="edge13_Node000010_Node000002" title=" " alt="" coords="382,208,371,211,184,255,183,250,370,206,381,203"/>
+<area shape="poly" id="edge14_Node000010_Node000003" title=" " alt="" coords="464,207,509,245,506,249,460,211"/>
 </map>

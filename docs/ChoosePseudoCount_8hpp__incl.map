@@ -1,6 +1,9 @@
 <map id="scran/normalization/ChoosePseudoCount.hpp" name="scran/normalization/ChoosePseudoCount.hpp">
-<area shape="rect" id="node1" title="Choose a suitable pseudo&#45;count." alt="" coords="47,5,219,45"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,93,80,119"/>
-<area shape="rect" id="node3" title=" " alt="" coords="104,93,163,119"/>
-<area shape="rect" id="node4" title=" " alt="" coords="187,93,245,119"/>
+<area shape="rect" id="Node000001" title="Choose a suitable pseudo&#45;count." alt="" coords="46,5,218,46"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,94,80,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,48,69,86,65,82,108,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="103,94,161,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="135,46,135,79,129,79,129,46"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="185,94,242,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="154,44,192,82,189,85,150,48"/>
 </map>

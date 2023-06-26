@@ -1,5 +1,8 @@
 <map id="scran/quality_control/PerCellCrisprQcMetrics.hpp" name="scran/quality_control/PerCellCrisprQcMetrics.hpp">
-<area shape="rect" id="node1" title="Compute per&#45;cell quality control metrics from a CRISPR guide count matrix." alt="" coords="70,5,257,45"/>
-<area shape="rect" id="node2" href="$SuggestCrisprQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from CRISPR&#45;derived QC metrics." alt="" coords="5,93,191,133"/>
-<area shape="rect" id="node3" href="$scran_8hpp_source.html" title=" " alt="" coords="106,181,221,207"/>
+<area shape="rect" id="Node000001" title="Compute per&#45;cell quality control metrics from a CRISPR guide count matrix." alt="" coords="69,5,254,46"/>
+<area shape="rect" id="Node000002" href="$SuggestCrisprQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from CRISPR&#45;derived QC metrics." alt="" coords="5,94,190,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,60,114,95,110,92,136,57"/>
+<area shape="rect" id="Node000003" href="$scran_8hpp_source.html" title=" " alt="" coords="105,183,218,208"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="187,57,204,93,208,114,204,135,191,162,175,184,171,180,186,160,199,134,203,114,199,95,183,59"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="124,144,154,180,150,184,120,148"/>
 </map>

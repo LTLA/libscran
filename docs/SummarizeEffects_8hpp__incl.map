@@ -1,10 +1,21 @@
 <map id="scran/differential_analysis/SummarizeEffects.hpp" name="scran/differential_analysis/SummarizeEffects.hpp">
-<area shape="rect" id="node1" title="Summarize the effect sizes from pairwise comparisons." alt="" coords="33,5,243,45"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,181,132,207"/>
-<area shape="rect" id="node3" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="34,93,149,133"/>
-<area shape="rect" id="node4" title=" " alt="" coords="157,181,215,207"/>
-<area shape="rect" id="node5" href="$summarize__comparisons_8hpp.html" title="Utilities for effect summarization." alt="" coords="224,101,415,126"/>
-<area shape="rect" id="node6" title=" " alt="" coords="239,181,314,207"/>
-<area shape="rect" id="node7" title=" " alt="" coords="339,181,407,207"/>
-<area shape="rect" id="node8" title=" " alt="" coords="431,181,490,207"/>
+<area shape="rect" id="Node000001" title="Summarize the effect sizes from pairwise comparisons." alt="" coords="32,5,241,46"/>
+<area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,183,132,208"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,49,47,68,23,95,18,114,23,134,33,153,47,170,43,174,29,156,18,136,13,114,18,93,44,64,76,44"/>
+<area shape="rect" id="Node000003" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="33,94,147,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="128,48,110,82,105,79,124,45"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="156,183,213,208"/>
+<area shape="poly" id="edge11_Node000001_Node000004" title=" " alt="" coords="145,45,160,93,181,168,175,169,155,95,140,47"/>
+<area shape="rect" id="Node000005" href="$summarize__comparisons_8hpp.html" title="Utilities for effect summarization." alt="" coords="222,102,411,127"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="178,44,279,92,277,97,176,49"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="87,136,78,169,73,168,82,134"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="115,133,161,171,157,175,112,137"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="279,130,121,180,120,175,277,125"/>
+<area shape="poly" id="edge9_Node000005_Node000004" title=" " alt="" coords="298,130,219,177,216,172,295,125"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="237,183,311,208"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="312,129,290,171,285,168,308,126"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="335,183,402,208"/>
+<area shape="poly" id="edge8_Node000005_Node000007" title=" " alt="" coords="327,126,355,169,350,172,322,129"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="427,183,484,208"/>
+<area shape="poly" id="edge10_Node000005_Node000008" title=" " alt="" coords="339,125,423,173,420,177,336,130"/>
 </map>

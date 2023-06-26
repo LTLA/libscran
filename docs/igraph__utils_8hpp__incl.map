@@ -1,5 +1,7 @@
 <map id="scran/clustering/igraph_utils.hpp" name="scran/clustering/igraph_utils.hpp">
-<area shape="rect" id="node1" title="Utilities for manipulating igraph data structures." alt="" coords="52,5,205,45"/>
-<area shape="rect" id="node2" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,93,132,119"/>
-<area shape="rect" id="node3" title=" " alt="" coords="157,93,223,119"/>
+<area shape="rect" id="Node000001" title="Utilities for manipulating igraph data structures." alt="" coords="52,5,205,46"/>
+<area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,94,132,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,48,89,83,85,80,112,45"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="155,94,222,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="145,45,172,80,168,83,141,48"/>
 </map>
