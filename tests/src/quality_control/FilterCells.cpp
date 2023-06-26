@@ -4,8 +4,7 @@
 #include "../data/data.h"
 #include "../utils/compare_vectors.h"
 
-#include "tatami/base/DenseMatrix.hpp"
-#include "tatami/base/DelayedSubset.hpp"
+#include "tatami/tatami.hpp"
 
 #include "scran/quality_control/FilterCells.hpp"
 
@@ -36,14 +35,13 @@ TEST_F(FilterCellsTester, RetainSubset) {
     EXPECT_EQ(filtered->ncol(), keep_i.size());
     
     std::vector<double> buffer(mat->nrow());
+    auto mext = mat->dense_column();
+    auto fext = filtered->dense_column();
+
     for (size_t c = 0; c < keep_i.size(); ++c) {
-        auto ptr = filtered->column(c, buffer.data());
-        std::vector<double> copy(ptr, ptr + mat->nrow());
-
-        auto rptr = mat->column(keep_i[c], buffer.data());
-        std::vector<double> ref(rptr, rptr + mat->nrow());
-
-        EXPECT_EQ(copy, ref);
+        auto filt = fext->fetch(c);
+        auto ref = mext->fetch(keep_i[c]);
+        EXPECT_EQ(filt, ref);
     }
 }
 
@@ -57,16 +55,15 @@ TEST_F(FilterCellsTester, DiscardSubset) {
     EXPECT_EQ(filtered->ncol(), mat->ncol() - discard_i.size());
 
     std::vector<double> buffer(mat->nrow());
+    auto mext = mat->dense_column();
+    auto fext = filtered->dense_column();
+
     size_t counter = 0;
     for (size_t c = 0; c < mat->ncol(); ++c) {
         if (!discard_s[c]) {
-            auto ptr = filtered->column(counter, buffer.data());
-            std::vector<double> copy(ptr, ptr + mat->nrow());
-
-            auto rptr = mat->column(c, buffer.data());
-            std::vector<double> ref(rptr, rptr + mat->nrow());
-
-            EXPECT_EQ(copy, ref);
+            auto filt = fext->fetch(counter);
+            auto ref = mext->fetch(c);
+            EXPECT_EQ(filt, ref);
             ++counter;
         }
     }

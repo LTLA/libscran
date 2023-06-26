@@ -3,12 +3,11 @@
 
 #include "../utils/macros.hpp"
 
-#include "tatami/base/Matrix.hpp"
-#include "tatami/stats/apply.hpp"
+#include "tatami/tatami.hpp"
 
 #include "../utils/vector_to_pointers.hpp"
-#include "blocked_variances.hpp"
 #include "FitTrendVar.hpp"
+#include "blocked_variances.hpp"
 
 #include <algorithm>
 #include <vector>
@@ -112,6 +111,141 @@ public:
         return *this;
     }
 
+private:
+    template<bool blocked_, typename Data_, typename Index_, typename Stat_, typename Block_> 
+    void compute_dense_row(const tatami::Matrix<Data_, Index_>* mat, std::vector<Stat_*>& means, std::vector<Stat_*>& variances, const Block_* block, const std::vector<Index_>& block_size) const {
+        auto nblocks = block_size.size();
+        auto NR = mat->nrow(), NC = mat->ncol();
+
+        tatami::parallelize([&](size_t, Index_ start, Index_ length) -> void {
+            std::vector<Stat_> tmp_means(nblocks);
+            std::vector<Stat_> tmp_vars(nblocks);
+
+            std::vector<Data_> buffer(NC);
+            auto ext = tatami::consecutive_extractor<true, false>(mat, start, length);
+
+            for (Index_ r = start, end = start + length; r < end; ++r) {
+                auto ptr = ext->fetch(r, buffer.data());
+                feature_selection::blocked_variance_with_mean<blocked_>(ptr, NC, block, nblocks, block_size.data(), tmp_means.data(), tmp_vars.data());
+                for (size_t b = 0; b < nblocks; ++b) {
+                    means[b][r] = tmp_means[b];
+                    variances[b][r] = tmp_vars[b];
+                }
+            }
+        }, NR, num_threads);
+    }
+
+    template<bool blocked_, typename Data_, typename Index_, typename Stat_, typename Block_> 
+    void compute_sparse_row(const tatami::Matrix<Data_, Index_>* mat, std::vector<Stat_*>& means, std::vector<Stat_*>& variances, const Block_* block, const std::vector<Index_>& block_size) const {
+        auto nblocks = block_size.size();
+        auto NR = mat->nrow(), NC = mat->ncol();
+
+        tatami::parallelize([&](size_t, Index_ start, Index_ length) -> void {
+            std::vector<Stat_> tmp_means(nblocks);
+            std::vector<Stat_> tmp_vars(nblocks);
+            std::vector<Index_> tmp_nzero(nblocks);
+
+            std::vector<Data_> vbuffer(NC);
+            std::vector<Index_> ibuffer(NC);
+            tatami::Options opt;
+            opt.sparse_ordered_index = false;
+            auto ext = tatami::consecutive_extractor<true, true>(mat, start, length, opt);
+
+            for (Index_ r = start, end = start + length; r < end; ++r) {
+                auto range = ext->fetch(r, vbuffer.data(), ibuffer.data());
+                feature_selection::blocked_variance_with_mean<blocked_>(range, block, nblocks, block_size.data(), tmp_means.data(), tmp_vars.data(), tmp_nzero.data());
+                for (size_t b = 0; b < nblocks; ++b) {
+                    means[b][r] = tmp_means[b];
+                    variances[b][r] = tmp_vars[b];
+                }
+            }
+        }, NR, num_threads);
+    }
+
+    template<bool blocked_, typename Data_, typename Index_, typename Stat_, typename Block_> 
+    void compute_dense_column(const tatami::Matrix<Data_, Index_>* mat, std::vector<Stat_*>& means, std::vector<Stat_*>& variances, const Block_* block, const std::vector<Index_>& block_size) const {
+        auto nblocks = block_size.size();
+        auto NR = mat->nrow(), NC = mat->ncol();
+
+        tatami::parallelize([&](size_t, Index_ start, Index_ length) -> void {
+            std::vector<Data_> buffer(length);
+            auto ext = tatami::consecutive_extractor<false, false>(mat, 0, NC, start, length);
+
+            // Shifting pointers to account for the new start point.
+            auto mcopy = means;
+            auto vcopy = variances;
+            for (Index_ b = 0; b < nblocks; ++b) {
+                mcopy[b] += start;
+                vcopy[b] += start;
+            }
+
+            std::vector<Index_> counts(nblocks);
+            for (Index_ c = 0; c < NC; ++c) {
+                auto ptr = ext->fetch(c, buffer.data());
+                auto b = feature_selection::get_block<blocked_>(c, block);
+                tatami::stats::variances::compute_running(ptr, length, mcopy[b], vcopy[b], counts[b]);
+            }
+
+            for (size_t b = 0; b < nblocks; ++b) {
+                tatami::stats::variances::finish_running(length, mcopy[b], vcopy[b], counts[b]);
+            }
+        }, NR, num_threads);
+    }
+
+    template<bool blocked_, typename Data_, typename Index_, typename Stat_, typename Block_> 
+    void compute_sparse_column(const tatami::Matrix<Data_, Index_>* mat, std::vector<Stat_*>& means, std::vector<Stat_*>& variances, const Block_* block, const std::vector<Index_>& block_size) const {
+        auto nblocks = block_size.size();
+        auto NR = mat->nrow(), NC = mat->ncol();
+        std::vector<std::vector<Index_> > nonzeros(nblocks, std::vector<Index_>(NR));
+
+        tatami::parallelize([&](size_t, Index_ start, Index_ length) -> void {
+            std::vector<Data_> vbuffer(length);
+            std::vector<Index_> ibuffer(length);
+            tatami::Options opt;
+            opt.sparse_ordered_index = false;
+            auto ext = tatami::consecutive_extractor<false, true>(mat, 0, NC, start, length, opt);
+
+            std::vector<Index_> counts(nblocks);
+            for (Index_ c = 0; c < NC; ++c) {
+                auto range = ext->fetch(c, vbuffer.data(), ibuffer.data());;
+                auto b = feature_selection::get_block<blocked_>(c, block);
+                tatami::stats::variances::compute_running(range, means[b], variances[b], nonzeros[b].data(), counts[b]);
+            }
+
+            for (size_t b = 0; b < nblocks; ++b) {
+                tatami::stats::variances::finish_running(length, means[b] + start, variances[b] + start, nonzeros[b].data() + start, counts[b]);
+            }
+        }, NR, num_threads);
+    }
+
+private:
+    template<bool blocked_, typename Data_, typename Index_, typename Stat_, typename Block_> 
+    void compute(const tatami::Matrix<Data_, Index_>* mat, std::vector<Stat_*>& means, std::vector<Stat_*>& variances, const Block_* block, const std::vector<Index_>& block_size) const {
+        if (mat->prefer_rows()) {
+            if (mat->sparse()) {
+                compute_sparse_row<blocked_>(mat, means, variances, block, block_size);
+            } else {
+                compute_dense_row<blocked_>(mat, means, variances, block, block_size);
+            }
+
+        } else {
+            // Set everything to zero before computing the running statistics.
+            auto NR = mat->nrow();
+            for (auto& mptr : means) {
+                std::fill(mptr, mptr + NR, 0);
+            }
+            for (auto& vptr : variances) {
+                std::fill(vptr, vptr + NR, 0);
+            }
+
+            if (mat->sparse()) {
+                compute_sparse_column<blocked_>(mat, means, variances, block, block_size);
+            } else {
+                compute_dense_column<blocked_>(mat, means, variances, block, block_size);
+            }
+        }
+    }
+
 public:
     /** 
      * Compute and model the per-feature variances from a log-expression matrix.
@@ -162,19 +296,17 @@ public:
     template<class MAT, typename B, typename Stat>
     void run_blocked(const MAT* mat, const B* block, std::vector<Stat*> means, std::vector<Stat*> variances, std::vector<Stat*> fitted, std::vector<Stat*> residuals) const {
         size_t NR = mat->nrow(), NC = mat->ncol();
-        std::vector<int> block_size(means.size());
+        std::vector<typename MAT::index_type> block_size(means.size());
 
         if (block) {
             auto copy = block;
             for (size_t j = 0; j < NC; ++j, ++copy) {
                 ++block_size[*copy];
             }
-            feature_selection::BlockedVarianceFactory<true, Stat, B, decltype(block_size)> fact(NR, NC, means, variances, block, &block_size);
-            tatami::apply<0>(mat, fact, num_threads);
+            compute<true>(mat, means, variances, block, block_size);
         } else {
             block_size[0] = NC;
-            feature_selection::BlockedVarianceFactory<false, Stat, B, decltype(block_size)> fact(NR, NC, means, variances, block, &block_size);
-            tatami::apply<0>(mat, fact, num_threads);
+            compute<false>(mat, means, variances, block, block_size);
         }
 
         // Applying the trend fit to each block.

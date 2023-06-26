@@ -8,8 +8,7 @@
 #include <limits>
 #include <cstdint>
 
-#include "tatami/base/Matrix.hpp"
-#include "tatami/stats/apply.hpp"
+#include "tatami/tatami.hpp"
 #include "../utils/vector_to_pointers.hpp"
 
 /**
@@ -369,61 +368,51 @@ private:
     }
 
 private:
-    template<typename Subset, typename Float, typename Integer>
-    struct Factory {
-        Factory(size_t nr, size_t nc, const std::vector<Subset>& subs, Buffers<Float, Integer>& out) : 
-            NR(nr), NC(nc), subsets(subs), output(out) {}
-
-        size_t NR, NC;
-        const std::vector<Subset>& subsets;
-        Buffers<Float, Integer>& output;
-
-    private:
+    template<typename Data_, typename Index_, typename Subset_, typename Float_, typename Integer_>
+    void compute_direct_dense(const tatami::Matrix<Data_, Index_>* mat, const std::vector<Subset_>& subsets, Buffers<Float_, Integer_>& output) const {
         std::vector<std::vector<int> > subset_indices;
+        if (!output.subset_total.empty() || !output.subset_detected.empty()) {
+            size_t nsubsets = subsets.size();
+            subset_indices.resize(nsubsets);
+            auto NR = mat->nrow();
 
-    public:
-        void prepare_dense_direct() {
-            if (!output.subset_total.empty() || !output.subset_detected.empty()) {
-                size_t nsubsets = subsets.size();
-                subset_indices.resize(nsubsets);
+            for (size_t s = 0; s < nsubsets; ++s) {
+                auto& current = subset_indices[s];
+                const auto& source = subsets[s];
 
-                for (size_t s = 0; s < nsubsets; ++s) {
-                    auto& current = subset_indices[s];
-                    const auto& source = subsets[s];
-                    for (int i = 0, end = NR; i < end; ++i) {
-                        if (source[i]) {
-                            current.push_back(i);
-                        }
+                for (int i = 0; i < NR; ++i) {
+                    if (source[i]) {
+                        current.push_back(i);
                     }
                 }
             }
-            return;
         }
 
-        struct DenseDirect {
-            DenseDirect(size_t nr, const std::vector<std::vector<int> >& subs, Buffers<Float, Integer>& out) : 
-                NR(nr), subset_indices(subs), output(out) {}
+        tatami::parallelize([&](size_t, Index_ start, Index_ length) {
+            auto NR = mat->nrow();
+            auto ext = tatami::consecutive_extractor<false, false>(mat, start, length);
+            std::vector<Data_> vbuffer(NR);
+            bool do_max = output.max_index || output.max_count;
 
-            template<typename T>
-            void compute(size_t c, const T* ptr) {
+            for (Index_ c = start, end = start + length; c < end; ++c) {
+                auto ptr = ext->fetch(c, vbuffer.data());
+
                 if (output.total) {
-                    auto& current = output.total[c];
-                    for (size_t r = 0; r < NR; ++r) {
-                        current += ptr[r];
-                    }
+                    output.total[c] = std::accumulate(ptr, ptr + NR, static_cast<Float_>(0));
                 }
 
                 if (output.detected) {
-                    auto& current = output.detected[c];
-                    for (size_t r = 0; r < NR; ++r) {
-                        current += (ptr[r] != 0);
+                    Integer_ count = 0;
+                    for (Index_ r = 0; r < NR; ++r) {
+                        count += (ptr[r] != 0);
                     }
+                    output.detected[c] = count;
                 }
 
-                if (output.max_index || output.max_count) {
-                    auto max_count = PerCellQcMetrics::pick_fill_value<Float>();
-                    Integer max_index = 0;
-                    for (size_t r = 0; r < NR; ++r) {
+                if (do_max) {
+                    auto max_count = PerCellQcMetrics::pick_fill_value<Float_>();
+                    Integer_ max_index = 0;
+                    for (Index_ r = 0; r < NR; ++r) {
                         if (max_count < ptr[r]) {
                             max_count = ptr[r];
                             max_index = r;
@@ -443,55 +432,58 @@ private:
                     const auto& sub = subset_indices[s];
 
                     if (!output.subset_total.empty() && output.subset_total[s]) {
-                        auto& current = output.subset_total[s][c];
+                        Float_ current = 0;
                         for (auto r : sub) {
                             current += ptr[r];
                         }
+                        output.subset_total[s][c] = current;
                     }
 
                     if (!output.subset_detected.empty() && output.subset_detected[s]) {
-                        auto& current = output.subset_detected[s][c];
+                        Integer_ current = 0;
                         for (auto r : sub) {
                             current += ptr[r] != 0;
                         }
+                        output.subset_detected[s][c] = current;
                     }
                 }
             }
+        }, mat->ncol(), num_threads);
+    }
 
-            size_t NR;
-            const std::vector<std::vector<int> >& subset_indices;
-            Buffers<Float, Integer>& output;
-        };
+    template<typename Data_, typename Index_, typename Subset_, typename Float_, typename Integer_>
+    void compute_direct_sparse(const tatami::Matrix<Data_, Index_>* mat, const std::vector<Subset_>& subsets, Buffers<Float_, Integer_>& output) const {
+        tatami::Options opt;
+        opt.sparse_ordered_index = false;
 
-        DenseDirect dense_direct() {
-            return DenseDirect(NR, subset_indices, output);
-        }
+        tatami::parallelize([&](size_t, Index_ start, Index_ length) {
+            auto NR = mat->nrow();
+            auto ext = tatami::consecutive_extractor<false, true>(mat, start, length, opt);
+            std::vector<Data_> vbuffer(NR);
+            std::vector<Index_> ibuffer(NR);
 
-    public:
-        struct SparseDirect {
-            SparseDirect(size_t nr, const std::vector<Subset>& subs, Buffers<Float, Integer>& out) : 
-                NR(nr), subsets(subs), output(out), internal_is_nonzero(out.max_index ? nr : 0) {}
+            bool do_max = output.max_index || output.max_count;
+            std::vector<unsigned char> internal_is_nonzero(output.max_index ? NR : 0);
 
-            template<typename T, typename IDX>
-            void compute(size_t c, const tatami::SparseRange<T, IDX>& range) {
+            for (Index_ c = start, end = start + length; c < end; ++c) {
+                auto range = ext->fetch(c, vbuffer.data(), ibuffer.data());
+
                 if (output.total) {
-                    auto& current = output.total[c];
-                    for (size_t i = 0; i < range.number; ++i) {
-                        current += range.value[i];
-                    }
+                    output.total[c] = std::accumulate(range.value, range.value + range.number, static_cast<Float_>(0));
                 }
 
                 if (output.detected) {
-                    auto& current = output.detected[c];
-                    for (size_t i = 0; i < range.number; ++i) {
+                    Integer_ current = 0;
+                    for (Index_ i = 0; i < range.number; ++i) {
                         current += (range.value[i] != 0);
                     }
+                    output.detected[c] = current;
                 }
 
-                if (output.max_index || output.max_count) {
-                    auto max_count = PerCellQcMetrics::pick_fill_value<Float>();
-                    Integer max_index = 0;
-                    for (size_t i = 0; i < range.number; ++i) {
+                if (do_max) {
+                    auto max_count = PerCellQcMetrics::pick_fill_value<Float_>();
+                    Integer_ max_index = 0;
+                    for (Index_ i = 0; i < range.number; ++i) {
                         if (max_count < range.value[i]) {
                             max_count = range.value[i];
                             max_index = range.index[i];
@@ -508,18 +500,18 @@ private:
                         // indices are sorted. Hopefully we don't have to hit
                         // this section often.
                         if (output.max_index) {
-                            for (size_t i = 0; i < range.number; ++i) {
+                            for (Index_ i = 0; i < range.number; ++i) {
                                 if (range.value[i]) {
                                     internal_is_nonzero[range.index[i]] = 1;
                                 }
                             }
-                            for (size_t r = 0; r < NR; ++r) {
+                            for (Index_ r = 0; r < NR; ++r) {
                                 if (internal_is_nonzero[r] == 0) {
                                     max_index = r;
                                     break;
                                 }
                             }
-                            for (size_t i = 0; i < range.number; ++i) { // setting back to zero.
+                            for (Index_ i = 0; i < range.number; ++i) { // setting back to zero.
                                 internal_is_nonzero[range.index[i]] = 0;
                             }
                         }
@@ -539,57 +531,66 @@ private:
 
                     if (!output.subset_total.empty() && output.subset_total[s]) {
                         auto& current = output.subset_total[s][c];
-                        for (size_t i = 0; i < range.number; ++i) {
+                        for (Index_ i = 0; i < range.number; ++i) {
                             current += (sub[range.index[i]] != 0) * range.value[i];
                         }
                     }
 
                     if (!output.subset_detected.empty() && output.subset_detected[s]) {
                         auto& current = output.subset_detected[s][c];
-                        for (size_t i = 0; i < range.number; ++i) {
+                        for (Index_ i = 0; i < range.number; ++i) {
                             current += (sub[range.index[i]] != 0) * (range.value[i] != 0);
                         }
                     }
                 }
             }
+        }, mat->ncol(), num_threads);
+    }
 
-            size_t NR;
-            const std::vector<Subset>& subsets;
-            Buffers<Float, Integer>& output;
-            std::vector<uint8_t> internal_is_nonzero;
-        };
-        
-        SparseDirect sparse_direct() {
-            return SparseDirect(NR, subsets, output);
-        }
+    template<typename Data_, typename Index_, typename Subset_, typename Float_, typename Integer_>
+    void compute_running_dense(const tatami::Matrix<Data_, Index_>* mat, const std::vector<Subset_>& subsets, Buffers<Float_, Integer_>& output) const {
+        tatami::parallelize([&](size_t, Index_ start, Index_ len) {
+            auto NR = mat->nrow();
+            auto ext = tatami::consecutive_extractor<true, false>(mat, 0, NR, start, len);
+            std::vector<Data_> vbuffer(len);
+            bool do_max = output.max_index || output.max_count;
+            std::vector<Float_> internal_max_count(do_max && !output.max_count ? len : 0);
 
-    public:
-        struct DenseRunning {
-            DenseRunning(size_t n, size_t nr, const std::vector<Subset>& subs, Buffers<Float, Integer> out) :
-                num(n), NR(nr), subsets(subs), output(std::move(out)), 
-                internal_max_count(output.max_count ? 0 : n, PerCellQcMetrics::pick_fill_value<Float>()) {}
+            for (Index_ r = 0; r < NR; ++r) {
+                auto ptr = ext->fetch(r, vbuffer.data());
 
-            template<class T>
-            void add(const T* ptr) {
                 if (output.total) {
-                    for (size_t c = 0; c < num; ++c) {
-                        output.total[c] += ptr[c];
+                    auto outt = output.total + start;
+                    for (Index_ i = 0; i < len; ++i) {
+                        outt[i] += ptr[i];
                     }
                 }
 
                 if (output.detected) {
-                    for (size_t c = 0; c < num; ++c) {
-                        output.detected[c] += (ptr[c] != 0);
+                    auto outd = output.detected + start;
+                    for (Index_ i = 0; i < len; ++i) {
+                        outd[i] += (ptr[i] != 0);
                     }
                 }
 
-                if (output.max_count || output.max_index) {
-                    auto* tracker = (output.max_count ? output.max_count : internal_max_count.data());
-                    for (size_t c = 0; c < num; ++c) {
-                        if (tracker[c] < ptr[c]) {
-                            tracker[c] = ptr[c];
-                            if (output.max_index) {
-                                output.max_index[c] = counter;
+                if (do_max) {
+                    auto outmc = (output.max_count ? output.max_count + start : internal_max_count.data());
+
+                    if (r == 0) {
+                        std::copy(ptr, ptr + len, outmc);
+                        if (output.max_index) {
+                            auto outmi = output.max_index + start;
+                            std::fill(outmi, outmi + len, 0);
+                        }
+
+                    } else {
+                        for (Index_ i = 0; i < len; ++i) {
+                            auto& curmax = outmc[i];
+                            if (curmax < ptr[i]) {
+                                curmax = ptr[i];
+                                if (output.max_index) {
+                                    output.max_index[i + start] = r;
+                                }
                             }
                         }
                     }
@@ -598,99 +599,75 @@ private:
                 size_t nsubsets = subsets.size();
                 for (size_t s = 0; s < nsubsets; ++s) {
                     const auto& sub = subsets[s];
-                    if (sub[counter] == 0) {
+                    if (sub[r] == 0) {
                         continue;
                     }
 
                     if (!output.subset_total.empty() && output.subset_total[s]) {
-                        auto& current = output.subset_total[s];
-                        for (size_t c = 0; c < num; ++c) {
-                            current[c] += ptr[c];
+                        auto current = output.subset_total[s] + start;
+                        for (Index_ i = 0; i < len; ++i) {
+                            current[i] += ptr[i];
                         }
                     }
 
                     if (!output.subset_detected.empty() && output.subset_detected[s]) {
-                        auto& current = output.subset_detected[s];
-                        for (size_t c = 0; c < num; ++c) {
-                            current[c] += (ptr[c] != 0);
+                        auto current = output.subset_detected[s] + start;
+                        for (Index_ i = 0; i < len; ++i) {
+                            current[i] += (ptr[i] != 0);
                         }
                     }
                 }
-
-                ++counter;
             }
+        }, mat->ncol(), num_threads);
+    }
 
-            size_t counter = 0;
-            size_t num;
-            size_t NR;
-            const std::vector<Subset>& subsets;
-            Buffers<Float, Integer> output;
-            std::vector<Float> internal_max_count;
-        };
+    template<typename Data_, typename Index_, typename Subset_, typename Float_, typename Integer_>
+    void compute_running_sparse(const tatami::Matrix<Data_, Index_>* mat, const std::vector<Subset_>& subsets, Buffers<Float_, Integer_>& output) const {
+        tatami::Options opt;
+        opt.sparse_ordered_index = false;
 
-        DenseRunning dense_running() {
-            return DenseRunning(NC, NR, subsets, output);
-        }
+        Index_ NC = mat->ncol();
+        bool do_max = output.max_index || output.max_count;
+        std::vector<Float_> internal_max_count(do_max && !output.max_count ? NC : 0);
+        std::vector<Integer_> internal_last_consecutive_nonzero(do_max ? NC : 0);
 
-        DenseRunning dense_running(size_t start, size_t end) {
-            auto advance = [&](auto& ptr) -> void {
-                if (ptr) {
-                    ptr += start;
-                }
-            };
+        tatami::parallelize([&](size_t t, Index_ start, Index_ len) {
+            auto NR = mat->nrow();
+            auto ext = tatami::consecutive_extractor<true, true>(mat, 0, NR, start, len, opt);
+            std::vector<Data_> vbuffer(len);
+            std::vector<Index_> ibuffer(len);
 
-            auto copy = output;
-            advance(copy.total);
-            advance(copy.detected);
-            advance(copy.max_count);
-            advance(copy.max_index);
-            for (auto& s : copy.subset_total) {
-                advance(s);
-            }
-            for (auto& s : copy.subset_detected) {
-                advance(s);
-            }
+            for (Index_ r = 0; r < NR; ++r) {
+                auto range = ext->fetch(r, vbuffer.data(), ibuffer.data());
 
-            return DenseRunning(end - start, NR, subsets, copy);
-        }
-
-    public:
-        struct SparseRunning {
-            SparseRunning(size_t s, size_t e, size_t nr, const std::vector<Subset>& subs, Buffers<Float, Integer>& out) :
-                start(s), end(e), NR(nr), subsets(subs), output(out),
-                internal_max_count(output.max_count ? 0 : e - s, PerCellQcMetrics::pick_fill_value<Float>()),
-                internal_last_consecutive_nonzero(output.max_index || output.max_count ?  e - s : 0)
-                {}
-
-            template<typename T, typename IDX>
-            void add (const tatami::SparseRange<T, IDX> range) {
                 if (output.total) {
-                    for (size_t i = 0; i < range.number; ++i) {
+                    for (Index_ i = 0; i < range.number; ++i) {
                         output.total[range.index[i]] += range.value[i];
                     }
                 }
 
                 if (output.detected) {
-                    for (size_t i = 0; i < range.number; ++i) {
+                    for (Index_ i = 0; i < range.number; ++i) {
                         output.detected[range.index[i]] += (range.value[i] != 0);
                     }
                 }
 
-                if (output.max_count || output.max_index) {
-                    auto* tracker = (output.max_count ? output.max_count + start : internal_max_count.data());
-                    for (size_t i = 0; i < range.number; ++i) {
-                        auto offset = range.index[i] - start;
+                if (do_max) {
+                    auto outmc = (output.max_count ? output.max_count : internal_max_count.data());
 
-                        auto& curmax = tracker[offset];
+                    for (Index_ i = 0; i < range.number; ++i) {
+                        auto& curmax = outmc[range.index[i]];
                         if (curmax < range.value[i]) {
                             curmax = range.value[i];
                             if (output.max_index) {
-                                output.max_index[range.index[i]] = counter;
+                                output.max_index[range.index[i]] = r;
                             }
                         }
 
-                        auto& last = internal_last_consecutive_nonzero[offset];
-                        if (static_cast<size_t>(last) == counter) {
+                        // Getting the index of the last consecutive non-zero entry, so that
+                        // we can check if zero is the max and gets its first occurrence, if necessary.
+                        auto& last = internal_last_consecutive_nonzero[range.index[i]];
+                        if (static_cast<Index_>(last) == r) {
                             if (range.value[i] != 0) {
                                 ++last;
                             }
@@ -701,7 +678,7 @@ private:
                 size_t nsubsets = subsets.size();
                 for (size_t s = 0; s < nsubsets; ++s) {
                     const auto& sub = subsets[s];
-                    if (sub[counter] == 0) {
+                    if (sub[r] == 0) {
                         continue;
                     }
 
@@ -719,51 +696,33 @@ private:
                         }
                     }
                 }
-
-                ++counter;
             }
+        }, NC, num_threads);
 
-            void finish() {
-                if (output.max_count || output.max_index) {
-                    auto* tracker = (output.max_count ? output.max_count + start : internal_max_count.data());
+        if (do_max) {
+            auto outmc = (output.max_count ? output.max_count : internal_max_count.data());
+            auto NR = mat->nrow();
 
-                    // Checking anything with non-positive max count.
-                    for (size_t s = start; s < end; ++s) {
-                        auto& current = tracker[s - start];
-                        if (current > 0) {
-                            continue;
-                        }
+            // Checking anything with non-positive maximum, and replacing it with zero
+            // if there are any zeros (i.e., consecutive non-zeros is not equal to the number of rows).
+            for (Index_ c = 0; c < NC; ++c) {
+                auto& current = outmc[c];
+                if (current > 0) {
+                    continue;
+                }
 
-                        auto last_nz = internal_last_consecutive_nonzero[s - start];
-                        if (last_nz == NR) {
-                            continue;
-                        }
+                auto last_nz = internal_last_consecutive_nonzero[c];
+                if (last_nz == NR) {
+                    continue;
+                }
 
-                        current = 0;
-                        if (output.max_index) {
-                            output.max_index[s] = last_nz;
-                        }
-                    }
+                current = 0;
+                if (output.max_index) {
+                    output.max_index[c] = last_nz;
                 }
             }
-
-            const size_t start, end;
-            size_t counter = 0;
-            size_t NR;
-            const std::vector<Subset>& subsets;
-            Buffers<Float, Integer>& output;
-            std::vector<Float> internal_max_count;
-            std::vector<Integer> internal_last_consecutive_nonzero;
-        };
-         
-        SparseRunning sparse_running() {
-            return SparseRunning(0, NC, NR, subsets, output);
         }
-
-        SparseRunning sparse_running(size_t start, size_t end) {
-            return SparseRunning(start, end, NR, subsets, output);
-        }
-    };
+    }
 
 public:
     /**
@@ -803,10 +762,19 @@ public:
             }
         }
 
-        size_t nr = mat->nrow(), nc = mat->ncol();
-        Factory fact(nr, nc, subsets, output);
-        tatami::apply<1>(mat, fact, num_threads);
-        return;
+        if (mat->sparse()) {
+            if (mat->prefer_rows()) {
+                compute_running_sparse(mat, subsets, output);
+            } else {
+                compute_direct_sparse(mat, subsets, output);
+            }
+        } else {
+            if (mat->prefer_rows()) {
+                compute_running_dense(mat, subsets, output);
+            } else {
+                compute_direct_dense(mat, subsets, output);
+            }
+        }
     }
 };
 

@@ -3,8 +3,7 @@
 
 #include "../utils/macros.hpp"
 
-#include "tatami/stats/variances.hpp"
-#include "tatami/base/DelayedSubset.hpp"
+#include "tatami/tatami.hpp"
 
 #include "irlba/irlba.hpp"
 #include "Eigen/Dense"
@@ -320,24 +319,15 @@ private:
         double& total_var) 
     const {
 
-        size_t NR = mat->nrow(), NC = mat->ncol();
+        auto NR = mat->nrow(), NC = mat->ncol();
         auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major filling.
         auto& ptrs = extracted.ptrs;
         auto& values = extracted.values;
         auto& indices = extracted.indices;
 
-        // Computing block-specific means and variances.
-        {
+        tatami::parallelize([&](size_t, IDX start, IDX length) -> void {
             const size_t nblocks = block_size.size();
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-            #pragma omp parallel for num_threads(nthreads)
-            for (size_t r = 0; r < NR; ++r) {
-#else
-            SCRAN_CUSTOM_PARALLEL(NR, [&](size_t first, size_t last) -> void {
-            for (size_t r = first; r < last; ++r) {
-#endif
-
+            for (IDX r = start, end = start + length; r < end; ++r) {
                 auto offset = ptrs[r];
                 size_t num_entries = ptrs[r+1] - offset;
                 auto value_ptr = values.data() + offset;
@@ -374,16 +364,10 @@ private:
 
                     proxyvar /= NC - 1;
                 }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
             }
-#else
-            }
-            }, nthreads);
-#endif
+        }, NR, nthreads);
 
-            total_var = pca_utils::process_scale_vector(scale, scale_v);
-        }
+        total_var = pca_utils::process_scale_vector(scale, scale_v);
 
         return pca_utils::SparseMatrix(
             NC, // NC => number of rows, i.e., it's transposed as we want genes in the columns.
@@ -411,19 +395,11 @@ private:
         int nblocks = block_size.size();
         Eigen::VectorXd scale_v(NC);
 
-#ifndef SCRAN_CUSTOM_PARALLEL
-        #pragma omp parallel num_threads(nthreads)
-        {
+        tatami::parallelize([&](size_t, IDX start, IDX length) -> void {
             std::vector<double> mean_buffer(nblocks);
-            #pragma omp for
-            for (size_t c = 0; c < NC; ++c) {
-#else
-        SCRAN_CUSTOM_PARALLEL(NC, [&](size_t first, size_t last) -> void {
-            std::vector<double> mean_buffer(nblocks);
-            for (size_t c = first; c < last; ++c) {
-#endif
+            auto ptr = emat.data() + static_cast<size_t>(start) * NR; // use size_t to avoid overflow on IDX.
 
-                auto ptr = emat.data() + c * NR;
+            for (IDX c = start, end = start + length; c < end; ++c, ptr += NR) {
                 std::fill(mean_buffer.begin(), mean_buffer.end(), 0);
                 for (size_t r = 0; r < NR; ++r) {
                     mean_buffer[block[r]] += ptr[r];
@@ -448,38 +424,21 @@ private:
                     proxyvar += current * current;
                 }
                 proxyvar /= NR - 1;
-
-#ifndef SCRAN_CUSTOM_PARALLEL
             }
-        }
-#else
-            }
-        }, nthreads);
-#endif
+        }, NC, nthreads);
 
         total_var = pca_utils::process_scale_vector(scale, scale_v);
 
         if (scale) {
-#ifndef SCRAN_CUSTOM_PARALLEL
-            #pragma omp parallel for num_threads(nthreads)
-            for (size_t c = 0; c < NC; ++c) {
-#else
-            SCRAN_CUSTOM_PARALLEL(NC, [&](size_t first, size_t last) -> void {
-            for (size_t c = first; c < last; ++c) {
-#endif
-
-                auto ptr = emat.data() + c * NR;
-                auto sd = scale_v[c];
-                for (size_t r = 0; r < NR; ++r) {
-                    ptr[r] /= sd; // process_scale_vector() should already protect against div-by-zero.
+            tatami::parallelize([&](size_t, IDX start, IDX length) -> void {
+                auto ptr = emat.data() + static_cast<size_t>(start) * NR; // use size_t to avoid overflow on IDX.
+                for (IDX c = start, end = start + length; c < end; ++c, ptr += NR) {
+                    auto sd = scale_v[c];
+                    for (size_t r = 0; r < NR; ++r) {
+                        ptr[r] /= sd; // process_scale_vector() should already protect against div-by-zero.
+                    }
                 }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-            }
-#else
-            }
-            }, nthreads);
-#endif
+            }, NC, nthreads);
         }
 
         return emat;

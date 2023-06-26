@@ -3,7 +3,7 @@
 
 #include "../utils/macros.hpp"
 
-#include "tatami/base/DelayedSubset.hpp"
+#include "tatami/tatami.hpp"
 #include <vector>
 #include <numeric>
 #include <algorithm>

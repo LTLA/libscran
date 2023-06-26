@@ -5,11 +5,7 @@
 #include "../utils/compare_almost_equal.h"
 #include "utils.h"
 
-#include "tatami/base/DenseMatrix.hpp"
-#include "tatami/base/DelayedSubset.hpp"
-#include "tatami/utils/convert_to_dense.hpp"
-#include "tatami/utils/convert_to_sparse.hpp"
-#include "tatami/stats/sums.hpp"
+#include "tatami/tatami.hpp"
 
 #include "scran/quality_control/PerCellQcMetrics.hpp"
 
@@ -76,7 +72,7 @@ TEST_P(PerCellQcMetricsTestStandard, NoSubset) {
 
     auto res3 = qcfun.run(sparse_row.get(), {});
     compare(res, res3);
-    
+
     auto res4 = qcfun.run(sparse_column.get(), {});
     compare(res, res3);
 }
@@ -130,7 +126,7 @@ TEST_P(PerCellQcMetricsTestStandard, TwoSubsets) {
 
         auto ref2 = tatami::make_DelayedSubset<0>(dense_row, keep_i2);
         auto refprop2 = tatami::column_sums(ref2.get());
-        EXPECT_EQ(refprop2, res.subset_total[1]);
+        compare_almost_equal(refprop2, res.subset_total[1]); // keep_i2 is scrambled, so exact equality can't be expected upon summation.
         EXPECT_EQ(res.subset_detected[1], quality_control::compute_num_detected(ref2.get()));
     }
 

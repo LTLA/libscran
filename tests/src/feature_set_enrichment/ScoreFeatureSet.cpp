@@ -375,8 +375,9 @@ protected:
         }
 
         std::vector<double> scores(ncells);
+        auto ext = mat->dense_column();
         for (int c = 0; c < ncells; ++c) {
-            auto col = mat->column(c);
+            auto col = ext->fetch(c);
             auto b = block[c];
 
             for (int s = 0; s < nselected; ++s) {
@@ -577,7 +578,7 @@ TEST_F(ScoreFeatureSetOtherTest, EdgeCaseGenes) {
         auto obs = scorer.run(dense_row.get(), features.data());
         EXPECT_EQ(obs.weights.size(), 1);
         EXPECT_EQ(obs.weights[0], 1);
-        EXPECT_EQ(obs.scores, dense_row->row(3));
+        EXPECT_EQ(obs.scores, dense_row->dense_row()->fetch(3));
     }
 }
 
@@ -635,7 +636,7 @@ TEST_F(ScoreFeatureSetOtherTest, ScoreSanityCheck) {
     // Shifting everything up in one batch. This should manifest as a
     // corresponding shift in the scores for that batch. 
     {
-        auto added = tatami::make_DelayedIsometricOp(sparse_column, tatami::DelayedAddScalarHelper(5.6));
+        auto added = tatami::make_DelayedUnaryIsometricOp(sparse_column, tatami::make_DelayedAddScalarHelper(5.6));
         auto combined = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{ sparse_row, added });
 
         scran::ScoreFeatureSet scorer;
@@ -658,7 +659,7 @@ TEST_F(ScoreFeatureSetOtherTest, ScoreSanityCheck) {
     // corresponding scaling in the scores for that batch, regardless
     // of whether set_scale is true or not.
     {
-        auto scaled = tatami::make_DelayedIsometricOp(sparse_column, tatami::DelayedMultiplyScalarHelper(1.5));
+        auto scaled = tatami::make_DelayedUnaryIsometricOp(sparse_column, tatami::make_DelayedMultiplyScalarHelper(1.5));
         auto combined = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{ sparse_row, scaled });
         std::vector<int> batch(ncells * 2);
         std::fill(batch.begin() + ncells, batch.end(), 1);

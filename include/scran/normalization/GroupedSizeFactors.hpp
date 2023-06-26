@@ -6,9 +6,7 @@
 #include "MedianSizeFactors.hpp"
 #include "../aggregation/AggregateAcrossCells.hpp"
 
-#include "tatami/base/DenseMatrix.hpp"
-#include "tatami/utils/ArrayView.hpp"
-#include "tatami/stats/sums.hpp"
+#include "tatami/tatami.hpp"
 
 #include <memory>
 #include <vector>

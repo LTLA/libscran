@@ -45,14 +45,14 @@ namespace scran {
 
 template<class Function>
 void irlba_parallelize_(int nthreads, Function fun) {
-    SCRAN_CUSTOM_PARALLEL(nthreads, [&](size_t f, size_t l) -> void {
+    SCRAN_CUSTOM_PARALLEL([&](size_t, size_t f, size_t l) -> void {
         // This loop should be trivial if f + 1== l when nthreads == njobs.
         // Nonetheless, we still have a loop just in case the arbitrary
         // scheduling does wacky things. 
-        for (size_t i = f; i < l; ++i) {
-            fun(f);
+        for (size_t i = 0; i < l; ++i) {
+            fun(f + i);
         }
-    }, nthreads);
+    }, nthreads, nthreads);
 }
 
 }

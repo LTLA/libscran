@@ -201,8 +201,8 @@ public:
         #pragma omp parallel for num_threads(nthreads)
         for (size_t i = 0; i < ncells; ++i) {
 #else
-        SCRAN_CUSTOM_PARALLEL(ncells, [&](size_t start, size_t end) -> void {
-        for (size_t i = start; i < end; ++i) {
+        SCRAN_CUSTOM_PARALLEL([&](size_t, size_t start, size_t length) -> void {
+        for (size_t i = start, end = start + length; i < end; ++i) {
 #endif
             auto neighbors = search->find_nearest_neighbors(i, num_neighbors);
             auto& current = indices[i];
@@ -211,7 +211,7 @@ public:
             }
         }
 #ifdef SCRAN_CUSTOM_PARALLEL
-        }, nthreads);
+        }, ncells, nthreads);
 #endif
 
         return run(indices);
@@ -248,7 +248,7 @@ public:
         #pragma omp parallel num_threads(nthreads)
         {
 #else
-        SCRAN_CUSTOM_PARALLEL(ncells, [&](size_t start, size_t end) -> void {
+        SCRAN_CUSTOM_PARALLEL([&](size_t, size_t start, size_t length) -> void {
 #endif
 
             std::vector<int> current_score(ncells);
@@ -259,7 +259,7 @@ public:
             #pragma omp for
             for (size_t j = 0; j < ncells; ++j) {
 #else
-            for (size_t j = start; j < end; ++j) {
+            for (size_t j = start, end = start + length; j < end; ++j) {
 #endif
 
                 const auto& current_neighbors = indices[j];
@@ -328,7 +328,7 @@ public:
         } 
 #else
             }
-        }, nthreads);
+        }, ncells, nthreads);
 #endif
 
         // Collating the total number of edges.

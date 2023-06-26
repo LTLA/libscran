@@ -5,8 +5,7 @@
 
 #include <vector>
 #include <limits>
-#include "tatami/stats/medians.hpp"
-#include "tatami/stats/sums.hpp"
+#include "tatami/tatami.hpp"
 #include "CenterSizeFactors.hpp"
 
 /**
@@ -102,52 +101,6 @@ private:
     double prior_count = Defaults::prior_count;
     int num_threads = Defaults::num_threads;
 
-private:
-    template<typename T, typename Ref, typename Out>
-    struct Factory {
-        Factory(size_t nr, size_t nc, const Ref* ref_, Out* fac) : NR(nr), sums(nc), ref(ref_), factors(fac) {}
-        size_t NR;
-        std::vector<T> sums;
-        const Ref* ref;
-        Out* factors;
-    public:
-        struct DenseDirect {
-            DenseDirect(size_t nr, T* s, const Ref* ref_, Out* fac) : NR(nr), sums(s), ref(ref_), factors(fac), buffer(NR) {}
-
-            void compute(size_t c, const T* ptr) {
-                sums[c] = std::accumulate(ptr, ptr + NR, static_cast<T>(0));
-
-                size_t sofar = 0;
-                for (size_t i = 0; i < NR; ++i) {
-                    if (ref[i] == 0 && ptr[i] == 0) {
-                        continue;
-                    }
-
-                    if (ref[i] == 0) {
-                        buffer[sofar] = std::numeric_limits<T>::infinity();
-                    } else {
-                        buffer[sofar] = ptr[i] / ref[i];
-                    }
-
-                    ++sofar;
-                }
-
-                // TODO: convince tatami maintainers to document this.
-                factors[c] = tatami::stats::compute_median<Out>(buffer.data(), sofar);
-            }
-
-            size_t NR;
-            T* sums;
-            const Ref* ref;
-            Out* factors;
-            std::vector<Out> buffer;
-        };
-
-        DenseDirect dense_direct() {
-            return DenseDirect(NR, sums.data(), ref, factors);
-        }
-    };
-
 public:
     /**
      * Compute per-column size factors against a user-supplied reference profile.
@@ -168,9 +121,37 @@ public:
      */
     template<typename T, typename IDX, typename Ref, typename Out>
     void run(const tatami::Matrix<T, IDX>* mat, const Ref* ref, Out* output) const {
-        size_t NR = mat->nrow(), NC = mat->ncol();
-        Factory<T, Ref, Out> fact(NR, NC, ref, output);
-        tatami::apply<1>(mat, fact, num_threads);
+        auto NR = mat->nrow(), NC = mat->ncol();
+
+        std::vector<T> sums(NC);
+        tatami::parallelize([&](size_t, IDX start, IDX length) -> void {
+            auto ext = tatami::consecutive_extractor<false, false>(mat, start, length);
+            std::vector<T> buffer(NR);
+
+            for (IDX c = start, end = start + length; c < end; ++c) { 
+                auto ptr = ext->fetch(c, buffer.data());
+                sums[c] = std::accumulate(ptr, ptr + NR, static_cast<T>(0));
+
+                size_t sofar = 0;
+                for (IDX r = 0; r < NR; ++r) {
+                    if (ref[r] == 0 && ptr[r] == 0) {
+                        continue;
+                    }
+
+                    // potential overwriting of 'buffer' should be safe, as 'sofar' is always behind 'i'.
+                    if (ref[r] == 0) { 
+                        buffer[sofar] = std::numeric_limits<T>::infinity();
+                    } else {
+                        buffer[sofar] = ptr[r] / ref[r];
+                    }
+
+                    ++sofar;
+                }
+
+                // TODO: convince tatami maintainers to document this.
+                output[c] = tatami::stats::compute_median<Out>(buffer.data(), sofar);
+            }
+        }, NC, num_threads);
 
         /* Mild squeezing towards library size-derived factors. Basically,
          * we're adding a scaled version of the reference profile to each
@@ -227,7 +208,6 @@ public:
          * simplest case where the only difference is due to library size.
          */
         if (prior_count && NR && NC) {
-            const auto& sums = fact.sums;
             double mean = std::accumulate(sums.begin(), sums.end(), static_cast<T>(0));
             mean /= NC;
 

@@ -106,9 +106,9 @@ void summarize_comparisons(size_t ngenes, int ngroups, const Stat* effects, std:
         #pragma omp for
         for (size_t gene = 0; gene < ngenes; ++gene) {
 #else
-    SCRAN_CUSTOM_PARALLEL(ngenes, [&](size_t start, size_t end) -> void {
+    SCRAN_CUSTOM_PARALLEL([&](size_t, size_t start, size_t length) -> void {
         std::vector<double> effect_buffer(ngroups);
-        for (size_t gene = start; gene < end; ++gene) {
+        for (size_t gene = start, end = start + length; gene < end; ++gene) {
 #endif
 
             auto base = effects + gene * ngroups * ngroups;
@@ -121,7 +121,7 @@ void summarize_comparisons(size_t ngenes, int ngroups, const Stat* effects, std:
 	}
 #else
         }
-    }, threads);
+    }, ngenes, threads);
 #endif
 
     return;
@@ -154,13 +154,13 @@ void compute_min_rank_internal(size_t use, const std::vector<std::pair<Stat, int
 }
 
 template<typename Stat>
-void compute_min_rank(size_t ngenes, int ngroups, int group, const Stat* effects, Stat* output, int threads) {
+void compute_min_rank(size_t ngenes, size_t ngroups, int group, const Stat* effects, Stat* output, int threads) {
     // Assign groups to threads, minus the 'group' itself.
     std::vector<std::vector<int> > assignments(threads);
     {
         size_t per_thread = std::ceil(static_cast<double>(ngroups - 1) / threads);
         auto cur_thread = assignments.begin();
-        for (int counter = 0; counter < ngroups; ++counter) {
+        for (size_t counter = 0; counter < ngroups; ++counter) {
             if (counter == group) {
                 continue;
             }
@@ -181,9 +181,9 @@ void compute_min_rank(size_t ngenes, int ngroups, int group, const Stat* effects
         for (int t = 0; t < threads; ++t) {
             for (auto g : assignments[t]) {
 #else
-    SCRAN_CUSTOM_PARALLEL(threads, [&](size_t start, size_t end) -> void {
+    SCRAN_CUSTOM_PARALLEL([&](size_t, size_t start, size_t length) -> void {
         std::vector<std::pair<Stat, int> > buffer(ngenes);
-        for (int t = start; t < end; ++t) {  // should be a no-op loop, but we do this just in case.
+        for (size_t t = start, end = start + length; t < end; ++t) {  // should be a no-op loop, but we do this just in case.
             for (auto g : assignments[t]) {
 #endif
 
@@ -197,7 +197,7 @@ void compute_min_rank(size_t ngenes, int ngroups, int group, const Stat* effects
 #else
             }
         }
-    }, threads);
+    }, threads, threads);
 #endif
 
     std::fill(output, output + ngenes, ngenes + 1); 
@@ -213,19 +213,19 @@ void compute_min_rank(size_t ngenes, int ngroups, int group, const Stat* effects
 }
 
 template<typename Stat>
-void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vector<Stat*>& output, int threads) {
-    auto shift = ngroups * ngroups;
+void compute_min_rank(size_t ngenes, size_t ngroups, const Stat* effects, std::vector<Stat*>& output, int threads) {
+    size_t shift = ngroups * ngroups;
 
 #ifndef SCRAN_CUSTOM_PARALLEL
     #pragma omp parallel num_threads(threads)
     {
         std::vector<std::pair<Stat, int> > buffer(ngenes);
         #pragma omp for
-        for (int g = 0; g < ngroups; ++g) {
+        for (size_t g = 0; g < ngroups; ++g) {
 #else
-    SCRAN_CUSTOM_PARALLEL(ngroups, [&](size_t start, size_t end) -> void {
+    SCRAN_CUSTOM_PARALLEL([&](size_t, size_t start, size_t length) -> void {
         std::vector<std::pair<Stat, int> > buffer(ngenes);
-        for (int g = start; g < end; ++g) { 
+        for (size_t g = start, end = start + length; g < end; ++g) { 
 #endif
 
             auto target = output[g];
@@ -245,7 +245,7 @@ void compute_min_rank(size_t ngenes, int ngroups, const Stat* effects, std::vect
     }
 #else
         }
-    }, threads);
+    }, ngroups, threads);
 #endif
 }
 

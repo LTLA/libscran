@@ -49,7 +49,7 @@ add_executable(
     src/differential_analysis/simple_diff.cpp
     src/differential_analysis/ScoreMarkers.cpp
     src/differential_analysis/PairwiseEffects.cpp
-    src/differential_analysis/Factory.cpp
+    src/differential_analysis/MatrixCalculator.cpp
 
     src/aggregation/AggregateAcrossCells.cpp
     src/aggregation/DownsampleByNeighbors.cpp

@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <vector>
 #include "tatami/tatami.hpp"
-#include "Factory.hpp"
 
 /**
  * @file AggregateAcrossCells.hpp
@@ -152,6 +151,119 @@ public:
         return std::make_pair(std::move(output), std::move(combined));
     }
 
+private:
+    template<bool sparse_, typename Index_, typename Contents_, typename Factor_, typename Sum_, typename Detected_>
+    void compute_row(Index_ i, Index_ nc, const Contents_& row, const Factor_* factor, std::vector<Sum_>& tmp_sums, std::vector<Sum_*>& sums, std::vector<Detected_>& tmp_detected, std::vector<Detected_*>& detected) {
+        if (sums.size()) {
+            std::fill(tmp_sums.begin(), tmp_sums.end(), 0);
+
+            if constexpr(sparse_) {
+                for (Index_ j = 0; j < row.number; ++j) {
+                    tmp_sums[factor[row.index[j]]] += row.value[j];
+                }
+            } else {
+                for (Index_ j = 0; j < nc; ++j) {
+                    tmp_sums[factor[j]] += row[j];
+                }
+            }
+
+            // Computing before transferring for more cache-friendliness.
+            for (Index_ l = 0; l < tmp_sums.size(); ++l) {
+                sums[l][i] = tmp_sums[l];
+            }
+        }
+
+        if (detected.size()) {
+            std::fill(tmp_detected.begin(), tmp_detected.end(), 0);
+
+            if constexpr(sparse_) {
+                for (Index_ j = 0; j < row.number; ++j) {
+                    tmp_detected[factor[row.index[j]]] += (row.value[j] > 0);
+                }
+            } else {
+                for (Index_ j = 0; j < nc; ++j) {
+                    tmp_detected[factor[j]] += (row[j] > 0);
+                }
+            }
+
+            for (Index_ l = 0; l < tmp_detected.size(); ++l) {
+                detected[l][i] = tmp_detected[l];
+            }
+        }
+    }
+
+    template<bool row_, bool sparse_, typename Data_, typename Index_, typename Factor_, typename Sum_, typename Detected_>
+    void compute(const tatami::Matrix<Data_, Index_>* p, const Factor_* factor, std::vector<Sum_*>& sums, std::vector<Detected_*>& detected) {
+        tatami::Options opt;
+        opt.sparse_ordered_index = false;
+
+        if constexpr(row_) {
+            tatami::parallelize([&](size_t, Index_ s, Index_ l) {
+                auto ext = tatami::consecutive_extractor<row_, sparse_>(p, s, l, opt);
+                std::vector<Sum_> tmp_sums(sums.size());
+                std::vector<Detected_> tmp_detected(detected.size());
+
+                auto NC = p->ncol();
+                std::vector<Data_> vbuffer(NC);
+                typename std::conditional<sparse_, std::vector<Index_>, Index_>::type ibuffer(NC);
+
+                for (Index_ x = s, end = s + l; x < end; ++x) {
+                    if constexpr(sparse_) {
+                        compute_row<true>(x, NC, ext->fetch(x, vbuffer.data(), ibuffer.data()), factor, tmp_sums, sums, tmp_detected, detected);
+                    } else {
+                        compute_row<false>(x, NC, ext->fetch(x, vbuffer.data()), factor, tmp_sums, sums, tmp_detected, detected);
+                    }
+                }
+            }, p->nrow(), num_threads);
+
+        } else {
+            tatami::parallelize([&](size_t, Index_ s, Index_ l) {
+                auto NC = p->ncol();
+                auto ext = tatami::consecutive_extractor<row_, sparse_>(p, 0, NC, s, l, opt);
+                std::vector<Data_> vbuffer(l);
+                typename std::conditional<sparse_, std::vector<Index_>, Index_>::type ibuffer(l);
+
+                for (Index_ x = 0; x < NC; ++x) {
+                    auto current = factor[x];
+
+                    if constexpr(sparse_) {
+                        auto col = ext->fetch(x, vbuffer.data(), ibuffer.data());
+                        if (sums.size()) {
+                            auto& cursum = sums[current];
+                            for (Index_ i = 0; i < col.number; ++i) {
+                                cursum[col.index[i]] += col.value[i];
+                            }
+                        }
+
+                        if (detected.size()) {
+                            auto& curdetected = detected[current];
+                            for (Index_ i = 0; i < col.number; ++i) {
+                                curdetected[col.index[i]] += (col.value[i] > 0);
+                            }
+                        }
+
+                    } else {
+                        auto col = ext->fetch(x, vbuffer.data());
+
+                        if (sums.size()) {
+                            auto cursum = sums[current] + s;
+                            for (Index_ i = 0; i < l; ++i) {
+                                cursum[i] += col[i];
+                            }
+                        }
+
+                        if (detected.size()) {
+                            auto curdetected = detected[current] + s;
+                            for (Index_ i = 0; i < l; ++i) {
+                                curdetected[i] += (col[i] > 0);
+                            }
+                        }
+                    }
+                }
+            }, p->nrow(), num_threads);
+        }
+    }
+
 public:
     /**
      * @tparam Data Type of data in the input matrix, should be numeric.
@@ -178,9 +290,19 @@ public:
      */
     template<typename Data, typename Index, typename Factor, typename Sum, typename Detected>
     void run(const tatami::Matrix<Data, Index>* input, const Factor* factor, std::vector<Sum*> sums, std::vector<Detected*> detected) {
-        aggregate_across_cells::BidimensionalFactory fac(input->nrow(), input->ncol(), factor, std::move(sums), std::move(detected));
-        tatami::apply<0>(input, fac, num_threads);
-        return;
+        if (input->prefer_rows()) {
+            if (input->sparse()) {
+                compute<true, true>(input, factor, sums, detected);
+            } else {
+                compute<true, false>(input, factor, sums, detected);
+            }
+        } else {
+            if (input->sparse()) {
+                compute<false, true>(input, factor, sums, detected);
+            } else {
+                compute<false, false>(input, factor, sums, detected);
+            }
+        }
     } 
 
 public:

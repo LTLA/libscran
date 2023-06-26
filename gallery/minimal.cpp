@@ -1,5 +1,5 @@
 #include "scran/scran.hpp"
-#include "tatami/ext/MatrixMarket.hpp"
+#include "tatami_mtx/tatami_mtx.hpp"
 #include <iostream>
 
 int main(int argc, char * argv[]) {
@@ -9,7 +9,7 @@ int main(int argc, char * argv[]) {
     }
 
     // Loading the data from an unzipped MatrixMarket file.
-    auto mat = tatami::MatrixMarket::load_sparse_matrix_from_file(argv[1]);
+    auto mat = tatami_mtx::load_matrix_from_file<false, double, int>(argv[1]);
 
     // Filtering out low-quality cells. 
     auto qc_res = scran::PerCellRnaQcMetrics().run(mat.get(), { /* mito subset definitions go here */ });
