@@ -116,20 +116,22 @@ void compute_mean_and_variance_regress(
 {
     tatami::parallelize([&](size_t, int start, int length) -> void {
         const size_t nblocks = block_size.size();
-        for (int r = start, end = start + length; r < end; ++r) {
+        auto mptr = centers.data() + static_cast<size_t>(start) * nblocks; // coerce to size_t to avoid overflow.
+        auto block_copy = block_size;
+
+        for (int r = start, end = start + length; r < end; ++r, mptr += nblocks) {
             auto offset = ptrs[r];
             size_t num_entries = ptrs[r+1] - offset;
             auto value_ptr = values.data() + offset;
             auto index_ptr = indices.data() + offset;
 
             // Computing the block-wise means.
-            auto mbuffer = centers.data() + nblocks * static_cast<size_t>(r);
-            std::fill(mbuffer, mbuffer + nblocks, 0);
+            std::fill(mptr, mptr + nblocks, 0);
             for (size_t i = 0; i < num_entries; ++i) {
-                mbuffer[block[index_ptr[i]]] += value_ptr[i];
+                mptr[block[index_ptr[i]]] += value_ptr[i];
             }
             for (size_t b = 0; b < nblocks; ++b) {
-                mbuffer[b] /= block_size[b];
+                mptr[b] /= block_size[b];
             }
 
             // Computing the variance from the sum of squared differences.
@@ -138,36 +140,35 @@ void compute_mean_and_variance_regress(
             // the block means, but it's what the PCA sees, so whatever.
             double& proxyvar = variances[r];
             proxyvar = 0;
-            {
-                auto block_copy = block_size;
-                for (size_t i = 0; i < num_entries; ++i) {
-                    Block curb = block[index_ptr[i]];
-                    double diff = value_ptr[i] - mbuffer[curb];
+            std::copy(block_size.begin(), block_size.end(), block_copy.begin());
 
-                    double squared = diff * diff;
-                    if constexpr(equiweight_) {
-                        squared /= block_size[curb];
-                    }
+            for (size_t i = 0; i < num_entries; ++i) {
+                Block curb = block[index_ptr[i]];
+                double diff = value_ptr[i] - mptr[curb];
 
-                    proxyvar += squared;
-                    --block_copy[curb];
+                double squared = diff * diff;
+                if constexpr(equiweight_) {
+                    squared /= block_size[curb];
                 }
 
-                for (size_t b = 0; b < nblocks; ++b) {
-                    auto extra = mbuffer[b] * mbuffer[b] * block_copy[b];
-                    if constexpr(equiweight_) {
-                        extra /= block_size[b];
-                    }
-                    proxyvar += extra;
-                }
+                proxyvar += squared;
+                --block_copy[curb];
+            }
 
-                // If weighting is involved, we've already scaled it by the number of cells,
-                // so there's no need to do this extra step. As before, the concept of the
-                // variance is kinda murky when we do all this weighting, but just remember
-                // that PCA only looks at the sum of squares from the mean.
-                if constexpr(!equiweight_) {
-                    proxyvar /= NC - 1;
+            for (size_t b = 0; b < nblocks; ++b) {
+                auto extra = mptr[b] * mptr[b] * block_copy[b];
+                if constexpr(equiweight_) {
+                    extra /= block_size[b];
                 }
+                proxyvar += extra;
+            }
+
+            // If weighting is involved, we've already scaled it by the number of cells,
+            // so there's no need to do this extra step. As before, the concept of the
+            // variance is kinda murky when we do all this weighting, but just remember
+            // that PCA only looks at the sum of squares from the mean.
+            if constexpr(!equiweight_) {
+                proxyvar /= NC - 1;
             }
         }
     }, NR, nthreads);
@@ -215,7 +216,7 @@ void compute_mean_and_variance_equiweight(
                 mean_buffer[block[r]] += ptr[r];
             }
 
-            double& grand_mean = center_v[c];
+            double& grand_mean = centers[c];
             grand_mean = 0;
             int non_empty_blockes = 0;
             for (size_t b = 0; b < nblocks; ++b) {
@@ -229,7 +230,7 @@ void compute_mean_and_variance_equiweight(
 
             // We don't actually compute the blockwise variance, but instead
             // the weighted sum of squared deltas, which is what PCA actually sees.
-            double& proxyvar = scale_v[c];
+            double& proxyvar = variances[c];
             proxyvar = 0;
             for (size_t r = 0; r < NR; ++r) {
                 const auto& bsize = block_size[block[r]];
@@ -254,19 +255,19 @@ void compute_mean_and_variance_regress(
     tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
         size_t NC = emat.cols(), NR = emat.rows();
         size_t nblocks = block_size.size();
-        std::vector<double> mean_buffer(nblocks);
         auto ptr = emat.data() + static_cast<size_t>(start) * NR; 
+        auto mptr = centers.data() + static_cast<size_t>(start) * nblocks;
 
-        for (size_t c = start, end = start + length; c < end; ++c, ptr += NR) {
-            std::fill(mean_buffer.begin(), mean_buffer.end(), 0);
+        for (size_t c = start, end = start + length; c < end; ++c, ptr += NR, mptr += nblocks) {
+            std::fill(mptr, mptr + nblocks, 0);
             for (size_t r = 0; r < NR; ++r) {
-                mean_buffer[block[r]] += ptr[r];
+                mptr[block[r]] += ptr[r];
             }
 
             for (int b = 0; b < nblocks; ++b) {
                 const auto& bsize = block_size[b];
                 if (bsize) {
-                    mean_buffer[b] /= bsize;
+                    mptr[b] /= bsize;
                 }
             }
 
@@ -274,11 +275,12 @@ void compute_mean_and_variance_regress(
             // instead the squared sum of deltas from each block's means,
             // divided by the degrees of freedom as if there weren't any
             // blocks... as this is what PCA actually sees.
-            double& proxyvar = scale_v[c];
+            double& proxyvar = variances[c];
             proxyvar = 0;
 
             for (size_t r = 0; r < NR; ++r) {
-                double delta = ptr[r] - mean_buffer[block[r]]; 
+                auto curb = block[r];
+                double delta = ptr[r] - mptr[curb];
                 auto squared = current * current;
                 if constexpr(equiweight_) {
                     squared /= block_size[curb];
