@@ -58,6 +58,7 @@ TEST_P(ExtractForPcaTest, Sparse) {
 
     {
         auto extracted = scran::pca_utils::extract_sparse_for_pca(sparse_row.get(), nthreads);
+        EXPECT_TRUE(sparse_row->prefer_rows());
         EXPECT_EQ(values, extracted.values);
         EXPECT_EQ(indices, extracted.indices);
         EXPECT_EQ(ptrs, extracted.ptrs);
@@ -65,6 +66,7 @@ TEST_P(ExtractForPcaTest, Sparse) {
 
     {
         auto extracted = scran::pca_utils::extract_sparse_for_pca(sparse_column.get(), nthreads);
+        EXPECT_FALSE(sparse_row->prefer_rows());
         EXPECT_EQ(values, extracted.values);
         EXPECT_EQ(indices, extracted.indices);
         EXPECT_EQ(ptrs, extracted.ptrs);
@@ -112,98 +114,6 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(19, 47, 98), // columns
         ::testing::Values(1, 3) // number of threads
     )
-);
-
-/********************************************
- ********************************************/
-
-class MeanVarPcaCalculationsTest : public ::testing::TestWithParam<int> {};
-
-TEST_P(MeanVarPcaCalculationsTest, DenseCheck) {
-    auto nthreads = GetParam();
-    size_t NR = 99;
-    size_t NC = 101;
-
-    Simulator sim;
-    auto mat = sim.matrix(NR, NC);
-    auto extracted = scran::pca_utils::extract_dense_for_pca(&mat, nthreads);
-
-    // Check that the mean and variance calculations are correct.
-    Eigen::VectorXd center_v(NR);
-    Eigen::VectorXd scale_v(NR);
-    scran::pca_utils::compute_mean_and_variance_from_dense_columns(extracted, center_v, scale_v, nthreads);
-
-    auto means = tatami::row_sums(&mat);
-    for (auto& x : means) {
-        x /= NC;
-    }
-    compare_almost_equal(means, std::vector<double>(center_v.begin(), center_v.end()));
-
-    auto refvar = tatami::row_variances(&mat);
-    compare_almost_equal(refvar, std::vector<double>(scale_v.begin(), scale_v.end()));
-
-    // Check that processing works with centering only.
-    {
-        double total = scran::pca_utils::process_scale_vector(false, scale_v);
-        EXPECT_EQ(total, std::accumulate(refvar.begin(), refvar.end(), 0.0));
-
-        auto matcopy = extracted;
-        scran::pca_utils::center_and_scale_dense_columns(matcopy, center_v, false, scale_v, nthreads);
-
-        Eigen::VectorXd center_v2(NR);
-        Eigen::VectorXd scale_v2(NR);
-        scran::pca_utils::compute_mean_and_variance_from_dense_columns(matcopy, center_v2, scale_v2, nthreads);
-
-        compare_almost_equal(std::vector<double>(NR), std::vector<double>(center_v2.begin(), center_v2.end()));
-        compare_almost_equal(refvar, std::vector<double>(scale_v2.begin(), scale_v2.end()));
-    }
-
-    // Check that processing works with centering and scaling.
-    {
-        double total = scran::pca_utils::process_scale_vector(true, scale_v);
-        EXPECT_EQ(total, NR);
-
-        auto matcopy = extracted;
-        scran::pca_utils::center_and_scale_dense_columns(matcopy, center_v, true, scale_v, nthreads);
-
-        Eigen::VectorXd center_v2(NR);
-        Eigen::VectorXd scale_v2(NR);
-        scran::pca_utils::compute_mean_and_variance_from_dense_columns(matcopy, center_v2, scale_v2, nthreads);
-
-        compare_almost_equal(std::vector<double>(NR), std::vector<double>(center_v2.begin(), center_v2.end()));
-        compare_almost_equal(std::vector<double>(NR, 1), std::vector<double>(scale_v2.begin(), scale_v2.end()));
-    }
-}
-
-TEST_P(MeanVarPcaCalculationsTest, SparseCheck) {
-    auto nthreads = GetParam();
-    size_t NR = 59;
-    size_t NC = 251;
-
-    Simulator sim;
-    auto mat = sim.matrix(NR, NC);
-    auto smat = tatami::convert_to_sparse(&mat, 1);
-    auto extracted = scran::pca_utils::extract_sparse_for_pca(smat.get(), nthreads);
-
-    // Check that the mean and variance calculations are correct.
-    Eigen::VectorXd center_v(NR);
-    Eigen::VectorXd scale_v(NR);
-    scran::pca_utils::compute_mean_and_variance_from_sparse_components(NR, NC, extracted.values, extracted.indices, extracted.ptrs, center_v, scale_v, nthreads);
-
-    auto means = tatami::row_sums(smat.get());
-    for (auto& x : means) {
-        x /= NC;
-    }
-    compare_almost_equal(means, std::vector<double>(center_v.begin(), center_v.end()));
-
-    auto refvar = tatami::row_variances(smat.get());
-    compare_almost_equal(refvar, std::vector<double>(scale_v.begin(), scale_v.end()));
-}
-
-INSTANTIATE_TEST_SUITE_P(
-    MeanVarPcaCalculations,
-    MeanVarPcaCalculationsTest,
-    ::testing::Values(1, 3) // number of threads
 );
 
 /********************************************

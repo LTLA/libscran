@@ -59,28 +59,6 @@ std::shared_ptr<const tatami::Matrix<T, IDX> > subset_matrix_by_features(const t
     return tatami::make_DelayedSubset<0>(tatami::wrap_shared_ptr(mat), std::move(subset));
 }
 
-inline void center_and_scale_dense_columns(Eigen::MatrixXd& mat, const Eigen::VectorXd& centers, bool use_scale, const Eigen::VectorXd& scale, int nthreads) {
-    size_t NC = mat.cols();
-    tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
-        size_t NR = mat.rows();
-        double* ptr = mat.data() + start * NR;
-        for (size_t c = start, end = start + length; c < end; ++c, ptr += NR) {
-            auto mean = centers[c];
-            for (size_t r = 0; r < NR; ++r) {
-                ptr[r] -= mean;
-            }
-
-            if (use_scale) {
-                auto sd = scale[c];
-                for (size_t r = 0; r < NR; ++r) {
-                    // process_scale_vector should already protect against division by zero.
-                    ptr[r] /= sd;
-                }
-            }
-        }
-    }, NC, nthreads);
-}
-
 /************************************************
  ************************************************/
 

@@ -1,5 +1,5 @@
-#ifndef SCRAN_RUN_PCA_HPP
-#define SCRAN_RUN_PCA_HPP
+#ifndef SCRAN_SIMPLE_PCA_HPP
+#define SCRAN_SIMPLE_PCA_HPP
 
 #include "../utils/macros.hpp"
 
@@ -10,18 +10,18 @@
 #include <vector>
 #include <cmath>
 
-#include "pca_utils.hpp"
+#include "utils.hpp"
 
 /**
- * @file RunPCA.hpp
+ * @file SimplePca.hpp
  *
- * @brief Perform PCA on a gene-by-cell matrix.
+ * @brief Perform a simple PCA on a gene-by-cell matrix.
  */
 
 namespace scran {
 
 /**
- * @brief Perform PCA on a gene-cell matrix.
+ * @brief Perform a simple PCA on a gene-cell matrix.
  *
  * Principal components analysis (PCA) is a helpful technique for data compression and denoising.
  * The idea is that the earlier PCs capture most of the systematic biological variation while the later PCs capture random technical noise.
@@ -29,7 +29,7 @@ namespace scran {
  * Most practitioners will keep the first 10-50 PCs, though the exact choice is fairly arbitrary.
  * For speed, we use the [**CppIrlba**](https://github.com/LTLA/CppIrlba) package to perform an approximate PCA.
  */
-class RunPCA {
+class SimplePca {
 public:
     /**
      * @brief Default parameter settings.
@@ -66,9 +66,9 @@ public:
      * @param r Number of PCs to compute.
      * This should be smaller than the smaller dimension of the input matrix.
      *
-     * @return A reference to this `RunPCA` instance.
+     * @return A reference to this `SimplePca` instance.
      */
-    RunPCA& set_rank(int r = Defaults::rank) {
+    SimplePca& set_rank(int r = Defaults::rank) {
         rank = r;
         return *this;
     }
@@ -76,9 +76,9 @@ public:
     /**
      * @param s Should genes be scaled to unit variance?
      *
-     * @return A reference to this `RunPCA` instance.
+     * @return A reference to this `SimplePca` instance.
      */
-    RunPCA& set_scale(bool s = Defaults::scale) {
+    SimplePca& set_scale(bool s = Defaults::scale) {
         scale = s;
         return *this;
     }
@@ -87,18 +87,18 @@ public:
      * @param t Should the PC matrix be transposed on output?
      * If `true`, the output matrix is column-major with cells in the columns, which is compatible with downstream **libscran** steps.
      * 
-     * @return A reference to this `RunPCA` instance.
+     * @return A reference to this `SimplePca` instance.
      */
-    RunPCA& set_transpose(bool t = Defaults::transpose) {
+    SimplePca& set_transpose(bool t = Defaults::transpose) {
         transpose = t;
         return *this;
     }
 
     /**
      * @param n Number of threads to use.
-     * @return A reference to this `RunPCA` instance.
+     * @return A reference to this `SimplePca` instance.
      */
-    RunPCA& set_num_threads(int n = Defaults::num_threads) {
+    SimplePca& set_num_threads(int n = Defaults::num_threads) {
         nthreads = n;
         return *this;
     }
@@ -111,8 +111,32 @@ private:
         irb.set_number(rank);
 
         if (mat->sparse()) {
-            Eigen::VectorXd center_v(mat->nrow()), scale_v(mat->nrow());
-            auto emat = create_custom_sparse_matrix(mat, center_v, scale_v, total_var);
+            auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major extraction to create a CSR matrix.
+            auto& ptrs = extracted.ptrs;
+            auto& values = extracted.values;
+            auto& indices = extracted.indices;
+
+            size_t NR = mat->nrow(), NC = mat->ncol();
+            Eigen::VectorXd center_v(NR), scale_v(NR);
+            tatami::parallelize([&](size_t, int start, int length) -> void {
+                for (int r = start, end = start + length; r < end; ++r) {
+                    auto offset = ptrs[r];
+
+                    tatami::SparseRange<double, int> range;
+                    range.number = ptrs[r+1] - offset;
+                    range.value = values.data() + offset;
+                    range.index = indices.data() + offset;
+
+                    auto results = tatami::stats::variances::compute_direct(range, NC);
+                    center_v.coeffRef(r) = results.first;
+                    scale_v.coeffRef(r) = results.second;
+                }
+            }, NR, nthreads);
+
+            total_var = pca_utils::process_scale_vector(scale, scale_v);
+
+            // Actually creating a sparse matrix. Again, note that this is transposed; we want genes in the columns.
+            pca_utils::SparseMatrix emat(NC, NR, std::move(values), std::move(indices), std::move(ptrs), nthreads);
 
             irlba::Centered<decltype(emat)> centered(&emat, &center_v);
             if (scale) {
@@ -121,9 +145,44 @@ private:
             } else {
                 irb.run(centered, pcs, rotation, variance_explained);
             }
+
         } else {
-            auto emat = create_eigen_matrix_dense(mat, total_var);
-            irb.run(emat, pcs, rotation, variance_explained); // already centered and scaled, if relevant.
+            auto emat = pca_utils::extract_dense_for_pca(mat, nthreads); // get a column-major matrix with genes in columns.
+
+            size_t NC = emat.cols();
+            Eigen::VectorXd center_v(NC), scale_v(NC);
+            tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
+                size_t NR = emat.rows();
+                const double* ptr = emat.data() + static_cast<size_t>(start) * NR; // enforce size_t to avoid overflow issues.
+                for (size_t c = start, end = start + length; c < end; ++c, ptr += NR) {
+                    auto results = tatami::stats::variances::compute_direct(ptr, NR);
+                    center_v.coeffRef(c) = results.first;
+                    scale_v.coeffRef(c) = results.second;
+                }
+            }, NC, nthreads);
+
+            total_var = pca_utils::process_scale_vector(scale, scale_v);
+
+            // Applying the centering and scaling now.
+            tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
+                size_t NR = emat.rows();
+                double* ptr = emat.data() + static_cast<size_t>(start) * NR;
+                for (size_t c = start, end = start + length; c < end; ++c, ptr += NR) {
+                    auto mean = center_v[c];
+                    for (size_t r = 0; r < NR; ++r) {
+                        ptr[r] -= mean;
+                    }
+
+                    if (scale) {
+                        auto sd = scale_v[c];
+                        for (size_t r = 0; r < NR; ++r) {
+                            ptr[r] /= sd; // process_scale_vector should already protect against division by zero.
+                        }
+                    }
+                }
+            }, NC, nthreads);
+
+            irb.run(emat, pcs, rotation, variance_explained); // already centered (and scaled, if so desired).
         }
 
         pca_utils::clean_up(mat->ncol(), pcs, variance_explained);
@@ -138,7 +197,7 @@ public:
     /**
      * @brief Container for the PCA results.
      *
-     * Instances should be constructed by the `RunPCA::run()` methods.
+     * Instances should be constructed by the `SimplePca::run()` methods.
      */
     struct Results {
         /**
@@ -216,39 +275,6 @@ public:
         }
 
         return output;
-    }
-
-private:
-    template<typename T, typename IDX> 
-    pca_utils::SparseMatrix create_custom_sparse_matrix(const tatami::Matrix<T, IDX>* mat, Eigen::VectorXd& center_v, Eigen::VectorXd& scale_v, double& total_var) const {
-        auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major extraction.
-        auto& ptrs = extracted.ptrs;
-        auto& values = extracted.values;
-        auto& indices = extracted.indices;
-
-        size_t NR = mat->nrow(), NC = mat->ncol();
-        pca_utils::compute_mean_and_variance_from_sparse_components(NR, NC, values, indices, ptrs, center_v, scale_v, nthreads); // row-major calculations.
-        total_var = pca_utils::process_scale_vector(scale, scale_v);
-
-        // Actually creating a sparse matrix. Again, note that this is
-        // transposed; we want genes in the columns.
-        return pca_utils::SparseMatrix(NC, NR, std::move(values), std::move(indices), std::move(ptrs), nthreads);
-    }
-
-private:
-    template<typename T, typename IDX> 
-    Eigen::MatrixXd create_eigen_matrix_dense(const tatami::Matrix<T, IDX>* mat, double& total_var) const {
-        auto emat = pca_utils::extract_dense_for_pca(mat, nthreads); // get a column-major matrix with genes in columns.
-        size_t NC = emat.cols();
-
-        Eigen::VectorXd center_v(NC);
-        Eigen::VectorXd scale_v(NC);
-        pca_utils::compute_mean_and_variance_from_dense_columns(emat, center_v, scale_v, nthreads);
-
-        total_var = pca_utils::process_scale_vector(scale, scale_v);
-        pca_utils::center_and_scale_dense_columns(emat, center_v, scale, scale_v, nthreads);
-
-        return emat;
     }
 };
 

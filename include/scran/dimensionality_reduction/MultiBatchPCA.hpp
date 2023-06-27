@@ -23,37 +23,33 @@ namespace scran {
 /**
  * @cond
  */
-template<class Matrix>
-struct MultiBatchEigenMatrix {
-    MultiBatchEigenMatrix(const Matrix* m, const Eigen::VectorXd* w, const Eigen::VectorXd* mx) : mat(m), weights(w), means(mx) {}
+template<class Matrix_>
+struct WeightedWrapper {
+    WeightedWrapper(const Matrix_* m, const Eigen::VectorXd* w, const Eigen::VectorXd* mx) : mat(m), weights(w), means(mx) {}
 
     auto rows() const { return mat->rows(); }
     auto cols() const { return mat->cols(); }
 
 public:
-    typedef irlba::WrappedWorkspace<Matrix> Workspace;
+    typedef irlba::WrappedWorkspace<Matrix_> Workspace;
 
     Workspace workspace() const {
         return irlba::wrapped_workspace(mat);
     }
 
-    template<class Right>
-    void multiply(const Right& rhs, Workspace& work, Eigen::VectorXd& output) const {
+    template<class Right_>
+    void multiply(const Right_& rhs, Workspace& work, Eigen::VectorXd& output) const {
         irlba::wrapped_multiply(mat, rhs, work, output);
-
         double sub = means->dot(rhs);
-        for (Eigen::Index i = 0; i < output.size(); ++i) {
-            auto& val = output.coeffRef(i);
-            val -= sub;
-            val *= weights->coeff(i);
-        }
+        output.noalias() -= sub;
+        output.noalias() *= (*weights);
     }
 
 public:
     struct AdjointWorkspace {
-        AdjointWorkspace(size_t n, irlba::WrappedAdjointWorkspace<Matrix> c) : combined(n), child(std::move(c)) {}
+        AdjointWorkspace(size_t n, irlba::WrappedAdjointWorkspace<Matrix_> c) : combined(n), child(std::move(c)) {}
         Eigen::VectorXd combined;
-        irlba::WrappedAdjointWorkspace<Matrix> child;
+        irlba::WrappedAdjointWorkspace<Matrix_> child;
     };
 
     AdjointWorkspace adjoint_workspace() const {
@@ -63,13 +59,9 @@ public:
     template<class Right>
     void adjoint_multiply(const Right& rhs, AdjointWorkspace& work, Eigen::VectorXd& output) const {
         work.combined.noalias() = weights->cwiseProduct(rhs);
-
-        irlba::wrapped_adjoint_multiply(mat, work.combined, work.child, output);
-
         double sum = work.combined.sum();
-        for (Eigen::Index i = 0; i < output.size(); ++i) {
-            output.coeffRef(i) -= means->coeff(i) * sum;
-        }
+        irlba::wrapped_adjoint_multiply(mat, work.combined, work.child, output);
+        output.noalias() -= (*means) * sum;
         return;
     }
 
@@ -77,8 +69,8 @@ public:
     Eigen::MatrixXd realize() const {
         Eigen::MatrixXd output = irlba::wrapped_realize(mat);
 
-        for (Eigen::Index c = 0; c < output.cols(); ++c) {
-            for (Eigen::Index r = 0; r < output.rows(); ++r) {
+        for (Eigen::Index c = 0, cend = output.cols(); c < cend; ++c) {
+            for (Eigen::Index r = 0, rend = output.rows(); r < rend; ++r) {
                 auto& val = output.coeffRef(r, c);
                 val -= means->coeff(c);
                 val *= weights->coeff(r);
@@ -86,8 +78,9 @@ public:
         }
         return output;
     }
+
 private:
-    const Matrix* mat;
+    const Matrix_* mat;
     const Eigen::VectorXd* weights;
     const Eigen::VectorXd* means;
 };
