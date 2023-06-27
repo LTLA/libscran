@@ -168,22 +168,7 @@ private:
             // This transposes 'pcs' to be a NDIM * NCELLS matrix.
             pca_utils::project_sparse_matrix(emat, pcs, rotation, scale, scale_v, nthreads);
 
-            // Effective centering and scaling; this should be equivalent to projecting 'centered' or 'scaled'.
-            auto pIt = pcs.data();
-            for (size_t i = 0, iend = pcs.cols(); i < iend; ++i) {
-                auto col = center_m.col(block[i]);
-                double meanval = (scale ? col.dot(rotation.col(i)) : col.dot(rotation.col(i) * scale_v));
-                for (size_t j = 0, jend = pcs.rows(); j < jend; ++j, ++pIt) {
-                    *pIt -= meanval;
-                }
-            }
-
-            // Variance is a somewhat murky concept with weights, so we just square
-            // it and assume that only the relative value matters.
-            for (auto& d : variance_explained) {
-                d = d * d;
-            }
-
+            pca_utils::clean_up_projected<true>(pcs, variance_explained);
             if (!transpose) {
                 pcs.adjointInPlace();
             }
@@ -221,7 +206,7 @@ private:
         pca_utils::compute_mean_and_variance_regress(emat, block, block_size, block_weight, center_m, scale_v, nthreads);
         total_var = pca_utils::process_scale_vector(scale, scale_v);
 
-        // Applying the centering and scaling directly.
+        // Applying the centering and scaling directly so that we can run the PCA with no or fewer layers.
         tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
             size_t ncells = emat.rows();
             double* ptr = emat.data() + static_cast<size_t>(start) * ncells;
@@ -244,6 +229,7 @@ private:
             pca_utils::SampleScaledWrapper<decltype(centered)> weighted(&centered, &expanded);
             irb.run(weighted, scale_v, pcs, rotation, variance_explained);
             pcs.noalias() = emat * rotation;
+            pca_utils::clean_up_projected<false>(pcs, variance_explained);
         } else {
             irb.run(emat, pcs, rotation, variance_explained);
             pca_utils::clean_up(NC, pcs, variance_explained);

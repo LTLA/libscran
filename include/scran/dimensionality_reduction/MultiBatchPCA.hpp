@@ -21,74 +21,6 @@
 namespace scran {
 
 /**
- * @cond
- */
-template<class Matrix_>
-struct WeightedWrapper {
-    WeightedWrapper(const Matrix_* m, const Eigen::VectorXd* w, const Eigen::VectorXd* mx) : mat(m), weights(w), means(mx) {}
-
-    auto rows() const { return mat->rows(); }
-    auto cols() const { return mat->cols(); }
-
-public:
-    typedef irlba::WrappedWorkspace<Matrix_> Workspace;
-
-    Workspace workspace() const {
-        return irlba::wrapped_workspace(mat);
-    }
-
-    template<class Right_>
-    void multiply(const Right_& rhs, Workspace& work, Eigen::VectorXd& output) const {
-        irlba::wrapped_multiply(mat, rhs, work, output);
-        double sub = means->dot(rhs);
-        output.noalias() -= sub;
-        output.noalias() *= (*weights);
-    }
-
-public:
-    struct AdjointWorkspace {
-        AdjointWorkspace(size_t n, irlba::WrappedAdjointWorkspace<Matrix_> c) : combined(n), child(std::move(c)) {}
-        Eigen::VectorXd combined;
-        irlba::WrappedAdjointWorkspace<Matrix_> child;
-    };
-
-    AdjointWorkspace adjoint_workspace() const {
-        return AdjointWorkspace(weights->size(), irlba::wrapped_adjoint_workspace(mat));
-    }
-
-    template<class Right>
-    void adjoint_multiply(const Right& rhs, AdjointWorkspace& work, Eigen::VectorXd& output) const {
-        work.combined.noalias() = weights->cwiseProduct(rhs);
-        double sum = work.combined.sum();
-        irlba::wrapped_adjoint_multiply(mat, work.combined, work.child, output);
-        output.noalias() -= (*means) * sum;
-        return;
-    }
-
-public:
-    Eigen::MatrixXd realize() const {
-        Eigen::MatrixXd output = irlba::wrapped_realize(mat);
-
-        for (Eigen::Index c = 0, cend = output.cols(); c < cend; ++c) {
-            for (Eigen::Index r = 0, rend = output.rows(); r < rend; ++r) {
-                auto& val = output.coeffRef(r, c);
-                val -= means->coeff(c);
-                val *= weights->coeff(r);
-            }
-        }
-        return output;
-    }
-
-private:
-    const Matrix_* mat;
-    const Eigen::VectorXd* weights;
-    const Eigen::VectorXd* means;
-};
-/**
- * @endcond
- */
-
-/**
  * @brief Compute PCA after adjusting for differences between batch sizes.
  *
  * In multi-batch scenarios, we may wish to compute a PCA involving data from multiple batches.
@@ -186,164 +118,256 @@ private:
         return weights;
     }
 
-public:
-#ifdef TEST_SCRAN_CUSTOM_SPARSE_MATRIX
-    template<typename T, typename IDX, typename Batch>
-    Eigen::MatrixXd test_realize(const tatami::Matrix<T, IDX>* mat, const Batch* batch) const {
-        const size_t NC = mat->ncol();
-        auto batch_size = block_sizes(NC, batch); 
-        auto weights = compute_weights(NC, batch, batch_size);
+private:
+    template<typename Data_, typename Index_, typename Block_>
+    void run_sparse_simple(const tatami::Matrix<Data_, Index_>* mat, const Block_* batch, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
+        size_t NR = mat->nrow(), NC = mat->ncol();
+        auto block_size = pca_utils::compute_block_size(NC, block);
+        auto block_weight = pca_utils::compute_block_weight<weight_>(block_size);
+        auto total_weight = total_block_weight(block_weight);
 
-        Eigen::VectorXd center_v(mat->nrow());
-        Eigen::VectorXd scale_v(mat->nrow());
+        auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major extraction.
+        pca_utils::SparseMatrix emat(NC, NR, std::move(extracted.values), std::move(extracted.indices), std::move(extracted.ptrs), nthreads); // CSC with genes in columns.
 
-        auto executor = [&](const auto& emat) -> Eigen::MatrixXd {
-            MultiBatchEigenMatrix<typename std::remove_reference<decltype(emat)>::type> thing(&emat, &weights, &center_v);
-            if (scale) {
-                irlba::Scaled<decltype(thing)> scaled(&thing, &scale_v); 
-                return scaled.realize();
-            } else {
-                return thing.realize();
+        Eigen::VectorXd center_v(NR);
+        Eigen::VectorXd scale_v(NR);
+
+        tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
+            const auto& ptrs = extracted.ptrs;
+            const auto& values = extracted.values;
+            const auto& indices = extracted.indices;
+
+            size_t nblocks = block_size.size();
+            auto block_count = block_Size;
+
+            for (size_t r = start, end = start + length; r < end; ++r) {
+                auto offset = ptrs[r];
+                size_t num_entries = ptrs[r+1] - offset;
+                auto value_ptr = values.data() + offset;
+                auto index_ptr = indices.data() + offset;
+
+                std::fill(block_count.begin(), block_count.end(), 0);
+
+                // Computing the grand mean across all blocks.
+                double& grand_mean = center_v[r];
+                grand_mean = 0;
+                for (size_t i = 0; i < num_entries; ++i) {
+                    auto b = block[index_ptr[i]];
+                    grand_mean += value_ptr[i] * block_weight[b];
+                    ++(block_count[b]);
+                }
+                grand_mean /= total_weight;
+
+                // Computing pseudo-variances where each block's contribution
+                // is weighted inversely proportional to its size. This aims to
+                // match up with the variances used in the PCA but not the
+                // variances of the output components (where weightings are not used).
+                double& proxyvar = scale_v[r];
+                proxyvar = 0;
+                for (size_t b = 0; b < nblocks; ++b) {
+                    double zero_sum = (block_size[b] - batch_count[b]) * grand_mean * grand_mean;
+                    proxyvar += zero_sum * block_weight[b];
+                }
+
+                for (size_t i = 0; i < num_entries; ++i) {
+                    double diff = value_ptr[i] - grand_mean;
+                    proxyvar += diff * diff * block_weight[block[index_ptr[i]]];
+                }
             }
-        };
+        }, NR, nthreads);
 
-        double total_var = 0; // dummy value.
-        if (mat->sparse()) {
-            auto emat = create_custom_sparse_matrix(mat, center_v, scale_v, batch, batch_size, total_var);
-            return executor(emat);
+        total_var = pca_utils::process_scale_vector(scale, scale_v);
+
+        // Now actually performing the PCA.
+        irlba::EigenThreadScope t(nthreads);
+        irlba::Irlba irb;
+        irb.set_number(rank);
+
+        irlba::Centered<decltype(emat), Block_> centered(&emat, &center_v);
+        auto expanded = expand_block_weight(NC, block, block_weight);
+
+        if (scale) {
+            irlba::Scaled<decltype(centered)> scaled(&centered, &scale_v)
+            pca_utils::SampleScaledWrapper<decltype(scaled)> weighted(&scaled, &expanded);
+            irb.run(weighted, pcs, rotation, variance_explained);
         } else {
-            auto emat = create_eigen_matrix_dense(mat, center_v, scale_v, batch, batch_size, total_var);
-            return executor(emat);
+            pca_utils::SampleScaledWrapper<decltype(scaled)> weighted(&centered, &expanded);
+            irb.run(weighted, pcs, rotation, variance_explained);
+        }
+
+        // This transposes 'pcs' to be a NDIM * NCELLS matrix.
+        pca_utils::project_sparse_matrix(emat, pcs, rotation, scale, scale_v, nthreads);
+
+        pca_utils::clean_up_projected<true>(pcs, variance_explained);
+        if (!transpose) {
+            pcs.adjointInPlace();
         }
     }
-#endif
 
-private:
-    template<class Matrix, class Rotation>
-    void reapply(const Matrix& emat,
-        const Eigen::VectorXd& center_v, 
-        Eigen::MatrixXd& pcs, 
-        const Rotation& rotation,
-        Eigen::VectorXd& variance_explained)
-    const {
-        if constexpr(!std::is_same<Matrix, pca_utils::SparseMatrix>::value) {
-            pcs.noalias() = emat * rotation;
-        } else {
-            size_t nvec = pcs.cols();
-            size_t nrow = emat.rows();
-            size_t ncol = emat.cols();
+    template<bool weight_, typename Data_, typename Index_, typename Block_>
+    void run_sparse_residuals(const tatami::Matrix<Data_, Index_>* mat, const Block_* batch, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
+        const size_t NR = mat->nrow(), NC = mat->ncol();
+        auto block_size = pca_utils::compute_block_size(NC, block);
+        auto nblocks = block_size.size();
+        auto block_weight = pca_utils::compute_block_weight<weight_>(block_size);
 
-            Eigen::MatrixXd transposed(nvec, nrow); // using a transposed version for more cache efficiency.
-            transposed.setZero();
+        auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major extraction.
+        pca_utils::SparseMatrix emat(NC, NR, std::move(extracted.values), std::move(extracted.indices), std::move(extracted.ptrs), nthreads); // CSC with genes in columns.
 
-            const auto& x = emat.get_values();
-            const auto& i = emat.get_indices();
-            const auto& p = emat.get_pointers();
+        Eigen::MatrixXd center_m(nblocks, NR);
+        Eigen::VectorXd scale_v(NR);
+        pca_utils::compute_mean_and_variance_regress(emat, block, block_size, block_weight, center_m, scale_v, nthreads);
+        total_var = pca_utils::process_scale_vector(scale, scale_v);
 
-            if (nthreads == 1) {
-                Eigen::VectorXd multipliers(nvec);
-                for (size_t c = 0; c < ncol; ++c) {
-                    multipliers.noalias() = rotation.row(c);
-                    auto start = p[c], end = p[c + 1];
-                    for (size_t s = start; s < end; ++s) {
-                        transposed.col(i[s]).noalias() += x[s] * multipliers;
-                    }
-                }
+        // Now actually performing the PCA.
+        irlba::EigenThreadScope t(nthreads);
+        irlba::Irlba irb;
+        irb.set_number(rank);
+
+        pca_utils::RegressWrapper<decltype(emat), Block_> centered(&emat, block, &center_m);
+        if constexpr(weight_) {
+            auto expanded = expand_block_weight(NC, block, block_weight);
+            if (scale) {
+                irlba::Scaled<decltype(centered)> scaled(&centered, &scale_v);
+                pca_utils::SampleScaledWrapper<decltype(scaled)> weighted(&scaled, &expanded);
+                irb.run(weighted, pcs, rotation, variance_explained);
             } else {
-                const auto& row_nonzero_starts = emat.get_secondary_nonzero_starts();
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-                #pragma omp parallel for num_threads(nthreads)
-                for (int t = 0; t < nthreads; ++t) {
-#else
-                SCRAN_CUSTOM_PARALLEL([&](size_t, int start, int length) -> void {
-                for (int t = start, end = start + length; t < end; ++t) {
-#endif
-
-                    const auto& starts = row_nonzero_starts[t];
-                    const auto& ends = row_nonzero_starts[t + 1];
-                    Eigen::VectorXd multipliers(nvec);
-                    for (size_t c = 0; c < ncol; ++c) {
-                        multipliers.noalias() = rotation.row(c);
-                        auto start = starts[c], end = ends[c];
-                        for (size_t s = start; s < end; ++s) {
-                            transposed.col(i[s]).noalias() += x[s] * multipliers;
-                        }
-                    }
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-                }
-#else
-                }
-                }, nthreads, nthreads);
-#endif
+                pca_utils::SampleScaledWrapper<decltype(centered)> weighted(&centered, &expanded);
+                irb.run(weighted, pcs, rotation, variance_explained);
             }
 
-            pcs.noalias() = transposed.adjoint();
-        }
-
-        // Effective centering because I don't want to modify 'emat'.
-        auto pIt = pcs.data();
-        for (size_t i = 0, iend = pcs.cols(); i < iend; ++i) {
-            double meanval = center_v.dot(rotation.col(i));
-            for (size_t j = 0, jend = pcs.rows(); j < jend; ++j, ++pIt) {
-                *pIt -= meanval;
+        } else {
+            if (scale) {
+                irlba::Scaled<decltype(centered)> scaled(&centered, &scale_v);
+                irb.run(scaled, pcs, rotation, variance_explained);
+            } else {
+                irb.run(centered, pcs, rotation, variance_explained);
             }
         }
 
-        // Variance is a somewhat murky concept with weights, so we just square
-        // it and assume that only the relative value matters.
-        for (auto& d : variance_explained) {
-            d = d * d;
+        // This transposes 'pcs' to be a NDIM * NCELLS matrix.
+        pca_utils::project_sparse_matrix(emat, pcs, rotation, scale, scale_v, nthreads);
+
+        pca_utils::clean_up_projected<true>(pcs, variance_explained);
+        if (!transpose) {
+            pcs.adjointInPlace();
         }
-        return;
     }
 
-private:
-    template<typename T, typename IDX, typename Batch>
-    void run(const tatami::Matrix<T, IDX>* mat, const Batch* batch, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
-        const size_t NC = mat->ncol();
-        auto batch_size = block_sizes(NC, batch); 
-        auto weights = compute_weights(NC, batch, batch_size);
+    template<typename Data_, typename Index_, typename Block_>
+    void run_dense_simple(const tatami::Matrix<Data_, Index_>* mat, const Block_* batch, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
+        size_t NR = mat->nrow(), NC = mat->ncol();
+        auto block_size = pca_utils::compute_block_size(NC, block);
+        auto block_weight = pca_utils::compute_block_weight<weight_>(block_size);
+        auto total_weight = total_block_weight(block_weight);
 
-        Eigen::VectorXd center_v(mat->nrow());
-        Eigen::VectorXd scale_v(mat->nrow());
+        auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major extraction.
+        pca_utils::SparseMatrix emat(NC, NR, std::move(extracted.values), std::move(extracted.indices), std::move(extracted.ptrs), nthreads); // CSC with genes in columns.
 
-        // Remember, we want to run the PCA on the modified matrix,
-        // but we want to apply the rotation vectors to the original matrix
-        // (after any centering/scaling but without the batch weights).
-        auto executor = [&](const auto& emat) -> void {
-            irlba::EigenThreadScope t(nthreads);
-            irlba::Irlba irb;
-            irb.set_number(rank);
+        Eigen::VectorXd center_v(NR);
+        Eigen::VectorXd scale_v(NR);
 
-            MultiBatchEigenMatrix<typename std::remove_reference<decltype(emat)>::type> thing(&emat, &weights, &center_v);
-            if (scale) {
-                irb.run(irlba::Scaled<decltype(thing)>(&thing, &scale_v), pcs, rotation, variance_explained);
+        tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
+            std::vector<double> mean_buffer(nbatchs);
+            for (size_t c = start, end = start + length; c < end; ++c) {
+                auto ptr = emat.data() + c * NR;
 
-                // Dividing the rotation vectors by the scaling factor to mimic
-                // the division of 'emat' by the scaling factor (after centering). 
-                Eigen::MatrixXd temp = rotation.array().colwise() / scale_v.array();
-                reapply(emat, center_v, pcs, temp, variance_explained);
-            } else {
-                irb.run(thing, pcs, rotation, variance_explained);
-                reapply(emat, center_v, pcs, rotation, variance_explained);
+                double& grand_mean = center_v[c];
+                grand_mean = 0;
+                for (size_t r = 0; r < NR; ++r) {
+                    grand_mean += ptr[r] * block_weight[block[r]];
+                }
+
+                // We don't actually compute the batchwise variance, but instead
+                // the weighted sum of squared deltas, which is what PCA actually sees.
+                double& proxyvar = scale_v[c];
+                proxyvar = 0;
+                for (size_t r = 0; r < NR; ++r) {
+                    double diff = ptr[r] - grand_mean;
+                    proxyvar += diff * diff * block_weight[block[r]];
+                }
             }
-        };
+        }, NC, nthreads);
 
-        if (mat->sparse()) {
-            auto emat = create_custom_sparse_matrix(mat, center_v, scale_v, batch, batch_size, total_var);
-            executor(emat);
-        } else {
-            auto emat = create_eigen_matrix_dense(mat, center_v, scale_v, batch, batch_size, total_var);
-            executor(emat);
-        }
+        total_var = pca_utils::process_scale_vector(scale, scale_v);
 
+        // Applying the centering and scaling now so we can do the PCA with fewer wrappers.
+        pca_utils::apply_dense_center_and_scale(emat, center_v, scale, scale_v, nthreads);
+
+        // Now actually performing the PCA.
+        irlba::EigenThreadScope t(nthreads);
+        irlba::Irlba irb;
+        irb.set_number(rank);
+
+        auto expanded = expand_block_weight(NC, block, block_weight);
+        pca_utils::SampleScaledWrapper<decltype(scaled)> weighted(&centered, &expanded);
+        irb.run(weighted, pcs, rotation, variance_explained);
+
+        pcs.noalias() = emat * rotation;
+        pca_utils::clean_up_projected<false>(pcs, variance_explained);
         if (transpose) {
             pcs.adjointInPlace();
         }
+    }
 
-        return;
+    template<typename Data_, typename Index_, typename Block_>
+    void run_dense_residuals(const tatami::Matrix<Data_, Index_>* mat, const Block_* batch, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
+        const size_t NR = mat->nrow(), NC = mat->ncol();
+        auto block_size = pca_utils::compute_block_size(NC, block);
+        auto nblocks = block_size.size();
+        auto block_weight = pca_utils::compute_block_weight<weight_>(block_size);
+
+        irlba::EigenThreadScope t(nthreads);
+        irlba::Irlba irb;
+        irb.set_number(rank);
+
+        auto emat = pca_utils::extract_dense_for_pca(mat, nthreads); // get a column-major matrix with genes in columns.
+
+        Eigen::MatrixXd center_m(nblocks, NR);
+        Eigen::VectorXd scale_v(NR);
+        pca_utils::compute_mean_and_variance_regress(emat, block, block_size, block_weight, center_m, scale_v, nthreads);
+        total_var = pca_utils::process_scale_vector(scale, scale_v);
+
+        // No choice but to use wrappers here, as we still need the original matrix for projection.
+        pca_utils::RegressWrapper<decltype(emat), Block_> centered(&emat, block, &center_m);
+        if constexpr(weight_) {
+            auto expanded = expand_block_weight(NC, block, block_weight);
+            pca_utils::SampleScaledWrapper<decltype(centered)> weighted(&centered, &expanded);
+            irb.run(weighted, scale_v, pcs, rotation, variance_explained);
+        } else {
+            irb.run(centered, pcs, rotation, variance_explained);
+        }
+
+        pcs.noalias() = emat * rotation;
+        pca_utils::clean_up_projected<false>(pcs, variance_explained);
+        if (!transpose) {
+            pcs.adjointInPlace();
+        }
+    }
+
+    template<typename Data_, typename Index_, typename Block_>
+    void run(const tatami::Matrix<Data_, Index_>* mat, const Block_* block, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
+        if (block_policy == BlockPolicy::WEIGHT_ONLY) {
+            if (mat->sparse()) {
+                run_sparse_simple(mat, block, pcs, rotation, variance_explained, total);
+            } else {
+                run_dense_simple(mat, block, pcs, rotation, variance_explained, total);
+            }
+
+        } else if (block_policy == BlockPolicy::RESIDUAL_ONLY) {
+            if (mat->sparse()) {
+                run_sparse_residuals<false>(mat, block, pcs, rotation, variance_explained, total);
+            } else {
+                run_dense_residuals<false>(mat, block, pcs, rotation, variance_explained, total);
+            }
+
+        } else {
+            if (mat->sparse()) {
+                run_sparse_residuals<true>(mat, block, pcs, rotation, variance_explained, total);
+            } else {
+                run_dense_residuals<true>(mat, block, pcs, rotation, variance_explained, total);
+            }
+        }
     }
 
 public:
@@ -437,80 +461,6 @@ public:
             run(subsetted.get(), batch, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         }
         return output;
-    }
-
-private:
-    template<typename T, typename IDX, typename Batch> 
-    pca_utils::SparseMatrix create_custom_sparse_matrix(const tatami::Matrix<T, IDX>* mat, 
-        Eigen::VectorXd& center_v, 
-        Eigen::VectorXd& scale_v, 
-        const Batch* batch,
-        const std::vector<int>& batch_size,
-        double& total_var) 
-    const {
-
-        auto NR = mat->nrow(), NC = mat->ncol();
-        auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major extraction.
-        auto& ptrs = extracted.ptrs;
-        auto& values = extracted.values;
-        auto& indices = extracted.indices;
-
-        tatami::parallelize([&](size_t, IDX start, IDX length) -> void {
-            size_t nbatchs = batch_size.size();
-            std::vector<double> batch_means(nbatchs);
-            std::vector<int> batch_count(nbatchs);
-
-            for (IDX r = start, end = start + length; r < end; ++r) {
-                auto offset = ptrs[r];
-                size_t num_entries = ptrs[r+1] - offset;
-                auto value_ptr = values.data() + offset;
-                auto index_ptr = indices.data() + offset;
-
-                // Computing the grand mean across all batchs.
-                std::fill(batch_means.begin(), batch_means.end(), 0);
-                std::fill(batch_count.begin(), batch_count.end(), 0);
-                for (size_t i = 0; i < num_entries; ++i) {
-                    auto b = batch[index_ptr[i]];
-                    batch_means[b] += value_ptr[i];
-                    ++batch_count[b];
-                }
-
-                double& grand_mean = center_v[r];
-                grand_mean = 0;
-                for (size_t b = 0; b < nbatchs; ++b) {
-                    auto bsize = batch_size[b];
-                    if (bsize) {
-                        grand_mean += batch_means[b] / bsize;
-                    }
-                }
-                grand_mean /= nbatchs;
-
-                // Computing pseudo-variances where each batch's contribution
-                // is weighted inversely proportional to its size. This aims to
-                // match up with the variances used in the PCA but not the
-                // variances of the output components (where weightings are not used).
-                double& proxyvar = scale_v[r];
-                proxyvar = 0;
-                for (size_t b = 0; b < nbatchs; ++b) {
-                    double zero_sum = (batch_size[b] - batch_count[b]) * grand_mean * grand_mean;
-                    proxyvar += zero_sum / batch_size[b];
-                }
-
-                for (size_t i = 0; i < num_entries; ++i) {
-                    double diff = value_ptr[i] - grand_mean;
-                    auto bsize = batch_size[batch[index_ptr[i]]];
-                    if (bsize) {
-                        proxyvar += diff * diff / bsize;
-                    }
-                }
-            }
-        }, NR, nthreads);
-
-        total_var = pca_utils::process_scale_vector(scale, scale_v);
-
-        // Actually filling the sparse matrix. Note that this is transposed
-        // because we want genes in the columns.
-        return pca_utils::SparseMatrix(NC, NR, std::move(values), std::move(indices), std::move(ptrs), nthreads);
     }
 
 private:

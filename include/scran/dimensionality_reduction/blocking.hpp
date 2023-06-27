@@ -19,25 +19,23 @@ std::vector<int> compute_block_size(size_t n, const Block_* block) {
     return block_size;
 }
 
-inline void rescale_block_weights(const std::vector<int>& block_size, std::vector<double>& block_weight) {
-    // Computing effective block weights that also incorporate division by the
-    // block size. This avoids having to do the division by block size in the
-    // 'compute_mean_and_variance_regress()' function.
-    for (size_t i = 0, end = block_size.size(); i < end; ++i) {
-        if (block_size[i]) {
-            block_weight[i] /= block_size[i];
-        } else {
-            block_weight[i] = 0;
-        }
-    }
-}
-
 template<bool weight_> 
 auto compute_block_weight(const std::vector<int>& block_size) {
     if constexpr(weight_) {
-        std::vector<double> block_weight(block.size(), 1);
-        std::fill(block_weight.begin(), block_weight.end(), 1.0); // TODO: allow variable weights here based on some convergence function.
-        pca_utils::rescale_block_weights(block_size, block_weight);
+        size_t nblocks = block_size.size();
+        std::vector<double> block_weight(nblocks, 1);
+
+        // Computing effective block weights that also incorporate division by the
+        // block size. This avoids having to do the division by block size in the
+        // 'compute_mean_and_variance_regress()' function.
+        for (size_t i = 0; i < nblocks; ++i) {
+            if (block_size[i]) {
+                block_weight[i] /= block_size[i];
+            } else {
+                block_weight[i] = 0;
+            }
+        }
+
         return block_weight;
     } else {
         return false;
@@ -72,7 +70,7 @@ void compute_mean_and_variance_regress(
     Eigen::VectorXd& variances,
     int nthreads) 
 {
-    // We assume that block_weight has already been passed through rescale_block_weight,
+    // We assume that block_weight was generated via compute_block_weight(),
     // such that they are already downscaled according to the size of the blocks.
     constexpr bool use_weights = std::is_same<Weights_, std::vector<double> >::value;
     double total_weight = 0;

@@ -163,26 +163,10 @@ private:
 
             total_var = pca_utils::process_scale_vector(scale, scale_v);
 
-            // Applying the centering and scaling now.
-            tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
-                size_t NR = emat.rows();
-                double* ptr = emat.data() + static_cast<size_t>(start) * NR;
-                for (size_t c = start, end = start + length; c < end; ++c, ptr += NR) {
-                    auto mean = center_v[c];
-                    for (size_t r = 0; r < NR; ++r) {
-                        ptr[r] -= mean;
-                    }
+            // Applying the centering and scaling now so we can do the PCA without any wrappers.
+            pca_utils::apply_dense_center_and_scale(emat, center_v, scale, scale_v, nthreads);
 
-                    if (scale) {
-                        auto sd = scale_v[c];
-                        for (size_t r = 0; r < NR; ++r) {
-                            ptr[r] /= sd; // process_scale_vector should already protect against division by zero.
-                        }
-                    }
-                }
-            }, NC, nthreads);
-
-            irb.run(emat, pcs, rotation, variance_explained); // already centered (and scaled, if so desired).
+            irb.run(emat, pcs, rotation, variance_explained); 
         }
 
         pca_utils::clean_up(mat->ncol(), pcs, variance_explained);

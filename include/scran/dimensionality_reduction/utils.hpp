@@ -30,6 +30,28 @@ inline void clean_up(size_t NC, Eigen::MatrixXd& U, Eigen::VectorXd& D) {
     return;
 }
 
+template<bool rows_are_dims_>
+void clean_up_projected(Eigen::MatrixXd& proj, Eigen::VectorXd& D) {
+    // Empirically centering to give nice centered PCs, because we can't
+    // guarantee that the projection is centered in this manner.
+    if constexpr(rows_are_dims_) {
+        for (size_t i = 0, iend = pcs.rows(); i < iend; ++i) {
+            pcs.row(i).noalias() -= pc_centers.row(i).sum();
+        }
+    } else {
+        for (size_t i = 0, iend = pcs.cols(); i < iend; ++i) {
+            pcs.col(i).noalias() -= pc_centers.col(i).sum();
+        }
+    }
+
+    // Variance is a somewhat murky concept when projecting a dataset onto
+    // the PC space defined by a modified version of that dataset, so we just
+    // square it and assume that only the relative value matters.
+    for (auto& d : variance_explained) {
+        d = d * d;
+    }
+}
+
 inline double process_scale_vector(bool scale, Eigen::VectorXd& scale_v) {
     if (scale) {
         double total_var = 0;
@@ -45,6 +67,27 @@ inline double process_scale_vector(bool scale, Eigen::VectorXd& scale_v) {
     } else {
         return std::accumulate(scale_v.begin(), scale_v.end(), 0.0);
     }
+}
+
+inline void dense_center_and_scale(Eigen::MatrixXd& emat, const Eigen::VectorXd& center_v, bool scale, const Eigen::VectorXd& scale_v, int nthreads) {
+    // Applying the centering and scaling now.
+    tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
+        size_t NR = emat.rows();
+        double* ptr = emat.data() + static_cast<size_t>(start) * NR;
+        for (size_t c = start, end = start + length; c < end; ++c, ptr += NR) {
+            auto mean = center_v[c];
+            for (size_t r = 0; r < NR; ++r) {
+                ptr[r] -= mean;
+            }
+
+            if (scale) {
+                auto sd = scale_v[c];
+                for (size_t r = 0; r < NR; ++r) {
+                    ptr[r] /= sd; // process_scale_vector should already protect against division by zero.
+                }
+            }
+        }
+    }, emat.cols(), nthreads);
 }
 
 template<typename T, typename IDX, typename X>
