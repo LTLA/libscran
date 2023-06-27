@@ -1,5 +1,5 @@
-#ifndef SCRAN_BLOCK_UTILS_HPP
-#define SCRAN_BLOCK_UTILS_HPP
+#ifndef SCRAN_PCA_WRAPPERS_HPP
+#define SCRAN_PCA_WRAPPERS_HPP
 
 #include "Eigen/Dense"
 #include <type_traits>
@@ -12,8 +12,8 @@ namespace pca_utils {
  * Multiplication of the residuals after centering on block-specific means.
  */
 template<class Matrix_, typename Block_>
-struct ResidualsWrapper {
-    ResidualsWrapper(const Matrix_* m, const Block_* b, const Eigen::MatrixXd* mx) : mat(m), block(b), means(mx) {}
+struct RegressWrapper {
+    RegressWrapper(const Matrix_* m, const Block_* b, const Eigen::MatrixXd* mx) : mat(m), block(b), means(mx) {}
 
     auto rows() const { return mat->rows(); }
     auto cols() const { return mat->cols(); }
@@ -152,8 +152,8 @@ private:
  * Multiplication of residual matrix where each block is downscaled according to its size.
  */
 template<class Matrix_, typename Block_>
-struct EquiweightResidualWrapper {
-    EquiweightResidualWrapper(const Matrix_* m, const Block_* b, const Eigen::VectorXd* w, const Eigen::MatrixXd* mx) : mat(m), block(b), weights(w), means(mx) {}
+struct EquiweightRegressWrapper {
+    EquiweightRegressWrapper(const Matrix_* m, const Block_* b, const Eigen::VectorXd* w, const Eigen::MatrixXd* mx) : mat(m), block(b), weights(w), means(mx) {}
 
     auto rows() const { return mat->rows(); }
     auto cols() const { return mat->cols(); }
