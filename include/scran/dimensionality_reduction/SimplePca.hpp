@@ -118,7 +118,7 @@ private:
 
             size_t NR = mat->nrow(), NC = mat->ncol();
             Eigen::VectorXd center_v(NR), scale_v(NR);
-            tatami::parallelize([&](size_t, int start, int length) -> void {
+            tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
                 for (int r = start, end = start + length; r < end; ++r) {
                     auto offset = ptrs[r];
 

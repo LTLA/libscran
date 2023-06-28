@@ -3,18 +3,21 @@
 
 #include "Eigen/Dense"
 #include <gtest/gtest.h>
+#include "../utils/compare_almost_equal.h"
 
-inline bool same_same(double left, double right, double tol) {
-    return std::abs(left - right) <= (std::abs(left) + std::abs(right)) * tol;
-}
-
-inline void expect_equal_pcs(const Eigen::MatrixXd& left, const Eigen::MatrixXd& right, double tol=1e-8) {
+void expect_equal_pcs(const Eigen::MatrixXd& left, const Eigen::MatrixXd& right, double tol=1e-8, bool relative = true) {
     ASSERT_EQ(left.cols(), right.cols());
     ASSERT_EQ(left.rows(), right.rows());
 
     for (size_t i = 0; i < left.rows(); ++i) {
         for (size_t j = 0; j < left.cols(); ++j) {
-            EXPECT_TRUE(same_same(std::abs(left(i, j)), std::abs(right(i, j)), tol));
+            auto aleft = std::abs(left(i, j));
+            auto aright = std::abs(right(i, j));
+            if (relative) {
+                compare_almost_equal(aleft, aright, tol);
+            } else if (std::abs(aleft - aright) > tol) {
+                EXPECT_TRUE(false) << "mismatch in almost-equal floats (expected " << aleft << ", got " << aright << ")";
+            }
         }
 
         // PCs should average to zero.
@@ -27,7 +30,7 @@ inline void expect_equal_pcs(const Eigen::MatrixXd& left, const Eigen::MatrixXd&
 inline void expect_equal_vectors(const Eigen::VectorXd& left, const Eigen::VectorXd& right, double tol=1e-8) {
     ASSERT_EQ(left.size(), right.size());
     for (size_t i = 0; i < left.size(); ++i) {
-        EXPECT_TRUE(same_same(left[i], right[i], tol));
+        compare_almost_equal(left[i], right[i], tol);
     }
     return;
 }

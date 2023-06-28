@@ -35,19 +35,19 @@ void clean_up_projected(Eigen::MatrixXd& proj, Eigen::VectorXd& D) {
     // Empirically centering to give nice centered PCs, because we can't
     // guarantee that the projection is centered in this manner.
     if constexpr(rows_are_dims_) {
-        for (size_t i = 0, iend = pcs.rows(); i < iend; ++i) {
-            pcs.row(i).noalias() -= pc_centers.row(i).sum();
+        for (size_t i = 0, iend = proj.rows(); i < iend; ++i) {
+            proj.row(i).array() -= proj.row(i).sum();
         }
     } else {
-        for (size_t i = 0, iend = pcs.cols(); i < iend; ++i) {
-            pcs.col(i).noalias() -= pc_centers.col(i).sum();
+        for (size_t i = 0, iend = proj.cols(); i < iend; ++i) {
+            proj.col(i).array() -= proj.col(i).sum();
         }
     }
 
     // Variance is a somewhat murky concept when projecting a dataset onto
     // the PC space defined by a modified version of that dataset, so we just
     // square it and assume that only the relative value matters.
-    for (auto& d : variance_explained) {
+    for (auto& d : D) {
         d = d * d;
     }
 }
