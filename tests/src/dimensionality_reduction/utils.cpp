@@ -6,7 +6,7 @@
 
 #include "tatami/tatami.hpp"
 
-#include "scran/dimensionality_reduction/pca_utils.hpp"
+#include "scran/dimensionality_reduction/utils.hpp"
 
 #include <vector>
 #include <random>
@@ -57,16 +57,18 @@ TEST_P(ExtractForPcaTest, Sparse) {
     assemble(param);
 
     {
-        auto extracted = scran::pca_utils::extract_sparse_for_pca(sparse_row.get(), nthreads);
         EXPECT_TRUE(sparse_row->prefer_rows());
+
+        auto extracted = scran::pca_utils::extract_sparse_for_pca(sparse_row.get(), nthreads);
         EXPECT_EQ(values, extracted.values);
         EXPECT_EQ(indices, extracted.indices);
         EXPECT_EQ(ptrs, extracted.ptrs);
     }
 
     {
+        EXPECT_FALSE(sparse_column->prefer_rows());
+
         auto extracted = scran::pca_utils::extract_sparse_for_pca(sparse_column.get(), nthreads);
-        EXPECT_FALSE(sparse_row->prefer_rows());
         EXPECT_EQ(values, extracted.values);
         EXPECT_EQ(indices, extracted.indices);
         EXPECT_EQ(ptrs, extracted.ptrs);
@@ -78,6 +80,8 @@ TEST_P(ExtractForPcaTest, Dense) {
     assemble(param);
 
     {
+        EXPECT_TRUE(sparse_row->prefer_rows());
+
         auto extracted = scran::pca_utils::extract_dense_for_pca(sparse_row.get(), nthreads);
 
         size_t NR = extracted.rows(), NC = extracted.cols();
@@ -92,6 +96,8 @@ TEST_P(ExtractForPcaTest, Dense) {
     }
 
     {
+        EXPECT_FALSE(sparse_column->prefer_rows());
+
         auto extracted = scran::pca_utils::extract_dense_for_pca(sparse_column.get(), nthreads);
 
         size_t NR = extracted.rows(), NC = extracted.cols();

@@ -34,7 +34,7 @@ add_executable(
     #    src/feature_selection/FitTrendVar.cpp
     #    src/feature_selection/ChooseHVGs.cpp
     #
-    #    src/dimensionality_reduction/pca_utils.cpp
+    src/dimensionality_reduction/utils.cpp
     src/dimensionality_reduction/SimplePca.cpp
     #    src/dimensionality_reduction/BlockedPCA.cpp
     #    src/dimensionality_reduction/MultiBatchPCA.cpp
