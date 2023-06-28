@@ -13,7 +13,7 @@ namespace pca_utils {
  * This should be applied after all centering is performed.
  */
 template<class Matrix_>
-class SampleScaledWrapper {
+struct SampleScaledWrapper {
     SampleScaledWrapper(const Matrix_* m, const Eigen::VectorXd* w) : mat(m), weights(w) {}
 
     auto rows() const { return mat->rows(); }

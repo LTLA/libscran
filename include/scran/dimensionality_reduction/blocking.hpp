@@ -74,7 +74,7 @@ BlockingDetails<weight_> compute_blocking_details(size_t ncells, const Block_* b
     return output;
 }
 
-template<typename Block_, bool weight_>
+template<bool weight_, typename Block_>
 void compute_mean_and_variance_regress(
     const SparseMatrix& emat,
     const Block_* block, 
@@ -90,7 +90,6 @@ void compute_mean_and_variance_regress(
         const auto& ptrs = emat.get_pointers();
 
         size_t nblocks = block_details.num_blocks();
-        const auto& element_weight = block_details.per_element_weight;
         const auto& block_size = block_details.block_size;
 
         auto mptr = centers.data() + static_cast<size_t>(start) * nblocks; // coerce to size_t to avoid overflow.
@@ -128,7 +127,7 @@ void compute_mean_and_variance_regress(
 
                 double squared = diff * diff;
                 if constexpr(weight_) {
-                    squared *= element_weight[curb];
+                    squared *= block_details.per_element_weight[curb];
                 }
 
                 proxyvar += squared;
@@ -138,7 +137,7 @@ void compute_mean_and_variance_regress(
             for (size_t b = 0; b < nblocks; ++b) {
                 auto extra = mptr[b] * mptr[b] * block_copy[b];
                 if constexpr(weight_) {
-                    extra *= element_weight[b];
+                    extra *= block_details.per_element_weight[b];
                 }
                 proxyvar += extra;
             }
@@ -159,7 +158,7 @@ void compute_mean_and_variance_regress(
     }, emat.cols(), nthreads);
 }
 
-template<typename Block_, bool weight_>
+template<bool weight_, typename Block_>
 void compute_mean_and_variance_regress(
     const Eigen::MatrixXd& emat,
     const Block_* block,
@@ -173,7 +172,6 @@ void compute_mean_and_variance_regress(
         auto ptr = emat.data() + static_cast<size_t>(start) * NR; 
 
         size_t nblocks = block_details.num_blocks();
-        const auto& element_weight = block_details.per_element_weight;
         const auto& block_size = block_details.block_size;
 
         auto mptr = centers.data() + static_cast<size_t>(start) * nblocks;
@@ -199,7 +197,7 @@ void compute_mean_and_variance_regress(
                 double delta = ptr[r] - mptr[curb];
                 auto squared = delta * delta;
                 if constexpr(weight_) {
-                    squared *= element_weight[curb];
+                    squared *= block_details.per_element_weight[curb];
                 }
                 proxyvar += squared;
             }

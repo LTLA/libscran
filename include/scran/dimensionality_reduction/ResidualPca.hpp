@@ -38,9 +38,9 @@ public:
      * Weight policy to apply to different batches, based on the number of cells in each batch.
      *
      * - `NONE`: no weighting is performed.
-     *   This means that larger batches will drive the PCA.
+     *   This means that larger batches will contribute more to the calculation of the rotation vectors in the PCA.
      * - `EQUAL`: each batch is weighted in inversely proportion to its number of cells,
-     *   such that all batches contribute "equally" regardless of its size.
+     *   such that all batches contribute "equally" to the rotation vectors regardless of their size.
      */
     enum class WeightPolicy : char { NONE, EQUAL };
 
@@ -71,7 +71,7 @@ public:
         /**
          * See `set_weight_policy()` for more details.
          */
-        static constexpr WeightPolicy weight_policy = WeightPolicy::EQUAL;
+        static constexpr WeightPolicy weight_policy = WeightPolicy::NONE;
     };
 
 private:
@@ -152,17 +152,17 @@ private:
         auto nblocks = block_details.num_blocks();
         Eigen::MatrixXd center_m(nblocks, ngenes);
         Eigen::VectorXd scale_v(ngenes);
-        pca_utils::compute_mean_and_variance_regress(emat, block, block_details, center_m, scale_v, nthreads);
+        pca_utils::compute_mean_and_variance_regress<weight_>(emat, block, block_details, center_m, scale_v, nthreads);
         total_var = pca_utils::process_scale_vector(scale, scale_v);
 
         pca_utils::RegressWrapper<decltype(emat), Block_> centered(&emat, block, &center_m);
         if constexpr(weight_) {
             if (scale) {
                 irlba::Scaled<decltype(centered)> scaled(&centered, &scale_v);
-                pca_utils::SampleScaledWrapper<decltype(scaled)> weighted(&scaled, &(block_details.expanded));
+                pca_utils::SampleScaledWrapper<decltype(scaled)> weighted(&scaled, &(block_details.expanded_weights));
                 irb.run(weighted, pcs, rotation, variance_explained);
             } else {
-                pca_utils::SampleScaledWrapper<decltype(centered)> weighted(&centered, &(block_details.expanded));
+                pca_utils::SampleScaledWrapper<decltype(centered)> weighted(&centered, &(block_details.expanded_weights));
                 irb.run(weighted, pcs, rotation, variance_explained);
             }
 
@@ -206,7 +206,7 @@ private:
         auto nblocks = block_details.num_blocks();
         Eigen::MatrixXd center_m(nblocks, ngenes);
         Eigen::VectorXd scale_v(ngenes);
-        pca_utils::compute_mean_and_variance_regress(emat, block, block_details, center_m, scale_v, nthreads);
+        pca_utils::compute_mean_and_variance_regress<weight_>(emat, block, block_details, center_m, scale_v, nthreads);
         total_var = pca_utils::process_scale_vector(scale, scale_v);
 
         // Applying the centering and scaling directly so that we can run the PCA with no or fewer layers.
@@ -228,8 +228,8 @@ private:
         }, ngenes, nthreads);
 
         if constexpr(weight_) {
-            pca_utils::SampleScaledWrapper<decltype(emat)> weighted(&emat, &(block_details.expanded));
-            irb.run(weighted, scale_v, pcs, rotation, variance_explained);
+            pca_utils::SampleScaledWrapper<decltype(emat)> weighted(&emat, &(block_details.expanded_weights));
+            irb.run(weighted, pcs, rotation, variance_explained);
             pcs.noalias() = emat * rotation;
             pca_utils::clean_up_projected<false>(pcs, variance_explained);
         } else {
@@ -244,19 +244,19 @@ private:
 
     template<typename Data_, typename Index_, typename Block_>
     void run(const tatami::Matrix<Data_, Index_>* mat, const Block_* block, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
-        auto bdetails = compute_block_details(mat->ncol(), block);
-
         irlba::EigenThreadScope t(nthreads);
         irlba::Irlba irb;
         irb.set_number(rank);
 
         if (weight_policy == WeightPolicy::NONE) {
+            auto bdetails = pca_utils::compute_blocking_details<false>(mat->ncol(), block);
             if (mat->sparse()) {
                 run_sparse<false>(mat, block, bdetails, irb, pcs, rotation, variance_explained, total_var);
             } else {
                 run_dense<false>(mat, block, bdetails, irb, pcs, rotation, variance_explained, total_var);
             }
         } else {
+            auto bdetails = pca_utils::compute_blocking_details<true>(mat->ncol(), block);
             if (mat->sparse()) {
                 run_sparse<true>(mat, block, bdetails, irb, pcs, rotation, variance_explained, total_var);
             } else {

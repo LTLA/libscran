@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "../utils/macros.h"
 
-#include "../data/data.h"
+#include "../data/Simulator.hpp"
 #include "compare_pcs.h"
 
 #include "tatami/tatami.hpp"
@@ -147,195 +147,232 @@ TEST(RegressWrapperTest, CustomSparse) {
     }
 }
 
-///******************************************/
-//
-//class BlockedPCATestCore {
-//protected:
-//    std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
-//
-//    template<class Param>
-//    void assemble(Param param) {
-//        scale = std::get<0>(param);
-//        rank = std::get<1>(param);
-//        nblocks = std::get<2>(param);
-//
-//        dense_row = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
-//        dense_column = tatami::convert_to_dense(dense_row.get(), 1);
-//        sparse_row = tatami::convert_to_sparse(dense_row.get(), 0);
-//        sparse_column = tatami::convert_to_sparse(dense_row.get(), 1);
-//        return;
-//    }
-//
-//    bool scale;
-//    int rank;
-//    int nblocks;
-//};
-//
-///******************************************/
-//
-//class BlockedPCABasicTest : public ::testing::TestWithParam<std::tuple<bool, int, int, int> >, public BlockedPCATestCore {};
-//
-//TEST_P(BlockedPCABasicTest, Basic) {
-//    auto param = GetParam();
-//    assemble(param);
-//    int nthreads = std::get<3>(param);
-//
-//    scran::BlockedPCA runner;
-//    runner.set_scale(scale).set_rank(rank);
-//    auto block = generate_blocks(dense_row->ncol(), nblocks);
-//    auto ref = runner.run(dense_row.get(), block.data());
-//
-//    if (nthreads == 1) {
-//        EXPECT_EQ(ref.pcs.rows(), rank);
-//        EXPECT_EQ(ref.pcs.cols(), dense_row->ncol());
-//        EXPECT_EQ(ref.variance_explained.size(), rank);
-//
-//        // Should be centered.
-//        size_t NC = dense_row->ncol();
-//        for (int r = 0; r < rank; ++r) {
-//            auto ptr = ref.pcs.data() + r;
-//
-//            double mean = 0;
-//            for (size_t c = 0; c < NC; ++c, ptr += rank) {
-//                mean += *ptr;
-//            }
-//            mean /= NC;
-//            EXPECT_TRUE(std::abs(mean) < 0.00000001);
-//        }
-//
-//        // Total variance makes sense. Remember, this doesn't consider the
-//        // loss of d.f. from calculation of the block means.
-//        if (scale) {
-//            EXPECT_FLOAT_EQ(dense_row->nrow(), ref.total_variance);
-//        } else {
-//            double total_var = 0;
-//            for (int b = 0; b < nblocks; ++b) {
-//                std::vector<int> keep;
-//                for (size_t i = 0; i < block.size(); ++i) {
-//                    if (block[i] == b) {
-//                        keep.push_back(i);
-//                    }
-//                }
-//
-//                if (keep.size() > 1) {
-//                    auto sub = tatami::make_DelayedSubset<1>(dense_row, keep);
-//                    auto vars = tatami::row_variances(sub.get());
-//                    total_var += std::accumulate(vars.begin(), vars.end(), 0.0) * (keep.size() - 1);
-//                }
-//            }
-//            EXPECT_FLOAT_EQ(total_var / (NC - 1), ref.total_variance);
-//        }
-//
-//    } else {
-//        runner.set_num_threads(nthreads);
-//
-//        // Results should be EXACTLY the same with parallelization.
-//        auto res1 = runner.run(dense_row.get(), block.data());
-//        EXPECT_EQ(ref.pcs, res1.pcs);
-//        EXPECT_EQ(ref.variance_explained, res1.variance_explained);
-//        EXPECT_EQ(ref.total_variance, res1.total_variance);
-//    }
-//
-//    // Checking that we get more-or-less the same results. 
-//    auto res2 = runner.run(dense_column.get(), block.data());
-//    expect_equal_pcs(ref.pcs, res2.pcs);
-//    expect_equal_vectors(ref.variance_explained, res2.variance_explained);
-//    EXPECT_FLOAT_EQ(ref.total_variance, res2.total_variance);
-//
-//    auto res3 = runner.run(sparse_row.get(), block.data());
-//    expect_equal_pcs(ref.pcs, res3.pcs);
-//    expect_equal_vectors(ref.variance_explained, res3.variance_explained);
-//    EXPECT_FLOAT_EQ(ref.total_variance, res3.total_variance);
-//
-//    auto res4 = runner.run(sparse_column.get(), block.data());
-//    expect_equal_pcs(ref.pcs, res4.pcs);
-//    expect_equal_vectors(ref.variance_explained, res4.variance_explained);
-//    EXPECT_FLOAT_EQ(ref.total_variance, res4.total_variance);
-//}
-//
-//INSTANTIATE_TEST_SUITE_P(
-//    BlockedPCA,
-//    BlockedPCABasicTest,
-//    ::testing::Combine(
-//        ::testing::Values(false, true), // to scale or not to scale?
-//        ::testing::Values(2, 3, 4), // number of PCs to obtain
-//        ::testing::Values(1, 2, 3), // number of blocks
-//        ::testing::Values(1, 3) // number of threads
-//    )
-//);
-//
-///******************************************/
-//
-//class BlockedPCAMoreTest : public ::testing::TestWithParam<std::tuple<bool, int, int> >, public BlockedPCATestCore {};
-//
-//TEST_P(BlockedPCAMoreTest, SingleBlock) {
-//    assemble(GetParam());
-//    auto block = generate_blocks(dense_row->ncol(), nblocks);
-//
-//    scran::BlockedPCA runner;
-//    runner.set_scale(scale).set_rank(rank);
-//    auto res1 = runner.run(dense_row.get(), block.data());
-//
-//    // Checking that we get more-or-less the same results
-//    // from the vanilla PCA algorithm in the absence of blocks.
-//    scran::RunPCA ref;
-//    ref.set_scale(scale).set_rank(rank);
-//    auto res2 = ref.run(dense_row.get());
-//
-//    if (nblocks == 1) {
-//        expect_equal_pcs(res1.pcs, res2.pcs);
-//        expect_equal_vectors(res1.variance_explained, res2.variance_explained);
-//        EXPECT_FLOAT_EQ(res1.total_variance, res2.total_variance);
-//    } else {
-//        // check that blocking actually has an effect.
-//        EXPECT_TRUE(std::abs(res1.pcs(0,0) - res2.pcs(0,0)) > 1e-8);
-//        if (!scale) {
-//            EXPECT_NE(res1.total_variance, res2.total_variance);
-//        }
-//    }
-//}
-//
-//TEST_P(BlockedPCAMoreTest, SubsetTest) {
-//    assemble(GetParam());
-//
-//    std::vector<int> subset(dense_row->nrow());
-//    std::vector<double> buffer(dense_row->ncol());
-//    std::vector<double> submatrix;
-//    auto it = sparse_matrix.begin();
-//
-//    size_t sub_nrows = 0;
-//    auto ext = dense_row->dense_row();
-//    for (size_t i = 0; i < subset.size(); ++i) {
-//        subset[i] = i%2;
-//        if (subset[i]) {
-//            auto ptr = ext->fetch(i, buffer.data());
-//            submatrix.insert(submatrix.end(), ptr, ptr + dense_row->ncol());
-//            ++sub_nrows;
-//        }
-//    }
-//
-//    scran::BlockedPCA runner;
-//    runner.set_scale(scale).set_rank(rank);
-//
-//    auto block = generate_blocks(dense_row->ncol(), 3);
-//    auto out = runner.run(dense_row.get(), block.data(), subset.data());
-//    EXPECT_EQ(out.variance_explained.size(), rank);
-//
-//    // Manually subsetting.
-//    auto mat = std::shared_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double, int>(sub_nrows, dense_row->ncol(), std::move(submatrix)));
-//    auto ref = runner.run(mat.get(), block.data());
-//
-//    expect_equal_pcs(ref.pcs, out.pcs);
-//    expect_equal_vectors(ref.variance_explained, out.variance_explained);
-//    EXPECT_FLOAT_EQ(out.total_variance, ref.total_variance);
-//}
-//
-//INSTANTIATE_TEST_SUITE_P(
-//    BlockedPCA,
-//    BlockedPCAMoreTest,
-//    ::testing::Combine(
-//        ::testing::Values(false, true), // to scale or not to scale?
-//        ::testing::Values(2, 3, 4), // number of PCs to obtain
-//        ::testing::Values(1, 2, 3) // number of blocks
-//    )
-//);
+/******************************************/
+
+class ResidualPcaTestCore {
+protected:
+    std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
+
+    template<class Param>
+    void assemble(Param param) {
+        scale = std::get<0>(param);
+        rank = std::get<1>(param);
+        nblocks = std::get<2>(param);
+
+        size_t nr = 121, nc = 155;
+        auto mat = Simulator().matrix(nr, nc);
+        dense_row.reset(new decltype(mat)(std::move(mat)));
+        dense_column = tatami::convert_to_dense(dense_row.get(), 1);
+        sparse_row = tatami::convert_to_sparse(dense_row.get(), 0);
+        sparse_column = tatami::convert_to_sparse(dense_row.get(), 1);
+        return;
+    }
+
+    bool scale;
+    int rank;
+    int nblocks;
+};
+
+/******************************************/
+
+class ResidualPcaBasicTest : public ::testing::TestWithParam<std::tuple<bool, int, int, int> >, public ResidualPcaTestCore {};
+
+TEST_P(ResidualPcaBasicTest, Basic) {
+    auto param = GetParam();
+    assemble(param);
+    int nthreads = std::get<3>(param);
+
+    scran::ResidualPca runner;
+    runner.set_scale(scale).set_rank(rank);
+    auto block = generate_blocks(dense_row->ncol(), nblocks);
+    auto ref = runner.run(dense_row.get(), block.data());
+
+    if (nthreads == 1) {
+        EXPECT_EQ(ref.pcs.rows(), rank);
+        EXPECT_EQ(ref.pcs.cols(), dense_row->ncol());
+        EXPECT_EQ(ref.variance_explained.size(), rank);
+
+        // Should be centered.
+        size_t NC = dense_row->ncol();
+        for (int r = 0; r < rank; ++r) {
+            auto ptr = ref.pcs.data() + r;
+
+            double mean = 0;
+            for (size_t c = 0; c < NC; ++c, ptr += rank) {
+                mean += *ptr;
+            }
+            mean /= NC;
+            EXPECT_TRUE(std::abs(mean) < 0.00000001);
+        }
+
+        // Total variance makes sense. Remember, this doesn't consider the
+        // loss of d.f. from calculation of the block means.
+        if (scale) {
+            EXPECT_FLOAT_EQ(dense_row->nrow(), ref.total_variance);
+        } else {
+            double total_var = 0;
+            for (int b = 0; b < nblocks; ++b) {
+                std::vector<int> keep;
+                for (size_t i = 0; i < block.size(); ++i) {
+                    if (block[i] == b) {
+                        keep.push_back(i);
+                    }
+                }
+
+                if (keep.size() > 1) {
+                    auto sub = tatami::make_DelayedSubset<1>(dense_row, keep);
+                    auto vars = tatami::row_variances(sub.get());
+                    total_var += std::accumulate(vars.begin(), vars.end(), 0.0) * (keep.size() - 1);
+                }
+            }
+            EXPECT_FLOAT_EQ(total_var / (NC - 1), ref.total_variance);
+        }
+
+    } else {
+        runner.set_num_threads(nthreads);
+
+        // Results should be EXACTLY the same with parallelization.
+        auto res1 = runner.run(dense_row.get(), block.data());
+        EXPECT_EQ(ref.pcs, res1.pcs);
+        EXPECT_EQ(ref.variance_explained, res1.variance_explained);
+        EXPECT_EQ(ref.total_variance, res1.total_variance);
+    }
+
+    // Checking that we get more-or-less the same results. 
+    auto res2 = runner.run(dense_column.get(), block.data());
+    expect_equal_pcs(ref.pcs, res2.pcs);
+    expect_equal_vectors(ref.variance_explained, res2.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res2.total_variance);
+
+    auto res3 = runner.run(sparse_row.get(), block.data());
+    expect_equal_pcs(ref.pcs, res3.pcs);
+    expect_equal_vectors(ref.variance_explained, res3.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res3.total_variance);
+
+    auto res4 = runner.run(sparse_column.get(), block.data());
+    expect_equal_pcs(ref.pcs, res4.pcs);
+    expect_equal_vectors(ref.variance_explained, res4.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res4.total_variance);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ResidualPca,
+    ResidualPcaBasicTest,
+    ::testing::Combine(
+        ::testing::Values(false, true), // to scale or not to scale?
+        ::testing::Values(2, 3, 4), // number of PCs to obtain
+        ::testing::Values(1, 2, 3), // number of blocks
+        ::testing::Values(1, 3) // number of threads
+    )
+);
+
+/******************************************/
+
+class ResidualPcaMoreTest : public ::testing::TestWithParam<std::tuple<bool, int, int> >, public ResidualPcaTestCore {};
+
+TEST_P(ResidualPcaMoreTest, VersusSimple) {
+    assemble(GetParam());
+    auto block = generate_blocks(dense_row->ncol(), nblocks);
+
+    scran::ResidualPca runner;
+    runner.set_scale(scale).set_rank(rank);
+    auto res1 = runner.run(dense_row.get(), block.data());
+
+    if (nblocks == 1) {
+        // Checking that we get more-or-less the same results
+        // from the vanilla PCA algorithm in the absence of blocks.
+        scran::SimplePca ref;
+        ref.set_scale(scale).set_rank(rank);
+        auto res2 = ref.run(dense_row.get());
+
+        expect_equal_pcs(res1.pcs, res2.pcs);
+        expect_equal_vectors(res1.variance_explained, res2.variance_explained);
+        EXPECT_FLOAT_EQ(res1.total_variance, res2.total_variance);
+    } else {
+        // Manually regressing things out.
+        size_t nr = dense_row->nrow(), nc = dense_row->ncol();
+        std::vector<double> regressed(nr * nc);
+        for (int b = 0; b < nblocks; ++b) {
+            std::vector<int> keep;
+            for (size_t i = 0; i < block.size(); ++i) {
+                if (block[i] == b) {
+                    keep.push_back(i);
+                }
+            }
+
+            if (keep.empty()) {
+                continue;
+            }
+
+            auto sub = tatami::make_DelayedSubset<1>(dense_row, keep);
+            auto center = tatami::row_sums(sub.get());
+            for (auto& x : center) {
+                x /= keep.size();
+            }
+
+            auto ext = dense_row->dense_column();
+            for (auto i : keep) {
+                auto ptr = regressed.data() + i * static_cast<size_t>(nr);
+                ext->fetch_copy(i, ptr);
+                for (auto x : center) {
+                    *ptr -= x;
+                    ++ptr;
+                }
+            }
+        }
+
+        scran::SimplePca ref;
+        ref.set_scale(scale).set_rank(rank);
+
+        tatami::DenseColumnMatrix<double> refmat(nr, nc, std::move(regressed));
+        auto res2 = ref.run(&refmat);
+
+        expect_equal_pcs(res1.pcs, res2.pcs);
+        expect_equal_vectors(res1.variance_explained, res2.variance_explained);
+        EXPECT_FLOAT_EQ(res1.total_variance, res2.total_variance);
+    }
+}
+
+TEST_P(ResidualPcaMoreTest, SubsetTest) {
+    assemble(GetParam());
+
+    std::vector<int> subset(dense_row->nrow());
+    std::vector<double> buffer(dense_row->ncol());
+    std::vector<double> submatrix;
+
+    size_t sub_nrows = 0;
+    auto ext = dense_row->dense_row();
+    for (size_t i = 0; i < subset.size(); ++i) {
+        subset[i] = i%2;
+        if (subset[i]) {
+            auto ptr = ext->fetch(i, buffer.data());
+            submatrix.insert(submatrix.end(), ptr, ptr + dense_row->ncol());
+            ++sub_nrows;
+        }
+    }
+
+    scran::ResidualPca runner;
+    runner.set_scale(scale).set_rank(rank);
+
+    auto block = generate_blocks(dense_row->ncol(), 3);
+    auto out = runner.run(dense_row.get(), block.data(), subset.data());
+    EXPECT_EQ(out.variance_explained.size(), rank);
+
+    // Manually subsetting.
+    auto mat = std::shared_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double, int>(sub_nrows, dense_row->ncol(), std::move(submatrix)));
+    auto ref = runner.run(mat.get(), block.data());
+
+    expect_equal_pcs(ref.pcs, out.pcs);
+    expect_equal_vectors(ref.variance_explained, out.variance_explained);
+    EXPECT_FLOAT_EQ(out.total_variance, ref.total_variance);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ResidualPca,
+    ResidualPcaMoreTest,
+    ::testing::Combine(
+        ::testing::Values(false, true), // to scale or not to scale?
+        ::testing::Values(2, 3, 4), // number of PCs to obtain
+        ::testing::Values(1, 2, 3) // number of blocks
+    )
+);
