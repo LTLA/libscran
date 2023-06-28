@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 #include "../utils/compare_almost_equal.h"
 
-void expect_equal_pcs(const Eigen::MatrixXd& left, const Eigen::MatrixXd& right, double tol=1e-8, bool relative = true) {
+inline void expect_equal_pcs(const Eigen::MatrixXd& left, const Eigen::MatrixXd& right, double tol=1e-8, bool relative = true) {
     ASSERT_EQ(left.cols(), right.cols());
     ASSERT_EQ(left.rows(), right.rows());
 

@@ -181,7 +181,7 @@ TEST_P(SimplePcaMoreTest, ZeroVariance) {
     auto ref = runner.run(&leftovers);
     auto out = runner.run(&has_zero);
 
-    expect_equal_pcs(ref.pcs, out.pcs, 1e-4, false); // RNG effect is slightly different, hence the need for a looser tolerance.
+    expect_equal_pcs(ref.pcs, out.pcs, 1e-4, false); // RNG effect is slightly different when we lose a feature, hence the need for a looser tolerance.
     expect_equal_vectors(ref.variance_explained, out.variance_explained);
     EXPECT_FLOAT_EQ(out.total_variance, ref.total_variance);
 

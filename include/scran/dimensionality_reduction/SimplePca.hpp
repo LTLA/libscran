@@ -114,7 +114,7 @@ private:
         double& total_var)
     const {
         auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major extraction to create a CSR matrix.
-        pca_utils::SparseMatrix emat(mat->ncol(), mat->nrow(), std::move(extracted.values), std::move(extracted.indices), std::move(extracted.ptrs), nthreads); // CSC with genes in columns.
+        pca_utils::SparseMatrix emat(mat->nrow(), mat->ncol(), std::move(extracted.values), std::move(extracted.indices), std::move(extracted.ptrs), nthreads); // CSC with genes in columns.
 
         size_t ngenes = emat.cols();
         Eigen::VectorXd center_v(ngenes), scale_v(ngenes);

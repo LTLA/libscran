@@ -10,83 +10,91 @@ namespace scran {
 
 namespace pca_utils {
 
-std::vector<int> compute_block_size(size_t n, const Block_* block) {
-    auto nblocks = static_cast<size_t>(n ? *std::max_element(block, block + n) : 0) + 1;
-    std::vector<int> block_size(nblocks);
-    for (size_t j = 0; j < NC; ++j) {
+struct UnweightedBlockingDetails {
+    UnweightedBlockingDetails(size_t nblocks, size_t) : block_size(nblocks) {}
+    std::vector<int> block_size;
+    size_t num_blocks() const { return block_size.size(); }
+};
+
+struct WeightedBlockingDetails {
+    WeightedBlockingDetails(size_t nblocks, size_t ncells) : block_size(nblocks), per_element_weight(nblocks), expanded_weights(ncells) {}
+    std::vector<int> block_size;
+    std::vector<double> per_element_weight;
+    double total_block_weight = 0;
+    Eigen::VectorXd expanded_weights;
+    size_t num_blocks() const { return block_size.size(); }
+};
+
+template<bool weight_>
+using BlockingDetails = typename std::conditional<weight_, WeightedBlockingDetails, UnweightedBlockingDetails>::type;
+
+template<bool weight_, typename Block_>
+BlockingDetails<weight_> compute_blocking_details(size_t ncells, const Block_* block) {
+    auto nblocks = static_cast<size_t>(ncells ? *std::max_element(block, block + ncells) : 0) + 1;
+    typename std::conditional<weight_, WeightedBlockingDetails, UnweightedBlockingDetails>::type output(nblocks, ncells);
+
+    auto& block_size = output.block_size;
+    for (size_t j = 0; j < ncells; ++j) {
         ++block_size[block[j]];
     }
-    return block_size;
-}
 
-template<bool weight_> 
-auto compute_block_weight(const std::vector<int>& block_size) {
     if constexpr(weight_) {
-        size_t nblocks = block_size.size();
-        std::vector<double> block_weight(nblocks, 1);
+        auto& total_weight = output.total_block_weight;
+        auto& element_weight = output.per_element_weight;
 
-        // Computing effective block weights that also incorporate division by the
-        // block size. This avoids having to do the division by block size in the
-        // 'compute_mean_and_variance_regress()' function.
         for (size_t i = 0; i < nblocks; ++i) {
-            if (block_size[i]) {
-                block_weight[i] /= block_size[i];
+            // This per-block total weight can be adjusted for more weighting schemes.
+            // By default, we assume that each block should be weighted equally, but
+            // that need not be the case if we want to penalize very small blocks.
+            double block_weight = 1;
+
+            // Computing effective block weights that also incorporate division by the
+            // block size. This avoids having to do the division by block size in the
+            // 'compute_mean_and_variance_regress()' function.
+            const auto& bs = block_size[i];
+            if (bs) {
+                total_weight += block_weight;
+                element_weight[i] = block_weight / bs;
             } else {
-                block_weight[i] = 0;
+                element_weight[i] = 0;
             }
         }
 
-        return block_weight;
-    } else {
-        return false;
-    }
-}
+        auto& expanded = output.expanded_weights;
+        for (size_t i = 0; i < ncells; ++i) {
+            expanded.coeffRef(i) = element_weight[block[i]];
+        }
 
-template<typename Block_>
-Eigen::VectorXd expand_block_weight(size_t n, const Block_* block, const std::vector<double>& block_weight) {
-    Eigen::VectorXd output(n);
-    for (size_t i = 0; i < n; ++i) {
-        output.coeffRef(i) = block_weight[block[i]];
+        // Setting a placeholder value to avoid problems with division by zero.
+        if (total_weight == 0) {
+            total_weight = 1; 
+        }
     }
+
     return output;
 }
 
-inline double total_block_weight(const std::vector<double>& block_weight) {
-    double total_weight = std::accumulate(block_weight.begin(), block_weight.end(), 0.0);
-    if (total_weight == 0) {
-        return 1; // placeholder value.
-    } else {
-        return total_weight;
-    }
-}
-
-template<typename Block_, typename Weights_>
+template<typename Block_, bool weight_>
 void compute_mean_and_variance_regress(
     const SparseMatrix& emat,
-    const Block* block, 
-    const std::vector<int>& block_size, 
-    const Weights_& block_weight,
+    const Block_* block, 
+    const BlockingDetails<weight_>& block_details,
     Eigen::MatrixXd& centers,
     Eigen::VectorXd& variances,
     int nthreads) 
 {
-    // We assume that block_weight was generated via compute_block_weight(),
-    // such that they are already downscaled according to the size of the blocks.
-    constexpr bool use_weights = std::is_same<Weights_, std::vector<double> >::value;
-    double total_weight = 0;
-    if constexpr(use_weights) {
-        total_weight = total_block_weight(block_weight);
-    }
-
     tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
-        size_t NR = emat.rows(), NC = emat.cols();
-        const auto& x = emat.get_values();
-        const auto& i = emat.get_indices();
-        const auto& p = emat.get_pointers();
+        size_t NR = emat.rows();
+        const auto& values = emat.get_values();
+        const auto& indices = emat.get_indices();
+        const auto& ptrs = emat.get_pointers();
 
-        size_t nblocks = block_size.size();
+        size_t nblocks = block_details.num_blocks();
+        const auto& element_weight = block_details.per_element_weight;
+        const auto& block_size = block_details.block_size;
+
         auto mptr = centers.data() + static_cast<size_t>(start) * nblocks; // coerce to size_t to avoid overflow.
-        auto block_copy = block_size;
+        auto block_copy = block_details.block_size;
 
         for (size_t c = start, end = start + length; c < end; ++c, mptr += nblocks) {
             auto offset = ptrs[c];
@@ -110,17 +118,17 @@ void compute_mean_and_variance_regress(
             // This is technically not the correct variance estimate if we
             // were to consider the loss of residual d.f. from estimating
             // the block means, but it's what the PCA sees, so whatever.
-            double& proxyvar = variances[r];
+            double& proxyvar = variances[c];
             proxyvar = 0;
             std::copy(block_size.begin(), block_size.end(), block_copy.begin());
 
             for (size_t i = 0; i < num_entries; ++i) {
-                Block curb = block[index_ptr[i]];
+                Block_ curb = block[index_ptr[i]];
                 double diff = value_ptr[i] - mptr[curb];
 
                 double squared = diff * diff;
-                if constexpr(use_weights) {
-                    mptr[b] *= block_weight[curb];
+                if constexpr(weight_) {
+                    squared *= element_weight[curb];
                 }
 
                 proxyvar += squared;
@@ -129,43 +137,45 @@ void compute_mean_and_variance_regress(
 
             for (size_t b = 0; b < nblocks; ++b) {
                 auto extra = mptr[b] * mptr[b] * block_copy[b];
-                if constexpr(use_weights) {
-                    extra *= block_weight[b];
+                if constexpr(weight_) {
+                    extra *= element_weight[b];
                 }
                 proxyvar += extra;
             }
 
-            // If weighting is involved, we've already scaled it by the number of cells,
-            // so there's no need to do this extra step. As before, the concept of the
-            // variance is kinda murky when we do all this weighting, but just remember
-            // that PCA only looks at the sum of squares from the mean.
-            if constexpr(!use_weights) {
-                proxyvar /= NC - 1;
+            // If we're not dealing with weights, we compute the actual sample
+            // variance for easy interpretation (and to match up with the
+            // per-PC calculations in pca_utils::clean_up).
+            //
+            // If we're dealing with weights, the concept of the sample
+            // variance becomes somewhat weird. So, we just keep proxyvar as
+            // the sum of squares, which is equivalent to the D^2 after SVD
+            // (computed by pca_utils::clean_up_projected). Magnitude doesn't
+            // matter when scaling for pca_utils::process_scale_vector anyway.
+            if constexpr(!weight_) {
+                proxyvar /= NR - 1;
             }
         }
     }, emat.cols(), nthreads);
 }
 
-template<typename Block_, typename Weights_>
+template<typename Block_, bool weight_>
 void compute_mean_and_variance_regress(
-    const Eigen::MatrixXd& mat,
+    const Eigen::MatrixXd& emat,
     const Block_* block,
-    const std::vector<int>& block_size,
-    const Weights_& block_weight,
+    const BlockingDetails<weight_>& block_details,
     Eigen::MatrixXd& centers, 
     Eigen::VectorXd& variances, 
     int nthreads)
 {
-    constexpr bool use_weights = std::is_same<Weights_, std::vector<double> >::value;
-    double total_weight = 0;
-    if constexpr(use_weights) {
-        total_weight = total_block_weight(block_weight);
-    }
-
     tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
-        size_t NC = emat.cols(), NR = emat.rows();
+        size_t NR = emat.rows();
         auto ptr = emat.data() + static_cast<size_t>(start) * NR; 
-        size_t nblocks = block_size.size();
+
+        size_t nblocks = block_details.num_blocks();
+        const auto& element_weight = block_details.per_element_weight;
+        const auto& block_size = block_details.block_size;
+
         auto mptr = centers.data() + static_cast<size_t>(start) * nblocks;
 
         for (size_t c = start, end = start + length; c < end; ++c, ptr += NR, mptr += nblocks) {
@@ -181,24 +191,20 @@ void compute_mean_and_variance_regress(
                 }
             }
 
-            // We don't actually compute the blockwise variance, but
-            // instead the squared sum of deltas from each block's means,
-            // divided by the degrees of freedom as if there weren't any
-            // blocks... as this is what PCA actually sees.
             double& proxyvar = variances[c];
             proxyvar = 0;
 
             for (size_t r = 0; r < NR; ++r) {
                 auto curb = block[r];
                 double delta = ptr[r] - mptr[curb];
-                auto squared = current * current;
-                if constexpr(use_weights) {
-                    squared *= block_weight[curb];
+                auto squared = delta * delta;
+                if constexpr(weight_) {
+                    squared *= element_weight[curb];
                 }
                 proxyvar += squared;
             }
 
-            if constexpr(!use_weights) {
+            if constexpr(!weight_) {
                 proxyvar /= NR - 1;
             }
         }
@@ -222,7 +228,7 @@ inline void project_sparse_matrix(const SparseMatrix& emat, Eigen::MatrixXd& pcs
         for (size_t c = 0; c < ncol; ++c) {
             multipliers.noalias() = rotation.row(c);
             if (scale) {
-                multipliers.noalias() *= scale_v[c];
+                multipliers.array() *= scale_v[c];
             }
 
             auto start = p[c], end = p[c + 1];
@@ -241,7 +247,7 @@ inline void project_sparse_matrix(const SparseMatrix& emat, Eigen::MatrixXd& pcs
             for (size_t c = 0; c < ncol; ++c) {
                 multipliers.noalias() = rotation.row(c);
                 if (scale) {
-                    multipliers.noalias() *= scale_v[c];
+                    multipliers.array() *= scale_v[c];
                 }
 
                 auto start = starts[c], end = ends[c];

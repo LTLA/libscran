@@ -14,7 +14,7 @@ namespace pca_utils {
  */
 template<class Matrix_>
 class SampleScaledWrapper {
-    SampleScaledWrapper(const Matrix_* m, const Eigen::VectorXd* v) : 
+    SampleScaledWrapper(const Matrix_* m, const Eigen::VectorXd* w) : mat(m), weights(w) {}
 
     auto rows() const { return mat->rows(); }
     auto cols() const { return mat->cols(); }
@@ -29,7 +29,7 @@ public:
     template<class Right_>
     void multiply(const Right_& rhs, Workspace& work, Eigen::VectorXd& output) const {
         irlba::wrapped_multiply(mat, rhs, work, output);
-        output.noalias() *= (*weights);
+        output.array() *= weights->array();
     }
 
 public:
@@ -79,7 +79,7 @@ struct RegressWrapper {
 
 public:
     struct Workspace {
-        Workspace(size_t nblocks, irlba::WrappedWorkspace<Matrix> c) : sub(nblocks), child(std::move(c)) {}
+        Workspace(size_t nblocks, irlba::WrappedWorkspace<Matrix_> c) : sub(nblocks), child(std::move(c)) {}
         Eigen::VectorXd sub;
         irlba::WrappedWorkspace<Matrix_> child;
     };
@@ -101,7 +101,7 @@ public:
 
 public:
     struct AdjointWorkspace {
-        AdjointWorkspace(size_t nblocks, irlba::WrappedAdjointWorkspace<Matrix> c) : aggr(nblocks), child(std::move(c)) {}
+        AdjointWorkspace(size_t nblocks, irlba::WrappedAdjointWorkspace<Matrix_> c) : aggr(nblocks), child(std::move(c)) {}
         Eigen::VectorXd aggr;
         irlba::WrappedWorkspace<Matrix_> child;
     };

@@ -13,6 +13,7 @@
 
 #include "utils.hpp"
 #include "wrappers.hpp"
+#include "blocking.hpp"
 
 /**
  * @file ResidualPca.hpp
@@ -134,34 +135,34 @@ public:
 
 private:
     template<bool weight_, typename Data_, typename Index_, typename Block_>
-    void run_sparse(const tatami::Matrix<T, IDX>* mat, const Block_* block, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
-        const size_t NR = mat->nrow(), NC = mat->ncol();
-        auto block_size = pca_utils::compute_block_size(NC, block);
-        auto nblocks = block_size.size();
-        auto block_weight = pca_utils::compute_block_weight<weight_>(block_size);
-
-        irlba::EigenThreadScope t(nthreads);
-        irlba::Irlba irb;
-        irb.set_number(rank);
-
+    void run_sparse(
+        const tatami::Matrix<Data_, Index_>* mat, 
+        const Block_* block, 
+        const pca_utils::BlockingDetails<weight_>& block_details, 
+        const irlba::Irlba& irb,
+        Eigen::MatrixXd& pcs, 
+        Eigen::MatrixXd& rotation, 
+        Eigen::VectorXd& variance_explained, 
+        double& total_var) 
+    const {
+        auto ngenes = mat->nrow(), ncells = mat->ncol(); 
         auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major filling.
-        pca_utils::SparseMatrix emat(NC, NR, std::move(extracted.values), std::move(extracted.indices), std::move(extracted.ptrs), nthreads); // CSC with genes in columns.
+        pca_utils::SparseMatrix emat(ncells, ngenes, std::move(extracted.values), std::move(extracted.indices), std::move(extracted.ptrs), nthreads); // CSC with genes in columns.
 
-        Eigen::MatrixXd center_m(nblocks, NR);
-        Eigen::VectorXd scale_v(NR);
-        pca_utils::compute_mean_and_variance_regress(emat, block, block_size, block_weight, center_m, scale_v, nthreads);
+        auto nblocks = block_details.num_blocks();
+        Eigen::MatrixXd center_m(nblocks, ngenes);
+        Eigen::VectorXd scale_v(ngenes);
+        pca_utils::compute_mean_and_variance_regress(emat, block, block_details, center_m, scale_v, nthreads);
         total_var = pca_utils::process_scale_vector(scale, scale_v);
 
         pca_utils::RegressWrapper<decltype(emat), Block_> centered(&emat, block, &center_m);
         if constexpr(weight_) {
-            auto expanded = expand_block_weight(NC, block, block_weight);
-
             if (scale) {
                 irlba::Scaled<decltype(centered)> scaled(&centered, &scale_v);
-                pca_utils::SampleScaledWrapper<decltype(scaled)> weighted(&scaled, &expanded);
+                pca_utils::SampleScaledWrapper<decltype(scaled)> weighted(&scaled, &(block_details.expanded));
                 irb.run(weighted, pcs, rotation, variance_explained);
             } else {
-                pca_utils::SampleScaledWrapper<decltype(centered)> weighted(&centered, &expanded);
+                pca_utils::SampleScaledWrapper<decltype(centered)> weighted(&centered, &(block_details.expanded));
                 irb.run(weighted, pcs, rotation, variance_explained);
             }
 
@@ -189,21 +190,23 @@ private:
     }
 
     template<bool weight_, typename Data_, typename Index_, typename Block_>
-    void run_dense(const tatami::Matrix<T, IDX>* mat, const Block_* block, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
-        const size_t NR = mat->nrow(), NC = mat->ncol();
-        auto block_size = pca_utils::compute_block_size(NC, block);
-        auto nblocks = block_size.size();
-        auto block_weight = pca_utils::compute_block_weight<weight_>(block_size);
-
-        irlba::EigenThreadScope t(nthreads);
-        irlba::Irlba irb;
-        irb.set_number(rank);
-
+    void run_dense(
+        const tatami::Matrix<Data_, Index_>* mat, 
+        const Block_* block,
+        const pca_utils::BlockingDetails<weight_>& block_details, 
+        const irlba::Irlba& irb,
+        Eigen::MatrixXd& pcs, 
+        Eigen::MatrixXd& rotation, 
+        Eigen::VectorXd& variance_explained, 
+        double& total_var) 
+    const {
         auto emat = pca_utils::extract_dense_for_pca(mat, nthreads); // get a column-major matrix with genes in columns.
 
-        Eigen::MatrixXd center_m(nblocks, NR);
-        Eigen::VectorXd scale_v(NR);
-        pca_utils::compute_mean_and_variance_regress(emat, block, block_size, block_weight, center_m, scale_v, nthreads);
+        auto ngenes = emat.cols();
+        auto nblocks = block_details.num_blocks();
+        Eigen::MatrixXd center_m(nblocks, ngenes);
+        Eigen::VectorXd scale_v(ngenes);
+        pca_utils::compute_mean_and_variance_regress(emat, block, block_details, center_m, scale_v, nthreads);
         total_var = pca_utils::process_scale_vector(scale, scale_v);
 
         // Applying the centering and scaling directly so that we can run the PCA with no or fewer layers.
@@ -212,7 +215,7 @@ private:
             double* ptr = emat.data() + static_cast<size_t>(start) * ncells;
             for (size_t g = start, end = start + length; g < end; ++g, ptr += ncells) {
                 for (size_t c = 0; c < ncells; ++c) {
-                    ptr[c] -= center_v.coeff(block[c], g);
+                    ptr[c] -= center_m.coeff(block[c], g);
                 }
 
                 if (scale) {
@@ -222,17 +225,16 @@ private:
                     }
                 }
             }
-        }, emat.cols(), nthreads);
+        }, ngenes, nthreads);
 
         if constexpr(weight_) {
-            auto expanded = expand_block_weight(NC, block, block_weight);
-            pca_utils::SampleScaledWrapper<decltype(centered)> weighted(&centered, &expanded);
+            pca_utils::SampleScaledWrapper<decltype(emat)> weighted(&emat, &(block_details.expanded));
             irb.run(weighted, scale_v, pcs, rotation, variance_explained);
             pcs.noalias() = emat * rotation;
             pca_utils::clean_up_projected<false>(pcs, variance_explained);
         } else {
             irb.run(emat, pcs, rotation, variance_explained);
-            pca_utils::clean_up(NC, pcs, variance_explained);
+            pca_utils::clean_up(pcs.rows(), pcs, variance_explained);
         }
 
         if (transpose) {
@@ -241,18 +243,24 @@ private:
     }
 
     template<typename Data_, typename Index_, typename Block_>
-    void run(const tatami::Matrix<T, IDX>* mat, const Block_* block, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
+    void run(const tatami::Matrix<Data_, Index_>* mat, const Block_* block, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
+        auto bdetails = compute_block_details(mat->ncol(), block);
+
+        irlba::EigenThreadScope t(nthreads);
+        irlba::Irlba irb;
+        irb.set_number(rank);
+
         if (weight_policy == WeightPolicy::NONE) {
             if (mat->sparse()) {
-                run_sparse<false>(mat, block, pcs, rotation, variance_explained, total);
+                run_sparse<false>(mat, block, bdetails, irb, pcs, rotation, variance_explained, total_var);
             } else {
-                run_dense<false>(mat, block, pcs, rotation, variance_explained, total);
+                run_dense<false>(mat, block, bdetails, irb, pcs, rotation, variance_explained, total_var);
             }
         } else {
             if (mat->sparse()) {
-                run_sparse<true>(mat, block, pcs, rotation, variance_explained, total);
+                run_sparse<true>(mat, block, bdetails, irb, pcs, rotation, variance_explained, total_var);
             } else {
-                run_dense<true>(mat, block, pcs, rotation, variance_explained, total);
+                run_dense<true>(mat, block, bdetails, irb, pcs, rotation, variance_explained, total_var);
             }
         }
     }
@@ -296,9 +304,9 @@ public:
     /**
      * Run the blocked PCA on an input gene-by-cell matrix.
      *
-     * @tparam T Floating point type for the data.
-     * @tparam IDX Integer type for the indices.
-     * @tparam Block Integer type for the blocking factor.
+     * @tparam Data_ Floating point type for the data.
+     * @tparam Index_ Integer type for the indices.
+     * @tparam Block_ Integer type for the blocking factor.
      *
      * @param[in] mat Pointer to the input matrix.
      * Columns should contain cells while rows should contain genes.
@@ -308,8 +316,8 @@ public:
      *
      * @return A `Results` object containing the PCs and the variance explained.
      */
-    template<typename T, typename IDX, typename Block>
-    Results run(const tatami::Matrix<T, IDX>* mat, const Block* block) const {
+    template<typename Data_, typename Index_, typename Block_>
+    Results run(const tatami::Matrix<Data_, Index_>* mat, const Block_* block) const {
         Results output;
         run(mat, block, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         return output;
@@ -320,10 +328,10 @@ public:
      * We typically use the set of highly variable genes from `ChooseHVGs`, 
      * with the aim being to improve computational efficiency and avoid random noise by removing lowly variable genes.
      *
-     * @tparam T Floating point type for the data.
-     * @tparam IDX Integer type for the indices.
-     * @tparam Block Integer type for the blocking factor.
-     * @tparam X Integer type for the feature filter.
+     * @tparam Data_ Floating point type for the data.
+     * @tparam Index_ Integer type for the indices.
+     * @tparam Block_ Integer type for the blocking factor.
+     * @tparam Subset_ Integer type for the feature filter.
      *
      * @param[in] mat Pointer to the input matrix.
      * Columns should contain cells while rows should contain genes.
@@ -335,8 +343,8 @@ public:
      *
      * @return A `Results` object containing the PCs and the variance explained.
      */
-    template<typename T, typename IDX, typename Block, typename X>
-    Results run(const tatami::Matrix<T, IDX>* mat, const Block* block, const X* features) const {
+    template<typename Data_, typename Index_, typename Block_, typename Subset_>
+    Results run(const tatami::Matrix<Data_, Index_>* mat, const Block_* block, const Subset_* features) const {
         Results output;
         if (!features) {
             run(mat, block, output.pcs, output.rotation, output.variance_explained, output.total_variance);
