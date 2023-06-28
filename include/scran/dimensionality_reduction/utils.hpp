@@ -69,8 +69,7 @@ inline double process_scale_vector(bool scale, Eigen::VectorXd& scale_v) {
     }
 }
 
-inline void dense_center_and_scale(Eigen::MatrixXd& emat, const Eigen::VectorXd& center_v, bool scale, const Eigen::VectorXd& scale_v, int nthreads) {
-    // Applying the centering and scaling now.
+inline void apply_dense_center_and_scale(Eigen::MatrixXd& emat, const Eigen::VectorXd& center_v, bool scale, const Eigen::VectorXd& scale_v, int nthreads) {
     tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
         size_t NR = emat.rows();
         double* ptr = emat.data() + static_cast<size_t>(start) * NR;
