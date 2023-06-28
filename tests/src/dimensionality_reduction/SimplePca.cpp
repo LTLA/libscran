@@ -80,6 +80,8 @@ TEST_P(SimplePcaBasicTest, Test) {
             EXPECT_FLOAT_EQ(total_var, ref.total_variance);
         }
 
+        EXPECT_TRUE(ref.total_variance >= std::accumulate(ref.variance_explained.begin(), ref.variance_explained.end(), 0.0));
+
     } else {
         runner.set_num_threads(threads);
 

@@ -104,77 +104,103 @@ public:
     }
 
 private:
-    template<typename T, typename IDX>
-    void run(const tatami::Matrix<T, IDX>* mat, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
+    template<typename Data_, typename Index_>
+    void run_sparse(
+        const tatami::Matrix<Data_, Index_>* mat, 
+        const irlba::Irlba& irb, 
+        Eigen::MatrixXd& pcs, 
+        Eigen::MatrixXd& rotation, 
+        Eigen::VectorXd& variance_explained, 
+        double& total_var)
+    const {
+        auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major extraction to create a CSR matrix.
+        pca_utils::SparseMatrix emat(mat->ncol(), mat->nrow(), std::move(extracted.values), std::move(extracted.indices), std::move(extracted.ptrs), nthreads); // CSC with genes in columns.
+
+        size_t ngenes = emat.cols();
+        Eigen::VectorXd center_v(ngenes), scale_v(ngenes);
+        tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
+            size_t ncells = emat.rows();
+            auto& ptrs = emat.get_pointers();
+            auto& values = emat.get_values();
+            auto& indices = emat.get_indices();
+
+            for (int r = start, end = start + length; r < end; ++r) {
+                auto offset = ptrs[r];
+
+                tatami::SparseRange<double, int> range;
+                range.number = ptrs[r + 1] - offset;
+                range.value = values.data() + offset;
+                range.index = indices.data() + offset;
+
+                auto results = tatami::stats::variances::compute_direct(range, ncells);
+                center_v.coeffRef(r) = results.first;
+                scale_v.coeffRef(r) = results.second;
+            }
+        }, ngenes, nthreads);
+
+        total_var = pca_utils::process_scale_vector(scale, scale_v);
+
+        irlba::Centered<decltype(emat)> centered(&emat, &center_v);
+        if (scale) {
+            irlba::Scaled<decltype(centered)> scaled(&centered, &scale_v);
+            irb.run(scaled, pcs, rotation, variance_explained);
+        } else {
+            irb.run(centered, pcs, rotation, variance_explained);
+        }
+    }
+
+    template<typename Data_, typename Index_>
+    void run_dense(
+        const tatami::Matrix<Data_, Index_>* mat, 
+        const irlba::Irlba& irb, 
+        Eigen::MatrixXd& pcs, 
+        Eigen::MatrixXd& rotation, 
+        Eigen::VectorXd& variance_explained, 
+        double& total_var) 
+    const {
+        auto emat = pca_utils::extract_dense_for_pca(mat, nthreads); // get a column-major matrix with genes in columns.
+
+        size_t ngenes = emat.cols();
+        Eigen::VectorXd center_v(ngenes), scale_v(ngenes);
+        tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
+            size_t ncells = emat.rows();
+            const double* ptr = emat.data() + static_cast<size_t>(start) * ncells; // enforce size_t to avoid overflow issues.
+            for (size_t c = start, end = start + length; c < end; ++c, ptr += ncells) {
+                auto results = tatami::stats::variances::compute_direct(ptr, ncells);
+                center_v.coeffRef(c) = results.first;
+                scale_v.coeffRef(c) = results.second;
+            }
+        }, ngenes, nthreads);
+
+        total_var = pca_utils::process_scale_vector(scale, scale_v);
+
+        // Applying the centering and scaling now so we can do the PCA without any wrappers.
+        pca_utils::apply_dense_center_and_scale(emat, center_v, scale, scale_v, nthreads);
+        irb.run(emat, pcs, rotation, variance_explained); 
+    }
+
+    template<typename Data_, typename Index_>
+    void run_internal(
+        const tatami::Matrix<Data_, Index_>* mat, 
+        Eigen::MatrixXd& pcs, 
+        Eigen::MatrixXd& rotation, 
+        Eigen::VectorXd& variance_explained, 
+        double& total_var) 
+    const {
         irlba::EigenThreadScope t(nthreads);
         irlba::Irlba irb;
         irb.set_number(rank);
 
         if (mat->sparse()) {
-            auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major extraction to create a CSR matrix.
-            auto& ptrs = extracted.ptrs;
-            auto& values = extracted.values;
-            auto& indices = extracted.indices;
-
-            size_t NR = mat->nrow(), NC = mat->ncol();
-            Eigen::VectorXd center_v(NR), scale_v(NR);
-            tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
-                for (int r = start, end = start + length; r < end; ++r) {
-                    auto offset = ptrs[r];
-
-                    tatami::SparseRange<double, int> range;
-                    range.number = ptrs[r+1] - offset;
-                    range.value = values.data() + offset;
-                    range.index = indices.data() + offset;
-
-                    auto results = tatami::stats::variances::compute_direct(range, NC);
-                    center_v.coeffRef(r) = results.first;
-                    scale_v.coeffRef(r) = results.second;
-                }
-            }, NR, nthreads);
-
-            total_var = pca_utils::process_scale_vector(scale, scale_v);
-
-            // Actually creating a sparse matrix. Again, note that this is transposed; we want genes in the columns.
-            pca_utils::SparseMatrix emat(NC, NR, std::move(values), std::move(indices), std::move(ptrs), nthreads);
-
-            irlba::Centered<decltype(emat)> centered(&emat, &center_v);
-            if (scale) {
-                irlba::Scaled<decltype(centered)> scaled(&centered, &scale_v);
-                irb.run(scaled, pcs, rotation, variance_explained);
-            } else {
-                irb.run(centered, pcs, rotation, variance_explained);
-            }
-
+            run_sparse(mat, irb, pcs, rotation, variance_explained, total_var);
         } else {
-            auto emat = pca_utils::extract_dense_for_pca(mat, nthreads); // get a column-major matrix with genes in columns.
-
-            size_t NC = emat.cols();
-            Eigen::VectorXd center_v(NC), scale_v(NC);
-            tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
-                size_t NR = emat.rows();
-                const double* ptr = emat.data() + static_cast<size_t>(start) * NR; // enforce size_t to avoid overflow issues.
-                for (size_t c = start, end = start + length; c < end; ++c, ptr += NR) {
-                    auto results = tatami::stats::variances::compute_direct(ptr, NR);
-                    center_v.coeffRef(c) = results.first;
-                    scale_v.coeffRef(c) = results.second;
-                }
-            }, NC, nthreads);
-
-            total_var = pca_utils::process_scale_vector(scale, scale_v);
-
-            // Applying the centering and scaling now so we can do the PCA without any wrappers.
-            pca_utils::apply_dense_center_and_scale(emat, center_v, scale, scale_v, nthreads);
-
-            irb.run(emat, pcs, rotation, variance_explained); 
+            run_dense(mat, irb, pcs, rotation, variance_explained, total_var);
         }
 
         pca_utils::clean_up(mat->ncol(), pcs, variance_explained);
         if (transpose) {
             pcs.adjointInPlace();
         }
-
-        return;
     }
 
 public:
@@ -227,7 +253,7 @@ public:
     template<typename T, typename IDX>
     Results run(const tatami::Matrix<T, IDX>* mat) const {
         Results output;
-        run(mat, output.pcs, output.rotation, output.variance_explained, output.total_variance);
+        run_internal(mat, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         return output;
     }
 
@@ -252,10 +278,10 @@ public:
         Results output;
 
         if (!features) {
-            run(mat, output.pcs, output.rotation, output.variance_explained, output.total_variance);
+            run_internal(mat, output.pcs, output.rotation, output.variance_explained, output.total_variance);
         } else {
             auto subsetted = pca_utils::subset_matrix_by_features(mat, features);
-            run(subsetted.get(), output.pcs, output.rotation, output.variance_explained, output.total_variance);
+            run_internal(subsetted.get(), output.pcs, output.rotation, output.variance_explained, output.total_variance);
         }
 
         return output;

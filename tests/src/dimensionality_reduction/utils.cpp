@@ -125,6 +125,57 @@ INSTANTIATE_TEST_SUITE_P(
 /********************************************
  ********************************************/
 
+class CenterScalePcaTest : public ::testing::TestWithParam<int> {};
+
+TEST_P(CenterScalePcaTest, ApplyDense) {
+    auto nthreads = GetParam();
+    size_t NR = 99;
+    size_t NC = 101;
+
+    Simulator sim;
+    auto mat = sim.matrix(NR, NC);
+
+    auto means = tatami::row_sums(&mat);
+    for (auto& x : means) {
+        x /= NC;
+    }
+
+    auto refvar = tatami::row_variances(&mat);
+    for (auto& x : refvar) {
+        x = std::sqrt(x);
+    }
+
+    Eigen::VectorXd center_v(means.size());
+    std::copy(means.begin(), means.end(), center_v.begin());
+    Eigen::VectorXd scale_v(refvar.size());
+    std::copy(refvar.begin(), refvar.end(), scale_v.begin());
+
+    auto extracted = scran::pca_utils::extract_dense_for_pca(&mat, nthreads);
+    scran::pca_utils::apply_dense_center_and_scale(extracted, center_v, true, scale_v, nthreads);
+
+    for (size_t c = 0, cend = extracted.cols(); c < cend; ++c) {
+        double mean = extracted.col(c).sum();
+        EXPECT_TRUE(std::abs(mean) < 1e-8);
+
+        double var = 0;
+        for (size_t r = 0, rend = extracted.rows(); r < rend; ++r) {
+            double diff = extracted(r, c) - mean;
+            var += diff * diff;
+        }
+        var /= (extracted.rows() - 1);
+        EXPECT_TRUE(std::abs(var - 1) < 1e-8);
+    }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    CenterScalePca,
+    CenterScalePcaTest,
+    ::testing::Values(1, 3) // number of threads
+);
+
+/********************************************
+ ********************************************/
+
 TEST(ProcessScaleVectorTest, EdgeCases) {
     Eigen::VectorXd scale_v(5);
     scale_v.fill(0);
