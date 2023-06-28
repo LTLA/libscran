@@ -169,6 +169,17 @@ private:
             // This transposes 'pcs' to be a NDIM * NCELLS matrix.
             pca_utils::project_sparse_matrix(emat, pcs, rotation, scale, scale_v, nthreads);
 
+            // Subtracting each block's mean from the PCs.
+            Eigen::MatrixXd centering;
+            if (scale) {
+                centering = (center_m * (rotation.array().colwise() / scale_v.array()).matrix()).adjoint();
+            } else {
+                centering = (center_m * rotation).adjoint();
+            }
+            for (size_t i = 0, iend = pcs.cols(); i < iend; ++i) {
+                pcs.col(i) -= centering.col(block[i]);
+            }
+
             pca_utils::clean_up_projected<true>(pcs, variance_explained);
             if (!transpose) {
                 pcs.adjointInPlace();

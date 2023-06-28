@@ -36,11 +36,11 @@ void clean_up_projected(Eigen::MatrixXd& proj, Eigen::VectorXd& D) {
     // guarantee that the projection is centered in this manner.
     if constexpr(rows_are_dims_) {
         for (size_t i = 0, iend = proj.rows(); i < iend; ++i) {
-            proj.row(i).array() -= proj.row(i).sum();
+            proj.row(i).array() -= proj.row(i).sum() / proj.cols();
         }
     } else {
         for (size_t i = 0, iend = proj.cols(); i < iend; ++i) {
-            proj.col(i).array() -= proj.col(i).sum();
+            proj.col(i).array() -= proj.col(i).sum() / proj.rows();
         }
     }
 

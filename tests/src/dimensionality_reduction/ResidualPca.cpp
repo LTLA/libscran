@@ -151,20 +151,19 @@ TEST(RegressWrapperTest, CustomSparse) {
 
 class ResidualPcaTestCore {
 protected:
-    std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
+    std::shared_ptr<tatami::NumericMatrix> dense_row;
 
     template<class Param>
-    void assemble(Param param) {
+    void assemble(const Param& param) {
         scale = std::get<0>(param);
         rank = std::get<1>(param);
         nblocks = std::get<2>(param);
 
         size_t nr = 121, nc = 155;
-        auto mat = Simulator().matrix(nr, nc);
+        Simulator sim;
+        sim.seed = nr * nc + scale + rank * nblocks;
+        auto mat = sim.matrix(nr, nc);
         dense_row.reset(new decltype(mat)(std::move(mat)));
-        dense_column = tatami::convert_to_dense(dense_row.get(), 1);
-        sparse_row = tatami::convert_to_sparse(dense_row.get(), 0);
-        sparse_column = tatami::convert_to_sparse(dense_row.get(), 1);
         return;
     }
 
@@ -175,11 +174,22 @@ protected:
 
 /******************************************/
 
-class ResidualPcaBasicTest : public ::testing::TestWithParam<std::tuple<bool, int, int, int> >, public ResidualPcaTestCore {};
+class ResidualPcaBasicTest : public ::testing::TestWithParam<std::tuple<bool, int, int, int> >, public ResidualPcaTestCore {
+protected:
+    std::shared_ptr<tatami::NumericMatrix> dense_column, sparse_row, sparse_column;
 
-TEST_P(ResidualPcaBasicTest, Basic) {
+    template<class Param>
+    void extra_assemble(const Param& param) {
+        assemble(param);
+        dense_column = tatami::convert_to_dense(dense_row.get(), 1);
+        sparse_row = tatami::convert_to_sparse(dense_row.get(), 0);
+        sparse_column = tatami::convert_to_sparse(dense_row.get(), 1);
+    }
+};
+
+TEST_P(ResidualPcaBasicTest, BasicConsistency) {
     auto param = GetParam();
-    assemble(param);
+    extra_assemble(param);
     int nthreads = std::get<3>(param);
 
     scran::ResidualPca runner;
@@ -229,6 +239,44 @@ TEST_P(ResidualPcaBasicTest, Basic) {
         }
 
     } else {
+        runner.set_num_threads(nthreads);
+
+        // Results should be EXACTLY the same with parallelization.
+        auto res1 = runner.run(dense_row.get(), block.data());
+        EXPECT_EQ(ref.pcs, res1.pcs);
+        EXPECT_EQ(ref.variance_explained, res1.variance_explained);
+        EXPECT_EQ(ref.total_variance, res1.total_variance);
+    }
+
+    // Checking that we get more-or-less the same results. 
+    auto res2 = runner.run(dense_column.get(), block.data());
+    expect_equal_pcs(ref.pcs, res2.pcs);
+    expect_equal_vectors(ref.variance_explained, res2.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res2.total_variance);
+
+    auto res3 = runner.run(sparse_row.get(), block.data());
+    expect_equal_pcs(ref.pcs, res3.pcs);
+    expect_equal_vectors(ref.variance_explained, res3.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res3.total_variance);
+
+    auto res4 = runner.run(sparse_column.get(), block.data());
+    expect_equal_pcs(ref.pcs, res4.pcs);
+    expect_equal_vectors(ref.variance_explained, res4.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res4.total_variance);
+}
+
+TEST_P(ResidualPcaBasicTest, WeightedConsistency) {
+    auto param = GetParam();
+    extra_assemble(param);
+    int nthreads = std::get<3>(param);
+
+    scran::ResidualPca runner;
+    runner.set_scale(scale).set_rank(rank);
+    runner.set_weight_policy(scran::ResidualPca::WeightPolicy::EQUAL);
+    auto block = generate_blocks(dense_row->ncol(), nblocks);
+    auto ref = runner.run(dense_row.get(), block.data());
+
+    if (nthreads != 1) {
         runner.set_num_threads(nthreads);
 
         // Results should be EXACTLY the same with parallelization.
@@ -376,3 +424,115 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(1, 2, 3) // number of blocks
     )
 );
+
+/******************************************/
+
+class ResidualPcaWeightedTest : public ::testing::TestWithParam<std::tuple<bool, int, int, int> > {
+protected:
+    std::vector<std::shared_ptr<tatami::NumericMatrix> > components;
+    std::vector<int> blocking;
+
+    template<class Param>
+    void assemble(Param param) {
+        scale = std::get<0>(param);
+        rank = std::get<1>(param);
+        nblocks = std::get<2>(param);
+
+        size_t nr = 50, nc = 20;
+        Simulator sim;
+        for (int b = 0; b < nblocks; ++b) {
+            sim.seed += b; // slightly different seed to keep things interesting.
+            auto mat = sim.matrix(nr, nc);
+            components.emplace_back(new decltype(mat)(std::move(mat)));
+            blocking.insert(blocking.end(), nc, b);
+        }
+    }
+
+    bool scale;
+    int rank;
+    int nblocks;
+};
+
+TEST_P(ResidualPcaWeightedTest, VersusReference) {
+    auto param = GetParam();
+    assemble(param);
+    int nthreads = std::get<3>(param);
+
+    scran::ResidualPca runner;
+    runner.set_scale(scale).set_rank(rank);
+    auto combined = tatami::make_DelayedBind<1>(components);
+    auto ref = runner.run(combined.get(), blocking.data());
+
+    // Some adjustment is required to adjust for the global scaling.
+    ref.pcs.array() /= ref.pcs.norm();
+    for (auto& x : ref.variance_explained) {
+        x /= ref.total_variance;
+    }
+
+    // Checking that we get more-or-less the same results with weighting.
+    runner.set_num_threads(nthreads);
+    runner.set_weight_policy(scran::ResidualPca::WeightPolicy::EQUAL);
+
+    auto res1 = runner.run(combined.get(), blocking.data());
+
+    for (auto& x : res1.variance_explained) {
+        x /= res1.total_variance;
+    }
+    expect_equal_vectors(ref.variance_explained, res1.variance_explained);
+
+    res1.pcs.array() /= res1.pcs.norm();
+    expect_equal_pcs(ref.pcs, res1.pcs);
+
+    // Manually adding more instances of a block.
+    auto expanded_block = blocking;
+    for (int b = 0; b < nblocks; ++b) {
+        for (int b0 = 0; b0 < b; ++b0) {
+            components.push_back(components[b]);
+        }
+        expanded_block.insert(expanded_block.end(), b * components[b]->ncol(), b);
+    }
+    auto expanded = tatami::make_DelayedBind<1>(components);
+
+    // Mocking up the expected results.
+    Eigen::MatrixXd expanded_pcs(rank, expanded->ncol());
+    expanded_pcs.leftCols(combined->ncol()) = ref.pcs;
+    size_t host_counter = 0, dest_counter = combined->ncol();
+    for (int b = 0; b < nblocks; ++b) {
+        size_t nc = components[b]->ncol();
+        for (int b0 = 0; b0 < b; ++b0) {
+            expanded_pcs.middleCols(dest_counter, nc) = ref.pcs.middleCols(host_counter, nc);
+            dest_counter += nc; 
+        }
+        host_counter += nc;
+    }
+
+    Eigen::VectorXd recenters = expanded_pcs.rowwise().sum();
+    recenters /= expanded_pcs.cols();
+    for (size_t i = 0, end = expanded_pcs.cols(); i < end; ++i) {
+        expanded_pcs.col(i) -= recenters;
+    }
+
+    // Now actually running the thing.
+    auto res2 = runner.run(expanded.get(), expanded_block.data());
+
+    expanded_pcs.array() /= expanded_pcs.norm();
+    res2.pcs.array() /= res2.pcs.norm();
+    expect_equal_pcs(expanded_pcs, res2.pcs);
+
+    for (auto& x : res2.variance_explained) {
+        x /= res2.total_variance;
+    }
+    expect_equal_vectors(ref.variance_explained, res2.variance_explained);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ResidualPca,
+    ResidualPcaWeightedTest,
+    ::testing::Combine(
+        ::testing::Values(false, true), // to scale or not to scale?
+        ::testing::Values(2, 3, 4), // number of PCs to obtain
+        ::testing::Values(2, 3), // number of blocks
+        ::testing::Values(1, 3) // number of threads
+    )
+);
+

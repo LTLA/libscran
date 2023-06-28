@@ -60,14 +60,20 @@ BlockingDetails<weight_> compute_blocking_details(size_t ncells, const Block_* b
             }
         }
 
-        auto& expanded = output.expanded_weights;
-        for (size_t i = 0; i < ncells; ++i) {
-            expanded.coeffRef(i) = element_weight[block[i]];
-        }
-
         // Setting a placeholder value to avoid problems with division by zero.
         if (total_weight == 0) {
             total_weight = 1; 
+        }
+
+        // Expanding them for multiplication in pca_utils::SampleScaledWrapper.
+        auto sqrt_weights = element_weight;
+        for (auto& s : sqrt_weights) {
+            s = std::sqrt(s);
+        }
+
+        auto& expanded = output.expanded_weights;
+        for (size_t i = 0; i < ncells; ++i) {
+            expanded.coeffRef(i) = sqrt_weights[block[i]];
         }
     }
 
@@ -226,7 +232,7 @@ inline void project_sparse_matrix(const SparseMatrix& emat, Eigen::MatrixXd& pcs
         for (size_t c = 0; c < ncol; ++c) {
             multipliers.noalias() = rotation.row(c);
             if (scale) {
-                multipliers.array() *= scale_v[c];
+                multipliers.array() /= scale_v[c];
             }
 
             auto start = p[c], end = p[c + 1];
@@ -245,7 +251,7 @@ inline void project_sparse_matrix(const SparseMatrix& emat, Eigen::MatrixXd& pcs
             for (size_t c = 0; c < ncol; ++c) {
                 multipliers.noalias() = rotation.row(c);
                 if (scale) {
-                    multipliers.array() *= scale_v[c];
+                    multipliers.array() /= scale_v[c];
                 }
 
                 auto start = starts[c], end = ends[c];
