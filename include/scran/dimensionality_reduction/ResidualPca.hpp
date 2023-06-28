@@ -35,7 +35,7 @@ namespace scran {
 class ResidualPca {
 public:
     /**
-     * Weight policy to apply to different batches, based on the number of cells in each batch.
+     * Policy to use for weighting batches based on their size, i.e., the number of cells in each batch.
      *
      * - `NONE`: no weighting is performed.
      *   This means that larger batches will contribute more to the calculation of the rotation vectors in the PCA.

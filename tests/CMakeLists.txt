@@ -37,7 +37,7 @@ add_executable(
     src/dimensionality_reduction/utils.cpp
     src/dimensionality_reduction/SimplePca.cpp
     src/dimensionality_reduction/ResidualPca.cpp
-    #    src/dimensionality_reduction/MultiBatchPCA.cpp
+    src/dimensionality_reduction/MultiBatchPCA.cpp
     #    src/dimensionality_reduction/ScaleByNeighbors.cpp
 
     # src/clustering/BuildSNNGraph.cpp
