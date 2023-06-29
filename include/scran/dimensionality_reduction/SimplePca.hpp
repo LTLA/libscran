@@ -10,6 +10,7 @@
 #include <vector>
 #include <cmath>
 
+#include "convert.hpp"
 #include "utils.hpp"
 
 /**
@@ -118,26 +119,7 @@ private:
 
         size_t ngenes = emat.cols();
         Eigen::VectorXd center_v(ngenes), scale_v(ngenes);
-        tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
-            size_t ncells = emat.rows();
-            auto& ptrs = emat.get_pointers();
-            auto& values = emat.get_values();
-            auto& indices = emat.get_indices();
-
-            for (int r = start, end = start + length; r < end; ++r) {
-                auto offset = ptrs[r];
-
-                tatami::SparseRange<double, int> range;
-                range.number = ptrs[r + 1] - offset;
-                range.value = values.data() + offset;
-                range.index = indices.data() + offset;
-
-                auto results = tatami::stats::variances::compute_direct(range, ncells);
-                center_v.coeffRef(r) = results.first;
-                scale_v.coeffRef(r) = results.second;
-            }
-        }, ngenes, nthreads);
-
+        pca_utils::compute_mean_and_variance_from_sparse_matrix(emat, center_v, scale_v, nthreads);
         total_var = pca_utils::process_scale_vector(scale, scale_v);
 
         irlba::Centered<decltype(emat)> centered(&emat, &center_v);
@@ -162,20 +144,11 @@ private:
 
         size_t ngenes = emat.cols();
         Eigen::VectorXd center_v(ngenes), scale_v(ngenes);
-        tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
-            size_t ncells = emat.rows();
-            const double* ptr = emat.data() + static_cast<size_t>(start) * ncells; // enforce size_t to avoid overflow issues.
-            for (size_t c = start, end = start + length; c < end; ++c, ptr += ncells) {
-                auto results = tatami::stats::variances::compute_direct(ptr, ncells);
-                center_v.coeffRef(c) = results.first;
-                scale_v.coeffRef(c) = results.second;
-            }
-        }, ngenes, nthreads);
-
+        pca_utils::compute_mean_and_variance_from_dense_matrix(emat, center_v, scale_v, nthreads);
         total_var = pca_utils::process_scale_vector(scale, scale_v);
 
         // Applying the centering and scaling now so we can do the PCA without any wrappers.
-        pca_utils::apply_dense_center_and_scale(emat, center_v, scale, scale_v, nthreads);
+        pca_utils::apply_center_and_scale_to_dense_matrix(emat, center_v, scale, scale_v, nthreads);
         irb.run(emat, pcs, rotation, variance_explained); 
     }
 

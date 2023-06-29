@@ -12,6 +12,7 @@
 #include <cmath>
 
 #include "utils.hpp"
+#include "convert.hpp"
 #include "wrappers.hpp"
 #include "blocking.hpp"
 

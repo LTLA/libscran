@@ -10,7 +10,8 @@
 #include "irlba/irlba.hpp"
 #include "Eigen/Dense"
 
-#include "../dimensionality_reduction/pca_utils.hpp"
+#include "../dimensionality_reduction/utils.hpp"
+#include "../dimensionality_reduction/convert.hpp"
 
 /**
  * @file ScoreFeatureSet.hpp
@@ -416,13 +417,6 @@ private:
             auto& indices = components[b].indices;
             auto& ptrs = components[b].ptrs;
 
-            centers.emplace_back(num_features);
-            auto& center_v = centers.back();
-            scales.emplace_back(num_features);
-            auto& scale_v = scales.back();
-            pca_utils::compute_mean_and_variance_from_sparse_components(num_features, block_size[b], values, indices, ptrs, center_v, scale_v, nthreads);
-            double total_var = pca_utils::process_scale_vector(scale, scale_v);
-
             all_matrices.emplace_back(
                 block_size[b], // transposed; we want genes in the columns.
                 num_features, 
@@ -432,6 +426,13 @@ private:
                 nthreads
             );
             const auto& A = all_matrices.back();
+
+            centers.emplace_back(num_features);
+            auto& center_v = centers.back();
+            scales.emplace_back(num_features);
+            auto& scale_v = scales.back();
+            pca_utils::compute_mean_and_variance_from_sparse_matrix(A, center_v, scale_v, nthreads);
+            double total_var = pca_utils::process_scale_vector(scale, scale_v);
 
             auto& current_rotation = rotation[b];
             if (block_size[b] >= 2) {
@@ -562,10 +563,10 @@ private:
             auto& emat = all_matrices[b];
             centers[b].resize(num_features);
             scales[b].resize(num_features);
-            pca_utils::compute_mean_and_variance_from_dense_columns(emat, centers[b], scales[b], nthreads);
+            pca_utils::compute_mean_and_variance_from_dense_matrix(emat, centers[b], scales[b], nthreads);
 
             double total_var = pca_utils::process_scale_vector(scale, scales[b]);
-            pca_utils::center_and_scale_dense_columns(emat, centers[b], scale, scales[b], nthreads);
+            pca_utils::apply_center_and_scale_to_dense_matrix(emat, centers[b], scale, scales[b], nthreads);
 
             if (block_size[b] >= 2) {
                 Eigen::MatrixXd pcs;

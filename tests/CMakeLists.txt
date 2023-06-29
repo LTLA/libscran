@@ -35,6 +35,7 @@ add_executable(
     #    src/feature_selection/ChooseHVGs.cpp
     #
     src/dimensionality_reduction/utils.cpp
+    src/dimensionality_reduction/convert.cpp
     src/dimensionality_reduction/SimplePca.cpp
     src/dimensionality_reduction/ResidualPca.cpp
     src/dimensionality_reduction/MultiBatchPCA.cpp
@@ -54,7 +55,7 @@ add_executable(
     # src/aggregation/AggregateAcrossCells.cpp
     # src/aggregation/DownsampleByNeighbors.cpp
 
-    # src/feature_set_enrichment/ScoreFeatureSet.cpp
+    src/feature_set_enrichment/ScoreFeatureSet.cpp
     # src/feature_set_enrichment/HypergeometricTail.cpp
 
     # src/utils/average_vectors.cpp

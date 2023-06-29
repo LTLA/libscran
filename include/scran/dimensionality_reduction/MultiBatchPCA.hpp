@@ -10,6 +10,7 @@
 #include <cmath>
 
 #include "utils.hpp"
+#include "convert.hpp"
 #include "wrappers.hpp"
 #include "blocking.hpp"
 
@@ -275,7 +276,7 @@ private:
         total_var = pca_utils::process_scale_vector(scale, scale_v);
 
         // Applying the centering and scaling now so we can do the PCA with fewer wrappers.
-        pca_utils::apply_dense_center_and_scale(emat, center_v, scale, scale_v, nthreads);
+        pca_utils::apply_center_and_scale_to_dense_matrix(emat, center_v, scale, scale_v, nthreads);
 
         pca_utils::SampleScaledWrapper<decltype(emat)> weighted(&emat, &(block_details.expanded_weights));
         irb.run(weighted, pcs, rotation, variance_explained);
