@@ -3,6 +3,7 @@
 
 #include "Eigen/Dense"
 #include <type_traits>
+#include "irlba/irlba.hpp"
 
 namespace scran {
 
@@ -13,59 +14,7 @@ namespace pca_utils {
  * This should be applied after all centering is performed.
  */
 template<class Matrix_>
-struct SampleScaledWrapper {
-    SampleScaledWrapper(const Matrix_* m, const Eigen::VectorXd* w) : mat(m), weights(w) {}
-
-    auto rows() const { return mat->rows(); }
-    auto cols() const { return mat->cols(); }
-
-public:
-    typedef irlba::WrappedWorkspace<Matrix_> Workspace;
-
-    Workspace workspace() const {
-        return irlba::wrapped_workspace(mat);
-    }
-
-    template<class Right_>
-    void multiply(const Right_& rhs, Workspace& work, Eigen::VectorXd& output) const {
-        irlba::wrapped_multiply(mat, rhs, work, output);
-        output.array() *= weights->array();
-    }
-
-public:
-    struct AdjointWorkspace {
-        AdjointWorkspace(size_t n, irlba::WrappedAdjointWorkspace<Matrix_> c) : combined(n), child(std::move(c)) {}
-        Eigen::VectorXd combined;
-        irlba::WrappedAdjointWorkspace<Matrix_> child;
-    };
-
-    AdjointWorkspace adjoint_workspace() const {
-        return AdjointWorkspace(weights->size(), irlba::wrapped_adjoint_workspace(mat));
-    }
-
-    template<class Right>
-    void adjoint_multiply(const Right& rhs, AdjointWorkspace& work, Eigen::VectorXd& output) const {
-        work.combined.noalias() = weights->cwiseProduct(rhs);
-        irlba::wrapped_adjoint_multiply(mat, work.combined, work.child, output);
-        return;
-    }
-
-public:
-    Eigen::MatrixXd realize() const {
-        Eigen::MatrixXd output = irlba::wrapped_realize(mat);
-
-        for (Eigen::Index c = 0, cend = output.cols(); c < cend; ++c) {
-            for (Eigen::Index r = 0, rend = output.rows(); r < rend; ++r) {
-                output.coeffRef(r, c) *= weights->coeff(r);
-            }
-        }
-        return output;
-    }
-
-private:
-    const Matrix_* mat;
-    const Eigen::VectorXd* weights;
-};
+using SampleScaledWrapper = irlba::Scaled<Matrix_, false, false>;
 
 /* 
  * Multiplication of the residuals after centering on block-specific means.
