@@ -1,6 +1,8 @@
 #ifndef SCRAN_PCA_WRAPPERS_HPP
 #define SCRAN_PCA_WRAPPERS_HPP
 
+#include "../utils/macros.hpp"
+
 #include "Eigen/Dense"
 #include <type_traits>
 #include "irlba/irlba.hpp"

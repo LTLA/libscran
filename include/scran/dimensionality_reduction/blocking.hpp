@@ -1,6 +1,8 @@
 #ifndef SCRAN_PCA_UTILS_MOMENTS_HPP
 #define SCRAN_PCA_UTILS_MOMENTS_HPP
 
+#include "../utils/macros.hpp"
+
 #include "tatami/tatami.hpp"
 #include "Eigen/Dense"
 
