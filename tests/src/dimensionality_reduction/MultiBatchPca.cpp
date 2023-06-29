@@ -6,11 +6,11 @@
 
 #include "tatami/tatami.hpp"
 
-#include "scran/dimensionality_reduction/MultiBatchPCA.hpp"
+#include "scran/dimensionality_reduction/MultiBatchPca.hpp"
 #include "scran/dimensionality_reduction/SimplePca.hpp"
 #include "scran/dimensionality_reduction/ResidualPca.hpp"
 
-class MultiBatchPCATestCore {
+class MultiBatchPcaTestCore {
 protected:
     std::shared_ptr<tatami::NumericMatrix> dense_row;
 
@@ -36,7 +36,7 @@ protected:
 
 /******************************************/
 
-class MultiBatchPCABasicTest : public ::testing::TestWithParam<std::tuple<bool, int, int, int> >, public MultiBatchPCATestCore {
+class MultiBatchPcaBasicTest : public ::testing::TestWithParam<std::tuple<bool, int, int, int> >, public MultiBatchPcaTestCore {
 protected:
     std::shared_ptr<tatami::NumericMatrix> dense_column, sparse_row, sparse_column;
 
@@ -49,12 +49,12 @@ protected:
     }
 };
 
-TEST_P(MultiBatchPCABasicTest, WeightedOnly) {
+TEST_P(MultiBatchPcaBasicTest, WeightedOnly) {
     auto param = GetParam();
     extra_assemble(param);
     int nthreads = std::get<3>(param);
 
-    scran::MultiBatchPCA runner;
+    scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
     auto block = generate_blocks(dense_row->ncol(), nblocks);
     auto ref = runner.run(dense_row.get(), block.data());
@@ -132,14 +132,14 @@ TEST_P(MultiBatchPCABasicTest, WeightedOnly) {
     EXPECT_FLOAT_EQ(ref.total_variance, res4.total_variance);
 }
 
-TEST_P(MultiBatchPCABasicTest, ResidualOnly) {
+TEST_P(MultiBatchPcaBasicTest, ResidualOnly) {
     auto param = GetParam();
     extra_assemble(param);
     int nthreads = std::get<3>(param);
 
-    scran::MultiBatchPCA runner;
+    scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
-    runner.set_block_policy(scran::MultiBatchPCA::BlockPolicy::RESIDUAL_ONLY);
+    runner.set_block_policy(scran::MultiBatchPca::BlockPolicy::RESIDUAL_ONLY);
     auto block = generate_blocks(dense_row->ncol(), nblocks);
     auto ref = runner.run(dense_row.get(), block.data());
 
@@ -189,14 +189,14 @@ TEST_P(MultiBatchPCABasicTest, ResidualOnly) {
     EXPECT_FLOAT_EQ(ref.total_variance, res4.total_variance);
 }
 
-TEST_P(MultiBatchPCABasicTest, WeightedResidual) {
+TEST_P(MultiBatchPcaBasicTest, WeightedResidual) {
     auto param = GetParam();
     extra_assemble(param);
     int nthreads = std::get<3>(param);
 
-    scran::MultiBatchPCA runner;
+    scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
-    runner.set_block_policy(scran::MultiBatchPCA::BlockPolicy::WEIGHTED_RESIDUAL);
+    runner.set_block_policy(scran::MultiBatchPca::BlockPolicy::WEIGHTED_RESIDUAL);
     auto block = generate_blocks(dense_row->ncol(), nblocks);
     auto ref = runner.run(dense_row.get(), block.data());
 
@@ -247,8 +247,8 @@ TEST_P(MultiBatchPCABasicTest, WeightedResidual) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    MultiBatchPCA,
-    MultiBatchPCABasicTest,
+    MultiBatchPca,
+    MultiBatchPcaBasicTest,
     ::testing::Combine(
         ::testing::Values(false, true), // to scale or not to scale?
         ::testing::Values(2, 3, 4), // number of PCs to obtain
@@ -259,9 +259,9 @@ INSTANTIATE_TEST_SUITE_P(
 
 /******************************************/
 
-class MultiBatchPCAMoreTest : public ::testing::TestWithParam<std::tuple<bool, int, int> >, public MultiBatchPCATestCore {};
+class MultiBatchPcaMoreTest : public ::testing::TestWithParam<std::tuple<bool, int, int> >, public MultiBatchPcaTestCore {};
 
-TEST_P(MultiBatchPCAMoreTest, WeightedOnly_VersusSimple) {
+TEST_P(MultiBatchPcaMoreTest, WeightedOnly_VersusSimple) {
     assemble(GetParam());
 
     std::vector<int> block;
@@ -273,7 +273,7 @@ TEST_P(MultiBatchPCAMoreTest, WeightedOnly_VersusSimple) {
     }
     auto expanded = tatami::make_DelayedBind<1>(std::move(combined));
 
-    scran::MultiBatchPCA runner;
+    scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
     auto res1 = runner.run(expanded.get(), block.data());
 
@@ -298,11 +298,11 @@ TEST_P(MultiBatchPCAMoreTest, WeightedOnly_VersusSimple) {
     expect_equal_pcs(res1.pcs, res2.pcs);
 }
 
-TEST_P(MultiBatchPCAMoreTest, WeightedOnly_DuplicatedBlocks) {
+TEST_P(MultiBatchPcaMoreTest, WeightedOnly_DuplicatedBlocks) {
     assemble(GetParam());
     auto block = generate_blocks(dense_row->ncol(), nblocks);
 
-    scran::MultiBatchPCA runner;
+    scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
     auto res1 = runner.run(dense_row.get(), block.data());
 
@@ -346,13 +346,13 @@ TEST_P(MultiBatchPCAMoreTest, WeightedOnly_DuplicatedBlocks) {
     expect_equal_vectors(res1.variance_explained, res2.variance_explained);
 }
 
-TEST_P(MultiBatchPCAMoreTest, ResidualOnly_VersusReference) {
+TEST_P(MultiBatchPcaMoreTest, ResidualOnly_VersusReference) {
     assemble(GetParam());
     auto block = generate_blocks(dense_row->ncol(), nblocks);
 
-    scran::MultiBatchPCA runner;
+    scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
-    runner.set_block_policy(scran::MultiBatchPCA::BlockPolicy::RESIDUAL_ONLY);
+    runner.set_block_policy(scran::MultiBatchPca::BlockPolicy::RESIDUAL_ONLY);
     auto res = runner.run(dense_row.get(), block.data());
 
     scran::ResidualPca refrunner;
@@ -368,13 +368,13 @@ TEST_P(MultiBatchPCAMoreTest, ResidualOnly_VersusReference) {
     EXPECT_EQ(res.pcs.cols(), dense_row->ncol());
 }
 
-TEST_P(MultiBatchPCAMoreTest, WeightedResidual_VersusReference) {
+TEST_P(MultiBatchPcaMoreTest, WeightedResidual_VersusReference) {
     assemble(GetParam());
     auto block = generate_blocks(dense_row->ncol(), nblocks);
 
-    scran::MultiBatchPCA runner;
+    scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
-    runner.set_block_policy(scran::MultiBatchPCA::BlockPolicy::WEIGHTED_RESIDUAL);
+    runner.set_block_policy(scran::MultiBatchPca::BlockPolicy::WEIGHTED_RESIDUAL);
     auto res = runner.run(dense_row.get(), block.data());
 
     scran::ResidualPca refrunner;
@@ -391,13 +391,13 @@ TEST_P(MultiBatchPCAMoreTest, WeightedResidual_VersusReference) {
     EXPECT_EQ(res.pcs.cols(), dense_row->ncol());
 }
 
-TEST_P(MultiBatchPCAMoreTest, WeightedResidual_DuplicatedBlocks) {
+TEST_P(MultiBatchPcaMoreTest, WeightedResidual_DuplicatedBlocks) {
     assemble(GetParam());
     auto block = generate_blocks(dense_row->ncol(), nblocks);
 
-    scran::MultiBatchPCA runner;
+    scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
-    runner.set_block_policy(scran::MultiBatchPCA::BlockPolicy::WEIGHTED_RESIDUAL);
+    runner.set_block_policy(scran::MultiBatchPca::BlockPolicy::WEIGHTED_RESIDUAL);
     auto res1 = runner.run(dense_row.get(), block.data());
 
     // Clone the first block.
@@ -440,7 +440,7 @@ TEST_P(MultiBatchPCAMoreTest, WeightedResidual_DuplicatedBlocks) {
     expect_equal_vectors(res1.variance_explained, res2.variance_explained);
 }
 
-TEST_P(MultiBatchPCAMoreTest, SubsetTest) {
+TEST_P(MultiBatchPcaMoreTest, SubsetTest) {
     assemble(GetParam());
 
     std::vector<int> subset(dense_row->nrow());
@@ -458,7 +458,7 @@ TEST_P(MultiBatchPCAMoreTest, SubsetTest) {
         }
     }
 
-    scran::MultiBatchPCA runner;
+    scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
 
     auto block = generate_blocks(dense_row->ncol(), 3);
@@ -475,8 +475,8 @@ TEST_P(MultiBatchPCAMoreTest, SubsetTest) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    MultiBatchPCA,
-    MultiBatchPCAMoreTest,
+    MultiBatchPca,
+    MultiBatchPcaMoreTest,
     ::testing::Combine(
         ::testing::Values(false, true), // to scale or not to scale?
         ::testing::Values(2, 3, 4), // number of PCs to obtain

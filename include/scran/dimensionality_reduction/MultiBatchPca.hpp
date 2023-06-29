@@ -15,7 +15,7 @@
 #include "blocking.hpp"
 
 /**
- * @file MultiBatchPCA.hpp
+ * @file MultiBatchPca.hpp
  *
  * @brief Compute PCA after adjusting for differences between batch sizes.
  */
@@ -36,7 +36,7 @@ namespace scran {
  * Unlike `BlockedPCA`, this class will not actually perform any batch correction.
  * Any batch effects will be preserved in the low-dimensional space and require further processing to remove.
  */
-class MultiBatchPCA {
+class MultiBatchPca {
 public:
     /**
      * Policy to use for handling different batches.
@@ -91,9 +91,9 @@ public:
      * @param r Number of PCs to compute.
      * This should be smaller than the smaller dimension of the input matrix.
      *
-     * @return A reference to this `MultiBatchPCA` instance.
+     * @return A reference to this `MultiBatchPca` instance.
      */
-    MultiBatchPCA& set_rank(int r = Defaults::rank) {
+    MultiBatchPca& set_rank(int r = Defaults::rank) {
         rank = r;
         return *this;
     }
@@ -101,9 +101,9 @@ public:
     /**
      * @param s Should genes be scaled to unit variance?
      *
-     * @return A reference to this `MultiBatchPCA` instance.
+     * @return A reference to this `MultiBatchPca` instance.
      */
-    MultiBatchPCA& set_scale(bool s = Defaults::scale) {
+    MultiBatchPca& set_scale(bool s = Defaults::scale) {
         scale = s;
         return *this;
     }
@@ -112,9 +112,9 @@ public:
      * @param t Should the PC matrix be transposed on output?
      * If `true`, the output matrix is column-major with cells in the columns, which is compatible with downstream **libscran** steps.
      * 
-     * @return A reference to this `MultiBatchPCA` instance.
+     * @return A reference to this `MultiBatchPca` instance.
      */
-    MultiBatchPCA& set_transpose(bool t = Defaults::transpose) {
+    MultiBatchPca& set_transpose(bool t = Defaults::transpose) {
         transpose = t;
         return *this;
     }
@@ -122,18 +122,18 @@ public:
     /**
      * @param w Policy to use for handling multiple batches, see `BlockPolicy` for details.
      * 
-     * @return A reference to this `MultiBatchPCA` instance.
+     * @return A reference to this `MultiBatchPca` instance.
      */
-    MultiBatchPCA& set_block_policy(BlockPolicy b = Defaults::block_policy) {
+    MultiBatchPca& set_block_policy(BlockPolicy b = Defaults::block_policy) {
         block_policy = b;
         return *this;
     }
 
     /**
      * @param n Number of threads to use.
-     * @return A reference to this `MultiBatchPCA` instance.
+     * @return A reference to this `MultiBatchPca` instance.
      */
-    MultiBatchPCA& set_num_threads(int n = Defaults::num_threads) {
+    MultiBatchPca& set_num_threads(int n = Defaults::num_threads) {
         nthreads = n;
         return *this;
     }
@@ -447,7 +447,7 @@ public:
     /**
      * @brief Container for the PCA results.
      *
-     * Instances should be constructed by the `MultiBatchPCA::run()` methods.
+     * Instances should be constructed by the `MultiBatchPca::run()` methods.
      */
     struct Results {
         /**
