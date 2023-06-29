@@ -264,6 +264,23 @@ TEST_P(ResidualPcaBasicTest, WeightedConsistency) {
         are_pcs_centered(ref.pcs);
         EXPECT_TRUE(ref.total_variance >= std::accumulate(ref.variance_explained.begin(), ref.variance_explained.end(), 0.0));
 
+        if (scale) {
+            EXPECT_FLOAT_EQ(dense_row->nrow(), ref.total_variance);
+        } else {
+            auto collected = fragment_matrices_by_block(dense_row, block, nblocks);
+
+            // The 'variance' is really just the grand sum (across blocks) of
+            // the sum (across cells) of the squared difference from the mean.
+            double total_var = 0;
+            for (int b = 0, end = collected.size(); b < end; ++b) {
+                const auto& sub = collected[b];
+                auto vars = tatami::row_variances(sub.get());
+                total_var += std::accumulate(vars.begin(), vars.end(), 0.0) * (sub->ncol() - 1) / sub->ncol();
+            }
+
+            EXPECT_FLOAT_EQ(total_var, ref.total_variance);
+        }
+
     } else {
         runner.set_num_threads(nthreads);
 
