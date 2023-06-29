@@ -102,7 +102,121 @@ TEST_P(MultiBatchPCABasicTest, WeightedOnly) {
                 total_var += subvar / NC;
             }
 
-            EXPECT_FLOAT_EQ(total_var, ref.total_variance);
+            EXPECT_FLOAT_EQ(total_var / (dense_row->ncol() - 1), ref.total_variance);
+        }
+
+    } else {
+        runner.set_num_threads(nthreads);
+
+        // Results should be EXACTLY the same with parallelization.
+        auto res1 = runner.run(dense_row.get(), block.data());
+        EXPECT_EQ(ref.pcs, res1.pcs);
+        EXPECT_EQ(ref.variance_explained, res1.variance_explained);
+        EXPECT_EQ(ref.total_variance, res1.total_variance);
+    }
+
+    auto res2 = runner.run(dense_column.get(), block.data());
+    expect_equal_pcs(ref.pcs, res2.pcs);
+    expect_equal_vectors(ref.variance_explained, res2.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res2.total_variance);
+
+    auto res3 = runner.run(sparse_row.get(), block.data());
+    expect_equal_pcs(ref.pcs, res3.pcs);
+    expect_equal_vectors(ref.variance_explained, res3.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res3.total_variance);
+
+    auto res4 = runner.run(sparse_column.get(), block.data());
+    expect_equal_pcs(ref.pcs, res4.pcs);
+    expect_equal_vectors(ref.variance_explained, res4.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res4.total_variance);
+}
+
+TEST_P(MultiBatchPCABasicTest, ResidualOnly) {
+    auto param = GetParam();
+    extra_assemble(param);
+    int nthreads = std::get<3>(param);
+
+    scran::MultiBatchPCA runner;
+    runner.set_scale(scale).set_rank(rank);
+    runner.set_block_policy(scran::MultiBatchPCA::BlockPolicy::RESIDUAL_ONLY);
+    auto block = generate_blocks(dense_row->ncol(), nblocks);
+    auto ref = runner.run(dense_row.get(), block.data());
+
+    if (nthreads == 1) {
+        are_pcs_centered(ref.pcs);
+        EXPECT_TRUE(ref.total_variance >= std::accumulate(ref.variance_explained.begin(), ref.variance_explained.end(), 0.0));
+
+        // Total variance makes sense. 
+        if (scale) {
+            EXPECT_FLOAT_EQ(dense_row->nrow(), ref.total_variance);
+        } else {
+            auto collected = fragment_matrices_by_block(dense_row, block, nblocks);
+
+            double total_var = 0;
+            for (int b = 0, end = collected.size(); b < end; ++b) {
+                const auto& sub = collected[b];
+                auto vars = tatami::row_variances(sub.get());
+                total_var += std::accumulate(vars.begin(), vars.end(), 0.0) * (sub->ncol() - 1);
+            }
+
+            EXPECT_FLOAT_EQ(total_var / (dense_row->ncol() - 1), ref.total_variance);
+        }
+
+    } else {
+        runner.set_num_threads(nthreads);
+
+        // Results should be EXACTLY the same with parallelization.
+        auto res1 = runner.run(dense_row.get(), block.data());
+        EXPECT_EQ(ref.pcs, res1.pcs);
+        EXPECT_EQ(ref.variance_explained, res1.variance_explained);
+        EXPECT_EQ(ref.total_variance, res1.total_variance);
+    }
+
+    auto res2 = runner.run(dense_column.get(), block.data());
+    expect_equal_pcs(ref.pcs, res2.pcs);
+    expect_equal_vectors(ref.variance_explained, res2.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res2.total_variance);
+
+    auto res3 = runner.run(sparse_row.get(), block.data());
+    expect_equal_pcs(ref.pcs, res3.pcs);
+    expect_equal_vectors(ref.variance_explained, res3.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res3.total_variance);
+
+    auto res4 = runner.run(sparse_column.get(), block.data());
+    expect_equal_pcs(ref.pcs, res4.pcs);
+    expect_equal_vectors(ref.variance_explained, res4.variance_explained);
+    EXPECT_FLOAT_EQ(ref.total_variance, res4.total_variance);
+}
+
+TEST_P(MultiBatchPCABasicTest, WeightResidual) {
+    auto param = GetParam();
+    extra_assemble(param);
+    int nthreads = std::get<3>(param);
+
+    scran::MultiBatchPCA runner;
+    runner.set_scale(scale).set_rank(rank);
+    runner.set_block_policy(scran::MultiBatchPCA::BlockPolicy::WEIGHTED_RESIDUAL);
+    auto block = generate_blocks(dense_row->ncol(), nblocks);
+    auto ref = runner.run(dense_row.get(), block.data());
+
+    if (nthreads == 1) {
+        are_pcs_centered(ref.pcs);
+        EXPECT_TRUE(ref.total_variance >= std::accumulate(ref.variance_explained.begin(), ref.variance_explained.end(), 0.0));
+
+        // Total variance makes sense. 
+        if (scale) {
+            EXPECT_FLOAT_EQ(dense_row->nrow(), ref.total_variance);
+        } else {
+            auto collected = fragment_matrices_by_block(dense_row, block, nblocks);
+
+            double total_var = 0;
+            for (int b = 0, end = collected.size(); b < end; ++b) {
+                const auto& sub = collected[b];
+                auto vars = tatami::row_variances(sub.get());
+                total_var += std::accumulate(vars.begin(), vars.end(), 0.0) * static_cast<double>(sub->ncol() - 1) / sub->ncol();
+            }
+
+            EXPECT_FLOAT_EQ(total_var / (dense_row->ncol() - 1), ref.total_variance);
         }
 
     } else {

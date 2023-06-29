@@ -155,13 +155,11 @@ void compute_mean_and_variance_regress(
             // per-PC calculations in pca_utils::clean_up).
             //
             // If we're dealing with weights, the concept of the sample
-            // variance becomes somewhat weird. So, we just keep proxyvar as
-            // the sum of squares, which is equivalent to the D^2 after SVD
-            // (computed by pca_utils::clean_up_projected). Magnitude doesn't
-            // matter when scaling for pca_utils::process_scale_vector anyway.
-            if constexpr(!weight_) {
-                proxyvar /= NR - 1;
-            }
+            // variance becomes somewhat weird, but we just use the same
+            // denominator for consistency in pca_utils::clean_up_projected.
+            // Magnitude doesn't matter when scaling for
+            // pca_utils::process_scale_vector anyway.
+            proxyvar /= NR - 1;
         }
     }, emat.cols(), nthreads);
 }
@@ -210,9 +208,7 @@ void compute_mean_and_variance_regress(
                 proxyvar += squared;
             }
 
-            if constexpr(!weight_) {
-                proxyvar /= NR - 1;
-            }
+            proxyvar /= NR - 1;
         }
     }, emat.cols(), nthreads);
 }
@@ -279,11 +275,10 @@ void clean_up_projected(Eigen::MatrixXd& proj, Eigen::VectorXd& D) {
         }
     }
 
-    // Variance is a somewhat murky concept when projecting a dataset onto
-    // the PC space defined by a modified version of that dataset, so we just
-    // square it and assume that only the relative value matters.
+    // Just dividing by the number of observations - 1 regardless of weighting.
+    double denom = (rows_are_dims_ ? proj.cols() : proj.rows()) - 1;
     for (auto& d : D) {
-        d = d * d;
+        d = d * d / denom;
     }
 }
 

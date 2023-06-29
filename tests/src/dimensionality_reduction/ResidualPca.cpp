@@ -278,7 +278,7 @@ TEST_P(ResidualPcaBasicTest, WeightedConsistency) {
                 total_var += std::accumulate(vars.begin(), vars.end(), 0.0) * (sub->ncol() - 1) / sub->ncol();
             }
 
-            EXPECT_FLOAT_EQ(total_var, ref.total_variance);
+            EXPECT_FLOAT_EQ(total_var / (dense_row->ncol() - 1), ref.total_variance);
         }
 
     } else {

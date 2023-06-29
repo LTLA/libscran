@@ -199,6 +199,8 @@ private:
                     double diff = value_ptr[i] - grand_mean;
                     proxyvar += diff * diff * block_weight[block[index_ptr[i]]];
                 }
+
+                proxyvar /= emat.rows() - 1;
             }
         }, ngenes, nthreads);
 
@@ -265,6 +267,8 @@ private:
                     double diff = ptr[r] - grand_mean;
                     proxyvar += diff * diff * block_weight[block[r]];
                 }
+
+                proxyvar /= emat.rows() - 1;
             }
         }, ngenes, nthreads);
 
@@ -391,9 +395,14 @@ private:
             variance_explained
         );
 
-        pcs.noalias() = emat * rotation;
+        if (scale) {
+            pcs.noalias() = emat * (rotation.array().colwise() / scale_v.array()).matrix();
+        } else {
+            pcs.noalias() = emat * rotation;
+        }
+
         pca_utils::clean_up_projected<false>(pcs, variance_explained);
-        if (!transpose) {
+        if (transpose) {
             pcs.adjointInPlace();
         }
     }
