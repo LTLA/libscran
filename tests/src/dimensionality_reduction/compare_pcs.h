@@ -4,6 +4,43 @@
 #include "Eigen/Dense"
 #include <gtest/gtest.h>
 #include "../utils/compare_almost_equal.h"
+#include <vector>
+#include "tatami/tatami.hpp"
+
+inline void are_pcs_centered(const Eigen::MatrixXd& pcs, double tol = 1e-8) {
+    int ndims = pcs.rows(), ncells = pcs.cols();
+    for (int r = 0; r < ndims; ++r) {
+        auto ptr = pcs.data() + r;
+
+        double mean = 0;
+        for (size_t c = 0; c < ncells; ++c, ptr += ndims) {
+            mean += *ptr;
+        }
+        mean /= ncells;
+
+        EXPECT_TRUE(std::abs(mean) < tol);
+    }
+}
+
+inline std::vector<std::shared_ptr<tatami::NumericMatrix> > fragment_matrices_by_block(const std::shared_ptr<tatami::NumericMatrix>& x, const std::vector<int>& block, int nblocks) {
+    std::vector<std::shared_ptr<tatami::NumericMatrix> > collected;
+
+    for (int b = 0; b < nblocks; ++b) {
+        std::vector<int> keep;
+
+        for (size_t i = 0; i < block.size(); ++i) {
+            if (block[i] == b) {
+                keep.push_back(i);
+            }
+        }
+
+        if (keep.size() > 1) {
+            collected.push_back(tatami::make_DelayedSubset<1>(x, keep));
+        }
+    }
+
+    return collected;
+}
 
 inline void expect_equal_pcs(const Eigen::MatrixXd& left, const Eigen::MatrixXd& right, double tol=1e-8, bool relative = true) {
     ASSERT_EQ(left.cols(), right.cols());

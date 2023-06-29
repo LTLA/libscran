@@ -202,40 +202,24 @@ TEST_P(ResidualPcaBasicTest, BasicConsistency) {
         EXPECT_EQ(ref.pcs.cols(), dense_row->ncol());
         EXPECT_EQ(ref.variance_explained.size(), rank);
 
-        // Should be centered.
-        size_t NC = dense_row->ncol();
-        for (int r = 0; r < rank; ++r) {
-            auto ptr = ref.pcs.data() + r;
-
-            double mean = 0;
-            for (size_t c = 0; c < NC; ++c, ptr += rank) {
-                mean += *ptr;
-            }
-            mean /= NC;
-            EXPECT_TRUE(std::abs(mean) < 0.00000001);
-        }
+        are_pcs_centered(ref.pcs);
+        EXPECT_TRUE(ref.total_variance >= std::accumulate(ref.variance_explained.begin(), ref.variance_explained.end(), 0.0));
 
         // Total variance makes sense. Remember, this doesn't consider the
         // loss of d.f. from calculation of the block means.
         if (scale) {
             EXPECT_FLOAT_EQ(dense_row->nrow(), ref.total_variance);
         } else {
-            double total_var = 0;
-            for (int b = 0; b < nblocks; ++b) {
-                std::vector<int> keep;
-                for (size_t i = 0; i < block.size(); ++i) {
-                    if (block[i] == b) {
-                        keep.push_back(i);
-                    }
-                }
+            auto collected = fragment_matrices_by_block(dense_row, block, nblocks);
 
-                if (keep.size() > 1) {
-                    auto sub = tatami::make_DelayedSubset<1>(dense_row, keep);
-                    auto vars = tatami::row_variances(sub.get());
-                    total_var += std::accumulate(vars.begin(), vars.end(), 0.0) * (keep.size() - 1);
-                }
+            double total_var = 0;
+            for (int b = 0, end = collected.size(); b < end; ++b) {
+                const auto& sub = collected[b];
+                auto vars = tatami::row_variances(sub.get());
+                total_var += std::accumulate(vars.begin(), vars.end(), 0.0) * (sub->ncol() - 1);
             }
-            EXPECT_FLOAT_EQ(total_var / (NC - 1), ref.total_variance);
+
+            EXPECT_FLOAT_EQ(total_var / (dense_row->ncol() - 1), ref.total_variance);
         }
 
     } else {
@@ -276,7 +260,11 @@ TEST_P(ResidualPcaBasicTest, WeightedConsistency) {
     auto block = generate_blocks(dense_row->ncol(), nblocks);
     auto ref = runner.run(dense_row.get(), block.data());
 
-    if (nthreads != 1) {
+    if (nthreads == 1) {
+        are_pcs_centered(ref.pcs);
+        EXPECT_TRUE(ref.total_variance >= std::accumulate(ref.variance_explained.begin(), ref.variance_explained.end(), 0.0));
+
+    } else {
         runner.set_num_threads(nthreads);
 
         // Results should be EXACTLY the same with parallelization.

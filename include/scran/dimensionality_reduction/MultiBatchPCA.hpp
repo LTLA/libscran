@@ -157,13 +157,13 @@ private:
         Eigen::VectorXd scale_v(ngenes);
 
         tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
-            const auto& ptrs = extracted.ptrs;
-            const auto& values = extracted.values;
-            const auto& indices = extracted.indices;
+            const auto& values = emat.get_values();
+            const auto& indices = emat.get_indices();
+            const auto& ptrs = emat.get_pointers();
 
             const auto& block_size = block_details.block_size;
             size_t nblocks = block_size.size();
-            auto block_count = block_size;
+            std::vector<int> block_count(nblocks);
             const auto& block_weight = block_details.per_element_weight;
 
             for (size_t r = start, end = start + length; r < end; ++r) {
@@ -296,7 +296,7 @@ private:
         Eigen::MatrixXd& rotation, 
         Eigen::VectorXd& variance_explained)
     const {
-        pca_utils::RegressWrapper<decltype(emat), Block_> centered(&emat, block, &center_m);
+        pca_utils::RegressWrapper<Matrix_, Block_> centered(&emat, block, &center_m);
 
         if constexpr(weight_) {
             if (scale) {
@@ -335,7 +335,7 @@ private:
         size_t ngenes = emat.cols();
         Eigen::MatrixXd center_m(block_details.num_blocks(), ngenes);
         Eigen::VectorXd scale_v(ngenes);
-        pca_utils::compute_mean_and_variance_regress(emat, block, block_details, center_m, scale_v, nthreads);
+        pca_utils::compute_mean_and_variance_regress<weight_>(emat, block, block_details, center_m, scale_v, nthreads);
         total_var = pca_utils::process_scale_vector(scale, scale_v);
 
         run_residuals_internal<weight_>(
@@ -375,7 +375,7 @@ private:
         size_t ngenes = emat.cols();
         Eigen::MatrixXd center_m(block_details.num_blocks(), ngenes);
         Eigen::VectorXd scale_v(ngenes);
-        pca_utils::compute_mean_and_variance_regress(emat, block, block_details, center_m, scale_v, nthreads);
+        pca_utils::compute_mean_and_variance_regress<weight_>(emat, block, block_details, center_m, scale_v, nthreads);
         total_var = pca_utils::process_scale_vector(scale, scale_v);
 
         // No choice but to use wrappers here, as we still need the original matrix for projection.
