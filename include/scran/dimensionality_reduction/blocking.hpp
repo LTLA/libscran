@@ -243,7 +243,13 @@ inline void project_sparse_matrix(const SparseMatrix& emat, Eigen::MatrixXd& pcs
     } else {
         const auto& row_nonzero_starts = emat.get_secondary_nonzero_starts();
 
+#ifndef IRLBA_CUSTOM_PARALLEL
+        #pragma omp parallel for num_threads(nthreads)
+        for (size_t t = 0; t < nthreads; ++t) {
+#else
         IRLBA_CUSTOM_PARALLEL(nthreads, [&](size_t t) -> void { 
+#endif
+
             const auto& starts = row_nonzero_starts[t];
             const auto& ends = row_nonzero_starts[t + 1];
             Eigen::VectorXd multipliers(nvec);
@@ -259,7 +265,12 @@ inline void project_sparse_matrix(const SparseMatrix& emat, Eigen::MatrixXd& pcs
                     pcs.col(i[s]).noalias() += x[s] * multipliers;
                 }
             }
+
+#ifndef IRLBA_CUSTOM_PARALLEL
+        }
+#else
         });
+#endif
     }
 }
 
