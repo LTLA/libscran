@@ -8,6 +8,7 @@
 
 #include "scran/dimensionality_reduction/MultiBatchPCA.hpp"
 #include "scran/dimensionality_reduction/SimplePca.hpp"
+#include "scran/dimensionality_reduction/ResidualPca.hpp"
 
 class MultiBatchPCATestCore {
 protected:
@@ -188,7 +189,7 @@ TEST_P(MultiBatchPCABasicTest, ResidualOnly) {
     EXPECT_FLOAT_EQ(ref.total_variance, res4.total_variance);
 }
 
-TEST_P(MultiBatchPCABasicTest, WeightResidual) {
+TEST_P(MultiBatchPCABasicTest, WeightedResidual) {
     auto param = GetParam();
     extra_assemble(param);
     int nthreads = std::get<3>(param);
@@ -260,19 +261,27 @@ INSTANTIATE_TEST_SUITE_P(
 
 class MultiBatchPCAMoreTest : public ::testing::TestWithParam<std::tuple<bool, int, int> >, public MultiBatchPCATestCore {};
 
-TEST_P(MultiBatchPCAMoreTest, BalancedBlock) {
+TEST_P(MultiBatchPCAMoreTest, WeightedOnly_VersusSimple) {
     assemble(GetParam());
-    auto block = generate_blocks(dense_row->ncol(), nblocks);
+
+    std::vector<int> block;
+    std::vector<std::shared_ptr<tatami::NumericMatrix> > combined;
+    combined.reserve(nblocks);
+    for (int b = 0; b < nblocks; ++b) {
+        combined.push_back(dense_row);
+        block.insert(block.end(), dense_row->ncol(), b);
+    }
+    auto expanded = tatami::make_DelayedBind<1>(std::move(combined));
 
     scran::MultiBatchPCA runner;
     runner.set_scale(scale).set_rank(rank);
-    auto res1 = runner.run(dense_row.get(), block.data());
+    auto res1 = runner.run(expanded.get(), block.data());
 
     // Checking that we get more-or-less the same results
     // from the vanilla PCA algorithm in the absence of blocks.
     scran::SimplePca ref;
     ref.set_scale(scale).set_rank(rank);
-    auto res2 = ref.run(dense_row.get());
+    auto res2 = ref.run(expanded.get());
 
     // Only relative variances make sense with the various scaling effects.
     for (auto& p : res1.variance_explained) { p /= res1.total_variance; }
@@ -285,16 +294,11 @@ TEST_P(MultiBatchPCAMoreTest, BalancedBlock) {
         res1.pcs /= mult;
     }
 
-    if (dense_row->ncol() % nblocks == 0) { // balanced blocks.
-        expect_equal_vectors(res1.variance_explained, res2.variance_explained);
-        expect_equal_pcs(res1.pcs, res2.pcs);
-    } else { // check that blocking actually has an effect.
-        EXPECT_TRUE(std::abs(res1.pcs(0,0) - res2.pcs(0,0)) > 1e-8);
-        EXPECT_TRUE(std::abs(res1.variance_explained[0] - res2.variance_explained[0]) > 1e-8);
-    }
+    expect_equal_vectors(res1.variance_explained, res2.variance_explained);
+    expect_equal_pcs(res1.pcs, res2.pcs);
 }
 
-TEST_P(MultiBatchPCAMoreTest, DuplicatedBlocks) {
+TEST_P(MultiBatchPCAMoreTest, WeightedOnly_DuplicatedBlocks) {
     assemble(GetParam());
     auto block = generate_blocks(dense_row->ncol(), nblocks);
 
@@ -333,9 +337,107 @@ TEST_P(MultiBatchPCAMoreTest, DuplicatedBlocks) {
     }
 
     // Comparing:
+    expanded_pcs.array() /= expanded_pcs.norm();
+    res2.pcs.array() /= res2.pcs.norm();
     expect_equal_pcs(expanded_pcs, res2.pcs);
+
+    res1.variance_explained.array() /= res1.total_variance;
+    res2.variance_explained.array() /= res2.total_variance;
     expect_equal_vectors(res1.variance_explained, res2.variance_explained);
-    EXPECT_FLOAT_EQ(res1.total_variance, res2.total_variance);
+}
+
+TEST_P(MultiBatchPCAMoreTest, ResidualOnly_VersusReference) {
+    assemble(GetParam());
+    auto block = generate_blocks(dense_row->ncol(), nblocks);
+
+    scran::MultiBatchPCA runner;
+    runner.set_scale(scale).set_rank(rank);
+    runner.set_block_policy(scran::MultiBatchPCA::BlockPolicy::RESIDUAL_ONLY);
+    auto res = runner.run(dense_row.get(), block.data());
+
+    scran::ResidualPca refrunner;
+    refrunner.set_scale(scale).set_rank(rank);
+    auto ref = refrunner.run(dense_row.get(), block.data());
+
+    expect_equal_vectors(res.variance_explained, ref.variance_explained);
+    EXPECT_FLOAT_EQ(res.total_variance, ref.total_variance);
+    expect_equal_rotation(res.rotation, ref.rotation);
+
+    are_pcs_centered(res.pcs);
+    EXPECT_EQ(res.pcs.rows(), rank);
+    EXPECT_EQ(res.pcs.cols(), dense_row->ncol());
+}
+
+TEST_P(MultiBatchPCAMoreTest, WeightedResidual_VersusReference) {
+    assemble(GetParam());
+    auto block = generate_blocks(dense_row->ncol(), nblocks);
+
+    scran::MultiBatchPCA runner;
+    runner.set_scale(scale).set_rank(rank);
+    runner.set_block_policy(scran::MultiBatchPCA::BlockPolicy::WEIGHTED_RESIDUAL);
+    auto res = runner.run(dense_row.get(), block.data());
+
+    scran::ResidualPca refrunner;
+    refrunner.set_scale(scale).set_rank(rank);
+    refrunner.set_weight_policy(scran::ResidualPca::WeightPolicy::EQUAL);
+    auto ref = refrunner.run(dense_row.get(), block.data());
+
+    expect_equal_vectors(res.variance_explained, ref.variance_explained);
+    EXPECT_FLOAT_EQ(res.total_variance, ref.total_variance);
+    expect_equal_rotation(res.rotation, ref.rotation);
+
+    are_pcs_centered(res.pcs);
+    EXPECT_EQ(res.pcs.rows(), rank);
+    EXPECT_EQ(res.pcs.cols(), dense_row->ncol());
+}
+
+TEST_P(MultiBatchPCAMoreTest, WeightedResidual_DuplicatedBlocks) {
+    assemble(GetParam());
+    auto block = generate_blocks(dense_row->ncol(), nblocks);
+
+    scran::MultiBatchPCA runner;
+    runner.set_scale(scale).set_rank(rank);
+    runner.set_block_policy(scran::MultiBatchPCA::BlockPolicy::WEIGHTED_RESIDUAL);
+    auto res1 = runner.run(dense_row.get(), block.data());
+
+    // Clone the first block.
+    auto block2 = block;
+    std::vector<int> subset;
+    for (size_t b = 0; b < block.size(); ++b) {
+        if (block[b] == 0) {
+            subset.push_back(b);
+            block2.push_back(0);
+        }
+    }
+    EXPECT_TRUE(subset.size() > 0);
+
+    auto subs = tatami::make_DelayedSubset<1>(dense_row, subset);
+    auto com = tatami::make_DelayedBind<1>(std::vector<decltype(subs)>{ dense_row, subs });
+    auto res2 = runner.run(com.get(), block2.data());
+
+    // Mocking up the expected results.
+    Eigen::MatrixXd expanded_pcs(rank, com->ncol());
+    size_t offset = dense_row->ncol();
+    expanded_pcs.leftCols(offset) = res1.pcs;
+    for (auto x : subset) {
+        expanded_pcs.col(offset) = res1.pcs.col(x);
+        ++offset;
+    }
+
+    Eigen::VectorXd recenters = expanded_pcs.rowwise().sum();
+    recenters /= expanded_pcs.cols();
+    for (size_t i = 0, end = expanded_pcs.cols(); i < end; ++i) {
+        expanded_pcs.col(i) -= recenters;
+    }
+
+    // Comparing:
+    expanded_pcs.array() /= expanded_pcs.norm();
+    res2.pcs.array() /= res2.pcs.norm();
+    expect_equal_pcs(expanded_pcs, res2.pcs);
+
+    res1.variance_explained.array() /= res1.total_variance;
+    res2.variance_explained.array() /= res2.total_variance;
+    expect_equal_vectors(res1.variance_explained, res2.variance_explained);
 }
 
 TEST_P(MultiBatchPCAMoreTest, SubsetTest) {
@@ -381,3 +483,7 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(1, 2, 3) // number of blocks
     )
 );
+
+/******************************************/
+
+

@@ -470,23 +470,18 @@ TEST_P(ResidualPcaWeightedTest, VersusReference) {
 
     // Some adjustment is required to adjust for the global scaling.
     ref.pcs.array() /= ref.pcs.norm();
-    for (auto& x : ref.variance_explained) {
-        x /= ref.total_variance;
-    }
+    ref.variance_explained.array() /= ref.total_variance;
 
     // Checking that we get more-or-less the same results with weighting.
     runner.set_num_threads(nthreads);
     runner.set_weight_policy(scran::ResidualPca::WeightPolicy::EQUAL);
 
     auto res1 = runner.run(combined.get(), blocking.data());
-
-    for (auto& x : res1.variance_explained) {
-        x /= res1.total_variance;
-    }
-    expect_equal_vectors(ref.variance_explained, res1.variance_explained);
-
     res1.pcs.array() /= res1.pcs.norm();
     expect_equal_pcs(ref.pcs, res1.pcs);
+
+    res1.variance_explained.array() /= res1.total_variance;
+    expect_equal_vectors(ref.variance_explained, res1.variance_explained);
 
     // Manually adding more instances of a block.
     auto expanded_block = blocking;
@@ -524,9 +519,7 @@ TEST_P(ResidualPcaWeightedTest, VersusReference) {
     res2.pcs.array() /= res2.pcs.norm();
     expect_equal_pcs(expanded_pcs, res2.pcs);
 
-    for (auto& x : res2.variance_explained) {
-        x /= res2.total_variance;
-    }
+    res2.variance_explained.array() /= res2.total_variance;
     expect_equal_vectors(ref.variance_explained, res2.variance_explained);
 }
 

@@ -64,6 +64,20 @@ inline void expect_equal_pcs(const Eigen::MatrixXd& left, const Eigen::MatrixXd&
     return;
 }
 
+inline void expect_equal_rotation(const Eigen::MatrixXd& left, const Eigen::MatrixXd& right, double tol=1e-8) {
+    ASSERT_EQ(left.cols(), right.cols());
+    ASSERT_EQ(left.rows(), right.rows());
+
+    for (size_t i = 0; i < left.rows(); ++i) {
+        for (size_t j = 0; j < left.cols(); ++j) {
+            auto aleft = std::abs(left(i, j));
+            auto aright = std::abs(right(i, j));
+            compare_almost_equal(aleft, aright, tol);
+        }
+    }
+    return;
+}
+
 inline void expect_equal_vectors(const Eigen::VectorXd& left, const Eigen::VectorXd& right, double tol=1e-8) {
     ASSERT_EQ(left.size(), right.size());
     for (size_t i = 0; i < left.size(); ++i) {
