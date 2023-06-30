@@ -28,13 +28,18 @@ namespace scran {
  * In multi-batch scenarios, we may wish to compute a PCA involving data from multiple batches.
  * However, if one batch has many more cells, it will dominate the PCA by driving the definition of the rotation vectors.
  * This may mask interesting aspects of variation in the smaller batches.
- * 
- * To overcome this problem, we weight each batch in inverse proportion to its size.
+ * To overcome this problem, we scale each batch in inverse proportion to its size.
  * This ensures that each batch contributes equally to the (conceptual) gene-gene covariance matrix, the eigenvectors of which are used as the rotation vectors.
  * Cells are then projected to the subspace defined by these rotation vectors to obtain PC coordinates.
  *
- * Unlike `BlockedPCA`, this class will not actually perform any batch correction.
- * Any batch effects will be preserved in the low-dimensional space and require further processing to remove.
+ * Alternatively, we can compute rotation vectors from the residuals, i.e., after centering each batch.
+ * The gene-gene covariance matrix will thus focus on variation within each batch, ensuring that the top PCs capture biological heterogeneity instead of batch effects.
+ * (This is particularly important in applications with many batches, where batch effects might otherwise displace biology from the top PCs.)
+ * However, unlike `ResidualPca`, it is important to note that the residuals are only used here for calculating the rotation vectors.
+ * We still project the input matrix to obtain the PCs, so batch effects will likely still be present (though hopefully less pronounced) and must be removed with methods like [MNN correction](https://github.com/LTLA/CppMnnCorrect).
+ *
+ * Finally, we can combine these mechanisms to compute rotation vectors from residuals with equal weighting.
+ * This gives us the benefits of both approaches as described above.
  */
 class MultiBatchPca {
 public:

@@ -32,6 +32,16 @@ namespace scran {
  * Unfortunately, naively centering the expression values will discard sparsity and reduce the computational efficiency of the PCA.
  * To avoid these drawbacks, `ResidualPca` defers the residual calculation until the matrix multiplication of the IRLBA step.
  * This yields the same results as the naive approach but is much faster as it can take advantage of efficient sparse operations.
+ *
+ * We can optionally scale each batch so that they contribute equally to the rotation vectors, regardless of their size.
+ * This is achieved using the same approach described in `MultiBatchPca`,
+ * whereby batches with more cells are downscaled during calculation of the rotation vectors.
+ * The final PCs are then obtained by projecting the residuals onto the space defined by the rotation vectors.
+ * This ensures that larger batches do not mask interesting variation in other batches.
+ *
+ * Note that the use of residuals for batch correction makes some strong assumptions about the batches,
+ * e.g., they have the same composition and the batch effect is a consistent shift for all populations.
+ * Non-linear correction algorithms are usually more effective, e.g., [MNN correction](https://github.com/LTLA/CppMnnCorrect).
  */
 class ResidualPca {
 public:
@@ -40,7 +50,7 @@ public:
      *
      * - `NONE`: no weighting is performed.
      *   This means that larger batches will contribute more to the calculation of the rotation vectors in the PCA.
-     * - `EQUAL`: each batch is weighted in inversely proportion to its number of cells,
+     * - `EQUAL`: each batch is downscaled in proportion to its number of cells,
      *   such that all batches contribute "equally" to the rotation vectors regardless of their size.
      */
     enum class WeightPolicy : char { NONE, EQUAL };
