@@ -90,27 +90,46 @@ $(function() {
 <code>#include &quot;tatami/tatami.hpp&quot;</code><br />
 <code>#include &quot;irlba/irlba.hpp&quot;</code><br />
 <code>#include &quot;Eigen/Dense&quot;</code><br />
-<code>#include &quot;../dimensionality_reduction/pca_utils.hpp&quot;</code><br />
+<code>#include &quot;../dimensionality_reduction/utils.hpp&quot;</code><br />
+<code>#include &quot;../dimensionality_reduction/convert.hpp&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for ScoreFeatureSet.hpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="ScoreFeatureSet_8hpp__incl.png" border="0" usemap="#ascran_2feature__set__enrichment_2ScoreFeatureSet_8hpp" alt=""/></div>
 <map name="ascran_2feature__set__enrichment_2ScoreFeatureSet_8hpp" id="ascran_2feature__set__enrichment_2ScoreFeatureSet_8hpp">
-<area shape="rect" title="Compute per&#45;cell scores for a feature set." alt="" coords="299,5,492,46"/>
-<area shape="rect" href="macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,102,132,127"/>
-<area shape="poly" title=" " alt="" coords="321,49,129,100,128,95,320,44"/>
-<area shape="rect" title=" " alt="" coords="155,102,230,127"/>
-<area shape="poly" title=" " alt="" coords="350,49,235,98,233,93,348,44"/>
-<area shape="rect" title=" " alt="" coords="253,102,311,127"/>
-<area shape="poly" title=" " alt="" coords="371,49,311,95,307,90,368,44"/>
-<area shape="rect" title=" " alt="" coords="335,102,456,127"/>
-<area shape="poly" title=" " alt="" coords="398,47,398,87,393,87,393,47"/>
-<area shape="rect" title=" " alt="" coords="480,102,577,127"/>
-<area shape="poly" title=" " alt="" coords="427,44,499,91,497,96,424,49"/>
-<area shape="rect" title=" " alt="" coords="601,102,696,127"/>
-<area shape="poly" title=" " alt="" coords="454,44,600,94,598,99,452,49"/>
-<area shape="rect" title=" " alt="" coords="719,94,893,135"/>
-<area shape="poly" title=" " alt="" coords="489,44,705,89,704,94,488,49"/>
+<area shape="rect" title="Compute per&#45;cell scores for a feature set." alt="" coords="305,5,499,46"/>
+<area shape="rect" href="macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,183,132,208"/>
+<area shape="poly" title=" " alt="" coords="306,48,241,68,178,96,127,134,89,174,85,170,124,130,175,92,239,63,304,43"/>
+<area shape="rect" title=" " alt="" coords="155,183,230,208"/>
+<area shape="poly" title=" " alt="" coords="305,36,274,44,244,56,217,73,195,96,187,112,184,131,187,168,182,169,178,131,182,111,190,92,213,69,242,51,273,39,304,31"/>
+<area shape="rect" title=" " alt="" coords="253,183,311,208"/>
+<area shape="poly" title=" " alt="" coords="305,39,277,47,250,59,226,75,207,95,200,114,207,133,223,155,245,173,242,177,220,159,202,136,195,114,202,93,223,71,248,54,275,42,304,34"/>
+<area shape="rect" title=" " alt="" coords="672,183,793,208"/>
+<area shape="poly" title=" " alt="" coords="500,43,563,63,626,92,677,130,716,170,712,174,673,134,623,96,561,68,498,49"/>
+<area shape="rect" title=" " alt="" coords="713,102,811,127"/>
+<area shape="poly" title=" " alt="" coords="493,44,694,91,706,94,705,100,693,97,492,49"/>
+<area shape="rect" title=" " alt="" coords="553,183,648,208"/>
+<area shape="poly" title=" " alt="" coords="500,34,528,42,556,54,581,71,601,92,610,111,614,131,610,169,605,168,608,131,605,112,597,96,577,75,553,59,526,47,498,39"/>
+<area shape="rect" href="dimensionality__reduction_2utils_8hpp_source.html" title=" " alt="" coords="217,94,390,135"/>
+<area shape="poly" title=" " alt="" coords="381,49,338,86,335,82,378,45"/>
+<area shape="rect" href="convert_8hpp_source.html" title=" " alt="" coords="414,94,587,135"/>
+<area shape="poly" title=" " alt="" coords="426,45,469,82,466,86,422,49"/>
+<area shape="poly" title=" " alt="" coords="245,138,119,180,117,175,244,133"/>
+<area shape="poly" title=" " alt="" coords="277,137,223,176,220,171,274,133"/>
+<area shape="poly" title=" " alt="" coords="300,136,291,169,286,168,295,134"/>
+<area shape="poly" title=" " alt="" coords="391,130,402,132,658,178,657,184,401,137,390,135"/>
+<area shape="poly" title=" " alt="" coords="378,133,541,176,540,181,377,138"/>
+<area shape="rect" title=" " alt="" coords="472,183,529,208"/>
+<area shape="poly" title=" " alt="" coords="353,133,459,175,457,180,351,138"/>
+<area shape="rect" title=" " alt="" coords="334,183,448,208"/>
+<area shape="poly" title=" " alt="" coords="327,133,369,171,365,175,323,137"/>
+<area shape="poly" title=" " alt="" coords="414,135,402,137,147,183,146,178,401,132,413,130"/>
+<area shape="poly" title=" " alt="" coords="424,138,245,184,243,178,423,133"/>
+<area shape="poly" title=" " alt="" coords="447,138,325,181,324,176,445,133"/>
+<area shape="poly" title=" " alt="" coords="559,133,684,175,682,180,558,138"/>
+<area shape="poly" title=" " alt="" coords="527,133,576,171,572,175,524,137"/>
+<area shape="poly" title=" " alt="" coords="503,135,503,167,498,167,498,135"/>
+<area shape="poly" title=" " alt="" coords="475,137,421,176,418,171,472,133"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">

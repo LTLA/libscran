@@ -1,3 +1,3 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$structscran_1_1PerCellQcMetrics_1_1Buffers.html" title="Buffers for direct storage of the calculated statistics." alt="" coords="5,5,172,46"/>
+<area shape="rect" id="Node000000" href="$classscran_1_1PerCellRnaQcMetrics.html" title="Compute typical per&#45;cell quality control metrics from an RNA count matrix." alt="" coords="5,5,190,31"/>
 </map>

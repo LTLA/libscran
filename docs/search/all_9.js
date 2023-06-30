@@ -22,6 +22,6 @@ var searchData=
   ['modelgenevar_19',['ModelGeneVar',['../classscran_1_1ModelGeneVar.html',1,'scran']]],
   ['modelgenevar_2ehpp_20',['ModelGeneVar.hpp',['../ModelGeneVar_8hpp.html',1,'']]],
   ['modularity_21',['modularity',['../structscran_1_1ClusterSNNGraphMultiLevel_1_1Results.html#ad24f154bae449495590393bdb2ff59fc',1,'scran::ClusterSNNGraphMultiLevel::Results::modularity'],['../structscran_1_1ClusterSNNGraphWalktrap_1_1Results.html#a54659717e5be3972357d5fd4680894d9',1,'scran::ClusterSNNGraphWalktrap::Results::modularity'],['../structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#ac1bf98a6de928de8b786643942768deb',1,'scran::ClusterSNNGraphLeiden::Defaults::modularity']]],
-  ['multibatchpca_22',['MultiBatchPCA',['../classscran_1_1MultiBatchPCA.html',1,'scran']]],
-  ['multibatchpca_2ehpp_23',['MultiBatchPCA.hpp',['../MultiBatchPCA_8hpp.html',1,'']]]
+  ['multibatchpca_22',['MultiBatchPca',['../classscran_1_1MultiBatchPca.html',1,'scran']]],
+  ['multibatchpca_2ehpp_23',['MultiBatchPca.hpp',['../MultiBatchPca_8hpp.html',1,'']]]
 ];

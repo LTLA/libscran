@@ -1,0 +1,5 @@
+<map id="scran/dimensionality_reduction/ResidualPca.hpp" name="scran/dimensionality_reduction/ResidualPca.hpp">
+<area shape="rect" id="Node000001" title="Compute PCA after regressing out an uninteresting factor." alt="" coords="5,5,188,46"/>
+<area shape="rect" id="Node000002" href="$scran_8hpp_source.html" title=" " alt="" coords="40,94,153,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,61,99,93,94,93,94,61"/>
+</map>
