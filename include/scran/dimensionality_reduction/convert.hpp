@@ -1,5 +1,5 @@
-#ifndef SCRAN_PCA_UTILS_HPP
-#define SCRAN_PCA_UTILS_HPP
+#ifndef SCRAN_PCA_CONVERT_HPP
+#define SCRAN_PCA_CONVERT_HPP
 
 #include "../utils/macros.hpp"
 
@@ -15,131 +15,11 @@ namespace scran {
 
 namespace pca_utils {
 
-inline void clean_up(size_t NC, Eigen::MatrixXd& U, Eigen::VectorXd& D) {
-    auto uIt = U.data();
-    auto dIt = D.data();
-    for (int i = 0, iend = U.cols(); i < iend; ++i, ++dIt) {
-        for (int j = 0, jend = U.rows(); j < jend; ++j, ++uIt) {
-            (*uIt) *= (*dIt);
-        }
-    }
-
-    for (auto& d : D) {
-        d = d * d / static_cast<double>(NC - 1);
-    }
-    return;
-}
-
-inline double process_scale_vector(bool scale, Eigen::VectorXd& scale_v) {
-    if (scale) {
-        double total_var = 0;
-        for (auto& s : scale_v) {
-            if (s) {
-                s = std::sqrt(s);
-                ++total_var;
-            } else {
-                s = 1; // avoid division by zero.
-            }
-        }
-        return total_var;
-    } else {
-        return std::accumulate(scale_v.begin(), scale_v.end(), 0.0);
-    }
-}
-
-template<typename T, typename IDX, typename X>
-std::shared_ptr<const tatami::Matrix<T, IDX> > subset_matrix_by_features(const tatami::Matrix<T, IDX>* mat, const X * features) {
-    std::vector<int> subset;
-    subset.reserve(mat->nrow());
-    for (size_t r = 0; r < mat->nrow(); ++r) {
-        if (features[r]) {
-            subset.push_back(r);
-        }
-    }
-    return tatami::make_DelayedSubset<0>(tatami::wrap_shared_ptr(mat), std::move(subset));
-}
-
-// Compute mean and variance from CSR components.
-template<typename Index_>
-void compute_mean_and_variance_from_sparse_components( 
-    Index_ NR,
-    Index_ NC,
-    const std::vector<double>& values,
-    const std::vector<int>& indices,
-    const std::vector<size_t>& ptrs,
-    Eigen::VectorXd& centers,
-    Eigen::VectorXd& variances,
-    int nthreads) 
-{
-    tatami::parallelize([&](size_t, Index_ start, Index_ length) -> void {
-        for (Index_ r = start, end = start + length; r < end; ++r) {
-            auto offset = ptrs[r];
-
-            tatami::SparseRange<double, int> range;
-            range.number = ptrs[r+1] - offset;
-            range.value = values.data() + offset;
-            range.index = indices.data() + offset;
-
-            auto results = tatami::stats::variances::compute_direct(range, NC);
-            centers.coeffRef(r) = results.first;
-            variances.coeffRef(r) = results.second;
-        }
-    }, NR, nthreads);
-}
-
-// Compute mean and variance from column-major dense matrix.
-inline void compute_mean_and_variance_from_dense_columns(
-    const Eigen::MatrixXd& mat, 
-    Eigen::VectorXd& centers, 
-    Eigen::VectorXd& variances, 
-    int nthreads)
-{
-    size_t NC = mat.cols();
-    tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
-        size_t NR = mat.rows();
-        const double* ptr = mat.data() + start * NR;
-        for (size_t c = start, end = start + length; c < end; ++c, ptr += NR) {
-            auto results = tatami::stats::variances::compute_direct(ptr, NR);
-            centers.coeffRef(c) = results.first;
-            variances.coeffRef(c) = results.second;
-        }
-    }, NC, nthreads);
-}
-
-inline void center_and_scale_dense_columns(Eigen::MatrixXd& mat, const Eigen::VectorXd& centers, bool use_scale, const Eigen::VectorXd& scale, int nthreads) {
-    size_t NC = mat.cols();
-    tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
-        size_t NR = mat.rows();
-        double* ptr = mat.data() + start * NR;
-        for (size_t c = start, end = start + length; c < end; ++c, ptr += NR) {
-            auto mean = centers[c];
-            for (size_t r = 0; r < NR; ++r) {
-                ptr[r] -= mean;
-            }
-
-            if (use_scale) {
-                auto sd = scale[c];
-                for (size_t r = 0; r < NR; ++r) {
-                    // process_scale_vector should already protect against division by zero.
-                    ptr[r] /= sd;
-                }
-            }
-        }
-    }, NC, nthreads);
-}
-
-/************************************************
- ************************************************/
-
-typedef irlba::ParallelSparseMatrix<> SparseMatrix;
-
 struct SparseComponents {
     std::vector<size_t> ptrs;
     std::vector<double> values;
     std::vector<int> indices;
 };
-
-namespace extract_for_pca_internal {
 
 /*
  * We use a two-pass philosophy to create a CSR matrix, which is a little
@@ -149,6 +29,8 @@ namespace extract_for_pca_internal {
  * single CSR matrix; or we'd have to suffer repeated reallocations or 
  * overallocations to accommodate an unknown total number of non-zeros.
 */
+
+namespace extract_for_pca_internal {
 
 template<typename T, typename IDX>
 SparseComponents sparse_by_row(const tatami::Matrix<T, IDX>* mat, int nthreads) {

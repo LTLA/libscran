@@ -13,12 +13,13 @@
 #include "clustering/ClusterKmeans.hpp"
 #include "clustering/ClusterSNNGraph.hpp"
 #include "differential_analysis/ScoreMarkers.hpp"
-#include "dimensionality_reduction/BlockedPCA.hpp"
-#include "dimensionality_reduction/MultiBatchPCA.hpp"
-#include "dimensionality_reduction/RunPCA.hpp"
 #include "feature_selection/ChooseHVGs.hpp"
 #include "feature_selection/FitTrendVar.hpp"
 #include "feature_selection/ModelGeneVar.hpp"
+
+#include "dimensionality_reduction/SimplePca.hpp"
+#include "dimensionality_reduction/ResidualPca.hpp"
+#include "dimensionality_reduction/MultiBatchPca.hpp"
 
 #include "normalization/LogNormCounts.hpp"
 #include "normalization/GroupedSizeFactors.hpp"

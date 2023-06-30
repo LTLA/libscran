@@ -1,20 +1,22 @@
 #include <gtest/gtest.h>
 #include "../utils/macros.h"
 
-#include "../data/data.h"
+#include "../data/Simulator.hpp"
 #include "compare_pcs.h"
 
 #include "tatami/tatami.hpp"
 
-#include "scran/dimensionality_reduction/RunPCA.hpp"
+#include "scran/dimensionality_reduction/SimplePca.hpp"
 
-class RunPCATestCore {
+class SimplePcaTestCore {
 protected:
     std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
 
     template<class Param>
     void assemble(const Param& param) {
-        dense_row = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
+        size_t nr = 199, nc = 165;
+        auto mat = Simulator().matrix(nr, nc);
+        dense_row.reset(new decltype(mat)(std::move(mat)));
         dense_column = tatami::convert_to_dense(dense_row.get(), 1);
         sparse_row = tatami::convert_to_sparse(dense_row.get(), 0);
         sparse_column = tatami::convert_to_sparse(dense_row.get(), 1);
@@ -30,14 +32,14 @@ protected:
 
 /******************************************/
 
-class RunPCABasicTest : public ::testing::TestWithParam<std::tuple<bool, int, int> >, public RunPCATestCore {};
+class SimplePcaBasicTest : public ::testing::TestWithParam<std::tuple<bool, int, int> >, public SimplePcaTestCore {};
 
-TEST_P(RunPCABasicTest, Test) {
+TEST_P(SimplePcaBasicTest, Test) {
     auto param = GetParam();
     assemble(param);
     auto threads = std::get<2>(param);
 
-    scran::RunPCA runner;
+    scran::SimplePca runner;
     runner.set_scale(scale).set_rank(rank);
     auto ref = runner.run(dense_row.get());
 
@@ -78,6 +80,8 @@ TEST_P(RunPCABasicTest, Test) {
             EXPECT_FLOAT_EQ(total_var, ref.total_variance);
         }
 
+        EXPECT_TRUE(ref.total_variance >= std::accumulate(ref.variance_explained.begin(), ref.variance_explained.end(), 0.0));
+
     } else {
         runner.set_num_threads(threads);
 
@@ -107,8 +111,8 @@ TEST_P(RunPCABasicTest, Test) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    RunPCA,
-    RunPCABasicTest,
+    SimplePca,
+    SimplePcaBasicTest,
     ::testing::Combine(
         ::testing::Values(false, true), // to scale or not to scale?
         ::testing::Values(2, 3, 4), // number of PCs to obtain
@@ -118,15 +122,14 @@ INSTANTIATE_TEST_SUITE_P(
 
 /******************************************/
 
-class RunPCAMoreTest : public ::testing::TestWithParam<std::tuple<bool, int> >, public RunPCATestCore {};
+class SimplePcaMoreTest : public ::testing::TestWithParam<std::tuple<bool, int> >, public SimplePcaTestCore {};
 
-TEST_P(RunPCAMoreTest, Subset) {
+TEST_P(SimplePcaMoreTest, Subset) {
     assemble(GetParam());
 
     std::vector<int> subset(dense_row->nrow());
     std::vector<double> buffer(dense_row->ncol());
     std::vector<double> submatrix;
-    auto it = sparse_matrix.begin();
 
     size_t sub_nrows = 0;
     auto ext = dense_row->dense_row();
@@ -139,7 +142,7 @@ TEST_P(RunPCAMoreTest, Subset) {
         }
     }
 
-    scran::RunPCA runner;
+    scran::SimplePca runner;
     runner.set_scale(scale).set_rank(rank);
 
     auto out = runner.run(dense_row.get(), subset.data());
@@ -156,23 +159,29 @@ TEST_P(RunPCAMoreTest, Subset) {
     EXPECT_FLOAT_EQ(out.total_variance, ref.total_variance);
 }
 
-TEST_P(RunPCAMoreTest, ZeroVariance) {
-    assemble(GetParam());
+TEST_P(SimplePcaMoreTest, ZeroVariance) {
+    auto param = GetParam();
+    scale = std::get<0>(param);
+    rank = std::get<1>(param);
 
-    auto copy = sparse_matrix;
-    std::fill(copy.begin(), copy.begin() + sparse_ncol, 0);
-    tatami::DenseRowMatrix<double> has_zero(sparse_nrow, sparse_ncol, copy);
+    size_t nr = 109, nc = 153;
+    auto vec = Simulator().vector(nr * nc);
 
-    std::vector<double> removed(copy.begin() + sparse_ncol, copy.end());
-    tatami::DenseRowMatrix<double> leftovers(sparse_nrow - 1, sparse_ncol, removed);
+    auto copy = vec;
+    size_t last_row = (nr - 1) * nc;
+    std::fill(copy.begin() + last_row, copy.begin() + last_row + nc, 0);
+    tatami::DenseRowMatrix<double> has_zero(nr, nc, std::move(copy));
 
-    scran::RunPCA runner;
+    std::vector<double> removed(vec.begin(), vec.begin() + last_row);
+    tatami::DenseRowMatrix<double> leftovers(nr - 1, nc, std::move(removed));
+
+    scran::SimplePca runner;
     runner.set_scale(scale).set_rank(rank);
     
     auto ref = runner.run(&leftovers);
     auto out = runner.run(&has_zero);
 
-    expect_equal_pcs(ref.pcs, out.pcs, 1e-6); // dunno why it needs a higher tolerance, but whatever.
+    expect_equal_pcs(ref.pcs, out.pcs, 1e-4, false); // RNG effect is slightly different when we lose a feature, hence the need for a looser tolerance.
     expect_equal_vectors(ref.variance_explained, out.variance_explained);
     EXPECT_FLOAT_EQ(out.total_variance, ref.total_variance);
 
@@ -186,8 +195,8 @@ TEST_P(RunPCAMoreTest, ZeroVariance) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    RunPCA,
-    RunPCAMoreTest,
+    SimplePca,
+    SimplePcaMoreTest,
     ::testing::Combine(
         ::testing::Values(false, true), // to scale or not to scale?
         ::testing::Values(2, 3, 4) // number of PCs to obtain

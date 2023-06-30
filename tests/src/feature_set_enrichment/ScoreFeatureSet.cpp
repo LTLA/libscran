@@ -5,7 +5,7 @@
 #include "../data/Simulator.hpp"
 
 #include "scran/feature_set_enrichment/ScoreFeatureSet.hpp"
-#include "scran/dimensionality_reduction/RunPCA.hpp"
+#include "scran/dimensionality_reduction/SimplePca.hpp"
 #include "aarand/aarand.hpp"
 
 class ScoreFeatureSetTestCore {
@@ -37,7 +37,7 @@ protected:
     };
 
     static ReferenceResults reference(const tatami::NumericMatrix* mat, const unsigned char* features, bool scale) {
-        scran::RunPCA runner;
+        scran::SimplePca runner;
         runner.set_rank(1);
         runner.set_scale(scale);
         auto res = runner.run(mat, features);
