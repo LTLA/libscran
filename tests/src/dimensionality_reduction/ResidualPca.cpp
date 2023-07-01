@@ -534,3 +534,31 @@ INSTANTIATE_TEST_SUITE_P(
     )
 );
 
+/******************************************/
+
+TEST(ResidualPcaTest, ReturnValues) {
+    size_t nr = 120, nc = 131;
+    auto mat = Simulator().matrix(nr, nc);
+    auto block = generate_blocks(nc, 3);
+
+    scran::ResidualPca runner;
+    runner.set_rank(4);
+    {
+        auto ref = runner.run(&mat, block.data());
+        EXPECT_EQ(ref.rotation.cols(), 0);
+        EXPECT_EQ(ref.rotation.rows(), 0);
+        EXPECT_EQ(ref.center.rows(), 0);
+        EXPECT_EQ(ref.center.cols(), 0);
+        EXPECT_EQ(ref.scale.size(), 0);
+    }
+
+    runner.set_return_center(true).set_return_scale(true).set_return_rotation(true);
+    {
+        auto ref = runner.run(&mat, block.data());
+        EXPECT_EQ(ref.rotation.cols(), 4);
+        EXPECT_EQ(ref.rotation.rows(), nr);
+        EXPECT_EQ(ref.center.cols(), 3);
+        EXPECT_EQ(ref.center.rows(), nr);
+        EXPECT_EQ(ref.scale.size(), nr);
+    }
+}

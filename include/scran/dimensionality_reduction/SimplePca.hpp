@@ -55,11 +55,31 @@ public:
          * See `set_num_threads()` for more details.
          */
         static constexpr int num_threads = 1;
+
+        /**
+         * See `set_return_rotation()` for more details.
+         */
+        static constexpr bool return_rotation = false;
+
+        /**
+         * See `set_return_center()` for more details.
+         */
+        static constexpr bool return_center = false;
+
+        /**
+         * See `set_return_scale()` for more details.
+         */
+        static constexpr bool return_scale = false;
     };
 private:
     bool scale = Defaults::scale;
     bool transpose = Defaults::transpose;
     int rank = Defaults::rank;
+
+    bool return_rotation = Defaults::return_rotation;
+    bool return_center = Defaults::return_center;
+    bool return_scale = Defaults::return_scale;
+
     int nthreads = Defaults::num_threads;
 
 public:
@@ -96,6 +116,36 @@ public:
     }
 
     /**
+     * @param r Should the rotation matrix be returned in the output?
+     * 
+     * @return A reference to this `SimplePca` instance.
+     */
+    SimplePca& set_return_rotation(bool r = Defaults::return_rotation) {
+        return_rotation = r;
+        return *this;
+    }
+
+    /**
+     * @param c Should the center vector be returned in the output?
+     * 
+     * @return A reference to this `SimplePca` instance.
+     */
+    SimplePca& set_return_center(bool r = Defaults::return_center) {
+        return_center = r;
+        return *this;
+    }
+
+    /**
+     * @param c Should the scale vector be returned in the output?
+     * 
+     * @return A reference to this `SimplePca` instance.
+     */
+    SimplePca& set_return_scale(bool r = Defaults::return_scale) {
+        return_scale = r;
+        return *this;
+    }
+
+    /**
      * @param n Number of threads to use.
      * @return A reference to this `SimplePca` instance.
      */
@@ -111,14 +161,17 @@ private:
         const irlba::Irlba& irb, 
         Eigen::MatrixXd& pcs, 
         Eigen::MatrixXd& rotation, 
-        Eigen::VectorXd& variance_explained, 
+        Eigen::VectorXd& variance_explained,
+        Eigen::VectorXd& center_v,
+        Eigen::VectorXd& scale_v,
         double& total_var)
     const {
         auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major extraction to create a CSR matrix.
         pca_utils::SparseMatrix emat(mat->ncol(), mat->nrow(), std::move(extracted.values), std::move(extracted.indices), std::move(extracted.ptrs), nthreads); // CSC with genes in columns.
 
         size_t ngenes = emat.cols();
-        Eigen::VectorXd center_v(ngenes), scale_v(ngenes);
+        center_v.resize(ngenes);
+        scale_v.resize(ngenes);
         pca_utils::compute_mean_and_variance_from_sparse_matrix(emat, center_v, scale_v, nthreads);
         total_var = pca_utils::process_scale_vector(scale, scale_v);
 
@@ -138,12 +191,15 @@ private:
         Eigen::MatrixXd& pcs, 
         Eigen::MatrixXd& rotation, 
         Eigen::VectorXd& variance_explained, 
+        Eigen::VectorXd& center_v,
+        Eigen::VectorXd& scale_v,
         double& total_var) 
     const {
         auto emat = pca_utils::extract_dense_for_pca(mat, nthreads); // get a column-major matrix with genes in columns.
 
         size_t ngenes = emat.cols();
-        Eigen::VectorXd center_v(ngenes), scale_v(ngenes);
+        center_v.resize(ngenes);
+        scale_v.resize(ngenes);
         pca_utils::compute_mean_and_variance_from_dense_matrix(emat, center_v, scale_v, nthreads);
         total_var = pca_utils::process_scale_vector(scale, scale_v);
 
@@ -158,6 +214,8 @@ private:
         Eigen::MatrixXd& pcs, 
         Eigen::MatrixXd& rotation, 
         Eigen::VectorXd& variance_explained, 
+        Eigen::VectorXd& center_v,
+        Eigen::VectorXd& scale_v,
         double& total_var) 
     const {
         irlba::EigenThreadScope t(nthreads);
@@ -165,9 +223,9 @@ private:
         irb.set_number(rank);
 
         if (mat->sparse()) {
-            run_sparse(mat, irb, pcs, rotation, variance_explained, total_var);
+            run_sparse(mat, irb, pcs, rotation, variance_explained, center_v, scale_v, total_var);
         } else {
-            run_dense(mat, irb, pcs, rotation, variance_explained, total_var);
+            run_dense(mat, irb, pcs, rotation, variance_explained, center_v, scale_v, total_var);
         }
 
         pca_utils::clean_up(mat->ncol(), pcs, variance_explained);
@@ -204,12 +262,26 @@ public:
         double total_variance = 0;
 
         /**
-         * Rotation matrix.
+         * Rotation matrix, only returned if `SimplePca::set_return_rotation()` is `true`.
          * Each row corresponds to a feature while each column corresponds to a PC.
          * The number of PCs is determined by `set_rank()`.
          * If feature filtering was performed, the number of rows is equal to the number of features remaining after filtering.
          */
         Eigen::MatrixXd rotation;
+
+        /**
+         * Centering vector, only returned if `SimplePca::set_return_center()` is `true`.
+         * Each entry corresponds to a row in the matrix and contains the mean value for that feature.
+         * If feature filtering was performed, the length is equal to the number of features remaining after filtering.
+         */
+        Eigen::MatrixXd center;
+
+        /**
+         * Scaling vector, only returned if `SimplePca::set_return_center()` is `true`.
+         * Each entry corresponds to a row in the matrix and contains the scaling factor used to divide the feature values if `SimplePca::set_scale()` is `true`.
+         * If feature filtering was performed, the length is equal to the number of features remaining after filtering.
+         */
+        Eigen::MatrixXd scale;
     };
 
     /**
@@ -226,7 +298,22 @@ public:
     template<typename T, typename IDX>
     Results run(const tatami::Matrix<T, IDX>* mat) const {
         Results output;
-        run_internal(mat, output.pcs, output.rotation, output.variance_explained, output.total_variance);
+
+        Eigen::MatrixXd rotation;
+        Eigen::VectorXd center, scale;
+        run_internal(mat, output.pcs, rotation, output.variance_explained, center, scale, output.total_variance);
+
+        // Shifting them if we want to keep them.
+        if (return_rotation) {
+            output.rotation = std::move(rotation);
+        }
+        if (return_center) {
+            output.center = std::move(center);
+        }
+        if (return_scale) {
+            output.scale = std::move(scale);
+        }
+
         return output;
     }
 
@@ -248,16 +335,12 @@ public:
      */
     template<typename T, typename IDX, typename X>
     Results run(const tatami::Matrix<T, IDX>* mat, const X* features) const {
-        Results output;
-
         if (!features) {
-            run_internal(mat, output.pcs, output.rotation, output.variance_explained, output.total_variance);
+            return run(mat);
         } else {
             auto subsetted = pca_utils::subset_matrix_by_features(mat, features);
-            run_internal(subsetted.get(), output.pcs, output.rotation, output.variance_explained, output.total_variance);
+            return run(subsetted.get());
         }
-
-        return output;
     }
 };
 
