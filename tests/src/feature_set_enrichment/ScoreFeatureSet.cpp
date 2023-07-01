@@ -40,6 +40,7 @@ protected:
         scran::SimplePca runner;
         runner.set_rank(1);
         runner.set_scale(scale);
+        runner.set_return_rotation(true);
         auto res = runner.run(mat, features);
 
         ReferenceResults output;
