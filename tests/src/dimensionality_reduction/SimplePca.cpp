@@ -47,8 +47,6 @@ TEST_P(SimplePcaBasicTest, Test) {
         EXPECT_EQ(ref.variance_explained.size(), rank);
         EXPECT_EQ(ref.pcs.rows(), rank);
         EXPECT_EQ(ref.pcs.cols(), dense_row->ncol());
-        EXPECT_EQ(ref.rotation.rows(), dense_row->nrow());
-        EXPECT_EQ(ref.rotation.cols(), rank);
 
         // Checking that we scaled the PCs correctly.
         size_t NC = dense_row->ncol();
@@ -143,7 +141,7 @@ TEST_P(SimplePcaMoreTest, Subset) {
     }
 
     scran::SimplePca runner;
-    runner.set_scale(scale).set_rank(rank);
+    runner.set_scale(scale).set_rank(rank).set_return_rotation(true);
 
     auto out = runner.run(dense_row.get(), subset.data());
     EXPECT_EQ(out.variance_explained.size(), rank);
@@ -202,3 +200,27 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(2, 3, 4) // number of PCs to obtain
     )
 );
+
+TEST(SimplePcaTest, ReturnValues) {
+    size_t nr = 99, nc = 123;
+    auto mat = Simulator().matrix(nr, nc);
+
+    scran::SimplePca runner;
+    runner.set_rank(4);
+    {
+        auto ref = runner.run(&mat);
+        EXPECT_EQ(ref.rotation.cols(), 0);
+        EXPECT_EQ(ref.rotation.rows(), 0);
+        EXPECT_EQ(ref.center.size(), 0);
+        EXPECT_EQ(ref.scale.size(), 0);
+    }
+
+    runner.set_return_center(true).set_return_scale(true).set_return_rotation(true);
+    {
+        auto ref = runner.run(&mat);
+        EXPECT_EQ(ref.rotation.cols(), 4);
+        EXPECT_EQ(ref.rotation.rows(), nr);
+        EXPECT_EQ(ref.center.size(), nr);
+        EXPECT_EQ(ref.scale.size(), nr);
+    }
+}
