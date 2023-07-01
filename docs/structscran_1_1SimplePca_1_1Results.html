@@ -97,6 +97,10 @@ Public Attributes</h2></td></tr>
 <tr class="separator:a1c3bf6e8c6af914c3359fad6cb6666d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a79dd9564437973d7a2088462e0f9a646"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1SimplePca_1_1Results.html#a79dd9564437973d7a2088462e0f9a646">rotation</a></td></tr>
 <tr class="separator:a79dd9564437973d7a2088462e0f9a646"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8c5be8757519bf063a81cfdbd1e8112"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1SimplePca_1_1Results.html#ae8c5be8757519bf063a81cfdbd1e8112">center</a></td></tr>
+<tr class="separator:ae8c5be8757519bf063a81cfdbd1e8112"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec778e5e04cb6af9313845de1e5a4374"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1SimplePca_1_1Results.html#aec778e5e04cb6af9313845de1e5a4374">scale</a></td></tr>
+<tr class="separator:aec778e5e04cb6af9313845de1e5a4374"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Container for the PCA results. </p>
@@ -158,7 +162,37 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Rotation matrix. Each row corresponds to a feature while each column corresponds to a PC. The number of PCs is determined by <code><a class="el" href="classscran_1_1SimplePca.html#a5bea514662c9fd85fd59b423b415aae1">set_rank()</a></code>. If feature filtering was performed, the number of rows is equal to the number of features remaining after filtering. </p>
+<p>Rotation matrix, only returned if <code><a class="el" href="classscran_1_1SimplePca.html#a42164645dcd9c353e518a65c435a5e45">SimplePca::set_return_rotation()</a></code> is <code>true</code>. Each row corresponds to a feature while each column corresponds to a PC. The number of PCs is determined by <code><a class="el" href="classscran_1_1SimplePca.html#a5bea514662c9fd85fd59b423b415aae1">set_rank()</a></code>. If feature filtering was performed, the number of rows is equal to the number of features remaining after filtering. </p>
+
+</div>
+</div>
+<a id="ae8c5be8757519bf063a81cfdbd1e8112" name="ae8c5be8757519bf063a81cfdbd1e8112"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae8c5be8757519bf063a81cfdbd1e8112">&#9670;&#160;</a></span>center</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::MatrixXd scran::SimplePca::Results::center</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Centering vector, only returned if <code><a class="el" href="classscran_1_1SimplePca.html#a7b531c386dde8cc43fb88a8d0748e9d9">SimplePca::set_return_center()</a></code> is <code>true</code>. Each entry corresponds to a row in the matrix and contains the mean value for that feature. If feature filtering was performed, the length is equal to the number of features remaining after filtering. </p>
+
+</div>
+</div>
+<a id="aec778e5e04cb6af9313845de1e5a4374" name="aec778e5e04cb6af9313845de1e5a4374"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec778e5e04cb6af9313845de1e5a4374">&#9670;&#160;</a></span>scale</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::MatrixXd scran::SimplePca::Results::scale</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Scaling vector, only returned if <code><a class="el" href="classscran_1_1SimplePca.html#a7b531c386dde8cc43fb88a8d0748e9d9">SimplePca::set_return_center()</a></code> is <code>true</code>. Each entry corresponds to a row in the matrix and contains the scaling factor used to divide the feature values if <code><a class="el" href="classscran_1_1SimplePca.html#ac2ed6378fbcea8f4be809b1aaf04aad5">SimplePca::set_scale()</a></code> is <code>true</code>. If feature filtering was performed, the length is equal to the number of features remaining after filtering. </p>
 
 </div>
 </div>

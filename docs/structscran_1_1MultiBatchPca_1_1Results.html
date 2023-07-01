@@ -97,10 +97,14 @@ Public Attributes</h2></td></tr>
 <tr class="separator:a8f8c371781b3931f13f1b487ad0cc044"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d2caab0d75322582de7f8c3880a5c78"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1MultiBatchPca_1_1Results.html#a9d2caab0d75322582de7f8c3880a5c78">rotation</a></td></tr>
 <tr class="separator:a9d2caab0d75322582de7f8c3880a5c78"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20efd348150662b68e5d0ad44a0cde3b"><td class="memItemLeft" align="right" valign="top">Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1MultiBatchPca_1_1Results.html#a20efd348150662b68e5d0ad44a0cde3b">center</a></td></tr>
+<tr class="separator:a20efd348150662b68e5d0ad44a0cde3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa634e52e04a45bf22679e063654b0bfd"><td class="memItemLeft" align="right" valign="top">Eigen::VectorXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1MultiBatchPca_1_1Results.html#aa634e52e04a45bf22679e063654b0bfd">scale</a></td></tr>
+<tr class="separator:aa634e52e04a45bf22679e063654b0bfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Container for the PCA results. </p>
-<p>Instances should be constructed by the <code>MultiBatchPca::run()</code> methods. </p>
+<p>Instances should be constructed by the <code><a class="el" href="classscran_1_1MultiBatchPca.html#a02198e53fecd46289c648e8cf9ddaf7f">MultiBatchPca::run()</a></code> methods. </p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="af9a778bbf9b2ed871a45e29a698f6093" name="af9a778bbf9b2ed871a45e29a698f6093"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af9a778bbf9b2ed871a45e29a698f6093">&#9670;&#160;</a></span>pcs</h2>
@@ -159,7 +163,40 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Rotation matrix. Each row corresponds to a feature while each column corresponds to a PC. The number of PCs is determined by <code><a class="el" href="classscran_1_1MultiBatchPca.html#a1a826421c677af500db839f8a18a2c39">set_rank()</a></code>. If feature filtering was performed, the number of rows is equal to the number of features remaining after filtering. </p>
+<p>Rotation matrix, only returned if <code><a class="el" href="classscran_1_1MultiBatchPca.html#a6325469e46f9a4dc9a6969d44cab099d">MultiBatchPca::set_return_rotation()</a></code> is <code>true</code>. Each row corresponds to a feature while each column corresponds to a PC. The number of PCs is determined by <code><a class="el" href="classscran_1_1MultiBatchPca.html#a1a826421c677af500db839f8a18a2c39">set_rank()</a></code>. If feature filtering was performed, the number of rows is equal to the number of features remaining after filtering. </p>
+
+</div>
+</div>
+<a id="a20efd348150662b68e5d0ad44a0cde3b" name="a20efd348150662b68e5d0ad44a0cde3b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20efd348150662b68e5d0ad44a0cde3b">&#9670;&#160;</a></span>center</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::MatrixXd scran::MultiBatchPca::Results::center</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Centering matrix, only returned if <code><a class="el" href="classscran_1_1MultiBatchPca.html#af44678f99924f3e0025fb06d88237132">MultiBatchPca::set_return_center()</a></code> is <code>true</code>.</p>
+<p>If <code><a class="el" href="classscran_1_1MultiBatchPca.html#a69c46de0ade14b01cd6551babe94a901">MultiBatchPca::set_block_policy()</a></code> is <code>MultiBatchPca::BlockPolicy::RESIDUAL_ONLY</code> or <code>MultiBatchPca::BlockPolicy::WEIGHTED_RESIDUAL</code>, the number of columns is equal to the number of unique blocking levels. Each row corresponds to a row in the matrix and each column corresponds to a block, such that each entry contains the mean for a particular feature in the corresponding block.</p>
+<p>Otherwise, the number of columns is equal to 1. Each row corresponds to a row in the matrix and contains the (weighted) grand mean for that feature across all blocks.</p>
+<p>If feature filtering was performed, the length is equal to the number of features remaining after filtering. </p>
+
+</div>
+</div>
+<a id="aa634e52e04a45bf22679e063654b0bfd" name="aa634e52e04a45bf22679e063654b0bfd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa634e52e04a45bf22679e063654b0bfd">&#9670;&#160;</a></span>scale</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::VectorXd scran::MultiBatchPca::Results::scale</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Scaling vector, only returned if <code><a class="el" href="classscran_1_1MultiBatchPca.html#af44678f99924f3e0025fb06d88237132">MultiBatchPca::set_return_center()</a></code> is <code>true</code>. Each entry corresponds to a row in the matrix and contains the scaling factor used to divide the feature values if <code><a class="el" href="classscran_1_1MultiBatchPca.html#affd83f857848808000f8a1750c950152">MultiBatchPca::set_scale()</a></code> is <code>true</code>. If feature filtering was performed, the length is equal to the number of features remaining after filtering. </p>
 
 </div>
 </div>

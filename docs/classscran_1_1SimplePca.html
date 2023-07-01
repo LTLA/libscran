@@ -105,6 +105,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ac2ed6378fbcea8f4be809b1aaf04aad5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9ba30c5f99233681c49106508b9d8297"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1SimplePca.html">SimplePca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1SimplePca.html#a9ba30c5f99233681c49106508b9d8297">set_transpose</a> (bool t=<a class="el" href="structscran_1_1SimplePca_1_1Defaults.html#a03fb3b2158469b101a6b8da33e1370db">Defaults::transpose</a>)</td></tr>
 <tr class="separator:a9ba30c5f99233681c49106508b9d8297"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a42164645dcd9c353e518a65c435a5e45"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1SimplePca.html">SimplePca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1SimplePca.html#a42164645dcd9c353e518a65c435a5e45">set_return_rotation</a> (bool r=<a class="el" href="structscran_1_1SimplePca_1_1Defaults.html#a0d22da3d38abcdcd7a9266f7dda52542">Defaults::return_rotation</a>)</td></tr>
+<tr class="separator:a42164645dcd9c353e518a65c435a5e45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b531c386dde8cc43fb88a8d0748e9d9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1SimplePca.html">SimplePca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1SimplePca.html#a7b531c386dde8cc43fb88a8d0748e9d9">set_return_center</a> (bool r=<a class="el" href="structscran_1_1SimplePca_1_1Defaults.html#a88070ce9673e73891bd07dc436d7b30b">Defaults::return_center</a>)</td></tr>
+<tr class="separator:a7b531c386dde8cc43fb88a8d0748e9d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92989ae6f6a1b910a72a0002d7d77eee"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1SimplePca.html">SimplePca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1SimplePca.html#a92989ae6f6a1b910a72a0002d7d77eee">set_return_scale</a> (bool r=<a class="el" href="structscran_1_1SimplePca_1_1Defaults.html#ab2429592740cd87a5ef3d04956a438be">Defaults::return_scale</a>)</td></tr>
+<tr class="separator:a92989ae6f6a1b910a72a0002d7d77eee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8093e83942005c36bfd7fd76aabd780c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1SimplePca.html">SimplePca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1SimplePca.html#a8093e83942005c36bfd7fd76aabd780c">set_num_threads</a> (int n=<a class="el" href="structscran_1_1SimplePca_1_1Defaults.html#a449bea5ac3776b9a386366e367d2f0f4">Defaults::num_threads</a>)</td></tr>
 <tr class="separator:a8093e83942005c36bfd7fd76aabd780c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8a4eef007821dbc0cfbddb5909ab33b3"><td class="memTemplParams" colspan="2">template&lt;typename T , typename IDX &gt; </td></tr>
@@ -210,6 +216,105 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">t</td><td>Should the PC matrix be transposed on output? If <code>true</code>, the output matrix is column-major with cells in the columns, which is compatible with downstream <b>libscran</b> steps.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1SimplePca.html" title="Perform a simple PCA on a gene-cell matrix.">SimplePca</a></code> instance. </dd></dl>
+
+</div>
+</div>
+<a id="a42164645dcd9c353e518a65c435a5e45" name="a42164645dcd9c353e518a65c435a5e45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a42164645dcd9c353e518a65c435a5e45">&#9670;&#160;</a></span>set_return_rotation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1SimplePca.html">SimplePca</a> &amp; scran::SimplePca::set_return_rotation </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>r</em> = <code><a class="el" href="structscran_1_1SimplePca_1_1Defaults.html#a0d22da3d38abcdcd7a9266f7dda52542">Defaults::return_rotation</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">r</td><td>Should the rotation matrix be returned in the output?</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1SimplePca.html" title="Perform a simple PCA on a gene-cell matrix.">SimplePca</a></code> instance. </dd></dl>
+
+</div>
+</div>
+<a id="a7b531c386dde8cc43fb88a8d0748e9d9" name="a7b531c386dde8cc43fb88a8d0748e9d9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b531c386dde8cc43fb88a8d0748e9d9">&#9670;&#160;</a></span>set_return_center()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1SimplePca.html">SimplePca</a> &amp; scran::SimplePca::set_return_center </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>r</em> = <code><a class="el" href="structscran_1_1SimplePca_1_1Defaults.html#a88070ce9673e73891bd07dc436d7b30b">Defaults::return_center</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">c</td><td>Should the center vector be returned in the output?</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1SimplePca.html" title="Perform a simple PCA on a gene-cell matrix.">SimplePca</a></code> instance. </dd></dl>
+
+</div>
+</div>
+<a id="a92989ae6f6a1b910a72a0002d7d77eee" name="a92989ae6f6a1b910a72a0002d7d77eee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92989ae6f6a1b910a72a0002d7d77eee">&#9670;&#160;</a></span>set_return_scale()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1SimplePca.html">SimplePca</a> &amp; scran::SimplePca::set_return_scale </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>r</em> = <code><a class="el" href="structscran_1_1SimplePca_1_1Defaults.html#ab2429592740cd87a5ef3d04956a438be">Defaults::return_scale</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">c</td><td>Should the scale vector be returned in the output?</td></tr>
   </table>
   </dd>
 </dl>
