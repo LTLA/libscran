@@ -83,12 +83,33 @@ public:
          * See `set_num_threads()` for more details.
          */
         static constexpr int num_threads = 1;
+
+        /**
+         * See `set_return_rotation()` for more details.
+         */
+        static constexpr bool return_rotation = false;
+
+        /**
+         * See `set_return_center()` for more details.
+         */
+        static constexpr bool return_center = false;
+
+        /**
+         * See `set_return_scale()` for more details.
+         */
+        static constexpr bool return_scale = false;
     };
+
 private:
     bool scale = Defaults::scale;
     bool transpose = Defaults::transpose;
     int rank = Defaults::rank;
     BlockPolicy block_policy = Defaults::block_policy;
+
+    bool return_rotation = Defaults::return_rotation;
+    bool return_center = Defaults::return_center;
+    bool return_scale = Defaults::return_scale;
+
     int nthreads = Defaults::num_threads;
 
 public:
@@ -135,6 +156,36 @@ public:
     }
 
     /**
+     * @param r Should the rotation matrix be returned in the output?
+     * 
+     * @return A reference to this `MultiBatchPca` instance.
+     */
+    MultiBatchPca& set_return_rotation(bool r = Defaults::return_rotation) {
+        return_rotation = r;
+        return *this;
+    }
+
+    /**
+     * @param c Should the center vector be returned in the output?
+     * 
+     * @return A reference to this `MultiBatchPca` instance.
+     */
+    MultiBatchPca& set_return_center(bool r = Defaults::return_center) {
+        return_center = r;
+        return *this;
+    }
+
+    /**
+     * @param c Should the scale vector be returned in the output?
+     * 
+     * @return A reference to this `MultiBatchPca` instance.
+     */
+    MultiBatchPca& set_return_scale(bool r = Defaults::return_scale) {
+        return_scale = r;
+        return *this;
+    }
+
+    /**
      * @param n Number of threads to use.
      * @return A reference to this `MultiBatchPca` instance.
      */
@@ -153,14 +204,16 @@ private:
         Eigen::MatrixXd& pcs, 
         Eigen::MatrixXd& rotation, 
         Eigen::VectorXd& variance_explained, 
+        Eigen::VectorXd& center_v,
+        Eigen::VectorXd& scale_v,
         double& total_var) 
     const {
         auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major extraction.
         pca_utils::SparseMatrix emat(mat->ncol(), mat->nrow(), std::move(extracted.values), std::move(extracted.indices), std::move(extracted.ptrs), nthreads); // CSC with genes in columns.
 
         size_t ngenes = emat.cols();
-        Eigen::VectorXd center_v(ngenes);
-        Eigen::VectorXd scale_v(ngenes);
+        center_v.resize(ngenes);
+        scale_v.resize(ngenes);
 
         tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
             const auto& values = emat.get_values();
@@ -241,13 +294,15 @@ private:
         Eigen::MatrixXd& pcs, 
         Eigen::MatrixXd& rotation, 
         Eigen::VectorXd& variance_explained, 
+        Eigen::VectorXd& center_v,
+        Eigen::VectorXd& scale_v,
         double& total_var) 
     const {
         auto emat = pca_utils::extract_dense_for_pca(mat, nthreads); // row-major extraction.
 
         size_t ngenes = emat.cols();
-        Eigen::VectorXd center_v(ngenes);
-        Eigen::VectorXd scale_v(ngenes);
+        center_v.resize(ngenes);
+        scale_v.resize(ngenes);
 
         tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
             size_t nblocks = block_details.num_blocks();
@@ -337,14 +392,16 @@ private:
         Eigen::MatrixXd& pcs, 
         Eigen::MatrixXd& rotation, 
         Eigen::VectorXd& variance_explained, 
+        Eigen::MatrixXd& center_m,
+        Eigen::VectorXd& scale_v,
         double& total_var) 
     const {
         auto extracted = pca_utils::extract_sparse_for_pca(mat, nthreads); // row-major extraction.
         pca_utils::SparseMatrix emat(mat->ncol(), mat->nrow(), std::move(extracted.values), std::move(extracted.indices), std::move(extracted.ptrs), nthreads); // CSC with genes in columns.
 
         size_t ngenes = emat.cols();
-        Eigen::MatrixXd center_m(block_details.num_blocks(), ngenes);
-        Eigen::VectorXd scale_v(ngenes);
+        center_m.resize(block_details.num_blocks(), ngenes);
+        scale_v.resize(ngenes);
         pca_utils::compute_mean_and_variance_regress<weight_>(emat, block, block_details, center_m, scale_v, nthreads);
         total_var = pca_utils::process_scale_vector(scale, scale_v);
 
@@ -378,13 +435,15 @@ private:
         Eigen::MatrixXd& pcs, 
         Eigen::MatrixXd& rotation, 
         Eigen::VectorXd& variance_explained, 
+        Eigen::MatrixXd& center_m,
+        Eigen::VectorXd& scale_v,
         double& total_var) 
     const {
         auto emat = pca_utils::extract_dense_for_pca(mat, nthreads); // get a column-major matrix with genes in columns.
 
         size_t ngenes = emat.cols();
-        Eigen::MatrixXd center_m(block_details.num_blocks(), ngenes);
-        Eigen::VectorXd scale_v(ngenes);
+        center_m.resize(block_details.num_blocks(), ngenes);
+        scale_v.resize(ngenes);
         pca_utils::compute_mean_and_variance_regress<weight_>(emat, block, block_details, center_m, scale_v, nthreads);
         total_var = pca_utils::process_scale_vector(scale, scale_v);
 
@@ -415,7 +474,16 @@ private:
 
 private:
     template<typename Data_, typename Index_, typename Block_>
-    void run(const tatami::Matrix<Data_, Index_>* mat, const Block_* block, Eigen::MatrixXd& pcs, Eigen::MatrixXd& rotation, Eigen::VectorXd& variance_explained, double& total_var) const {
+    bool run_internal(
+        const tatami::Matrix<Data_, Index_>* mat, 
+        const Block_* block, 
+        Eigen::MatrixXd& pcs, 
+        Eigen::MatrixXd& rotation, 
+        Eigen::VectorXd& variance_explained, 
+        Eigen::MatrixXd& center_m,
+        Eigen::VectorXd& scale_v,
+        double& total_var) 
+    const {
         irlba::EigenThreadScope t(nthreads);
         irlba::Irlba irb;
         irb.set_number(rank);
@@ -423,26 +491,32 @@ private:
         if (block_policy == BlockPolicy::RESIDUAL_ONLY) {
             auto bdetails = pca_utils::compute_blocking_details<false>(mat->ncol(), block);
             if (mat->sparse()) {
-                run_sparse_residuals<false>(mat, block, bdetails, irb, pcs, rotation, variance_explained, total_var);
+                run_sparse_residuals<false>(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_m, scale_v, total_var);
             } else {
-                run_dense_residuals<false>(mat, block, bdetails, irb, pcs, rotation, variance_explained, total_var);
+                run_dense_residuals<false>(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_m, scale_v, total_var);
             }
 
         } else {
             auto bdetails = pca_utils::compute_blocking_details<true>(mat->ncol(), block);
 
             if (block_policy == BlockPolicy::WEIGHTED_ONLY) {
+                Eigen::VectorXd center_v;
                 if (mat->sparse()) {
-                    run_sparse_simple(mat, block, bdetails, irb, pcs, rotation, variance_explained, total_var);
+                    run_sparse_simple(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_v, scale_v, total_var);
                 } else {
-                    run_dense_simple(mat, block, bdetails, irb, pcs, rotation, variance_explained, total_var);
+                    run_dense_simple(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_v, scale_v, total_var);
+                }
+
+                if (return_center) {
+                    center_m.resize(1, center_v.size());
+                    center_m.row(0) = center_v;
                 }
 
             } else {
                 if (mat->sparse()) {
-                    run_sparse_residuals<true>(mat, block, bdetails, irb, pcs, rotation, variance_explained, total_var);
+                    run_sparse_residuals<true>(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_m, scale_v, total_var);
                 } else {
-                    run_dense_residuals<true>(mat, block, bdetails, irb, pcs, rotation, variance_explained, total_var);
+                    run_dense_residuals<true>(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_m, scale_v, total_var);
                 }
             }
         }
@@ -479,12 +553,34 @@ public:
         double total_variance = 0;
 
         /**
-         * Rotation matrix.
+         * Rotation matrix, only returned if `MultiBatchPca::set_return_rotation()` is `true`.
          * Each row corresponds to a feature while each column corresponds to a PC.
          * The number of PCs is determined by `set_rank()`.
          * If feature filtering was performed, the number of rows is equal to the number of features remaining after filtering.
          */
         Eigen::MatrixXd rotation;
+
+        /**
+         * Centering matrix, only returned if `MultiBatchPca::set_return_center()` is `true`.
+         *
+         * If `MultiBatchPca::set_block_policy()` is `MultiBatchPca::BlockPolicy::RESIDUAL_ONLY` or `MultiBatchPca::BlockPolicy::WEIGHTED_RESIDUAL`,
+         * the number of columns is equal to the number of unique blocking levels.
+         * Each row corresponds to a row in the matrix and each column corresponds to a block, 
+         * such that each entry contains the mean for a particular feature in the corresponding block.
+         *
+         * Otherwise, the number of columns is equal to 1.
+         * Each row corresponds to a row in the matrix and contains the (weighted) grand mean for that feature across all blocks.
+         *
+         * If feature filtering was performed, the length is equal to the number of features remaining after filtering.
+         */
+        Eigen::MatrixXd center;
+
+        /**
+         * Scaling vector, only returned if `MultiBatchPca::set_return_center()` is `true`.
+         * Each entry corresponds to a row in the matrix and contains the scaling factor used to divide the feature values if `MultiBatchPca::set_scale()` is `true`.
+         * If feature filtering was performed, the length is equal to the number of features remaining after filtering.
+         */
+        Eigen::VectorXd scale;
     };
 
     /**
@@ -505,7 +601,22 @@ public:
     template<typename T, typename IDX, typename Batch>
     Results run(const tatami::Matrix<T, IDX>* mat, const Batch* batch) const {
         Results output;
-        run(mat, batch, output.pcs, output.rotation, output.variance_explained, output.total_variance);
+        Eigen::MatrixXd rotation, center_m;
+        Eigen::VectorXd scale_v;
+
+        run_internal(mat, batch, output.pcs, rotation, output.variance_explained, center_m, scale_v, output.total_variance);
+
+        // Shifting them if we want to keep them.
+        if (return_rotation) {
+            output.rotation = std::move(rotation);
+        }
+        if (return_center) {
+            output.center = center_m.adjoint();
+        }
+        if (return_scale) {
+            output.scale = std::move(scale_v);
+        }
+
         return output;
     }
 
@@ -533,12 +644,11 @@ public:
     Results run(const tatami::Matrix<T, IDX>* mat, const Batch* batch, const X* features) const {
         Results output;
         if (!features) {
-            run(mat, batch, output.pcs, output.rotation, output.variance_explained, output.total_variance);
+            return run(mat, batch);
         } else {
             auto subsetted = pca_utils::subset_matrix_by_features(mat, features);
-            run(subsetted.get(), batch, output.pcs, output.rotation, output.variance_explained, output.total_variance);
+            return run(subsetted.get(), batch);
         }
-        return output;
     }
 };
 
