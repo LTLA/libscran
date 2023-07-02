@@ -156,133 +156,123 @@ INSTANTIATE_TEST_CASE_P(
     )
 );
 
-///******************************************************
-// ******************************************************/
-//
-//class ScoreFeatureSetOtherTest : public ::testing::Test, public ScoreFeatureSetTestCore {};
-//
-//TEST_F(ScoreFeatureSetOtherTest, EdgeCaseGenes) {
-//    int ngenes = 1011;
-//    int ncells = 101;
-//    load(ngenes, ncells, /* seed */ 42);
-//
-//    scran::ScoreFeatureSet scorer;
-//
-//    // No features at all.
-//    {
-//        std::vector<unsigned char> features(ngenes);
-//        auto obs = scorer.run(dense_row.get(), features.data());
-//        EXPECT_TRUE(obs.weights.empty());
-//        EXPECT_EQ(obs.scores, std::vector<double>(ncells));
-//    }
-//
-//    // Single feature.
-//    {
-//        std::vector<unsigned char> features(ngenes);
-//        features[3] = 1;
-//
-//        auto obs = scorer.run(dense_row.get(), features.data());
-//        EXPECT_EQ(obs.weights.size(), 1);
-//        EXPECT_EQ(obs.weights[0], 1);
-//        EXPECT_EQ(obs.scores, dense_row->dense_row()->fetch(3));
-//    }
-//}
-//
-//TEST_F(ScoreFeatureSetOtherTest, EdgeCaseBlock) {
-//    int ngenes = 1011;
-//    std::vector<unsigned char> features = spawn_features(ngenes, /* seed */ 43);
-//    size_t nfeatures = std::accumulate(features.begin(), features.end(), 0);
-//
-//    // Empty dataset.
-//    {
-//        load(ngenes, 0, /* seed */ 44);
-//        scran::ScoreFeatureSet scorer;
-//        auto obs = scorer.run(dense_row.get(), features.data());
-//        EXPECT_EQ(obs.weights, std::vector<double>(nfeatures));
-//        EXPECT_TRUE(obs.scores.empty());
-//    }
-//
-//    // Zero length batches are ignored.
-//    {
-//        int ncells = 99;
-//        load(ngenes, ncells, /* seed */ 45);
-//        std::vector<int> block(ncells, 2); // 0 and 1 are now zero-length.
-//
-//        scran::ScoreFeatureSet scorer;
-//        auto obs = scorer.run_blocked(dense_column.get(), features.data(), block.data());
-//        auto ref = scorer.run(dense_column.get(), features.data());
-//        EXPECT_EQ(obs.weights, ref.weights);
-//        EXPECT_EQ(obs.scores, ref.scores);
-//    }
-//}
-//
-//TEST_F(ScoreFeatureSetOtherTest, ScoreSanityCheck) {
-//    int ngenes = 1011;
-//    int ncells = 101;
-//    int seed = 9876521;
-//    load(ngenes, ncells, seed);
-//    std::vector<unsigned char> features = spawn_features(ngenes, seed);
-//
-//    // Shifting everything up in one batch. This should manifest as a
-//    // corresponding shift in the scores for that batch. 
-//    {
-//        auto added = tatami::make_DelayedUnaryIsometricOp(sparse_column, tatami::make_DelayedAddScalarHelper(5.6));
-//        auto combined = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{ sparse_row, added });
-//
-//        scran::ScoreFeatureSet scorer;
-//        auto ref = scorer.run(dense_row.get(), features.data());
-//
-//        std::vector<int> batch(ncells * 2);
-//        std::fill(batch.begin() + ncells, batch.end(), 1);
-//        auto obs = scorer.run_blocked(combined.get(), features.data(), batch.data());
-//
-//        compare_almost_equal(ref.weights, obs.weights);
-//        std::vector<double> first_half(obs.scores.begin(), obs.scores.begin() + ncells);
-//        compare_almost_equal(first_half, ref.scores);
-//
-//        std::vector<double> second_half(obs.scores.begin() + ncells, obs.scores.end());
-//        for (auto& s : second_half) { s -= 5.6; }
-//        compare_almost_equal(second_half, first_half);
-//    }
-//
-//    // Scaling everything up in one batch. This should manifest as a
-//    // corresponding scaling in the scores for that batch, regardless
-//    // of whether set_scale is true or not.
-//    {
-//        auto scaled = tatami::make_DelayedUnaryIsometricOp(sparse_column, tatami::make_DelayedMultiplyScalarHelper(1.5));
-//        auto combined = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{ sparse_row, scaled });
-//        std::vector<int> batch(ncells * 2);
-//        std::fill(batch.begin() + ncells, batch.end(), 1);
-//
-//        // Without scaling.
-//        scran::ScoreFeatureSet scorer;
-//        {
-//            auto ref = scorer.run(dense_row.get(), features.data());
-//            auto obs = scorer.run_blocked(combined.get(), features.data(), batch.data());
-//
-//            compare_almost_equal(ref.weights, obs.weights);
-//            std::vector<double> first_half(obs.scores.begin(), obs.scores.begin() + ncells);
-//            compare_almost_equal(first_half, ref.scores);
-//
-//            std::vector<double> second_half(obs.scores.begin() + ncells, obs.scores.end());
-//            for (auto& s : second_half) { s /= 1.5; }
-//            compare_almost_equal(second_half, first_half);
-//        }
-//
-//        // Again, with scaling.
-//        scorer.set_scale(true);
-//        {
-//            auto ref = scorer.run(dense_row.get(), features.data());
-//            auto obs = scorer.run_blocked(combined.get(), features.data(), batch.data());
-//
-//            compare_almost_equal(ref.weights, obs.weights);
-//            std::vector<double> first_half(obs.scores.begin(), obs.scores.begin() + ncells);
-//            compare_almost_equal(first_half, ref.scores);
-//
-//            std::vector<double> second_half(obs.scores.begin() + ncells, obs.scores.end());
-//            for (auto& s : second_half) { s /= 1.5; }
-//            compare_almost_equal(second_half, first_half);
-//        }
-//    }
-//}
-//
+/******************************************************
+ ******************************************************/
+
+class ScoreFeatureSetOtherTest : public ::testing::Test, public ScoreFeatureSetTestCore {};
+
+TEST_F(ScoreFeatureSetOtherTest, EdgeCaseGenes) {
+    int ngenes = 1011;
+    int ncells = 101;
+    load(ngenes, ncells, /* seed */ 42);
+
+    scran::ScoreFeatureSet scorer;
+
+    // No features at all.
+    {
+        std::vector<unsigned char> features(ngenes);
+        auto obs = scorer.run(dense_row.get(), features.data());
+        EXPECT_TRUE(obs.weights.empty());
+        EXPECT_EQ(obs.scores, std::vector<double>(ncells));
+    }
+
+    // Single feature.
+    {
+        std::vector<unsigned char> features(ngenes);
+        features[3] = 1;
+
+        auto obs = scorer.run(dense_row.get(), features.data());
+        EXPECT_EQ(obs.weights.size(), 1);
+        EXPECT_EQ(obs.weights[0], 1);
+        EXPECT_EQ(obs.scores, dense_row->dense_row()->fetch(3));
+    }
+}
+
+/******************************************************
+ ******************************************************/
+
+class ScoreFeatureSetBatchTest : public ::testing::Test, public ScoreFeatureSetTestCore {};
+
+TEST_F(ScoreFeatureSetBatchTest, ScoreSanityCheck) {
+    int ngenes = 1011;
+    int ncells = 101;
+    int seed = 9876521;
+    load(ngenes, ncells, seed);
+    std::vector<unsigned char> features = spawn_features(ngenes, seed);
+
+    // Shifting everything up in one batch. This should manifest as a
+    // corresponding shift in the scores for that batch. 
+    {
+        const double CONSTANT = 5.6;
+        auto added = tatami::make_DelayedUnaryIsometricOp(sparse_column, tatami::make_DelayedAddScalarHelper(CONSTANT));
+        auto combined = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{ sparse_row, added });
+
+        scran::ScoreFeatureSet scorer;
+        auto ref = scorer.run(dense_row.get(), features.data());
+        double ref_position = std::accumulate(ref.scores.begin(), ref.scores.end(), 0.0) / ncells;
+
+        std::vector<int> batch(ncells * 2);
+        std::fill(batch.begin() + ncells, batch.end(), 1);
+        auto obs = scorer.run_blocked(combined.get(), features.data(), batch.data());
+        compare_almost_equal(ref.weights, obs.weights);
+        EXPECT_EQ(obs.scores.size(), ncells * 2);
+
+        // Checking that the recovery of the low-rank approximation worked correctly.
+        std::vector<double> first_half(obs.scores.begin(), obs.scores.begin() + ncells);
+        double first_position = std::accumulate(first_half.begin(), first_half.end(), 0.0) / ncells;
+        for (auto& x : first_half) {
+            x += (ref_position - first_position);
+        }
+        compare_almost_equal(first_half, ref.scores); 
+
+        std::vector<double> second_half(obs.scores.begin() + ncells, obs.scores.end());
+        double second_position = std::accumulate(second_half.begin(), second_half.end(), 0.0) / ncells;
+        for (auto& x : second_half) {
+            x += (ref_position - second_position);
+        }
+        compare_almost_equal(second_half, ref.scores);
+
+        EXPECT_FLOAT_EQ(second_position - first_position, CONSTANT);
+    }
+
+    // Scaling everything up in one batch. This should manifest as a
+    // corresponding scaling in the scores for that batch, regardless
+    // of whether set_scale is true or not.
+    {
+        const double CONSTANT = 1.5;
+        auto scaled = tatami::make_DelayedUnaryIsometricOp(sparse_column, tatami::make_DelayedMultiplyScalarHelper(CONSTANT));
+        auto combined = tatami::make_DelayedBind<1>(std::vector<std::shared_ptr<tatami::NumericMatrix> >{ sparse_row, scaled });
+        std::vector<int> batch(ncells * 2);
+        std::fill(batch.begin() + ncells, batch.end(), 1);
+
+        for (int i = 0; i < 2; ++i) {
+            scran::ScoreFeatureSet scorer;
+            scorer.set_scale(i == 1);
+
+            auto ref = scorer.run(dense_row.get(), features.data());
+            double ref_position = std::accumulate(ref.scores.begin(), ref.scores.end(), 0.0) / ncells;
+
+            auto obs = scorer.run_blocked(combined.get(), features.data(), batch.data());
+            compare_almost_equal(ref.weights, obs.weights);
+            EXPECT_EQ(obs.scores.size(), ncells * 2);
+
+            // Checking that the recovery of the low-rank approximation worked correctly.
+            std::vector<double> first_half(obs.scores.begin(), obs.scores.begin() + ncells);
+            double first_position = std::accumulate(first_half.begin(), first_half.end(), 0.0) / ncells;
+            for (auto& x : first_half) {
+                x += (ref_position - first_position);
+            }
+            compare_almost_equal(first_half, ref.scores); 
+
+            std::vector<double> second_half(obs.scores.begin() + ncells, obs.scores.end());
+            double second_position = std::accumulate(second_half.begin(), second_half.end(), 0.0) / ncells;
+            for (auto& x : second_half) {
+                x -= second_position;
+                x /= CONSTANT;
+                x += ref_position;
+            }
+            compare_almost_equal(second_half, ref.scores);
+        }
+    }
+}
+
