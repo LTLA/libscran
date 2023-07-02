@@ -186,6 +186,14 @@ TEST_F(ScoreFeatureSetOtherTest, EdgeCaseGenes) {
         EXPECT_EQ(obs.weights[0], 1);
         EXPECT_EQ(obs.scores, dense_row->dense_row()->fetch(3));
     }
+
+    // No cells.
+    {
+        std::vector<unsigned char> features(ngenes, 1);
+        auto empty = tatami::make_DelayedSubset<1>(dense_row, std::vector<int>());       
+        auto obs = scorer.run(empty.get(), features.data());
+        EXPECT_TRUE(obs.scores.empty());
+    }
 }
 
 /******************************************************
