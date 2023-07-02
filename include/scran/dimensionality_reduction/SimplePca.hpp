@@ -274,14 +274,14 @@ public:
          * Each entry corresponds to a row in the matrix and contains the mean value for that feature.
          * If feature filtering was performed, the length is equal to the number of features remaining after filtering.
          */
-        Eigen::MatrixXd center;
+        Eigen::VectorXd center;
 
         /**
          * Scaling vector, only returned if `SimplePca::set_return_center()` is `true`.
          * Each entry corresponds to a row in the matrix and contains the scaling factor used to divide the feature values if `SimplePca::set_scale()` is `true`.
          * If feature filtering was performed, the length is equal to the number of features remaining after filtering.
          */
-        Eigen::MatrixXd scale;
+        Eigen::VectorXd scale;
     };
 
     /**
