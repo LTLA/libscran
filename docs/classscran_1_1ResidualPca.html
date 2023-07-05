@@ -115,6 +115,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a5a1e82d10dcacbae854213f4dea206c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a935c56294aa05af7aa6157f4569b8023"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ResidualPca.html">ResidualPca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ResidualPca.html#a935c56294aa05af7aa6157f4569b8023">set_weight_policy</a> (<a class="el" href="classscran_1_1ResidualPca.html#aa6ff98f2ed51c84448fead6dc615ccb4">WeightPolicy</a> w=<a class="el" href="structscran_1_1ResidualPca_1_1Defaults.html#ad313b5573f8175ab1fb474481126bf41">Defaults::weight_policy</a>)</td></tr>
 <tr class="separator:a935c56294aa05af7aa6157f4569b8023"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2c684105303d49ac35a261509ef379e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ResidualPca.html">ResidualPca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ResidualPca.html#aa2c684105303d49ac35a261509ef379e">set_weight_size_cap</a> (int w=<a class="el" href="structscran_1_1ResidualPca_1_1Defaults.html#aec288e788534dfae8158ae5d7bfe09a0">Defaults::weight_size_cap</a>)</td></tr>
+<tr class="separator:aa2c684105303d49ac35a261509ef379e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a352355b0cdd190b5829239ac9c80dd94"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ResidualPca.html">ResidualPca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ResidualPca.html#a352355b0cdd190b5829239ac9c80dd94">set_return_rotation</a> (bool r=<a class="el" href="structscran_1_1ResidualPca_1_1Defaults.html#a28c4016fe15012de3bf8b73e5b53bc9b">Defaults::return_rotation</a>)</td></tr>
 <tr class="separator:a352355b0cdd190b5829239ac9c80dd94"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af9ce7a7e950c2d77c6dea583f2e8c05c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ResidualPca.html">ResidualPca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ResidualPca.html#af9ce7a7e950c2d77c6dea583f2e8c05c">set_return_center</a> (bool r=<a class="el" href="structscran_1_1ResidualPca_1_1Defaults.html#aa6ddf96e0cd7f882e14056a82c25c1bf">Defaults::return_center</a>)</td></tr>
@@ -289,6 +291,39 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">w</td><td>Policy to use for weighting batches of different size, see <code>WeightPolicy</code> for details.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ResidualPca.html" title="Compute PCA after regressing out an uninteresting factor.">ResidualPca</a></code> instance. </dd></dl>
+
+</div>
+</div>
+<a id="aa2c684105303d49ac35a261509ef379e" name="aa2c684105303d49ac35a261509ef379e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2c684105303d49ac35a261509ef379e">&#9670;&#160;</a></span>set_weight_size_cap()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ResidualPca.html">ResidualPca</a> &amp; scran::ResidualPca::set_weight_size_cap </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>w</em> = <code><a class="el" href="structscran_1_1ResidualPca_1_1Defaults.html#aec288e788534dfae8158ae5d7bfe09a0">Defaults::weight_size_cap</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">w</td><td>Cap on the size of each block (i.e., number of cells), above which all blocks are to be assigned equal weight - see <code><a class="el" href="namespacescran.html#a9bf9566ed0cbf9bf3cb310f0847ca5cd">weight_block()</a></code> for details.</td></tr>
   </table>
   </dd>
 </dl>
@@ -475,7 +510,7 @@ template&lt;typename Data_ , typename Index_ , typename Block_ &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">mat</td><td>Pointer to the input matrix. Columns should contain cells while rows should contain genes. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of cells. This should contain the blocking factor as 0-based block assignments (i.e., for <code>n</code> blocks, block identities should run from 0 to <code>n-1</code> with at least one entry for each block.)</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of cells, containing the block assignment for each cell - see <code><a class="el" href="namespacescran.html#a4ad7ef476e1d9852cb9b9b53a46eb63c">count_blocks()</a></code> for details.</td></tr>
   </table>
   </dd>
 </dl>
@@ -537,8 +572,8 @@ template&lt;typename Data_ , typename Index_ , typename Block_ , typename Subset
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">mat</td><td>Pointer to the input matrix. Columns should contain cells while rows should contain genes. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of cells. This should contain the blocking factor as 0-based block assignments (i.e., for <code>n</code> blocks, block identities should run from 0 to <code>n-1</code> with at least one entry for each block.) </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">features</td><td>Pointer to an array of length equal to the number of genes. Each entry treated as a boolean specifying whether the corresponding genes should be used in the PCA.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of cells, containing the block assignment for each cell - see <code><a class="el" href="namespacescran.html#a4ad7ef476e1d9852cb9b9b53a46eb63c">count_blocks()</a></code> for details. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">features</td><td>Pointer to an array of length equal to the number of genes. Each entry is a boolean specifying whether the corresponding gene should be used in the PCA.</td></tr>
   </table>
   </dd>
 </dl>

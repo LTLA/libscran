@@ -1,7 +1,7 @@
 var searchData=
 [
   ['cache_5fsize_0',['cache_size',['../structscran_1_1ScoreMarkers_1_1Defaults.html#a0a887b918caa0be9523adf38ec6e892b',1,'scran::ScoreMarkers::Defaults']]],
-  ['center_1',['center',['../structscran_1_1GroupedSizeFactors_1_1Defaults.html#acbe5c154e3b67420a1f2ef84ef304310',1,'scran::GroupedSizeFactors::Defaults::center'],['../structscran_1_1MultiBatchPca_1_1Results.html#a20efd348150662b68e5d0ad44a0cde3b',1,'scran::MultiBatchPca::Results::center'],['../structscran_1_1ResidualPca_1_1Results.html#aa218e48e2407f9afabaff8c87ae282a8',1,'scran::ResidualPca::Results::center'],['../structscran_1_1SimplePca_1_1Results.html#ab40e587a305aec905c4f02e3a77df0c9',1,'scran::SimplePca::Results::center'],['../structscran_1_1LogNormCounts_1_1Defaults.html#aeb75e212cc28f620391082fc735e7341',1,'scran::LogNormCounts::Defaults::center'],['../structscran_1_1MedianSizeFactors_1_1Defaults.html#af747d883c33f4793ce28b9aade2d2ad6',1,'scran::MedianSizeFactors::Defaults::center']]],
+  ['center_1',['center',['../structscran_1_1MedianSizeFactors_1_1Defaults.html#af747d883c33f4793ce28b9aade2d2ad6',1,'scran::MedianSizeFactors::Defaults::center'],['../structscran_1_1LogNormCounts_1_1Defaults.html#aeb75e212cc28f620391082fc735e7341',1,'scran::LogNormCounts::Defaults::center'],['../structscran_1_1GroupedSizeFactors_1_1Defaults.html#acbe5c154e3b67420a1f2ef84ef304310',1,'scran::GroupedSizeFactors::Defaults::center'],['../structscran_1_1SimplePca_1_1Results.html#ab40e587a305aec905c4f02e3a77df0c9',1,'scran::SimplePca::Results::center'],['../structscran_1_1ResidualPca_1_1Results.html#aa218e48e2407f9afabaff8c87ae282a8',1,'scran::ResidualPca::Results::center'],['../structscran_1_1MultiBatchPca_1_1Results.html#a20efd348150662b68e5d0ad44a0cde3b',1,'scran::MultiBatchPca::Results::center']]],
   ['centersizefactors_2',['CenterSizeFactors',['../classscran_1_1CenterSizeFactors.html',1,'scran']]],
   ['centersizefactors_2ehpp_3',['CenterSizeFactors.hpp',['../CenterSizeFactors_8hpp.html',1,'']]],
   ['choose_5fpseudo_5fcount_4',['choose_pseudo_count',['../structscran_1_1LogNormCounts_1_1Defaults.html#a53c44f0ab479e87a88dd43ad850f7690',1,'scran::LogNormCounts::Defaults']]],
@@ -45,5 +45,7 @@ var searchData=
   ['computemedianmad_42',['ComputeMedianMad',['../classscran_1_1ComputeMedianMad.html',1,'scran']]],
   ['computemedianmad_2ehpp_43',['ComputeMedianMad.hpp',['../ComputeMedianMad_8hpp.html',1,'']]],
   ['computesummaries_44',['ComputeSummaries',['../classscran_1_1ScoreMarkers.html#a836ea0c31fa496f274943e79035314b5',1,'scran::ScoreMarkers']]],
-  ['counts_45',['counts',['../structscran_1_1AggregateAcrossCells_1_1Combinations.html#aff25c122a815de09258f468ab4c03d70',1,'scran::AggregateAcrossCells::Combinations']]]
+  ['count_5fblock_5flevels_45',['count_block_levels',['../namespacescran.html#a2e8cdbed52a90a233c7e02eec2933f81',1,'scran']]],
+  ['count_5fblocks_46',['count_blocks',['../namespacescran.html#a4ad7ef476e1d9852cb9b9b53a46eb63c',1,'scran']]],
+  ['counts_47',['counts',['../structscran_1_1AggregateAcrossCells_1_1Combinations.html#aff25c122a815de09258f468ab4c03d70',1,'scran::AggregateAcrossCells::Combinations']]]
 ];

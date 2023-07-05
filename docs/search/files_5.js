@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['hypergeometrictail_2ehpp_0',['HypergeometricTail.hpp',['../HypergeometricTail_8hpp.html',1,'']]]
+  ['groupedsizefactors_2ehpp_0',['GroupedSizeFactors.hpp',['../GroupedSizeFactors_8hpp.html',1,'']]]
 ];

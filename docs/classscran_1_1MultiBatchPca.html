@@ -116,6 +116,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:abbdb8c1a5db29d6db7e9b63b8f47a46a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a69c46de0ade14b01cd6551babe94a901"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MultiBatchPca.html#a69c46de0ade14b01cd6551babe94a901">set_block_policy</a> (<a class="el" href="classscran_1_1MultiBatchPca.html#ad545a41745c48f16810490a8ab8d74f8">BlockPolicy</a> b=<a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#ad84be96724471820858200eba8785e84">Defaults::block_policy</a>)</td></tr>
 <tr class="separator:a69c46de0ade14b01cd6551babe94a901"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca9c28e3bd13dbe9c7484118ec5f08d5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MultiBatchPca.html#aca9c28e3bd13dbe9c7484118ec5f08d5">set_weight_size_cap</a> (int w=<a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#a991908d4944f0e75a5188d3797bc23c4">Defaults::weight_size_cap</a>)</td></tr>
+<tr class="separator:aca9c28e3bd13dbe9c7484118ec5f08d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6325469e46f9a4dc9a6969d44cab099d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MultiBatchPca.html#a6325469e46f9a4dc9a6969d44cab099d">set_return_rotation</a> (bool r=<a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#a290139ceca981fae9c7c5f49b6a6f095">Defaults::return_rotation</a>)</td></tr>
 <tr class="separator:a6325469e46f9a4dc9a6969d44cab099d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af44678f99924f3e0025fb06d88237132"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MultiBatchPca.html#af44678f99924f3e0025fb06d88237132">set_return_center</a> (bool r=<a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#a4b47e1cdbc323a960c517cc71c9f6a12">Defaults::return_center</a>)</td></tr>
@@ -291,6 +293,39 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">w</td><td>Policy to use for handling multiple batches, see <code>BlockPolicy</code> for details.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1MultiBatchPca.html" title="Compute PCA after adjusting for differences between batch sizes.">MultiBatchPca</a></code> instance. </dd></dl>
+
+</div>
+</div>
+<a id="aca9c28e3bd13dbe9c7484118ec5f08d5" name="aca9c28e3bd13dbe9c7484118ec5f08d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca9c28e3bd13dbe9c7484118ec5f08d5">&#9670;&#160;</a></span>set_weight_size_cap()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp; scran::MultiBatchPca::set_weight_size_cap </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>w</em> = <code><a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#a991908d4944f0e75a5188d3797bc23c4">Defaults::weight_size_cap</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">w</td><td>Cap on the size of each block (i.e., number of cells), above which all blocks are to be assigned equal weight - see <code><a class="el" href="namespacescran.html#a9bf9566ed0cbf9bf3cb310f0847ca5cd">weight_block()</a></code> for details. Only used when <code><a class="el" href="classscran_1_1MultiBatchPca.html#a69c46de0ade14b01cd6551babe94a901">set_block_policy()</a></code> is <code>BlockPolicy::WEIGHTED_ONLY</code> or <code>BlockPolicy::WEIGHTED_RESIDUAL</code>.</td></tr>
   </table>
   </dd>
 </dl>

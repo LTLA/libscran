@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['pairwiseeffects_2ehpp_0',['PairwiseEffects.hpp',['../PairwiseEffects_8hpp.html',1,'']]],
-  ['percelladtqcmetrics_2ehpp_1',['PerCellAdtQcMetrics.hpp',['../PerCellAdtQcMetrics_8hpp.html',1,'']]],
-  ['percellcrisprqcmetrics_2ehpp_2',['PerCellCrisprQcMetrics.hpp',['../PerCellCrisprQcMetrics_8hpp.html',1,'']]],
-  ['percellqcmetrics_2ehpp_3',['PerCellQcMetrics.hpp',['../PerCellQcMetrics_8hpp.html',1,'']]]
+  ['macros_2ehpp_0',['macros.hpp',['../macros_8hpp.html',1,'']]],
+  ['mediansizefactors_2ehpp_1',['MedianSizeFactors.hpp',['../MedianSizeFactors_8hpp.html',1,'']]],
+  ['modelgenevar_2ehpp_2',['ModelGeneVar.hpp',['../ModelGeneVar_8hpp.html',1,'']]],
+  ['multibatchpca_2ehpp_3',['MultiBatchPca.hpp',['../MultiBatchPca_8hpp.html',1,'']]]
 ];

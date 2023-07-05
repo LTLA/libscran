@@ -1,0 +1,15 @@
+<map id="scran/utils/blocking.hpp" name="scran/utils/blocking.hpp">
+<area shape="rect" id="Node000001" title="Utilities for handling blocks of cells." alt="" coords="92,5,249,31"/>
+<area shape="rect" id="Node000002" href="$dimensionality__reduction_2blocking_8hpp_source.html" title=" " alt="" coords="92,79,249,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,46,173,79,168,79,168,46"/>
+<area shape="rect" id="Node000003" href="$MultiBatchPca_8hpp.html" title="Compute PCA after adjusting for differences between batch sizes." alt="" coords="5,256,200,297"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="154,134,137,169,121,216,110,257,104,255,116,214,132,167,149,131"/>
+<area shape="rect" id="Node000005" href="$ResidualPca_8hpp.html" title="Compute PCA after regressing out an uninteresting factor." alt="" coords="146,168,328,208"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="197,130,224,166,220,169,192,133"/>
+<area shape="rect" id="Node000004" href="$scran_8hpp_source.html" title=" " alt="" coords="181,345,294,371"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="150,303,218,342,215,347,147,307"/>
+<area shape="poly" id="edge7_Node000005_Node000004" title=" " alt="" coords="240,223,240,345,235,345,235,223"/>
+<area shape="rect" id="Node000006" href="$ScoreFeatureSet_8hpp.html" title="Compute per&#45;cell scores for a feature set." alt="" coords="275,256,469,297"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="281,214,343,254,340,258,278,219"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="327,307,259,347,256,342,324,303"/>
+</map>
