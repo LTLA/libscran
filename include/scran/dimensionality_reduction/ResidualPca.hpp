@@ -85,6 +85,11 @@ public:
         static constexpr WeightPolicy weight_policy = WeightPolicy::NONE;
 
         /**
+         * See `set_weight_size_cap()` for more details.
+         */
+        static constexpr int weight_size_cap = 1000;
+
+        /**
          * See `set_return_rotation()` for more details.
          */
         static constexpr bool return_rotation = false;
@@ -104,7 +109,9 @@ private:
     bool scale = Defaults::scale;
     bool transpose = Defaults::transpose;
     int rank = Defaults::rank;
+
     WeightPolicy weight_policy = Defaults::weight_policy;
+    int weight_size_cap = Defaults::weight_size_cap;
 
     bool return_rotation = Defaults::return_rotation;
     bool return_center = Defaults::return_center;
@@ -152,6 +159,16 @@ public:
      */
     ResidualPca& set_weight_policy(WeightPolicy w = Defaults::weight_policy) {
         weight_policy = w;
+        return *this;
+    }
+
+    /**
+     * @param w Cap on the size of each block (i.e., number of cells), above which all blocks are to be assigned equal weight - see `weight_block()` for details.
+     * 
+     * @return A reference to this `ResidualPca` instance.
+     */
+    ResidualPca& set_weight_size_cap(int w = Defaults::weight_size_cap) {
+        weight_size_cap = w;
         return *this;
     }
 
@@ -334,14 +351,14 @@ private:
         irb.set_number(rank);
 
         if (weight_policy == WeightPolicy::NONE) {
-            auto bdetails = pca_utils::compute_blocking_details<false>(mat->ncol(), block);
+            auto bdetails = pca_utils::compute_blocking_details<false>(mat->ncol(), block, weight_size_cap);
             if (mat->sparse()) {
                 run_sparse<false>(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_m, scale_v, total_var);
             } else {
                 run_dense<false>(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_m, scale_v, total_var);
             }
         } else {
-            auto bdetails = pca_utils::compute_blocking_details<true>(mat->ncol(), block);
+            auto bdetails = pca_utils::compute_blocking_details<true>(mat->ncol(), block, weight_size_cap);
             if (mat->sparse()) {
                 run_sparse<true>(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_m, scale_v, total_var);
             } else {
@@ -410,9 +427,8 @@ public:
      *
      * @param[in] mat Pointer to the input matrix.
      * Columns should contain cells while rows should contain genes.
-     * @param[in] block Pointer to an array of length equal to the number of cells.
-     * This should contain the blocking factor as 0-based block assignments 
-     * (i.e., for `n` blocks, block identities should run from 0 to `n-1` with at least one entry for each block.)
+     * @param[in] block Pointer to an array of length equal to the number of cells, 
+     * containing the block assignment for each cell - see `count_blocks()` for details.
      *
      * @return A `Results` object containing the PCs and the variance explained.
      */
@@ -450,11 +466,10 @@ public:
      *
      * @param[in] mat Pointer to the input matrix.
      * Columns should contain cells while rows should contain genes.
-     * @param[in] block Pointer to an array of length equal to the number of cells.
-     * This should contain the blocking factor as 0-based block assignments 
-     * (i.e., for `n` blocks, block identities should run from 0 to `n-1` with at least one entry for each block.)
+     * @param[in] block Pointer to an array of length equal to the number of cells, 
+     * containing the block assignment for each cell - see `count_blocks()` for details.
      * @param[in] features Pointer to an array of length equal to the number of genes.
-     * Each entry treated as a boolean specifying whether the corresponding genes should be used in the PCA.
+     * Each entry is a boolean specifying whether the corresponding gene should be used in the PCA.
      *
      * @return A `Results` object containing the PCs and the variance explained.
      */

@@ -11,7 +11,6 @@
 
 #include "CenterSizeFactors.hpp"
 #include "ChoosePseudoCount.hpp"
-#include "../utils/block_indices.hpp"
 
 /**
  * @file LogNormCounts.hpp

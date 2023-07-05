@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "utils.hpp"
+#include "../utils/blocking.hpp"
 
 namespace scran {
 
@@ -33,32 +34,26 @@ template<bool weight_>
 using BlockingDetails = typename std::conditional<weight_, WeightedBlockingDetails, UnweightedBlockingDetails>::type;
 
 template<bool weight_, typename Block_>
-BlockingDetails<weight_> compute_blocking_details(size_t ncells, const Block_* block) {
-    auto nblocks = static_cast<size_t>(ncells ? *std::max_element(block, block + ncells) : 0) + 1;
+BlockingDetails<weight_> compute_blocking_details(size_t ncells, const Block_* block, int size_cap) {
+    auto bsizes = count_blocks<int>(ncells, block);
+    auto nblocks = bsizes.size();
     typename std::conditional<weight_, WeightedBlockingDetails, UnweightedBlockingDetails>::type output(nblocks, ncells);
-
-    auto& block_size = output.block_size;
-    for (size_t j = 0; j < ncells; ++j) {
-        ++block_size[block[j]];
-    }
+    output.block_size = std::move(bsizes);
 
     if constexpr(weight_) {
         auto& total_weight = output.total_block_weight;
         auto& element_weight = output.per_element_weight;
 
         for (size_t i = 0; i < nblocks; ++i) {
-            // This per-block total weight can be adjusted for more weighting schemes.
-            // By default, we assume that each block should be weighted equally, but
-            // that need not be the case if we want to penalize very small blocks.
-            double block_weight = 1;
+            auto block_size = output.block_size[i];
 
             // Computing effective block weights that also incorporate division by the
             // block size. This avoids having to do the division by block size in the
             // 'compute_mean_and_variance_regress()' function.
-            const auto& bs = block_size[i];
-            if (bs) {
+            if (block_size) {
+                double block_weight = weight_block(block_size, size_cap);
+                element_weight[i] = block_weight / block_size;
                 total_weight += block_weight;
-                element_weight[i] = block_weight / bs;
             } else {
                 element_weight[i] = 0;
             }
