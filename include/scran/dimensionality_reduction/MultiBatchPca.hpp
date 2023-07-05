@@ -80,6 +80,11 @@ public:
         static constexpr BlockPolicy block_policy = BlockPolicy::WEIGHTED_ONLY;
 
         /**
+         * See `set_weight_size_cap()` for more details.
+         */
+        static constexpr int weight_size_cap = 1000;
+
+        /**
          * See `set_num_threads()` for more details.
          */
         static constexpr int num_threads = 1;
@@ -104,7 +109,9 @@ private:
     bool scale = Defaults::scale;
     bool transpose = Defaults::transpose;
     int rank = Defaults::rank;
+
     BlockPolicy block_policy = Defaults::block_policy;
+    int weight_size_cap = Defaults::weight_size_cap;
 
     bool return_rotation = Defaults::return_rotation;
     bool return_center = Defaults::return_center;
@@ -152,6 +159,17 @@ public:
      */
     MultiBatchPca& set_block_policy(BlockPolicy b = Defaults::block_policy) {
         block_policy = b;
+        return *this;
+    }
+
+    /**
+     * @param w Cap on the size of each block (i.e., number of cells), above which all blocks are to be assigned equal weight - see `weight_block()` for details.
+     * Only used when `set_block_policy()` is `BlockPolicy::WEIGHTED_ONLY` or `BlockPolicy::WEIGHTED_RESIDUAL`.
+     * 
+     * @return A reference to this `MultiBatchPca` instance.
+     */
+    MultiBatchPca& set_weight_size_cap(int w = Defaults::weight_size_cap) {
+        weight_size_cap = w;
         return *this;
     }
 
@@ -489,7 +507,7 @@ private:
         irb.set_number(rank);
 
         if (block_policy == BlockPolicy::RESIDUAL_ONLY) {
-            auto bdetails = pca_utils::compute_blocking_details<false>(mat->ncol(), block);
+            auto bdetails = pca_utils::compute_blocking_details<false>(mat->ncol(), block, weight_size_cap);
             if (mat->sparse()) {
                 run_sparse_residuals<false>(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_m, scale_v, total_var);
             } else {
@@ -497,7 +515,7 @@ private:
             }
 
         } else {
-            auto bdetails = pca_utils::compute_blocking_details<true>(mat->ncol(), block);
+            auto bdetails = pca_utils::compute_blocking_details<true>(mat->ncol(), block, weight_size_cap);
 
             if (block_policy == BlockPolicy::WEIGHTED_ONLY) {
                 Eigen::VectorXd center_v;

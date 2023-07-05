@@ -257,6 +257,8 @@ TEST_P(ResidualPcaBasicTest, WeightedConsistency) {
     scran::ResidualPca runner;
     runner.set_scale(scale).set_rank(rank);
     runner.set_weight_policy(scran::ResidualPca::WeightPolicy::EQUAL);
+    runner.set_weight_size_cap(0); // for simplicity's sake.
+
     auto block = generate_blocks(dense_row->ncol(), nblocks);
     auto ref = runner.run(dense_row.get(), block.data());
 
@@ -269,7 +271,8 @@ TEST_P(ResidualPcaBasicTest, WeightedConsistency) {
         } else {
             auto collected = fragment_matrices_by_block(dense_row, block, nblocks);
 
-            // The 'variance' is really just the grand sum (across blocks) of
+            // When the weight size cap is set to zero, blocks are equally weighted.
+            // Then, the 'variance' is really just the grand sum (across blocks) of
             // the sum (across cells) of the squared difference from the mean.
             double total_var = 0;
             for (int b = 0, end = collected.size(); b < end; ++b) {
@@ -493,34 +496,58 @@ TEST_P(ResidualPcaWeightedTest, VersusReference) {
     }
     auto expanded = tatami::make_DelayedBind<1>(components);
 
-    // Mocking up the expected results.
-    Eigen::MatrixXd expanded_pcs(rank, expanded->ncol());
-    expanded_pcs.leftCols(combined->ncol()) = ref.pcs;
-    size_t host_counter = 0, dest_counter = combined->ncol();
-    for (int b = 0; b < nblocks; ++b) {
-        size_t nc = components[b]->ncol();
-        for (int b0 = 0; b0 < b; ++b0) {
-            expanded_pcs.middleCols(dest_counter, nc) = ref.pcs.middleCols(host_counter, nc);
-            dest_counter += nc; 
+    // With a large size cap, each block is weighted by its size,
+    // which is equivalent to the total absence of re-weighting.
+    runner.set_weight_size_cap(1000000);
+    {
+        auto res2 = runner.run(expanded.get(), expanded_block.data());
+
+        scran::ResidualPca runner2;
+        runner2.set_scale(scale).set_rank(rank);
+        runner2.set_weight_policy(scran::ResidualPca::WeightPolicy::NONE);
+        auto ref2 = runner2.run(expanded.get(), expanded_block.data());
+
+        ref2.pcs.array() /= ref2.pcs.norm();
+        res2.pcs.array() /= res2.pcs.norm();
+        expect_equal_pcs(ref2.pcs, res2.pcs);
+
+        ref2.variance_explained.array() /= ref2.total_variance;
+        res2.variance_explained.array() /= res2.total_variance;
+        expect_equal_vectors(ref2.variance_explained, res2.variance_explained);
+    }
+
+    // We turn down the size cap so that every batch is equally weighted.
+    runner.set_weight_size_cap(0);
+    {
+        auto res2 = runner.run(expanded.get(), expanded_block.data());
+
+        // Mocking up the expected results.
+        Eigen::MatrixXd expanded_pcs(rank, expanded->ncol());
+        expanded_pcs.leftCols(combined->ncol()) = ref.pcs;
+        size_t host_counter = 0, dest_counter = combined->ncol();
+        for (int b = 0; b < nblocks; ++b) {
+            size_t nc = components[b]->ncol();
+            for (int b0 = 0; b0 < b; ++b0) {
+                expanded_pcs.middleCols(dest_counter, nc) = ref.pcs.middleCols(host_counter, nc);
+                dest_counter += nc; 
+            }
+            host_counter += nc;
         }
-        host_counter += nc;
+
+        Eigen::VectorXd recenters = expanded_pcs.rowwise().sum();
+        recenters /= expanded_pcs.cols();
+        for (size_t i = 0, end = expanded_pcs.cols(); i < end; ++i) {
+            expanded_pcs.col(i) -= recenters;
+        }
+
+        // Comparing the results.
+        expanded_pcs.array() /= expanded_pcs.norm();
+        res2.pcs.array() /= res2.pcs.norm();
+        expect_equal_pcs(expanded_pcs, res2.pcs);
+
+        res2.variance_explained.array() /= res2.total_variance;
+        expect_equal_vectors(ref.variance_explained, res2.variance_explained);
     }
-
-    Eigen::VectorXd recenters = expanded_pcs.rowwise().sum();
-    recenters /= expanded_pcs.cols();
-    for (size_t i = 0, end = expanded_pcs.cols(); i < end; ++i) {
-        expanded_pcs.col(i) -= recenters;
-    }
-
-    // Now actually running the thing.
-    auto res2 = runner.run(expanded.get(), expanded_block.data());
-
-    expanded_pcs.array() /= expanded_pcs.norm();
-    res2.pcs.array() /= res2.pcs.norm();
-    expect_equal_pcs(expanded_pcs, res2.pcs);
-
-    res2.variance_explained.array() /= res2.total_variance;
-    expect_equal_vectors(ref.variance_explained, res2.variance_explained);
 }
 
 INSTANTIATE_TEST_SUITE_P(
