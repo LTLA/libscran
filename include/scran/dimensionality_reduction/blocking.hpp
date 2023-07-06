@@ -16,10 +16,20 @@ namespace scran {
 namespace pca_utils {
 
 struct UnweightedBlockingDetails {
-    UnweightedBlockingDetails(size_t nblocks, size_t) : block_size(nblocks) {}
+    UnweightedBlockingDetails(size_t nblocks) : block_size(nblocks) {}
+    UnweightedBlockingDetails(size_t nblocks, size_t) : UnweightedBlockingDetails(nblocks) {}
     std::vector<int> block_size;
     size_t num_blocks() const { return block_size.size(); }
 };
+
+template<typename Block_>
+UnweightedBlockingDetails compute_blocking_details(size_t ncells, const Block_* block) {
+    auto bsizes = tabulate_ids(ncells, block);
+    auto nblocks = bsizes.size();
+    UnweightedBlockingDetails output(nblocks);
+    output.block_size = std::move(bsizes);
+    return output;
+}
 
 struct WeightedBlockingDetails {
     WeightedBlockingDetails(size_t nblocks, size_t ncells) : block_size(nblocks), per_element_weight(nblocks), expanded_weights(ncells) {}
@@ -30,54 +40,56 @@ struct WeightedBlockingDetails {
     size_t num_blocks() const { return block_size.size(); }
 };
 
-template<bool weight_>
-using BlockingDetails = typename std::conditional<weight_, WeightedBlockingDetails, UnweightedBlockingDetails>::type;
-
-template<bool weight_, typename Block_>
-BlockingDetails<weight_> compute_blocking_details(size_t ncells, const Block_* block, int size_cap) {
-    auto bsizes = count_blocks<int>(ncells, block);
+template<typename Block_>
+WeightedBlockingDetails compute_blocking_details(size_t ncells, const Block_* block, WeightPolicy block_weight_policy, const VariableBlockWeightParameters& variable_block_weight_parameters) {
+    auto bsizes = tabulate_ids(ncells, block);
     auto nblocks = bsizes.size();
-    typename std::conditional<weight_, WeightedBlockingDetails, UnweightedBlockingDetails>::type output(nblocks, ncells);
+    WeightedBlockingDetails output(nblocks, ncells);
     output.block_size = std::move(bsizes);
 
-    if constexpr(weight_) {
-        auto& total_weight = output.total_block_weight;
-        auto& element_weight = output.per_element_weight;
+    auto& total_weight = output.total_block_weight;
+    auto& element_weight = output.per_element_weight;
 
-        for (size_t i = 0; i < nblocks; ++i) {
-            auto block_size = output.block_size[i];
+    for (size_t i = 0; i < nblocks; ++i) {
+        auto block_size = output.block_size[i];
 
-            // Computing effective block weights that also incorporate division by the
-            // block size. This avoids having to do the division by block size in the
-            // 'compute_mean_and_variance_regress()' function.
-            if (block_size) {
-                double block_weight = weight_block(block_size, size_cap);
-                element_weight[i] = block_weight / block_size;
-                total_weight += block_weight;
-            } else {
-                element_weight[i] = 0;
+        // Computing effective block weights that also incorporate division by the
+        // block size. This avoids having to do the division by block size in the
+        // 'compute_mean_and_variance_regress()' function.
+        if (block_size) {
+            double block_weight = 1;
+            if (block_weight_policy == WeightPolicy::VARIABLE) {
+                block_weight = variable_block_weight(block_size, variable_block_weight_parameters);
             }
-        }
 
-        // Setting a placeholder value to avoid problems with division by zero.
-        if (total_weight == 0) {
-            total_weight = 1; 
+            element_weight[i] = block_weight / block_size;
+            total_weight += block_weight;
+        } else {
+            element_weight[i] = 0;
         }
+    }
 
-        // Expanding them for multiplication in pca_utils::SampleScaledWrapper.
-        auto sqrt_weights = element_weight;
-        for (auto& s : sqrt_weights) {
-            s = std::sqrt(s);
-        }
+    // Setting a placeholder value to avoid problems with division by zero.
+    if (total_weight == 0) {
+        total_weight = 1; 
+    }
 
-        auto& expanded = output.expanded_weights;
-        for (size_t i = 0; i < ncells; ++i) {
-            expanded.coeffRef(i) = sqrt_weights[block[i]];
-        }
+    // Expanding them for multiplication in pca_utils::SampleScaledWrapper.
+    auto sqrt_weights = element_weight;
+    for (auto& s : sqrt_weights) {
+        s = std::sqrt(s);
+    }
+
+    auto& expanded = output.expanded_weights;
+    for (size_t i = 0; i < ncells; ++i) {
+        expanded.coeffRef(i) = sqrt_weights[block[i]];
     }
 
     return output;
 }
+
+template<bool weight_>
+using BlockingDetails = typename std::conditional<weight_, WeightedBlockingDetails, UnweightedBlockingDetails>::type;
 
 template<bool weight_, typename Block_>
 void compute_mean_and_variance_regress(

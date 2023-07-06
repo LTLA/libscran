@@ -44,18 +44,6 @@ namespace scran {
 class MultiBatchPca {
 public:
     /**
-     * Policy to use for handling different batches.
-     *
-     * - `WEIGHTED_ONLY`: each batch is weighted in inversely proportion to its number of cells,
-     *   such that all batches contribute "equally" to the rotation vectors regardless of their size.
-     * - `RESIDUAL_ONLY`: the rotation vectors are computed from the residuals after centering each batch.
-     *   The uncentered data is then projected onto these rotation vectors and reported in `Results::pcs`.
-     * - `WEIGHTED_RESIDUAL`: this combined both `WEIGHTED_ONLY` and `RESIDUAL_ONLY`,
-     *   where each batch is weighted for equal contributions and the rotation vectors are computed from the residuals.
-     */
-    enum class BlockPolicy : char { WEIGHTED_ONLY, RESIDUAL_ONLY, WEIGHTED_RESIDUAL };
-
-    /**
      * @brief Default parameter settings.
      */
     struct Defaults {
@@ -75,14 +63,19 @@ public:
         static constexpr bool transpose = true;
 
         /**
-         * See `set_block_policy()` for more details.
+         * See `set_use_residuals()` for more details.
          */
-        static constexpr BlockPolicy block_policy = BlockPolicy::WEIGHTED_ONLY;
+        static constexpr bool use_residuals = false;
+        
+        /**
+         * See `set_block_weight_policy()` for more details.
+         */
+        static constexpr WeightPolicy block_weight_policy = WeightPolicy::EQUAL;
 
         /**
-         * See `set_weight_size_cap()` for more details.
+         * See `set_variable_block_weight_parameters()` for more details.
          */
-        static constexpr int weight_size_cap = 1000;
+        static constexpr VariableBlockWeightParameters variable_block_weight_parameters = VariableBlockWeightParameters();
 
         /**
          * See `set_num_threads()` for more details.
@@ -110,8 +103,9 @@ private:
     bool transpose = Defaults::transpose;
     int rank = Defaults::rank;
 
-    BlockPolicy block_policy = Defaults::block_policy;
-    int weight_size_cap = Defaults::weight_size_cap;
+    bool use_residuals = Defaults::use_residuals;
+    WeightPolicy block_weight_policy = Defaults::block_weight_policy;
+    VariableBlockWeightParameters variable_block_weight_parameters = Defaults::variable_block_weight_parameters;
 
     bool return_rotation = Defaults::return_rotation;
     bool return_center = Defaults::return_center;
@@ -153,23 +147,33 @@ public:
     }
 
     /**
-     * @param w Policy to use for handling multiple batches, see `BlockPolicy` for details.
+     * @param u Whether to compute the rotation vectors from the residuals after centering each batch.
      * 
      * @return A reference to this `MultiBatchPca` instance.
      */
-    MultiBatchPca& set_block_policy(BlockPolicy b = Defaults::block_policy) {
-        block_policy = b;
+    MultiBatchPca& set_use_residuals(bool u = Defaults::use_residuals) {
+        use_residuals = u;
         return *this;
     }
 
     /**
-     * @param w Cap on the size of each block (i.e., number of cells), above which all blocks are to be assigned equal weight - see `weight_block()` for details.
-     * Only used when `set_block_policy()` is `BlockPolicy::WEIGHTED_ONLY` or `BlockPolicy::WEIGHTED_RESIDUAL`.
+     * @param w Policy to use for weighting batches of different size.
      * 
      * @return A reference to this `MultiBatchPca` instance.
      */
-    MultiBatchPca& set_weight_size_cap(int w = Defaults::weight_size_cap) {
-        weight_size_cap = w;
+    MultiBatchPca& set_block_weight_policy(WeightPolicy w = Defaults::block_weight_policy) {
+        block_weight_policy = w;
+        return *this;
+    }
+
+    /**
+     * @param v Parameters for the variable block weights, see `variable_block_weight()` for more details.
+     * Only used when the block weight policy is set to `WeightPolicy::VARIABLE`.
+     * 
+     * @return A reference to this `MultiBatchPca` instance.
+     */
+    MultiBatchPca& set_variable_block_weight_parameters(VariableBlockWeightParameters v = Defaults::variable_block_weight_parameters) {
+        variable_block_weight_parameters = v;
         return *this;
     }
 
@@ -492,7 +496,7 @@ private:
 
 private:
     template<typename Data_, typename Index_, typename Block_>
-    bool run_internal(
+    void run_internal(
         const tatami::Matrix<Data_, Index_>* mat, 
         const Block_* block, 
         Eigen::MatrixXd& pcs, 
@@ -506,36 +510,41 @@ private:
         irlba::Irlba irb;
         irb.set_number(rank);
 
-        if (block_policy == BlockPolicy::RESIDUAL_ONLY) {
-            auto bdetails = pca_utils::compute_blocking_details<false>(mat->ncol(), block, weight_size_cap);
-            if (mat->sparse()) {
-                run_sparse_residuals<false>(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_m, scale_v, total_var);
-            } else {
-                run_dense_residuals<false>(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_m, scale_v, total_var);
-            }
-
-        } else {
-            auto bdetails = pca_utils::compute_blocking_details<true>(mat->ncol(), block, weight_size_cap);
-
-            if (block_policy == BlockPolicy::WEIGHTED_ONLY) {
-                Eigen::VectorXd center_v;
+        if (use_residuals) {
+            if (block_weight_policy == WeightPolicy::NONE) {
+                auto bdetails = pca_utils::compute_blocking_details(mat->ncol(), block);
                 if (mat->sparse()) {
-                    run_sparse_simple(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_v, scale_v, total_var);
+                    run_sparse_residuals<false>(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_m, scale_v, total_var);
                 } else {
-                    run_dense_simple(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_v, scale_v, total_var);
-                }
-
-                if (return_center) {
-                    center_m.resize(1, center_v.size());
-                    center_m.row(0) = center_v;
+                    run_dense_residuals<false>(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_m, scale_v, total_var);
                 }
 
             } else {
+                auto bdetails = pca_utils::compute_blocking_details(mat->ncol(), block, block_weight_policy, variable_block_weight_parameters);
                 if (mat->sparse()) {
                     run_sparse_residuals<true>(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_m, scale_v, total_var);
                 } else {
                     run_dense_residuals<true>(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_m, scale_v, total_var);
                 }
+            }
+
+        } else {
+            if (block_weight_policy == WeightPolicy::NONE) {
+                throw std::runtime_error("block weight policy cannot be NONE when 'use_residuals = true', use SimplePca instead"); 
+            }
+
+            auto bdetails = pca_utils::compute_blocking_details(mat->ncol(), block, block_weight_policy, variable_block_weight_parameters);
+
+            Eigen::VectorXd center_v;
+            if (mat->sparse()) {
+                run_sparse_simple(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_v, scale_v, total_var);
+            } else {
+                run_dense_simple(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_v, scale_v, total_var);
+            }
+
+            if (return_center) {
+                center_m.resize(1, center_v.size());
+                center_m.row(0) = center_v;
             }
         }
     }

@@ -256,8 +256,7 @@ TEST_P(ResidualPcaBasicTest, WeightedConsistency) {
 
     scran::ResidualPca runner;
     runner.set_scale(scale).set_rank(rank);
-    runner.set_weight_policy(scran::ResidualPca::WeightPolicy::EQUAL);
-    runner.set_weight_size_cap(0); // for simplicity's sake.
+    runner.set_block_weight_policy(scran::WeightPolicy::EQUAL);
 
     auto block = generate_blocks(dense_row->ncol(), nblocks);
     auto ref = runner.run(dense_row.get(), block.data());
@@ -271,8 +270,7 @@ TEST_P(ResidualPcaBasicTest, WeightedConsistency) {
         } else {
             auto collected = fragment_matrices_by_block(dense_row, block, nblocks);
 
-            // When the weight size cap is set to zero, blocks are equally weighted.
-            // Then, the 'variance' is really just the grand sum (across blocks) of
+            // Here, the 'variance' is really just the grand sum (across blocks) of
             // the sum (across cells) of the squared difference from the mean.
             double total_var = 0;
             for (int b = 0, end = collected.size(); b < end; ++b) {
@@ -477,7 +475,7 @@ TEST_P(ResidualPcaWeightedTest, VersusReference) {
 
     // Checking that we get more-or-less the same results with weighting.
     runner.set_num_threads(nthreads);
-    runner.set_weight_policy(scran::ResidualPca::WeightPolicy::EQUAL);
+    runner.set_block_weight_policy(scran::WeightPolicy::EQUAL);
 
     auto res1 = runner.run(combined.get(), blocking.data());
     res1.pcs.array() /= res1.pcs.norm();
@@ -498,13 +496,14 @@ TEST_P(ResidualPcaWeightedTest, VersusReference) {
 
     // With a large size cap, each block is weighted by its size,
     // which is equivalent to the total absence of re-weighting.
-    runner.set_weight_size_cap(1000000);
+    runner.set_block_weight_policy(scran::WeightPolicy::VARIABLE);
+    runner.set_variable_block_weight_parameters({ 0, 1000000 });
     {
         auto res2 = runner.run(expanded.get(), expanded_block.data());
 
         scran::ResidualPca runner2;
         runner2.set_scale(scale).set_rank(rank);
-        runner2.set_weight_policy(scran::ResidualPca::WeightPolicy::NONE);
+        runner2.set_block_weight_policy(scran::WeightPolicy::NONE);
         auto ref2 = runner2.run(expanded.get(), expanded_block.data());
 
         ref2.pcs.array() /= ref2.pcs.norm();
@@ -517,7 +516,7 @@ TEST_P(ResidualPcaWeightedTest, VersusReference) {
     }
 
     // We turn down the size cap so that every batch is equally weighted.
-    runner.set_weight_size_cap(0);
+    runner.set_variable_block_weight_parameters({ 0, 0 });
     {
         auto res2 = runner.run(expanded.get(), expanded_block.data());
 

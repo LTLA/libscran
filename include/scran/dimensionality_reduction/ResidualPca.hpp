@@ -46,16 +46,6 @@ namespace scran {
 class ResidualPca {
 public:
     /**
-     * Policy to use for weighting batches based on their size, i.e., the number of cells in each batch.
-     *
-     * - `NONE`: no weighting is performed.
-     *   This means that larger batches will contribute more to the calculation of the rotation vectors in the PCA.
-     * - `EQUAL`: each batch is downscaled in proportion to its number of cells,
-     *   such that all batches contribute "equally" to the rotation vectors regardless of their size.
-     */
-    enum class WeightPolicy : char { NONE, EQUAL };
-
-    /**
      * @brief Default parameter settings.
      */
     struct Defaults {
@@ -80,14 +70,14 @@ public:
         static constexpr int num_threads = 1;
 
         /**
-         * See `set_weight_policy()` for more details.
+         * See `set_block_weight_policy()` for more details.
          */
-        static constexpr WeightPolicy weight_policy = WeightPolicy::NONE;
+        static constexpr WeightPolicy block_weight_policy = WeightPolicy::NONE;
 
         /**
-         * See `set_weight_size_cap()` for more details.
+         * See `set_variable_block_weight_parameters()` for more details.
          */
-        static constexpr int weight_size_cap = 1000;
+        static constexpr VariableBlockWeightParameters variable_block_weight_parameters = VariableBlockWeightParameters();
 
         /**
          * See `set_return_rotation()` for more details.
@@ -110,12 +100,12 @@ private:
     bool transpose = Defaults::transpose;
     int rank = Defaults::rank;
 
-    WeightPolicy weight_policy = Defaults::weight_policy;
-    int weight_size_cap = Defaults::weight_size_cap;
-
     bool return_rotation = Defaults::return_rotation;
     bool return_center = Defaults::return_center;
     bool return_scale = Defaults::return_scale;
+
+    WeightPolicy block_weight_policy = Defaults::block_weight_policy;
+    VariableBlockWeightParameters variable_block_weight_parameters = Defaults::variable_block_weight_parameters;
 
     int nthreads = Defaults::num_threads;
 
@@ -153,26 +143,6 @@ public:
     }
 
     /**
-     * @param w Policy to use for weighting batches of different size, see `WeightPolicy` for details.
-     * 
-     * @return A reference to this `ResidualPca` instance.
-     */
-    ResidualPca& set_weight_policy(WeightPolicy w = Defaults::weight_policy) {
-        weight_policy = w;
-        return *this;
-    }
-
-    /**
-     * @param w Cap on the size of each block (i.e., number of cells), above which all blocks are to be assigned equal weight - see `weight_block()` for details.
-     * 
-     * @return A reference to this `ResidualPca` instance.
-     */
-    ResidualPca& set_weight_size_cap(int w = Defaults::weight_size_cap) {
-        weight_size_cap = w;
-        return *this;
-    }
-
-    /**
      * @param r Should the rotation matrix be returned in the output?
      * 
      * @return A reference to this `ResidualPca` instance.
@@ -199,6 +169,27 @@ public:
      */
     ResidualPca& set_return_scale(bool r = Defaults::return_scale) {
         return_scale = r;
+        return *this;
+    }
+
+    /**
+     * @param w Policy to use for weighting batches of different size.
+     * 
+     * @return A reference to this `ResidualPca` instance.
+     */
+    ResidualPca& set_block_weight_policy(WeightPolicy w = Defaults::block_weight_policy) {
+        block_weight_policy = w;
+        return *this;
+    }
+
+    /**
+     * @param v Parameters for the variable block weights, see `variable_block_weight()` for more details.
+     * Only used when the block weight policy is set to `WeightPolicy::VARIABLE`.
+     * 
+     * @return A reference to this `ResidualPca` instance.
+     */
+    ResidualPca& set_variable_block_weight_parameters(VariableBlockWeightParameters v = Defaults::variable_block_weight_parameters) {
+        variable_block_weight_parameters = v;
         return *this;
     }
 
@@ -350,15 +341,16 @@ private:
         irlba::Irlba irb;
         irb.set_number(rank);
 
-        if (weight_policy == WeightPolicy::NONE) {
-            auto bdetails = pca_utils::compute_blocking_details<false>(mat->ncol(), block, weight_size_cap);
+        if (block_weight_policy == WeightPolicy::NONE) {
+            auto bdetails = pca_utils::compute_blocking_details(mat->ncol(), block);
             if (mat->sparse()) {
                 run_sparse<false>(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_m, scale_v, total_var);
             } else {
                 run_dense<false>(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_m, scale_v, total_var);
             }
+
         } else {
-            auto bdetails = pca_utils::compute_blocking_details<true>(mat->ncol(), block, weight_size_cap);
+            auto bdetails = pca_utils::compute_blocking_details(mat->ncol(), block, block_weight_policy, variable_block_weight_parameters);
             if (mat->sparse()) {
                 run_sparse<true>(mat, block, bdetails, irb, pcs, rotation, variance_explained, center_m, scale_v, total_var);
             } else {
