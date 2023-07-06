@@ -86,19 +86,31 @@ $(function() {
  <a href="structscran_1_1ModelGeneVar_1_1Defaults.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="ModelGeneVar_8hpp_source.html">ModelGeneVar.hpp</a>&gt;</code></p>
+<div class="dynheader">
+Collaboration diagram for scran::ModelGeneVar::Defaults:</div>
+<div class="dyncontent">
+<div class="center"><img src="structscran_1_1ModelGeneVar_1_1Defaults__coll__graph.png" border="0" usemap="#ascran_1_1ModelGeneVar_1_1Defaults_coll__map" alt="Collaboration graph"/></div>
+<map name="ascran_1_1ModelGeneVar_1_1Defaults_coll__map" id="ascran_1_1ModelGeneVar_1_1Defaults_coll__map">
+<area shape="rect" title="Default parameters for variance modelling." alt="" coords="22,124,168,165"/>
+<area shape="rect" href="structscran_1_1VariableBlockWeightParameters.html" title="Parameters for variable_block_weight()." alt="" coords="5,5,185,46"/>
+<area shape="poly" title=" " alt="" coords="98,61,98,123,92,123,92,61"/>
+</map>
+<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr class="memitem:a4119fae2b60c2d2cc76a940f65b0d13e"><td class="memItemLeft" align="right" valign="top">static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ModelGeneVar_1_1Defaults.html#a4119fae2b60c2d2cc76a940f65b0d13e">weight_size_cap</a> = 1000</td></tr>
-<tr class="separator:a4119fae2b60c2d2cc76a940f65b0d13e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56250b4747b3eccaa87aa9e6c8fb44b5"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="namespacescran.html#abcd041d625290609e221552910ae2c34">WeightPolicy</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ModelGeneVar_1_1Defaults.html#a56250b4747b3eccaa87aa9e6c8fb44b5">block_weight_policy</a> = WeightPolicy::VARIABLE</td></tr>
+<tr class="separator:a56250b4747b3eccaa87aa9e6c8fb44b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b47cec1ec3cfea85a5d6ce47c8cccfd"><td class="memItemLeft" align="right" valign="top">static constexpr <a class="el" href="structscran_1_1VariableBlockWeightParameters.html">VariableBlockWeightParameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ModelGeneVar_1_1Defaults.html#a5b47cec1ec3cfea85a5d6ce47c8cccfd">variable_block_weight_parameters</a> = <a class="el" href="structscran_1_1VariableBlockWeightParameters.html">VariableBlockWeightParameters</a>()</td></tr>
+<tr class="separator:a5b47cec1ec3cfea85a5d6ce47c8cccfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9ccac88ed4b0762bd8ea3528724d517f"><td class="memItemLeft" align="right" valign="top">static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ModelGeneVar_1_1Defaults.html#a9ccac88ed4b0762bd8ea3528724d517f">num_threads</a> = 1</td></tr>
 <tr class="separator:a9ccac88ed4b0762bd8ea3528724d517f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Default parameters for variance modelling. </p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
-<a id="a4119fae2b60c2d2cc76a940f65b0d13e" name="a4119fae2b60c2d2cc76a940f65b0d13e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4119fae2b60c2d2cc76a940f65b0d13e">&#9670;&#160;</a></span>weight_size_cap</h2>
+<a id="a56250b4747b3eccaa87aa9e6c8fb44b5" name="a56250b4747b3eccaa87aa9e6c8fb44b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a56250b4747b3eccaa87aa9e6c8fb44b5">&#9670;&#160;</a></span>block_weight_policy</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -107,7 +119,7 @@ Static Public Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">constexpr int scran::ModelGeneVar::Defaults::weight_size_cap = 1000</td>
+          <td class="memname">constexpr <a class="el" href="namespacescran.html#abcd041d625290609e221552910ae2c34">WeightPolicy</a> scran::ModelGeneVar::Defaults::block_weight_policy = WeightPolicy::VARIABLE</td>
         </tr>
       </table>
   </td>
@@ -116,7 +128,30 @@ Static Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>See <code><a class="el" href="classscran_1_1ModelGeneVar.html#a6b1ff2ae16c3d32de3d56e54ae97138c">set_weight_size_cap()</a></code> for more details. </p>
+<p>See <code><a class="el" href="classscran_1_1ModelGeneVar.html#a6c7fdd291fd6784010827acc230e35bf">set_block_weight_policy()</a></code> for more details. </p>
+
+</div>
+</div>
+<a id="a5b47cec1ec3cfea85a5d6ce47c8cccfd" name="a5b47cec1ec3cfea85a5d6ce47c8cccfd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5b47cec1ec3cfea85a5d6ce47c8cccfd">&#9670;&#160;</a></span>variable_block_weight_parameters</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr <a class="el" href="structscran_1_1VariableBlockWeightParameters.html">VariableBlockWeightParameters</a> scran::ModelGeneVar::Defaults::variable_block_weight_parameters = <a class="el" href="structscran_1_1VariableBlockWeightParameters.html">VariableBlockWeightParameters</a>()</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>See <code><a class="el" href="classscran_1_1ModelGeneVar.html#a8b1974737ce30bef77140ba22aa7463c">set_variable_block_weight_parameters()</a></code> for more details. </p>
 
 </div>
 </div>

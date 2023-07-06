@@ -75,6 +75,7 @@ $(function() {
 <a href="#namespaces">Namespaces</a> &#124;
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">scran Namespace Reference</div></div>
 </div><!--header-->
@@ -187,11 +188,22 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1SummarizeEffects.html">SummarizeEffects</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Summarize pairwise effects into summary statistics per group.  <a href="classscran_1_1SummarizeEffects.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1VariableBlockWeightParameters.html">VariableBlockWeightParameters</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parameters for <code><a class="el" href="namespacescran.html#a128f43444ef77988f27ae5b91cef6b13">variable_block_weight()</a></code>.  <a href="structscran_1_1VariableBlockWeightParameters.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
 <tr class="memitem:a836b35676870dd7296db5763e317c702"><td class="memItemLeft" align="right" valign="top">typedef kmeans::Kmeans&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacescran.html#a836b35676870dd7296db5763e317c702">ClusterKmeans</a></td></tr>
 <tr class="separator:a836b35676870dd7296db5763e317c702"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:abcd041d625290609e221552910ae2c34"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacescran.html#abcd041d625290609e221552910ae2c34">WeightPolicy</a> : char { <b>NONE</b>
+, <b>VARIABLE</b>
+, <b>EQUAL</b>
+ }</td></tr>
+<tr class="separator:abcd041d625290609e221552910ae2c34"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
@@ -207,15 +219,14 @@ Functions</h2></td></tr>
 <tr class="memitem:a945a1f18683033b5eed71bdd748f1c72"><td class="memTemplParams" colspan="2">template&lt;typename Output  = double, typename Stat , typename Weight &gt; </td></tr>
 <tr class="memitem:a945a1f18683033b5eed71bdd748f1c72"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; Output &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacescran.html#a945a1f18683033b5eed71bdd748f1c72">average_vectors_weighted</a> (size_t n, std::vector&lt; Stat * &gt; in, const Weight *w)</td></tr>
 <tr class="separator:a945a1f18683033b5eed71bdd748f1c72"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2e8cdbed52a90a233c7e02eec2933f81"><td class="memTemplParams" colspan="2">template&lt;typename Index_ , typename Block_ &gt; </td></tr>
-<tr class="memitem:a2e8cdbed52a90a233c7e02eec2933f81"><td class="memTemplItemLeft" align="right" valign="top">Index_&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacescran.html#a2e8cdbed52a90a233c7e02eec2933f81">count_block_levels</a> (Index_ num, const Block_ *block)</td></tr>
-<tr class="separator:a2e8cdbed52a90a233c7e02eec2933f81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4ad7ef476e1d9852cb9b9b53a46eb63c"><td class="memTemplParams" colspan="2">template&lt;typename Index_ , typename Block_ &gt; </td></tr>
-<tr class="memitem:a4ad7ef476e1d9852cb9b9b53a46eb63c"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; Index_ &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacescran.html#a4ad7ef476e1d9852cb9b9b53a46eb63c">count_blocks</a> (Index_ num, const Block_ *block)</td></tr>
-<tr class="separator:a4ad7ef476e1d9852cb9b9b53a46eb63c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9bf9566ed0cbf9bf3cb310f0847ca5cd"><td class="memTemplParams" colspan="2">template&lt;class Size_ &gt; </td></tr>
-<tr class="memitem:a9bf9566ed0cbf9bf3cb310f0847ca5cd"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacescran.html#a9bf9566ed0cbf9bf3cb310f0847ca5cd">weight_block</a> (Size_ block_size, Size_ cap)</td></tr>
-<tr class="separator:a9bf9566ed0cbf9bf3cb310f0847ca5cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9139c8a147e1ed970aac8ffc18776075"><td class="memTemplParams" colspan="2">template&lt;typename Id_ &gt; </td></tr>
+<tr class="memitem:a9139c8a147e1ed970aac8ffc18776075"><td class="memTemplItemLeft" align="right" valign="top">size_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacescran.html#a9139c8a147e1ed970aac8ffc18776075">count_ids</a> (size_t length, const Id_ *value)</td></tr>
+<tr class="separator:a9139c8a147e1ed970aac8ffc18776075"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f1658794e621bcd27fd33b91422a4a3"><td class="memTemplParams" colspan="2">template&lt;typename Output_  = int, bool allow_zeros_ = false, typename Id_ &gt; </td></tr>
+<tr class="memitem:a7f1658794e621bcd27fd33b91422a4a3"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; Output_ &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacescran.html#a7f1658794e621bcd27fd33b91422a4a3">tabulate_ids</a> (size_t num, const Id_ *ids, bool allow_zeros=false)</td></tr>
+<tr class="separator:a7f1658794e621bcd27fd33b91422a4a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a128f43444ef77988f27ae5b91cef6b13"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacescran.html#a128f43444ef77988f27ae5b91cef6b13">variable_block_weight</a> (double s, const <a class="el" href="structscran_1_1VariableBlockWeightParameters.html">VariableBlockWeightParameters</a> &amp;params)</td></tr>
+<tr class="separator:a128f43444ef77988f27ae5b91cef6b13"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af57dae3ada8336a1bfa01ac8daa9fc11"><td class="memTemplParams" colspan="2">template&lt;bool retain, class Vector , typename Subset &gt; </td></tr>
 <tr class="memitem:af57dae3ada8336a1bfa01ac8daa9fc11"><td class="memTemplItemLeft" align="right" valign="top">Vector&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacescran.html#af57dae3ada8336a1bfa01ac8daa9fc11">subset_vector</a> (const Vector &amp;vec, const Subset *sub)</td></tr>
 <tr class="separator:af57dae3ada8336a1bfa01ac8daa9fc11"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -245,6 +256,35 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Provides the <code>kmeans::Kmeans</code> class under the <b>scran</b> namespace. This is mostly for the sake of having a consistent naming scheme - see the <a href="https://ltla.github.io/CppKmeans/"><b>kmeans</b> documentation</a> for specifics.</p>
 <p>Note that applications using a custom parallelization scheme will need to set the <code>KMEANS_CUSTOM_PARALLEL</code> macro; the setting of the <code>SCRAN_CUSTOM_PARALLEL</code> macro will not be propagated automatically. </p>
+
+</div>
+</div>
+<h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="abcd041d625290609e221552910ae2c34" name="abcd041d625290609e221552910ae2c34"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abcd041d625290609e221552910ae2c34">&#9670;&#160;</a></span>WeightPolicy</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="namespacescran.html#abcd041d625290609e221552910ae2c34">scran::WeightPolicy</a> : char</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Policy to use for weighting blocks based on their size, i.e., the number of cells in each block. This controls the calculation of weighted averages across blocks.</p>
+<ul>
+<li><code>NONE</code>: no weighting is performed. Larger blocks will contribute more to the weighted average.</li>
+<li><code>EQUAL</code>: each block receives equal weight, regardless of its size. Equivalent to averaging across blocks without weights.</li>
+<li><code>VARIABLE</code>: each batch is weighted using the logic in <code><a class="el" href="namespacescran.html#a128f43444ef77988f27ae5b91cef6b13">variable_block_weight()</a></code>. This penalizes small blocks with unreliable statistics while equally weighting all large blocks. </li>
+</ul>
 
 </div>
 </div>
@@ -463,71 +503,76 @@ template&lt;typename Output  = double, typename Stat , typename Weight &gt; </di
 
 </div>
 </div>
-<a id="a2e8cdbed52a90a233c7e02eec2933f81" name="a2e8cdbed52a90a233c7e02eec2933f81"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2e8cdbed52a90a233c7e02eec2933f81">&#9670;&#160;</a></span>count_block_levels()</h2>
+<a id="a9139c8a147e1ed970aac8ffc18776075" name="a9139c8a147e1ed970aac8ffc18776075"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9139c8a147e1ed970aac8ffc18776075">&#9670;&#160;</a></span>count_ids()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename Index_ , typename Block_ &gt; </div>
+template&lt;typename Id_ &gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">Index_ scran::count_block_levels </td>
+          <td class="memname">size_t scran::count_ids </td>
           <td>(</td>
-          <td class="paramtype">Index_&#160;</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>length</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Id_ *&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Count the number of unique 0-based IDs, e.g., for block or group assignments. All IDs are assumed to be integers in <code>[0, x)</code> where <code>x</code> is the return value of this function.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Id_</td><td>Integer type for the IDs.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">length</td><td>Length of the array in <code>ids</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ids</td><td>Pointer to an array containing 0-based IDs of some kind.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Number of IDs, or 0 if <code>length = 0</code>. </dd></dl>
+
+</div>
+</div>
+<a id="a7f1658794e621bcd27fd33b91422a4a3" name="a7f1658794e621bcd27fd33b91422a4a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f1658794e621bcd27fd33b91422a4a3">&#9670;&#160;</a></span>tabulate_ids()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Output_  = int, bool allow_zeros_ = false, typename Id_ &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; Output_ &gt; scran::tabulate_ids </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>num</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Block_ *&#160;</td>
-          <td class="paramname"><em>block</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Compute the number of cells in each block.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">Index_</td><td>Integer type for the number of cells. </td></tr>
-    <tr><td class="paramname">Block_</td><td>Integer type for the block IDs.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">num</td><td>Number of cells. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of cells. This should contain a 0-based block assignment for each cell (i.e., for <code>B</code> block, batch identities should run from 0 to <code>B-1</code> with at least one entry for each block.)</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Number of unique blocks in <code>block</code>. </dd></dl>
-
-</div>
-</div>
-<a id="a4ad7ef476e1d9852cb9b9b53a46eb63c" name="a4ad7ef476e1d9852cb9b9b53a46eb63c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4ad7ef476e1d9852cb9b9b53a46eb63c">&#9670;&#160;</a></span>count_blocks()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Index_ , typename Block_ &gt; </div>
-      <table class="memname">
-        <tr>
-          <td class="memname">std::vector&lt; Index_ &gt; scran::count_blocks </td>
-          <td>(</td>
-          <td class="paramtype">Index_&#160;</td>
-          <td class="paramname"><em>num</em>, </td>
+          <td class="paramtype">const Id_ *&#160;</td>
+          <td class="paramname"><em>ids</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Block_ *&#160;</td>
-          <td class="paramname"><em>block</em>&#160;</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>allow_zeros</em> = <code>false</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -536,44 +581,46 @@ template&lt;typename Index_ , typename Block_ &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Compute the number of cells in each block.</p>
+<p>Count the frequency of 0-based IDs, e.g., for block or group assignments. All IDs are assumed to be integers in <code>[0, x)</code> where <code>x</code> is the number of unique IDs.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">Index_</td><td>Integer type for the number of cells. </td></tr>
-    <tr><td class="paramname">Block_</td><td>Integer type for the block IDs.</td></tr>
+    <tr><td class="paramname">Output_</td><td>Numeric type for the output frequencies. </td></tr>
+    <tr><td class="paramname">Id_</td><td>Integer type for the IDs.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">num</td><td>Number of cells. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of cells. This should contain a 0-based block assignment for each cell (i.e., for <code>B</code> block, batch identities should run from 0 to <code>B-1</code> with at least one entry for each block.)</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">length</td><td>Length of the array in <code>ids</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ids</td><td>Pointer to an array containing 0-based IDs of some kind. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">allow_zeros</td><td>Whether to throw an error if frequencies of zero are detected.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Vector of length equal to the number of blocks, containing the number of cells in each block. An error is raised if an empty block is detected. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Vector of length equal to the number of IDs, containing the frequency of each ID. An error is raised if an ID has zero frequency and <code>allow_zeros = false</code>. </dd></dl>
 
 </div>
 </div>
-<a id="a9bf9566ed0cbf9bf3cb310f0847ca5cd" name="a9bf9566ed0cbf9bf3cb310f0847ca5cd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9bf9566ed0cbf9bf3cb310f0847ca5cd">&#9670;&#160;</a></span>weight_block()</h2>
+<a id="a128f43444ef77988f27ae5b91cef6b13" name="a128f43444ef77988f27ae5b91cef6b13"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a128f43444ef77988f27ae5b91cef6b13">&#9670;&#160;</a></span>variable_block_weight()</h2>
 
 <div class="memitem">
 <div class="memproto">
-<div class="memtemplate">
-template&lt;class Size_ &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">double scran::weight_block </td>
+          <td class="memname">double scran::variable_block_weight </td>
           <td>(</td>
-          <td class="paramtype">Size_&#160;</td>
-          <td class="paramname"><em>block_size</em>, </td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">Size_&#160;</td>
-          <td class="paramname"><em>cap</em>&#160;</td>
+          <td class="paramtype">const <a class="el" href="structscran_1_1VariableBlockWeightParameters.html">VariableBlockWeightParameters</a> &amp;&#160;</td>
+          <td class="paramname"><em>params</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -581,18 +628,23 @@ template&lt;class Size_ &gt; </div>
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Weight each block of cells when averaging statistics across blocks. Each weight is defined as <code>min(1, block_size / cap)</code>. Blocks that are "large enough" (i.e., <code>block_size &gt;= cap</code>) are considered to be equally trustworthy and receive the same weight, ensuring that each block contributes equally to the weighted average. By comparison, very small blocks receive lower weight as their statistics are generally less stable.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">Size_</td><td>Numeric type for the sizes.</td></tr>
-  </table>
-  </dd>
-</dl>
+<p>Weight each block of cells for use in computing a weighted average across blocks. The weight for each block is calcualted from the size of that block.</p>
+<ul>
+<li>If the block is smaller than some lower bound, it has zero weight.</li>
+<li>If the block is greater than some upper bound, it has weight of 1.</li>
+<li>Otherwise, the block has weight proportional to its size, increasing linearly from 0 to 1 between the two bounds.</li>
+</ul>
+<p>Blocks that are "large enough" are considered to be equally trustworthy and receive the same weight, ensuring that each block contributes equally to the weighted average. By comparison, very small blocks receive lower weight as their statistics are generally less stable.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">block_size</td><td>Size of the block, in terms of the number of cells in that block. </td></tr>
-    <tr><td class="paramname">cap</td><td>Minimum number of cells for a block to be considered "large enough".</td></tr>
+    <tr><td class="paramname">s</td><td>Size of the block, in terms of the number of cells in that block. </td></tr>
+    <tr><td class="paramname">params</td><td>Parameters for the weight calculation, consisting of the lower and upper bounds.</td></tr>
   </table>
   </dd>
 </dl>

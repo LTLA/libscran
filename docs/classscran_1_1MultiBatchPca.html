@@ -77,7 +77,6 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classscran_1_1MultiBatchPca-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">scran::MultiBatchPca Class Reference</div></div>
@@ -98,14 +97,6 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Container for the PCA results.  <a href="structscran_1_1MultiBatchPca_1_1Results.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
-Public Types</h2></td></tr>
-<tr class="memitem:ad545a41745c48f16810490a8ab8d74f8"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MultiBatchPca.html#ad545a41745c48f16810490a8ab8d74f8">BlockPolicy</a> : char { <b>WEIGHTED_ONLY</b>
-, <b>RESIDUAL_ONLY</b>
-, <b>WEIGHTED_RESIDUAL</b>
- }</td></tr>
-<tr class="separator:ad545a41745c48f16810490a8ab8d74f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a1a826421c677af500db839f8a18a2c39"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MultiBatchPca.html#a1a826421c677af500db839f8a18a2c39">set_rank</a> (int r=<a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#a248820dc9034a1bafd85a65c2eeca6f4">Defaults::rank</a>)</td></tr>
@@ -114,10 +105,12 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:affd83f857848808000f8a1750c950152"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abbdb8c1a5db29d6db7e9b63b8f47a46a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MultiBatchPca.html#abbdb8c1a5db29d6db7e9b63b8f47a46a">set_transpose</a> (bool t=<a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#a21094170e7bad50d62c41953af91ee14">Defaults::transpose</a>)</td></tr>
 <tr class="separator:abbdb8c1a5db29d6db7e9b63b8f47a46a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a69c46de0ade14b01cd6551babe94a901"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MultiBatchPca.html#a69c46de0ade14b01cd6551babe94a901">set_block_policy</a> (<a class="el" href="classscran_1_1MultiBatchPca.html#ad545a41745c48f16810490a8ab8d74f8">BlockPolicy</a> b=<a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#ad84be96724471820858200eba8785e84">Defaults::block_policy</a>)</td></tr>
-<tr class="separator:a69c46de0ade14b01cd6551babe94a901"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aca9c28e3bd13dbe9c7484118ec5f08d5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MultiBatchPca.html#aca9c28e3bd13dbe9c7484118ec5f08d5">set_weight_size_cap</a> (int w=<a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#a991908d4944f0e75a5188d3797bc23c4">Defaults::weight_size_cap</a>)</td></tr>
-<tr class="separator:aca9c28e3bd13dbe9c7484118ec5f08d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2e92f29f42ab49d2a83d756fae75638"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MultiBatchPca.html#ac2e92f29f42ab49d2a83d756fae75638">set_use_residuals</a> (bool u=<a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#aeaf151ac0d14f85b26c1acf16dd2eec5">Defaults::use_residuals</a>)</td></tr>
+<tr class="separator:ac2e92f29f42ab49d2a83d756fae75638"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3fd66fbbc86c9ec8be6899a75fa463b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MultiBatchPca.html#ab3fd66fbbc86c9ec8be6899a75fa463b">set_block_weight_policy</a> (<a class="el" href="namespacescran.html#abcd041d625290609e221552910ae2c34">WeightPolicy</a> w=<a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#a309917adfb9497416204fb547db3d9b5">Defaults::block_weight_policy</a>)</td></tr>
+<tr class="separator:ab3fd66fbbc86c9ec8be6899a75fa463b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe01c3b8a4dc06b7e60ae281af2ce992"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MultiBatchPca.html#afe01c3b8a4dc06b7e60ae281af2ce992">set_variable_block_weight_parameters</a> (<a class="el" href="structscran_1_1VariableBlockWeightParameters.html">VariableBlockWeightParameters</a> v=<a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#afddd3819171f2d7175b72b27aa3fb54e">Defaults::variable_block_weight_parameters</a>)</td></tr>
+<tr class="separator:afe01c3b8a4dc06b7e60ae281af2ce992"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6325469e46f9a4dc9a6969d44cab099d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MultiBatchPca.html#a6325469e46f9a4dc9a6969d44cab099d">set_return_rotation</a> (bool r=<a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#a290139ceca981fae9c7c5f49b6a6f095">Defaults::return_rotation</a>)</td></tr>
 <tr class="separator:a6325469e46f9a4dc9a6969d44cab099d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af44678f99924f3e0025fb06d88237132"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1MultiBatchPca.html#af44678f99924f3e0025fb06d88237132">set_return_center</a> (bool r=<a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#a4b47e1cdbc323a960c517cc71c9f6a12">Defaults::return_center</a>)</td></tr>
@@ -138,36 +131,7 @@ Public Member Functions</h2></td></tr>
 <p>In multi-batch scenarios, we may wish to compute a PCA involving data from multiple batches. However, if one batch has many more cells, it will dominate the PCA by driving the definition of the rotation vectors. This may mask interesting aspects of variation in the smaller batches. To overcome this problem, we scale each batch in inverse proportion to its size. This ensures that each batch contributes equally to the (conceptual) gene-gene covariance matrix, the eigenvectors of which are used as the rotation vectors. Cells are then projected to the subspace defined by these rotation vectors to obtain PC coordinates.</p>
 <p>Alternatively, we can compute rotation vectors from the residuals, i.e., after centering each batch. The gene-gene covariance matrix will thus focus on variation within each batch, ensuring that the top PCs capture biological heterogeneity instead of batch effects. (This is particularly important in applications with many batches, where batch effects might otherwise displace biology from the top PCs.) However, unlike <code><a class="el" href="classscran_1_1ResidualPca.html" title="Compute PCA after regressing out an uninteresting factor.">ResidualPca</a></code>, it is important to note that the residuals are only used here for calculating the rotation vectors. We still project the input matrix to obtain the PCs, so batch effects will likely still be present (though hopefully less pronounced) and must be removed with methods like <a href="https://github.com/LTLA/CppMnnCorrect">MNN correction</a>.</p>
 <p>Finally, we can combine these mechanisms to compute rotation vectors from residuals with equal weighting. This gives us the benefits of both approaches as described above. </p>
-</div><h2 class="groupheader">Member Enumeration Documentation</h2>
-<a id="ad545a41745c48f16810490a8ab8d74f8" name="ad545a41745c48f16810490a8ab8d74f8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad545a41745c48f16810490a8ab8d74f8">&#9670;&#160;</a></span>BlockPolicy</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">enum class <a class="el" href="classscran_1_1MultiBatchPca.html#ad545a41745c48f16810490a8ab8d74f8">scran::MultiBatchPca::BlockPolicy</a> : char</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Policy to use for handling different batches.</p>
-<ul>
-<li><code>WEIGHTED_ONLY</code>: each batch is weighted in inversely proportion to its number of cells, such that all batches contribute "equally" to the rotation vectors regardless of their size.</li>
-<li><code>RESIDUAL_ONLY</code>: the rotation vectors are computed from the residuals after centering each batch. The uncentered data is then projected onto these rotation vectors and reported in <code><a class="el" href="structscran_1_1MultiBatchPca_1_1Results.html#af9a778bbf9b2ed871a45e29a698f6093">Results::pcs</a></code>.</li>
-<li><code>WEIGHTED_RESIDUAL</code>: this combined both <code>WEIGHTED_ONLY</code> and <code>RESIDUAL_ONLY</code>, where each batch is weighted for equal contributions and the rotation vectors are computed from the residuals. </li>
-</ul>
-
-</div>
-</div>
-<h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="a1a826421c677af500db839f8a18a2c39" name="a1a826421c677af500db839f8a18a2c39"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a1a826421c677af500db839f8a18a2c39">&#9670;&#160;</a></span>set_rank()</h2>
 
@@ -267,8 +231,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a69c46de0ade14b01cd6551babe94a901" name="a69c46de0ade14b01cd6551babe94a901"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a69c46de0ade14b01cd6551babe94a901">&#9670;&#160;</a></span>set_block_policy()</h2>
+<a id="ac2e92f29f42ab49d2a83d756fae75638" name="ac2e92f29f42ab49d2a83d756fae75638"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2e92f29f42ab49d2a83d756fae75638">&#9670;&#160;</a></span>set_use_residuals()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -277,10 +241,10 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp; scran::MultiBatchPca::set_block_policy </td>
+          <td class="memname"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp; scran::MultiBatchPca::set_use_residuals </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classscran_1_1MultiBatchPca.html#ad545a41745c48f16810490a8ab8d74f8">BlockPolicy</a>&#160;</td>
-          <td class="paramname"><em>b</em> = <code><a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#ad84be96724471820858200eba8785e84">Defaults::block_policy</a></code></td><td>)</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>u</em> = <code><a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#aeaf151ac0d14f85b26c1acf16dd2eec5">Defaults::use_residuals</a></code></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -292,7 +256,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">w</td><td>Policy to use for handling multiple batches, see <code>BlockPolicy</code> for details.</td></tr>
+    <tr><td class="paramname">u</td><td>Whether to compute the rotation vectors from the residuals after centering each batch.</td></tr>
   </table>
   </dd>
 </dl>
@@ -300,8 +264,8 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="aca9c28e3bd13dbe9c7484118ec5f08d5" name="aca9c28e3bd13dbe9c7484118ec5f08d5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aca9c28e3bd13dbe9c7484118ec5f08d5">&#9670;&#160;</a></span>set_weight_size_cap()</h2>
+<a id="ab3fd66fbbc86c9ec8be6899a75fa463b" name="ab3fd66fbbc86c9ec8be6899a75fa463b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3fd66fbbc86c9ec8be6899a75fa463b">&#9670;&#160;</a></span>set_block_weight_policy()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -310,10 +274,10 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp; scran::MultiBatchPca::set_weight_size_cap </td>
+          <td class="memname"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp; scran::MultiBatchPca::set_block_weight_policy </td>
           <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>w</em> = <code><a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#a991908d4944f0e75a5188d3797bc23c4">Defaults::weight_size_cap</a></code></td><td>)</td>
+          <td class="paramtype"><a class="el" href="namespacescran.html#abcd041d625290609e221552910ae2c34">WeightPolicy</a>&#160;</td>
+          <td class="paramname"><em>w</em> = <code><a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#a309917adfb9497416204fb547db3d9b5">Defaults::block_weight_policy</a></code></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -325,7 +289,40 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">w</td><td>Cap on the size of each block (i.e., number of cells), above which all blocks are to be assigned equal weight - see <code><a class="el" href="namespacescran.html#a9bf9566ed0cbf9bf3cb310f0847ca5cd">weight_block()</a></code> for details. Only used when <code><a class="el" href="classscran_1_1MultiBatchPca.html#a69c46de0ade14b01cd6551babe94a901">set_block_policy()</a></code> is <code>BlockPolicy::WEIGHTED_ONLY</code> or <code>BlockPolicy::WEIGHTED_RESIDUAL</code>.</td></tr>
+    <tr><td class="paramname">w</td><td>Policy to use for weighting batches of different size.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1MultiBatchPca.html" title="Compute PCA after adjusting for differences between batch sizes.">MultiBatchPca</a></code> instance. </dd></dl>
+
+</div>
+</div>
+<a id="afe01c3b8a4dc06b7e60ae281af2ce992" name="afe01c3b8a4dc06b7e60ae281af2ce992"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe01c3b8a4dc06b7e60ae281af2ce992">&#9670;&#160;</a></span>set_variable_block_weight_parameters()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1MultiBatchPca.html">MultiBatchPca</a> &amp; scran::MultiBatchPca::set_variable_block_weight_parameters </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structscran_1_1VariableBlockWeightParameters.html">VariableBlockWeightParameters</a>&#160;</td>
+          <td class="paramname"><em>v</em> = <code><a class="el" href="structscran_1_1MultiBatchPca_1_1Defaults.html#afddd3819171f2d7175b72b27aa3fb54e">Defaults::variable_block_weight_parameters</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">v</td><td>Parameters for the variable block weights, see <code><a class="el" href="namespacescran.html#a128f43444ef77988f27ae5b91cef6b13">variable_block_weight()</a></code> for more details. Only used when the block weight policy is set to <code>WeightPolicy::VARIABLE</code>.</td></tr>
   </table>
   </dd>
 </dl>

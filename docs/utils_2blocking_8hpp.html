@@ -76,7 +76,9 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#namespaces">Namespaces</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">blocking.hpp File Reference</div></div>
 </div><!--header-->
@@ -130,23 +132,36 @@ This graph shows which files directly or indirectly include this file:</div>
 </div>
 <p><a href="utils_2blocking_8hpp_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1VariableBlockWeightParameters.html">scran::VariableBlockWeightParameters</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parameters for <code><a class="el" href="namespacescran.html#a128f43444ef77988f27ae5b91cef6b13">variable_block_weight()</a></code>.  <a href="structscran_1_1VariableBlockWeightParameters.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
 <tr class="memitem:namespacescran"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacescran.html">scran</a></td></tr>
 <tr class="memdesc:namespacescran"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functions for single-cell RNA-seq analyses. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:abcd041d625290609e221552910ae2c34"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacescran.html#abcd041d625290609e221552910ae2c34">scran::WeightPolicy</a> : char { <b>NONE</b>
+, <b>VARIABLE</b>
+, <b>EQUAL</b>
+ }</td></tr>
+<tr class="separator:abcd041d625290609e221552910ae2c34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a2e8cdbed52a90a233c7e02eec2933f81"><td class="memTemplParams" colspan="2">template&lt;typename Index_ , typename Block_ &gt; </td></tr>
-<tr class="memitem:a2e8cdbed52a90a233c7e02eec2933f81"><td class="memTemplItemLeft" align="right" valign="top">Index_&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacescran.html#a2e8cdbed52a90a233c7e02eec2933f81">scran::count_block_levels</a> (Index_ num, const Block_ *block)</td></tr>
-<tr class="separator:a2e8cdbed52a90a233c7e02eec2933f81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4ad7ef476e1d9852cb9b9b53a46eb63c"><td class="memTemplParams" colspan="2">template&lt;typename Index_ , typename Block_ &gt; </td></tr>
-<tr class="memitem:a4ad7ef476e1d9852cb9b9b53a46eb63c"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; Index_ &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacescran.html#a4ad7ef476e1d9852cb9b9b53a46eb63c">scran::count_blocks</a> (Index_ num, const Block_ *block)</td></tr>
-<tr class="separator:a4ad7ef476e1d9852cb9b9b53a46eb63c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9bf9566ed0cbf9bf3cb310f0847ca5cd"><td class="memTemplParams" colspan="2">template&lt;class Size_ &gt; </td></tr>
-<tr class="memitem:a9bf9566ed0cbf9bf3cb310f0847ca5cd"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacescran.html#a9bf9566ed0cbf9bf3cb310f0847ca5cd">scran::weight_block</a> (Size_ block_size, Size_ cap)</td></tr>
-<tr class="separator:a9bf9566ed0cbf9bf3cb310f0847ca5cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9139c8a147e1ed970aac8ffc18776075"><td class="memTemplParams" colspan="2">template&lt;typename Id_ &gt; </td></tr>
+<tr class="memitem:a9139c8a147e1ed970aac8ffc18776075"><td class="memTemplItemLeft" align="right" valign="top">size_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacescran.html#a9139c8a147e1ed970aac8ffc18776075">scran::count_ids</a> (size_t length, const Id_ *value)</td></tr>
+<tr class="separator:a9139c8a147e1ed970aac8ffc18776075"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f1658794e621bcd27fd33b91422a4a3"><td class="memTemplParams" colspan="2">template&lt;typename Output_  = int, bool allow_zeros_ = false, typename Id_ &gt; </td></tr>
+<tr class="memitem:a7f1658794e621bcd27fd33b91422a4a3"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; Output_ &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacescran.html#a7f1658794e621bcd27fd33b91422a4a3">scran::tabulate_ids</a> (size_t num, const Id_ *ids, bool allow_zeros=false)</td></tr>
+<tr class="separator:a7f1658794e621bcd27fd33b91422a4a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a128f43444ef77988f27ae5b91cef6b13"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacescran.html#a128f43444ef77988f27ae5b91cef6b13">scran::variable_block_weight</a> (double s, const <a class="el" href="structscran_1_1VariableBlockWeightParameters.html">VariableBlockWeightParameters</a> &amp;params)</td></tr>
+<tr class="separator:a128f43444ef77988f27ae5b91cef6b13"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Utilities for handling blocks of cells. </p>

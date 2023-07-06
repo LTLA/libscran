@@ -77,7 +77,6 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classscran_1_1ScoreFeatureSet-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">scran::ScoreFeatureSet Class Reference</div></div>
@@ -98,17 +97,10 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Feature set scoring results.  <a href="structscran_1_1ScoreFeatureSet_1_1Results.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
-Public Types</h2></td></tr>
-<tr class="memitem:aad2852f816d76bebe5a5ecec6a55d6ec"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ScoreFeatureSet.html#aad2852f816d76bebe5a5ecec6a55d6ec">WeightPolicy</a> : char { <b>NONE</b>
-, <b>EQUAL</b>
- }</td></tr>
-<tr class="separator:aad2852f816d76bebe5a5ecec6a55d6ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ab9d12d35e3005d65b187c41b4f476b7c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ScoreFeatureSet.html">ScoreFeatureSet</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ScoreFeatureSet.html#ab9d12d35e3005d65b187c41b4f476b7c">set_weight_policy</a> (<a class="el" href="classscran_1_1ScoreFeatureSet.html#aad2852f816d76bebe5a5ecec6a55d6ec">WeightPolicy</a> b=<a class="el" href="structscran_1_1ScoreFeatureSet_1_1Defaults.html#a697de1b2aa7d8fe7e2cd9c0630468827">Defaults::weight_policy</a>)</td></tr>
-<tr class="separator:ab9d12d35e3005d65b187c41b4f476b7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae83cd44e1a04ce7425d0087b49b41657"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ScoreFeatureSet.html">ScoreFeatureSet</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ScoreFeatureSet.html#ae83cd44e1a04ce7425d0087b49b41657">set_block_weight_policy</a> (<a class="el" href="namespacescran.html#abcd041d625290609e221552910ae2c34">WeightPolicy</a> b=<a class="el" href="structscran_1_1ScoreFeatureSet_1_1Defaults.html#ab4734ec94c8f1053bc4da276e4362c61">Defaults::block_weight_policy</a>)</td></tr>
+<tr class="separator:ae83cd44e1a04ce7425d0087b49b41657"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5c2999a41031be48d138dbf5cedd2c36"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ScoreFeatureSet.html">ScoreFeatureSet</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ScoreFeatureSet.html#a5c2999a41031be48d138dbf5cedd2c36">set_num_threads</a> (int n=<a class="el" href="structscran_1_1ScoreFeatureSet_1_1Defaults.html#a518aa9ca768c8b5cbafa0f0820533912">Defaults::num_threads</a>)</td></tr>
 <tr class="separator:a5c2999a41031be48d138dbf5cedd2c36"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6892c7b954ddd7ca056b94ae772fc309"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ScoreFeatureSet.html">ScoreFeatureSet</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ScoreFeatureSet.html#a6892c7b954ddd7ca056b94ae772fc309">set_scale</a> (bool s=<a class="el" href="structscran_1_1ScoreFeatureSet_1_1Defaults.html#ad6b829970b884c66a0e81df6d169caef">Defaults::scale</a>)</td></tr>
@@ -123,11 +115,11 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Compute per-cell scores for a given feature set. </p>
 <p>Per-cell scores are defined as the column means of the rank-1 approximation of the input matrix for the subset of features in the set. The assumption here is that the primary activity of the feature set can be quantified by the largest component of variance amongst its features. (If this was not the case, one could argue that this feature set is not well-suited to capture the biology attributed to it.) In effect, the rotation vector defines weights for all features in the set, focusing on genes that contribute to the primary activity. This is based on the <a href="https://github.com/JasonHackney/GSDecon"><b>GSDecon</b></a> package from Jason Hackney and is implemented using <code><a class="el" href="classscran_1_1SimplePca.html" title="Perform a simple PCA on a gene-cell matrix.">SimplePca</a></code>.</p>
-<p>For multi-block analyses, we extend this approach by performing the PCA on the residuals generated after centering each block in <code><a class="el" href="classscran_1_1ResidualPca.html" title="Compute PCA after regressing out an uninteresting factor.">ResidualPca</a></code>. Each cell is projected onto this rotation vector, and the feature set score for each cell is then defined from the ensuing rank-1 approximation. This approach avoids comparing cells between blocks and favors blocks where the feature set has greater (relative) activity. In addition, blocks can be weighted so that they contribute equally to the rotation vector, regardless of the number of cells - see <code><a class="el" href="classscran_1_1ResidualPca.html#a935c56294aa05af7aa6157f4569b8023">ResidualPca::set_weight_policy()</a></code> for more details.</p>
+<p>For multi-block analyses, we extend this approach by performing the PCA on the residuals generated after centering each block in <code><a class="el" href="classscran_1_1ResidualPca.html" title="Compute PCA after regressing out an uninteresting factor.">ResidualPca</a></code>. Each cell is projected onto this rotation vector, and the feature set score for each cell is then defined from the ensuing rank-1 approximation. This approach avoids comparing cells between blocks and favors blocks where the feature set has greater (relative) activity. In addition, blocks can be weighted so that they contribute equally to the rotation vector, regardless of the number of cells - see <code>ResidualPca::set_weight_policy()</code> for more details.</p>
 <p>For a typical log-expression input matrix, the per-cell scores can be interpreted as the mean log-expression across all features in the set. The importance of each feature is quantified by the absolute value of the weights. </p>
-</div><h2 class="groupheader">Member Enumeration Documentation</h2>
-<a id="aad2852f816d76bebe5a5ecec6a55d6ec" name="aad2852f816d76bebe5a5ecec6a55d6ec"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aad2852f816d76bebe5a5ecec6a55d6ec">&#9670;&#160;</a></span>WeightPolicy</h2>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="ae83cd44e1a04ce7425d0087b49b41657" name="ae83cd44e1a04ce7425d0087b49b41657"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae83cd44e1a04ce7425d0087b49b41657">&#9670;&#160;</a></span>set_block_weight_policy()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -136,38 +128,10 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">enum class <a class="el" href="classscran_1_1ScoreFeatureSet.html#aad2852f816d76bebe5a5ecec6a55d6ec">scran::ScoreFeatureSet::WeightPolicy</a> : char</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Policy to use for weighting batches based on their size, i.e., the number of cells in each batch.</p>
-<ul>
-<li><code>NONE</code>: no weighting is performed. This means that larger batches will contribute more to the calculation of the rotation vectors in the PCA.</li>
-<li><code>EQUAL</code>: each batch is downscaled in proportion to its number of cells, such that all batches contribute "equally" to the rotation vectors regardless of their size. </li>
-</ul>
-
-</div>
-</div>
-<h2 class="groupheader">Member Function Documentation</h2>
-<a id="ab9d12d35e3005d65b187c41b4f476b7c" name="ab9d12d35e3005d65b187c41b4f476b7c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab9d12d35e3005d65b187c41b4f476b7c">&#9670;&#160;</a></span>set_weight_policy()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="classscran_1_1ScoreFeatureSet.html">ScoreFeatureSet</a> &amp; scran::ScoreFeatureSet::set_weight_policy </td>
+          <td class="memname"><a class="el" href="classscran_1_1ScoreFeatureSet.html">ScoreFeatureSet</a> &amp; scran::ScoreFeatureSet::set_block_weight_policy </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classscran_1_1ScoreFeatureSet.html#aad2852f816d76bebe5a5ecec6a55d6ec">WeightPolicy</a>&#160;</td>
-          <td class="paramname"><em>b</em> = <code><a class="el" href="structscran_1_1ScoreFeatureSet_1_1Defaults.html#a697de1b2aa7d8fe7e2cd9c0630468827">Defaults::weight_policy</a></code></td><td>)</td>
+          <td class="paramtype"><a class="el" href="namespacescran.html#abcd041d625290609e221552910ae2c34">WeightPolicy</a>&#160;</td>
+          <td class="paramname"><em>b</em> = <code><a class="el" href="structscran_1_1ScoreFeatureSet_1_1Defaults.html#ab4734ec94c8f1053bc4da276e4362c61">Defaults::block_weight_policy</a></code></td><td>)</td>
           <td></td>
         </tr>
       </table>

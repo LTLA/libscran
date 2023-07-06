@@ -179,7 +179,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Centering matrix, only returned if <code><a class="el" href="classscran_1_1MultiBatchPca.html#af44678f99924f3e0025fb06d88237132">MultiBatchPca::set_return_center()</a></code> is <code>true</code>.</p>
-<p>If <code><a class="el" href="classscran_1_1MultiBatchPca.html#a69c46de0ade14b01cd6551babe94a901">MultiBatchPca::set_block_policy()</a></code> is <code>MultiBatchPca::BlockPolicy::RESIDUAL_ONLY</code> or <code>MultiBatchPca::BlockPolicy::WEIGHTED_RESIDUAL</code>, the number of columns is equal to the number of unique blocking levels. Each row corresponds to a row in the matrix and each column corresponds to a block, such that each entry contains the mean for a particular feature in the corresponding block.</p>
+<p>If <code>MultiBatchPca::set_block_policy()</code> is <code>MultiBatchPca::BlockPolicy::RESIDUAL_ONLY</code> or <code>MultiBatchPca::BlockPolicy::WEIGHTED_RESIDUAL</code>, the number of columns is equal to the number of unique blocking levels. Each row corresponds to a row in the matrix and each column corresponds to a block, such that each entry contains the mean for a particular feature in the corresponding block.</p>
 <p>Otherwise, the number of columns is equal to 1. Each row corresponds to a row in the matrix and contains the (weighted) grand mean for that feature across all blocks.</p>
 <p>If feature filtering was performed, the length is equal to the number of features remaining after filtering. </p>
 
