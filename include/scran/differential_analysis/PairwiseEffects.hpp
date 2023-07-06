@@ -9,6 +9,7 @@
 
 #include "../utils/vector_to_pointers.hpp"
 #include "../utils/blocking.hpp"
+#include "../utils/average_vectors.hpp"
 
 #include "tatami/tatami.hpp"
 
@@ -83,10 +84,8 @@ namespace scran {
  * @section other Other statistics
  * We report the mean log-expression of all cells in each group, as well as the proportion of cells with detectable expression in each group.
  * These statistics are useful for quickly interpreting the differences in expression driving the effect size summaries.
- *
- * If blocking is involved, we compute the mean and proportion for each group in each separate blocking level.
- * This is helpful for detecting differences in expression between batches.
- * They can also be combined into a single statistic for each group by using the `average_vectors()` or `average_vectors_weighted()` functions.
+ * If blocking is involved, we compute the grand average across blocks of the mean and proportion for each group,
+ * where the weight for each block is defined from `weight_block()` on the size of the group in that block.
  */
 class PairwiseEffects {
 public:
@@ -244,9 +243,13 @@ public:
      * This is used to store the proportion of detected expression in each group.
      * @param[out] cohen Pointer to an array of length equal to $GN^2$, where `N` is the number of groups and `G` is the number of genes (see `Results` for details).
      * This is filled with the Cohen's d for the pairwise comparisons between groups across all genes.
+     * Ignored if set to `nullptr`, in which case Cohen's d is not computed.
      * @param[out] auc Pointer to an array as described for `cohen`, but instead storing the AUC.
+     * Ignored if set to `nullptr`, in which case the AUC is not computed.
      * @param[out] lfc Pointer to an array as described for `cohen`, but instead storing the log-fold change. 
+     * Ignored if set to `nullptr`, in which case the log-fold change is not computed.
      * @param[out] delta_detected Pointer to an array as described for `cohen`, but instead the delta in the detected proportions.
+     * Ignored if set to `nullptr`, in which case the delta detected is not computed.
      */
     template<typename Data_, typename Index_, typename Group_, typename Stat_>
     void run(
@@ -282,55 +285,72 @@ public:
      * @param[in] block Pointer to an array of length equal to the number of columns in `p`, containing the blocking factor.
      * Block identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
      * @param[out] means Vector of length equal to the number of groups.
-     * Each element corresponds to a group and is another vector of length equal to the number of blocks.
-     * Each entry of the inner vector is a pointer to an array of length equal to the number of rows in `p`,
-     * which is used to store the mean expression of each group across all genes.
+     * Each element corresponds to a group and is another vector of length equal to the number of genes.
+     * Each entry of the inner vector contains the grand average of the mean expression across all blocks.
      * @param[out] detected Vector of length equal to the number of groups.
-     * Each element corresponds to a group and is another vector of length equal to the number of blocks.
-     * Each entry of the inner vector is a pointer to an array of length equal to the number of rows in `p`,
-     * which is used to store the proportion of detected expression in each group.
+     * Each element corresponds to a group and is another vector of length equal to the number of genes.
+     * Each entry of the inner vector contains the grand average of the detected proportion across all blocks.
      * @param[out] cohen Pointer to an array of length equal to $GN^2$, where `N` is the number of groups and `G` is the number of genes (see `Results` for details).
      * This is filled with the Cohen's d for the pairwise comparisons between groups across all genes.
+     * Ignored if set to `nullptr`, in which case Cohen's d is not computed.
      * @param[out] auc Pointer to an array as described for `cohen`, but instead storing the AUC.
+     * Ignored if set to `nullptr`, in which case the AUC is not computed.
      * @param[out] lfc Pointer to an array as described for `cohen`, but instead storing the log-fold change. 
+     * Ignored if set to `nullptr`, in which case the log-fold change is not computed.
      * @param[out] delta_detected Pointer to an array as described for `cohen`, but instead the delta in the detected proportions.
+     * Ignored if set to `nullptr`, in which case the delta detected is not computed.
      */
     template<typename Data_, typename Index_, typename Group_, typename Block_, typename Stat_>
     void run_blocked(
         const tatami::Matrix<Data_, Index_>* p, 
         const Group_* group, 
         const Block_* block, 
-        std::vector<std::vector<Stat_*> > means, 
-        std::vector<std::vector<Stat_*> > detected, 
+        std::vector<Stat_*> means, 
+        std::vector<Stat_*> detected, 
         Stat_* cohen,
         Stat_* auc,
         Stat_* lfc,
-        Stat_* delta_detected) 
+        Stat_* delta_detected)
     const {
         if (block == NULL) {
-            run(p, group, fetch_first(means), fetch_first(detected), cohen, auc, lfc, delta_detected);
-            return;
-        }
+            run(p, group, std::move(means), std::move(detected), cohen, auc, lfc, delta_detected);
 
-        int ngroups = means.size();
-        int nblocks = (ngroups ? means[0].size() : 0); // no blocks = no groups.
+        } else {
+            auto ngenes = p->nrow();
+            int ngroups = means.size();
+            int nblocks = count_block_levels(p->ncol(), block);
+            int ncombos = ngroups * nblocks;
 
-        int ncombos = ngroups * nblocks;
-        std::vector<Stat_*> means2(ncombos), detected2(ncombos);
-        {
-            auto mIt = means2.begin(), dIt = detected2.begin();
-            for (int g = 0; g < ngroups; ++g) {
-                for (int b = 0; b < nblocks; ++b, ++mIt, ++dIt) {
-                    *mIt = means[g][b];
-                    *dIt = detected[g][b];
+            std::vector<std::vector<Stat_> > means_store(ncombos), detected_store(ncombos);
+            std::vector<Stat_*> means2(ncombos), detected2(ncombos);
+            for (int c = 0; c < ncombos; ++c) {
+                means_store[c].resize(ngenes);
+                detected_store[c].resize(ngenes);
+                means2[c] = means_store[c].data();
+                detected2[c] = detected_store[c].data();
+            }
+
+            differential_analysis::MatrixCalculator runner(nthreads, threshold, weight_size_cap);
+            Overlord overlord(auc);
+            auto state = runner.run_blocked(p, group, ngroups, block, nblocks, overlord);
+            process_simple_effects(p->nrow(), ngroups, nblocks, state, means2, detected2, cohen, lfc, delta_detected);
+
+            // Averaging the statistics.
+            std::vector<double> weights(nblocks);
+            std::vector<Stat_*> mstats(nblocks), dstats(nblocks);
+
+            for (int gr = 0; gr < ngroups; ++gr) {
+                for (int b = 0; b < nblocks; ++b) {
+                    size_t offset = gr * static_cast<size_t>(nblocks) + b;
+                    weights[b] = state.level_weight[offset];
+                    mstats[b] = means2[offset];
+                    dstats[b] = detected2[offset];
                 }
+
+                average_vectors_weighted(ngenes, mstats, weights.data(), means[gr]);
+                average_vectors_weighted(ngenes, dstats, weights.data(), detected[gr]);
             }
         }
-
-        differential_analysis::MatrixCalculator runner(nthreads, threshold, weight_size_cap);
-        Overlord overlord(auc);
-        auto state = runner.run_blocked(p, group, ngroups, block, nblocks, overlord);
-        process_simple_effects(p->nrow(), ngroups, nblocks, state, means2, detected2, cohen, lfc, delta_detected);
     }
 
 private:
@@ -364,12 +384,6 @@ private:
         const auto& level_size = state.level_size;
         size_t nlevels = level_size.size();
 
-        std::vector<double> level_weights;
-        level_weights.reserve(nlevels);
-        for (size_t l = 0; l < nlevels; ++l) {
-            level_weights.push_back(weight_block<double>(level_size[l], weight_size_cap));
-        }
-
         tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
             auto in_offset = nlevels * start;
             const auto* tmp_means = state.means.data() + in_offset;
@@ -385,15 +399,15 @@ private:
                 }
 
                 if (cohen != NULL) {
-                    differential_analysis::compute_pairwise_cohens_d(tmp_means, tmp_variances, level_weights, ngroups, nblocks, threshold, cohen + out_offset);
+                    differential_analysis::compute_pairwise_cohens_d(tmp_means, tmp_variances, state.level_weight, ngroups, nblocks, threshold, cohen + out_offset);
                 }
 
                 if (delta_detected != NULL) {
-                    differential_analysis::compute_pairwise_simple_diff(tmp_detected, level_weights, ngroups, nblocks, delta_detected + out_offset);
+                    differential_analysis::compute_pairwise_simple_diff(tmp_detected, state.level_weight, ngroups, nblocks, delta_detected + out_offset);
                 }
 
                 if (lfc != NULL) {
-                    differential_analysis::compute_pairwise_simple_diff(tmp_means, level_weights, ngroups, nblocks, lfc + out_offset);
+                    differential_analysis::compute_pairwise_simple_diff(tmp_means, state.level_weight, ngroups, nblocks, lfc + out_offset);
                 }
 
                 tmp_means += nlevels;
@@ -420,7 +434,10 @@ public:
         /**
          * @cond
          */
-        Results(size_t ngenes, size_t ngroups, bool do_cohen, bool do_auc, bool do_lfc, bool do_delta) {
+        Results(size_t ngenes, size_t ngroups, bool do_cohen, bool do_auc, bool do_lfc, bool do_delta) :
+            means(ngroups, std::vector<Stat_>(ngenes)),
+            detected(ngroups, std::vector<Stat_>(ngenes))
+        {
             size_t nelements = ngenes * ngroups * ngroups;
             if (do_cohen) {
                 cohen.resize(nelements);
@@ -440,154 +457,42 @@ public:
          */
 
         /**
-         * Vector of pairwise Cohen's d, to be interpreted as a 3-dimensional array.
+         * Vector of pairwise Cohen's d, to be interpreted as a 3-dimensional array - see the description in `Results` for more details.
+         * Only returned if `set_compute_cohen()` is `true`.
          */
         std::vector<Stat_> cohen;
 
         /**
-         * Vector of pairwise AUCs, to be interpreted as a 3-dimensional array.
+         * Vector of pairwise AUCs, to be interpreted as a 3-dimensional array - see the description in `Results` for more details.
+         * Only returned if `set_compute_auc()` is `true`.
          */
         std::vector<Stat_> auc;
 
         /**
-         * Vector of pairwise log-fold changes, to be interpreted as a 3-dimensional array.
+         * Vector of pairwise log-fold changes, to be interpreted as a 3-dimensional array - see the description in `Results` for more details.
+         * Only returned if `set_compute_lfc()` is `true`.
          */
         std::vector<Stat_> lfc;
 
         /**
-         * Vector of pairwise delta-detected, to be interpreted as a 3-dimensional array.
+         * Vector of pairwise delta-detected, to be interpreted as a 3-dimensional array - see the description in `Results` for more details.
+         * Only returned if `set_compute_delta_detected()` is `true`.
          */
         std::vector<Stat_> delta_detected;
-    };
-
-    /**
-     * Score potential marker genes by computing summary statistics across pairwise comparisons between groups.
-     *
-     * @tparam Data_ Matrix data type.
-     * @tparam Index_ Matrix index type.
-     * @tparam Group_ Integer type for the group assignments.
-     * @tparam Stat_ Floating-point type to store the statistics.
-     *
-     * @param p Pointer to a **tatami** matrix instance.
-     * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
-     * Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
-     * @param[out] means Vector of length equal to the number of groups.
-     * Each element corresponds to a group and is a pointer to an array of length equal to the number of rows in `p`.
-     * This is used to store the mean expression of each group across all genes.
-     * @param[out] detected Vector of length equal to the number of groups,
-     * Each element corresponds to a group and is a pointer to an array of length equal to the number of rows in `p`.
-     * This is used to store the proportion of detected expression in each group.
-     *
-     * @return A `Results` object is returned containing the pairwise effects.
-     * `means` and `detected` are filled with their corresponding statistics on output.
-     */
-    template<typename Data_, typename Index_, typename Group_, typename Stat_>
-    Results<Stat_> run(const tatami::Matrix<Data_, Index_>* p, const Group_* group, std::vector<Stat_*> means, std::vector<Stat_*> detected) const {
-        size_t ngroups = means.size();
-        Results<Stat_> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected);
-        run(
-            p, 
-            group, 
-            std::move(means), 
-            std::move(detected), 
-            harvest_pointer(res.cohen, do_cohen),
-            harvest_pointer(res.auc, do_auc),
-            harvest_pointer(res.lfc, do_lfc),
-            harvest_pointer(res.delta_detected, do_delta_detected)
-        );        
-        return res; 
-    }
-
-    /**
-     * Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.
-     *
-     * @tparam Data_ Matrix data type.
-     * @tparam Index_ Matrix index type.
-     * @tparam Group_ Integer type for the group assignments.
-     * @tparam Block_ Integer type for the block assignments.
-     * @tparam Stat_ Floating-point type to store the statistics.
-     *
-     * @param p Pointer to a **tatami** matrix instance.
-     * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
-     * Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
-     * @param[in] block Pointer to an array of length equal to the number of columns in `p`, containing the blocking factor.
-     * Block identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
-     * @param[out] means Vector of length equal to the number of groups.
-     * Each element corresponds to a group and is another vector of length equal to the number of blocks.
-     * Each entry of the inner vector is a pointer to an array of length equal to the number of rows in `p`,
-     * which is used to store the mean expression of each group across all genes.
-     * @param[out] detected Vector of length equal to the number of groups.
-     * Each element corresponds to a group and is another vector of length equal to the number of blocks.
-     * Each entry of the inner vector is a pointer to an array of length equal to the number of rows in `p`,
-     * which is used to store the proportion of detected expression in each group.
-     *
-     * @return A `Results` object is returned containing the pairwise effects.
-     * `means` and `detected` are filled with their corresponding statistics on output.
-     */
-    template<typename Data_, typename Index_, typename Group_, typename Block_, typename Stat_>
-    Results<Stat_> run_blocked(const tatami::Matrix<Data_, Index_>* p, const Group_* group, const Block_* block, std::vector<std::vector<Stat_*> > means, std::vector<std::vector<Stat_*> > detected) const {
-        if (block == NULL) {
-            return run(p, group, fetch_first(means), fetch_first(detected));
-        }
-
-        size_t ngroups = means.size();
-        Results<Stat_> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); 
-        run_blocked(
-            p,
-            group,
-            block,
-            std::move(means),
-            std::move(detected),
-            harvest_pointer(res.cohen, do_cohen),
-            harvest_pointer(res.auc, do_auc),
-            harvest_pointer(res.lfc, do_lfc),
-            harvest_pointer(res.delta_detected, do_delta_detected)
-        );
-        return res;
-    }
-
-public:
-    /**
-     * @brief Pairwise effect size results, with per-group means.
-     *
-     * @tparam Stat_ Floating-point type to store the statistics.
-     *
-     * See `Results` for more details on how to interpret the 3-dimensional effect size arrays.
-     */
-    template<typename Stat_>
-    struct ResultsWithMeans : public Results<Stat_> {
-        /**
-         * @cond
-         */
-        ResultsWithMeans(size_t ngenes, size_t ngroups, size_t nblocks, bool do_cohen, bool do_auc, bool do_lfc, bool do_delta) :
-            Results<Stat_>(ngenes, ngroups, do_cohen, do_auc, do_lfc, do_delta), means(ngroups), detected(ngroups) 
-        {
-            for (size_t g = 0; g < ngroups; ++g) {
-                means[g].reserve(nblocks);
-                detected[g].reserve(nblocks);
-                for (size_t b = 0; b < nblocks; ++b) {
-                    means[g].emplace_back(ngenes);
-                    detected[g].emplace_back(ngenes);
-                }
-            }
-        }
-        /**
-         * @endcond
-         */
 
         /**
-         * Each element of `means` corresponds to a group and is itself a vector of length equal to the number of blocks.
-         * For group `i`, each element of `means[i]` corresponds to a block and is itself a vector of length equal to the number of genes.
-         * For block `j`, each element of `means[i][j]` corresponds to a gene and contains the mean expression of that gene in block `j` for group `i`.
+         * Each element of `means` corresponds to a group and is itself a vector of length equal to the number of genes.
+         * Each element of `means[i]` corresponds to a gene and contains the mean expression of that gene in group `i`.
+         * When used in `run_blocked()`, the grand average across all blocks is reported.
          */
-        std::vector<std::vector<std::vector<Stat_> > > means;
+        std::vector<std::vector<Stat_> > means;
 
         /**
-         * Each element of `detected` corresponds to a group and is itself a vector of length equal to the number of blocks.
-         * For group `i`, each element of `detected[i]` corresponds to a block and is itself a vector of length equal to the number of genes.
-         * For block `j`, each element of `detected[i][j]` corresponds to a gene and contains the proportion of detected expression of that gene in block `j` for group `i`.
+         * Each element of `detected` corresponds to a group and is itself a vector of length equal to the number of genes.
+         * Each element of `detected[i]` corresponds to a gene and contains the proportion of detected expression of that gene in group `i`.
+         * When used in `run_blocked()`, the grand average across all blocks is reported.
          */
-        std::vector<std::vector<std::vector<Stat_> > > detected;
+        std::vector<std::vector<Stat_> > detected;
     };
 
     /**
@@ -602,17 +507,17 @@ public:
      * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
      * Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
      *
-     * @return A `ResultsWithMeans` object is returned containing the pairwise effects, plus the mean expression and detected proportion in each group.
+     * @return A `Results` object is returned containing the pairwise effects, plus the mean expression and detected proportion in each group.
      */
     template<typename Stat_ = double, typename Data_ = double, typename Index_ = int, typename Group_ = int>
-    ResultsWithMeans<Stat_> run(const tatami::Matrix<Data_, Index_>* p, const Group_* group) {
-        auto ngroups = static_cast<size_t>(*std::max_element(group, group + p->ncol())) + 1;
-        ResultsWithMeans<Stat_> res(p->nrow(), ngroups, 1, do_cohen, do_auc, do_lfc, do_delta_detected); 
+    Results<Stat_> run(const tatami::Matrix<Data_, Index_>* p, const Group_* group) {
+        size_t ngroups = count_block_levels(p->ncol(), group);
+        Results<Stat_> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); 
         run(
             p, 
             group, 
-            vector_to_front_pointers(res.means), 
-            vector_to_front_pointers(res.detected), 
+            vector_to_pointers(res.means), 
+            vector_to_pointers(res.detected), 
             harvest_pointer(res.cohen, do_cohen),
             harvest_pointer(res.auc, do_auc),
             harvest_pointer(res.lfc, do_lfc),
@@ -636,17 +541,16 @@ public:
      * @param[in] block Pointer to an array of length equal to the number of columns in `p`, containing the blocking factor.
      * Block identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
      *
-     * @return A `ResultsWithMeans` object is returned containing the pairwise effects, plus the mean expression and detected proportion in each group and block.
+     * @return A `Results` object is returned containing the pairwise effects, plus the mean expression and detected proportion in each group and block.
      */
     template<typename Stat_ = double, typename Data_ = double, typename Index_ = int, typename Group_ = int, typename Block_ = int>
-    ResultsWithMeans<Stat_> run_blocked(const tatami::Matrix<Data_, Index_>* p, const Group_* group, const Block_* block) {
+    Results<Stat_> run_blocked(const tatami::Matrix<Data_, Index_>* p, const Group_* group, const Block_* block) {
         if (block == NULL) {
             return run(p, group);
         }
 
-        size_t ngroups = static_cast<size_t>(*std::max_element(group, group + p->ncol())) + 1;
-        size_t nblocks = static_cast<size_t>(*std::max_element(block, block + p->ncol())) + 1;
-        ResultsWithMeans<Stat_> res(p->nrow(), ngroups, nblocks, do_cohen, do_auc, do_lfc, do_delta_detected); 
+        size_t ngroups = count_block_levels(p->ncol(), group);
+        Results<Stat_> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); 
         run_blocked(
             p,
             group,

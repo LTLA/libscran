@@ -81,12 +81,11 @@ TEST_P(PairwiseEffectsUnblockedTest, Reference) {
     EXPECT_EQ(res.means.size(), ngroups);
     EXPECT_EQ(res.detected.size(), ngroups);
     for (int g = 0; g < ngroups; ++g) {
-        EXPECT_EQ(res.means[g].size(), 1);
-        EXPECT_EQ(res.detected[g].size(), 1);
-        EXPECT_EQ(res.means[g][0], ref.means[g]);
-        EXPECT_EQ(res.detected[g][0], ref.detected[g]);
+        EXPECT_EQ(res.means[g], ref.means[g]);
+        EXPECT_EQ(res.detected[g], ref.detected[g]);
     }
 
+    // TODO: change back to EXPECT_EQ once the weighting is disabled.
     compare_almost_equal(res.cohen, ref.paired_cohen);
     compare_almost_equal(res.lfc, ref.paired_lfc);
     compare_almost_equal(res.delta_detected, ref.paired_delta_detected);
@@ -131,16 +130,19 @@ TEST_P(PairwiseEffectsBlockedTest, Blocked) {
     auto ref_auc = ref_cohen;
     auto ref_lfc = ref_cohen;
     auto ref_delta_detected = ref_cohen;
-    std::vector<int> total_weights(ngroups * ngroups);
+    std::vector<int> total_product_weights(ngroups * ngroups);
 
-    std::vector<std::vector<std::vector<double> > > ref_means(ngroups, 
-        std::vector<std::vector<double> >(nblocks, std::vector<double>(nrows)));
+    std::vector<std::vector<double> > ref_means(ngroups, std::vector<double>(nrows));
     auto ref_detected = ref_means;
+    std::vector<int> total_group_weights(ngroups);
 
     auto uw_ref_cohen = ref_cohen;
     auto uw_ref_auc = ref_cohen;
     auto uw_ref_lfc = ref_cohen;
     auto uw_ref_delta_detected = ref_cohen;
+
+    auto uw_ref_means = ref_means;
+    auto uw_ref_detected = ref_detected;
 
     for (int b = 0; b < nblocks; ++b) {
         std::vector<int> subset;
@@ -175,30 +177,41 @@ TEST_P(PairwiseEffectsBlockedTest, Blocked) {
             }
 
             for (int g = 0; g < ngroups; ++g) {
-                ref_means[g][b][i] = res.means[g][0][i];
-                ref_detected[g][b][i] = res.detected[g][0][i];
+                ref_means[g][i] += res.means[g][i] * subcount[g];
+                ref_detected[g][i] += res.detected[g][i] * subcount[g];
+                uw_ref_means[g][i] += res.means[g][i];
+                uw_ref_detected[g][i] += res.detected[g][i];
             }
         }
 
         for (int g1 = 0; g1 < ngroups; ++g1) {
+            total_group_weights[g1] += subcount[g1];
             for (int g2 = 0; g2 < ngroups; ++g2) {
-                total_weights[g1 * ngroups + g2] += subcount[g1] * subcount[g2];
+                total_product_weights[g1 * ngroups + g2] += subcount[g1] * subcount[g2];
             }
         }
     }
 
     for (size_t i = 0; i < nrows; ++i) {
         auto offset = i * ngroups * ngroups;
+
         for (int g = 0; g < ngroups * ngroups; ++g) {
-            ref_cohen[offset + g] /= total_weights[g];
-            ref_lfc[offset + g] /= total_weights[g];
-            ref_auc[offset + g] /= total_weights[g];
-            ref_delta_detected[offset + g] /= total_weights[g];
+            ref_cohen[offset + g] /= total_product_weights[g];
+            ref_lfc[offset + g] /= total_product_weights[g];
+            ref_auc[offset + g] /= total_product_weights[g];
+            ref_delta_detected[offset + g] /= total_product_weights[g];
 
             uw_ref_cohen[offset + g] /= nblocks;
             uw_ref_lfc[offset + g] /= nblocks;
             uw_ref_auc[offset + g] /= nblocks;
             uw_ref_delta_detected[offset + g] /= nblocks;
+        }
+
+        for (int g = 0; g < ngroups; ++g) {
+            ref_means[g][i] /= total_group_weights[g];
+            ref_detected[g][i] /= total_group_weights[g];
+            uw_ref_means[g][i] /= nblocks;
+            uw_ref_detected[g][i] /= nblocks;
         }
     }
 
@@ -218,10 +231,10 @@ TEST_P(PairwiseEffectsBlockedTest, Blocked) {
     compare_almost_equal(ref_auc, equal.auc);
 
     for (int g = 0; g < ngroups; ++g) {
-        for (int b = 0; b < nblocks; ++b) {
-            EXPECT_EQ(ref_means[g][b], full.means[g][b]);
-            EXPECT_EQ(ref_detected[g][b], full.detected[g][b]);
-        }
+        compare_almost_equal(ref_means[g], equal.means[g]);
+        compare_almost_equal(ref_detected[g], equal.detected[g]);
+        compare_almost_equal(uw_ref_means[g], full.means[g]);
+        compare_almost_equal(uw_ref_detected[g], full.detected[g]);
     }
 }
 
