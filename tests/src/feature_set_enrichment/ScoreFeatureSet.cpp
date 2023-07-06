@@ -140,7 +140,7 @@ TEST_P(ScoreFeatureSetSingleBlockTest, Reference) {
     compare_almost_equal(obsb.weights, ref.weights);
     compare_almost_equal(obsb.scores, ref.scores);
 
-    scorer.set_weight_policy(scran::ScoreFeatureSet::WeightPolicy::NONE);
+    scorer.set_block_weight_policy(scran::WeightPolicy::NONE);
     auto obsb2 = scorer.run_blocked(sparse_column.get(), features.data(), block.data());
     compare_almost_equal(obsb2.weights, ref.weights);
     compare_almost_equal(obsb2.scores, ref.scores);

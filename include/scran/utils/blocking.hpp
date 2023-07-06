@@ -15,81 +15,121 @@
 namespace scran {
 
 /**
- * Compute the number of cells in each block.
+ * Count the number of unique 0-based IDs, e.g., for block or group assignments.
+ * All IDs are assumed to be integers in `[0, x)` where `x` is the return value of this function.
  *
- * @tparam Index_ Integer type for the number of cells.
- * @tparam Block_ Integer type for the block IDs.
+ * @tparam Id_ Integer type for the IDs.
  *
- * @param num Number of cells.
- * @param[in] block Pointer to an array of length equal to the number of cells.
- * This should contain a 0-based block assignment for each cell
- * (i.e., for `B` block, batch identities should run from 0 to `B-1` with at least one entry for each block.)
+ * @param length Length of the array in `ids`.
+ * @param[in] ids Pointer to an array containing 0-based IDs of some kind.
  *
- * @return Number of unique blocks in `block`.
+ * @return Number of IDs, or 0 if `length = 0`.
  */
-template<typename Index_, typename Block_>
-Index_ count_block_levels(Index_ num, const Block_* block) {
-    if (!num) {
+template<typename Id_>
+size_t count_ids(size_t length, const Id_* value) {
+    if (!length) {
         return 0;
     } else {
-        return static_cast<Index_>(*std::max_element(block, block + num)) + 1;
+        return static_cast<size_t>(*std::max_element(value, value + length)) + 1;
     }
 }
 
 /**
- * Compute the number of cells in each block.
+ * Count the frequency of 0-based IDs, e.g., for block or group assignments.
+ * All IDs are assumed to be integers in `[0, x)` where `x` is the number of unique IDs.
  *
- * @tparam Index_ Integer type for the number of cells.
- * @tparam Block_ Integer type for the block IDs.
+ * @tparam Output_ Numeric type for the output frequencies.
+ * @tparam Id_ Integer type for the IDs.
  *
- * @param num Number of cells.
- * @param[in] block Pointer to an array of length equal to the number of cells.
- * This should contain a 0-based block assignment for each cell
- * (i.e., for `B` block, batch identities should run from 0 to `B-1` with at least one entry for each block.)
+ * @param length Length of the array in `ids`.
+ * @param[in] ids Pointer to an array containing 0-based IDs of some kind.
+ * @param allow_zeros Whether to throw an error if frequencies of zero are detected.
  *
- * @return Vector of length equal to the number of blocks, containing the number of cells in each block.
- * An error is raised if an empty block is detected.
+ * @return Vector of length equal to the number of IDs, containing the frequency of each ID.
+ * An error is raised if an ID has zero frequency and `allow_zeros = false`.
  */
-template<typename Index_, typename Block_>
-std::vector<Index_> count_blocks(Index_ num, const Block_* block) {
-    Index_ nblocks = count_block_levels(num, block);
+template<typename Output_ = int, bool allow_zeros_ = false, typename Id_> 
+std::vector<Output_> tabulate_ids(size_t num, const Id_* ids, bool allow_zeros = false) {
+    size_t nidss = count_ids(num, ids);
 
-    std::vector<Index_> block_size(nblocks);
-    for (Index_ j = 0; j < num; ++j) {
-        ++block_size[block[j]];
+    std::vector<Output_> ids_size(nidss);
+    for (size_t j = 0; j < num; ++j) {
+        ++ids_size[ids[j]];
     }
 
-    for (auto b : block_size) {
-        if (b == 0) {
-            throw std::runtime_error("block IDs must be 0-based and consecutive with no empty blocks");
+    if (!allow_zeros) {
+        for (auto b : ids_size) {
+            if (b == 0) {
+                throw std::runtime_error("IDs must be 0-based and consecutive with no empty blocks");
+            }
         }
     }
 
-    return block_size;
+    return ids_size;
 }
 
 /**
- * Weight each block of cells when averaging statistics across blocks.
- * Each weight is defined as `min(1, block_size / cap)`.
- * Blocks that are "large enough" (i.e., `block_size >= cap`) are considered to be equally trustworthy and receive the same weight,
- * ensuring that each block contributes equally to the weighted average.
+ * Policy to use for weighting blocks based on their size, i.e., the number of cells in each block.
+ * This controls the calculation of weighted averages across blocks.
+ *
+ * - `NONE`: no weighting is performed.
+ *   Larger blocks will contribute more to the weighted average. 
+ * - `EQUAL`: each block receives equal weight, regardless of its size.
+ *   Equivalent to averaging across blocks without weights.
+ * - `VARIABLE`: each batch is weighted using the logic in `variable_block_weight()`.
+ *   This penalizes small blocks with unreliable statistics while equally weighting all large blocks.
+ */
+enum class WeightPolicy : char { NONE, VARIABLE, EQUAL };
+
+/**
+ * @brief Parameters for `variable_block_weight()`.
+ */
+struct VariableBlockWeightParameters {
+    /**
+     * @param l Lower bound for the block weight calculation.
+     * @param u Upper bound for the block weight calculation.
+     * This should be greater than `l`.
+     */
+    constexpr VariableBlockWeightParameters(double l = 0, double u = 1000) : upper_bound(u), lower_bound(l) {}
+
+    /**
+     * Lower bound for the block weight calculation.
+     */
+    double lower_bound;
+
+    /**
+     * Upper bound for the block weight calculation.
+     */
+    double upper_bound;
+};
+
+/**
+ * Weight each block of cells for use in computing a weighted average across blocks.
+ * The weight for each block is calcualted from the size of that block.
+ *
+ * - If the block is smaller than some lower bound, it has zero weight.
+ * - If the block is greater than some upper bound, it has weight of 1.
+ * - Otherwise, the block has weight proportional to its size, increasing linearly from 0 to 1 between the two bounds.
+ *
+ * Blocks that are "large enough" are considered to be equally trustworthy and receive the same weight, ensuring that each block contributes equally to the weighted average.
  * By comparison, very small blocks receive lower weight as their statistics are generally less stable.
  *
- * @tparam Size_ Numeric type for the sizes.
- *
- * @param block_size Size of the block, in terms of the number of cells in that block.
- * @param cap Minimum number of cells for a block to be considered "large enough".
+ * @param s Size of the block, in terms of the number of cells in that block.
+ * @param params Parameters for the weight calculation, consisting of the lower and upper bounds.
  *
  * @return Weight of the block, to use for computing a weighted average across blocks. 
  */
-template<class Size_>
-double weight_block(Size_ block_size, Size_ cap) {
-    if (block_size >= cap) {
-        return 1;
-    } else {
-        return static_cast<double>(block_size)/static_cast<double>(cap);
+inline double variable_block_weight(double s, const VariableBlockWeightParameters& params) {
+    if (s < params.lower_bound) {
+        return 0;
     }
-};
+
+    if (s > params.upper_bound) {
+        return 1;
+    }
+
+    return (s - params.lower_bound) / (params.upper_bound - params.lower_bound);
+}
 
 }
 
