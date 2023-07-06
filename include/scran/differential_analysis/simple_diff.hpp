@@ -13,27 +13,27 @@ namespace scran {
  */
 namespace differential_analysis {
 
-template<typename Stat, typename Ls>
-double compute_pairwise_simple_diff(int g1, int g2, const Stat* values, const Ls& level_size, int ngroups, int nblocks) {
+template<typename Stat_, typename Weights_>
+double compute_pairwise_simple_diff(int g1, int g2, const Stat_* values, const Weights_& weights, int ngroups, int nblocks) {
     double total_weight = 0;
     double output = 0;
 
     for (int b = 0; b < nblocks; ++b) {
         int offset1 = g1 * nblocks + b;
-        const auto& left = values[offset1];
-        const auto& left_size = level_size[offset1];
-        if (!left_size) {
+        auto left = values[offset1];
+        auto lweight = weights[offset1];
+        if (!lweight) {
             continue;
         }
 
         int offset2 = g2 * nblocks + b;
-        const auto& right = values[offset2]; 
-        const auto& right_size = level_size[offset2];
-        if (!right_size) {
+        auto right = values[offset2]; 
+        auto rweight = weights[offset2];
+        if (!rweight) {
             continue;
         }
 
-        double weight = left_size * right_size;
+        double weight = lweight * rweight;
         total_weight += weight;
         output += (left - right) * weight;
     }

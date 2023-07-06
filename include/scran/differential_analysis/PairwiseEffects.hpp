@@ -6,7 +6,9 @@
 #include "MatrixCalculator.hpp"
 #include "cohens_d.hpp"
 #include "simple_diff.hpp"
+
 #include "../utils/vector_to_pointers.hpp"
+#include "../utils/blocking.hpp"
 
 #include "tatami/tatami.hpp"
 
@@ -70,10 +72,11 @@ namespace scran {
  *
  * Specifically, for each gene and each pair of groups, we obtain one effect size per blocking level.
  * We consolidate these into a single statistic by computing the weighted mean across levels.
- * The weight for each level is defined as the product of the sizes of the two groups;
- * this favors contribution from levels with more cells in both groups, where the effect size is presumably more reliable.
- * (Obviously, levels with no cells in either group will not contribute anything to the weighted mean.)
+ * The weight for each level is defined as the product of the weights of the two groups involved in the comparison,
+ * where each weight is computed from the size of the group using the logic described in `weight_block()`.
+ * This favors contribution from levels with more cells in both groups (up to the cap in `set_weight_size_cap()`), where the effect size is presumably more reliable.
  *
+ * Obviously, blocking levels with no cells in either group will not contribute anything to the weighted mean.
  * If two groups never co-occur in the same blocking level, no effect size will be computed and a `NaN` is reported in the output.
  * We do not attempt to reconcile batch effects in a partially confounded scenario.
  *
@@ -120,6 +123,11 @@ public:
          * See `set_compute_delta_detected()`.
          */
         static constexpr bool compute_delta_detected = true;
+
+        /**
+         * See `set_weight_size_cap()` for more details.
+         */
+        static constexpr int weight_size_cap = 1000;
     };
 
 private:
@@ -129,6 +137,7 @@ private:
     bool do_auc = Defaults::compute_auc;
     bool do_lfc = Defaults::compute_lfc;
     bool do_delta_detected = Defaults::compute_delta_detected;
+    int weight_size_cap = Defaults::weight_size_cap;
 
 public:
     /**
@@ -203,6 +212,17 @@ public:
         return *this;
     }
 
+    /**
+     * @param w Cap on the group size in each block, above which all blocks are to be assigned equal weight when averaging effect sizes across blocks.
+     * See `weight_block()` for details.
+     * 
+     * @return A reference to this `PairwiseEffects` instance.
+     */
+    PairwiseEffects& set_weight_size_cap(int w = Defaults::weight_size_cap) {
+        weight_size_cap = w;
+        return *this;
+    }
+
 public:
     /**
      * Compute effect sizes for pairwise comparisons between groups.
@@ -240,7 +260,7 @@ public:
         Stat_* delta_detected) 
     const {
         int ngroups = means.size();
-        differential_analysis::MatrixCalculator runner(nthreads, threshold);
+        differential_analysis::MatrixCalculator runner(nthreads, threshold, weight_size_cap);
         Overlord overlord(auc);
         auto state = runner.run(p, group, ngroups, overlord);
         process_simple_effects(p->nrow(), ngroups, 1, state, means, detected, cohen, lfc, delta_detected);
@@ -307,7 +327,7 @@ public:
             }
         }
 
-        differential_analysis::MatrixCalculator runner(nthreads, threshold);
+        differential_analysis::MatrixCalculator runner(nthreads, threshold, weight_size_cap);
         Overlord overlord(auc);
         auto state = runner.run_blocked(p, group, ngroups, block, nblocks, overlord);
         process_simple_effects(p->nrow(), ngroups, nblocks, state, means2, detected2, cohen, lfc, delta_detected);
@@ -344,6 +364,12 @@ private:
         const auto& level_size = state.level_size;
         size_t nlevels = level_size.size();
 
+        std::vector<double> level_weights;
+        level_weights.reserve(nlevels);
+        for (size_t l = 0; l < nlevels; ++l) {
+            level_weights.push_back(weight_block<double>(level_size[l], weight_size_cap));
+        }
+
         tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
             auto in_offset = nlevels * start;
             const auto* tmp_means = state.means.data() + in_offset;
@@ -359,15 +385,15 @@ private:
                 }
 
                 if (cohen != NULL) {
-                    differential_analysis::compute_pairwise_cohens_d(tmp_means, tmp_variances, level_size, ngroups, nblocks, threshold, cohen + out_offset);
+                    differential_analysis::compute_pairwise_cohens_d(tmp_means, tmp_variances, level_weights, ngroups, nblocks, threshold, cohen + out_offset);
                 }
 
                 if (delta_detected != NULL) {
-                    differential_analysis::compute_pairwise_simple_diff(tmp_detected, level_size, ngroups, nblocks, delta_detected + out_offset);
+                    differential_analysis::compute_pairwise_simple_diff(tmp_detected, level_weights, ngroups, nblocks, delta_detected + out_offset);
                 }
 
                 if (lfc != NULL) {
-                    differential_analysis::compute_pairwise_simple_diff(tmp_means, level_size, ngroups, nblocks, lfc + out_offset);
+                    differential_analysis::compute_pairwise_simple_diff(tmp_means, level_weights, ngroups, nblocks, lfc + out_offset);
                 }
 
                 tmp_means += nlevels;

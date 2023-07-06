@@ -33,7 +33,7 @@ protected:
     static ReferenceResult simple_reference(const tatami::NumericMatrix* mat, const int* group, int ngroups, double threshold) {
         size_t ngenes = mat->nrow();
 
-        scran::differential_analysis::MatrixCalculator runner(1, threshold);
+        scran::differential_analysis::MatrixCalculator runner(1, threshold, 0);
         EffectsOverlord ova(true, ngenes, ngroups);
         auto state = runner.run(mat, group, ngroups, ova);
 
@@ -87,10 +87,10 @@ TEST_P(PairwiseEffectsUnblockedTest, Reference) {
         EXPECT_EQ(res.detected[g][0], ref.detected[g]);
     }
 
-    EXPECT_EQ(res.cohen, ref.paired_cohen);
-    EXPECT_EQ(res.lfc, ref.paired_lfc);
-    EXPECT_EQ(res.delta_detected, ref.paired_delta_detected);
-    EXPECT_EQ(res.auc, ref.paired_auc);
+    compare_almost_equal(res.cohen, ref.paired_cohen);
+    compare_almost_equal(res.lfc, ref.paired_lfc);
+    compare_almost_equal(res.delta_detected, ref.paired_delta_detected);
+    compare_almost_equal(res.auc, ref.paired_auc);
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -126,7 +126,6 @@ TEST_P(PairwiseEffectsBlockedTest, Blocked) {
 
     auto groups = create_groupings(ncols, ngroups);
     auto blocks = create_blocks(ncols, nblocks);
-    auto full = chd.run_blocked(sparse_row.get(), groups.data(), blocks.data());
 
     std::vector<double> ref_cohen(ngroups * ngroups * nrows);
     auto ref_auc = ref_cohen;
@@ -137,6 +136,11 @@ TEST_P(PairwiseEffectsBlockedTest, Blocked) {
     std::vector<std::vector<std::vector<double> > > ref_means(ngroups, 
         std::vector<std::vector<double> >(nblocks, std::vector<double>(nrows)));
     auto ref_detected = ref_means;
+
+    auto uw_ref_cohen = ref_cohen;
+    auto uw_ref_auc = ref_cohen;
+    auto uw_ref_lfc = ref_cohen;
+    auto uw_ref_delta_detected = ref_cohen;
 
     for (int b = 0; b < nblocks; ++b) {
         std::vector<int> subset;
@@ -162,6 +166,11 @@ TEST_P(PairwiseEffectsBlockedTest, Blocked) {
                     ref_lfc[offset] += weight * res.lfc[offset];
                     ref_delta_detected[offset] += weight * res.delta_detected[offset];
                     ref_auc[offset] += weight * res.auc[offset];
+
+                    uw_ref_cohen[offset] += res.cohen[offset];
+                    uw_ref_lfc[offset] += res.lfc[offset];
+                    uw_ref_delta_detected[offset] += res.delta_detected[offset];
+                    uw_ref_auc[offset] += res.auc[offset];
                 }
             }
 
@@ -185,14 +194,28 @@ TEST_P(PairwiseEffectsBlockedTest, Blocked) {
             ref_lfc[offset + g] /= total_weights[g];
             ref_auc[offset + g] /= total_weights[g];
             ref_delta_detected[offset + g] /= total_weights[g];
+
+            uw_ref_cohen[offset + g] /= nblocks;
+            uw_ref_lfc[offset + g] /= nblocks;
+            uw_ref_auc[offset + g] /= nblocks;
+            uw_ref_delta_detected[offset + g] /= nblocks;
         }
     }
 
     // Alright, running all the tests.
-    compare_almost_equal(ref_cohen, full.cohen);
-    compare_almost_equal(ref_lfc, full.lfc);
-    compare_almost_equal(ref_delta_detected, full.delta_detected);
-    compare_almost_equal(ref_auc, full.auc);
+    chd.set_weight_size_cap(0);
+    auto full = chd.run_blocked(sparse_row.get(), groups.data(), blocks.data());
+    compare_almost_equal(uw_ref_cohen, full.cohen);
+    compare_almost_equal(uw_ref_lfc, full.lfc);
+    compare_almost_equal(uw_ref_delta_detected, full.delta_detected);
+    compare_almost_equal(uw_ref_auc, full.auc);
+
+    chd.set_weight_size_cap(100000);
+    auto equal = chd.run_blocked(sparse_row.get(), groups.data(), blocks.data());
+    compare_almost_equal(ref_cohen, equal.cohen);
+    compare_almost_equal(ref_lfc, equal.lfc);
+    compare_almost_equal(ref_delta_detected, equal.delta_detected);
+    compare_almost_equal(ref_auc, equal.auc);
 
     for (int g = 0; g < ngroups; ++g) {
         for (int b = 0; b < nblocks; ++b) {

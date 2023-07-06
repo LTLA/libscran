@@ -9,7 +9,10 @@
 #include <type_traits>
 
 #include "../utils/vector_to_pointers.hpp"
+#include "../utils/blocking.hpp"
+
 #include "../feature_selection/blocked_variances.hpp"
+
 #include "auc.hpp"
 #include "tatami/tatami.hpp"
 
@@ -30,11 +33,12 @@ namespace differential_analysis {
 
 class MatrixCalculator {
 public:
-    MatrixCalculator(int nt, double t) : num_threads(nt), threshold(t) {}
+    MatrixCalculator(int nt, double t, int w) : num_threads(nt), threshold(t), weight_size_cap(w) {}
 
 private:
     int num_threads;
     double threshold;
+    int weight_size_cap;
 
 public:
     struct State {
@@ -72,12 +76,13 @@ public:
 
 private:
     struct AucBundle {
-        AucBundle(size_t ngroups, size_t nblocks, const std::vector<int>& level_size) :
+        AucBundle(size_t ngroups, size_t nblocks, const std::vector<int>& level_size, int weight_size_cap) :
             paired(nblocks),
             num_zeros(nblocks, std::vector<int>(ngroups)),
             totals(nblocks, std::vector<int>(ngroups)),
             auc_buffer(ngroups * ngroups),
-            denominator(ngroups, std::vector<double>(ngroups))
+            block_scale(nblocks, std::vector<double>(ngroups * ngroups)),
+            full_weight(ngroups * ngroups)
         {
             auto lsIt = level_size.begin();
             for (size_t g = 0; g < ngroups; ++g) {
@@ -87,9 +92,28 @@ private:
             }
 
             for (size_t b = 0; b < nblocks; ++b) {
+                std::vector<double> temp_weights(ngroups);
+                for (int g = 0; g < ngroups; ++g) {
+                    temp_weights[g] = weight_block(totals[b][g], weight_size_cap);
+                }
+
                 for (int g1 = 0; g1 < ngroups; ++g1) {
-                    for (int g2 = 0; g2 < ngroups; ++g2) {
-                        denominator[g1][g2] += totals[b][g1] * totals[b][g2];
+                    for (int g2 = 0; g2 < g1; ++g2) {
+                        double block_denom = totals[b][g1] * totals[b][g2];
+                        if (block_denom == 0) {
+                            continue;
+                        }
+
+                        double block_weight = temp_weights[g1] * temp_weights[g2];
+                        double block_scaling = block_denom / block_weight;
+
+                        auto offset1 = g1 * ngroups + g2;
+                        block_scale[b][offset1] = block_scaling;
+                        full_weight[offset1] += block_weight;
+
+                        auto offset2 = g2 * ngroups + g1;
+                        block_scale[b][offset2] = block_scaling;
+                        full_weight[offset2] += block_weight;
                     }
                 }
             }
@@ -99,11 +123,12 @@ private:
         std::vector<std::vector<int> > num_zeros;
         std::vector<std::vector<int> > totals;
         std::vector<double> auc_buffer;
-        std::vector<std::vector<double> > denominator;
+        std::vector<std::vector<double> > block_scale;
+        std::vector<double> full_weight;
     };
 
     struct DummyBundle {
-        DummyBundle(size_t, size_t, const std::vector<int>&) {}
+        DummyBundle(size_t, size_t, const std::vector<int>&, int) {}
     };
 
     template<bool sparse_, bool auc_, typename Data_, typename Index_, typename Level_, typename Group_, typename Block_, class State_, class Overlord_>
@@ -127,7 +152,7 @@ private:
             auto ext = tatami::consecutive_extractor<true, sparse_, Data_, Index_>(p, start, length);
 
             // AUC-only object.
-            typename std::conditional<auc_, AucBundle, DummyBundle>::type auc_info(ngroups, nblocks, level_size);
+            typename std::conditional<auc_, AucBundle, DummyBundle>::type auc_info(ngroups, nblocks, level_size, weight_size_cap);
 
             size_t nlevels = level_size.size();
             size_t offset = nlevels * start;
@@ -200,7 +225,8 @@ private:
     }
 
     static void process_auc_for_rows(size_t ngroups, size_t nblocks, double threshold, AucBundle& bundle, double* output) {
-        std::fill(output, output + ngroups * ngroups, 0);
+        size_t ngroups2 = ngroups * ngroups;
+        std::fill(output, output + ngroups2, 0);
         auto& auc_buffer = bundle.auc_buffer;
 
         for (size_t b = 0; b < nblocks; ++b) {
@@ -216,19 +242,23 @@ private:
             }
 
             // Adding to the blocks.
-            for (size_t g = 0, end = auc_buffer.size(); g < end; ++g) {
-                output[g] += auc_buffer[g];
+            const auto& block_scale = bundle.block_scale[b];
+            for (size_t g = 0; g < ngroups2; ++g) {
+                if (block_scale[g]) {
+                    output[g] += auc_buffer[g] / block_scale[g];
+                }
             }
         }
 
+        size_t g = 0;
         for (size_t g1 = 0; g1 < ngroups; ++g1) {
-            for (size_t g2 = 0; g2 < ngroups; ++g2) {
-                auto& current = output[g1 * ngroups + g2];
-                if (bundle.denominator[g1][g2]) {
-                    current /= bundle.denominator[g1][g2];
-                } else {
+            for (size_t g2 = 0; g2 < ngroups; ++g2, ++g) {
+                auto& current = output[g];
+                if (bundle.full_weight[g]) {
+                    current /= bundle.full_weight[g];
+                } else if (g1 != g2) {
                     current = std::numeric_limits<double>::quiet_NaN();
-                }
+                } // g1 == g2 gets a current = 0, which is technically wrong, but no one should be using the self-comparison effect size anyway.
             }
         }
     }

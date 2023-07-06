@@ -74,6 +74,7 @@ std::vector<Index_> count_blocks(Index_ num, const Block_* block) {
  * Blocks that are "large enough" (i.e., `block_size >= cap`) are considered to be equally trustworthy and receive the same weight,
  * ensuring that each block contributes equally to the weighted average.
  * By comparison, very small blocks receive lower weight as their statistics are generally less stable.
+ * If both `cap` and `block_size` are zero, the weight is also set to zero.
  *
  * @tparam Size_ Numeric type for the sizes.
  *
@@ -85,9 +86,11 @@ std::vector<Index_> count_blocks(Index_ num, const Block_* block) {
 template<class Size_>
 double weight_block(Size_ block_size, Size_ cap) {
     if (block_size >= cap) {
-        return 1;
-    } else {
+        return (block_size > 0);
+    } else if (cap) {
         return static_cast<double>(block_size)/static_cast<double>(cap);
+    } else {
+        return 0;
     }
 };
 
