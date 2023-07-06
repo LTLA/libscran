@@ -27,13 +27,8 @@ protected:
         EXPECT_EQ(res.detected.size(), ngroups);
 
         for (int l = 0; l < ngroups; ++l) {
-            EXPECT_EQ(other.means[l].size(), nblocks);
-            EXPECT_EQ(other.detected[l].size(), nblocks);
-
-            for (int b = 0; b < nblocks; ++b) {
-                compare_almost_equal(res.means[l][b], other.means[l][b]);
-                compare_almost_equal(res.detected[l][b], other.detected[l][b]);
-            }
+            compare_almost_equal(res.means[l], other.means[l]);
+            compare_almost_equal(res.detected[l], other.detected[l]);
         }
     }
 

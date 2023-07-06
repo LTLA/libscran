@@ -319,8 +319,8 @@ public:
             auto ngenes = p->nrow();
             int ngroups = means.size();
             int nblocks = count_block_levels(p->ncol(), block);
-            int ncombos = ngroups * nblocks;
 
+            int ncombos = ngroups * nblocks;
             std::vector<std::vector<Stat_> > means_store(ncombos), detected_store(ncombos);
             std::vector<Stat_*> means2(ncombos), detected2(ncombos);
             for (int c = 0; c < ncombos; ++c) {
@@ -335,7 +335,7 @@ public:
             auto state = runner.run_blocked(p, group, ngroups, block, nblocks, overlord);
             process_simple_effects(p->nrow(), ngroups, nblocks, state, means2, detected2, cohen, lfc, delta_detected);
 
-            // Averaging the statistics.
+            // Averaging the remaining statistics.
             std::vector<double> weights(nblocks);
             std::vector<Stat_*> mstats(nblocks), dstats(nblocks);
 
