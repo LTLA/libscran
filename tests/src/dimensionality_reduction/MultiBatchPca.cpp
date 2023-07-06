@@ -56,7 +56,6 @@ TEST_P(MultiBatchPcaBasicTest, WeightedOnly) {
 
     scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
-    runner.set_weight_size_cap(0); // for simplicity
 
     auto block = generate_blocks(dense_row->ncol(), nblocks);
     auto ref = runner.run(dense_row.get(), block.data());
@@ -141,7 +140,8 @@ TEST_P(MultiBatchPcaBasicTest, ResidualOnly) {
 
     scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
-    runner.set_block_policy(scran::MultiBatchPca::BlockPolicy::RESIDUAL_ONLY);
+    runner.set_use_residuals(true);
+    runner.set_block_weight_policy(scran::WeightPolicy::NONE);
 
     auto block = generate_blocks(dense_row->ncol(), nblocks);
     auto ref = runner.run(dense_row.get(), block.data());
@@ -199,8 +199,7 @@ TEST_P(MultiBatchPcaBasicTest, WeightedResidual) {
 
     scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
-    runner.set_block_policy(scran::MultiBatchPca::BlockPolicy::WEIGHTED_RESIDUAL);
-    runner.set_weight_size_cap(0); // for simplicity
+    runner.set_use_residuals(true);
 
     auto block = generate_blocks(dense_row->ncol(), nblocks);
     auto ref = runner.run(dense_row.get(), block.data());
@@ -324,9 +323,57 @@ TEST_P(MultiBatchPcaMoreTest, WeightedOnly_DuplicatedBlocks) {
     scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
 
+    // By default, every batch is equally weighted.
+    {
+        auto res2 = runner.run(com.get(), block2.data());
+        res2.pcs.array() /= res2.pcs.norm();
+        res2.variance_explained.array() /= res2.total_variance;
+
+        {
+            // Mocking up the expected results.
+            auto res1 = runner.run(dense_row.get(), block.data());
+
+            Eigen::MatrixXd expanded_pcs(rank, com->ncol());
+            size_t offset = dense_row->ncol();
+            expanded_pcs.leftCols(offset) = res1.pcs;
+            for (auto x : subset) {
+                expanded_pcs.col(offset) = res1.pcs.col(x);
+                ++offset;
+            }
+
+            Eigen::VectorXd recenters = expanded_pcs.rowwise().sum();
+            recenters /= expanded_pcs.cols();
+            for (size_t i = 0, end = expanded_pcs.cols(); i < end; ++i) {
+                expanded_pcs.col(i) -= recenters;
+            }
+
+            // Comparing:
+            expanded_pcs.array() /= expanded_pcs.norm();
+            expect_equal_pcs(expanded_pcs, res2.pcs);
+
+            res1.variance_explained.array() /= res1.total_variance;
+            expect_equal_vectors(res1.variance_explained, res2.variance_explained);
+        }
+
+        // Comparing to a small variable cap, which has the same effect.
+        {
+            auto vrunner = runner;
+            vrunner.set_block_weight_policy(scran::WeightPolicy::VARIABLE);
+            vrunner.set_variable_block_weight_parameters({0, 0});
+            auto vres = vrunner.run(com.get(), block2.data());
+
+            vres.pcs.array() /= vres.pcs.norm();
+            expect_equal_pcs(vres.pcs, res2.pcs);
+
+            vres.variance_explained.array() /= vres.total_variance;
+            expect_equal_vectors(vres.variance_explained, res2.variance_explained);
+        }
+    }
+
     // With a large size cap, each block is weighted by its size,
     // which is equivalent to the total absence of re-weighting.
-    runner.set_weight_size_cap(1000000);
+    runner.set_block_weight_policy(scran::WeightPolicy::VARIABLE);
+    runner.set_variable_block_weight_parameters({0, 1000000});
     {
         auto res2 = runner.run(com.get(), block2.data());
 
@@ -342,38 +389,6 @@ TEST_P(MultiBatchPcaMoreTest, WeightedOnly_DuplicatedBlocks) {
         res2.variance_explained.array() /= res2.total_variance;
         expect_equal_vectors(ref2.variance_explained, res2.variance_explained);
     }
-
-    // We turn down the size cap so that every batch is equally weighted.
-    runner.set_weight_size_cap(0);
-    {
-        auto res2 = runner.run(com.get(), block2.data());
-
-        // Mocking up the expected results.
-        auto res1 = runner.run(dense_row.get(), block.data());
-
-        Eigen::MatrixXd expanded_pcs(rank, com->ncol());
-        size_t offset = dense_row->ncol();
-        expanded_pcs.leftCols(offset) = res1.pcs;
-        for (auto x : subset) {
-            expanded_pcs.col(offset) = res1.pcs.col(x);
-            ++offset;
-        }
-
-        Eigen::VectorXd recenters = expanded_pcs.rowwise().sum();
-        recenters /= expanded_pcs.cols();
-        for (size_t i = 0, end = expanded_pcs.cols(); i < end; ++i) {
-            expanded_pcs.col(i) -= recenters;
-        }
-
-        // Comparing:
-        expanded_pcs.array() /= expanded_pcs.norm();
-        res2.pcs.array() /= res2.pcs.norm();
-        expect_equal_pcs(expanded_pcs, res2.pcs);
-
-        res1.variance_explained.array() /= res1.total_variance;
-        res2.variance_explained.array() /= res2.total_variance;
-        expect_equal_vectors(res1.variance_explained, res2.variance_explained);
-    }
 }
 
 TEST_P(MultiBatchPcaMoreTest, ResidualOnly_VersusReference) {
@@ -382,7 +397,9 @@ TEST_P(MultiBatchPcaMoreTest, ResidualOnly_VersusReference) {
 
     scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
-    runner.set_block_policy(scran::MultiBatchPca::BlockPolicy::RESIDUAL_ONLY);
+    runner.set_use_residuals(true);
+    runner.set_block_weight_policy(scran::WeightPolicy::NONE);
+
     auto res = runner.run(dense_row.get(), block.data());
 
     scran::ResidualPca refrunner;
@@ -404,12 +421,14 @@ TEST_P(MultiBatchPcaMoreTest, WeightedResidual_VersusReference) {
 
     scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
-    runner.set_block_policy(scran::MultiBatchPca::BlockPolicy::WEIGHTED_RESIDUAL);
+    runner.set_use_residuals(true);
+
     auto res = runner.run(dense_row.get(), block.data());
 
     scran::ResidualPca refrunner;
     refrunner.set_scale(scale).set_rank(rank);
-    refrunner.set_weight_policy(scran::ResidualPca::WeightPolicy::EQUAL);
+    refrunner.set_block_weight_policy(scran::WeightPolicy::EQUAL);
+
     auto ref = refrunner.run(dense_row.get(), block.data());
 
     expect_equal_vectors(res.variance_explained, ref.variance_explained);
@@ -441,18 +460,66 @@ TEST_P(MultiBatchPcaMoreTest, WeightedResidual_DuplicatedBlocks) {
 
     scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
-    runner.set_block_policy(scran::MultiBatchPca::BlockPolicy::WEIGHTED_RESIDUAL);
+    runner.set_use_residuals(true);
+
+    // By default, it's all equally weighted.
+    {
+        auto res2 = runner.run(com.get(), block2.data());
+        res2.pcs.array() /= res2.pcs.norm();
+        res2.variance_explained.array() /= res2.total_variance;
+
+        {
+            // Mocking up the expected results.
+            auto res1 = runner.run(dense_row.get(), block.data());
+
+            Eigen::MatrixXd expanded_pcs(rank, com->ncol());
+            size_t offset = dense_row->ncol();
+            expanded_pcs.leftCols(offset) = res1.pcs;
+            for (auto x : subset) {
+                expanded_pcs.col(offset) = res1.pcs.col(x);
+                ++offset;
+            }
+
+            Eigen::VectorXd recenters = expanded_pcs.rowwise().sum();
+            recenters /= expanded_pcs.cols();
+            for (size_t i = 0, end = expanded_pcs.cols(); i < end; ++i) {
+                expanded_pcs.col(i) -= recenters;
+            }
+
+            // Comparing:
+            expanded_pcs.array() /= expanded_pcs.norm();
+            expect_equal_pcs(expanded_pcs, res2.pcs);
+
+            res1.variance_explained.array() /= res1.total_variance;
+            expect_equal_vectors(res1.variance_explained, res2.variance_explained);
+        }
+
+        // Comparing to a small variable cap, which has the same effect.
+        {
+            auto vrunner = runner;
+            vrunner.set_block_weight_policy(scran::WeightPolicy::VARIABLE);
+            vrunner.set_variable_block_weight_parameters({0, 0});
+            auto vres = vrunner.run(com.get(), block2.data());
+
+            vres.pcs.array() /= vres.pcs.norm();
+            expect_equal_pcs(vres.pcs, res2.pcs);
+
+            vres.variance_explained.array() /= vres.total_variance;
+            expect_equal_vectors(vres.variance_explained, res2.variance_explained);
+        }
+    }
 
     // With a large size cap, each block is weighted by its size,
     // which is equivalent to the total absence of re-weighting.
-    runner.set_weight_size_cap(1000000);
+    runner.set_block_weight_policy(scran::WeightPolicy::VARIABLE);
+    runner.set_variable_block_weight_parameters({0, 1000000});
     {
         auto res2 = runner.run(com.get(), block2.data());
 
-        scran::MultiBatchPca runner2;
-        runner2.set_scale(scale).set_rank(rank);
-        runner2.set_block_policy(scran::MultiBatchPca::BlockPolicy::RESIDUAL_ONLY);
-        auto ref2 = runner2.run(com.get(), block2.data());
+        auto nrunner = runner;
+        nrunner.set_block_weight_policy(scran::WeightPolicy::NONE);
+
+        auto ref2 = nrunner.run(com.get(), block2.data());
 
         ref2.pcs.array() /= ref2.pcs.norm();
         res2.pcs.array() /= res2.pcs.norm();
@@ -461,38 +528,6 @@ TEST_P(MultiBatchPcaMoreTest, WeightedResidual_DuplicatedBlocks) {
         ref2.variance_explained.array() /= ref2.total_variance;
         res2.variance_explained.array() /= res2.total_variance;
         expect_equal_vectors(ref2.variance_explained, res2.variance_explained);
-    }
-
-    // We turn down the size cap so that every batch is equally weighted.
-    runner.set_weight_size_cap(0);
-    {
-        auto res2 = runner.run(com.get(), block2.data());
-
-        // Mocking up the expected results.
-        auto res1 = runner.run(dense_row.get(), block.data());
-
-        Eigen::MatrixXd expanded_pcs(rank, com->ncol());
-        size_t offset = dense_row->ncol();
-        expanded_pcs.leftCols(offset) = res1.pcs;
-        for (auto x : subset) {
-            expanded_pcs.col(offset) = res1.pcs.col(x);
-            ++offset;
-        }
-
-        Eigen::VectorXd recenters = expanded_pcs.rowwise().sum();
-        recenters /= expanded_pcs.cols();
-        for (size_t i = 0, end = expanded_pcs.cols(); i < end; ++i) {
-            expanded_pcs.col(i) -= recenters;
-        }
-
-        // Comparing:
-        expanded_pcs.array() /= expanded_pcs.norm();
-        res2.pcs.array() /= res2.pcs.norm();
-        expect_equal_pcs(expanded_pcs, res2.pcs);
-
-        res1.variance_explained.array() /= res1.total_variance;
-        res2.variance_explained.array() /= res2.total_variance;
-        expect_equal_vectors(res1.variance_explained, res2.variance_explained);
     }
 }
 
@@ -568,7 +603,8 @@ TEST(MultiBatchPcaTest, ReturnValues) {
         EXPECT_EQ(ref.scale.size(), nr);
     }
 
-    runner.set_block_policy(scran::MultiBatchPca::BlockPolicy::RESIDUAL_ONLY);
+    // Correct handling of center/scale with residuals.
+    runner.set_use_residuals(true);
     {
         auto ref = runner.run(&mat, block.data());
         EXPECT_EQ(ref.rotation.cols(), 4);

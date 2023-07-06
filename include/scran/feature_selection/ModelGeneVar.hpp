@@ -40,9 +40,14 @@ public:
      */
     struct Defaults {
         /**
-         * See `set_weight_size_cap()` for more details.
+         * See `set_block_weight_policy()` for more details.
          */
-        static constexpr int weight_size_cap = 1000;
+        static constexpr WeightPolicy block_weight_policy = WeightPolicy::VARIABLE;
+
+        /**
+         * See `set_variable_block_weight_parameters()` for more details.
+         */
+        static constexpr VariableBlockWeightParameters variable_block_weight_parameters = VariableBlockWeightParameters();
 
         /**
          * See `set_num_threads()`.
@@ -51,8 +56,8 @@ public:
     };
 
 private:
-    int weight_size_cap = Defaults::weight_size_cap;
-
+    WeightPolicy block_weight_policy = Defaults::block_weight_policy;
+    VariableBlockWeightParameters variable_block_weight_parameters = Defaults::variable_block_weight_parameters;
     int num_threads = Defaults::num_threads;
 
     double span = FitTrendVar::Defaults::span;
@@ -114,12 +119,23 @@ public:
     }
 
     /**
-     * @param w Cap on the size of each block (i.e., number of cells), above which all blocks are to be assigned equal weight - see `weight_block()` for details.
+     * @param p Weighting policy to use for averaging statistics across blocks.
      * 
      * @return A reference to this `ModelGeneVar` instance.
      */
-    ModelGeneVar& set_weight_size_cap(int w = Defaults::weight_size_cap) {
-        weight_size_cap = w;
+    ModelGeneVar& set_block_weight_policy(WeightPolicy w = Defaults::block_weight_policy) {
+        block_weight_policy = w;
+        return *this;
+    }
+
+    /**
+     * @param v Parameters for the variable block weights, see `variable_block_weight()` for more details.
+     * Only used when the block weight policy is set to `WeightPolicy::VARIABLE`.
+     * 
+     * @return A reference to this `ModelGeneVar` instance.
+     */
+    ModelGeneVar& set_variable_block_weight_parameters(VariableBlockWeightParameters v = Defaults::variable_block_weight_parameters) {
+        variable_block_weight_parameters = v;
         return *this;
     }
 
@@ -303,7 +319,7 @@ public:
      * @tparam Stat_ Floating-point type for the output statistics.
      *
      * @param mat Pointer to a feature-by-cells **tatami** matrix containing log-expression values.
-     * @param[in] block Pointer to an array of length equal to the number of cells, containing block identifiers - see `count_blocks()` for more details.
+     * @param[in] block Pointer to an array of length equal to the number of cells, containing a 0-based block ID for each cell - see `tabulate_ids()` for more details.
      * This can also be a `nullptr`, in which case all cells are assumed to belong to the same block.
      * @param[out] means Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in `mat`.
      * Each vector stores the mean of each feature in the corresponding block of cells.
@@ -339,7 +355,7 @@ public:
         std::vector<Index_> block_size;
 
         if (block) {
-            block_size = count_blocks(NC, block);
+            block_size = tabulate_ids(NC, block);
             compute<true>(mat, means, variances, block, block_size);
         } else {
             block_size.push_back(NC); // everything is one big block.
@@ -363,25 +379,42 @@ public:
             }
         }
 
-        // Computing averages.
+        // Computing averages under different policies.
         if (ave_means || ave_variances || ave_fitted || ave_residuals) {
-            std::vector<double> block_weight;
-            block_weight.reserve(block_size.size());
-            for (auto bs : block_size) {
-                block_weight.push_back(weight_block(bs, weight_size_cap));
-            }
+            if (block_weight_policy == WeightPolicy::EQUAL) {
+                if (ave_means) {
+                    average_vectors(NR, means, ave_means);
+                }
+                if (ave_variances) {
+                    average_vectors(NR, variances, ave_variances);
+                }
+                if (ave_fitted) {
+                    average_vectors(NR, fitted, ave_fitted);
+                }
+                if (ave_residuals) {
+                    average_vectors(NR, residuals, ave_residuals);
+                }
 
-            if (ave_means) {
-                average_vectors_weighted(NR, means, block_weight.data(), ave_means);
-            }
-            if (ave_variances) {
-                average_vectors_weighted(NR, variances, block_weight.data(), ave_variances);
-            }
-            if (ave_fitted) {
-                average_vectors_weighted(NR, fitted, block_weight.data(), ave_fitted);
-            }
-            if (ave_residuals) {
-                average_vectors_weighted(NR, residuals, block_weight.data(), ave_residuals);
+            } else {
+                std::vector<double> block_weight(block_size.begin(), block_size.end());
+                if (block_weight_policy == WeightPolicy::VARIABLE) {
+                    for (auto& bw : block_weight) {
+                        bw = variable_block_weight(bw, variable_block_weight_parameters);
+                    }
+                }
+
+                if (ave_means) {
+                    average_vectors_weighted(NR, means, block_weight.data(), ave_means);
+                }
+                if (ave_variances) {
+                    average_vectors_weighted(NR, variances, block_weight.data(), ave_variances);
+                }
+                if (ave_fitted) {
+                    average_vectors_weighted(NR, fitted, block_weight.data(), ave_fitted);
+                }
+                if (ave_residuals) {
+                    average_vectors_weighted(NR, residuals, block_weight.data(), ave_residuals);
+                }
             }
         }
 
@@ -398,7 +431,7 @@ public:
      * @tparam Stat_ Floating-point type for the output statistics.
      *
      * @param mat Pointer to a feature-by-cells **tatami** matrix containing log-expression values.
-     * @param[in] block Pointer to an array of length equal to the number of cells, containing block identifiers - see `count_blocks()` for more details.
+     * @param[in] block Pointer to an array of length equal to the number of cells, containing block identifiers - see `tabulate_ids()` for more details.
      * This can also be a `nullptr`, in which case all cells are assumed to belong to the same block.
      * @param[out] means Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in `mat`.
      * Each vector stores the mean of each feature in the corresponding block of cells.
@@ -550,7 +583,7 @@ public:
      */
     template<typename Value_, typename Index_, typename Block_>
     BlockResults run_blocked(const tatami::Matrix<Value_, Index_>* mat, const Block_* block) const {
-        int nblocks = (block ? count_block_levels(mat->ncol(), block) : 1);
+        int nblocks = (block ? count_ids(mat->ncol(), block) : 1);
         BlockResults output(mat->nrow(), nblocks);
 
         std::vector<double*> mean_ptr, var_ptr, fit_ptr, resid_ptr;
@@ -598,7 +631,7 @@ public:
      */
     template<typename Value_, typename Index_, typename Block_>
     AverageBlockResults run_blocked_with_average(const tatami::Matrix<Value_, Index_>* mat, const Block_* block) const {
-        int nblocks = (block ? count_block_levels(mat->ncol(), block) : 1);
+        int nblocks = (block ? count_ids(mat->ncol(), block) : 1);
         AverageBlockResults output(mat->nrow(), nblocks);
 
         std::vector<double*> mean_ptr, var_ptr, fit_ptr, resid_ptr;

@@ -41,23 +41,13 @@ namespace scran {
 class ScoreFeatureSet {
 public:
     /**
-     * Policy to use for weighting batches based on their size, i.e., the number of cells in each batch.
-     *
-     * - `NONE`: no weighting is performed.
-     *   This means that larger batches will contribute more to the calculation of the rotation vectors in the PCA.
-     * - `EQUAL`: each batch is downscaled in proportion to its number of cells,
-     *   such that all batches contribute "equally" to the rotation vectors regardless of their size.
-     */
-    enum class WeightPolicy : char { NONE, EQUAL };
-
-    /**
      * @brief Default parameters.
      */
     struct Defaults {
         /**
-         * See `set_weight_policy()` for more details.
+         * See `set_block_weight_policy()` for more details.
          */
-        static constexpr WeightPolicy weight_policy = WeightPolicy::EQUAL;
+        static constexpr WeightPolicy block_weight_policy = WeightPolicy::EQUAL;
 
         /**
          * See `set_num_threads()` for more details.
@@ -71,7 +61,7 @@ public:
     };
 
 private:
-    WeightPolicy weight_policy = Defaults::weight_policy;
+    WeightPolicy block_weight_policy = Defaults::block_weight_policy;
     int nthreads = Defaults::num_threads;
     bool scale = Defaults::scale;
 
@@ -80,8 +70,8 @@ public:
      * @param b Policy to use when dealing with multiple blocks containing different numbers of cells.
      * @return A reference to this `ScoreFeatureSet` instance.
      */
-    ScoreFeatureSet& set_weight_policy(WeightPolicy b = Defaults::weight_policy) {
-        weight_policy = b;
+    ScoreFeatureSet& set_block_weight_policy(WeightPolicy b = Defaults::block_weight_policy) {
+        block_weight_policy = b;
         return *this;
     }
 
@@ -223,12 +213,7 @@ public:
             runner.set_scale(scale);
             runner.set_num_threads(nthreads);
             runner.set_return_rotation(true).set_return_scale(scale).set_return_center(true);
-
-            if (weight_policy == WeightPolicy::EQUAL) {
-                runner.set_weight_policy(ResidualPca::WeightPolicy::EQUAL);
-            } else {
-                runner.set_weight_policy(ResidualPca::WeightPolicy::NONE);
-            }
+            runner.set_block_weight_policy(block_weight_policy);
 
             auto temp = runner.run(subsetted.get(), block);
             transfer_rotation(temp.rotation, output.weights);
