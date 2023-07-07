@@ -51,7 +51,7 @@ int main(int argc, char * argv[]) {
 
     // Running the PCA using the default irlba::ParallelSparseMatrix.
     {
-        scran::RunPCA runner;
+        scran::SimplePca runner;
         runner.set_num_threads(nthreads);
 
         auto start = std::chrono::high_resolution_clock::now();
@@ -64,13 +64,30 @@ int main(int argc, char * argv[]) {
     // Doing it with Eigen, including the centering and the extraction/transformation time for consistency.
     {   
         irlba::Irlba runner2;
-        runner2.set_number(scran::RunPCA::Defaults::rank);
+        runner2.set_number(scran::SimplePca::Defaults::rank);
 
         auto start = std::chrono::high_resolution_clock::now();
         auto extracted = scran::pca_utils::extract_sparse_for_pca(&mat, nthreads); // row-major extraction.
         auto& ptrs = extracted.ptrs;
         auto& values = extracted.values;
         auto& indices = extracted.indices;
+
+        Eigen::VectorXd center_v(nr), scale_v(nr);
+        tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
+            size_t ncells = nc;
+            for (int r = start, end = start + length; r < end; ++r) {
+                auto offset = ptrs[r];
+
+                tatami::SparseRange<double, int> range;
+                range.number = ptrs[r + 1] - offset;
+                range.value = values.data() + offset;
+                range.index = indices.data() + offset;
+
+                auto results = tatami::stats::variances::compute_direct(range, ncells);
+                center_v.coeffRef(r) = results.first;
+                scale_v.coeffRef(r) = results.second;
+            }
+        }, nr, nthreads);
 
         Eigen::SparseMatrix<double> spmat(nc, nr); // transposed (features in the columns).
         {
@@ -90,9 +107,6 @@ int main(int argc, char * argv[]) {
             }
             spmat.makeCompressed();
         }
-
-        Eigen::VectorXd center_v(nr), scale_v(nr);
-        scran::pca_utils::compute_mean_and_variance_from_sparse_components(nr, nc, values, indices, ptrs, center_v, scale_v, nthreads); // row-major calculations.
 
         irlba::EigenThreadScope scope(nthreads);
         irlba::Centered centered(&spmat, &center_v); 

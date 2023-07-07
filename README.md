@@ -20,25 +20,25 @@ The example below demonstrates how to use **libscran** to run a standard analysi
 #include "scran/scran.hpp"
 
 // Loading the data from an unzipped MatrixMarket file.
-auto mat = tatami::MatrixMarket::load_sparse_matrix_from_file(path);
+auto mat = tatami_mtx::load_matrix_from_file<false, double, int>(argv[1]);
 
 // Filtering out low-quality cells. 
 auto qc_res = scran::PerCellRnaQcMetrics().run(mat.get(), { /* mito subset definitions go here */ });
 auto qc_filters = scran::SuggestRnaQcFilters().run(qc_res);
-auto is_low_quality = qc_filters.filter(qc_res);
-auto filtered = scran::FilterCells().run(mat, is_low_quality.data());
+auto low_quality = qc_filters.filter(qc_res);
+auto filtered = scran::FilterCells().run(mat, low_quality.data());
 
 // Computing log-normalized expression values, re-using the total count from the QC step.
-auto size_factors = scran::subset_vector<false>(qc_res.sums, is_low_quality.data());
+auto size_factors = scran::subset_vector<false>(qc_res.sums, low_quality.data());
 auto normalized = scran::LogNormCounts().run(filtered, std::move(size_factors));
 
-// Identifying highly variable genes from the residuals from the first (and only) batch.
+// Identifying highly variable genes.
 auto var_res = scran::ModelGeneVar().run(normalized.get());
-auto keep = scran::ChooseHVGs().run(var_res.residuals[0].size(), var_res.residuals[0].data());
+auto keep = scran::ChooseHVGs().run(var_res.residuals.size(), var_res.residuals.data());
 
-// Performing a PCA on the HVGs. 
+// Performing a PCA on the HVGs.
 int npcs = 20;
-auto pca_res = scran::RunPCA().set_rank(npcs).run(normalized.get(), keep.data());
+auto pca_res = scran::SimplePca().set_rank(npcs).run(normalized.get(), keep.data());
 
 // Performing clustering.
 auto graph = scran::BuildSNNGraph().run(npcs, pca_res.pcs.cols(), pca_res.pcs.data());
