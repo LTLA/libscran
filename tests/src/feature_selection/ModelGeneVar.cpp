@@ -199,7 +199,7 @@ TEST_P(ModelGeneVarTest, BlockedStats) {
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     ModelGeneVar,
     ModelGeneVarTest,
     ::testing::Values(1, 3) // number of threads

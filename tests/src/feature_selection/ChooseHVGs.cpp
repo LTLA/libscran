@@ -35,7 +35,7 @@ TEST_P(ChooseHVGsTest, Basic) {
     EXPECT_TRUE(min_has > max_lost);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     ChooseHVGs,
     ChooseHVGsTest,
     ::testing::Combine(

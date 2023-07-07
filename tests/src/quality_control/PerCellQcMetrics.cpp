@@ -146,7 +146,7 @@ TEST_P(PerCellQcMetricsTestStandard, TwoSubsets) {
     compare(res, res4);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     PerCellQcMetrics,
     PerCellQcMetricsTestStandard,
     ::testing::Values(1, 3) // number of threads
@@ -401,7 +401,7 @@ TEST_P(PerCellQcMetricsTestMaxed, OkayOnMissing) {
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     PerCellQcMetrics,
     PerCellQcMetricsTestMaxed,
     ::testing::Values(1, 3) // number of threads

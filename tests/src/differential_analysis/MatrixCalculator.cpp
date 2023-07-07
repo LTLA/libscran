@@ -347,7 +347,7 @@ TEST_P(DifferentialAnalysisMatrixCalculatorUnblockedTest, SingleBlock) {
     EXPECT_EQ(ova.store, ova3.store);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     DifferentialAnalysisMatrixCalculatorUnblocked,
     DifferentialAnalysisMatrixCalculatorUnblockedTest,
     ::testing::Combine(
@@ -524,7 +524,7 @@ TEST_P(DifferentialAnalysisMatrixCalculatorBlockedTest, SubsettedReference) {
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     DifferentialAnalysisMatrixCalculatorBlocked,
     DifferentialAnalysisMatrixCalculatorBlockedTest,
     ::testing::Combine(

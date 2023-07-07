@@ -146,7 +146,7 @@ TEST_P(ScoreFeatureSetSingleBlockTest, Reference) {
     compare_almost_equal(obsb2.scores, ref.scores);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     ScoreFeatureSetSingleBlock,
     ScoreFeatureSetSingleBlockTest,
     ::testing::Combine(

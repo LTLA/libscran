@@ -91,7 +91,7 @@ TEST_P(PairwiseEffectsUnblockedTest, Reference) {
     EXPECT_EQ(res.auc, ref.paired_auc);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     PairwiseEffectsUnblocked,
     PairwiseEffectsUnblockedTest,
     ::testing::Combine(
@@ -210,7 +210,7 @@ TEST_P(PairwiseEffectsBlockedTest, VersusReference) {
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     PairwiseEffectsBlocked,
     PairwiseEffectsBlockedTest,
     ::testing::Combine(

@@ -91,7 +91,7 @@ TEST_P(AggregateAcrossCellsTest, Basics) {
     compare(res4);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     AggregateAcrossCells,
     AggregateAcrossCellsTest,
     ::testing::Combine(

@@ -156,7 +156,7 @@ TEST_P(SummarizeComparisonsTest, Missing) {
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     SummarizeComparisons,
     SummarizeComparisonsTest,
     ::testing::Combine(
@@ -248,7 +248,7 @@ TEST_P(ComputeMinRankTest, Missing) {
     compare_vectors(std::vector<double>{1, 2, 3, 4}, ngenes, output.data() + ngenes * 2);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     ComputeMinRank,
     ComputeMinRankTest,
     ::testing::Values(1, 3) // number of threads
@@ -306,7 +306,7 @@ TEST_P(ComputeMinRankTestThreaded, Consistency) {
     EXPECT_EQ(pergroup_output, ref_output);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     ComputeMinRankThreaded,
     ComputeMinRankTestThreaded,
     ::testing::Combine(

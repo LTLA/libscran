@@ -113,7 +113,7 @@ TEST_P(BuildSNNGraphRefTest, Reference) {
     EXPECT_EQ(expected, ref);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     BuildSNNGraph,
     BuildSNNGraphRefTest,
     ::testing::Combine(
@@ -160,7 +160,7 @@ TEST_P(BuildSNNGraphSymmetryTest, Symmetry) {
     EXPECT_EQ(refd, revd);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     BuildSNNGraph,
     BuildSNNGraphSymmetryTest,
     ::testing::Combine(
@@ -189,7 +189,7 @@ TEST_P(BuildSNNGraphAnnoyTest, Annoy) {
     EXPECT_TRUE(output.weights.size() > 1); // well, it gives _something_, at least.
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     BuildSNNGraph,
     BuildSNNGraphAnnoyTest,
     ::testing::Combine(

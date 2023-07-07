@@ -173,7 +173,7 @@ TEST_P(ScoreMarkersTest, AgainstPairwise) {
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     ScoreMarkers,
     ScoreMarkersTest,
     ::testing::Combine(
@@ -237,7 +237,7 @@ TEST_P(ScoreMarkersBlockedTest, AgainstPairwise) {
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     ScoreMarkers,
     ScoreMarkersBlockedTest,
     ::testing::Combine(
@@ -290,7 +290,7 @@ TEST_P(ScoreMarkersCacheTest, Basic) {
     compare_effects(ngroups, cached.delta_detected, uncached.delta_detected);
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     ScoreMarkersCache,
     ScoreMarkersCacheTest,
     ::testing::Combine(

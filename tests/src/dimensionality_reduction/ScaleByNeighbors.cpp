@@ -98,7 +98,7 @@ TEST_P(ScaleByNeighborsTest, Zeros) {
     }
 }
 
-INSTANTIATE_TEST_CASE_P(
+INSTANTIATE_TEST_SUITE_P(
     ScaleByNeighbors,
     ScaleByNeighborsTest,
     ::testing::Values(1, 3) // number of threads
