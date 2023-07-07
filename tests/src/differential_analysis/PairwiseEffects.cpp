@@ -81,10 +81,8 @@ TEST_P(PairwiseEffectsUnblockedTest, Reference) {
     EXPECT_EQ(res.means.size(), ngroups);
     EXPECT_EQ(res.detected.size(), ngroups);
     for (int g = 0; g < ngroups; ++g) {
-        EXPECT_EQ(res.means[g].size(), 1);
-        EXPECT_EQ(res.detected[g].size(), 1);
-        EXPECT_EQ(res.means[g][0], ref.means[g]);
-        EXPECT_EQ(res.detected[g][0], ref.detected[g]);
+        EXPECT_EQ(res.means[g], ref.means[g]);
+        EXPECT_EQ(res.detected[g], ref.detected[g]);
     }
 
     EXPECT_EQ(res.cohen, ref.paired_cohen);
@@ -105,7 +103,7 @@ INSTANTIATE_TEST_CASE_P(
 
 /*********************************************/
 
-class PairwiseEffectsBlockedTest : public ::testing::TestWithParam<std::tuple<int, int, int> >, public DifferentialAnalysisTestCore {
+class PairwiseEffectsBlockedTest : public ::testing::TestWithParam<std::tuple<int, int, scran::WeightPolicy, int> >, public DifferentialAnalysisTestCore {
 protected:
     static constexpr size_t nrows = 100;
     static constexpr size_t ncols = 50;
@@ -115,49 +113,53 @@ protected:
     }
 };
 
-TEST_P(PairwiseEffectsBlockedTest, Blocked) {
+TEST_P(PairwiseEffectsBlockedTest, VersusReference) {
     auto param = GetParam();
     auto ngroups = std::get<0>(param);
     auto nblocks = std::get<1>(param);
-    auto nthreads = std::get<2>(param);
+    auto policy = std::get<2>(param);
+    auto nthreads = std::get<3>(param);
 
     scran::PairwiseEffects chd;
     chd.set_num_threads(nthreads);
+    chd.set_block_weight_policy(policy);
+    scran::VariableBlockWeightParameters vparams{0, 10};
+    chd.set_variable_block_weight_parameters(vparams); // get some interesting variable weights, if we can.
 
     auto groups = create_groupings(ncols, ngroups);
     auto blocks = create_blocks(ncols, nblocks);
-    auto full = chd.run_blocked(sparse_row.get(), groups.data(), blocks.data());
 
     std::vector<double> ref_cohen(ngroups * ngroups * nrows);
     auto ref_auc = ref_cohen;
     auto ref_lfc = ref_cohen;
     auto ref_delta_detected = ref_cohen;
-    std::vector<int> total_weights(ngroups * ngroups);
+    std::vector<int> total_product_weights(ngroups * ngroups);
 
-    std::vector<std::vector<std::vector<double> > > ref_means(ngroups, 
-        std::vector<std::vector<double> >(nblocks, std::vector<double>(nrows)));
+    std::vector<std::vector<double> > ref_means(ngroups, std::vector<double>(nrows));
     auto ref_detected = ref_means;
+    std::vector<int> total_group_weights(ngroups);
 
     for (int b = 0; b < nblocks; ++b) {
         std::vector<int> subset;
         std::vector<int> subgroups;
-        std::vector<int> subcount(ngroups);
         for (int i = 0; i < ncols; ++i) {
             if (blocks[i] == b) {
                 subset.push_back(i);
                 subgroups.push_back(groups[i]);
-                ++subcount[groups[i]];
             }
         }
 
         auto sub = tatami::make_DelayedSubset<1>(dense_row, std::move(subset));
         auto res = chd.run(sub.get(), subgroups.data());
 
+        auto subcount = scran::tabulate_ids(subgroups.size(), subgroups.data());
+        std::vector<double> subweights = scran::compute_block_weights(subcount, policy, vparams);
+
         for (size_t i = 0; i < nrows; ++i) {
             for (int g1 = 0; g1 < ngroups; ++g1) {
                 for (int g2 = 0; g2 < ngroups; ++g2) {
                     size_t offset = i * ngroups * ngroups + g1 * ngroups + g2;
-                    double weight = subcount[g1] * subcount[g2];
+                    double weight = subweights[g1] * subweights[g2];
                     ref_cohen[offset] += weight * res.cohen[offset];
                     ref_lfc[offset] += weight * res.lfc[offset];
                     ref_delta_detected[offset] += weight * res.delta_detected[offset];
@@ -166,39 +168,45 @@ TEST_P(PairwiseEffectsBlockedTest, Blocked) {
             }
 
             for (int g = 0; g < ngroups; ++g) {
-                ref_means[g][b][i] = res.means[g][0][i];
-                ref_detected[g][b][i] = res.detected[g][0][i];
+                ref_means[g][i] += res.means[g][i] * subweights[g];
+                ref_detected[g][i] += res.detected[g][i] * subweights[g];
             }
         }
 
         for (int g1 = 0; g1 < ngroups; ++g1) {
+            total_group_weights[g1] += subweights[g1];
             for (int g2 = 0; g2 < ngroups; ++g2) {
-                total_weights[g1 * ngroups + g2] += subcount[g1] * subcount[g2];
+                total_product_weights[g1 * ngroups + g2] += subweights[g1] * subweights[g2];
             }
         }
     }
 
     for (size_t i = 0; i < nrows; ++i) {
         auto offset = i * ngroups * ngroups;
+
         for (int g = 0; g < ngroups * ngroups; ++g) {
-            ref_cohen[offset + g] /= total_weights[g];
-            ref_lfc[offset + g] /= total_weights[g];
-            ref_auc[offset + g] /= total_weights[g];
-            ref_delta_detected[offset + g] /= total_weights[g];
+            ref_cohen[offset + g] /= total_product_weights[g];
+            ref_lfc[offset + g] /= total_product_weights[g];
+            ref_auc[offset + g] /= total_product_weights[g];
+            ref_delta_detected[offset + g] /= total_product_weights[g];
+        }
+
+        for (int g = 0; g < ngroups; ++g) {
+            ref_means[g][i] /= total_group_weights[g];
+            ref_detected[g][i] /= total_group_weights[g];
         }
     }
 
     // Alright, running all the tests.
-    compare_almost_equal(ref_cohen, full.cohen);
-    compare_almost_equal(ref_lfc, full.lfc);
-    compare_almost_equal(ref_delta_detected, full.delta_detected);
-    compare_almost_equal(ref_auc, full.auc);
+    auto res = chd.run_blocked(sparse_row.get(), groups.data(), blocks.data());
+    compare_almost_equal(ref_cohen, res.cohen);
+    compare_almost_equal(ref_lfc, res.lfc);
+    compare_almost_equal(ref_delta_detected, res.delta_detected);
+    compare_almost_equal(ref_auc, res.auc);
 
     for (int g = 0; g < ngroups; ++g) {
-        for (int b = 0; b < nblocks; ++b) {
-            EXPECT_EQ(ref_means[g][b], full.means[g][b]);
-            EXPECT_EQ(ref_detected[g][b], full.detected[g][b]);
-        }
+        compare_almost_equal(ref_means[g], res.means[g]);
+        compare_almost_equal(ref_detected[g], res.detected[g]);
     }
 }
 
@@ -208,6 +216,7 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Combine(
         ::testing::Values(2, 3, 4, 5), // number of clusters
         ::testing::Values(1, 2, 3), // number of blocks
+        ::testing::Values(scran::WeightPolicy::NONE, scran::WeightPolicy::EQUAL, scran::WeightPolicy::VARIABLE), // block weighting method.
         ::testing::Values(1, 3) // number of threads
     )
 );

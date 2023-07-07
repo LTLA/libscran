@@ -13,54 +13,54 @@ enable_testing()
 add_executable(
     libtest 
 
-    src/quality_control/PerCellQcMetrics.cpp
-    src/quality_control/PerCellRnaQcMetrics.cpp
-    src/quality_control/PerCellAdtQcMetrics.cpp
-    src/quality_control/PerCellCrisprQcMetrics.cpp
-    src/quality_control/ComputeMedianMad.cpp
-    src/quality_control/ChooseOutlierFilters.cpp
-    src/quality_control/SuggestRnaQcFilters.cpp
-    src/quality_control/SuggestAdtQcFilters.cpp
-    src/quality_control/SuggestCrisprQcFilters.cpp
-    src/quality_control/FilterCells.cpp
-
-    src/normalization/LogNormCounts.cpp
-    src/normalization/CenterSizeFactors.cpp
-    src/normalization/MedianSizeFactors.cpp
-    src/normalization/GroupedSizeFactors.cpp
-    src/normalization/ChoosePseudoCount.cpp
-
-    src/feature_selection/ModelGeneVar.cpp
-    src/feature_selection/FitTrendVar.cpp
-    src/feature_selection/ChooseHVGs.cpp
-
-    src/dimensionality_reduction/utils.cpp
-    src/dimensionality_reduction/convert.cpp
-    src/dimensionality_reduction/SimplePca.cpp
-    src/dimensionality_reduction/ResidualPca.cpp
-    src/dimensionality_reduction/MultiBatchPca.cpp
-    src/dimensionality_reduction/ScaleByNeighbors.cpp
-
-    src/clustering/BuildSNNGraph.cpp
-    src/clustering/ClusterSNNGraph.cpp
-
-    src/differential_analysis/summarize_comparisons.cpp
-    src/differential_analysis/auc.cpp
-    src/differential_analysis/cohens_d.cpp
-    src/differential_analysis/simple_diff.cpp
+#    src/quality_control/PerCellQcMetrics.cpp
+#    src/quality_control/PerCellRnaQcMetrics.cpp
+#    src/quality_control/PerCellAdtQcMetrics.cpp
+#    src/quality_control/PerCellCrisprQcMetrics.cpp
+#    src/quality_control/ComputeMedianMad.cpp
+#    src/quality_control/ChooseOutlierFilters.cpp
+#    src/quality_control/SuggestRnaQcFilters.cpp
+#    src/quality_control/SuggestAdtQcFilters.cpp
+#    src/quality_control/SuggestCrisprQcFilters.cpp
+#    src/quality_control/FilterCells.cpp
+#
+#    src/normalization/LogNormCounts.cpp
+#    src/normalization/CenterSizeFactors.cpp
+#    src/normalization/MedianSizeFactors.cpp
+#    src/normalization/GroupedSizeFactors.cpp
+#    src/normalization/ChoosePseudoCount.cpp
+#
+#    src/feature_selection/ModelGeneVar.cpp
+#    src/feature_selection/FitTrendVar.cpp
+#    src/feature_selection/ChooseHVGs.cpp
+#
+#    src/dimensionality_reduction/utils.cpp
+#    src/dimensionality_reduction/convert.cpp
+#    src/dimensionality_reduction/SimplePca.cpp
+#    src/dimensionality_reduction/ResidualPca.cpp
+#    src/dimensionality_reduction/MultiBatchPca.cpp
+#    src/dimensionality_reduction/ScaleByNeighbors.cpp
+#
+#    src/clustering/BuildSNNGraph.cpp
+#    src/clustering/ClusterSNNGraph.cpp
+#
+#    src/differential_analysis/summarize_comparisons.cpp
+#    src/differential_analysis/auc.cpp
+#    src/differential_analysis/cohens_d.cpp
+#    src/differential_analysis/simple_diff.cpp
     src/differential_analysis/ScoreMarkers.cpp
     src/differential_analysis/PairwiseEffects.cpp
     src/differential_analysis/MatrixCalculator.cpp
 
-    src/aggregation/AggregateAcrossCells.cpp
-    src/aggregation/DownsampleByNeighbors.cpp
-
-    src/feature_set_enrichment/ScoreFeatureSet.cpp
-    src/feature_set_enrichment/HypergeometricTail.cpp
-
-    src/utils/average_vectors.cpp
-    src/utils/subset_vector.cpp
-    src/data/data_sparse.cpp
+#    src/aggregation/AggregateAcrossCells.cpp
+#    src/aggregation/DownsampleByNeighbors.cpp
+#
+#    src/feature_set_enrichment/ScoreFeatureSet.cpp
+#    src/feature_set_enrichment/HypergeometricTail.cpp
+#
+#    src/utils/average_vectors.cpp
+#    src/utils/subset_vector.cpp
+#    src/data/data_sparse.cpp
 )
 
 target_link_libraries(

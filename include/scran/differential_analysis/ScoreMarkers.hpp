@@ -7,7 +7,10 @@
 #include "cohens_d.hpp"
 #include "simple_diff.hpp"
 #include "summarize_comparisons.hpp"
+
 #include "../utils/vector_to_pointers.hpp"
+#include "../utils/average_vectors.hpp"
+#include "../utils/blocking.hpp"
 
 #include "tatami/tatami.hpp"
 
@@ -43,7 +46,7 @@ enum class CacheAction : unsigned char { SKIP, COMPUTE, CACHE };
 // the incoming entry. Given that, if the cache is full, we have to throw away
 // one of these effects anyway, I'd prefer to hold onto the one we're using
 // soon, because at least it'll be freed up rapidly.
-template<typename Stat>
+template<typename Stat_>
 struct EffectsCacher {
     EffectsCacher(size_t nge, int ngr, int cs) :
         ngenes(nge),
@@ -67,14 +70,14 @@ public:
     // only used to avoid repeated look-ups in 'cached' while filling the
     // effect size vectors; they will ultimately be transferred to cached after
     // the processing for the current group is complete.
-    std::vector<std::vector<Stat> > staging_cache;
+    std::vector<std::vector<Stat_> > staging_cache;
 
     // 'vector_pool' allows us to recycle effect size vectors to avoid reallocations.
-    std::vector<std::vector<Stat> > vector_pool;
+    std::vector<std::vector<Stat_> > vector_pool;
 
     // 'cached' contains the cached effect size vectors from previous groups. Note
     // that the use of a map is deliberate as we need the sorting.
-    std::map<std::pair<int, int>, std::vector<Stat> > cached;
+    std::map<std::pair<int, int>, std::vector<Stat_> > cached;
 
 public:
     void clear() {
@@ -146,7 +149,7 @@ public:
 
             std::pair<int, int> key(other, group);
             if (cached.size() < static_cast<size_t>(cache_size)) {
-                cached[key] = std::vector<Stat>();
+                cached[key] = std::vector<Stat_>();
                 prepare_staging_cache(other);
                 continue;
             }
@@ -163,7 +166,7 @@ public:
                 }
                 cached.erase(it);
                 prepare_staging_cache(other);
-                cached[key] = std::vector<Stat>();
+                cached[key] = std::vector<Stat_>();
             } else {
                 // Otherwise, if we're not going to do any evictions, we
                 // indicate that we shouldn't even bother computing the
@@ -273,9 +276,22 @@ public:
          * See `set_cache_size()` for details.
          */
         static constexpr int cache_size = 100;
+
+        /**
+         * See `set_block_weight_policy()` for more details.
+         */
+        static constexpr WeightPolicy block_weight_policy = WeightPolicy::NONE;
+
+        /**
+         * See `set_variable_block_weight_parameters()` for more details.
+         */
+        static constexpr VariableBlockWeightParameters variable_block_weight_parameters = VariableBlockWeightParameters();
     };
+
 private:
     double threshold = Defaults::threshold;
+    WeightPolicy block_weight_policy = Defaults::block_weight_policy;
+    VariableBlockWeightParameters variable_block_weight_parameters = Defaults::variable_block_weight_parameters;
 
     ComputeSummaries do_cohen = Defaults::compute_all_summaries();
     ComputeSummaries do_auc = Defaults::compute_all_summaries();
@@ -314,6 +330,27 @@ public:
      */
     ScoreMarkers& set_cache_size(int c = Defaults::cache_size) {
         cache_size = c;
+        return *this;
+    }
+
+    /**
+     * @param p Policy to use for weighting blocks when computing average statistics/effect sizes across blocks.
+     * 
+     * @return A reference to this `ScoreMarkers` instance.
+     */
+    ScoreMarkers& set_block_weight_policy(WeightPolicy w = Defaults::block_weight_policy) {
+        block_weight_policy = w;
+        return *this;
+    }
+
+    /**
+     * @param v Parameters for the variable block weights, see `variable_block_weight()` for more details.
+     * Only used when the block weight policy is set to `WeightPolicy::VARIABLE`.
+     * 
+     * @return A reference to this `ScoreMarkers` instance.
+     */
+    ScoreMarkers& set_variable_block_weight_parameters(VariableBlockWeightParameters v = Defaults::variable_block_weight_parameters) {
+        variable_block_weight_parameters = v;
         return *this;
     }
 
@@ -583,10 +620,17 @@ public:
 public:
     /**
      * Score potential marker genes by computing summary statistics across pairwise comparisons between groups.
+     * On output, `means`, `detected`, `cohen`, `auc`, `lfc` and `delta_detected` are filled with their corresponding statistics.
      *
-     * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
-     * @tparam G Integer type for the group assignments.
-     * @tparam Stat Floating-point type to store the statistics.
+     * If `cohen` is of length 0, Cohen's d is not computed.
+     * If any of the inner vectors are of length 0, the corresponding summary statistic is not computed.
+     * The same applies to `auc`, `lfc` and `delta_detected`.
+     * (`set_compute_cohen()` and related functions have no effect here.)
+     *
+     * @tparam Data_ Matrix data type.
+     * @tparam Index_ Matrix index type.
+     * @tparam Group_ Integer type for the group assignments.
+     * @tparam Stat_ Floating-point type to store the statistics.
      *
      * @param p Pointer to a **tatami** matrix instance.
      * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
@@ -601,28 +645,21 @@ public:
      * @param[out] auc Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the AUC.
      * @param[out] lfc Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the log-fold change instead of Cohen's d.
      * @param[out] delta_detected Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the delta in the detected proportions.
-     * 
-     * If `cohen` is of length 0, Cohen's d is not computed.
-     * If any of the inner vectors are of length 0, the corresponding summary statistic is not computed.
-     * The same applies to `auc`, `lfc` and `delta_detected`.
-     * (`set_compute_cohen()` and related functions have no effect here.)
-     *
-     * @return `means`, `detected`, `cohen` and `auc` are filled with their corresponding statistics on output.
      */
-    template<class Matrix, typename G, typename Stat>
-    void run(const Matrix* p, const G* group, 
-        std::vector<Stat*> means, 
-        std::vector<Stat*> detected, 
-        std::vector<std::vector<Stat*> > cohen, 
-        std::vector<std::vector<Stat*> > auc,
-        std::vector<std::vector<Stat*> > lfc,
-        std::vector<std::vector<Stat*> > delta_detected) 
+    template<typename Value_, typename Index_, typename Group_, typename Stat_>
+    void run(const tatami::Matrix<Value_, Index_>* p, const Group_* group, 
+        std::vector<Stat_*> means, 
+        std::vector<Stat_*> detected, 
+        std::vector<std::vector<Stat_*> > cohen, 
+        std::vector<std::vector<Stat_*> > auc,
+        std::vector<std::vector<Stat_*> > lfc,
+        std::vector<std::vector<Stat_*> > delta_detected) 
     const {
-        differential_analysis::MatrixCalculator runner(nthreads, threshold);
+        differential_analysis::MatrixCalculator runner(nthreads, threshold, block_weight_policy, variable_block_weight_parameters);
 
         size_t ngenes = p->nrow();
         size_t ngroups = means.size();
-        Overlord<Stat> overlord(ngenes, ngroups, auc.empty());
+        Overlord<Stat_> overlord(ngenes, ngroups, auc.empty());
         auto state = runner.run(p, group, ngroups, overlord);
 
         process_simple_effects(ngenes, ngroups, 1, state, means, detected, cohen, lfc, delta_detected);
@@ -631,11 +668,18 @@ public:
 
     /**
      * Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.
+     * On output, `means`, `detected`, `cohen`, `auc`, `lfc` and `delta_detected` are filled with their corresponding statistics.
      *
-     * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
-     * @tparam G Integer type for the group assignments.
-     * @tparam B Integer type for the block assignments.
-     * @tparam Stat Floating-point type to store the statistics.
+     * If `cohen` is of length 0, Cohen's d is not computed.
+     * If any of the inner vectors are of length 0, the corresponding summary statistic is not computed.
+     * The same applies to `auc`, `lfc` and `delta_detected`.
+     * (`set_compute_cohen()` and related functions have no effect here.)
+     *
+     * @tparam Data_ Matrix data type.
+     * @tparam Index_ Matrix index type.
+     * @tparam Group_ Integer type for the group assignments.
+     * @tparam Block_ Integer type for the block assignments.
+     * @tparam Stat_ Floating-point type to store the statistics.
      *
      * @param p Pointer to a **tatami** matrix instance.
      * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
@@ -652,43 +696,52 @@ public:
      * @param[out] auc Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the AUC.
      * @param[out] lfc Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the log-fold change instead of Cohen's d.
      * @param[out] delta_detected Vector of vector of pointers as described for `cohen`, but instead storing summary statistics for the delta in the detected proportions.
-     * 
-     * If `cohen` is of length 0, Cohen's d is not computed.
-     * If any of the inner vectors are of length 0, the corresponding summary statistic is not computed.
-     * The same applies to `auc`, `lfc` and `delta_detected`.
-     * (`set_compute_cohen()` and related functions have no effect here.)
-     *
-     * @return `means`, `detected`, `cohen` and `auc` are filled with their corresponding statistics on output.
      */
-    template<class Matrix, typename G, typename B, typename Stat>
-    void run_blocked(const Matrix* p, const G* group, const B* block, 
-        std::vector<std::vector<Stat*> > means, 
-        std::vector<std::vector<Stat*> > detected, 
-        std::vector<std::vector<Stat*> > cohen,
-        std::vector<std::vector<Stat*> > auc,
-        std::vector<std::vector<Stat*> > lfc,
-        std::vector<std::vector<Stat*> > delta_detected) 
+    template<typename Value_, typename Index_, typename Group_, typename Block_, typename Stat_>
+    void run_blocked(const tatami::Matrix<Value_, Index_>* p, const Group_* group, const Block_* block, 
+        std::vector<Stat_*> means, 
+        std::vector<Stat_*> detected, 
+        std::vector<std::vector<Stat_*> > cohen,
+        std::vector<std::vector<Stat_*> > auc,
+        std::vector<std::vector<Stat_*> > lfc,
+        std::vector<std::vector<Stat_*> > delta_detected) 
     const {
-        differential_analysis::MatrixCalculator runner(nthreads, threshold);
+        differential_analysis::MatrixCalculator runner(nthreads, threshold, block_weight_policy, variable_block_weight_parameters);
 
         size_t ngenes = p->nrow();
         size_t ngroups = means.size();
-        size_t nblocks = (ngroups ? means[0].size() : 0); // no blocks = no groups.
-        Overlord<Stat> overlord(ngenes, ngroups, auc.empty());
+        size_t nblocks = count_ids(p->ncol(), block);
+        Overlord<Stat_> overlord(ngenes, ngroups, auc.empty());
         auto state = runner.run_blocked(p, group, ngroups, block, nblocks, overlord);
 
         int ncombos = ngroups * nblocks;
-        std::vector<Stat*> means2(ncombos), detected2(ncombos);
-        auto mIt = means2.begin(), dIt = detected2.begin();
-        for (int g = 0; g < ngroups; ++g) {
-            for (int b = 0; b < nblocks; ++b, ++mIt, ++dIt) {
-                *mIt = means[g][b];
-                *dIt = detected[g][b];
-            }
+        std::vector<std::vector<Stat_> > means_store(ncombos), detected_store(ncombos);
+        std::vector<Stat_*> means2(ncombos), detected2(ncombos);
+        for (int c = 0; c < ncombos; ++c) {
+            means_store[c].resize(ngenes);
+            detected_store[c].resize(ngenes);
+            means2[c] = means_store[c].data();
+            detected2[c] = detected_store[c].data();
         }
 
         process_simple_effects(ngenes, ngroups, nblocks, state, means2, detected2, cohen, lfc, delta_detected);
         summarize_auc(ngenes, ngroups, state, auc, overlord.auc_buffer);
+
+        // Averaging the remaining statistics.
+        std::vector<double> weights(nblocks);
+        std::vector<Stat_*> mstats(nblocks), dstats(nblocks);
+
+        for (int gr = 0; gr < ngroups; ++gr) {
+            for (int b = 0; b < nblocks; ++b) {
+                size_t offset = gr * static_cast<size_t>(nblocks) + b;
+                weights[b] = state.level_weight[offset];
+                mstats[b] = means2[offset];
+                dstats[b] = detected2[offset];
+            }
+
+            average_vectors_weighted(ngenes, mstats, weights.data(), means[gr]);
+            average_vectors_weighted(ngenes, dstats, weights.data(), detected[gr]);
+        }
     }
 
 private:
@@ -721,8 +774,8 @@ private:
         std::vector<std::vector<Stat_*> >& lfc,
         std::vector<std::vector<Stat_*> >& delta_detected) 
     const {
-        const auto& level_size = state.level_size;
-        auto nlevels = level_size.size();
+        const auto& level_weight = state.level_weight;
+        auto nlevels = level_weight.size();
         const auto* tmp_means = state.means.data();
         const auto* tmp_variances = state.variances.data();
         const auto* tmp_detected = state.detected.data();
@@ -768,11 +821,11 @@ private:
                             }
 
                             if (actions[other] == differential_analysis::CacheAction::COMPUTE) {
-                                cohen_ptr[other] = differential_analysis::compute_pairwise_cohens_d<false>(group, other, my_means, my_variances, level_size, ngroups, nblocks, threshold);
+                                cohen_ptr[other] = differential_analysis::compute_pairwise_cohens_d<false>(group, other, my_means, my_variances, level_weight, ngroups, nblocks, threshold);
                                 continue;
                             }
 
-                            auto tmp = differential_analysis::compute_pairwise_cohens_d<true>(group, other, my_means, my_variances, level_size, ngroups, nblocks, threshold);
+                            auto tmp = differential_analysis::compute_pairwise_cohens_d<true>(group, other, my_means, my_variances, level_weight, ngroups, nblocks, threshold);
                             cohen_ptr[other] = tmp.first;
                             staging_cache[other][gene] = tmp.second;
                         }
@@ -809,7 +862,7 @@ private:
                                 continue;
                             }
 
-                            auto val = differential_analysis::compute_pairwise_simple_diff(group, other, my_means, level_size, ngroups, nblocks);
+                            auto val = differential_analysis::compute_pairwise_simple_diff(group, other, my_means, level_weight, ngroups, nblocks);
                             lfc_ptr[other] = val;
                             if (actions[other] == differential_analysis::CacheAction::CACHE) {
                                 staging_cache[other][gene] = -val;
@@ -848,7 +901,7 @@ private:
                                 continue;
                             }
 
-                            auto val = differential_analysis::compute_pairwise_simple_diff(group, other, my_detected, level_size, ngroups, nblocks);
+                            auto val = differential_analysis::compute_pairwise_simple_diff(group, other, my_detected, level_weight, ngroups, nblocks);
                             delta_detected_ptr[other] = val;
                             if (actions[other] == differential_analysis::CacheAction::CACHE) {
                                 staging_cache[other][gene] = -val;
@@ -889,13 +942,12 @@ public:
     /** 
      * @brief Results of the marker scoring.
      * 
-     * @tparam Stat Floating-point type to store the statistics.
-     * @brief Marker effect size summaries and other statistics.
+     * @tparam Stat_ Floating-point type to store the statistics.
      *
      * Meaningful instances of this object should generally be constructed by calling the `ScoreMarkers::run()` methods.
      * Empty instances can be default-constructed as placeholders.
      */
-    template<typename Stat>
+    template<typename Stat_>
     struct Results {
         /**
          * @cond
@@ -905,7 +957,6 @@ public:
         Results(
             size_t ngenes, 
             int ngroups, 
-            int nblocks, 
             const ComputeSummaries& do_cohen, 
             const ComputeSummaries& do_auc, 
             const ComputeSummaries& do_lfc, 
@@ -918,12 +969,8 @@ public:
                 }
             };
 
-            means.resize(ngroups);
-            detected.resize(ngroups);
-            for (int g = 0; g < ngroups; ++g) {
-                fill_inner(nblocks, means[g]);
-                fill_inner(nblocks, detected[g]);
-            }
+            fill_inner(ngroups, means);
+            fill_inner(ngroups, detected);
 
             auto fill_effect = [&](const ComputeSummaries& do_this, auto& effect) {
                 bool has_any = false;
@@ -971,7 +1018,7 @@ public:
          * elements of the middle vector correspond to the different groups;
          * and elements of the inner vector correspond to individual genes.
          */
-        std::vector<std::vector<std::vector<Stat> > > cohen;
+        std::vector<std::vector<std::vector<Stat_> > > cohen;
 
         /**
          * Summary statistics for the AUC.
@@ -979,7 +1026,7 @@ public:
          * elements of the middle vector correspond to the different groups;
          * and elements of the inner vector correspond to individual genes.
          */
-        std::vector<std::vector<std::vector<Stat> > > auc;
+        std::vector<std::vector<std::vector<Stat_> > > auc;
 
         /**
          * Summary statistics for the log-fold change.
@@ -987,7 +1034,7 @@ public:
          * elements of the middle vector correspond to the different groups;
          * and elements of the inner vector correspond to individual genes.
          */
-        std::vector<std::vector<std::vector<Stat> > > lfc;
+        std::vector<std::vector<std::vector<Stat_> > > lfc;
 
         /**
          * Summary statistics for the delta in the detected proportions.
@@ -995,31 +1042,28 @@ public:
          * elements of the middle vector correspond to the different groups;
          * and elements of the inner vector correspond to individual genes.
          */
-        std::vector<std::vector<std::vector<Stat> > > delta_detected;
+        std::vector<std::vector<std::vector<Stat_> > > delta_detected;
 
         /**
          * Mean expression in each group.
-         * Elements of the outer vector corresponds to the different groups;
-         * elements of the middle vector correspond to the different blocking levels (this is of length 1 for `run()`);
-         * and elements of the inner vector correspond to individual genes.
+         * Elements of the outer vector corresponds to the different groups, and elements of the inner vector correspond to individual genes.
          */
-        std::vector<std::vector<std::vector<Stat> > > means;
+        std::vector<std::vector<Stat_> > means;
 
         /**
          * Proportion of detected expression in each group.
-         * Elements of the outer vector corresponds to the different groups;
-         * elements of the middle vector correspond to the different blocking levels (this is of length 1 for `run()`);
-         * and elements of the inner vector correspond to individual genes.
+         * Elements of the outer vector corresponds to the different groups, and elements of the inner vector correspond to individual genes.
          */
-        std::vector<std::vector<std::vector<Stat> > > detected;
+        std::vector<std::vector<Stat_> > detected;
     };
 
     /**
      * Score potential marker genes by computing summary statistics across pairwise comparisons between groups. 
      *
-     * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
-     * @tparam G Integer type for the group assignments.
-     * @tparam Stat Floating-point type to store the statistics.
+     * @tparam Stat_ Floating-point type to store the statistics.
+     * @tparam Data_ Matrix data type.
+     * @tparam Index_ Matrix index type.
+     * @tparam Group_ Integer type for the group assignments.
      *
      * @param p Pointer to a **tatami** matrix instance.
      * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
@@ -1028,15 +1072,15 @@ public:
      * @return A `Results` object containing the summary statistics and the other per-group statistics.
      * Whether particular statistics are computed depends on the configuration from `set_compute_cohen()` and related setters.
      */
-    template<typename Stat = double, class MAT, typename G> 
-    Results<Stat> run(const MAT* p, const G* group) const {
-        auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
-        Results<Stat> res(p->nrow(), ngroups, 1, do_cohen, do_auc, do_lfc, do_delta_detected); 
+    template<typename Stat_ = double, typename Value_, typename Index_, typename Group_>
+    Results<Stat_> run(const tatami::Matrix<Value_, Index_>* p, const Group_* group) const {
+        auto ngroups = count_ids(p->ncol(), group);
+        Results<Stat_> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); 
         run(
             p, 
             group,
-            vector_to_front_pointers(res.means),
-            vector_to_front_pointers(res.detected),
+            vector_to_pointers(res.means),
+            vector_to_pointers(res.detected),
             vector_to_pointers(res.cohen),
             vector_to_pointers(res.auc),
             vector_to_pointers(res.lfc),
@@ -1048,10 +1092,11 @@ public:
     /**
      * Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.
      *
-     * @tparam Matrix A **tatami** matrix class, usually a `NumericMatrix`.
-     * @tparam G Integer type for the group assignments.
-     * @tparam B Integer type for the block assignments.
-     * @tparam Stat Floating-point type to store the statistics.
+     * @tparam Stat_ Floating-point type to store the statistics.
+     * @tparam Data_ Matrix data type.
+     * @tparam Index_ Matrix index type.
+     * @tparam Group_ Integer type for the group assignments.
+     * @tparam Block_ Integer type for the block assignments.
      *
      * @param p Pointer to a **tatami** matrix instance.
      * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
@@ -1062,15 +1107,14 @@ public:
      * @return A `Results` object containing the summary statistics and the other per-group statistics.
      * Whether particular statistics are computed depends on the configuration from `set_compute_cohen()` and related setters.
      */
-    template<typename Stat = double, class MAT, typename G, typename B> 
-    Results<Stat> run_blocked(const MAT* p, const G* group, const B* block) const {
+    template<typename Stat_ = double, typename Value_, typename Index_, typename Group_, typename Block_>
+    Results<Stat_> run_blocked(const tatami::Matrix<Value_, Index_>* p, const Group_* group, const Block_* block) const {
         if (block == NULL) {
             return run(p, group);
         }
- 
-        auto ngroups = *std::max_element(group, group + p->ncol()) + 1;
-        auto nblocks = *std::max_element(block, block + p->ncol()) + 1;
-        Results<Stat> res(p->nrow(), ngroups, nblocks, do_cohen, do_auc, do_lfc, do_delta_detected); 
+
+        auto ngroups = count_ids(p->ncol(), group);
+        Results<Stat_> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); 
 
         run_blocked(
             p, 

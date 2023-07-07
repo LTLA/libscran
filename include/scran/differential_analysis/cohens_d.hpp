@@ -44,8 +44,8 @@ inline double cohen_denominator(double left_var, double right_var) {
     }
 }
 
-template<typename Stat, typename Ls, class Output>
-void compute_pairwise_cohens_d_internal(int g1, int g2, const Stat* means, const Stat* vars, const Ls& level_size, int ngroups, int nblocks, double threshold, Output& output) {
+template<typename Stat, typename Weights_, class Output>
+void compute_pairwise_cohens_d_internal(int g1, int g2, const Stat* means, const Stat* vars, const Weights_& weights, int ngroups, int nblocks, double threshold, Output& output) {
     double total_weight = 0;
     constexpr bool do_both_sides = !std::is_same<Stat, Output>::value;
 
@@ -53,16 +53,16 @@ void compute_pairwise_cohens_d_internal(int g1, int g2, const Stat* means, const
         int offset1 = g1 * nblocks + b;
         const auto& left_mean = means[offset1];
         const auto& left_var = vars[offset1];
-        const auto& left_size = level_size[offset1];
-        if (!left_size) {
+        const auto& left_weight = weights[offset1];
+        if (!left_weight) {
             continue;
         }
 
         int offset2 = g2 * nblocks + b;
         const auto& right_mean = means[offset2]; 
         const auto& right_var = vars[offset2];
-        const auto& right_size = level_size[offset2];
-        if (!right_size) {
+        const auto& right_weight = weights[offset2];
+        if (!right_weight) {
             continue;
         }
 
@@ -71,7 +71,7 @@ void compute_pairwise_cohens_d_internal(int g1, int g2, const Stat* means, const
             continue;
         }
 
-        double weight = left_size * right_size;
+        double weight = left_weight * right_weight;
         total_weight += weight;
 
         double extra = compute_cohens_d(left_mean, right_mean, denom, threshold) * weight;
@@ -106,24 +106,24 @@ void compute_pairwise_cohens_d_internal(int g1, int g2, const Stat* means, const
     }
 }
 
-template<bool both, typename Stat, typename Ls>
-typename std::conditional<both, std::pair<Stat, Stat>, Stat>::type compute_pairwise_cohens_d(int g1, int g2, const Stat* means, const Stat* vars, const Ls& level_size, int ngroups, int nblocks, double threshold) {
+template<bool both, typename Stat, typename Weights_>
+auto compute_pairwise_cohens_d(int g1, int g2, const Stat* means, const Stat* vars, const Weights_& weights, int ngroups, int nblocks, double threshold) {
     if constexpr(!both) {
         Stat output = 0;
-        compute_pairwise_cohens_d_internal(g1, g2, means, vars, level_size, ngroups, nblocks, threshold, output);
+        compute_pairwise_cohens_d_internal(g1, g2, means, vars, weights, ngroups, nblocks, threshold, output);
         return output;
     } else {
         std::pair<Stat, Stat> output(0, 0);
-        compute_pairwise_cohens_d_internal(g1, g2, means, vars, level_size, ngroups, nblocks, threshold, output);
+        compute_pairwise_cohens_d_internal(g1, g2, means, vars, weights, ngroups, nblocks, threshold, output);
         return output;
     }
 }
 
-template<typename Stat, typename Ls>
-void compute_pairwise_cohens_d (const Stat* means, const Stat* vars, const Ls& level_size, int ngroups, int nblocks, double threshold, Stat* output) {
+template<typename Stat, typename Weights_>
+void compute_pairwise_cohens_d (const Stat* means, const Stat* vars, const Weights_& weights, int ngroups, int nblocks, double threshold, Stat* output) {
     for (int g1 = 0; g1 < ngroups; ++g1) {
         for (int g2 = 0; g2 < g1; ++g2) {
-            auto tmp = compute_pairwise_cohens_d<true>(g1, g2, means, vars, level_size, ngroups, nblocks, threshold);
+            auto tmp = compute_pairwise_cohens_d<true>(g1, g2, means, vars, weights, ngroups, nblocks, threshold);
             output[g1 * ngroups + g2] = tmp.first;
             output[g2 * ngroups + g1] = tmp.second;
         }

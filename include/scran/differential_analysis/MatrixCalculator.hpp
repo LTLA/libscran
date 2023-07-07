@@ -9,7 +9,10 @@
 #include <type_traits>
 
 #include "../utils/vector_to_pointers.hpp"
+#include "../utils/blocking.hpp"
+
 #include "../feature_selection/blocked_variances.hpp"
+
 #include "auc.hpp"
 #include "tatami/tatami.hpp"
 
@@ -30,17 +33,25 @@ namespace differential_analysis {
 
 class MatrixCalculator {
 public:
-    MatrixCalculator(int nt, double t) : num_threads(nt), threshold(t) {}
+    MatrixCalculator(int nt, double t) : MatrixCalculator(nt, t, WeightPolicy::NONE) {}
+
+    MatrixCalculator(int nt, double t, WeightPolicy w) : MatrixCalculator(nt, t, w, VariableBlockWeightParameters()) {}
+
+    MatrixCalculator(int nt, double t, WeightPolicy w, const VariableBlockWeightParameters& bw) : 
+        num_threads(nt), threshold(t), block_weight_policy(w), variable_block_weight_parameters(bw) {}
 
 private:
     int num_threads;
     double threshold;
+    WeightPolicy block_weight_policy;
+    VariableBlockWeightParameters variable_block_weight_parameters;
 
 public:
     struct State {
         State(size_t n) : means(n), variances(n), detected(n) {}
         std::vector<double> means, variances, detected;
         std::vector<int> level_size;
+        std::vector<double> level_weight;
     };
 
 public:
@@ -72,12 +83,13 @@ public:
 
 private:
     struct AucBundle {
-        AucBundle(size_t ngroups, size_t nblocks, const std::vector<int>& level_size) :
+        AucBundle(size_t ngroups, size_t nblocks, const std::vector<int>& level_size, const std::vector<double>& level_weight) :
             paired(nblocks),
             num_zeros(nblocks, std::vector<int>(ngroups)),
             totals(nblocks, std::vector<int>(ngroups)),
             auc_buffer(ngroups * ngroups),
-            denominator(ngroups, std::vector<double>(ngroups))
+            block_scale(nblocks, std::vector<double>(ngroups * ngroups)),
+            full_weight(ngroups * ngroups)
         {
             auto lsIt = level_size.begin();
             for (size_t g = 0; g < ngroups; ++g) {
@@ -88,8 +100,24 @@ private:
 
             for (size_t b = 0; b < nblocks; ++b) {
                 for (int g1 = 0; g1 < ngroups; ++g1) {
-                    for (int g2 = 0; g2 < ngroups; ++g2) {
-                        denominator[g1][g2] += totals[b][g1] * totals[b][g2];
+                    auto w1 = level_weight[g1 * nblocks + b];
+
+                    for (int g2 = 0; g2 < g1; ++g2) {
+                        double block_denom = totals[b][g1] * totals[b][g2];
+                        if (block_denom == 0) {
+                            continue;
+                        }
+
+                        double block_weight = w1 * level_weight[g2 * nblocks + b];
+                        double block_scaling = block_denom / block_weight;
+
+                        auto offset1 = g1 * ngroups + g2;
+                        block_scale[b][offset1] = block_scaling;
+                        full_weight[offset1] += block_weight;
+
+                        auto offset2 = g2 * ngroups + g1;
+                        block_scale[b][offset2] = block_scaling;
+                        full_weight[offset2] += block_weight;
                     }
                 }
             }
@@ -99,11 +127,13 @@ private:
         std::vector<std::vector<int> > num_zeros;
         std::vector<std::vector<int> > totals;
         std::vector<double> auc_buffer;
-        std::vector<std::vector<double> > denominator;
+        std::vector<std::vector<double> > block_scale;
+        std::vector<double> full_weight;
     };
 
     struct DummyBundle {
-        DummyBundle(size_t, size_t, const std::vector<int>&) {}
+        template<typename ... Args_>
+        DummyBundle(Args_&&...) {}
     };
 
     template<bool sparse_, bool auc_, typename Data_, typename Index_, typename Level_, typename Group_, typename Block_, class State_, class Overlord_>
@@ -111,6 +141,7 @@ private:
         const tatami::Matrix<Data_, Index_>* p, 
         const Level_* level, 
         const std::vector<int>& level_size, 
+        const std::vector<double>& level_weight, 
         const Group_* group, 
         size_t ngroups, 
         const Block_* block, 
@@ -127,7 +158,7 @@ private:
             auto ext = tatami::consecutive_extractor<true, sparse_, Data_, Index_>(p, start, length);
 
             // AUC-only object.
-            typename std::conditional<auc_, AucBundle, DummyBundle>::type auc_info(ngroups, nblocks, level_size);
+            typename std::conditional<auc_, AucBundle, DummyBundle>::type auc_info(ngroups, nblocks, level_size, level_weight);
 
             size_t nlevels = level_size.size();
             size_t offset = nlevels * start;
@@ -200,7 +231,8 @@ private:
     }
 
     static void process_auc_for_rows(size_t ngroups, size_t nblocks, double threshold, AucBundle& bundle, double* output) {
-        std::fill(output, output + ngroups * ngroups, 0);
+        size_t ngroups2 = ngroups * ngroups;
+        std::fill(output, output + ngroups2, 0);
         auto& auc_buffer = bundle.auc_buffer;
 
         for (size_t b = 0; b < nblocks; ++b) {
@@ -216,28 +248,30 @@ private:
             }
 
             // Adding to the blocks.
-            for (size_t g = 0, end = auc_buffer.size(); g < end; ++g) {
-                output[g] += auc_buffer[g];
+            const auto& block_scale = bundle.block_scale[b];
+            for (size_t g = 0; g < ngroups2; ++g) {
+                if (block_scale[g]) {
+                    output[g] += auc_buffer[g] / block_scale[g];
+                }
             }
         }
 
+        size_t g = 0;
         for (size_t g1 = 0; g1 < ngroups; ++g1) {
-            for (size_t g2 = 0; g2 < ngroups; ++g2) {
-                auto& current = output[g1 * ngroups + g2];
-                if (bundle.denominator[g1][g2]) {
-                    current /= bundle.denominator[g1][g2];
-                } else {
+            for (size_t g2 = 0; g2 < ngroups; ++g2, ++g) {
+                auto& current = output[g];
+                if (bundle.full_weight[g]) {
+                    current /= bundle.full_weight[g];
+                } else if (g1 != g2) {
                     current = std::numeric_limits<double>::quiet_NaN();
-                }
+                } // g1 == g2 gets a current = 0, which is technically wrong, but no one should be using the self-comparison effect size anyway.
             }
         }
     }
 
 private:
     template<bool sparse_, typename Data_, typename Index_, typename Level_, class State_>
-    void by_column(const tatami::Matrix<Data_, Index_>* p, const Level_* level, const std::vector<int>& level_size, State_& state) const {
-        size_t nlevels = level_size.size();
-
+    void by_column(const tatami::Matrix<Data_, Index_>* p, const Level_* level, size_t nlevels, State_& state) const {
         tatami::parallelize([&](size_t, size_t start, size_t length) -> void {
             size_t NC = p->ncol();
             std::vector<Data_> vbuffer(length);
@@ -309,19 +343,20 @@ private:
         auto ngenes = p->nrow();
         size_t nlevels = level_size.size();
         State state(static_cast<size_t>(ngenes) * nlevels);
+        auto level_weight = compute_block_weights(level_size, block_weight_policy, variable_block_weight_parameters);
 
         if (!overlord.needs_auc()) {
             if (p->prefer_rows()) {
                 if (p->sparse()) {
-                    by_row<true, false>(p, level, level_size, group, ngroups, block, nblocks, state, overlord);
+                    by_row<true, false>(p, level, level_size, level_weight, group, ngroups, block, nblocks, state, overlord);
                 } else {
-                    by_row<false, false>(p, level, level_size, group, ngroups, block, nblocks, state, overlord);
+                    by_row<false, false>(p, level, level_size, level_weight, group, ngroups, block, nblocks, state, overlord);
                 }
             } else {
                 if (p->sparse()) {
-                    by_column<true>(p, level, level_size, state);
+                    by_column<true>(p, level, level_size.size(), state);
                 } else {
-                    by_column<false>(p, level, level_size, state);
+                    by_column<false>(p, level, level_size.size(), state);
                 }
             }
         } else {
@@ -333,9 +368,9 @@ private:
             }
 
             if (p->sparse()) {
-                by_row<true, true>(p, level, level_size, group, ngroups, block, nblocks, state, overlord);
+                by_row<true, true>(p, level, level_size, level_weight, group, ngroups, block, nblocks, state, overlord);
             } else {
-                by_row<false, true>(p, level, level_size, group, ngroups, block, nblocks, state, overlord);
+                by_row<false, true>(p, level, level_size, level_weight, group, ngroups, block, nblocks, state, overlord);
             }
         }
 
@@ -355,6 +390,8 @@ private:
 
         // Moving it in for output's sake.
         state.level_size = std::move(level_size);
+        state.level_weight = std::move(level_weight);
+
         return state;
     }
 };

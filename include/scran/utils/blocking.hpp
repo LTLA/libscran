@@ -113,6 +113,7 @@ struct VariableBlockWeightParameters {
  *
  * Blocks that are "large enough" are considered to be equally trustworthy and receive the same weight, ensuring that each block contributes equally to the weighted average.
  * By comparison, very small blocks receive lower weight as their statistics are generally less stable.
+ * If both `cap` and `block_size` are zero, the weight is also set to zero.
  *
  * @param s Size of the block, in terms of the number of cells in that block.
  * @param params Parameters for the weight calculation, consisting of the lower and upper bounds.
@@ -129,6 +130,37 @@ inline double variable_block_weight(double s, const VariableBlockWeightParameter
     }
 
     return (s - params.lower_bound) / (params.upper_bound - params.lower_bound);
+}
+
+/**
+ * Compute block weights for multiple blocks based on their size and the weighting policy.
+ * For variable weights, this function will call `variable_block_weight()` for each block.
+ *
+ * @tparam Size_ Numeric type for the block size.
+ *
+ * @param sizes Vector of block sizes.
+ * @param policy Policy for weighting blocks of different sizes.
+ * @param param Parameters for the variable block weights.
+ *
+ * @return Vector of block weights.
+ */
+template<typename Size_>
+std::vector<double> compute_block_weights(const std::vector<Size_>& sizes, WeightPolicy policy, const VariableBlockWeightParameters& param) {
+    size_t nblocks = sizes.size();
+    std::vector<double> weights;
+    weights.reserve(nblocks);
+
+    if (policy == WeightPolicy::NONE) {
+        weights.insert(weights.end(), sizes.begin(), sizes.end());
+    } else if (policy == WeightPolicy::EQUAL) {
+        weights.resize(nblocks, 1);
+    } else {
+        for (size_t l = 0; l < nblocks; ++l) {
+            weights.push_back(variable_block_weight(sizes[l], param));
+        }
+    }
+
+    return weights;
 }
 
 }
