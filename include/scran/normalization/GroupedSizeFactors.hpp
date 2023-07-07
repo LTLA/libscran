@@ -8,6 +8,8 @@
 
 #include "tatami/tatami.hpp"
 
+#include "../utils/blocking.hpp"
+
 #include <memory>
 #include <vector>
 #include <algorithm>
@@ -144,7 +146,7 @@ private:
         }
 
         // Aggregating each group to get a pseudo-bulk sample.
-        auto ngroups = *std::max_element(group, group + NC) + 1;
+        auto ngroups = count_ids(NC, group);
         std::vector<double> combined(ngroups * NR);
         {
             std::vector<double*> sums(ngroups);

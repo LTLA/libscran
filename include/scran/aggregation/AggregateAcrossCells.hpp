@@ -7,6 +7,8 @@
 #include <vector>
 #include "tatami/tatami.hpp"
 
+#include "../utils/blocking.hpp"
+
 /**
  * @file AggregateAcrossCells.hpp
  *
@@ -408,7 +410,7 @@ public:
     template<typename Sum = double, typename Detected = int, typename Data, typename Index, typename Factor>
     Results<Sum, Detected> run(const tatami::Matrix<Data, Index>* input, const Factor* factor) {
         size_t NC = input->ncol();
-        size_t nlevels = (NC ? *std::max_element(factor, factor + NC) + 1 : 0);
+        size_t nlevels = count_ids(NC, factor);
         size_t ngenes = input->nrow();
 
         Results<Sum, Detected> output;

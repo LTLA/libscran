@@ -3,6 +3,8 @@
 
 #include "../utils/macros.hpp"
 
+#include "../utils/blocking.hpp"
+
 #include <stdexcept>
 #include <vector>
 #include <algorithm>
@@ -168,59 +170,57 @@ public:
             return run(n, size_factors);
         } 
 
+        size_t ngroups = count_ids(n, block);
+        std::vector<double> group_mean(ngroups);
+        std::vector<double> group_num(ngroups);
+
         bool has_zero = false;
-        if (n) {
-            size_t ngroups = *std::max_element(block, block + n) + 1;
-            std::vector<double> group_mean(ngroups);
-            std::vector<double> group_num(ngroups);
+        for (size_t i = 0; i < n; ++i) {
+            const auto& current = size_factors[i];
+            if (current < 0) {
+               throw std::runtime_error("negative size factors detected");
+            }
 
-            for (size_t i = 0; i < n; ++i) {
-                const auto& current = size_factors[i];
-                if (current < 0) {
-                   throw std::runtime_error("negative size factors detected");
-                }
-
-                const auto& b = block[i];
-                if (current == 0) {
-                    if (!ignore_zeros) {
-                        ++group_num[b];
-                    }
-                    has_zero = true;
-                } else {
-                    group_mean[b] += size_factors[i];
+            const auto& b = block[i];
+            if (current == 0) {
+                if (!ignore_zeros) {
                     ++group_num[b];
                 }
+                has_zero = true;
+            } else {
+                group_mean[b] += size_factors[i];
+                ++group_num[b];
             }
+        }
 
-            for (size_t g = 0; g < ngroups; ++g) {
-                if (group_num[g]) {
-                    group_mean[g] /= group_num[g];
+        for (size_t g = 0; g < ngroups; ++g) {
+            if (group_num[g]) {
+                group_mean[g] /= group_num[g];
+            }
+        }
+
+        if (block_mode == PER_BLOCK) {
+            for (size_t i = 0; i < n; ++i) {
+                const auto& div = group_mean[block[i]];
+                if (div) {
+                    size_factors[i] /= div;
                 }
             }
 
-            if (block_mode == PER_BLOCK) {
+        } else if (block_mode == LOWEST) {
+            // Ignore groups with means of zeros, either because they're full of zeros themselves
+            // or they have no cells associated with them.
+            double min = std::numeric_limits<double>::infinity();
+            for (size_t b = 0; b < ngroups; ++b) {
+                const auto& div = group_mean[b];
+                if (div && div < min) {
+                    min = div;
+                }
+            }
+
+            if (std::isfinite(min)) {
                 for (size_t i = 0; i < n; ++i) {
-                    const auto& div = group_mean[block[i]];
-                    if (div) {
-                        size_factors[i] /= div;
-                    }
-                }
-
-            } else if (block_mode == LOWEST) {
-                // Ignore groups with means of zeros, either because they're full of zeros themselves
-                // or they have no cells associated with them.
-                double min = std::numeric_limits<double>::infinity();
-                for (size_t b = 0; b < ngroups; ++b) {
-                    const auto& div = group_mean[b];
-                    if (div && div < min) {
-                        min = div;
-                    }
-                }
-
-                if (std::isfinite(min)) {
-                    for (size_t i = 0; i < n; ++i) {
-                        size_factors[i] /= min;
-                    }
+                    size_factors[i] /= min;
                 }
             }
         }
