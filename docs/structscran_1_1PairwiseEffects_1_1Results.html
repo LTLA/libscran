@@ -86,16 +86,6 @@ $(function() {
  <a href="structscran_1_1PairwiseEffects_1_1Results.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="PairwiseEffects_8hpp_source.html">PairwiseEffects.hpp</a>&gt;</code></p>
-<div class="dynheader">
-Inheritance diagram for scran::PairwiseEffects::Results&lt; Stat_ &gt;:</div>
-<div class="dyncontent">
-<div class="center"><img src="structscran_1_1PairwiseEffects_1_1Results__inherit__graph.png" border="0" usemap="#ascran_1_1PairwiseEffects_1_1Results_3_01Stat___01_4_inherit__map" alt="Inheritance graph"/></div>
-<map name="ascran_1_1PairwiseEffects_1_1Results_3_01Stat___01_4_inherit__map" id="ascran_1_1PairwiseEffects_1_1Results_3_01Stat___01_4_inherit__map">
-<area shape="rect" title="Pairwise effect size results." alt="" coords="25,5,175,46"/>
-<area shape="rect" href="structscran_1_1PairwiseEffects_1_1ResultsWithMeans.html" title="Pairwise effect size results, with per&#45;group means." alt="" coords="5,94,195,135"/>
-<area shape="poly" title=" " alt="" coords="103,61,103,94,97,94,97,61"/>
-</map>
-<center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -107,6 +97,10 @@ Public Attributes</h2></td></tr>
 <tr class="separator:af6054db15f5ace1cb6622df801518c67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b223fa37472fedb49c93459ba674d9c"><td class="memItemLeft" align="right" valign="top">std::vector&lt; Stat_ &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html#a2b223fa37472fedb49c93459ba674d9c">delta_detected</a></td></tr>
 <tr class="separator:a2b223fa37472fedb49c93459ba674d9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72dbbc446340c0e4280d18667bbf1784"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; Stat_ &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html#a72dbbc446340c0e4280d18667bbf1784">means</a></td></tr>
+<tr class="separator:a72dbbc446340c0e4280d18667bbf1784"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a496eb4c77c9e1c0ed40b8f943eba42d8"><td class="memItemLeft" align="right" valign="top">std::vector&lt; std::vector&lt; Stat_ &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html#a496eb4c77c9e1c0ed40b8f943eba42d8">detected</a></td></tr>
+<tr class="separator:a496eb4c77c9e1c0ed40b8f943eba42d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename Stat_&gt;<br />
@@ -132,7 +126,7 @@ template&lt;typename Stat_ &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Vector of pairwise Cohen's d, to be interpreted as a 3-dimensional array. </p>
+<p>Vector of pairwise Cohen's d, to be interpreted as a 3-dimensional array - see the description in <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">Results</a></code> for more details. Only returned if <code><a class="el" href="classscran_1_1PairwiseEffects.html#a8502150c4ebec6bf8e13e6f7ef85b105">set_compute_cohen()</a></code> is <code>true</code>. </p>
 
 </div>
 </div>
@@ -149,7 +143,7 @@ template&lt;typename Stat_ &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Vector of pairwise AUCs, to be interpreted as a 3-dimensional array. </p>
+<p>Vector of pairwise AUCs, to be interpreted as a 3-dimensional array - see the description in <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">Results</a></code> for more details. Only returned if <code><a class="el" href="classscran_1_1PairwiseEffects.html#a03200aae7ecd4a67af7172d2e13f0618">set_compute_auc()</a></code> is <code>true</code>. </p>
 
 </div>
 </div>
@@ -166,7 +160,7 @@ template&lt;typename Stat_ &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Vector of pairwise log-fold changes, to be interpreted as a 3-dimensional array. </p>
+<p>Vector of pairwise log-fold changes, to be interpreted as a 3-dimensional array - see the description in <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">Results</a></code> for more details. Only returned if <code><a class="el" href="classscran_1_1PairwiseEffects.html#a84ccf66ce778baa44e0ec226b9b469e3">set_compute_lfc()</a></code> is <code>true</code>. </p>
 
 </div>
 </div>
@@ -183,7 +177,41 @@ template&lt;typename Stat_ &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Vector of pairwise delta-detected, to be interpreted as a 3-dimensional array. </p>
+<p>Vector of pairwise delta-detected, to be interpreted as a 3-dimensional array - see the description in <code><a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html" title="Pairwise effect size results.">Results</a></code> for more details. Only returned if <code><a class="el" href="classscran_1_1PairwiseEffects.html#ad0f6c3655e8abfb22092ca858bcd396f">set_compute_delta_detected()</a></code> is <code>true</code>. </p>
+
+</div>
+</div>
+<a id="a72dbbc446340c0e4280d18667bbf1784" name="a72dbbc446340c0e4280d18667bbf1784"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a72dbbc446340c0e4280d18667bbf1784">&#9670;&#160;</a></span>means</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Stat_ &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::vector&lt;Stat_&gt; &gt; <a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html">scran::PairwiseEffects::Results</a>&lt; Stat_ &gt;::means</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Each element of <code>means</code> corresponds to a group and is itself a vector of length equal to the number of genes. Each element of <code>means[i]</code> corresponds to a gene and contains the mean expression of that gene in group <code>i</code>. When used in <code><a class="el" href="classscran_1_1PairwiseEffects.html#afb171621973111cd81e268e32939fcf6">run_blocked()</a></code>, the grand average across all blocks is reported. </p>
+
+</div>
+</div>
+<a id="a496eb4c77c9e1c0ed40b8f943eba42d8" name="a496eb4c77c9e1c0ed40b8f943eba42d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a496eb4c77c9e1c0ed40b8f943eba42d8">&#9670;&#160;</a></span>detected</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Stat_ &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::vector&lt;Stat_&gt; &gt; <a class="el" href="structscran_1_1PairwiseEffects_1_1Results.html">scran::PairwiseEffects::Results</a>&lt; Stat_ &gt;::detected</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Each element of <code>detected</code> corresponds to a group and is itself a vector of length equal to the number of genes. Each element of <code>detected[i]</code> corresponds to a gene and contains the proportion of detected expression of that gene in group <code>i</code>. When used in <code><a class="el" href="classscran_1_1PairwiseEffects.html#afb171621973111cd81e268e32939fcf6">run_blocked()</a></code>, the grand average across all blocks is reported. </p>
 
 </div>
 </div>

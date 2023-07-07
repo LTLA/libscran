@@ -227,6 +227,9 @@ Functions</h2></td></tr>
 <tr class="separator:a7f1658794e621bcd27fd33b91422a4a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a128f43444ef77988f27ae5b91cef6b13"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacescran.html#a128f43444ef77988f27ae5b91cef6b13">variable_block_weight</a> (double s, const <a class="el" href="structscran_1_1VariableBlockWeightParameters.html">VariableBlockWeightParameters</a> &amp;params)</td></tr>
 <tr class="separator:a128f43444ef77988f27ae5b91cef6b13"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92ec43b74a91a73bd539472d265af8ff"><td class="memTemplParams" colspan="2">template&lt;typename Size_ &gt; </td></tr>
+<tr class="memitem:a92ec43b74a91a73bd539472d265af8ff"><td class="memTemplItemLeft" align="right" valign="top">std::vector&lt; double &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacescran.html#a92ec43b74a91a73bd539472d265af8ff">compute_block_weights</a> (const std::vector&lt; Size_ &gt; &amp;sizes, <a class="el" href="namespacescran.html#abcd041d625290609e221552910ae2c34">WeightPolicy</a> policy, const <a class="el" href="structscran_1_1VariableBlockWeightParameters.html">VariableBlockWeightParameters</a> &amp;param)</td></tr>
+<tr class="separator:a92ec43b74a91a73bd539472d265af8ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af57dae3ada8336a1bfa01ac8daa9fc11"><td class="memTemplParams" colspan="2">template&lt;bool retain, class Vector , typename Subset &gt; </td></tr>
 <tr class="memitem:af57dae3ada8336a1bfa01ac8daa9fc11"><td class="memTemplItemLeft" align="right" valign="top">Vector&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacescran.html#af57dae3ada8336a1bfa01ac8daa9fc11">subset_vector</a> (const Vector &amp;vec, const Subset *sub)</td></tr>
 <tr class="separator:af57dae3ada8336a1bfa01ac8daa9fc11"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -640,7 +643,7 @@ template&lt;typename Output_  = int, bool allow_zeros_ = false, typename Id_ &gt
 <li>If the block is greater than some upper bound, it has weight of 1.</li>
 <li>Otherwise, the block has weight proportional to its size, increasing linearly from 0 to 1 between the two bounds.</li>
 </ul>
-<p>Blocks that are "large enough" are considered to be equally trustworthy and receive the same weight, ensuring that each block contributes equally to the weighted average. By comparison, very small blocks receive lower weight as their statistics are generally less stable.</p>
+<p>Blocks that are "large enough" are considered to be equally trustworthy and receive the same weight, ensuring that each block contributes equally to the weighted average. By comparison, very small blocks receive lower weight as their statistics are generally less stable. If both <code>cap</code> and <code>block_size</code> are zero, the weight is also set to zero.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">s</td><td>Size of the block, in terms of the number of cells in that block. </td></tr>
@@ -649,6 +652,58 @@ template&lt;typename Output_  = int, bool allow_zeros_ = false, typename Id_ &gt
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Weight of the block, to use for computing a weighted average across blocks. </dd></dl>
+
+</div>
+</div>
+<a id="a92ec43b74a91a73bd539472d265af8ff" name="a92ec43b74a91a73bd539472d265af8ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92ec43b74a91a73bd539472d265af8ff">&#9670;&#160;</a></span>compute_block_weights()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Size_ &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; double &gt; scran::compute_block_weights </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; Size_ &gt; &amp;&#160;</td>
+          <td class="paramname"><em>sizes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacescran.html#abcd041d625290609e221552910ae2c34">WeightPolicy</a>&#160;</td>
+          <td class="paramname"><em>policy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structscran_1_1VariableBlockWeightParameters.html">VariableBlockWeightParameters</a> &amp;&#160;</td>
+          <td class="paramname"><em>param</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Compute block weights for multiple blocks based on their size and the weighting policy. For variable weights, this function will call <code><a class="el" href="namespacescran.html#a128f43444ef77988f27ae5b91cef6b13">variable_block_weight()</a></code> for each block.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Size_</td><td>Numeric type for the block size.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sizes</td><td>Vector of block sizes. </td></tr>
+    <tr><td class="paramname">policy</td><td>Policy for weighting blocks of different sizes. </td></tr>
+    <tr><td class="paramname">param</td><td>Parameters for the variable block weights.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Vector of block weights. </dd></dl>
 
 </div>
 </div>
