@@ -343,18 +343,7 @@ private:
         auto ngenes = p->nrow();
         size_t nlevels = level_size.size();
         State state(static_cast<size_t>(ngenes) * nlevels);
-
-        std::vector<double> level_weight;
-        level_weight.reserve(nlevels);
-        if (block_weight_policy == WeightPolicy::NONE) {
-            level_weight.insert(level_weight.end(), level_size.begin(), level_size.end());
-        } else if (block_weight_policy == WeightPolicy::EQUAL) {
-            level_weight.resize(nlevels, 1);
-        } else {
-            for (size_t l = 0; l < nlevels; ++l) {
-                level_weight.push_back(variable_block_weight(level_size[l], variable_block_weight_parameters));
-            }
-        }
+        auto level_weight = compute_block_weights(level_size, block_weight_policy, variable_block_weight_parameters);
 
         if (!overlord.needs_auc()) {
             if (p->prefer_rows()) {

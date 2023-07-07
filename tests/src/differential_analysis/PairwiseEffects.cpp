@@ -153,16 +153,7 @@ TEST_P(PairwiseEffectsBlockedTest, VersusReference) {
         auto res = chd.run(sub.get(), subgroups.data());
 
         auto subcount = scran::tabulate_ids(subgroups.size(), subgroups.data());
-        std::vector<double> subweights;
-        if (policy == scran::WeightPolicy::VARIABLE) {
-            for (auto s : subcount) {
-                subweights.push_back(variable_block_weight(s, vparams));
-            }
-        } else if (policy == scran::WeightPolicy::EQUAL) {
-            subweights.resize(subgroups.size(), 1);
-        } else {
-            subweights.insert(subweights.end(), subcount.begin(), subcount.end());
-        }
+        std::vector<double> subweights = scran::compute_block_weights(subcount, policy, vparams);
 
         for (size_t i = 0; i < nrows; ++i) {
             for (int g1 = 0; g1 < ngroups; ++g1) {

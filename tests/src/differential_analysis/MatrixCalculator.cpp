@@ -481,21 +481,12 @@ TEST_P(DifferentialAnalysisMatrixCalculatorBlockedTest, SubsettedReference) {
         // Manually computing the weighted average AUC.
         if (do_auc) {
             auto subgroup_sizes = scran::tabulate_ids(subgroups.size(), subgroups.data());
-            std::vector<double> subgroup_weights(subgroup_sizes.begin(), subgroup_sizes.end());
-            for (auto& x : subgroup_weights) {
-                x = variable_block_weight(x, vparams);
-            }
+            std::vector<double> subgroup_weights = scran::compute_block_weights(subgroup_sizes, policy, vparams);
 
             for (int g1 = 0; g1 < ngroups; ++g1) {
                 for (int g2 = 0; g2 < ngroups; ++g2) {
                     size_t offset = g1 * ngroups + g2;
-                    if (policy == scran::WeightPolicy::EQUAL) {
-                        ++total_weight[offset];
-                    } else if (policy == scran::WeightPolicy::NONE) {
-                        total_weight[offset] += subgroup_sizes[g1] * subgroup_sizes[g2];
-                    } else {
-                        total_weight[offset] += subgroup_weights[g1] * subgroup_weights[g2];
-                    }
+                    total_weight[offset] += subgroup_weights[g1] * subgroup_weights[g2];
                 }
             }
 
@@ -505,14 +496,7 @@ TEST_P(DifferentialAnalysisMatrixCalculatorBlockedTest, SubsettedReference) {
                     size_t g1_offset = r_offset + g1 * ngroups;
                     for (int g2 = 0; g2 < ngroups; ++g2) {
                         auto offset = g1_offset + g2;
-
-                        if (policy == scran::WeightPolicy::EQUAL) {
-                            aucs[offset] += subova.store[offset];
-                        } else if (policy == scran::WeightPolicy::NONE) {
-                            aucs[offset] += subova.store[offset] * subgroup_sizes[g1] * subgroup_sizes[g2];
-                        } else {
-                            aucs[offset] += subova.store[offset] * subgroup_weights[g1] * subgroup_weights[g2];
-                        }
+                        aucs[offset] += subova.store[offset] * subgroup_weights[g1] * subgroup_weights[g2];
                     }
                 }
             }
