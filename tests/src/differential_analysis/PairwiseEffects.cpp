@@ -33,7 +33,7 @@ protected:
     static ReferenceResult simple_reference(const tatami::NumericMatrix* mat, const int* group, int ngroups, double threshold) {
         size_t ngenes = mat->nrow();
 
-        scran::differential_analysis::MatrixCalculator runner(1, threshold, 0);
+        scran::differential_analysis::MatrixCalculator runner(1, threshold);
         EffectsOverlord ova(true, ngenes, ngroups);
         auto state = runner.run(mat, group, ngroups, ova);
 
@@ -85,11 +85,10 @@ TEST_P(PairwiseEffectsUnblockedTest, Reference) {
         EXPECT_EQ(res.detected[g], ref.detected[g]);
     }
 
-    // TODO: change back to EXPECT_EQ once the weighting is disabled.
-    compare_almost_equal(res.cohen, ref.paired_cohen);
-    compare_almost_equal(res.lfc, ref.paired_lfc);
-    compare_almost_equal(res.delta_detected, ref.paired_delta_detected);
-    compare_almost_equal(res.auc, ref.paired_auc);
+    EXPECT_EQ(res.cohen, ref.paired_cohen);
+    EXPECT_EQ(res.lfc, ref.paired_lfc);
+    EXPECT_EQ(res.delta_detected, ref.paired_delta_detected);
+    EXPECT_EQ(res.auc, ref.paired_auc);
 }
 
 INSTANTIATE_TEST_CASE_P(
@@ -216,25 +215,62 @@ TEST_P(PairwiseEffectsBlockedTest, Blocked) {
     }
 
     // Alright, running all the tests.
-    chd.set_weight_size_cap(0);
-    auto full = chd.run_blocked(sparse_row.get(), groups.data(), blocks.data());
-    compare_almost_equal(uw_ref_cohen, full.cohen);
-    compare_almost_equal(uw_ref_lfc, full.lfc);
-    compare_almost_equal(uw_ref_delta_detected, full.delta_detected);
-    compare_almost_equal(uw_ref_auc, full.auc);
+    chd.set_block_weight_policy(scran::WeightPolicy::EQUAL);
+    {
+        auto full = chd.run_blocked(sparse_row.get(), groups.data(), blocks.data());
+        compare_almost_equal(uw_ref_cohen, full.cohen);
+        compare_almost_equal(uw_ref_lfc, full.lfc);
+        compare_almost_equal(uw_ref_delta_detected, full.delta_detected);
+        compare_almost_equal(uw_ref_auc, full.auc);
 
-    chd.set_weight_size_cap(100000);
-    auto equal = chd.run_blocked(sparse_row.get(), groups.data(), blocks.data());
-    compare_almost_equal(ref_cohen, equal.cohen);
-    compare_almost_equal(ref_lfc, equal.lfc);
-    compare_almost_equal(ref_delta_detected, equal.delta_detected);
-    compare_almost_equal(ref_auc, equal.auc);
+        for (int g = 0; g < ngroups; ++g) {
+            compare_almost_equal(uw_ref_means[g], full.means[g]);
+            compare_almost_equal(uw_ref_detected[g], full.detected[g]);
+        }
+    }
 
-    for (int g = 0; g < ngroups; ++g) {
-        compare_almost_equal(ref_means[g], equal.means[g]);
-        compare_almost_equal(ref_detected[g], equal.detected[g]);
-        compare_almost_equal(uw_ref_means[g], full.means[g]);
-        compare_almost_equal(uw_ref_detected[g], full.detected[g]);
+    chd.set_block_weight_policy(scran::WeightPolicy::NONE);
+    {
+        auto equal = chd.run_blocked(sparse_row.get(), groups.data(), blocks.data());
+        compare_almost_equal(ref_cohen, equal.cohen);
+        compare_almost_equal(ref_lfc, equal.lfc);
+        compare_almost_equal(ref_delta_detected, equal.delta_detected);
+        compare_almost_equal(ref_auc, equal.auc);
+
+        for (int g = 0; g < ngroups; ++g) {
+            compare_almost_equal(ref_means[g], equal.means[g]);
+            compare_almost_equal(ref_detected[g], equal.detected[g]);
+        }
+    }
+
+    // Checking variable weights.
+    chd.set_block_weight_policy(scran::WeightPolicy::VARIABLE);
+    chd.set_variable_block_weight_parameters({ 0, 0 });
+    {
+        auto equal = chd.run_blocked(sparse_row.get(), groups.data(), blocks.data());
+        compare_almost_equal(uw_ref_cohen, equal.cohen);
+        compare_almost_equal(uw_ref_lfc, equal.lfc);
+        compare_almost_equal(uw_ref_delta_detected, equal.delta_detected);
+        compare_almost_equal(uw_ref_auc, equal.auc);
+
+        for (int g = 0; g < ngroups; ++g) {
+            compare_almost_equal(uw_ref_means[g], equal.means[g]);
+            compare_almost_equal(uw_ref_detected[g], equal.detected[g]);
+        }
+    }
+
+    chd.set_variable_block_weight_parameters({ 0, 100000 });
+    {
+        auto full = chd.run_blocked(sparse_row.get(), groups.data(), blocks.data());
+        compare_almost_equal(ref_cohen, full.cohen);
+        compare_almost_equal(ref_lfc, full.lfc);
+        compare_almost_equal(ref_delta_detected, full.delta_detected);
+        compare_almost_equal(ref_auc, full.auc);
+
+        for (int g = 0; g < ngroups; ++g) {
+            compare_almost_equal(ref_means[g], full.means[g]);
+            compare_almost_equal(ref_detected[g], full.detected[g]);
+        }
     }
 }
 

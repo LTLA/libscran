@@ -278,14 +278,20 @@ public:
         static constexpr int cache_size = 100;
 
         /**
-         * See `set_weight_size_cap()` for more details.
+         * See `set_block_weight_policy()` for more details.
          */
-        static constexpr int weight_size_cap = 1000;
+        static constexpr WeightPolicy block_weight_policy = WeightPolicy::NONE;
+
+        /**
+         * See `set_variable_block_weight_parameters()` for more details.
+         */
+        static constexpr VariableBlockWeightParameters variable_block_weight_parameters = VariableBlockWeightParameters();
     };
 
 private:
     double threshold = Defaults::threshold;
-    int weight_size_cap = Defaults::weight_size_cap;
+    WeightPolicy block_weight_policy = Defaults::block_weight_policy;
+    VariableBlockWeightParameters variable_block_weight_parameters = Defaults::variable_block_weight_parameters;
 
     ComputeSummaries do_cohen = Defaults::compute_all_summaries();
     ComputeSummaries do_auc = Defaults::compute_all_summaries();
@@ -328,13 +334,23 @@ public:
     }
 
     /**
-     * @param w Cap on the group size in each block, above which all blocks are to be assigned equal weight when averaging effect sizes across blocks.
-     * See `weight_block()` for details.
+     * @param p Policy to use for weighting blocks when computing average statistics/effect sizes across blocks.
      * 
      * @return A reference to this `ScoreMarkers` instance.
      */
-    ScoreMarkers& set_weight_size_cap(int w = Defaults::weight_size_cap) {
-        weight_size_cap = w;
+    ScoreMarkers& set_block_weight_policy(WeightPolicy w = Defaults::block_weight_policy) {
+        block_weight_policy = w;
+        return *this;
+    }
+
+    /**
+     * @param v Parameters for the variable block weights, see `variable_block_weight()` for more details.
+     * Only used when the block weight policy is set to `WeightPolicy::VARIABLE`.
+     * 
+     * @return A reference to this `ScoreMarkers` instance.
+     */
+    ScoreMarkers& set_variable_block_weight_parameters(VariableBlockWeightParameters v = Defaults::variable_block_weight_parameters) {
+        variable_block_weight_parameters = v;
         return *this;
     }
 
@@ -639,7 +655,7 @@ public:
         std::vector<std::vector<Stat_*> > lfc,
         std::vector<std::vector<Stat_*> > delta_detected) 
     const {
-        differential_analysis::MatrixCalculator runner(nthreads, threshold, weight_size_cap);
+        differential_analysis::MatrixCalculator runner(nthreads, threshold, block_weight_policy, variable_block_weight_parameters);
 
         size_t ngenes = p->nrow();
         size_t ngroups = means.size();
@@ -690,11 +706,11 @@ public:
         std::vector<std::vector<Stat_*> > lfc,
         std::vector<std::vector<Stat_*> > delta_detected) 
     const {
-        differential_analysis::MatrixCalculator runner(nthreads, threshold, weight_size_cap);
+        differential_analysis::MatrixCalculator runner(nthreads, threshold, block_weight_policy, variable_block_weight_parameters);
 
         size_t ngenes = p->nrow();
         size_t ngroups = means.size();
-        size_t nblocks = count_block_levels(p->ncol(), block);
+        size_t nblocks = count_ids(p->ncol(), block);
         Overlord<Stat_> overlord(ngenes, ngroups, auc.empty());
         auto state = runner.run_blocked(p, group, ngroups, block, nblocks, overlord);
 
@@ -1058,7 +1074,7 @@ public:
      */
     template<typename Stat_ = double, typename Value_, typename Index_, typename Group_>
     Results<Stat_> run(const tatami::Matrix<Value_, Index_>* p, const Group_* group) const {
-        auto ngroups = count_block_levels(p->ncol(), group);
+        auto ngroups = count_ids(p->ncol(), group);
         Results<Stat_> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); 
         run(
             p, 
@@ -1097,7 +1113,7 @@ public:
             return run(p, group);
         }
 
-        auto ngroups = count_block_levels(p->ncol(), group);
+        auto ngroups = count_ids(p->ncol(), group);
         Results<Stat_> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); 
 
         run_blocked(

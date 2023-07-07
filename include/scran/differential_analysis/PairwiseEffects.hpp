@@ -74,8 +74,7 @@ namespace scran {
  * Specifically, for each gene and each pair of groups, we obtain one effect size per blocking level.
  * We consolidate these into a single statistic by computing the weighted mean across levels.
  * The weight for each level is defined as the product of the weights of the two groups involved in the comparison,
- * where each weight is computed from the size of the group using the logic described in `weight_block()`.
- * This favors contribution from levels with more cells in both groups (up to the cap in `set_weight_size_cap()`), where the effect size is presumably more reliable.
+ * where each weight is computed from the size of the group using the logic described in `variable_block_weight()`.
  *
  * Obviously, blocking levels with no cells in either group will not contribute anything to the weighted mean.
  * If two groups never co-occur in the same blocking level, no effect size will be computed and a `NaN` is reported in the output.
@@ -85,7 +84,7 @@ namespace scran {
  * We report the mean log-expression of all cells in each group, as well as the proportion of cells with detectable expression in each group.
  * These statistics are useful for quickly interpreting the differences in expression driving the effect size summaries.
  * If blocking is involved, we compute the grand average across blocks of the mean and proportion for each group,
- * where the weight for each block is defined from `weight_block()` on the size of the group in that block.
+ * where the weight for each block is defined from `variable_block_weight()` on the size of the group in that block.
  */
 class PairwiseEffects {
 public:
@@ -124,9 +123,14 @@ public:
         static constexpr bool compute_delta_detected = true;
 
         /**
-         * See `set_weight_size_cap()` for more details.
+         * See `set_block_weight_policy()` for more details.
          */
-        static constexpr int weight_size_cap = 1000;
+        static constexpr WeightPolicy block_weight_policy = WeightPolicy::NONE;
+
+        /**
+         * See `set_variable_block_weight_parameters()` for more details.
+         */
+        static constexpr VariableBlockWeightParameters variable_block_weight_parameters = VariableBlockWeightParameters();
     };
 
 private:
@@ -136,7 +140,9 @@ private:
     bool do_auc = Defaults::compute_auc;
     bool do_lfc = Defaults::compute_lfc;
     bool do_delta_detected = Defaults::compute_delta_detected;
-    int weight_size_cap = Defaults::weight_size_cap;
+
+    WeightPolicy block_weight_policy = Defaults::block_weight_policy;
+    VariableBlockWeightParameters variable_block_weight_parameters = Defaults::variable_block_weight_parameters;
 
 public:
     /**
@@ -212,13 +218,23 @@ public:
     }
 
     /**
-     * @param w Cap on the group size in each block, above which all blocks are to be assigned equal weight when averaging effect sizes across blocks.
-     * See `weight_block()` for details.
+     * @param p Policy to use for weighting blocks when computing average statistics/effect sizes across blocks.
      * 
      * @return A reference to this `PairwiseEffects` instance.
      */
-    PairwiseEffects& set_weight_size_cap(int w = Defaults::weight_size_cap) {
-        weight_size_cap = w;
+    PairwiseEffects& set_block_weight_policy(WeightPolicy w = Defaults::block_weight_policy) {
+        block_weight_policy = w;
+        return *this;
+    }
+
+    /**
+     * @param v Parameters for the variable block weights, see `variable_block_weight()` for more details.
+     * Only used when the block weight policy is set to `WeightPolicy::VARIABLE`.
+     * 
+     * @return A reference to this `PairwiseEffects` instance.
+     */
+    PairwiseEffects& set_variable_block_weight_parameters(VariableBlockWeightParameters v = Defaults::variable_block_weight_parameters) {
+        variable_block_weight_parameters = v;
         return *this;
     }
 
@@ -263,7 +279,7 @@ public:
         Stat_* delta_detected) 
     const {
         int ngroups = means.size();
-        differential_analysis::MatrixCalculator runner(nthreads, threshold, weight_size_cap);
+        differential_analysis::MatrixCalculator runner(nthreads, threshold, block_weight_policy, variable_block_weight_parameters);
         Overlord overlord(auc);
         auto state = runner.run(p, group, ngroups, overlord);
         process_simple_effects(p->nrow(), ngroups, 1, state, means, detected, cohen, lfc, delta_detected);
@@ -318,7 +334,7 @@ public:
         } else {
             auto ngenes = p->nrow();
             int ngroups = means.size();
-            int nblocks = count_block_levels(p->ncol(), block);
+            int nblocks = count_ids(p->ncol(), block);
 
             int ncombos = ngroups * nblocks;
             std::vector<std::vector<Stat_> > means_store(ncombos), detected_store(ncombos);
@@ -330,7 +346,7 @@ public:
                 detected2[c] = detected_store[c].data();
             }
 
-            differential_analysis::MatrixCalculator runner(nthreads, threshold, weight_size_cap);
+            differential_analysis::MatrixCalculator runner(nthreads, threshold, block_weight_policy, variable_block_weight_parameters);
             Overlord overlord(auc);
             auto state = runner.run_blocked(p, group, ngroups, block, nblocks, overlord);
             process_simple_effects(p->nrow(), ngroups, nblocks, state, means2, detected2, cohen, lfc, delta_detected);
@@ -511,7 +527,7 @@ public:
      */
     template<typename Stat_ = double, typename Data_ = double, typename Index_ = int, typename Group_ = int>
     Results<Stat_> run(const tatami::Matrix<Data_, Index_>* p, const Group_* group) {
-        size_t ngroups = count_block_levels(p->ncol(), group);
+        size_t ngroups = count_ids(p->ncol(), group);
         Results<Stat_> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); 
         run(
             p, 
@@ -549,7 +565,7 @@ public:
             return run(p, group);
         }
 
-        size_t ngroups = count_block_levels(p->ncol(), group);
+        size_t ngroups = count_ids(p->ncol(), group);
         Results<Stat_> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); 
         run_blocked(
             p,
