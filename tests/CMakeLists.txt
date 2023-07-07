@@ -60,6 +60,7 @@ add_executable(
 
     src/utils/average_vectors.cpp
     src/utils/subset_vector.cpp
+    src/utils/blocking.cpp
     src/data/data_sparse.cpp
 )
 

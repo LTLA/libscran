@@ -86,8 +86,8 @@ enum class WeightPolicy : char { NONE, VARIABLE, EQUAL };
  */
 struct VariableBlockWeightParameters {
     /**
-     * @param l Lower bound for the block weight calculation.
-     * @param u Upper bound for the block weight calculation.
+     * @param l Lower bound for the block weight calculation, should be non-negative.
+     * @param u Upper bound for the block weight calculation, should be not less than `l`.
      * This should be greater than `l`.
      */
     constexpr VariableBlockWeightParameters(double l = 0, double u = 1000) : upper_bound(u), lower_bound(l) {}
@@ -107,7 +107,7 @@ struct VariableBlockWeightParameters {
  * Weight each block of cells for use in computing a weighted average across blocks.
  * The weight for each block is calcualted from the size of that block.
  *
- * - If the block is smaller than some lower bound, it has zero weight.
+ * - If the block is empty smaller than some lower bound, it has zero weight.
  * - If the block is greater than some upper bound, it has weight of 1.
  * - Otherwise, the block has weight proportional to its size, increasing linearly from 0 to 1 between the two bounds.
  *
@@ -121,7 +121,7 @@ struct VariableBlockWeightParameters {
  * @return Weight of the block, to use for computing a weighted average across blocks. 
  */
 inline double variable_block_weight(double s, const VariableBlockWeightParameters& params) {
-    if (s < params.lower_bound) {
+    if (s < params.lower_bound || s == 0) {
         return 0;
     }
 
@@ -153,10 +153,12 @@ std::vector<double> compute_block_weights(const std::vector<Size_>& sizes, Weigh
     if (policy == WeightPolicy::NONE) {
         weights.insert(weights.end(), sizes.begin(), sizes.end());
     } else if (policy == WeightPolicy::EQUAL) {
-        weights.resize(nblocks, 1);
+        for (auto s : sizes) {
+            weights.push_back(s > 0);
+        }
     } else {
-        for (size_t l = 0; l < nblocks; ++l) {
-            weights.push_back(variable_block_weight(sizes[l], param));
+        for (auto s : sizes) {
+            weights.push_back(variable_block_weight(s, param));
         }
     }
 
