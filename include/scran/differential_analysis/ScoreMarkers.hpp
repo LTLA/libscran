@@ -774,8 +774,8 @@ private:
         std::vector<std::vector<Stat_*> >& lfc,
         std::vector<std::vector<Stat_*> >& delta_detected) 
     const {
-        const auto& level_size = state.level_size;
-        auto nlevels = level_size.size();
+        const auto& level_weight = state.level_weight;
+        auto nlevels = level_weight.size();
         const auto* tmp_means = state.means.data();
         const auto* tmp_variances = state.variances.data();
         const auto* tmp_detected = state.detected.data();
@@ -821,11 +821,11 @@ private:
                             }
 
                             if (actions[other] == differential_analysis::CacheAction::COMPUTE) {
-                                cohen_ptr[other] = differential_analysis::compute_pairwise_cohens_d<false>(group, other, my_means, my_variances, level_size, ngroups, nblocks, threshold);
+                                cohen_ptr[other] = differential_analysis::compute_pairwise_cohens_d<false>(group, other, my_means, my_variances, level_weight, ngroups, nblocks, threshold);
                                 continue;
                             }
 
-                            auto tmp = differential_analysis::compute_pairwise_cohens_d<true>(group, other, my_means, my_variances, level_size, ngroups, nblocks, threshold);
+                            auto tmp = differential_analysis::compute_pairwise_cohens_d<true>(group, other, my_means, my_variances, level_weight, ngroups, nblocks, threshold);
                             cohen_ptr[other] = tmp.first;
                             staging_cache[other][gene] = tmp.second;
                         }
@@ -862,7 +862,7 @@ private:
                                 continue;
                             }
 
-                            auto val = differential_analysis::compute_pairwise_simple_diff(group, other, my_means, level_size, ngroups, nblocks);
+                            auto val = differential_analysis::compute_pairwise_simple_diff(group, other, my_means, level_weight, ngroups, nblocks);
                             lfc_ptr[other] = val;
                             if (actions[other] == differential_analysis::CacheAction::CACHE) {
                                 staging_cache[other][gene] = -val;
@@ -901,7 +901,7 @@ private:
                                 continue;
                             }
 
-                            auto val = differential_analysis::compute_pairwise_simple_diff(group, other, my_detected, level_size, ngroups, nblocks);
+                            auto val = differential_analysis::compute_pairwise_simple_diff(group, other, my_detected, level_weight, ngroups, nblocks);
                             delta_detected_ptr[other] = val;
                             if (actions[other] == differential_analysis::CacheAction::CACHE) {
                                 staging_cache[other][gene] = -val;

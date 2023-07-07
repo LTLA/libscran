@@ -432,7 +432,7 @@ TEST_P(DifferentialAnalysisMatrixCalculatorBlockedTest, Consistency) {
     EXPECT_EQ(ova.store, ova4.store);
 }
 
-TEST_P(DifferentialAnalysisMatrixCalculatorBlockedTest, Subsetted) {
+TEST_P(DifferentialAnalysisMatrixCalculatorBlockedTest, SubsettedReference) {
     auto param = GetParam();
     auto ngroups = std::get<0>(param);
     auto nblocks = std::get<1>(param);
@@ -453,6 +453,7 @@ TEST_P(DifferentialAnalysisMatrixCalculatorBlockedTest, Subsetted) {
     std::vector<double> aucs(do_auc ? ngroups * ngroups * nrows : 0);
     std::vector<double> total_weight(ngroups * ngroups);
 
+    // Looping through each block, taking the subset, and then computing the statistics.
     for (int b = 0; b < nblocks; ++b) {
         std::vector<int> subset;
         std::vector<int> subgroups;
@@ -479,9 +480,9 @@ TEST_P(DifferentialAnalysisMatrixCalculatorBlockedTest, Subsetted) {
 
         // Manually computing the weighted average AUC.
         if (do_auc) {
-            auto group_sizes = scran::tabulate_ids(subgroups.size(), subgroups.data());
-            std::vector<double> group_weights(group_sizes.begin(), group_sizes.end());
-            for (auto& x : group_weights) {
+            auto subgroup_sizes = scran::tabulate_ids(subgroups.size(), subgroups.data());
+            std::vector<double> subgroup_weights(subgroup_sizes.begin(), subgroup_sizes.end());
+            for (auto& x : subgroup_weights) {
                 x = variable_block_weight(x, vparams);
             }
 
@@ -491,9 +492,9 @@ TEST_P(DifferentialAnalysisMatrixCalculatorBlockedTest, Subsetted) {
                     if (policy == scran::WeightPolicy::EQUAL) {
                         ++total_weight[offset];
                     } else if (policy == scran::WeightPolicy::NONE) {
-                        total_weight[offset] += group_sizes[g1] * group_sizes[g2];
+                        total_weight[offset] += subgroup_sizes[g1] * subgroup_sizes[g2];
                     } else {
-                        total_weight[offset] += group_weights[g1] * group_weights[g2];
+                        total_weight[offset] += subgroup_weights[g1] * subgroup_weights[g2];
                     }
                 }
             }
@@ -508,9 +509,9 @@ TEST_P(DifferentialAnalysisMatrixCalculatorBlockedTest, Subsetted) {
                         if (policy == scran::WeightPolicy::EQUAL) {
                             aucs[offset] += subova.store[offset];
                         } else if (policy == scran::WeightPolicy::NONE) {
-                            aucs[offset] += subova.store[offset] * group_sizes[g1] * group_sizes[g2];
+                            aucs[offset] += subova.store[offset] * subgroup_sizes[g1] * subgroup_sizes[g2];
                         } else {
-                            aucs[offset] += subova.store[offset] * group_weights[g1] * group_weights[g2];
+                            aucs[offset] += subova.store[offset] * subgroup_weights[g1] * subgroup_weights[g2];
                         }
                     }
                 }

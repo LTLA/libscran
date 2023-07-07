@@ -9,16 +9,8 @@
 #include "../utils/compare_almost_equal.h"
 #include "utils.h"
 
-/*********************************************/
-
-class ScoreMarkersTest : 
-    public ::testing::TestWithParam<std::tuple<int, bool, int> >, 
-    public DifferentialAnalysisTestCore {
+class ScoreMarkersTestCore : public DifferentialAnalysisTestCore {
 protected:
-    void SetUp() {
-        assemble();
-    }
-
     template<class Left, class Right>
     static void compare_basic(const Left& res, const Right& other, int ngroups, int nblocks) {
         EXPECT_EQ(other.means.size(), ngroups);
@@ -85,85 +77,14 @@ protected:
     }
 };
 
-// Comparing the efficient ScoreMarkers implementation against the
-// PairwiseEffects + SummarizeEffects combination, which is less mind-bending
-// but requires holding a large 3D matrix in memory.
+/*********************************************/
 
-TEST_P(ScoreMarkersTest, AgainstPairwise) {
-    auto param = GetParam();
-    auto ngroups = std::get<0>(param);
-    bool do_auc = std::get<1>(param);
-    auto nthreads = std::get<2>(param);
-
-    std::vector<int> groupings = create_groupings(dense_row->ncol(), ngroups);
-    scran::ScoreMarkers chd;
-    chd.set_num_threads(nthreads);
-    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
-    auto res = chd.run(dense_row.get(), groupings.data());
-
-    scran::PairwiseEffects paired;
-    paired.set_num_threads(nthreads);
-    paired.set_compute_auc(do_auc); // false, if we want to check the running implementations.
-    auto pairres = paired.run(dense_row.get(), groupings.data());
-    compare_basic(res, pairres, ngroups, 1);
-
-    scran::SummarizeEffects summarizer;
-    summarizer.set_num_threads(nthreads);
-    size_t ngenes = dense_row->nrow();
-    auto cohen_summ = summarizer.run(ngenes, ngroups, pairres.cohen.data());
-    compare_effects(ngroups, cohen_summ, res.cohen);
-
-    auto lfc_summ = summarizer.run(ngenes, ngroups, pairres.lfc.data());
-    compare_effects(ngroups, lfc_summ, res.lfc);
-
-    auto delta_detected_summ = summarizer.run(ngenes, ngroups, pairres.delta_detected.data());
-    compare_effects(ngroups, delta_detected_summ, res.delta_detected);
-
-    if (do_auc) {
-        auto auc_summ = summarizer.run(ngenes, ngroups, pairres.auc.data());
-        compare_effects(ngroups, auc_summ, res.auc);
+class ScoreMarkersTest : public ScoreMarkersTestCore, public ::testing::TestWithParam<std::tuple<int, bool, int> > {
+protected:
+    void SetUp() {
+        assemble();
     }
-}
-
-TEST_P(ScoreMarkersTest, AgainstPairwiseBlocked) {
-    auto param = GetParam();
-    auto ngroups = std::get<0>(param);
-    bool do_auc = std::get<1>(param);
-    auto nthreads = std::get<2>(param);
-
-    auto NC = dense_row->ncol();
-    std::vector<int> groupings = create_groupings(NC, ngroups);
-    std::vector<int> blocks = create_blocks(NC, 2);
-
-    scran::ScoreMarkers chd;
-    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
-    chd.set_num_threads(nthreads);
-    auto res = chd.run_blocked(dense_row.get(), groupings.data(), blocks.data());
-
-    scran::PairwiseEffects paired;
-    paired.set_compute_auc(do_auc); // false, if we want to check the running implementations.
-    paired.set_num_threads(nthreads);
-    auto pairres = paired.run_blocked(dense_row.get(), groupings.data(), blocks.data());
-    compare_basic(res, pairres, ngroups, 2);
-
-    scran::SummarizeEffects summarizer;
-    summarizer.set_num_threads(nthreads);
-
-    size_t ngenes = dense_row->nrow();
-    auto cohen_summ = summarizer.run(ngenes, ngroups, pairres.cohen.data());
-    compare_effects(ngroups, cohen_summ, res.cohen);
-
-    auto lfc_summ = summarizer.run(ngenes, ngroups, pairres.lfc.data());
-    compare_effects(ngroups, lfc_summ, res.lfc);
-
-    auto delta_detected_summ = summarizer.run(ngenes, ngroups, pairres.delta_detected.data());
-    compare_effects(ngroups, delta_detected_summ, res.delta_detected);
-
-    if (do_auc) {
-        auto auc_summ = summarizer.run(ngenes, ngroups, pairres.auc.data());
-        compare_effects(ngroups, auc_summ, res.auc);
-    }
-}
+};
 
 TEST_P(ScoreMarkersTest, Basic) {
     auto param = GetParam();
@@ -212,12 +133,117 @@ TEST_P(ScoreMarkersTest, Basic) {
     }
 }
 
+// Comparing the efficient ScoreMarkers implementation against the
+// PairwiseEffects + SummarizeEffects combination, which is less mind-bending
+// but requires holding a large 3D matrix in memory.
+
+TEST_P(ScoreMarkersTest, AgainstPairwise) {
+    auto param = GetParam();
+    auto ngroups = std::get<0>(param);
+    bool do_auc = std::get<1>(param);
+    auto nthreads = std::get<2>(param);
+
+    std::vector<int> groupings = create_groupings(dense_row->ncol(), ngroups);
+    scran::ScoreMarkers chd;
+    chd.set_num_threads(nthreads);
+    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
+    auto res = chd.run(dense_row.get(), groupings.data());
+
+    scran::PairwiseEffects paired;
+    paired.set_num_threads(nthreads);
+    paired.set_compute_auc(do_auc); // false, if we want to check the running implementations.
+    auto pairres = paired.run(dense_row.get(), groupings.data());
+    compare_basic(res, pairres, ngroups, 1);
+
+    scran::SummarizeEffects summarizer;
+    summarizer.set_num_threads(nthreads);
+    size_t ngenes = dense_row->nrow();
+    auto cohen_summ = summarizer.run(ngenes, ngroups, pairres.cohen.data());
+    compare_effects(ngroups, cohen_summ, res.cohen);
+
+    auto lfc_summ = summarizer.run(ngenes, ngroups, pairres.lfc.data());
+    compare_effects(ngroups, lfc_summ, res.lfc);
+
+    auto delta_detected_summ = summarizer.run(ngenes, ngroups, pairres.delta_detected.data());
+    compare_effects(ngroups, delta_detected_summ, res.delta_detected);
+
+    if (do_auc) {
+        auto auc_summ = summarizer.run(ngenes, ngroups, pairres.auc.data());
+        compare_effects(ngroups, auc_summ, res.auc);
+    }
+}
+
 INSTANTIATE_TEST_CASE_P(
     ScoreMarkers,
     ScoreMarkersTest,
     ::testing::Combine(
         ::testing::Values(2, 3, 4, 5), // number of clusters
         ::testing::Values(false, true), // with or without the AUC?
+        ::testing::Values(1, 3) // number of threads
+    )
+);
+
+/*********************************************/
+
+class ScoreMarkersBlockedTest : public ScoreMarkersTestCore, public ::testing::TestWithParam<std::tuple<int, bool, scran::WeightPolicy, int> > {
+protected:
+    void SetUp() {
+        assemble();
+    }
+};
+
+TEST_P(ScoreMarkersBlockedTest, AgainstPairwise) {
+    auto param = GetParam();
+    auto ngroups = std::get<0>(param);
+    bool do_auc = std::get<1>(param);
+    auto policy = std::get<2>(param);
+    auto nthreads = std::get<3>(param);
+
+    auto NC = dense_row->ncol();
+    std::vector<int> groupings = create_groupings(NC, ngroups);
+    std::vector<int> blocks = create_blocks(NC, 3);
+
+    scran::ScoreMarkers chd;
+    chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
+    chd.set_num_threads(nthreads);
+    chd.set_block_weight_policy(policy);
+    chd.set_variable_block_weight_parameters({0, 1000}); // for some more interesting variable block weights.
+    auto res = chd.run_blocked(dense_row.get(), groupings.data(), blocks.data());
+
+    scran::PairwiseEffects paired;
+    paired.set_compute_auc(do_auc); // false, if we want to check the running implementations.
+    paired.set_num_threads(nthreads);
+    paired.set_block_weight_policy(policy);
+    paired.set_variable_block_weight_parameters({0, 1000});
+    auto pairres = paired.run_blocked(dense_row.get(), groupings.data(), blocks.data());
+    compare_basic(res, pairres, ngroups, 2);
+
+    scran::SummarizeEffects summarizer;
+    summarizer.set_num_threads(nthreads);
+
+    size_t ngenes = dense_row->nrow();
+    auto cohen_summ = summarizer.run(ngenes, ngroups, pairres.cohen.data());
+    compare_effects(ngroups, cohen_summ, res.cohen);
+
+    auto lfc_summ = summarizer.run(ngenes, ngroups, pairres.lfc.data());
+    compare_effects(ngroups, lfc_summ, res.lfc);
+
+    auto delta_detected_summ = summarizer.run(ngenes, ngroups, pairres.delta_detected.data());
+    compare_effects(ngroups, delta_detected_summ, res.delta_detected);
+
+    if (do_auc) {
+        auto auc_summ = summarizer.run(ngenes, ngroups, pairres.auc.data());
+        compare_effects(ngroups, auc_summ, res.auc);
+    }
+}
+
+INSTANTIATE_TEST_CASE_P(
+    ScoreMarkers,
+    ScoreMarkersBlockedTest,
+    ::testing::Combine(
+        ::testing::Values(2, 3, 4, 5), // number of clusters
+        ::testing::Values(false, true), // with or without the AUC?
+        ::testing::Values(scran::WeightPolicy::NONE, scran::WeightPolicy::EQUAL, scran::WeightPolicy::VARIABLE), // block weighting method.
         ::testing::Values(1, 3) // number of threads
     )
 );
