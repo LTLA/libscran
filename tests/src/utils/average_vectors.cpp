@@ -36,7 +36,7 @@ TEST(AverageVectors, Weighted) {
         std::vector<double>{3, 7, 3, 3, 2}
     };
 
-    // Just using simple binary weights for testing purposes.
+    // Using simple binary weights for testing purposes.
     std::vector<double> weights { 1, 0, 0 };
     std::vector<double*> ptrs{stuff[0].data(), stuff[1].data(), stuff[2].data()};
     auto out = scran::average_vectors_weighted(5, ptrs, weights.data());
@@ -51,6 +51,10 @@ TEST(AverageVectors, Weighted) {
     auto out2 = scran::average_vectors_weighted(5, ptrs, weights2.data());
     auto ref2 = scran::average_vectors(5, ptrs);
     EXPECT_EQ(out2, ref2);
+
+    // Now using some more complex weights.
+    std::vector<double> weights3 { 0.5, 2, 1.5 };
+    auto out3 = scran::average_vectors_weighted(5, ptrs, weights3.data());
+    std::vector<double> ref3{ 2.250, 3.375, 2.500, 4.625, 5.375 };
+    EXPECT_EQ(out3, ref3);
 }
-
-

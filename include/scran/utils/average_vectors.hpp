@@ -7,6 +7,7 @@
 #include <limits>
 #include <algorithm>
 #include <cmath>
+#include <numeric>
 
 /**
  * @file average_vectors.hpp
@@ -19,37 +20,63 @@ namespace scran {
 /**
  * @cond
  */
-template<bool weighted = true, typename Stat, typename Weight, typename Output>
-void average_vectors_internal(size_t n, std::vector<Stat*> in, const Weight* w, Output* out) {
+template<bool check_nan_ = true, bool weighted_, typename Stat_, typename Weight_, typename Output_>
+void average_vectors_internal(size_t n, std::vector<Stat_*> in, const Weight_* w, Output_* out) {
     std::fill(out, out + n, 0);
-    std::vector<Weight> accumulated(n);
+    typename std::conditional<check_nan_, std::vector<Weight_>, size_t>::type accumulated(n);
 
+    auto wcopy = w;
     for (auto current : in) {
         auto copy = out;
-        for (size_t i = 0; i < n; ++i, ++current, ++copy) {
-            auto x = *current;
-            if (!std::isnan(x)) {
-                auto& a = accumulated[i];
-                if constexpr(weighted) {
-                    *copy += x * (*w); 
-                    a += (*w);
-                } else {
-                    *copy += x; 
-                    ++a;
-                }
+
+        Weight_ weight = 0;
+        if constexpr(weighted_) {
+            weight = *(wcopy++);
+            if (weight == 0) {
+                continue;
             }
         }
 
-        if constexpr(weighted) {
-            ++w;
+        if constexpr(weighted_) {
+            if (weight != 1) {
+                for (size_t i = 0; i < n; ++i, ++current, ++copy) {
+                    auto x = *current * weight;
+                    if constexpr(!check_nan_) {
+                        copy += x;
+                    } else if (!std::isnan(x)) {
+                        *copy += x; 
+                        accumulated[i] += weight;
+                    }
+                }
+                continue;
+            }
+        }
+
+        // Avoid an extra multiplication if unweighted OR the weight = 1.
+        for (size_t i = 0; i < n; ++i, ++current, ++copy) {
+            auto x = *current;
+            if constexpr(!check_nan_) {
+                copy += x;
+            } else if (!std::isnan(x)) {
+                *copy += x; 
+                ++accumulated[i];
+            }
         }
     }
 
-    for (size_t i = 0; i < n; ++i, ++out) {
-        if (accumulated[i]) {
+    if constexpr(check_nan_) {
+        for (size_t i = 0; i < n; ++i, ++out) {
             *out /= accumulated[i];
+        }
+    } else {
+        double denom = 1;
+        if constexpr(weighted_) {
+            denom /= std::accumulate(w, w + in.size(), 0.0);
         } else {
-            *out = std::numeric_limits<Output>::quiet_NaN();
+            denom /= in.size();
+        }
+        for (size_t i = 0; i < n; ++i, ++out) {
+            *out *= denom;
         }
     }
 }
@@ -60,8 +87,10 @@ void average_vectors_internal(size_t n, std::vector<Stat*> in, const Weight* w, 
 /**
  * Average parallel elements across multiple arrays.
  *
- * @tparam Stat Type of the input statistic, typically floating point.
- * @tparam Output Floating-point output type.
+ * @tparam check_nan_ Whether to check for NaNs.
+ * If `true`, NaNs are ignored in the average calculations for each element, at the cost of some efficiency.
+ * @tparam Stat_ Type of the input statistic, typically floating point.
+ * @tparam Output_ Floating-point output type.
  *
  * @param n Length of each array.
  * @param[in] in Vector of pointers to input arrays of length `n`.
@@ -69,15 +98,16 @@ void average_vectors_internal(size_t n, std::vector<Stat*> in, const Weight* w, 
  * On completion, `out` is filled with the average of all arrays in `in`.
  * Specifically, each element of `out` is set to the average of the corresponding elements across all `in` arrays.
  */
-template<typename Stat, typename Output>
-void average_vectors(size_t n, std::vector<Stat*> in, Output* out) {
-    average_vectors_internal<false>(n, std::move(in), (double*)NULL, out);
+template<bool check_nan_ = true, typename Stat_, typename Output_>
+void average_vectors(size_t n, std::vector<Stat_*> in, Output_* out) {
+    average_vectors_internal<check_nan_, false>(n, std::move(in), static_cast<int*>(NULL), out);
     return;
 }
 
 /**
  * Average parallel elements across multiple arrays.
  *
+ * @tparam check_nan_ Whether to check for NaNs, see `average_vectors()`.
  * @tparam Output Floating-point output type.
  * @tparam Stat Type of the input statistic, typically floating point.
  *
@@ -86,19 +116,21 @@ void average_vectors(size_t n, std::vector<Stat*> in, Output* out) {
  *
  * @return A vector of length `n` is returned, containing the average of all arrays in `in`.
  */
-template<typename Output = double, typename Stat>
-std::vector<Output> average_vectors(size_t n, std::vector<Stat*> in) {
-    std::vector<Output> out(n);
-    average_vectors(n, std::move(in), out.data());
+template<bool check_nan_ = true, typename Output_ = double, typename Stat_>
+std::vector<Output_> average_vectors(size_t n, std::vector<Stat_*> in) {
+    std::vector<Output_> out(n);
+    average_vectors<check_nan_>(n, std::move(in), out.data());
     return out;
 }
 
 /**
  * Compute a weighted average of parallel elements across multiple arrays.
  *
- * @tparam Stat Type of the input statistic, typically floating point.
- * @tparam Weight Type of the weight, typically floating point.
- * @tparam Output Floating-point output type.
+ * @tparam check_nan_ Whether to check for NaNs.
+ * If `true`, NaNs are ignored in the average calculations for each element, at the cost of some efficiency.
+ * @tparam Stat_ Type of the input statistic, typically floating point.
+ * @tparam Weight_ Type of the weight, typically floating point.
+ * @tparam Output_ Floating-point output type.
  *
  * @param n Length of each array.
  * @param[in] in Vector of pointers to input arrays of length `n`.
@@ -107,18 +139,19 @@ std::vector<Output> average_vectors(size_t n, std::vector<Stat*> in) {
  * On output, `out` is filled with the weighted average of all arrays in `in`.
  * Specifically, each element of `out` is set to the weighted average of the corresponding elements across all `in` arrays.
  */
-template<typename Stat, typename Weight, typename Output>
-void average_vectors_weighted(size_t n, std::vector<Stat*> in, const Weight* w, Output* out) {
-    average_vectors_internal<true>(n, std::move(in), w, out);
+template<bool check_nan_ = true, typename Stat_, typename Weight_, typename Output_>
+void average_vectors_weighted(size_t n, std::vector<Stat_*> in, const Weight_* w, Output_* out) {
+    average_vectors_internal<check_nan_, true>(n, std::move(in), w, out);
     return;
 }
 
 /**
  * Compute a weighted average of parallel elements across multiple arrays.
  *
- * @tparam Output Floating-point output type.
- * @tparam Stat Type of the input statistic, typically floating point.
- * @tparam Weight Type of the weight, typically floating point.
+ * @tparam check_nan_ Whether to check for NaNs, see `average_vectors_weighted()` for details.
+ * @tparam Output_ Floating-point output type.
+ * @tparam Weight_ Type of the weight, typically floating point.
+ * @tparam Stat_ Type of the input statistic, typically floating point.
  *
  * @param n Length of each array.
  * @param[in] in Vector of pointers to input arrays of the same length.
@@ -126,10 +159,10 @@ void average_vectors_weighted(size_t n, std::vector<Stat*> in, const Weight* w, 
  *
  * @return A vector is returned containing with the average of all arrays in `in`.
  */
-template<typename Output = double, typename Stat, typename Weight>
-std::vector<Output> average_vectors_weighted(size_t n, std::vector<Stat*> in, const Weight* w) {
-    std::vector<Output> out(n);
-    average_vectors_weighted(n, std::move(in), w, out.data());
+template<bool check_nan_ = true, typename Output_ = double, typename Stat_, typename Weight_>
+std::vector<Output_> average_vectors_weighted(size_t n, std::vector<Stat_*> in, const Weight_* w) {
+    std::vector<Output_> out(n);
+    average_vectors_weighted<check_nan_>(n, std::move(in), w, out.data());
     return out;
 }
 

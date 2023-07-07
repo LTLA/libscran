@@ -380,40 +380,18 @@ public:
 
         // Computing averages under different policies.
         if (ave_means || ave_variances || ave_fitted || ave_residuals) {
-            if (block_weight_policy == WeightPolicy::EQUAL) {
-                if (ave_means) {
-                    average_vectors(NR, means, ave_means);
-                }
-                if (ave_variances) {
-                    average_vectors(NR, variances, ave_variances);
-                }
-                if (ave_fitted) {
-                    average_vectors(NR, fitted, ave_fitted);
-                }
-                if (ave_residuals) {
-                    average_vectors(NR, residuals, ave_residuals);
-                }
-
-            } else {
-                std::vector<double> block_weight(block_size.begin(), block_size.end());
-                if (block_weight_policy == WeightPolicy::VARIABLE) {
-                    for (auto& bw : block_weight) {
-                        bw = variable_block_weight(bw, variable_block_weight_parameters);
-                    }
-                }
-
-                if (ave_means) {
-                    average_vectors_weighted(NR, means, block_weight.data(), ave_means);
-                }
-                if (ave_variances) {
-                    average_vectors_weighted(NR, variances, block_weight.data(), ave_variances);
-                }
-                if (ave_fitted) {
-                    average_vectors_weighted(NR, fitted, block_weight.data(), ave_fitted);
-                }
-                if (ave_residuals) {
-                    average_vectors_weighted(NR, residuals, block_weight.data(), ave_residuals);
-                }
+            std::vector<double> block_weight = compute_block_weights(block_size, block_weight_policy, variable_block_weight_parameters);
+            if (ave_means) {
+                average_vectors_weighted(NR, means, block_weight.data(), ave_means);
+            }
+            if (ave_variances) {
+                average_vectors_weighted(NR, variances, block_weight.data(), ave_variances);
+            }
+            if (ave_fitted) {
+                average_vectors_weighted(NR, fitted, block_weight.data(), ave_fitted);
+            }
+            if (ave_residuals) {
+                average_vectors_weighted(NR, residuals, block_weight.data(), ave_residuals);
             }
         }
 
