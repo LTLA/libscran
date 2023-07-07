@@ -218,7 +218,7 @@ public:
     }
 
     /**
-     * @param p Policy to use for weighting blocks when computing average statistics/effect sizes across blocks.
+     * @param w Policy to use for weighting blocks when computing average statistics/effect sizes across blocks.
      * 
      * @return A reference to this `PairwiseEffects` instance.
      */
@@ -241,7 +241,7 @@ public:
 public:
     /**
      * Compute effect sizes for pairwise comparisons between groups.
-     * On output, `means`, `detected`, `cohen`, `auc`, `lfc` and `delta_detected` are filled with their corresponding statistics. 
+     * On completion, `means`, `detected`, `cohen`, `auc`, `lfc` and `delta_detected` are filled with their corresponding statistics. 
      *
      * @tparam Data_ Matrix data type.
      * @tparam Index_ Matrix index type.
@@ -287,7 +287,7 @@ public:
 
     /**
      * Compute effect sizes for pairwise comparisons between groups, accounting for any blocking factor in the dataset.
-     * On output, `means`, `detected`, `cohen`, `auc`, `lfc` and `delta_detected` are filled with their corresponding statistics. 
+     * On completion, `means`, `detected`, `cohen`, `auc`, `lfc` and `delta_detected` are filled with their corresponding statistics. 
      *
      * @tparam Data_ Matrix data type.
      * @tparam Index_ Matrix index type.

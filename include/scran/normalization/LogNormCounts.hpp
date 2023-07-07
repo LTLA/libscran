@@ -99,7 +99,7 @@ public:
      * This can be avoided by instead dividing the normalized expression values by the pseudo-count and then applying the usual `log1p` transformation.
      * However, the resulting values can not be interpreted on the scale of log-counts.
      *
-     * @param e Whether to use an effective pseudo-count that avoids breaking sparsity.
+     * @param a Whether to use an effective pseudo-count that avoids breaking sparsity.
      *
      * @return A reference to this `LogNormCounts` object.
      */

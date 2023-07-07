@@ -334,7 +334,7 @@ public:
     }
 
     /**
-     * @param p Policy to use for weighting blocks when computing average statistics/effect sizes across blocks.
+     * @param w Policy to use for weighting blocks when computing average statistics/effect sizes across blocks.
      * 
      * @return A reference to this `ScoreMarkers` instance.
      */
@@ -620,7 +620,7 @@ public:
 public:
     /**
      * Score potential marker genes by computing summary statistics across pairwise comparisons between groups.
-     * On output, `means`, `detected`, `cohen`, `auc`, `lfc` and `delta_detected` are filled with their corresponding statistics.
+     * On completion, `means`, `detected`, `cohen`, `auc`, `lfc` and `delta_detected` are filled with their corresponding statistics.
      *
      * If `cohen` is of length 0, Cohen's d is not computed.
      * If any of the inner vectors are of length 0, the corresponding summary statistic is not computed.
@@ -668,7 +668,7 @@ public:
 
     /**
      * Score potential marker genes by computing summary statistics across pairwise comparisons between groups in multiple blocks.
-     * On output, `means`, `detected`, `cohen`, `auc`, `lfc` and `delta_detected` are filled with their corresponding statistics.
+     * On completion, `means`, `detected`, `cohen`, `auc`, `lfc` and `delta_detected` are filled with their corresponding statistics.
      *
      * If `cohen` is of length 0, Cohen's d is not computed.
      * If any of the inner vectors are of length 0, the corresponding summary statistic is not computed.

@@ -11,7 +11,7 @@
 #include "utils.hpp"
 
 /**
- * @file PerCellRNAQcMetrics.hpp
+ * @file PerCellRnaQcMetrics.hpp
  *
  * @brief Compute typical per-cell quality control metrics from an RNA count matrix.
  */

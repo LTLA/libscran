@@ -126,7 +126,7 @@ public:
     }
 
     /**
-     * @param c Should the center vector be returned in the output?
+     * @param r Should the center vector be returned in the output?
      * 
      * @return A reference to this `SimplePca` instance.
      */
@@ -136,7 +136,7 @@ public:
     }
 
     /**
-     * @param c Should the scale vector be returned in the output?
+     * @param r Should the scale vector be returned in the output?
      * 
      * @return A reference to this `SimplePca` instance.
      */

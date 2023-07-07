@@ -3,6 +3,11 @@
 
 #include "macros.hpp"
 
+/**
+ * @file subset_vector.hpp
+ * @brief Subset a vector easily.
+ */
+
 namespace scran {
 
 /**

@@ -397,9 +397,6 @@ private:
 };
 
 }
-/**
- * @endcond
- */
 
 }
 

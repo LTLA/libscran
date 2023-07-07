@@ -26,11 +26,11 @@ namespace scran {
  * @return Number of IDs, or 0 if `length = 0`.
  */
 template<typename Id_>
-size_t count_ids(size_t length, const Id_* value) {
+size_t count_ids(size_t length, const Id_* ids) {
     if (!length) {
         return 0;
     } else {
-        return static_cast<size_t>(*std::max_element(value, value + length)) + 1;
+        return static_cast<size_t>(*std::max_element(ids, ids + length)) + 1;
     }
 }
 
@@ -49,11 +49,11 @@ size_t count_ids(size_t length, const Id_* value) {
  * An error is raised if an ID has zero frequency and `allow_zeros = false`.
  */
 template<typename Output_ = int, bool allow_zeros_ = false, typename Id_> 
-std::vector<Output_> tabulate_ids(size_t num, const Id_* ids, bool allow_zeros = false) {
-    size_t nidss = count_ids(num, ids);
+std::vector<Output_> tabulate_ids(size_t length, const Id_* ids, bool allow_zeros = false) {
+    size_t nids = count_ids(length, ids);
 
-    std::vector<Output_> ids_size(nidss);
-    for (size_t j = 0; j < num; ++j) {
+    std::vector<Output_> ids_size(nids);
+    for (size_t j = 0; j < length; ++j) {
         ++ids_size[ids[j]];
     }
 

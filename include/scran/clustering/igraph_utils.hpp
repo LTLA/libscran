@@ -14,6 +14,10 @@
 
 namespace scran {
 
+/**
+ * @namespace scran::igraph
+ * @brief Utilities for working with **igraph** in **libscran**.
+ */
 namespace igraph {
 
 /**
@@ -240,16 +244,15 @@ public:
 
     igraph_t graph;
     /**
-     * @cond
+     * @endcond
      */
 
     /**
-     * @name Get the graph.
+     * Get the graph.
+     * Users should not pass this pointer to `igraph_destroy`; the `Graph` destructor will handle the freeing automatically.
      *
      * @return Pointer to an **igraph** graph.
      * Nodes are cells with edges being formed between its nearest neighbors.
-     *
-     * Users should not pass this pointer to `igraph_destroy`; the `Graph` destructor will handle the freeing.
      */
     const igraph_t* get_graph() const {
         return &graph;

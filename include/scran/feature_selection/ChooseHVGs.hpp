@@ -54,14 +54,15 @@ public:
 
 public:
     /**
+     * Choose HVGs to use in downstream analyses. 
+     *
      * @tparam V Type of the variance statistic.
      * @tparam T Type to be used as a boolean.
      *
      * @param n Number of genes.
      * @param[in] statistic Pointer to an array of length `n` containing the per-gene variance statistics.
      * @param[out] output Pointer to an array of length `n`, used to store a boolean flag.
-     *
-     * @return `output` is filled with `true` if the gene is to be retained and `false` otherwise.
+     * On completion, `output` is filled with `true` if the gene is to be retained and `false` otherwise.
      */
     template<typename V, typename T>
     void run(size_t n, const V* statistic, T* output) const {

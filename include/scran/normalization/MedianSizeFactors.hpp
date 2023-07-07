@@ -116,8 +116,6 @@ public:
      * This should be of length equal to the number of rows in `mat` and should contain non-negative values.
      * @param[out] output Pointer to an array to use to store the output size factors.
      * This should be of length equal to the number of columns in `mat`.
-     *
-     * @return `output` is filled with the size factors for each column in `mat`.
      */
     template<typename T, typename IDX, typename Ref, typename Out>
     void run(const tatami::Matrix<T, IDX>* mat, const Ref* ref, Out* output) const {
@@ -242,8 +240,6 @@ public:
      * Rows should be genes; columns may be cells, but are more typically some kind of aggregated pseudo-bulk profile.
      * @param[out] output Pointer to an array to use to store the output size factors.
      * This should be of length equal to the number of columns in `mat`.
-     *
-     * @return `output` is filled with the size factors for each column in `mat`.
      */
     template<typename T, typename IDX, typename Out>
     void run_with_mean(const tatami::Matrix<T, IDX>* mat, Out* output) const {

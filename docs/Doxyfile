@@ -873,13 +873,18 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = ../include/scran/utils/block_indices.hpp \
-                         ../include/scran/differential_analysis/auc.hpp \
+EXCLUDE                = ../include/scran/differential_analysis/auc.hpp \
                          ../include/scran/differential_analysis/cohens_d.hpp \
                          ../include/scran/differential_analysis/lfc.hpp \
                          ../include/scran/differential_analysis/delta_detected.hpp \
-                         ../include/scran/differential_analysis/Factory.hpp \
+                         ../include/scran/differential_analysis/MatrixCalculator.hpp \
+                         ../include/scran/differential_analysis/simple_diff.hpp \
                          ../include/scran/dimensionality_reduction/pca_utils.hpp \
+                         ../include/scran/dimensionality_reduction/blocking.hpp \
+                         ../include/scran/dimensionality_reduction/convert.hpp \
+                         ../include/scran/dimensionality_reduction/utils.hpp \
+                         ../include/scran/dimensionality_reduction/wrappers.hpp \
+                         ../include/scran/quality_control/utils.hpp \
                          ../include/scran/feature_selection/blocked_variances.hpp
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or

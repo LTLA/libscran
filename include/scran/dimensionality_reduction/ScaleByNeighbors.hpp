@@ -224,10 +224,9 @@ public:
      * The number of rows should be equal to the corresponding element in `ndims` and the number of columns should be equal to `ncells`.
      * @param scaling Scaling to apply to each embedding, usually from `compute_scale()`.
      * This should be of length equal to that of `ndims`.
-     * @param output Pointer to the output array.
+     * @param[out] output Pointer to the output array.
      * This should be of length equal to the product of `ncells` and the sum of `ndims`.
-     *
-     * @return `output` is filled with the combined embeddings in column-major format.
+     * On completion, `output` is filled with the combined embeddings in column-major format.
      * Each row corresponds to a dimension while each column corresponds to a cell.
      */
     template<typename Embed>

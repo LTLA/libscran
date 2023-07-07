@@ -119,7 +119,7 @@ public:
     }
 
     /**
-     * @param p Weighting policy to use for averaging statistics across blocks.
+     * @param w Weighting policy to use for averaging statistics across blocks.
      * 
      * @return A reference to this `ModelGeneVar` instance.
      */
@@ -286,6 +286,7 @@ private:
 public:
     /** 
      * Compute and model the per-feature variances from a log-expression matrix.
+     * This returns the mean and variance for each feature, as well as the fitted value and residuals from the mean-variance trend fitted across features.
      *
      * @tparam Value_ Data type of the matrix.
      * @tparam Index_ Integer type for the row/column indices.
@@ -296,8 +297,6 @@ public:
      * @param[out] variances Pointer to an output array of length equal to the number of rows in `mat`, used to store the variance of each feature.
      * @param[out] fitted Pointer to an output array of length equal to the number of rows in `mat`, used to store the fitted value of the trend.
      * @param[out] residuals Pointer to an output array of length equal to the number of rows in `mat`, used to store the residual from the trend for each feature.
-     *
-     * @return `means`, `variances`, `fitted` and `residuals` are filled with the relevant statistics.
      */
     template<typename Value_, typename Index_, typename Stat_> 
     void run(const tatami::Matrix<Value_, Index_>* mat, Stat_* means, Stat_* variances, Stat_* fitted, Stat_* residuals) const {

@@ -266,6 +266,8 @@ private:
 
 public:
     /**
+     * Compute the per-gene sum and number of cells with detected expression for each level of a grouping factor.
+     *
      * @tparam Data Type of data in the input matrix, should be numeric.
      * @tparam Index Integer type of index in the input matrix.
      * @tparam Factor Integer type of the factor.
@@ -284,9 +286,6 @@ public:
      * containing pointers to arrays of length equal to the number of columns of `input`.
      * These will be filled with the number of cells with detected expression in the corresponding level for each gene.
      * Alternatively, if the vector is of length 0, no numbers will be computed.
-     *
-     * @return `sums` and `detected` are filled on output.
-     * If either are empty, the corresponding statistic will not be computed.
      */
     template<typename Data, typename Index, typename Factor, typename Sum, typename Detected>
     void run(const tatami::Matrix<Data, Index>* input, const Factor* factor, std::vector<Sum*> sums, std::vector<Detected*> detected) {

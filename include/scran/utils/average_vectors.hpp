@@ -66,8 +66,7 @@ void average_vectors_internal(size_t n, std::vector<Stat*> in, const Weight* w, 
  * @param n Length of each array.
  * @param[in] in Vector of pointers to input arrays of length `n`.
  * @param[out] out Pointer to an output array of length `n`.
- *
- * @return `out` is filled with the average of all arrays in `in`.
+ * On completion, `out` is filled with the average of all arrays in `in`.
  * Specifically, each element of `out` is set to the average of the corresponding elements across all `in` arrays.
  */
 template<typename Stat, typename Output>
@@ -105,8 +104,7 @@ std::vector<Output> average_vectors(size_t n, std::vector<Stat*> in) {
  * @param[in] in Vector of pointers to input arrays of length `n`.
  * @param[in] w Pointer to an array of length equal to `in.size()`, containing the weight to use for each input array.
  * @param[out] out Pointer to an output array of length `n`.
- *
- * @return `out` is filled with the weighted average of all arrays in `in`.
+ * On output, `out` is filled with the weighted average of all arrays in `in`.
  * Specifically, each element of `out` is set to the weighted average of the corresponding elements across all `in` arrays.
  */
 template<typename Stat, typename Weight, typename Output>

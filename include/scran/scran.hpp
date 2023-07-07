@@ -40,6 +40,11 @@
 #include "utils/vector_to_pointers.hpp"
 
 /**
+ * @file scran.hpp
+ * @brief Umbrella header for all **libscran** functionality.
+ */
+
+/**
  * @namespace scran
  * @brief Functions for single-cell RNA-seq analyses.
  */

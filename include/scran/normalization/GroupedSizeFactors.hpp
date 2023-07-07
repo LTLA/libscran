@@ -93,8 +93,8 @@ private:
 public:
     /**
      * Compute per-cell size factors based on user-supplied groupings.
-     * The reference group is automatically determined from the pseudo-cell with the highest sum of root-counts;
-     * this favors higher-coverage libraries with decent transcriptome complexity.
+     * The reference group is automatically determined from the pseudo-cell with the highest sum of root-counts, inspired by the `calcNormFactors` function from the **edgeR** R package.
+     * This approach favors higher-coverage libraries with decent transcriptomic complexity.
      *
      * @tparam T Numeric data type of the input matrix.
      * @tparam IDX Integer index type of the input matrix.
@@ -107,8 +107,6 @@ public:
      * Values should be integers in \f$[0, N)\f$ where \f$N\f$ is the total number of groups.
      * @param[out] output Pointer to an array to use to store the output size factors.
      * This should be of length equal to the number of columns in `mat`.
-     *
-     * @return `output` is filled with the size factors for all cells in `mat`.
      */
     template<typename T, typename IDX, typename Group, typename Out>
     void run(const tatami::Matrix<T, IDX>* mat, const Group* group, Out* output) const {
@@ -131,8 +129,6 @@ public:
      * This should be an integer in \f$[0, N)\f$.
      * @param[out] output Pointer to an array to use to store the output size factors.
      * This should be of length equal to the number of columns in `mat`.
-     *
-     * @return `output` is filled with the size factors for all cells in `mat`.
      */
     template<typename T, typename IDX, typename Group, typename Out>
     void run(const tatami::Matrix<T, IDX>* mat, const Group* group, size_t reference, Out* output) const {

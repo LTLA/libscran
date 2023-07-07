@@ -109,8 +109,8 @@ public:
      * and each inner vector contains the index and distance of its nearest neighbors.
      * It is assumed that each inner vector is sorted by increasing distance.
      * @param[out] assigned Vector of length equal to the number of cells in `neighbors`.
-     * On output, this contains the index of the representative for each cell in the original dataset.
-     * This may also be a null pointer, in which case nothing is returned.
+     * On completion, this contains the index of the representative for each cell in the original dataset.
+     * `assigned` may also be a null pointer, in which case nothing is returned.
      *
      * @return Vector of indices of the chosen representative cells.
      * The length of this vector depends on the dataset and the specified number of neighbors in `set_num_neighbors()`. 
@@ -240,8 +240,8 @@ public:
      * @param nobs Number of observations, i.e., cells.
      * @param data Pointer to a column-major array of dimensions (rows) by cells (columns) containing coordinates for each cell, typically in some kind of embedding.
      * @param[out] assigned Vector of length equal to the number of cells in `neighbors`.
-     * On output, this contains the index of the representative for each cell in the original dataset.
-     * This may also be a null pointer, in which case nothing is returned.
+     * On completion, this contains the index of the representative for each cell in the original dataset.
+     * `assigned` may also be a null pointer, in which case nothing is returned.
      *
      * @return Vector of indices of the chosen representative cells.
      * The length of this vector depends on the dataset and the specified number of neighbors in `set_num_neighbors()`. 
@@ -265,8 +265,8 @@ public:
      * @param index Pointer to a `knncolle::Base` index object,
      * containing a pre-built neighbor index for a dataset.
      * @param[out] assigned Vector of length equal to the number of cells in `neighbors`.
-     * On output, this contains the index of the representative for each cell in the original dataset.
-     * This may also be a null pointer, in which case nothing is returned.
+     * On completion, this contains the index of the representative for each cell in the original dataset.
+     * `assigned` may also be a null pointer, in which case nothing is returned.
      *
      * @return Vector of indices of the chosen representative cells.
      * The length of this vector depends on the dataset and the specified number of neighbors in `set_num_neighbors()`. 

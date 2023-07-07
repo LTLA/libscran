@@ -184,14 +184,13 @@ private:
 public:
     /**
      * Run the trend fitting on the means and variances across all features.
+     * This returns the fitted value and residual from the trend for each feature.
      *
      * @param n Number of features.
      * @param[in] mean Pointer to an array of length `n`, containing the means for all features.
      * @param[in] variance Pointer to an array of length `n`, containing the variances for all features.
      * @param[out] fitted Pointer to an array of length `n`, to store the fitted values.
      * @param[out] residuals Pointer to an array of length `n`, to store the residuals.
-     * 
-     * @return `fitted` and `residuals` are filled with the fitted values and residuals of the trend.
      */
     void run(size_t n, const double* mean, const double* variance, double* fitted, double* residuals) const {
         std::vector<double> xbuffer(n), ybuffer(n);
