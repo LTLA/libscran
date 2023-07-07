@@ -418,18 +418,17 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Run the trend fitting on the means and variances across all features.</p>
+<p>Run the trend fitting on the means and variances across all features. This returns the fitted value and residual from the trend for each feature.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of features. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">mean</td><td>Pointer to an array of length <code>n</code>, containing the means for all features. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">variance</td><td>Pointer to an array of length <code>n</code>, containing the variances for all features. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">fitted</td><td>Pointer to an array of length <code>n</code>, to store the fitted values. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">residuals</td><td>Pointer to an array of length <code>n</code>, to store the residuals.</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">residuals</td><td>Pointer to an array of length <code>n</code>, to store the residuals. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><code>fitted</code> and <code>residuals</code> are filled with the fitted values and residuals of the trend. </dd></dl>
 
 </div>
 </div>

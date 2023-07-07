@@ -295,6 +295,7 @@ template&lt;typename Data , typename Index , typename Factor , typename Sum , ty
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Compute the per-gene sum and number of cells with detected expression for each level of a grouping factor.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Data</td><td>Type of data in the input matrix, should be numeric. </td></tr>
@@ -310,11 +311,10 @@ template&lt;typename Data , typename Index , typename Factor , typename Sum , ty
     <tr><td class="paramdir"></td><td class="paramname">input</td><td>The input matrix where rows are features and columns are cells. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">factor</td><td>Pointer to an array of length equal to the number of columns of <code>input</code>, containing the factor level for each cell. All levels should be integers in $[0, N)$ where $N$ is the number of unique levels. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">sums</td><td>Vector of length $N$ (see <code>factor</code>), containing pointers to arrays of length equal to the number of columns of <code>input</code>. These will be filled with the summed expression across all cells in the corresponding level for each gene. Alternatively, if the vector is of length 0, no sums will be computed. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">detected</td><td>Vector of length $N$ (see <code>factor</code>), containing pointers to arrays of length equal to the number of columns of <code>input</code>. These will be filled with the number of cells with detected expression in the corresponding level for each gene. Alternatively, if the vector is of length 0, no numbers will be computed.</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">detected</td><td>Vector of length $N$ (see <code>factor</code>), containing pointers to arrays of length equal to the number of columns of <code>input</code>. These will be filled with the number of cells with detected expression in the corresponding level for each gene. Alternatively, if the vector is of length 0, no numbers will be computed. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><code>sums</code> and <code>detected</code> are filled on output. If either are empty, the corresponding statistic will not be computed. </dd></dl>
 
 </div>
 </div>

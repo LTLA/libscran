@@ -1,0 +1,8 @@
+<map id="scran/clustering/BuildSNNGraph.hpp" name="scran/clustering/BuildSNNGraph.hpp">
+<area shape="rect" id="Node000001" title="Build a shared nearest&#45;neighbor graph on the cells." alt="" coords="25,5,259,31"/>
+<area shape="rect" id="Node000002" href="$ClusterSNNGraph_8hpp.html" title="Identify clusters of cells from a shared nearest&#45;neighbor graph." alt="" coords="5,79,164,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="127,45,101,80,96,77,122,42"/>
+<area shape="rect" id="Node000003" href="$scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="85,168,199,193"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="161,43,178,78,181,99,178,120,167,147,153,169,149,166,162,145,173,119,176,99,173,80,157,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,130,135,165,131,169,105,133"/>
+</map>

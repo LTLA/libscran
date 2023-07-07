@@ -284,11 +284,10 @@ template&lt;typename T , typename IDX , typename Ref , typename Out &gt; </div>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes; columns may be cells, but are more typically some kind of aggregated pseudo-bulk profile. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">ref</td><td>Pointer to an array containing the reference expression profile to normalize against. This should be of length equal to the number of rows in <code>mat</code> and should contain non-negative values. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array to use to store the output size factors. This should be of length equal to the number of columns in <code>mat</code>.</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array to use to store the output size factors. This should be of length equal to the number of columns in <code>mat</code>. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><code>output</code> is filled with the size factors for each column in <code>mat</code>. </dd></dl>
 
 </div>
 </div>
@@ -339,11 +338,10 @@ template&lt;typename T , typename IDX , typename Out &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes; columns may be cells, but are more typically some kind of aggregated pseudo-bulk profile. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array to use to store the output size factors. This should be of length equal to the number of columns in <code>mat</code>.</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array to use to store the output size factors. This should be of length equal to the number of columns in <code>mat</code>. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><code>output</code> is filled with the size factors for each column in <code>mat</code>. </dd></dl>
 
 </div>
 </div>

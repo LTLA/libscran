@@ -2,7 +2,7 @@
 <area shape="rect" id="Node000001" title="Aggregate expression values across cells." alt="" coords="55,5,243,46"/>
 <area shape="rect" id="Node000002" href="$GroupedSizeFactors_8hpp.html" title="Compute size factors for groups of cells." alt="" coords="5,94,173,135"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,60,105,95,100,92,125,57"/>
-<area shape="rect" id="Node000003" href="$scran_8hpp_source.html" title=" " alt="" coords="92,183,206,208"/>
+<area shape="rect" id="Node000003" href="$scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="92,183,206,208"/>
 <area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="173,58,188,93,191,114,188,135,176,162,161,184,157,181,171,160,182,134,186,114,182,95,168,60"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="115,145,142,180,138,184,110,148"/>
 </map>

@@ -193,44 +193,44 @@ $(function() {
 <div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>        }</div>
 <div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    }</div>
 <div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span> </div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Embed&gt;</div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno"><a class="line" href="classscran_1_1ScaleByNeighbors.html#ab2457f764f63b1a3874257b7dca97478">  234</a></span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classscran_1_1ScaleByNeighbors.html#ab2457f764f63b1a3874257b7dca97478">combine_scaled_embeddings</a>(<span class="keyword">const</span> std::vector&lt;int&gt;&amp; ndims, <span class="keywordtype">size_t</span> ncells, <span class="keyword">const</span> std::vector&lt;Embed&gt;&amp; embeddings, <span class="keyword">const</span> std::vector&lt;double&gt;&amp; scaling, <span class="keywordtype">double</span>* output) {</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        <span class="keywordtype">size_t</span> nembed = ndims.size();</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        <span class="keywordflow">if</span> (embeddings.size() != nembed || scaling.size() != nembed) {</div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>            <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;&#39;ndims&#39;, &#39;embeddings&#39; and &#39;scale&#39; should have the same length&quot;</span>);</div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>        }</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span> </div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>        <span class="keywordtype">int</span> ntotal = std::accumulate(ndims.begin(), ndims.end(), 0);</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>        <span class="keywordtype">size_t</span> offset = 0;</div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> e = 0; e &lt; nembed; ++e) {</div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>            <span class="keywordtype">size_t</span> curdim = ndims[e];</div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>            <span class="keyword">auto</span> inptr = embeddings[e];</div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>            <span class="keyword">auto</span> outptr = output + offset;</div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>            <span class="keyword">auto</span> s = scaling[e];</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span> </div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>            <span class="keywordflow">if</span> (std::isinf(s)) {</div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>                <span class="comment">// If the scaling factor is infinite, it implies that the current</span></div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>                <span class="comment">// embedding is all-zero, so we just fill with zeros, and move on.</span></div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> c = 0; c &lt; ncells; ++c, inptr += curdim, outptr += ntotal) {</div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>                    std::fill(outptr, outptr + curdim, 0);</div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>                }</div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> c = 0; c &lt; ncells; ++c, inptr += curdim, outptr += ntotal) {</div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>                    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> d = 0; d &lt; curdim; ++d) {</div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>                        outptr[d] = inptr[d] * s;</div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>                    }</div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>                }</div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>            }</div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span> </div>
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>            offset += curdim;</div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>        }</div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    }</div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>};</div>
-<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span> </div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>}</div>
-<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span> </div>
-<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Embed&gt;</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno"><a class="line" href="classscran_1_1ScaleByNeighbors.html#ab2457f764f63b1a3874257b7dca97478">  233</a></span>    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code hl_function" href="classscran_1_1ScaleByNeighbors.html#ab2457f764f63b1a3874257b7dca97478">combine_scaled_embeddings</a>(<span class="keyword">const</span> std::vector&lt;int&gt;&amp; ndims, <span class="keywordtype">size_t</span> ncells, <span class="keyword">const</span> std::vector&lt;Embed&gt;&amp; embeddings, <span class="keyword">const</span> std::vector&lt;double&gt;&amp; scaling, <span class="keywordtype">double</span>* output) {</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        <span class="keywordtype">size_t</span> nembed = ndims.size();</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        <span class="keywordflow">if</span> (embeddings.size() != nembed || scaling.size() != nembed) {</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>            <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;&#39;ndims&#39;, &#39;embeddings&#39; and &#39;scale&#39; should have the same length&quot;</span>);</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>        }</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span> </div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        <span class="keywordtype">int</span> ntotal = std::accumulate(ndims.begin(), ndims.end(), 0);</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>        <span class="keywordtype">size_t</span> offset = 0;</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span> </div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> e = 0; e &lt; nembed; ++e) {</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>            <span class="keywordtype">size_t</span> curdim = ndims[e];</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>            <span class="keyword">auto</span> inptr = embeddings[e];</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>            <span class="keyword">auto</span> outptr = output + offset;</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>            <span class="keyword">auto</span> s = scaling[e];</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span> </div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>            <span class="keywordflow">if</span> (std::isinf(s)) {</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>                <span class="comment">// If the scaling factor is infinite, it implies that the current</span></div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>                <span class="comment">// embedding is all-zero, so we just fill with zeros, and move on.</span></div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> c = 0; c &lt; ncells; ++c, inptr += curdim, outptr += ntotal) {</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>                    std::fill(outptr, outptr + curdim, 0);</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>                }</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> c = 0; c &lt; ncells; ++c, inptr += curdim, outptr += ntotal) {</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>                    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> d = 0; d &lt; curdim; ++d) {</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>                        outptr[d] = inptr[d] * s;</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>                    }</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>                }</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>            }</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span> </div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>            offset += curdim;</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>        }</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>    }</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>};</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span> </div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>}</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span> </div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aclassscran_1_1ScaleByNeighbors_html"><div class="ttname"><a href="classscran_1_1ScaleByNeighbors.html">scran::ScaleByNeighbors</a></div><div class="ttdoc">Scale multi-modal embeddings to adjust for differences in variance.</div><div class="ttdef"><b>Definition</b> ScaleByNeighbors.hpp:38</div></div>
 <div class="ttc" id="aclassscran_1_1ScaleByNeighbors_html_a0c63ae4793732b14ae902bc165e3c968"><div class="ttname"><a href="classscran_1_1ScaleByNeighbors.html#a0c63ae4793732b14ae902bc165e3c968">scran::ScaleByNeighbors::compute_scale</a></div><div class="ttdeci">static std::vector&lt; double &gt; compute_scale(const std::vector&lt; std::pair&lt; double, double &gt; &gt; &amp;distances)</div><div class="ttdef"><b>Definition</b> ScaleByNeighbors.hpp:159</div></div>
 <div class="ttc" id="aclassscran_1_1ScaleByNeighbors_html_a257b5d2f53b85a7769110c205d101be8"><div class="ttname"><a href="classscran_1_1ScaleByNeighbors.html#a257b5d2f53b85a7769110c205d101be8">scran::ScaleByNeighbors::compute_scale</a></div><div class="ttdeci">static double compute_scale(const std::pair&lt; double, double &gt; &amp;ref, const std::pair&lt; double, double &gt; &amp;target)</div><div class="ttdef"><b>Definition</b> ScaleByNeighbors.hpp:200</div></div>
@@ -238,9 +238,9 @@ $(function() {
 <div class="ttc" id="aclassscran_1_1ScaleByNeighbors_html_a61fd690cbc88b65016cef7fe4616a085"><div class="ttname"><a href="classscran_1_1ScaleByNeighbors.html#a61fd690cbc88b65016cef7fe4616a085">scran::ScaleByNeighbors::compute_distance</a></div><div class="ttdeci">std::pair&lt; double, double &gt; compute_distance(int ndim, size_t ncells, const double *data) const</div><div class="ttdef"><b>Definition</b> ScaleByNeighbors.hpp:109</div></div>
 <div class="ttc" id="aclassscran_1_1ScaleByNeighbors_html_a787ad5a20e61bd9ac930242840f72448"><div class="ttname"><a href="classscran_1_1ScaleByNeighbors.html#a787ad5a20e61bd9ac930242840f72448">scran::ScaleByNeighbors::compute_distance</a></div><div class="ttdeci">std::pair&lt; double, double &gt; compute_distance(const Search *search) const</div><div class="ttdef"><b>Definition</b> ScaleByNeighbors.hpp:128</div></div>
 <div class="ttc" id="aclassscran_1_1ScaleByNeighbors_html_aa3847a86a6011def45566c13c633ee04"><div class="ttname"><a href="classscran_1_1ScaleByNeighbors.html#aa3847a86a6011def45566c13c633ee04">scran::ScaleByNeighbors::set_approximate</a></div><div class="ttdeci">ScaleByNeighbors &amp; set_approximate(int a=Defaults::approximate)</div><div class="ttdef"><b>Definition</b> ScaleByNeighbors.hpp:79</div></div>
-<div class="ttc" id="aclassscran_1_1ScaleByNeighbors_html_ab2457f764f63b1a3874257b7dca97478"><div class="ttname"><a href="classscran_1_1ScaleByNeighbors.html#ab2457f764f63b1a3874257b7dca97478">scran::ScaleByNeighbors::combine_scaled_embeddings</a></div><div class="ttdeci">static void combine_scaled_embeddings(const std::vector&lt; int &gt; &amp;ndims, size_t ncells, const std::vector&lt; Embed &gt; &amp;embeddings, const std::vector&lt; double &gt; &amp;scaling, double *output)</div><div class="ttdef"><b>Definition</b> ScaleByNeighbors.hpp:234</div></div>
+<div class="ttc" id="aclassscran_1_1ScaleByNeighbors_html_ab2457f764f63b1a3874257b7dca97478"><div class="ttname"><a href="classscran_1_1ScaleByNeighbors.html#ab2457f764f63b1a3874257b7dca97478">scran::ScaleByNeighbors::combine_scaled_embeddings</a></div><div class="ttdeci">static void combine_scaled_embeddings(const std::vector&lt; int &gt; &amp;ndims, size_t ncells, const std::vector&lt; Embed &gt; &amp;embeddings, const std::vector&lt; double &gt; &amp;scaling, double *output)</div><div class="ttdef"><b>Definition</b> ScaleByNeighbors.hpp:233</div></div>
 <div class="ttc" id="aclassscran_1_1ScaleByNeighbors_html_acf21fb0b11f6a6f3f0c250c3b6fb4cb5"><div class="ttname"><a href="classscran_1_1ScaleByNeighbors.html#acf21fb0b11f6a6f3f0c250c3b6fb4cb5">scran::ScaleByNeighbors::set_neighbors</a></div><div class="ttdeci">ScaleByNeighbors &amp; set_neighbors(int n=Defaults::neighbors)</div><div class="ttdef"><b>Definition</b> ScaleByNeighbors.hpp:66</div></div>
-<div class="ttc" id="anamespacescran_html"><div class="ttname"><a href="namespacescran.html">scran</a></div><div class="ttdoc">Functions for single-cell RNA-seq analyses.</div><div class="ttdef"><b>Definition</b> AggregateAcrossCells.hpp:16</div></div>
+<div class="ttc" id="anamespacescran_html"><div class="ttname"><a href="namespacescran.html">scran</a></div><div class="ttdoc">Functions for single-cell RNA-seq analyses.</div><div class="ttdef"><b>Definition</b> AggregateAcrossCells.hpp:18</div></div>
 <div class="ttc" id="astructscran_1_1ScaleByNeighbors_1_1Defaults_html"><div class="ttname"><a href="structscran_1_1ScaleByNeighbors_1_1Defaults.html">scran::ScaleByNeighbors::Defaults</a></div><div class="ttdoc">Default parameter settings.</div><div class="ttdef"><b>Definition</b> ScaleByNeighbors.hpp:43</div></div>
 <div class="ttc" id="astructscran_1_1ScaleByNeighbors_1_1Defaults_html_a4aac6f0569099d41a6e51ffc9fb23064"><div class="ttname"><a href="structscran_1_1ScaleByNeighbors_1_1Defaults.html#a4aac6f0569099d41a6e51ffc9fb23064">scran::ScaleByNeighbors::Defaults::num_threads</a></div><div class="ttdeci">static constexpr int num_threads</div><div class="ttdef"><b>Definition</b> ScaleByNeighbors.hpp:57</div></div>
 <div class="ttc" id="astructscran_1_1ScaleByNeighbors_1_1Defaults_html_a8659f7467c8c29d61c1317957e1b20b6"><div class="ttname"><a href="structscran_1_1ScaleByNeighbors_1_1Defaults.html#a8659f7467c8c29d61c1317957e1b20b6">scran::ScaleByNeighbors::Defaults::approximate</a></div><div class="ttdeci">static constexpr bool approximate</div><div class="ttdef"><b>Definition</b> ScaleByNeighbors.hpp:52</div></div>

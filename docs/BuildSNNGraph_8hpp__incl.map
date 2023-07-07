@@ -1,0 +1,19 @@
+<map id="scran/clustering/BuildSNNGraph.hpp" name="scran/clustering/BuildSNNGraph.hpp">
+<area shape="rect" id="Node000001" title="Build a shared nearest&#45;neighbor graph on the cells." alt="" coords="171,5,406,31"/>
+<area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,153,132,178"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="199,34,116,53,83,66,63,81,56,94,55,108,60,139,55,140,49,109,51,92,58,77,80,61,114,48,198,29"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="171,153,238,178"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="282,33,251,80,219,141,214,138,246,78,278,30"/>
+<area shape="rect" id="Node000004" href="$igraph__utils_8hpp.html" title="Utilities for manipulating igraph data structures." alt="" coords="73,79,184,105"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="262,34,170,75,168,70,260,29"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="260,79,317,105"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="291,31,291,64,286,64,286,31"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="341,79,415,105"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="305,29,353,68,350,72,302,34"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="439,79,506,105"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="321,29,429,71,427,76,319,34"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="531,79,676,105"/>
+<area shape="poly" id="edge9_Node000001_Node000008" title=" " alt="" coords="343,29,536,73,535,78,342,34"/>
+<area shape="poly" id="edge4_Node000004_Node000002" title=" " alt="" coords="121,107,90,143,86,139,117,103"/>
+<area shape="poly" id="edge5_Node000004_Node000003" title=" " alt="" coords="143,103,183,140,179,144,140,107"/>
+</map>

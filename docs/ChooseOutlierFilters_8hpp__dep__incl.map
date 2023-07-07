@@ -6,7 +6,7 @@
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="295,61,295,94,289,94,289,61"/>
 <area shape="rect" id="Node000005" href="$SuggestRnaQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from RNA&#45;derived QC metrics." alt="" coords="408,94,581,135"/>
 <area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="352,50,449,91,447,96,350,55"/>
-<area shape="rect" id="Node000003" href="$scran_8hpp_source.html" title=" " alt="" coords="235,183,349,208"/>
+<area shape="rect" id="Node000003" href="$scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="235,183,349,208"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="155,138,262,180,260,185,153,143"/>
 <area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="295,150,295,182,289,182,289,150"/>
 <area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="431,143,324,185,322,180,430,138"/>

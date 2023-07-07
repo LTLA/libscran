@@ -459,15 +459,14 @@ template&lt;typename Embed &gt; </div>
 </dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">ndims</td><td>Vector containing the number of dimensions in each embedding. </td></tr>
-    <tr><td class="paramname">ncells</td><td>Number of cells in each embedding. </td></tr>
-    <tr><td class="paramname">embeddings</td><td>Vector of pointers of length equal to that of <code>ndims</code>. Each pointer refers to an array containing an embedding matrix, which should be in column-major format with dimensions in rows and cells in columns. The number of rows should be equal to the corresponding element in <code>ndims</code> and the number of columns should be equal to <code>ncells</code>. </td></tr>
-    <tr><td class="paramname">scaling</td><td>Scaling to apply to each embedding, usually from <code><a class="el" href="classscran_1_1ScaleByNeighbors.html#a0c63ae4793732b14ae902bc165e3c968">compute_scale()</a></code>. This should be of length equal to that of <code>ndims</code>. </td></tr>
-    <tr><td class="paramname">output</td><td>Pointer to the output array. This should be of length equal to the product of <code>ncells</code> and the sum of <code>ndims</code>.</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">ndims</td><td>Vector containing the number of dimensions in each embedding. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">ncells</td><td>Number of cells in each embedding. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">embeddings</td><td>Vector of pointers of length equal to that of <code>ndims</code>. Each pointer refers to an array containing an embedding matrix, which should be in column-major format with dimensions in rows and cells in columns. The number of rows should be equal to the corresponding element in <code>ndims</code> and the number of columns should be equal to <code>ncells</code>. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">scaling</td><td>Scaling to apply to each embedding, usually from <code><a class="el" href="classscran_1_1ScaleByNeighbors.html#a0c63ae4793732b14ae902bc165e3c968">compute_scale()</a></code>. This should be of length equal to that of <code>ndims</code>. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to the output array. This should be of length equal to the product of <code>ncells</code> and the sum of <code>ndims</code>. On completion, <code>output</code> is filled with the combined embeddings in column-major format. Each row corresponds to a dimension while each column corresponds to a cell. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><code>output</code> is filled with the combined embeddings in column-major format. Each row corresponds to a dimension while each column corresponds to a cell. </dd></dl>
 
 </div>
 </div>

@@ -2,7 +2,7 @@
 <area shape="rect" id="Node000001" title="Center size factors prior to normalization." alt="" coords="109,5,265,46"/>
 <area shape="rect" id="Node000002" href="$LogNormCounts_8hpp.html" title="Compute log&#45;normalized expression values." alt="" coords="5,183,150,223"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="169,60,92,184,87,181,165,57"/>
-<area shape="rect" id="Node000003" href="$scran_8hpp_source.html" title=" " alt="" coords="156,271,269,297"/>
+<area shape="rect" id="Node000003" href="$scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="156,271,269,297"/>
 <area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="193,61,214,271,208,271,188,61"/>
 <area shape="rect" id="Node000004" href="$MedianSizeFactors_8hpp.html" title="Compute median&#45;based size factors." alt="" coords="224,94,384,135"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="226,53,279,91,276,96,223,57"/>

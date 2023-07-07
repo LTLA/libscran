@@ -1,0 +1,28 @@
+<map id="scran/quality_control/PerCellRnaQcMetrics.hpp" name="scran/quality_control/PerCellRnaQcMetrics.hpp">
+<area shape="rect" id="Node000001" title="Compute typical per&#45;cell quality control metrics from an RNA count matrix." alt="" coords="297,5,472,46"/>
+<area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="52,256,178,282"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="297,34,223,46,144,70,106,87,71,109,40,137,15,169,8,188,15,207,36,231,63,248,61,252,32,235,10,210,3,188,10,166,36,133,68,105,103,83,142,65,222,41,296,29"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="505,256,562,282"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="473,41,525,58,578,84,625,119,644,141,660,167,667,188,660,210,643,229,622,244,578,262,576,257,620,239,640,225,655,207,662,188,655,169,640,145,621,123,575,88,523,63,471,46"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="25,175,77,201"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="329,49,213,96,143,134,83,169,81,165,140,129,211,92,327,44"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="395,94,547,120"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="408,44,449,82,445,86,404,48"/>
+<area shape="rect" id="Node000006" href="$PerCellQcMetrics_8hpp.html" title="Compute a variety of per&#45;cell quality control metrics from a count matrix." alt="" coords="224,94,371,120"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="365,48,324,86,320,82,361,44"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="720,94,790,120"/>
+<area shape="poly" id="edge15_Node000001_Node000011" title=" " alt="" coords="472,43,702,91,707,92,706,98,701,97,471,48"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="226,123,181,140,160,153,142,169,131,186,124,205,118,242,113,241,119,203,127,183,138,166,157,149,178,136,224,118"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="369,118,452,138,487,151,510,166,523,183,530,203,537,241,531,242,525,204,518,186,507,170,484,156,450,143,367,123"/>
+<area shape="poly" id="edge9_Node000006_Node000004" title=" " alt="" coords="252,123,97,170,92,172,90,167,95,165,251,118"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="571,175,646,201"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="357,118,450,138,553,165,562,168,560,173,552,170,449,144,356,123"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="153,175,213,201"/>
+<area shape="poly" id="edge10_Node000006_Node000008" title=" " alt="" coords="282,122,214,169,211,164,279,118"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="237,175,358,201"/>
+<area shape="poly" id="edge11_Node000006_Node000009" title=" " alt="" coords="300,120,300,160,295,160,295,120"/>
+<area shape="rect" id="Node000010" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="382,168,496,208"/>
+<area shape="poly" id="edge12_Node000006_Node000010" title=" " alt="" coords="320,118,393,158,390,163,318,122"/>
+<area shape="poly" id="edge13_Node000010_Node000002" title=" " alt="" coords="383,208,372,211,185,255,183,250,370,206,381,203"/>
+<area shape="poly" id="edge14_Node000010_Node000003" title=" " alt="" coords="464,207,510,245,506,249,461,211"/>
+</map>

@@ -1,11 +1,18 @@
 <map id="scran/aggregation/AggregateAcrossCells.hpp" name="scran/aggregation/AggregateAcrossCells.hpp">
-<area shape="rect" id="Node000001" title="Aggregate expression values across cells." alt="" coords="143,5,330,46"/>
-<area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,94,132,120"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,49,109,90,106,85,193,44"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="155,94,230,120"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="228,48,209,82,204,79,223,45"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="253,94,311,120"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="250,45,270,80,265,82,245,48"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="335,94,456,120"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="277,44,359,85,357,89,275,49"/>
+<area shape="rect" id="Node000001" title="Aggregate expression values across cells." alt="" coords="188,5,376,46"/>
+<area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,168,132,193"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="256,49,99,161,95,157,253,44"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="155,168,230,193"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="251,49,227,69,207,95,197,124,194,153,189,153,192,123,202,93,223,66,248,45"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="356,168,413,193"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="313,44,339,66,361,93,375,123,383,152,378,154,370,124,357,95,335,69,310,48"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="423,94,544,120"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="333,44,440,86,438,91,331,49"/>
+<area shape="rect" id="Node000006" href="$blocking_8hpp.html" title="Utilities for handling blocks of cells." alt="" coords="216,94,348,120"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="285,46,285,79,279,79,279,46"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="246,123,119,165,118,160,245,118"/>
+<area shape="poly" id="edge8_Node000006_Node000003" title=" " alt="" coords="268,122,220,161,217,156,265,118"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="301,118,357,157,354,161,298,122"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="254,168,331,193"/>
+<area shape="poly" id="edge9_Node000006_Node000007" title=" " alt="" coords="286,119,291,153,286,153,281,120"/>
 </map>

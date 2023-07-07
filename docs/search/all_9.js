@@ -1,27 +1,9 @@
 var searchData=
 [
-  ['macros_2ehpp_0',['macros.hpp',['../macros_8hpp.html',1,'']]],
-  ['mads_1',['mads',['../structscran_1_1ComputeMedianMad_1_1Results.html#a88c52d12ebb26ba8e56dfb22d2923980',1,'scran::ComputeMedianMad::Results']]],
-  ['max_2',['max',['../structscran_1_1ClusterSNNGraphMultiLevel_1_1Results.html#a569e235d05befc66022b27cf329c1b2d',1,'scran::ClusterSNNGraphMultiLevel::Results']]],
-  ['max_5fbias_3',['max_bias',['../structscran_1_1ChoosePseudoCount_1_1Defaults.html#a197babeb9eba67c95191621082c902a0',1,'scran::ChoosePseudoCount::Defaults']]],
-  ['max_5fcount_4',['max_count',['../structscran_1_1PerCellQcMetrics_1_1Results.html#a7808fa46556ba405929ef2299af7b4e6',1,'scran::PerCellQcMetrics::Results::max_count'],['../structscran_1_1PerCellQcMetrics_1_1Buffers.html#a1fec0a30a28025b1d2725bb908333127',1,'scran::PerCellQcMetrics::Buffers::max_count'],['../structscran_1_1SuggestCrisprQcFilters_1_1Thresholds.html#a73232cb4c2d9370dfe8777dd686be809',1,'scran::SuggestCrisprQcFilters::Thresholds::max_count']]],
-  ['max_5findex_5',['max_index',['../structscran_1_1PerCellQcMetrics_1_1Buffers.html#aaa9d95d1df2013dd608c542bf2007e05',1,'scran::PerCellQcMetrics::Buffers::max_index'],['../structscran_1_1PerCellQcMetrics_1_1Results.html#acefc7b86a67f31211c2126a5472e3850',1,'scran::PerCellQcMetrics::Results::max_index'],['../structscran_1_1PerCellCrisprQcMetrics_1_1Results.html#a3d033711aaa3c5b04ffc9faca91f2706',1,'scran::PerCellCrisprQcMetrics::Results::max_index'],['../structscran_1_1PerCellCrisprQcMetrics_1_1Buffers.html#a161a02e54a0bf4bf809ed7f7ae90613d',1,'scran::PerCellCrisprQcMetrics::Buffers::max_index']]],
-  ['max_5fproportion_6',['max_proportion',['../structscran_1_1PerCellCrisprQcMetrics_1_1Results.html#a61cb19a0e435f52f22bb4b65fbc424f4',1,'scran::PerCellCrisprQcMetrics::Results::max_proportion'],['../structscran_1_1PerCellCrisprQcMetrics_1_1Buffers.html#a08a9113007510fb7e279adc29961289e',1,'scran::PerCellCrisprQcMetrics::Buffers::max_proportion']]],
-  ['means_7',['means',['../structscran_1_1PairwiseEffects_1_1Results.html#a72dbbc446340c0e4280d18667bbf1784',1,'scran::PairwiseEffects::Results::means'],['../structscran_1_1ScoreMarkers_1_1Results.html#ae761722c02bcd4860b60f5ec42de8d56',1,'scran::ScoreMarkers::Results::means'],['../structscran_1_1ModelGeneVar_1_1Results.html#a4528b71b2b1fd8dd58050b6681a7fd17',1,'scran::ModelGeneVar::Results::means']]],
-  ['median_5fonly_8',['median_only',['../structscran_1_1ComputeMedianMad_1_1Defaults.html#ab9474c93b07481e5a85d4c94f50f9327',1,'scran::ComputeMedianMad::Defaults']]],
-  ['medians_9',['medians',['../structscran_1_1ComputeMedianMad_1_1Results.html#a83619acc22cc2727158dcfa98bd89f13',1,'scran::ComputeMedianMad::Results']]],
-  ['mediansizefactors_10',['MedianSizeFactors',['../classscran_1_1MedianSizeFactors.html',1,'scran']]],
-  ['mediansizefactors_2ehpp_11',['MedianSizeFactors.hpp',['../MedianSizeFactors_8hpp.html',1,'']]],
-  ['membership_12',['membership',['../structscran_1_1ClusterSNNGraphMultiLevel_1_1Results.html#a27434f77a03c488270b68c08e5105e80',1,'scran::ClusterSNNGraphMultiLevel::Results::membership'],['../structscran_1_1ClusterSNNGraphWalktrap_1_1Results.html#aa14b1d5ff2045c1513039697e5320d0f',1,'scran::ClusterSNNGraphWalktrap::Results::membership'],['../structscran_1_1ClusterSNNGraphLeiden_1_1Results.html#a2a59465810969c36e6a084f5cac31675',1,'scran::ClusterSNNGraphLeiden::Results::membership']]],
-  ['merges_13',['merges',['../structscran_1_1ClusterSNNGraphWalktrap_1_1Results.html#aa6ef7c62f9f348d3e26592956c467e50',1,'scran::ClusterSNNGraphWalktrap::Results']]],
-  ['min_5fdetected_5fdrop_14',['min_detected_drop',['../structscran_1_1SuggestAdtQcFilters_1_1Defaults.html#a1a005c69dd9caff11f86ba877b7618f1',1,'scran::SuggestAdtQcFilters::Defaults']]],
-  ['min_5fdiff_15',['min_diff',['../structscran_1_1ChooseOutlierFilters_1_1Defaults.html#ad4d2c7e8721165f20da60c34c95becc5',1,'scran::ChooseOutlierFilters::Defaults']]],
-  ['min_5fvalue_16',['min_value',['../structscran_1_1ChoosePseudoCount_1_1Defaults.html#a41f4c1003ef9d4bd088f61d1dfee40fa',1,'scran::ChoosePseudoCount::Defaults']]],
-  ['minimum_5fmean_17',['minimum_mean',['../structscran_1_1FitTrendVar_1_1Defaults.html#a34486e740e69ef045edb53603852f4e5',1,'scran::FitTrendVar::Defaults']]],
-  ['minimum_5fwindow_5fcount_18',['minimum_window_count',['../structscran_1_1FitTrendVar_1_1Defaults.html#ac17dc9c3a9866f92227fe9454a02bc90',1,'scran::FitTrendVar::Defaults']]],
-  ['modelgenevar_19',['ModelGeneVar',['../classscran_1_1ModelGeneVar.html',1,'scran']]],
-  ['modelgenevar_2ehpp_20',['ModelGeneVar.hpp',['../ModelGeneVar_8hpp.html',1,'']]],
-  ['modularity_21',['modularity',['../structscran_1_1ClusterSNNGraphMultiLevel_1_1Results.html#ad24f154bae449495590393bdb2ff59fc',1,'scran::ClusterSNNGraphMultiLevel::Results::modularity'],['../structscran_1_1ClusterSNNGraphWalktrap_1_1Results.html#a54659717e5be3972357d5fd4680894d9',1,'scran::ClusterSNNGraphWalktrap::Results::modularity'],['../structscran_1_1ClusterSNNGraphLeiden_1_1Defaults.html#ac1bf98a6de928de8b786643942768deb',1,'scran::ClusterSNNGraphLeiden::Defaults::modularity']]],
-  ['multibatchpca_22',['MultiBatchPca',['../classscran_1_1MultiBatchPca.html',1,'scran']]],
-  ['multibatchpca_2ehpp_23',['MultiBatchPca.hpp',['../MultiBatchPca_8hpp.html',1,'']]]
+  ['lfc_0',['lfc',['../structscran_1_1PairwiseEffects_1_1Results.html#af6054db15f5ace1cb6622df801518c67',1,'scran::PairwiseEffects::Results::lfc'],['../structscran_1_1ScoreMarkers_1_1Results.html#a7c97efc95f4895728f3ec631e86d474f',1,'scran::ScoreMarkers::Results::lfc']]],
+  ['log_1',['log',['../structscran_1_1HypergeometricTail_1_1Defaults.html#a5afb6c229f5680ce0ba5ce5d6992891d',1,'scran::HypergeometricTail::Defaults::log'],['../structscran_1_1ComputeMedianMad_1_1Defaults.html#a095a3632edf95f2271506ecdaed5c2d5',1,'scran::ComputeMedianMad::Defaults::log'],['../structscran_1_1ComputeMedianMad_1_1Results.html#aaf5a53262dd2f828c4667eecb85c9836',1,'scran::ComputeMedianMad::Results::log']]],
+  ['lognormcounts_2',['LogNormCounts',['../classscran_1_1LogNormCounts.html',1,'scran']]],
+  ['lognormcounts_2ehpp_3',['LogNormCounts.hpp',['../LogNormCounts_8hpp.html',1,'']]],
+  ['lower_4',['lower',['../structscran_1_1ChooseOutlierFilters_1_1Defaults.html#a44847673cd7e1318639ba13b236cf42e',1,'scran::ChooseOutlierFilters::Defaults::lower'],['../structscran_1_1ChooseOutlierFilters_1_1Thresholds.html#a847938b5a3a9143f4bb9eabda2ee068d',1,'scran::ChooseOutlierFilters::Thresholds::lower']]],
+  ['lower_5fbound_5',['lower_bound',['../structscran_1_1VariableBlockWeightParameters.html#aeb6b3413b96c37765632f27d7c0ff346',1,'scran::VariableBlockWeightParameters']]]
 ];

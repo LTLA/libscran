@@ -78,7 +78,7 @@ $(function() {
   <div class="headertitle"><div class="title">blocking.hpp</div></div>
 </div><!--header-->
 <div class="contents">
-<a href="utils_2blocking_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef SCRAN_UTILS_BLOCKING_HPP</span></div>
+<a href="blocking_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef SCRAN_UTILS_BLOCKING_HPP</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define SCRAN_UTILS_BLOCKING_HPP</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;<a class="code" href="macros_8hpp.html">macros.hpp</a>&quot;</span></div>
@@ -90,20 +90,20 @@ $(function() {
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacescran.html">scran</a> {</div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="keyword">template</span>&lt;<span class="keyword">typename</span> Id_&gt;</div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="namespacescran.html#a9139c8a147e1ed970aac8ffc18776075">   29</a></span><span class="keywordtype">size_t</span> <a class="code hl_function" href="namespacescran.html#a9139c8a147e1ed970aac8ffc18776075">count_ids</a>(<span class="keywordtype">size_t</span> length, <span class="keyword">const</span> Id_* value) {</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="namespacescran.html#a2d993d00e1fa75ce3f4864cc2999c321">   29</a></span><span class="keywordtype">size_t</span> <a class="code hl_function" href="namespacescran.html#a2d993d00e1fa75ce3f4864cc2999c321">count_ids</a>(<span class="keywordtype">size_t</span> length, <span class="keyword">const</span> Id_* ids) {</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>    <span class="keywordflow">if</span> (!length) {</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        <span class="keywordflow">return</span> 0;</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(*std::max_element(value, value + length)) + 1;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(*std::max_element(ids, ids + length)) + 1;</div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    }</div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>}</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="keyword">template</span>&lt;<span class="keyword">typename</span> Output_ = <span class="keywordtype">int</span>, <span class="keywordtype">bool</span> allow_zeros_ = false, <span class="keyword">typename</span> Id_&gt; </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="namespacescran.html#a7f1658794e621bcd27fd33b91422a4a3">   52</a></span>std::vector&lt;Output_&gt; <a class="code hl_function" href="namespacescran.html#a7f1658794e621bcd27fd33b91422a4a3">tabulate_ids</a>(<span class="keywordtype">size_t</span> num, <span class="keyword">const</span> Id_* ids, <span class="keywordtype">bool</span> allow_zeros = <span class="keyword">false</span>) {</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordtype">size_t</span> nidss = <a class="code hl_function" href="namespacescran.html#a9139c8a147e1ed970aac8ffc18776075">count_ids</a>(num, ids);</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="namespacescran.html#a442c2327430d3e4c425beebfe4dcd768">   52</a></span>std::vector&lt;Output_&gt; <a class="code hl_function" href="namespacescran.html#a442c2327430d3e4c425beebfe4dcd768">tabulate_ids</a>(<span class="keywordtype">size_t</span> length, <span class="keyword">const</span> Id_* ids, <span class="keywordtype">bool</span> allow_zeros = <span class="keyword">false</span>) {</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordtype">size_t</span> nids = <a class="code hl_function" href="namespacescran.html#a2d993d00e1fa75ce3f4864cc2999c321">count_ids</a>(length, ids);</div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    std::vector&lt;Output_&gt; ids_size(nidss);</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> j = 0; j &lt; num; ++j) {</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    std::vector&lt;Output_&gt; ids_size(nids);</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> j = 0; j &lt; length; ++j) {</div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        ++ids_size[ids[j]];</div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    }</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
@@ -129,7 +129,7 @@ $(function() {
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>};</div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
 <div class="line"><a id="l00123" name="l00123"></a><span class="lineno"><a class="line" href="namespacescran.html#a128f43444ef77988f27ae5b91cef6b13">  123</a></span><span class="keyword">inline</span> <span class="keywordtype">double</span> <a class="code hl_function" href="namespacescran.html#a128f43444ef77988f27ae5b91cef6b13">variable_block_weight</a>(<span class="keywordtype">double</span> s, <span class="keyword">const</span> <a class="code hl_struct" href="structscran_1_1VariableBlockWeightParameters.html">VariableBlockWeightParameters</a>&amp; params) {</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    <span class="keywordflow">if</span> (s &lt; params.<a class="code hl_variable" href="structscran_1_1VariableBlockWeightParameters.html#aeb6b3413b96c37765632f27d7c0ff346">lower_bound</a>) {</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    <span class="keywordflow">if</span> (s &lt; params.<a class="code hl_variable" href="structscran_1_1VariableBlockWeightParameters.html#aeb6b3413b96c37765632f27d7c0ff346">lower_bound</a> || s == 0) {</div>
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>        <span class="keywordflow">return</span> 0;</div>
 <div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    }</div>
 <div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span> </div>
@@ -149,24 +149,26 @@ $(function() {
 <div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    <span class="keywordflow">if</span> (policy == WeightPolicy::NONE) {</div>
 <div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>        weights.insert(weights.end(), sizes.begin(), sizes.end());</div>
 <div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (policy == WeightPolicy::EQUAL) {</div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>        weights.resize(nblocks, 1);</div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> l = 0; l &lt; nblocks; ++l) {</div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>            weights.push_back(<a class="code hl_function" href="namespacescran.html#a128f43444ef77988f27ae5b91cef6b13">variable_block_weight</a>(sizes[l], param));</div>
-<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        }</div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    }</div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span> </div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    <span class="keywordflow">return</span> weights;</div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>}</div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span> s : sizes) {</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>            weights.push_back(s &gt; 0);</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>        }</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span> s : sizes) {</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>            weights.push_back(<a class="code hl_function" href="namespacescran.html#a128f43444ef77988f27ae5b91cef6b13">variable_block_weight</a>(s, param));</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>        }</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    }</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    <span class="keywordflow">return</span> weights;</div>
 <div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>}</div>
 <div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span> </div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>}</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="amacros_8hpp_html"><div class="ttname"><a href="macros_8hpp.html">macros.hpp</a></div><div class="ttdoc">Set common macros used through libscran.</div></div>
-<div class="ttc" id="anamespacescran_html"><div class="ttname"><a href="namespacescran.html">scran</a></div><div class="ttdoc">Functions for single-cell RNA-seq analyses.</div><div class="ttdef"><b>Definition</b> AggregateAcrossCells.hpp:16</div></div>
+<div class="ttc" id="anamespacescran_html"><div class="ttname"><a href="namespacescran.html">scran</a></div><div class="ttdoc">Functions for single-cell RNA-seq analyses.</div><div class="ttdef"><b>Definition</b> AggregateAcrossCells.hpp:18</div></div>
 <div class="ttc" id="anamespacescran_html_a128f43444ef77988f27ae5b91cef6b13"><div class="ttname"><a href="namespacescran.html#a128f43444ef77988f27ae5b91cef6b13">scran::variable_block_weight</a></div><div class="ttdeci">double variable_block_weight(double s, const VariableBlockWeightParameters &amp;params)</div><div class="ttdef"><b>Definition</b> blocking.hpp:123</div></div>
-<div class="ttc" id="anamespacescran_html_a7f1658794e621bcd27fd33b91422a4a3"><div class="ttname"><a href="namespacescran.html#a7f1658794e621bcd27fd33b91422a4a3">scran::tabulate_ids</a></div><div class="ttdeci">std::vector&lt; Output_ &gt; tabulate_ids(size_t num, const Id_ *ids, bool allow_zeros=false)</div><div class="ttdef"><b>Definition</b> blocking.hpp:52</div></div>
-<div class="ttc" id="anamespacescran_html_a9139c8a147e1ed970aac8ffc18776075"><div class="ttname"><a href="namespacescran.html#a9139c8a147e1ed970aac8ffc18776075">scran::count_ids</a></div><div class="ttdeci">size_t count_ids(size_t length, const Id_ *value)</div><div class="ttdef"><b>Definition</b> blocking.hpp:29</div></div>
+<div class="ttc" id="anamespacescran_html_a2d993d00e1fa75ce3f4864cc2999c321"><div class="ttname"><a href="namespacescran.html#a2d993d00e1fa75ce3f4864cc2999c321">scran::count_ids</a></div><div class="ttdeci">size_t count_ids(size_t length, const Id_ *ids)</div><div class="ttdef"><b>Definition</b> blocking.hpp:29</div></div>
+<div class="ttc" id="anamespacescran_html_a442c2327430d3e4c425beebfe4dcd768"><div class="ttname"><a href="namespacescran.html#a442c2327430d3e4c425beebfe4dcd768">scran::tabulate_ids</a></div><div class="ttdeci">std::vector&lt; Output_ &gt; tabulate_ids(size_t length, const Id_ *ids, bool allow_zeros=false)</div><div class="ttdef"><b>Definition</b> blocking.hpp:52</div></div>
 <div class="ttc" id="anamespacescran_html_a92ec43b74a91a73bd539472d265af8ff"><div class="ttname"><a href="namespacescran.html#a92ec43b74a91a73bd539472d265af8ff">scran::compute_block_weights</a></div><div class="ttdeci">std::vector&lt; double &gt; compute_block_weights(const std::vector&lt; Size_ &gt; &amp;sizes, WeightPolicy policy, const VariableBlockWeightParameters &amp;param)</div><div class="ttdef"><b>Definition</b> blocking.hpp:148</div></div>
 <div class="ttc" id="anamespacescran_html_abcd041d625290609e221552910ae2c34"><div class="ttname"><a href="namespacescran.html#abcd041d625290609e221552910ae2c34">scran::WeightPolicy</a></div><div class="ttdeci">WeightPolicy</div><div class="ttdef"><b>Definition</b> blocking.hpp:82</div></div>
 <div class="ttc" id="astructscran_1_1VariableBlockWeightParameters_html"><div class="ttname"><a href="structscran_1_1VariableBlockWeightParameters.html">scran::VariableBlockWeightParameters</a></div><div class="ttdoc">Parameters for variable_block_weight().</div><div class="ttdef"><b>Definition</b> blocking.hpp:87</div></div>

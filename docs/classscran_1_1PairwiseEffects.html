@@ -378,7 +378,7 @@ Other statistics</h1>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">p</td><td>Policy to use for weighting blocks when computing average statistics/effect sizes across blocks.</td></tr>
+    <tr><td class="paramname">w</td><td>Policy to use for weighting blocks when computing average statistics/effect sizes across blocks.</td></tr>
   </table>
   </dd>
 </dl>
@@ -490,7 +490,7 @@ template&lt;typename Data_ , typename Index_ , typename Group_ , typename Stat_ 
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Compute effect sizes for pairwise comparisons between groups. On output, <code>means</code>, <code>detected</code>, <code>cohen</code>, <code>auc</code>, <code>lfc</code> and <code>delta_detected</code> are filled with their corresponding statistics.</p>
+<p>Compute effect sizes for pairwise comparisons between groups. On completion, <code>means</code>, <code>detected</code>, <code>cohen</code>, <code>auc</code>, <code>lfc</code> and <code>delta_detected</code> are filled with their corresponding statistics.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Data_</td><td>Matrix data type. </td></tr>
@@ -593,7 +593,7 @@ template&lt;typename Data_ , typename Index_ , typename Group_ , typename Block_
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Compute effect sizes for pairwise comparisons between groups, accounting for any blocking factor in the dataset. On output, <code>means</code>, <code>detected</code>, <code>cohen</code>, <code>auc</code>, <code>lfc</code> and <code>delta_detected</code> are filled with their corresponding statistics.</p>
+<p>Compute effect sizes for pairwise comparisons between groups, accounting for any blocking factor in the dataset. On completion, <code>means</code>, <code>detected</code>, <code>cohen</code>, <code>auc</code>, <code>lfc</code> and <code>delta_detected</code> are filled with their corresponding statistics.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Data_</td><td>Matrix data type. </td></tr>

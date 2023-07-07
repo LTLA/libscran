@@ -1,8 +1,9 @@
 var searchData=
 [
-  ['upper_0',['upper',['../structscran_1_1ChooseOutlierFilters_1_1Defaults.html#a4c2618e86b59817e2a4a84c630277b88',1,'scran::ChooseOutlierFilters::Defaults::upper'],['../structscran_1_1ChooseOutlierFilters_1_1Thresholds.html#a98445cd7e1fd152578ed88a191530478',1,'scran::ChooseOutlierFilters::Thresholds::upper']]],
-  ['upper_5fbound_1',['upper_bound',['../structscran_1_1VariableBlockWeightParameters.html#a4efde0e6da03ba1b10cb08cd3332528e',1,'scran::VariableBlockWeightParameters']]],
-  ['upper_5ftail_2',['upper_tail',['../structscran_1_1HypergeometricTail_1_1Defaults.html#a56a1e1ff3f7e8ed42c2729f8b5025e63',1,'scran::HypergeometricTail::Defaults']]],
-  ['use_5ffixed_5fwidth_3',['use_fixed_width',['../structscran_1_1FitTrendVar_1_1Defaults.html#a4e82a47a7c8c3f499d5dfe67bd12d331',1,'scran::FitTrendVar::Defaults']]],
-  ['use_5fresiduals_4',['use_residuals',['../structscran_1_1MultiBatchPca_1_1Defaults.html#aeaf151ac0d14f85b26c1acf16dd2eec5',1,'scran::MultiBatchPca::Defaults']]]
+  ['threshold_0',['threshold',['../structscran_1_1PairwiseEffects_1_1Defaults.html#a4e73a03cee22b6ee5f949fcdf4500b46',1,'scran::PairwiseEffects::Defaults::threshold'],['../structscran_1_1ScoreMarkers_1_1Defaults.html#ac1138a7ec0df83d0af5d43af9bf7f14b',1,'scran::ScoreMarkers::Defaults::threshold']]],
+  ['top_1',['top',['../structscran_1_1ChooseHVGs_1_1Defaults.html#ab47b622404c5eb3ed1835518e4164bf1',1,'scran::ChooseHVGs::Defaults']]],
+  ['total_2',['total',['../structscran_1_1PerCellQcMetrics_1_1Results.html#a58e7c4f82b9dd420a25766e027a812a3',1,'scran::PerCellQcMetrics::Results::total'],['../structscran_1_1PerCellQcMetrics_1_1Buffers.html#afd4b7e0a947bc1d7ab44a794a8754eb3',1,'scran::PerCellQcMetrics::Buffers::total']]],
+  ['total_5fvariance_3',['total_variance',['../structscran_1_1MultiBatchPca_1_1Results.html#a8f8c371781b3931f13f1b487ad0cc044',1,'scran::MultiBatchPca::Results::total_variance'],['../structscran_1_1ResidualPca_1_1Results.html#a1fbc99650d44054b4c3b424a60d36055',1,'scran::ResidualPca::Results::total_variance'],['../structscran_1_1SimplePca_1_1Results.html#a1c3bf6e8c6af914c3359fad6cb6666d7',1,'scran::SimplePca::Results::total_variance']]],
+  ['transform_4',['transform',['../structscran_1_1FitTrendVar_1_1Defaults.html#a75cd7828781b4845c3ea7e6b49710d11',1,'scran::FitTrendVar::Defaults']]],
+  ['transpose_5',['transpose',['../structscran_1_1MultiBatchPca_1_1Defaults.html#a21094170e7bad50d62c41953af91ee14',1,'scran::MultiBatchPca::Defaults::transpose'],['../structscran_1_1ResidualPca_1_1Defaults.html#a3836f907b9af2445b61cb38dba7a2d3a',1,'scran::ResidualPca::Defaults::transpose'],['../structscran_1_1SimplePca_1_1Defaults.html#a03fb3b2158469b101a6b8da33e1370db',1,'scran::SimplePca::Defaults::transpose']]]
 ];

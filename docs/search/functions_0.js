@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['average_5fvectors_0',['average_vectors',['../namespacescran.html#a1ad83ffd5170468e5c4ec082605f79e7',1,'scran::average_vectors(size_t n, std::vector&lt; Stat * &gt; in, Output *out)'],['../namespacescran.html#a824f746e361b0d57b2bb756fd7713827',1,'scran::average_vectors(size_t n, std::vector&lt; Stat * &gt; in)']]],
-  ['average_5fvectors_5fweighted_1',['average_vectors_weighted',['../namespacescran.html#a0f0c8d5308d416b2d1f516691ee362ef',1,'scran::average_vectors_weighted(size_t n, std::vector&lt; Stat * &gt; in, const Weight *w, Output *out)'],['../namespacescran.html#a945a1f18683033b5eed71bdd748f1c72',1,'scran::average_vectors_weighted(size_t n, std::vector&lt; Stat * &gt; in, const Weight *w)']]]
+  ['average_5fvectors_0',['average_vectors',['../namespacescran.html#a9ef15c373235b0265a64091521a23b90',1,'scran::average_vectors(size_t n, std::vector&lt; Stat_ * &gt; in, Output_ *out)'],['../namespacescran.html#a529f9eba1f60395f143e0e1be6478aa0',1,'scran::average_vectors(size_t n, std::vector&lt; Stat_ * &gt; in)']]],
+  ['average_5fvectors_5fweighted_1',['average_vectors_weighted',['../namespacescran.html#a90170f1fa4f0968c88bf2293b0428494',1,'scran::average_vectors_weighted(size_t n, std::vector&lt; Stat_ * &gt; in, const Weight_ *w, Output_ *out)'],['../namespacescran.html#a5d7d954de2d068e866197831608c5c84',1,'scran::average_vectors_weighted(size_t n, std::vector&lt; Stat_ * &gt; in, const Weight_ *w)']]]
 ];

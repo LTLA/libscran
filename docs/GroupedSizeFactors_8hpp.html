@@ -88,6 +88,7 @@ $(function() {
 <code>#include &quot;<a class="el" href="MedianSizeFactors_8hpp_source.html">MedianSizeFactors.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="AggregateAcrossCells_8hpp_source.html">../aggregation/AggregateAcrossCells.hpp</a>&quot;</code><br />
 <code>#include &quot;tatami/tatami.hpp&quot;</code><br />
+<code>#include &quot;<a class="el" href="blocking_8hpp_source.html">../utils/blocking.hpp</a>&quot;</code><br />
 <code>#include &lt;memory&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 <code>#include &lt;algorithm&gt;</code><br />
@@ -96,37 +97,45 @@ Include dependency graph for GroupedSizeFactors.hpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="GroupedSizeFactors_8hpp__incl.png" border="0" usemap="#ascran_2normalization_2GroupedSizeFactors_8hpp" alt=""/></div>
 <map name="ascran_2normalization_2GroupedSizeFactors_8hpp" id="ascran_2normalization_2GroupedSizeFactors_8hpp">
-<area shape="rect" title="Compute size factors for groups of cells." alt="" coords="410,5,578,46"/>
-<area shape="rect" href="macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,256,132,282"/>
-<area shape="poly" title=" " alt="" coords="410,38,292,59,228,75,165,97,83,127,54,147,27,184,23,199,27,215,47,244,42,247,22,217,18,199,22,182,50,144,81,122,164,91,226,70,291,53,409,33"/>
-<area shape="rect" href="MedianSizeFactors_8hpp.html" title="Compute median&#45;based size factors." alt="" coords="177,102,333,127"/>
-<area shape="poly" title=" " alt="" coords="441,49,303,98,302,93,439,44"/>
-<area shape="rect" title=" " alt="" coords="435,256,492,282"/>
-<area shape="poly" title=" " alt="" coords="539,44,567,65,590,93,594,114,590,135,580,175,559,210,533,234,505,251,502,247,530,229,554,207,575,173,585,134,589,114,585,95,563,69,536,49"/>
-<area shape="rect" title=" " alt="" coords="403,183,524,208"/>
-<area shape="poly" title=" " alt="" coords="453,49,425,69,404,95,399,114,404,134,417,154,435,172,431,175,413,158,399,136,393,114,399,93,422,65,450,44"/>
-<area shape="rect" title=" " alt="" coords="626,256,700,282"/>
-<area shape="poly" title=" " alt="" coords="545,44,579,65,609,92,632,129,648,170,663,241,658,242,643,171,627,132,605,96,576,69,542,49"/>
-<area shape="rect" href="AggregateAcrossCells_8hpp.html" title="Aggregate expression values across cells." alt="" coords="413,94,575,135"/>
-<area shape="poly" title=" " alt="" coords="497,47,497,79,491,79,491,47"/>
-<area shape="rect" title=" " alt="" coords="751,102,818,127"/>
-<area shape="poly" title=" " alt="" coords="570,44,733,91,740,94,739,99,732,97,569,49"/>
-<area shape="poly" title=" " alt="" coords="177,120,139,126,101,138,66,157,37,184,32,198,34,213,50,243,45,246,29,215,27,197,33,181,62,153,99,133,138,121,176,115"/>
-<area shape="poly" title=" " alt="" coords="273,125,437,245,434,249,270,130"/>
-<area shape="rect" title=" " alt="" coords="48,183,100,208"/>
-<area shape="poly" title=" " alt="" coords="228,130,115,179,113,174,226,125"/>
-<area shape="poly" title=" " alt="" coords="288,125,418,174,416,179,286,130"/>
-<area shape="rect" href="CenterSizeFactors_8hpp.html" title="Center size factors prior to normalization." alt="" coords="175,183,327,208"/>
-<area shape="poly" title=" " alt="" coords="257,128,255,168,250,168,252,127"/>
-<area shape="poly" title=" " alt="" coords="221,211,114,253,112,248,219,206"/>
-<area shape="poly" title=" " alt="" coords="288,206,421,251,419,256,286,211"/>
-<area shape="rect" title=" " alt="" coords="213,256,290,282"/>
-<area shape="poly" title=" " alt="" coords="254,209,254,241,249,241,249,209"/>
-<area shape="poly" title=" " alt="" coords="322,206,612,256,611,262,321,212"/>
-<area shape="poly" title=" " alt="" coords="413,130,273,154,209,169,164,185,122,214,90,247,86,243,119,210,162,180,208,164,272,149,412,124"/>
-<area shape="poly" title=" " alt="" coords="516,134,538,168,543,189,539,209,522,233,501,250,498,246,518,229,534,207,538,189,533,170,511,137"/>
-<area shape="poly" title=" " alt="" coords="489,136,476,170,471,168,484,134"/>
-<area shape="poly" title=" " alt="" coords="517,133,641,244,638,248,514,137"/>
+<area shape="rect" title="Compute size factors for groups of cells." alt="" coords="488,5,655,46"/>
+<area shape="rect" href="macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,330,132,356"/>
+<area shape="poly" title=" " alt="" coords="488,43,382,64,264,92,209,109,161,128,122,148,96,169,76,204,67,244,65,282,67,315,62,316,60,282,62,243,71,202,92,166,119,144,158,123,207,104,263,87,381,58,487,38"/>
+<area shape="rect" href="MedianSizeFactors_8hpp.html" title="Compute median&#45;based size factors." alt="" coords="268,94,424,120"/>
+<area shape="poly" title=" " alt="" coords="516,49,395,91,393,86,514,44"/>
+<area shape="rect" title=" " alt="" coords="397,330,455,356"/>
+<area shape="poly" title=" " alt="" coords="565,47,440,318,435,316,560,45"/>
+<area shape="rect" title=" " alt="" coords="689,256,811,282"/>
+<area shape="poly" title=" " alt="" coords="617,44,653,65,692,92,728,126,756,166,762,186,764,206,760,242,755,242,759,205,757,187,751,169,724,129,689,96,651,69,615,49"/>
+<area shape="rect" href="blocking_8hpp.html" title="Utilities for handling blocks of cells." alt="" coords="258,256,389,282"/>
+<area shape="poly" title=" " alt="" coords="549,49,496,96,441,153,388,210,349,248,345,244,384,206,437,149,492,92,546,45"/>
+<area shape="rect" title=" " alt="" coords="535,330,610,356"/>
+<area shape="poly" title=" " alt="" coords="638,44,683,64,726,92,781,136,825,181,839,205,845,230,841,256,825,284,812,295,792,305,740,321,680,332,625,339,624,334,679,327,739,316,790,300,809,291,821,280,836,254,840,230,834,207,821,184,777,140,723,96,681,69,636,49"/>
+<area shape="rect" href="AggregateAcrossCells_8hpp.html" title="Aggregate expression values across cells." alt="" coords="551,168,712,208"/>
+<area shape="poly" title=" " alt="" coords="581,46,621,153,616,155,576,48"/>
+<area shape="rect" title=" " alt="" coords="888,94,956,120"/>
+<area shape="poly" title=" " alt="" coords="656,43,874,92,873,97,655,48"/>
+<area shape="poly" title=" " alt="" coords="268,118,199,136,165,150,134,170,119,184,106,202,88,241,77,281,72,316,67,315,72,280,83,239,101,199,115,181,131,166,163,146,197,131,267,113"/>
+<area shape="poly" title=" " alt="" coords="358,119,374,140,388,167,403,206,413,247,425,315,420,316,408,248,398,208,383,169,369,143,354,122"/>
+<area shape="rect" title=" " alt="" coords="321,175,373,201"/>
+<area shape="poly" title=" " alt="" coords="349,120,349,160,344,160,343,120"/>
+<area shape="poly" title=" " alt="" coords="425,108,507,113,595,124,674,140,705,152,726,166,739,182,748,202,753,241,748,242,742,204,735,185,723,170,702,157,673,145,595,129,506,119,424,113"/>
+<area shape="rect" href="CenterSizeFactors_8hpp.html" title="Center size factors prior to normalization." alt="" coords="144,175,297,201"/>
+<area shape="poly" title=" " alt="" coords="328,122,253,169,250,165,325,118"/>
+<area shape="poly" title=" " alt="" coords="186,204,143,225,121,240,103,258,86,287,76,316,71,315,81,284,98,255,118,236,140,221,184,199"/>
+<area shape="poly" title=" " alt="" coords="223,201,228,240,235,261,248,280,278,304,313,320,350,330,383,336,382,341,349,336,311,325,275,308,244,284,231,264,223,241,218,202"/>
+<area shape="poly" title=" " alt="" coords="238,199,297,245,294,249,234,203"/>
+<area shape="poly" title=" " alt="" coords="257,199,402,254,539,320,536,325,399,259,256,204"/>
+<area shape="rect" title=" " alt="" coords="221,330,298,356"/>
+<area shape="poly" title=" " alt="" coords="216,202,203,239,200,260,204,281,217,301,233,319,229,322,212,305,199,283,195,260,198,237,211,200"/>
+<area shape="poly" title=" " alt="" coords="281,285,127,328,125,323,279,280"/>
+<area shape="poly" title=" " alt="" coords="342,280,398,319,395,324,339,285"/>
+<area shape="poly" title=" " alt="" coords="366,280,522,324,521,329,365,285"/>
+<area shape="poly" title=" " alt="" coords="315,284,282,321,278,317,311,280"/>
+<area shape="poly" title=" " alt="" coords="550,200,407,220,326,237,247,259,168,291,102,325,100,320,166,286,245,254,325,232,406,215,550,194"/>
+<area shape="poly" title=" " alt="" coords="619,210,588,247,547,284,509,309,470,327,467,323,506,304,544,280,584,243,615,207"/>
+<area shape="poly" title=" " alt="" coords="662,207,721,245,718,250,659,211"/>
+<area shape="poly" title=" " alt="" coords="555,212,385,255,384,250,554,206"/>
+<area shape="poly" title=" " alt="" coords="627,210,600,283,586,317,581,315,595,281,622,208"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -135,7 +144,7 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="center"><img src="GroupedSizeFactors_8hpp__dep__incl.png" border="0" usemap="#ascran_2normalization_2GroupedSizeFactors_8hppdep" alt=""/></div>
 <map name="ascran_2normalization_2GroupedSizeFactors_8hppdep" id="ascran_2normalization_2GroupedSizeFactors_8hppdep">
 <area shape="rect" title="Compute size factors for groups of cells." alt="" coords="5,5,173,46"/>
-<area shape="rect" href="scran_8hpp_source.html" title=" " alt="" coords="32,94,146,120"/>
+<area shape="rect" href="scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="32,94,146,120"/>
 <area shape="poly" title=" " alt="" coords="92,61,92,93,86,93,86,61"/>
 </map>
 </div>

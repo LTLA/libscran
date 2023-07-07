@@ -264,7 +264,7 @@ template&lt;typename Index , typename Float &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">neighbors</td><td>Vector of vector of neighbors for each cell. Each entry of the outer vector corresponds to a cell, and each inner vector contains the index and distance of its nearest neighbors. It is assumed that each inner vector is sorted by increasing distance. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">assigned</td><td>Vector of length equal to the number of cells in <code>neighbors</code>. On output, this contains the index of the representative for each cell in the original dataset. This may also be a null pointer, in which case nothing is returned.</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">assigned</td><td>Vector of length equal to the number of cells in <code>neighbors</code>. On completion, this contains the index of the representative for each cell in the original dataset. <code>assigned</code> may also be a null pointer, in which case nothing is returned.</td></tr>
   </table>
   </dd>
 </dl>
@@ -331,7 +331,7 @@ template&lt;typename Index  = int, typename Float &gt; </div>
     <tr><td class="paramdir"></td><td class="paramname">ndim</td><td>Number of dimensions. </td></tr>
     <tr><td class="paramdir"></td><td class="paramname">nobs</td><td>Number of observations, i.e., cells. </td></tr>
     <tr><td class="paramdir"></td><td class="paramname">data</td><td>Pointer to a column-major array of dimensions (rows) by cells (columns) containing coordinates for each cell, typically in some kind of embedding. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">assigned</td><td>Vector of length equal to the number of cells in <code>neighbors</code>. On output, this contains the index of the representative for each cell in the original dataset. This may also be a null pointer, in which case nothing is returned.</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">assigned</td><td>Vector of length equal to the number of cells in <code>neighbors</code>. On completion, this contains the index of the representative for each cell in the original dataset. <code>assigned</code> may also be a null pointer, in which case nothing is returned.</td></tr>
   </table>
   </dd>
 </dl>
@@ -384,7 +384,7 @@ template&lt;typename Index , typename Float &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">index</td><td>Pointer to a <code>knncolle::Base</code> index object, containing a pre-built neighbor index for a dataset. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">assigned</td><td>Vector of length equal to the number of cells in <code>neighbors</code>. On output, this contains the index of the representative for each cell in the original dataset. This may also be a null pointer, in which case nothing is returned.</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">assigned</td><td>Vector of length equal to the number of cells in <code>neighbors</code>. On completion, this contains the index of the representative for each cell in the original dataset. <code>assigned</code> may also be a null pointer, in which case nothing is returned.</td></tr>
   </table>
   </dd>
 </dl>

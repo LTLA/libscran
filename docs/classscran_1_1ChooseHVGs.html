@@ -184,6 +184,7 @@ template&lt;typename V , typename T &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
+<p>Choose HVGs to use in downstream analyses.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">V</td><td>Type of the variance statistic. </td></tr>
@@ -195,11 +196,10 @@ template&lt;typename V , typename T &gt; </div>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of genes. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">statistic</td><td>Pointer to an array of length <code>n</code> containing the per-gene variance statistics. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array of length <code>n</code>, used to store a boolean flag.</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array of length <code>n</code>, used to store a boolean flag. On completion, <code>output</code> is filled with <code>true</code> if the gene is to be retained and <code>false</code> otherwise. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><code>output</code> is filled with <code>true</code> if the gene is to be retained and <code>false</code> otherwise. </dd></dl>
 
 </div>
 </div>

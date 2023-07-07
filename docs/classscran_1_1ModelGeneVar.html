@@ -334,7 +334,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">p</td><td>Weighting policy to use for averaging statistics across blocks.</td></tr>
+    <tr><td class="paramname">w</td><td>Weighting policy to use for averaging statistics across blocks.</td></tr>
   </table>
   </dd>
 </dl>
@@ -461,7 +461,7 @@ template&lt;typename Value_ , typename Index_ , typename Stat_ &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Compute and model the per-feature variances from a log-expression matrix.</p>
+<p>Compute and model the per-feature variances from a log-expression matrix. This returns the mean and variance for each feature, as well as the fitted value and residuals from the mean-variance trend fitted across features.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Value_</td><td>Data type of the matrix. </td></tr>
@@ -476,11 +476,10 @@ template&lt;typename Value_ , typename Index_ , typename Stat_ &gt; </div>
     <tr><td class="paramdir">[out]</td><td class="paramname">means</td><td>Pointer to an output array of length equal to the number of rows in <code>mat</code>, used to store the mean of each feature. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">variances</td><td>Pointer to an output array of length equal to the number of rows in <code>mat</code>, used to store the variance of each feature. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">fitted</td><td>Pointer to an output array of length equal to the number of rows in <code>mat</code>, used to store the fitted value of the trend. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">residuals</td><td>Pointer to an output array of length equal to the number of rows in <code>mat</code>, used to store the residual from the trend for each feature.</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">residuals</td><td>Pointer to an output array of length equal to the number of rows in <code>mat</code>, used to store the residual from the trend for each feature. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><code>means</code>, <code>variances</code>, <code>fitted</code> and <code>residuals</code> are filled with the relevant statistics. </dd></dl>
 
 </div>
 </div>
@@ -581,7 +580,7 @@ template&lt;typename Value_ , typename Index_ , typename Block_ , typename Stat_
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Pointer to a feature-by-cells <b>tatami</b> matrix containing log-expression values. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of cells, containing a 0-based block ID for each cell - see <code><a class="el" href="namespacescran.html#a7f1658794e621bcd27fd33b91422a4a3">tabulate_ids()</a></code> for more details. This can also be a <code>nullptr</code>, in which case all cells are assumed to belong to the same block. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of cells, containing a 0-based block ID for each cell - see <code><a class="el" href="namespacescran.html#a442c2327430d3e4c425beebfe4dcd768">tabulate_ids()</a></code> for more details. This can also be a <code>nullptr</code>, in which case all cells are assumed to belong to the same block. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">means</td><td>Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in <code>mat</code>. Each vector stores the mean of each feature in the corresponding block of cells. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">variances</td><td>Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in <code>mat</code>. Each vector stores the variance of each feature in the corresponding block of cells. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">fitted</td><td>Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in <code>mat</code>. Each vector stores the fitted value of the trend for each feature in the corresponding block of cells. </td></tr>
@@ -668,7 +667,7 @@ template&lt;typename Value_ , typename Index_ , typename Block_ , typename Stat_
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Pointer to a feature-by-cells <b>tatami</b> matrix containing log-expression values. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of cells, containing block identifiers - see <code><a class="el" href="namespacescran.html#a7f1658794e621bcd27fd33b91422a4a3">tabulate_ids()</a></code> for more details. This can also be a <code>nullptr</code>, in which case all cells are assumed to belong to the same block. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of cells, containing block identifiers - see <code><a class="el" href="namespacescran.html#a442c2327430d3e4c425beebfe4dcd768">tabulate_ids()</a></code> for more details. This can also be a <code>nullptr</code>, in which case all cells are assumed to belong to the same block. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">means</td><td>Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in <code>mat</code>. Each vector stores the mean of each feature in the corresponding block of cells. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">variances</td><td>Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in <code>mat</code>. Each vector stores the variance of each feature in the corresponding block of cells. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">fitted</td><td>Vector of length equal to the number of blocks, containing pointers to output arrays of length equal to the number of rows in <code>mat</code>. Each vector stores the fitted value of the trend for each feature in the corresponding block of cells. </td></tr>

@@ -265,7 +265,7 @@ template&lt;typename T , typename IDX , typename Group , typename Out &gt; </div
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Compute per-cell size factors based on user-supplied groupings. The reference group is automatically determined from the pseudo-cell with the highest sum of root-counts; this favors higher-coverage libraries with decent transcriptome complexity.</p>
+<p>Compute per-cell size factors based on user-supplied groupings. The reference group is automatically determined from the pseudo-cell with the highest sum of root-counts, inspired by the <code>calcNormFactors</code> function from the <b>edgeR</b> R package. This approach favors higher-coverage libraries with decent transcriptomic complexity.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>Numeric data type of the input matrix. </td></tr>
@@ -279,11 +279,10 @@ template&lt;typename T , typename IDX , typename Group , typename Out &gt; </div
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes and columns should be cells. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of group identifiers, of length equal to the number of columns in <code>mat</code>. Values should be integers in <picture><source srcset="form_0_dark.png" media="(prefers-color-scheme: dark)"/><img class="formulaInl" alt="$[0, N)$" src="form_0.png"/></picture> where <picture><source srcset="form_1_dark.png" media="(prefers-color-scheme: dark)"/><img class="formulaInl" alt="$N$" src="form_1.png"/></picture> is the total number of groups. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array to use to store the output size factors. This should be of length equal to the number of columns in <code>mat</code>.</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array to use to store the output size factors. This should be of length equal to the number of columns in <code>mat</code>. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><code>output</code> is filled with the size factors for all cells in <code>mat</code>. </dd></dl>
 
 </div>
 </div>
@@ -349,11 +348,10 @@ template&lt;typename T , typename IDX , typename Group , typename Out &gt; </div
     <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Matrix containing non-negative expression data, usually counts. Rows should be genes and columns should be cells. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of group identifiers, of length equal to the number of columns in <code>mat</code>. Values should be integers in <picture><source srcset="form_0_dark.png" media="(prefers-color-scheme: dark)"/><img class="formulaInl" alt="$[0, N)$" src="form_0.png"/></picture> where <picture><source srcset="form_1_dark.png" media="(prefers-color-scheme: dark)"/><img class="formulaInl" alt="$N$" src="form_1.png"/></picture> is the total number of groups. </td></tr>
     <tr><td class="paramdir"></td><td class="paramname">reference</td><td>Identifier of the group to use as the reference. This should be an integer in <picture><source srcset="form_0_dark.png" media="(prefers-color-scheme: dark)"/><img class="formulaInl" alt="$[0, N)$" src="form_0.png"/></picture>. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array to use to store the output size factors. This should be of length equal to the number of columns in <code>mat</code>.</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to an array to use to store the output size factors. This should be of length equal to the number of columns in <code>mat</code>. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd><code>output</code> is filled with the size factors for all cells in <code>mat</code>. </dd></dl>
 
 </div>
 </div>
