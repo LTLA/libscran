@@ -70,6 +70,17 @@ target_link_libraries(
     scran
 )
 
+
+# Handling the igraph requirements.
+set(IGRAPH_WARNINGS_AS_ERRORS OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(
+  igraph
+  URL https://github.com/igraph/igraph/releases/download/0.10.6/igraph-0.10.6.tar.gz
+  URL_HASH MD5=1074f1fde392d1b7924677ad8cfb1dea
+)
+FetchContent_MakeAvailable(igraph)
+target_link_libraries(libtest igraph)
+
 target_compile_definitions(libtest PRIVATE TEST_SCRAN_CUSTOM_SPARSE_MATRIX)
 
 set(USE_OPENMP OFF CACHE BOOL "Compile with OpenMP support")

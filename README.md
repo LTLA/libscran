@@ -119,7 +119,7 @@ time example/gallery/minimal example/data/filtered_gene_bc_matrices/GRCh38/matri
 
 If you're using CMake, you just need to add something like this to your `CMakeLists.txt`:
 
-```
+```cmake
 include(FetchContent)
 
 FetchContent_Declare(
@@ -133,7 +133,7 @@ FetchContent_MakeAvailable(libscran)
 
 Then you can link to **libscran** to make the headers available during compilation:
 
-```
+```cmake
 # For executables:
 target_link_libraries(myexe libscran)
 
@@ -141,4 +141,5 @@ target_link_libraries(myexe libscran)
 target_link_libraries(mylib INTERFACE libscran)
 ```
 
-
+Developers are responsible for linking to the [**igraph**](https://igraph.org) C library themselves, either with `find_package()` or `FetchContent`.
+We expect **igraph** versions from the 0.10 series - see [`tests/CMakeLists.txt`](tests/CMakeLists.txt) for the specific version being tested.
