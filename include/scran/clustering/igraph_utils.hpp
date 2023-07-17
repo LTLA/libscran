@@ -1,7 +1,6 @@
 #ifndef SCRAN_IGRAPH_UTILS_HPP
 #define SCRAN_IGRAPH_UTILS_HPP
 
-#ifndef SCRAN_EXCLUDE_IGRAPH
 #include "../utils/macros.hpp"
 
 #include "igraph.h"
@@ -262,7 +261,5 @@ public:
 }
 
 }
-
-#endif 
 
 #endif

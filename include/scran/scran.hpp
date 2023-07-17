@@ -9,10 +9,15 @@
 #include "feature_set_enrichment/HypergeometricTail.hpp"
 #include "feature_set_enrichment/ScoreFeatureSet.hpp"
 
+#if __has_include("igraph.h")
 #include "clustering/BuildSNNGraph.hpp"
-#include "clustering/ClusterKmeans.hpp"
 #include "clustering/ClusterSNNGraph.hpp"
+#endif
+
+#include "clustering/ClusterKmeans.hpp"
+
 #include "differential_analysis/ScoreMarkers.hpp"
+
 #include "feature_selection/ChooseHVGs.hpp"
 #include "feature_selection/FitTrendVar.hpp"
 #include "feature_selection/ModelGeneVar.hpp"
