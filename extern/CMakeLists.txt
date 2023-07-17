@@ -48,8 +48,8 @@ if(NOT SCRAN_EXCLUDE_IGRAPH)
 
     FetchContent_Declare(
       igraph
-      URL https://github.com/igraph/igraph/releases/download/0.10.4/igraph-0.10.4.tar.gz
-      URL_HASH MD5=10a3f325425970c75a7ba8359376e208
+      URL https://github.com/igraph/igraph/releases/download/0.10.6/igraph-0.10.6.tar.gz
+      URL_HASH MD5=1074f1fde392d1b7924677ad8cfb1dea
     )
 
     FetchContent_MakeAvailable(igraph)
