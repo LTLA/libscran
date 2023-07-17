@@ -177,7 +177,8 @@ $(function() {
 <div class="line"> </div>
 <div class="line"># For libaries</div>
 <div class="line">target_link_libraries(mylib INTERFACE libscran)</div>
-</div><!-- fragment --> </div></div><!-- PageDoc -->
+</div><!-- fragment --><p>Developers are responsible for linking to the <a href="https://igraph.org"><b>igraph</b></a> C library themselves, either with <code>find_package()</code> or <code>FetchContent</code>. We expect <b>igraph</b> versions from the 0.10 series - see <a href="tests/CMakeLists.txt"><code>tests/CMakeLists.txt</code></a> for the specific version being tested. </p>
+</div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
