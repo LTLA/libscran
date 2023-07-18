@@ -21,7 +21,6 @@
  * If `SCRAN_CUSTOM_PARALLEL` is set, the following macros are also set (if they are not already defined):
  *
  * - `TATAMI_CUSTOM_PARALLEL`, from the [**tatami**](https://ltla.github.io/tatami) library.
- * - `KMEANS_CUSTOM_PARALLEL`, from the [**kmeans**](https://ltla.github.io/CppKmeans) library.
  * - `IRLBA_CUSTOM_PARALLEL`, from the [**irlba**](https://ltla.github.io/CppIrlba) library.
  *
  * This ensures that any custom parallelization scheme is propagated to all of **libscran**'s dependencies.
@@ -34,10 +33,6 @@
 
 #ifndef TATAMI_CUSTOM_PARALLEL
 #define TATAMI_CUSTOM_PARALLEL SCRAN_CUSTOM_PARALLEL
-#endif
-
-#ifndef KMEANS_CUSTOM_PARALLEL
-#define KMEANS_CUSTOM_PARALLEL SCRAN_CUSTOM_PARALLEL
 #endif
 
 #ifndef IRLBA_CUSTOM_PARALLEL

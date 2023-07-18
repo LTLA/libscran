@@ -14,8 +14,6 @@
 #include "clustering/ClusterSNNGraph.hpp"
 #endif
 
-#include "clustering/ClusterKmeans.hpp"
-
 #include "differential_analysis/ScoreMarkers.hpp"
 
 #include "feature_selection/ChooseHVGs.hpp"

@@ -73,10 +73,10 @@ while the `ChooseHVGs` class will choose the top set of HVGs based on the residu
 The `RunPCA` class will use an approximate PCA algorithm to efficiently compute the top PCs from the HVG-subsetted matrix.
 Alternatively, the `BlockedPCA` and `MultiBatchPCA` classes can be used when dealing with multiple batches.
 
-**Clustering of cells** is performed with various algorithms.
-The simplest of these is k-means clustering using the Hartigan-Wong algorithm, via `ClusterKmeans`.
-We also provide several flavors of graph-based clustering from a shared-nearest neighbor graph,
+**Clustering of cells** is performed using the per-cell PC scores.
+We provide several flavors of graph-based clustering from a shared-nearest neighbor graph,
 using community detection algorithms such as multi-level (`ClusterSNNGraphMultiLevel`), Leiden (`ClusterSNNGraphLeiden`) or Walktrap clustering (`ClusterSNNGraphWalktrap`).
+Developers can also easily apply other algorithms, e.g., [k-means](https://github.com/LTLA/CppKmeans).
 
 **Per-cluster marker detection** is performed based on pairwise comparisons between clusters.
 The `ScoreMarkers` class will aggregate the set of pairwise comparisons into a single suite of summary statistics for each cluster.
