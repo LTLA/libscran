@@ -74,7 +74,6 @@ $(function() {
   <div class="summary">
 <a href="#namespaces">Namespaces</a> &#124;
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#typedef-members">Typedefs</a> &#124;
 <a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">scran Namespace Reference</div></div>
@@ -198,11 +197,6 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parameters for <code><a class="el" href="namespacescran.html#a128f43444ef77988f27ae5b91cef6b13">variable_block_weight()</a></code>.  <a href="structscran_1_1VariableBlockWeightParameters.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:a836b35676870dd7296db5763e317c702"><td class="memItemLeft" align="right" valign="top">typedef kmeans::Kmeans&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacescran.html#a836b35676870dd7296db5763e317c702">ClusterKmeans</a></td></tr>
-<tr class="separator:a836b35676870dd7296db5763e317c702"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
 <tr class="memitem:abcd041d625290609e221552910ae2c34"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacescran.html#abcd041d625290609e221552910ae2c34">WeightPolicy</a> : char { <b>NONE</b>
@@ -251,24 +245,7 @@ Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Functions for single-cell RNA-seq analyses. </p>
-</div><h2 class="groupheader">Typedef Documentation</h2>
-<a id="a836b35676870dd7296db5763e317c702" name="a836b35676870dd7296db5763e317c702"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a836b35676870dd7296db5763e317c702">&#9670;&#160;</a></span>ClusterKmeans</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">typedef kmeans::Kmeans <a class="el" href="namespacescran.html#a836b35676870dd7296db5763e317c702">scran::ClusterKmeans</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Provides the <code>kmeans::Kmeans</code> class under the <b>scran</b> namespace. This is mostly for the sake of having a consistent naming scheme - see the <a href="https://ltla.github.io/CppKmeans/"><b>kmeans</b> documentation</a> for specifics.</p>
-<p>Note that applications using a custom parallelization scheme will need to set the <code>KMEANS_CUSTOM_PARALLEL</code> macro; the setting of the <code>SCRAN_CUSTOM_PARALLEL</code> macro will not be propagated automatically. </p>
-
-</div>
-</div>
-<h2 class="groupheader">Enumeration Type Documentation</h2>
+</div><h2 class="groupheader">Enumeration Type Documentation</h2>
 <a id="abcd041d625290609e221552910ae2c34" name="abcd041d625290609e221552910ae2c34"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abcd041d625290609e221552910ae2c34">&#9670;&#160;</a></span>WeightPolicy</h2>
 

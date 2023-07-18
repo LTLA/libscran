@@ -1,7 +1,0 @@
-<map id="scran/clustering/ClusterKmeans.hpp" name="scran/clustering/ClusterKmeans.hpp">
-<area shape="rect" id="Node000001" title="Identify clusters of cells with k&#45;means." alt="" coords="68,5,226,46"/>
-<area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,94,132,120"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="130,48,93,85,89,81,126,45"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="156,94,299,120"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="169,45,206,81,203,85,165,48"/>
-</map>
