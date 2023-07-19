@@ -6,11 +6,11 @@
 
 #include "tatami/tatami.hpp"
 
-#include "scran/feature_selection/ModelGeneVar.hpp"
+#include "scran/feature_selection/ModelGeneVariances.hpp"
 
 #include <cmath>
 
-class ModelGeneVarTest : public ::testing::TestWithParam<int> {
+class ModelGeneVariancesTest : public ::testing::TestWithParam<int> {
 protected:
     void SetUp() {
         dense_row = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
@@ -22,8 +22,8 @@ protected:
     std::shared_ptr<tatami::NumericMatrix> dense_row, dense_column, sparse_row, sparse_column;
 };
 
-TEST_P(ModelGeneVarTest, UnblockedStats) {
-    scran::ModelGeneVar varfun;
+TEST_P(ModelGeneVariancesTest, UnblockedStats) {
+    scran::ModelGeneVariances varfun;
     auto res = varfun.run(dense_row.get());
 
     auto nthreads = GetParam();
@@ -69,13 +69,13 @@ TEST_P(ModelGeneVarTest, UnblockedStats) {
     compare_almost_equal(res.variances, res4.variances);
 }
 
-TEST_P(ModelGeneVarTest, BlockedStats) {
+TEST_P(ModelGeneVariancesTest, BlockedStats) {
     std::vector<int> blocks(dense_row->ncol());
     for (size_t i = 0; i < blocks.size(); ++i) {
         blocks[i] = i % 3;
     }
 
-    scran::ModelGeneVar varfun;
+    scran::ModelGeneVariances varfun;
     auto res = varfun.run_blocked(dense_row.get(), blocks.data());
 
     auto nthreads = GetParam();
@@ -200,7 +200,7 @@ TEST_P(ModelGeneVarTest, BlockedStats) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    ModelGeneVar,
-    ModelGeneVarTest,
+    ModelGeneVariances,
+    ModelGeneVariancesTest,
     ::testing::Values(1, 3) // number of threads
 );

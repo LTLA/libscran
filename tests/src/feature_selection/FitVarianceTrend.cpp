@@ -1,16 +1,16 @@
 #include <gtest/gtest.h>
 #include "../utils/macros.h"
 
-#include "scran/feature_selection/FitTrendVar.hpp"
+#include "scran/feature_selection/FitVarianceTrend.hpp"
 
 #include "../utils/compare_almost_equal.h"
 
-TEST(FitTrendVarTester, Basic) {
+TEST(FitVarianceTrendTest, Basic) {
     std::vector<double> x { 0.86, 0.88, 0.98, 0.05, 0.69, 0.18, 0.2, 0.87, 0.8, 0.22, 0.54, 0.96, 0.45, 0.42, 0.53, 0.3, 0.84, 0.11, 0.74, 0.85 };
     std::vector<double> y (x);
     for (auto& y0 : y) { y0 *= 2; } // just to add some variety.
 
-    scran::FitTrendVar ftv;
+    scran::FitVarianceTrend ftv;
     auto output = ftv.set_transform(false).run(x.size(), x.data(), y.data());
     compare_almost_equal(output.fitted, y); // should be an exact fit for a straight line.
 
@@ -21,11 +21,11 @@ TEST(FitTrendVarTester, Basic) {
     compare_almost_equal(output.fitted, y);
 }
 
-TEST(FitTrendVarTester, Extrapolation) {
+TEST(FitVarianceTrendTest, Extrapolation) {
     std::vector<double> x { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     std::vector<double> y { 0, 0, 0, 0, 0, 6, 7, 8, 9, 10 };
     
-    scran::FitTrendVar ftv;
+    scran::FitVarianceTrend ftv;
     auto output = ftv.set_transform(false).set_minimum_mean(5.5).run(x.size(), x.data(), y.data());
     compare_almost_equal(output.fitted, x); // should be y = x, extrapolation to the filtered elements.
 }
@@ -44,8 +44,8 @@ static std::vector<double> ftv_y {
     1.32, 2.06, 0.4, 2.27, 1.52, 0.83
 };
 
-TEST(FitTrendVarTester, Residuals) {
-    scran::FitTrendVar ftv;
+TEST(FitVarianceTrendTest, Residuals) {
+    scran::FitVarianceTrend ftv;
     const auto& x = ftv_x;
     const auto& y = ftv_y;
 
@@ -65,8 +65,8 @@ TEST(FitTrendVarTester, Residuals) {
     EXPECT_EQ(output.residuals, ref);
 }
 
-TEST(FitTrendVarTester, FixedMode) {
-    scran::FitTrendVar ftv;
+TEST(FitVarianceTrendTest, FixedMode) {
+    scran::FitVarianceTrend ftv;
 
     const auto& x = ftv_x;
     const auto& y = ftv_y;

@@ -8,7 +8,7 @@
 #include "WeightedLowess/WeightedLowess.hpp"
 
 /**
- * @file FitTrendVar.hpp
+ * @file FitVarianceTrend.hpp
  *
  * @brief Fit a mean-variance trend to log-count data.
  */
@@ -31,7 +31,7 @@ namespace scran {
  * 5. Extrapolate linearly from the left-most fitted value to the origin to obtain fitted values for the previously filtered genes.
  * This is empirically justified by the observation that mean-variance trends of log-expression data are linear at very low abundances.
  */
-class FitTrendVar {
+class FitVarianceTrend {
 public:
     /**
      * @brief Parameter defaults for trend fitting.
@@ -80,9 +80,9 @@ public:
      *
      * @param s Span for the smoother.
      *
-     * @return A reference to this `FitTrendVar` object.
+     * @return A reference to this `FitVarianceTrend` object.
      */
-    FitTrendVar& set_span(double s = Defaults::span) {
+    FitVarianceTrend& set_span(double s = Defaults::span) {
         span = s;
         return *this;
     }
@@ -92,35 +92,35 @@ public:
      *
      * @param m Minimum value for the mean log-expression.
      *
-     * @return A reference to this `FitTrendVar` object.
+     * @return A reference to this `FitVarianceTrend` object.
      */
-    FitTrendVar& set_minimum_mean(double m = Defaults::minimum_mean) {
+    FitVarianceTrend& set_minimum_mean(double m = Defaults::minimum_mean) {
         min_mean = m;
         return *this;
     }
 
     /**
      * Should any filtering be performed by log-expression?
-     * This may need to be disabled if `FitTrendVar` is not being used on statistics computed from log-expression values.
+     * This may need to be disabled if `FitVarianceTrend` is not being used on statistics computed from log-expression values.
      *
      * @param f Whether filtering should be performed.
      *
-     * @return A reference to this `FitTrendVar` object.
+     * @return A reference to this `FitVarianceTrend` object.
      */
-    FitTrendVar& set_filter(bool f = Defaults::filter) {
+    FitVarianceTrend& set_filter(bool f = Defaults::filter) {
         filter = f;
         return *this;
     }
 
     /**
      * Should any transformation of the variances be performed prior to LOWESS smoothing.
-     * This may need to be disabled if `FitTrendVar` is not being used on statistics computed from log-expression values.
+     * This may need to be disabled if `FitVarianceTrend` is not being used on statistics computed from log-expression values.
      *
      * @param t Whether transformation should be performed.
      *
-     * @return A reference to this `FitTrendVar` object.
+     * @return A reference to this `FitVarianceTrend` object.
      */
-    FitTrendVar& set_transform(bool t = Defaults::transform) {
+    FitVarianceTrend& set_transform(bool t = Defaults::transform) {
         transform = t;
         return *this;
     }
@@ -132,9 +132,9 @@ public:
      *
      * @param u Whether to apply fixed-width constraints.
      *
-     * @return A reference to this `FitTrendVar` object.
+     * @return A reference to this `FitVarianceTrend` object.
      */
-    FitTrendVar& set_use_fixed_width(bool u = Defaults::use_fixed_width) {
+    FitVarianceTrend& set_use_fixed_width(bool u = Defaults::use_fixed_width) {
         use_fixed_width = u;
         return *this;
     }
@@ -146,9 +146,9 @@ public:
      *
      * @param f Fixed width of the window.
      *
-     * @return A reference to this `FitTrendVar` object.
+     * @return A reference to this `FitVarianceTrend` object.
      */
-    FitTrendVar& set_fixed_width(double f = Defaults::fixed_width) {
+    FitVarianceTrend& set_fixed_width(double f = Defaults::fixed_width) {
         fixed_width = f;
         return *this;
     }
@@ -160,9 +160,9 @@ public:
      *
      * @param c Minimum number of observations in the window.
      *
-     * @return A reference to this `FitTrendVar` object.
+     * @return A reference to this `FitVarianceTrend` object.
      */
-    FitTrendVar& set_minimum_window_count(int c = Defaults::minimum_window_count) {
+    FitVarianceTrend& set_minimum_window_count(int c = Defaults::minimum_window_count) {
         minimum_window_count = c; 
         return *this;
     }
@@ -249,7 +249,7 @@ public:
     /**
      * @brief Results of the trend fit.
      *
-     * Meaningful instances of this object should generally be constructed by calling the `FitTrendVar::run()` methods.
+     * Meaningful instances of this object should generally be constructed by calling the `FitVarianceTrend::run()` methods.
      * Empty instances can be default-constructed as placeholders.
      */
     struct Results {

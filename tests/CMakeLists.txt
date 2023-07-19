@@ -30,9 +30,9 @@ add_executable(
     src/normalization/GroupedSizeFactors.cpp
     src/normalization/ChoosePseudoCount.cpp
 
-    src/feature_selection/ModelGeneVar.cpp
-    src/feature_selection/FitTrendVar.cpp
-    src/feature_selection/ChooseHVGs.cpp
+    src/feature_selection/ModelGeneVariances.cpp
+    src/feature_selection/FitVarianceTrend.cpp
+    src/feature_selection/ChooseHvgs.cpp
 
     src/dimensionality_reduction/utils.cpp
     src/dimensionality_reduction/convert.cpp

@@ -22,8 +22,8 @@ int main(int argc, char * argv[]) {
     auto normalized = scran::LogNormCounts().run(filtered, std::move(size_factors));
 
     // Identifying highly variable genes.
-    auto var_res = scran::ModelGeneVar().run(normalized.get());
-    auto keep = scran::ChooseHVGs().run(var_res.residuals.size(), var_res.residuals.data());
+    auto var_res = scran::ModelGeneVariances().run(normalized.get());
+    auto keep = scran::ChooseHvgs().run(var_res.residuals.size(), var_res.residuals.data());
 
     // Performing a PCA on the HVGs.
     int npcs = 20;

@@ -9,7 +9,7 @@
 #include "../utils/blocking.hpp"
 #include "../utils/average_vectors.hpp"
 
-#include "FitTrendVar.hpp"
+#include "FitVarianceTrend.hpp"
 #include "blocked_variances.hpp"
 
 #include <algorithm>
@@ -17,7 +17,7 @@
 #include <limits>
 
 /**
- * @file ModelGeneVar.hpp
+ * @file ModelGeneVariances.hpp
  *
  * @brief Model the per-gene variance from log-count data.
  */
@@ -28,12 +28,12 @@ namespace scran {
  * @brief Compute and model the per-gene variances in log-expression data.
  *
  * This scans through a log-transformed normalized expression matrix (e.g., from `LogNormCounts`) and computes per-feature means and variances.
- * It then fits a trend to the variances with respect to the means using `FitTrendVar`.
+ * It then fits a trend to the variances with respect to the means using `FitVarianceTrend`.
  * We assume that most genes at any given abundance are not highly variable, such that the fitted value of the trend is interpreted as the "uninteresting" variance - 
  * this is mostly attributed to technical variation like sequencing noise, but can also represent constitutive biological noise like transcriptional bursting.
  * Under this assumption, the residual can be treated as a quantification of biologically interesting variation, and can be used to identify relevant features for downstream analyses.
  */
-class ModelGeneVar {
+class ModelGeneVariances {
 public:
     /**
      * @brief Default parameters for variance modelling.
@@ -60,60 +60,60 @@ private:
     VariableBlockWeightParameters variable_block_weight_parameters = Defaults::variable_block_weight_parameters;
     int num_threads = Defaults::num_threads;
 
-    double span = FitTrendVar::Defaults::span;
-    double min_mean = FitTrendVar::Defaults::minimum_mean;
+    double span = FitVarianceTrend::Defaults::span;
+    double min_mean = FitVarianceTrend::Defaults::minimum_mean;
 
-    bool use_fixed_width = FitTrendVar::Defaults::use_fixed_width;
-    bool fixed_width = FitTrendVar::Defaults::fixed_width;
-    int minimum_window_count = FitTrendVar::Defaults::minimum_window_count;
+    bool use_fixed_width = FitVarianceTrend::Defaults::use_fixed_width;
+    bool fixed_width = FitVarianceTrend::Defaults::fixed_width;
+    int minimum_window_count = FitVarianceTrend::Defaults::minimum_window_count;
 
 public:
     /** 
-     * @param s See `FitTrendVar::set_span()` for more details.
+     * @param s See `FitVarianceTrend::set_span()` for more details.
      *
-     * @return A reference to this `ModelGeneVar` object.
+     * @return A reference to this `ModelGeneVariances` object.
      */
-    ModelGeneVar& set_span(double s = FitTrendVar::Defaults::span) {
+    ModelGeneVariances& set_span(double s = FitVarianceTrend::Defaults::span) {
         span = s;
         return *this;
     }
 
     /** 
-     * @param m See `FitTrendVar::set_minimum_mean()` for more details.
+     * @param m See `FitVarianceTrend::set_minimum_mean()` for more details.
      *
-     * @return A reference to this `ModelGeneVar` object.
+     * @return A reference to this `ModelGeneVariances` object.
      */
-    ModelGeneVar& set_minimum_mean(double m = FitTrendVar::Defaults::minimum_mean) {
+    ModelGeneVariances& set_minimum_mean(double m = FitVarianceTrend::Defaults::minimum_mean) {
         min_mean = m;
         return *this;
     }
 
     /**
-     * @param u See `FitTrendVar::set_use_fixed_width()` for more details.
+     * @param u See `FitVarianceTrend::set_use_fixed_width()` for more details.
      *
-     * @return A reference to this `ModelGeneVar` object.
+     * @return A reference to this `ModelGeneVariances` object.
      */
-    ModelGeneVar& set_use_fixed_width(bool u = FitTrendVar::Defaults::use_fixed_width) {
+    ModelGeneVariances& set_use_fixed_width(bool u = FitVarianceTrend::Defaults::use_fixed_width) {
         use_fixed_width = u;
         return *this;
     }
 
     /**
-     * @param f See `FitTrendVar::set_fixed_width()` for more details.
+     * @param f See `FitVarianceTrend::set_fixed_width()` for more details.
      *
-     * @return A reference to this `ModelGeneVar` object.
+     * @return A reference to this `ModelGeneVariances` object.
      */
-    ModelGeneVar& set_fixed_width(double f = FitTrendVar::Defaults::fixed_width) {
+    ModelGeneVariances& set_fixed_width(double f = FitVarianceTrend::Defaults::fixed_width) {
         fixed_width = f;
         return *this;
     }
 
     /**
-     * @param c See `FitTrendVar::set_minimum_window_count()` for more details.
+     * @param c See `FitVarianceTrend::set_minimum_window_count()` for more details.
      *
-     * @return A reference to this `ModelGeneVar` object.
+     * @return A reference to this `ModelGeneVariances` object.
      */
-    ModelGeneVar& set_minimum_window_count(int c = FitTrendVar::Defaults::minimum_window_count) {
+    ModelGeneVariances& set_minimum_window_count(int c = FitVarianceTrend::Defaults::minimum_window_count) {
         minimum_window_count = c; 
         return *this;
     }
@@ -121,9 +121,9 @@ public:
     /**
      * @param w Weighting policy to use for averaging statistics across blocks.
      * 
-     * @return A reference to this `ModelGeneVar` instance.
+     * @return A reference to this `ModelGeneVariances` instance.
      */
-    ModelGeneVar& set_block_weight_policy(WeightPolicy w = Defaults::block_weight_policy) {
+    ModelGeneVariances& set_block_weight_policy(WeightPolicy w = Defaults::block_weight_policy) {
         block_weight_policy = w;
         return *this;
     }
@@ -132,18 +132,18 @@ public:
      * @param v Parameters for the variable block weights, see `variable_block_weight()` for more details.
      * Only used when the block weight policy is set to `WeightPolicy::VARIABLE`.
      * 
-     * @return A reference to this `ModelGeneVar` instance.
+     * @return A reference to this `ModelGeneVariances` instance.
      */
-    ModelGeneVar& set_variable_block_weight_parameters(VariableBlockWeightParameters v = Defaults::variable_block_weight_parameters) {
+    ModelGeneVariances& set_variable_block_weight_parameters(VariableBlockWeightParameters v = Defaults::variable_block_weight_parameters) {
         variable_block_weight_parameters = v;
         return *this;
     }
 
     /**
      * @param n Number of threads to use. 
-     * @return A reference to this `ModelGeneVar` object.
+     * @return A reference to this `ModelGeneVariances` object.
      */
-    ModelGeneVar& set_num_threads(int n = Defaults::num_threads) {
+    ModelGeneVariances& set_num_threads(int n = Defaults::num_threads) {
         num_threads = n;
         return *this;
     }
@@ -362,7 +362,7 @@ public:
         }
 
         // Applying the trend fit to each block.
-        FitTrendVar fit;
+        FitVarianceTrend fit;
         fit.set_span(span);
         fit.set_minimum_mean(min_mean);
         fit.set_use_fixed_width(use_fixed_width);
@@ -446,7 +446,7 @@ public:
     /**
      * @brief Results of variance modelling without blocks.
      *
-     * Meaningful instances of this object should generally be constructed by calling the `ModelGeneVar::run()` methods.
+     * Meaningful instances of this object should generally be constructed by calling the `ModelGeneVariances::run()` methods.
      * Empty instances can be default-constructed as placeholders.
      */
     struct Results {
@@ -502,7 +502,7 @@ public:
     /**
      * @brief Results of variance modelling with blocks.
      *
-     * Meaningful instances of this object should generally be constructed by calling the `ModelGeneVar::run_blocked()` method.
+     * Meaningful instances of this object should generally be constructed by calling the `ModelGeneVariances::run_blocked()` method.
      * Empty instances can be default-constructed as placeholders.
      */
     struct BlockResults {
@@ -574,7 +574,7 @@ public:
     /**
      * @brief Results of variance modelling with average statistics across blocks.
      *
-     * Meaningful instances of this object should generally be constructed by calling the `ModelGeneVar::run_blocked_with_average()` method.
+     * Meaningful instances of this object should generally be constructed by calling the `ModelGeneVariances::run_blocked_with_average()` method.
      * Empty instances can be default-constructed as placeholders.
      */
     struct AverageBlockResults : public BlockResults {

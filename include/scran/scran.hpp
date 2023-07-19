@@ -16,9 +16,9 @@
 
 #include "differential_analysis/ScoreMarkers.hpp"
 
-#include "feature_selection/ChooseHVGs.hpp"
-#include "feature_selection/FitTrendVar.hpp"
-#include "feature_selection/ModelGeneVar.hpp"
+#include "feature_selection/ChooseHvgs.hpp"
+#include "feature_selection/FitVarianceTrend.hpp"
+#include "feature_selection/ModelGeneVariances.hpp"
 
 #include "dimensionality_reduction/SimplePca.hpp"
 #include "dimensionality_reduction/ResidualPca.hpp"

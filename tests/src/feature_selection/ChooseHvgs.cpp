@@ -1,13 +1,13 @@
 #include <gtest/gtest.h>
 #include "../utils/macros.h"
 
-#include "scran/feature_selection/ChooseHVGs.hpp"
+#include "scran/feature_selection/ChooseHvgs.hpp"
 #include "aarand/aarand.hpp"
 #include <random>
 
-class ChooseHVGsTest : public ::testing::TestWithParam<std::tuple<int, int> > {};
+class ChooseHvgsTest : public ::testing::TestWithParam<std::tuple<int, int> > {};
 
-TEST_P(ChooseHVGsTest, Basic) {
+TEST_P(ChooseHvgsTest, Basic) {
     auto p = GetParam();
     size_t ngenes = std::get<0>(p);
     size_t ntop = std::get<1>(p);
@@ -17,7 +17,7 @@ TEST_P(ChooseHVGsTest, Basic) {
     std::vector<double> x (ngenes);
     for (auto& x0 : x) { x0 = aarand::standard_uniform(rng); }
 
-    scran::ChooseHVGs chooser;
+    scran::ChooseHvgs chooser;
     chooser.set_top(ntop);
     auto output = chooser.run(ngenes, x.data());
 
@@ -36,8 +36,8 @@ TEST_P(ChooseHVGsTest, Basic) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    ChooseHVGs,
-    ChooseHVGsTest,
+    ChooseHvgs,
+    ChooseHvgsTest,
     ::testing::Combine(
         ::testing::Values(11, 111, 1111), // number of values
         ::testing::Values(5, 50, 500) // number of tops

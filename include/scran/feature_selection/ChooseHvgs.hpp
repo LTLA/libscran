@@ -9,7 +9,7 @@
 #include <cstdint>
 
 /**
- * @file ChooseHVGs.hpp
+ * @file ChooseHvgs.hpp
  *
  * @brief Choose highly variable genes for downstream analyses.
  */
@@ -22,7 +22,7 @@ namespace scran {
  * This is done by selecting the `top` number of genes with the largest values for a precomputed variance statistic.
  * We typically use the residual from the trend as computed by `ModelGeneVar`.
  */
-class ChooseHVGs {
+class ChooseHvgs {
 public:
     /**
      * @brief Default paramater settings.
@@ -41,13 +41,13 @@ public:
     /**
      * @param t The number of top genes to consider as highly variable genes.
      *
-     * @return A reference to this `ChooseHVGs` object.
+     * @return A reference to this `ChooseHvgs` object.
      *
      * The choice is more or less arbitrary and is a trade-off between capturing more biological signal at the cost of increasing noise.
      * Values of 1000-5000 seem appropriate for most use cases.
      * Note that increasing the number of genes will also increase the size of the subdataset to be used in downstream computation.
      */
-    ChooseHVGs& set_top(size_t t = Defaults::top) {
+    ChooseHvgs& set_top(size_t t = Defaults::top) {
         top = t;
         return *this;
     }
