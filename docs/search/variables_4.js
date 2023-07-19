@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['edges_0',['edges',['../structscran_1_1BuildSNNGraph_1_1Results.html#a78ba518a5919f9b01ebb46140fb0b869',1,'scran::BuildSNNGraph::Results']]]
+  ['edges_0',['edges',['../structscran_1_1BuildSnnGraph_1_1Results.html#ad331f9c0061ed08a83e1933660994f01',1,'scran::BuildSnnGraph::Results']]]
 ];

@@ -1,0 +1,26 @@
+<map id="scran/clustering/ClusterSnnGraph.hpp" name="scran/clustering/ClusterSnnGraph.hpp">
+<area shape="rect" id="Node000001" title="Identify clusters of cells from a shared nearest&#45;neighbor graph." alt="" coords="401,5,559,46"/>
+<area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="16,241,142,267"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="401,42,296,61,178,90,123,107,75,126,38,147,13,169,8,185,15,201,29,217,47,231,43,235,25,221,10,204,3,185,9,166,34,143,73,121,122,102,177,85,295,56,400,36"/>
+<area shape="rect" id="Node000003" href="$BuildSnnGraph_8hpp.html" title="Build a shared nearest&#45;neighbor graph on the cells." alt="" coords="326,94,458,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="460,48,418,86,415,82,457,44"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="451,241,517,267"/>
+<area shape="poly" id="edge14_Node000001_Node000004" title=" " alt="" coords="545,44,607,70,666,104,688,124,701,146,703,170,692,195,666,213,625,228,533,248,531,243,623,223,663,208,688,192,698,169,696,148,684,127,663,108,605,74,543,49"/>
+<area shape="rect" id="Node000005" href="$igraph__utils_8hpp.html" title="Utilities for manipulating igraph data structures." alt="" coords="23,168,135,193"/>
+<area shape="poly" id="edge15_Node000001_Node000005" title=" " alt="" coords="430,49,125,164,123,159,428,44"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="522,168,580,193"/>
+<area shape="poly" id="edge12_Node000001_Node000006" title=" " alt="" coords="492,45,542,153,537,155,487,47"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="603,168,677,193"/>
+<area shape="poly" id="edge13_Node000001_Node000007" title=" " alt="" coords="502,44,619,155,615,159,499,48"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="336,123,269,142,199,170,147,201,105,234,102,230,144,197,196,165,267,137,335,118"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="411,118,436,139,460,166,474,196,482,226,477,227,469,198,455,169,433,142,408,122"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="339,123,147,167,146,161,338,118"/>
+<area shape="poly" id="edge8_Node000003_Node000006" title=" " alt="" coords="420,118,512,159,510,164,418,123"/>
+<area shape="poly" id="edge9_Node000003_Node000007" title=" " alt="" coords="435,118,589,162,588,167,434,123"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="209,168,277,193"/>
+<area shape="poly" id="edge10_Node000003_Node000008" title=" " alt="" coords="368,123,283,163,281,158,366,118"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="301,168,446,193"/>
+<area shape="poly" id="edge11_Node000003_Node000009" title=" " alt="" coords="392,121,383,154,378,152,387,119"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="82,194,82,226,76,226,76,194"/>
+<area shape="poly" id="edge7_Node000005_Node000004" title=" " alt="" coords="135,189,437,242,436,247,134,194"/>
+</map>
