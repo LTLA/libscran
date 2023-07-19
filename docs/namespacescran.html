@@ -428,7 +428,7 @@ template&lt;bool check_nan_ = true, typename Stat_ , typename Weight_ , typename
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">n</td><td>Length of each array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">in</td><td>Vector of pointers to input arrays of length <code>n</code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">w</td><td>Pointer to an array of length equal to <code>in.size()</code>, containing the weight to use for each input array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">w</td><td>Pointer to an array of length equal to <code>in.size()</code>, containing the weight to use for each input array. Weights should be non-negative and finite. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">out</td><td>Pointer to an output array of length <code>n</code>. On output, <code>out</code> is filled with the weighted average of all arrays in <code>in</code>. Specifically, each element of <code>out</code> is set to the weighted average of the corresponding elements across all <code>in</code> arrays. </td></tr>
   </table>
   </dd>
@@ -483,7 +483,7 @@ template&lt;bool check_nan_ = true, typename Output_  = double, typename Stat_ ,
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">n</td><td>Length of each array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">in</td><td>Vector of pointers to input arrays of the same length. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">w</td><td>Pointer to an array of length equal to <code>in.size()</code>, containing the weight to use for each input array.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">w</td><td>Pointer to an array of length equal to <code>in.size()</code>, containing the weight to use for each input array. Weights should be non-negative and finite.</td></tr>
   </table>
   </dd>
 </dl>

@@ -87,13 +87,13 @@ $(function() {
 
 <p><code>#include &lt;<a class="el" href="ModelGeneVariances_8hpp_source.html">ModelGeneVariances.hpp</a>&gt;</code></p>
 <div class="dynheader">
-Inheritance diagram for scran::ModelGeneVariances::BlockResults:</div>
+Collaboration diagram for scran::ModelGeneVariances::BlockResults:</div>
 <div class="dyncontent">
-<div class="center"><img src="structscran_1_1ModelGeneVariances_1_1BlockResults__inherit__graph.png" border="0" usemap="#ascran_1_1ModelGeneVariances_1_1BlockResults_inherit__map" alt="Inheritance graph"/></div>
-<map name="ascran_1_1ModelGeneVariances_1_1BlockResults_inherit__map" id="ascran_1_1ModelGeneVariances_1_1BlockResults_inherit__map">
-<area shape="rect" title="Results of variance modelling with blocks." alt="" coords="5,5,189,46"/>
-<area shape="rect" href="structscran_1_1ModelGeneVariances_1_1AverageBlockResults.html" title="Results of variance modelling with average statistics across blocks." alt="" coords="5,94,189,135"/>
-<area shape="poly" title=" " alt="" coords="100,61,100,94,94,94,94,61"/>
+<div class="center"><img src="structscran_1_1ModelGeneVariances_1_1BlockResults__coll__graph.png" border="0" usemap="#ascran_1_1ModelGeneVariances_1_1BlockResults_coll__map" alt="Collaboration graph"/></div>
+<map name="ascran_1_1ModelGeneVariances_1_1BlockResults_coll__map" id="ascran_1_1ModelGeneVariances_1_1BlockResults_coll__map">
+<area shape="rect" title="Results of variance modelling with blocks." alt="" coords="5,109,189,150"/>
+<area shape="rect" href="structscran_1_1ModelGeneVariances_1_1Results.html" title="Results of variance modelling without blocks." alt="" coords="5,5,189,46"/>
+<area shape="poly" title=" " alt="" coords="100,61,100,109,94,109,94,61"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -101,10 +101,12 @@ Inheritance diagram for scran::ModelGeneVariances::BlockResults:</div>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a3ba5667667ec5811ad5a83f5786eb601"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structscran_1_1ModelGeneVariances_1_1Results.html">Results</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ModelGeneVariances_1_1BlockResults.html#a3ba5667667ec5811ad5a83f5786eb601">per_block</a></td></tr>
 <tr class="separator:a3ba5667667ec5811ad5a83f5786eb601"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5dc28c2e8378625924ddd3159d8eebc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1ModelGeneVariances_1_1Results.html">Results</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ModelGeneVariances_1_1BlockResults.html#ad5dc28c2e8378625924ddd3159d8eebc">average</a></td></tr>
+<tr class="separator:ad5dc28c2e8378625924ddd3159d8eebc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="structscran_1_1ModelGeneVariances_1_1Results.html" title="Results of variance modelling without blocks.">Results</a> of variance modelling with blocks. </p>
-<p>Meaningful instances of this object should generally be constructed by calling the <code><a class="el" href="classscran_1_1ModelGeneVariances.html#a57cde36a7e287a4efe045b58ff0095f6">ModelGeneVariances::run_blocked()</a></code> method. Empty instances can be default-constructed as placeholders. </p>
+<p>Meaningful instances of this object should generally be constructed by calling the <code><a class="el" href="classscran_1_1ModelGeneVariances.html#ad50b110c52beb8a20e0bba25c3fb2ee9">ModelGeneVariances::run_blocked()</a></code> method. Empty instances can be default-constructed as placeholders. </p>
 </div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="a3ba5667667ec5811ad5a83f5786eb601" name="a3ba5667667ec5811ad5a83f5786eb601"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3ba5667667ec5811ad5a83f5786eb601">&#9670;&#160;</a></span>per_block</h2>
@@ -118,6 +120,21 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Vector of length equal to the number of blocks, where each entry contains the variance modelling results for a single block. </p>
+
+</div>
+</div>
+<a id="ad5dc28c2e8378625924ddd3159d8eebc" name="ad5dc28c2e8378625924ddd3159d8eebc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5dc28c2e8378625924ddd3159d8eebc">&#9670;&#160;</a></span>average</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structscran_1_1ModelGeneVariances_1_1Results.html">Results</a> scran::ModelGeneVariances::BlockResults::average</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Average across blocks for all statistics in <code>per_block</code>. </p>
 
 </div>
 </div>

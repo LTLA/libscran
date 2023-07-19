@@ -90,9 +90,6 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ModelGeneVariances_1_1AverageBlockResults.html">AverageBlockResults</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structscran_1_1ModelGeneVariances_1_1Results.html" title="Results of variance modelling without blocks.">Results</a> of variance modelling with average statistics across blocks.  <a href="structscran_1_1ModelGeneVariances_1_1AverageBlockResults.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1ModelGeneVariances_1_1BlockResults.html">BlockResults</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structscran_1_1ModelGeneVariances_1_1Results.html" title="Results of variance modelling without blocks.">Results</a> of variance modelling with blocks.  <a href="structscran_1_1ModelGeneVariances_1_1BlockResults.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -119,14 +116,16 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a443daf250ab0cbf48dfaa3816442a45e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3fe070bda91379b20db1f516cffb0a19"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ModelGeneVariances.html">ModelGeneVariances</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVariances.html#a3fe070bda91379b20db1f516cffb0a19">set_variable_block_weight_parameters</a> (<a class="el" href="structscran_1_1VariableBlockWeightParameters.html">VariableBlockWeightParameters</a> v=<a class="el" href="structscran_1_1ModelGeneVariances_1_1Defaults.html#a6eeeca2eaa558e3ed0e4452ac625e063">Defaults::variable_block_weight_parameters</a>)</td></tr>
 <tr class="separator:a3fe070bda91379b20db1f516cffb0a19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b9ca0e93dbb98159df0f7dd340ed69b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ModelGeneVariances.html">ModelGeneVariances</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVariances.html#a9b9ca0e93dbb98159df0f7dd340ed69b">set_compute_average</a> (bool a=<a class="el" href="structscran_1_1ModelGeneVariances_1_1Defaults.html#acd15c6eb4576a70150096f05099f6d9b">Defaults::compute_average</a>)</td></tr>
+<tr class="separator:a9b9ca0e93dbb98159df0f7dd340ed69b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd751bd1d661e1d9882f6e83fc0a0aa6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1ModelGeneVariances.html">ModelGeneVariances</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVariances.html#abd751bd1d661e1d9882f6e83fc0a0aa6">set_num_threads</a> (int n=<a class="el" href="structscran_1_1ModelGeneVariances_1_1Defaults.html#a46f4dda7a0a51463872432d73cbe0823">Defaults::num_threads</a>)</td></tr>
 <tr class="separator:abd751bd1d661e1d9882f6e83fc0a0aa6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab86e8b75d53cbc77a09c65096e012389"><td class="memTemplParams" colspan="2">template&lt;typename Value_ , typename Index_ , typename Stat_ &gt; </td></tr>
 <tr class="memitem:ab86e8b75d53cbc77a09c65096e012389"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVariances.html#ab86e8b75d53cbc77a09c65096e012389">run</a> (const tatami::Matrix&lt; Value_, Index_ &gt; *mat, Stat_ *means, Stat_ *variances, Stat_ *fitted, Stat_ *residuals) const</td></tr>
 <tr class="separator:ab86e8b75d53cbc77a09c65096e012389"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac54f05e8c484a3c1911e6da90cd6253e"><td class="memTemplParams" colspan="2">template&lt;typename Value_ , typename Index_ , typename Block_ , typename Stat_ &gt; </td></tr>
-<tr class="memitem:ac54f05e8c484a3c1911e6da90cd6253e"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVariances.html#ac54f05e8c484a3c1911e6da90cd6253e">run_blocked_with_average</a> (const tatami::Matrix&lt; Value_, Index_ &gt; *mat, const Block_ *block, std::vector&lt; Stat_ * &gt; means, std::vector&lt; Stat_ * &gt; variances, std::vector&lt; Stat_ * &gt; fitted, std::vector&lt; Stat_ * &gt; residuals, Stat_ *ave_means, Stat_ *ave_variances, Stat_ *ave_fitted, Stat_ *ave_residuals) const</td></tr>
-<tr class="separator:ac54f05e8c484a3c1911e6da90cd6253e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad50b110c52beb8a20e0bba25c3fb2ee9"><td class="memTemplParams" colspan="2">template&lt;typename Value_ , typename Index_ , typename Block_ , typename Stat_ &gt; </td></tr>
+<tr class="memitem:ad50b110c52beb8a20e0bba25c3fb2ee9"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVariances.html#ad50b110c52beb8a20e0bba25c3fb2ee9">run_blocked</a> (const tatami::Matrix&lt; Value_, Index_ &gt; *mat, const Block_ *block, std::vector&lt; Stat_ * &gt; means, std::vector&lt; Stat_ * &gt; variances, std::vector&lt; Stat_ * &gt; fitted, std::vector&lt; Stat_ * &gt; residuals, Stat_ *ave_means, Stat_ *ave_variances, Stat_ *ave_fitted, Stat_ *ave_residuals) const</td></tr>
+<tr class="separator:ad50b110c52beb8a20e0bba25c3fb2ee9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a57cde36a7e287a4efe045b58ff0095f6"><td class="memTemplParams" colspan="2">template&lt;typename Value_ , typename Index_ , typename Block_ , typename Stat_ &gt; </td></tr>
 <tr class="memitem:a57cde36a7e287a4efe045b58ff0095f6"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVariances.html#a57cde36a7e287a4efe045b58ff0095f6">run_blocked</a> (const tatami::Matrix&lt; Value_, Index_ &gt; *mat, const Block_ *block, std::vector&lt; Stat_ * &gt; means, std::vector&lt; Stat_ * &gt; variances, std::vector&lt; Stat_ * &gt; fitted, std::vector&lt; Stat_ * &gt; residuals) const</td></tr>
 <tr class="separator:a57cde36a7e287a4efe045b58ff0095f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -136,9 +135,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aad89f68945b1ea031940b1424c823dd6"><td class="memTemplParams" colspan="2">template&lt;typename Value_ , typename Index_ , typename Block_ &gt; </td></tr>
 <tr class="memitem:aad89f68945b1ea031940b1424c823dd6"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1ModelGeneVariances_1_1BlockResults.html">BlockResults</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVariances.html#aad89f68945b1ea031940b1424c823dd6">run_blocked</a> (const tatami::Matrix&lt; Value_, Index_ &gt; *mat, const Block_ *block) const</td></tr>
 <tr class="separator:aad89f68945b1ea031940b1424c823dd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0b049520a7e880639c4c1d70c4063a1e"><td class="memTemplParams" colspan="2">template&lt;typename Value_ , typename Index_ , typename Block_ &gt; </td></tr>
-<tr class="memitem:a0b049520a7e880639c4c1d70c4063a1e"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1ModelGeneVariances_1_1AverageBlockResults.html">AverageBlockResults</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1ModelGeneVariances.html#a0b049520a7e880639c4c1d70c4063a1e">run_blocked_with_average</a> (const tatami::Matrix&lt; Value_, Index_ &gt; *mat, const Block_ *block) const</td></tr>
-<tr class="separator:a0b049520a7e880639c4c1d70c4063a1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Compute and model the per-gene variances in log-expression data. </p>
@@ -375,6 +371,39 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a9b9ca0e93dbb98159df0f7dd340ed69b" name="a9b9ca0e93dbb98159df0f7dd340ed69b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9b9ca0e93dbb98159df0f7dd340ed69b">&#9670;&#160;</a></span>set_compute_average()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1ModelGeneVariances.html">ModelGeneVariances</a> &amp; scran::ModelGeneVariances::set_compute_average </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>a</em> = <code><a class="el" href="structscran_1_1ModelGeneVariances_1_1Defaults.html#acd15c6eb4576a70150096f05099f6d9b">Defaults::compute_average</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">a</td><td>Whether to compute the average of each statistic across blocks. Note that this only affects the <code><a class="el" href="classscran_1_1ModelGeneVariances.html#ad50b110c52beb8a20e0bba25c3fb2ee9">run_blocked()</a></code> method that returns a <code><a class="el" href="structscran_1_1ModelGeneVariances_1_1BlockResults.html" title="Results of variance modelling with blocks.">BlockResults</a></code> object. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1ModelGeneVariances.html" title="Compute and model the per-gene variances in log-expression data.">ModelGeneVariances</a></code> object. </dd></dl>
+
+</div>
+</div>
 <a id="abd751bd1d661e1d9882f6e83fc0a0aa6" name="abd751bd1d661e1d9882f6e83fc0a0aa6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abd751bd1d661e1d9882f6e83fc0a0aa6">&#9670;&#160;</a></span>set_num_threads()</h2>
 
@@ -483,8 +512,8 @@ template&lt;typename Value_ , typename Index_ , typename Stat_ &gt; </div>
 
 </div>
 </div>
-<a id="ac54f05e8c484a3c1911e6da90cd6253e" name="ac54f05e8c484a3c1911e6da90cd6253e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac54f05e8c484a3c1911e6da90cd6253e">&#9670;&#160;</a></span>run_blocked_with_average() <span class="overload">[1/2]</span></h2>
+<a id="ad50b110c52beb8a20e0bba25c3fb2ee9" name="ad50b110c52beb8a20e0bba25c3fb2ee9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad50b110c52beb8a20e0bba25c3fb2ee9">&#9670;&#160;</a></span>run_blocked() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -495,7 +524,7 @@ template&lt;typename Value_ , typename Index_ , typename Block_ , typename Stat_
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void scran::ModelGeneVariances::run_blocked_with_average </td>
+          <td class="memname">void scran::ModelGeneVariances::run_blocked </td>
           <td>(</td>
           <td class="paramtype">const tatami::Matrix&lt; Value_, Index_ &gt; *&#160;</td>
           <td class="paramname"><em>mat</em>, </td>
@@ -596,7 +625,7 @@ template&lt;typename Value_ , typename Index_ , typename Block_ , typename Stat_
 </div>
 </div>
 <a id="a57cde36a7e287a4efe045b58ff0095f6" name="a57cde36a7e287a4efe045b58ff0095f6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a57cde36a7e287a4efe045b58ff0095f6">&#9670;&#160;</a></span>run_blocked() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a57cde36a7e287a4efe045b58ff0095f6">&#9670;&#160;</a></span>run_blocked() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -654,7 +683,7 @@ template&lt;typename Value_ , typename Index_ , typename Block_ , typename Stat_
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Compute and model the per-feature variances from a log-expression matrix with blocking. This is similar to <code><a class="el" href="classscran_1_1ModelGeneVariances.html#ac54f05e8c484a3c1911e6da90cd6253e">run_blocked_with_average()</a></code> but omits the calculation of the averaged statistics across blocks.</p>
+<p>Compute and model the per-feature variances from a log-expression matrix with blocking. This overload omits the calculation of the averaged statistics across blocks.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Value_</td><td>Data type of the matrix. </td></tr>
@@ -722,7 +751,7 @@ template&lt;typename Value_ , typename Index_ &gt; </div>
 </div>
 </div>
 <a id="aad89f68945b1ea031940b1424c823dd6" name="aad89f68945b1ea031940b1424c823dd6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aad89f68945b1ea031940b1424c823dd6">&#9670;&#160;</a></span>run_blocked() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aad89f68945b1ea031940b1424c823dd6">&#9670;&#160;</a></span>run_blocked() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -756,7 +785,7 @@ template&lt;typename Value_ , typename Index_ , typename Block_ &gt; </div>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Compute and model the per-feature variances from a log-expression matrix with blocking, see <code><a class="el" href="classscran_1_1ModelGeneVariances.html#a57cde36a7e287a4efe045b58ff0095f6">run_blocked()</a></code> for details.</p>
+<p>Compute and model the per-feature variances from a log-expression matrix with blocking, see <code><a class="el" href="classscran_1_1ModelGeneVariances.html#ad50b110c52beb8a20e0bba25c3fb2ee9">run_blocked()</a></code> for details.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Value_</td><td>Data type of the matrix. </td></tr>
@@ -768,66 +797,11 @@ template&lt;typename Value_ , typename Index_ , typename Block_ &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Pointer to a feature-by-cells <b>tatami</b> matrix containing log-expression values. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1ModelGeneVariances.html#a57cde36a7e287a4efe045b58ff0095f6">run_blocked()</a></code> for details.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1ModelGeneVariances.html#ad50b110c52beb8a20e0bba25c3fb2ee9">run_blocked()</a></code> for details.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ModelGeneVariances_1_1BlockResults.html" title="Results of variance modelling with blocks.">BlockResults</a></code> object containing the results of the variance modelling in each block. </dd></dl>
-
-</div>
-</div>
-<a id="a0b049520a7e880639c4c1d70c4063a1e" name="a0b049520a7e880639c4c1d70c4063a1e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0b049520a7e880639c4c1d70c4063a1e">&#9670;&#160;</a></span>run_blocked_with_average() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Value_ , typename Index_ , typename Block_ &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structscran_1_1ModelGeneVariances_1_1AverageBlockResults.html">AverageBlockResults</a> scran::ModelGeneVariances::run_blocked_with_average </td>
-          <td>(</td>
-          <td class="paramtype">const tatami::Matrix&lt; Value_, Index_ &gt; *&#160;</td>
-          <td class="paramname"><em>mat</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const Block_ *&#160;</td>
-          <td class="paramname"><em>block</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Compute and model the per-feature variances from a log-expression matrix with blocking, see <code><a class="el" href="classscran_1_1ModelGeneVariances.html#ac54f05e8c484a3c1911e6da90cd6253e">run_blocked_with_average()</a></code> for details.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">Value_</td><td>Data type of the matrix. </td></tr>
-    <tr><td class="paramname">Index_</td><td>Integer type for the row/column indices. </td></tr>
-    <tr><td class="paramname">Block_</td><td>Integer type, to hold the block IDs.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Pointer to a feature-by-cells <b>tatami</b> matrix containing log-expression values. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of block identifiers, see <code><a class="el" href="classscran_1_1ModelGeneVariances.html#a57cde36a7e287a4efe045b58ff0095f6">run_blocked()</a></code> for details.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>An <code><a class="el" href="structscran_1_1ModelGeneVariances_1_1AverageBlockResults.html" title="Results of variance modelling with average statistics across blocks.">AverageBlockResults</a></code> object containing the results of the variance modelling in each block, along with the average statistics across blocks. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A <code><a class="el" href="structscran_1_1ModelGeneVariances_1_1BlockResults.html" title="Results of variance modelling with blocks.">BlockResults</a></code> object containing the results of the variance modelling in each block. An average for each statistic is also computed by default unless <code><a class="el" href="classscran_1_1ModelGeneVariances.html#a9b9ca0e93dbb98159df0f7dd340ed69b">set_compute_average()</a></code> is set to <code>false</code>. </dd></dl>
 
 </div>
 </div>
