@@ -50,6 +50,11 @@ public:
         static constexpr VariableBlockWeightParameters variable_block_weight_parameters = VariableBlockWeightParameters();
 
         /**
+         * See `set_compute_average()`.
+         */
+        static constexpr bool compute_average = true;
+
+        /**
          * See `set_num_threads()`.
          */
         static constexpr int num_threads = 1;
@@ -66,6 +71,8 @@ private:
     bool use_fixed_width = FitVarianceTrend::Defaults::use_fixed_width;
     bool fixed_width = FitVarianceTrend::Defaults::fixed_width;
     int minimum_window_count = FitVarianceTrend::Defaults::minimum_window_count;
+
+    bool compute_average = Defaults::compute_average;
 
 public:
     /** 
@@ -136,6 +143,16 @@ public:
      */
     ModelGeneVariances& set_variable_block_weight_parameters(VariableBlockWeightParameters v = Defaults::variable_block_weight_parameters) {
         variable_block_weight_parameters = v;
+        return *this;
+    }
+
+    /**
+     * @param a Whether to compute the average of each statistic across blocks.
+     * Note that this only affects the `run_blocked()` method that returns a `BlockResults` object.
+     * @return A reference to this `ModelGeneVariances` object.
+     */
+    ModelGeneVariances& set_compute_average(bool a = Defaults::compute_average) {
+        compute_average = a;
         return *this;
     }
 
@@ -338,7 +355,7 @@ public:
      * If `nullptr`, the average calculation is skipped.
      */
     template<typename Value_, typename Index_, typename Block_, typename Stat_>
-    void run_blocked_with_average(
+    void run_blocked(
         const tatami::Matrix<Value_, Index_>* mat, 
         const Block_* block, 
         std::vector<Stat_*> means, 
@@ -400,7 +417,7 @@ public:
 
     /** 
      * Compute and model the per-feature variances from a log-expression matrix with blocking.
-     * This is similar to `run_blocked_with_average()` but omits the calculation of the averaged statistics across blocks.
+     * This overload omits the calculation of the averaged statistics across blocks.
      *
      * @tparam Value_ Data type of the matrix.
      * @tparam Index_ Integer type for the row/column indices.
@@ -428,7 +445,7 @@ public:
         std::vector<Stat_*> fitted, 
         std::vector<Stat_*> residuals)
     const {
-        run_blocked_with_average(
+        run_blocked(
             mat, 
             block, 
             std::move(means), 
@@ -511,7 +528,9 @@ public:
          */
         BlockResults() {}
 
-        BlockResults(size_t ngenes, int nblocks) : per_block(nblocks, Results(ngenes)) {}
+        BlockResults(size_t ngenes, int nblocks, bool compute_average) : 
+            per_block(nblocks, Results(ngenes)),
+            average(compute_average ? ngenes : 0) {}
         /**
          * @endcond
          */
@@ -520,6 +539,11 @@ public:
          * Vector of length equal to the number of blocks, where each entry contains the variance modelling results for a single block.
          */
         std::vector<Results> per_block;
+
+        /**
+         * Average across blocks for all statistics in `per_block`.
+         */
+        Results average;
     };
 
 private:
@@ -557,75 +581,39 @@ public:
      * @param[in] block Pointer to an array of block identifiers, see `run_blocked()` for details.
      *
      * @return A `BlockResults` object containing the results of the variance modelling in each block.
+     * An average for each statistic is also computed by default unless `set_compute_average()` is set to `false`.
      */
     template<typename Value_, typename Index_, typename Block_>
     BlockResults run_blocked(const tatami::Matrix<Value_, Index_>* mat, const Block_* block) const {
         int nblocks = (block ? count_ids(mat->ncol(), block) : 1);
-        BlockResults output(mat->nrow(), nblocks);
+        BlockResults output(mat->nrow(), nblocks, compute_average);
 
         std::vector<double*> mean_ptr, var_ptr, fit_ptr, resid_ptr;
         fill_pointers(nblocks, output, mean_ptr, var_ptr, fit_ptr, resid_ptr);
 
-        run_blocked(mat, block, std::move(mean_ptr), std::move(var_ptr), std::move(fit_ptr), std::move(resid_ptr));
-        return output;
-    }
-
-public:
-    /**
-     * @brief Results of variance modelling with average statistics across blocks.
-     *
-     * Meaningful instances of this object should generally be constructed by calling the `ModelGeneVariances::run_blocked_with_average()` method.
-     * Empty instances can be default-constructed as placeholders.
-     */
-    struct AverageBlockResults : public BlockResults {
-        /**
-         * @cond
-         */
-        AverageBlockResults() {}
-
-        AverageBlockResults(size_t ngenes, int nblocks) : BlockResults(ngenes, nblocks), average(ngenes) {}
-        /**
-         * @endcond
-         */
-
-        /**
-         * Average across blocks for all statistics in `per_block`.
-         */
-        Results average;
-    };
-
-    /** 
-     * Compute and model the per-feature variances from a log-expression matrix with blocking, see `run_blocked_with_average()` for details.
-     *
-     * @tparam Value_ Data type of the matrix.
-     * @tparam Index_ Integer type for the row/column indices.
-     * @tparam Block_ Integer type, to hold the block IDs.
-     *
-     * @param mat Pointer to a feature-by-cells **tatami** matrix containing log-expression values.
-     * @param[in] block Pointer to an array of block identifiers, see `run_blocked()` for details.
-     *
-     * @return An `AverageBlockResults` object containing the results of the variance modelling in each block, along with the average statistics across blocks.
-     */
-    template<typename Value_, typename Index_, typename Block_>
-    AverageBlockResults run_blocked_with_average(const tatami::Matrix<Value_, Index_>* mat, const Block_* block) const {
-        int nblocks = (block ? count_ids(mat->ncol(), block) : 1);
-        AverageBlockResults output(mat->nrow(), nblocks);
-
-        std::vector<double*> mean_ptr, var_ptr, fit_ptr, resid_ptr;
-        fill_pointers(nblocks, output, mean_ptr, var_ptr, fit_ptr, resid_ptr);
-
-        run_blocked_with_average(
-            mat, 
-            block, 
-            std::move(mean_ptr), 
-            std::move(var_ptr), 
-            std::move(fit_ptr), 
-            std::move(resid_ptr),
-            output.average.means.data(),
-            output.average.variances.data(),
-            output.average.fitted.data(),
-            output.average.residuals.data()
-        );
+        if (compute_average) {
+            run_blocked(
+                mat, 
+                block, 
+                std::move(mean_ptr), 
+                std::move(var_ptr), 
+                std::move(fit_ptr), 
+                std::move(resid_ptr),
+                output.average.means.data(), 
+                output.average.variances.data(), 
+                output.average.fitted.data(), 
+                output.average.residuals.data() 
+            );
+        } else {
+            run_blocked(
+                mat, 
+                block, 
+                std::move(mean_ptr), 
+                std::move(var_ptr), 
+                std::move(fit_ptr), 
+                std::move(resid_ptr)
+            );
+        }
 
         return output;
     }

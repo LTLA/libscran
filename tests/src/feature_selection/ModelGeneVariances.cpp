@@ -76,7 +76,10 @@ TEST_P(ModelGeneVariancesTest, BlockedStats) {
     }
 
     scran::ModelGeneVariances varfun;
+    varfun.set_compute_average(false);
     auto res = varfun.run_blocked(dense_row.get(), blocks.data());
+    EXPECT_TRUE(res.average.means.empty());
+    EXPECT_TRUE(res.average.variances.empty());
 
     auto nthreads = GetParam();
     varfun.set_num_threads(nthreads);
@@ -114,9 +117,10 @@ TEST_P(ModelGeneVariancesTest, BlockedStats) {
     }
 
     // Checking averages with equiweighting.
+    varfun.set_compute_average(true);
     varfun.set_block_weight_policy(scran::WeightPolicy::EQUAL);
     {
-        auto ares = varfun.run_blocked_with_average(dense_row.get(), blocks.data());
+        auto ares = varfun.run_blocked(dense_row.get(), blocks.data());
         EXPECT_EQ(ares.per_block[0].means, res.per_block[0].means);
         EXPECT_EQ(ares.per_block[1].variances, res.per_block[1].variances);
         EXPECT_EQ(ares.per_block[2].fitted, res.per_block[2].fitted);
@@ -150,7 +154,7 @@ TEST_P(ModelGeneVariancesTest, BlockedStats) {
         varfun.set_block_weight_policy(scran::WeightPolicy::VARIABLE);
         varfun.set_variable_block_weight_parameters(scran::VariableBlockWeightParameters(0, 0));
 
-        auto vres = varfun.run_blocked_with_average(dense_row.get(), blocks.data());
+        auto vres = varfun.run_blocked(dense_row.get(), blocks.data());
         compare_almost_equal(ares.average.means, vres.average.means);
         compare_almost_equal(ares.average.variances, vres.average.variances);
         compare_almost_equal(ares.average.fitted, vres.average.fitted);
@@ -160,7 +164,7 @@ TEST_P(ModelGeneVariancesTest, BlockedStats) {
     // Checking averages without equiweighting.
     varfun.set_block_weight_policy(scran::WeightPolicy::NONE);
     {
-        auto ares = varfun.run_blocked_with_average(dense_row.get(), blocks.data());
+        auto ares = varfun.run_blocked(dense_row.get(), blocks.data());
         auto block_size = scran::tabulate_ids(blocks.size(), blocks.data());
 
         std::vector<double> expected_means(dense_row->nrow()), 
@@ -191,7 +195,7 @@ TEST_P(ModelGeneVariancesTest, BlockedStats) {
         varfun.set_block_weight_policy(scran::WeightPolicy::VARIABLE);
         varfun.set_variable_block_weight_parameters(scran::VariableBlockWeightParameters(0, 100000));
 
-        auto vres = varfun.run_blocked_with_average(dense_row.get(), blocks.data());
+        auto vres = varfun.run_blocked(dense_row.get(), blocks.data());
         compare_almost_equal(ares.average.means, vres.average.means);
         compare_almost_equal(ares.average.variances, vres.average.variances);
         compare_almost_equal(ares.average.fitted, vres.average.fitted);
