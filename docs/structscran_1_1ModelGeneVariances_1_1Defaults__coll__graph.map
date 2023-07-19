@@ -1,0 +1,5 @@
+<map id="scran::ModelGeneVariances::Defaults" name="scran::ModelGeneVariances::Defaults">
+<area shape="rect" id="Node000001" title="Default parameters for variance modelling." alt="" coords="5,124,189,165"/>
+<area shape="rect" id="Node000002" href="$structscran_1_1VariableBlockWeightParameters.html" title="Parameters for variable_block_weight()." alt="" coords="7,5,187,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,61,100,123,94,123,94,61"/>
+</map>

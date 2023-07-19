@@ -1,5 +1,0 @@
-<map id="scran::ModelGeneVar::BlockResults" name="scran::ModelGeneVar::BlockResults">
-<area shape="rect" id="Node000001" title="Results of variance modelling with blocks." alt="" coords="9,5,154,46"/>
-<area shape="rect" id="Node000002" href="$structscran_1_1ModelGeneVar_1_1AverageBlockResults.html" title="Results of variance modelling with average statistics across blocks." alt="" coords="5,94,158,135"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,61,84,94,79,94,79,61"/>
-</map>

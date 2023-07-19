@@ -3,7 +3,7 @@ var searchData=
   ['pairwiseeffects_0',['PairwiseEffects',['../classscran_1_1PairwiseEffects.html',1,'scran']]],
   ['pairwiseeffects_2ehpp_1',['PairwiseEffects.hpp',['../PairwiseEffects_8hpp.html',1,'']]],
   ['pcs_2',['pcs',['../structscran_1_1MultiBatchPca_1_1Results.html#af9a778bbf9b2ed871a45e29a698f6093',1,'scran::MultiBatchPca::Results::pcs'],['../structscran_1_1ResidualPca_1_1Results.html#a73db50ec7ff678a3c678a91206989a13',1,'scran::ResidualPca::Results::pcs'],['../structscran_1_1SimplePca_1_1Results.html#ab01da322f6d4a36d8a3055eeeb68f659',1,'scran::SimplePca::Results::pcs']]],
-  ['per_5fblock_3',['per_block',['../structscran_1_1ModelGeneVar_1_1BlockResults.html#a7ace71940c693a5cd25d68a660950800',1,'scran::ModelGeneVar::BlockResults']]],
+  ['per_5fblock_3',['per_block',['../structscran_1_1ModelGeneVariances_1_1BlockResults.html#a3ba5667667ec5811ad5a83f5786eb601',1,'scran::ModelGeneVariances::BlockResults']]],
   ['percelladtqcmetrics_4',['PerCellAdtQcMetrics',['../classscran_1_1PerCellAdtQcMetrics.html',1,'scran']]],
   ['percelladtqcmetrics_2ehpp_5',['PerCellAdtQcMetrics.hpp',['../PerCellAdtQcMetrics_8hpp.html',1,'']]],
   ['percellcrisprqcmetrics_6',['PerCellCrisprQcMetrics',['../classscran_1_1PerCellCrisprQcMetrics.html',1,'scran']]],

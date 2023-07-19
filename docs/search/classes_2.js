@@ -1,7 +1,7 @@
 var searchData=
 [
   ['centersizefactors_0',['CenterSizeFactors',['../classscran_1_1CenterSizeFactors.html',1,'scran']]],
-  ['choosehvgs_1',['ChooseHVGs',['../classscran_1_1ChooseHVGs.html',1,'scran']]],
+  ['choosehvgs_1',['ChooseHvgs',['../classscran_1_1ChooseHvgs.html',1,'scran']]],
   ['chooseoutlierfilters_2',['ChooseOutlierFilters',['../structscran_1_1ChooseOutlierFilters.html',1,'scran']]],
   ['choosepseudocount_3',['ChoosePseudoCount',['../classscran_1_1ChoosePseudoCount.html',1,'scran']]],
   ['clustersnngraphleiden_4',['ClusterSnnGraphLeiden',['../classscran_1_1ClusterSnnGraphLeiden.html',1,'scran']]],
