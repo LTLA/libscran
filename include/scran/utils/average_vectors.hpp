@@ -22,6 +22,20 @@ namespace scran {
  */
 template<bool check_nan_ = true, bool weighted_, typename Stat_, typename Weight_, typename Output_>
 void average_vectors_internal(size_t n, std::vector<Stat_*> in, const Weight_* w, Output_* out) {
+    if (in.empty()) {
+        std::fill(out, out + n, std::numeric_limits<Output_>::quiet_NaN());
+        return;
+    } else if (in.size() == 1) {
+        if constexpr(weighted_) {
+            if (w[0] == 0) {
+                std::fill(out, out + n, std::numeric_limits<Output_>::quiet_NaN());
+                return;
+            }
+        } 
+        std::copy(in[0], in[0] + n, out);
+        return;
+    }
+
     std::fill(out, out + n, 0);
     typename std::conditional<check_nan_, std::vector<Weight_>, size_t>::type accumulated(n);
 
@@ -135,12 +149,32 @@ std::vector<Output_> average_vectors(size_t n, std::vector<Stat_*> in) {
  * @param n Length of each array.
  * @param[in] in Vector of pointers to input arrays of length `n`.
  * @param[in] w Pointer to an array of length equal to `in.size()`, containing the weight to use for each input array.
+ * Weights should be non-negative and finite.
  * @param[out] out Pointer to an output array of length `n`.
  * On output, `out` is filled with the weighted average of all arrays in `in`.
  * Specifically, each element of `out` is set to the weighted average of the corresponding elements across all `in` arrays.
  */
 template<bool check_nan_ = true, typename Stat_, typename Weight_, typename Output_>
 void average_vectors_weighted(size_t n, std::vector<Stat_*> in, const Weight_* w, Output_* out) {
+    if (!in.empty()) {
+        bool same = true;
+        for (size_t i = 1, end = in.size(); i < end; ++i) {
+            if (w[i] != w[0]) {
+                same = false;
+                break;
+            }
+        }
+
+        if (same) {
+            if (w[0] == 0) {
+                std::fill(out, out + n, std::numeric_limits<Output_>::quiet_NaN());
+            } else {
+                average_vectors<check_nan_>(n, std::move(in), out);
+            }
+            return;
+        }
+    }
+
     average_vectors_internal<check_nan_, true>(n, std::move(in), w, out);
     return;
 }
@@ -156,6 +190,7 @@ void average_vectors_weighted(size_t n, std::vector<Stat_*> in, const Weight_* w
  * @param n Length of each array.
  * @param[in] in Vector of pointers to input arrays of the same length.
  * @param[in] w Pointer to an array of length equal to `in.size()`, containing the weight to use for each input array.
+ * Weights should be non-negative and finite.
  *
  * @return A vector is returned containing with the average of all arrays in `in`.
  */

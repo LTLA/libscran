@@ -3,6 +3,14 @@
 #include "scran/utils/average_vectors.hpp"
 #include <vector>
 
+static int full_of_nans(const std::vector<double>& vec) {
+    int nan_count = 0;
+    for (auto x : vec) {
+        nan_count += std::isnan(x);
+    }
+    return nan_count;
+}
+
 TEST(AverageVectors, Simple) {
     std::vector<std::vector<double> > stuff {
         std::vector<double>{1, 2, 3, 4, 5},
@@ -13,6 +21,13 @@ TEST(AverageVectors, Simple) {
     auto out = scran::average_vectors(5, std::vector<double*>{stuff[0].data(), stuff[1].data(), stuff[2].data()});
     std::vector<double> ref {2, 10.0/3, 8.0/3, 13/3.0, 5.0};
     EXPECT_EQ(out, ref);
+
+    // Optimization when there's just one, or none.
+    auto out_opt = scran::average_vectors(5, std::vector<double*>{stuff[0].data()});
+    EXPECT_EQ(out_opt, stuff[0]);
+
+    auto out_opt2 = scran::average_vectors(5, std::vector<double*>{});
+    EXPECT_EQ(full_of_nans(out_opt2), out_opt2.size());
 }
 
 TEST(AverageVectors, Missings) {
@@ -57,4 +72,19 @@ TEST(AverageVectors, Weighted) {
     auto out3 = scran::average_vectors_weighted(5, ptrs, weights3.data());
     std::vector<double> ref3{ 2.250, 3.375, 2.500, 4.625, 5.375 };
     EXPECT_EQ(out3, ref3);
+
+    // Optimizations.
+    auto out_opt = scran::average_vectors_weighted(5, std::vector<double*>{stuff[0].data()}, weights1.data());
+    EXPECT_EQ(out_opt, stuff[0]);
+
+    auto out_opt2 = scran::average_vectors_weighted(5, std::vector<double*>{}, weights1.data());
+    EXPECT_EQ(full_of_nans(out_opt2), out_opt2.size());
+
+    double empty_weight = 0;
+    auto out_opt3 = scran::average_vectors_weighted(5, std::vector<double*>{ stuff[1].data() }, &empty_weight);
+    EXPECT_EQ(full_of_nans(out_opt3), out_opt3.size());
+
+    std::vector<double> empty_weights(3);
+    auto out_opt4 = scran::average_vectors_weighted(5, std::vector<double*>{stuff[0].data(), stuff[1].data(), stuff[2].data()}, empty_weights.data());
+    EXPECT_EQ(full_of_nans(out_opt4), out_opt4.size());
 }
