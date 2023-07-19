@@ -41,8 +41,8 @@ add_executable(
     src/dimensionality_reduction/MultiBatchPca.cpp
     src/dimensionality_reduction/ScaleByNeighbors.cpp
 
-    src/clustering/BuildSNNGraph.cpp
-    src/clustering/ClusterSNNGraph.cpp
+    src/clustering/BuildSnnGraph.cpp
+    src/clustering/ClusterSnnGraph.cpp
 
     src/differential_analysis/summarize_comparisons.cpp
     src/differential_analysis/auc.cpp

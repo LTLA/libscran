@@ -3,7 +3,7 @@
 
 #include "../utils/macros.hpp"
 
-#include "BuildSNNGraph.hpp"
+#include "BuildSnnGraph.hpp"
 
 #include <vector>
 #include <algorithm>
@@ -12,7 +12,7 @@
 #include "igraph_utils.hpp"
 
 /**
- * @file ClusterSNNGraph.hpp
+ * @file ClusterSnnGraph.hpp
  *
  * @brief Identify clusters of cells from a shared nearest-neighbor graph.
  */
@@ -25,7 +25,7 @@ namespace scran {
  * This applies multi-level (i.e., "Louvain") clustering on a shared nearest neighbor graph.
  * See [here](https://igraph.org/c/doc/igraph-Community.html#igraph_community_multilevel) for more details on the multi-level algorithm. 
  */
-class ClusterSNNGraphMultiLevel {
+class ClusterSnnGraphMultiLevel {
 public:
     /**
      * @brief Default parameter settings.
@@ -50,9 +50,9 @@ public:
     /**
      * @param s Seed for the default **igraph** random number generator.
      * 
-     * @return A reference to this `ClusterSNNGraphMultiLevel` object.
+     * @return A reference to this `ClusterSnnGraphMultiLevel` object.
      */
-    ClusterSNNGraphMultiLevel& set_seed(int s = Defaults::seed) {
+    ClusterSnnGraphMultiLevel& set_seed(int s = Defaults::seed) {
         seed = s;
         return *this;
     }
@@ -61,9 +61,9 @@ public:
      * @param r Resolution of the clustering, must be non-negative.
      * Lower values favor fewer, larger communities; higher values favor more, smaller communities.
      *
-     * @return A reference to this `ClusterSNNGraphMultiLevel` object.
+     * @return A reference to this `ClusterSnnGraphMultiLevel` object.
      */
-    ClusterSNNGraphMultiLevel& set_resolution(double r = Defaults::resolution) {
+    ClusterSnnGraphMultiLevel& set_resolution(double r = Defaults::resolution) {
         resolution = r;
         return *this;
     }
@@ -72,7 +72,7 @@ public:
     /**
      * @brief Result of the **igraph** multi-level community detection algorithm.
      *
-     * Instances should be constructed using the `ClusterSNNGraphMultiLevel::run()` methods.
+     * Instances should be constructed using the `ClusterSnnGraphMultiLevel::run()` methods.
      * A separate set of clustering results are reported for each level.
      * The level providing the highest modularity is also reported; the clustering at this level is usually a good default choice.
      */
@@ -105,18 +105,18 @@ public:
     /**
      * Run the multi-level community detection algorithm on a shared nearest-neighbor graph constructed from `knncolle::Base` object.
      *
-     * @param store SNN graph built by `BuildSNNGraph::run()`.
+     * @param store SNN graph built by `BuildSnnGraph::run()`.
      *
      * @return A `Results` object containing the clustering results for all cells.
      */
-    Results run(const BuildSNNGraph::Results& store) const {
+    Results run(const BuildSnnGraph::Results& store) const {
         return run(store.to_igraph(), store.weights.data());
     }
 
     /**
      * Run the multi-level community detection algorithm on a pre-constructed shared nearest-neighbor graph as a `Graph` object.
      *
-     * @param graph An existing `igraph::Graph` object, typically built by `BuildSNNGraph::Results::to_igraph()`.
+     * @param graph An existing `igraph::Graph` object, typically built by `BuildSnnGraph::Results::to_igraph()`.
      * @param weights Pointer to an array of weights of length equal to the number of edges in `graph`. 
      *
      * @return A `Results` object containing the clustering results for all cells.
@@ -170,7 +170,7 @@ public:
  * This applies Walktrap clustering on a shared nearest neighbor graph.
  * See [here](https://igraph.org/c/doc/igraph-Community.html#igraph_community_walktrap) for more details on the Walktrap algorithm. 
  */
-class ClusterSNNGraphWalktrap {
+class ClusterSnnGraphWalktrap {
 public:
     /**
      * @brief Default parameter settings.
@@ -190,9 +190,9 @@ public:
     /**
      * @param s Number of steps of the random walk.
      *
-     * @return A reference to this `ClusterSNNGraphWalktrap` object.
+     * @return A reference to this `ClusterSnnGraphWalktrap` object.
      */
-    ClusterSNNGraphWalktrap& set_steps(int s = Defaults::steps) {
+    ClusterSnnGraphWalktrap& set_steps(int s = Defaults::steps) {
         steps = s;
         return *this;
     }
@@ -201,7 +201,7 @@ public:
     /**
      * @brief Result of the **igraph** Walktrap community detection algorithm.
      * 
-     * Instances should be constructed using the `ClusterSNNGraphWalktrap::run()` methods.
+     * Instances should be constructed using the `ClusterSnnGraphWalktrap::run()` methods.
      */
     struct Results {
         /** 
@@ -231,18 +231,18 @@ public:
     /**
      * Run the Walktrap community detection algorithm on a shared nearest-neighbor graph constructed from `knncolle::Base` object.
      *
-     * @param store SNN graph built by `BuildSNNGraph::run()`.
+     * @param store SNN graph built by `BuildSnnGraph::run()`.
      *
      * @return A `Results` object containing the clustering results for all cells.
      */
-    Results run(const BuildSNNGraph::Results& store) const {
+    Results run(const BuildSnnGraph::Results& store) const {
         return run(store.to_igraph(), store.weights.data());
     }
 
     /**
      * Run the Walktrap community detection algorithm on a pre-constructed shared nearest-neighbor graph as a `Graph` object.
      *
-     * @param graph An existing `igraph::Graph` object, typically built by `BuildSNNGraph::Results::to_igraph()`.
+     * @param graph An existing `igraph::Graph` object, typically built by `BuildSnnGraph::Results::to_igraph()`.
      * @param weights Pointer to an array of weights of length equal to the number of edges in `graph`. 
      *
      * @return A `Results` object containing the clustering results for all cells.
@@ -294,7 +294,7 @@ public:
  * This applies Leiden clustering on a shared nearest neighbor graph.
  * See [here](https://igraph.org/c/doc/igraph-Community.html#igraph_community_leiden) for more details on the Leiden algorithm. 
  */
-class ClusterSNNGraphLeiden {
+class ClusterSnnGraphLeiden {
 public:
     /**
      * @brief Default parameter settings.
@@ -341,9 +341,9 @@ public:
     /**
      * @param s Seed for the default **igraph** random number generator.
      * 
-     * @return A reference to this `ClusterSNNGraphLeiden` object.
+     * @return A reference to this `ClusterSnnGraphLeiden` object.
      */
-    ClusterSNNGraphLeiden& set_seed(int s = Defaults::seed) {
+    ClusterSnnGraphLeiden& set_seed(int s = Defaults::seed) {
         seed = s;
         return *this;
     }
@@ -352,9 +352,9 @@ public:
      * @param r Resolution of the clustering.
      * Larger values result in more fine-grained communities.
      *
-     * @return A reference to this `ClusterSNNGraphLeiden` object.
+     * @return A reference to this `ClusterSnnGraphLeiden` object.
      */
-    ClusterSNNGraphLeiden& set_resolution(double r = Defaults::resolution) {
+    ClusterSnnGraphLeiden& set_resolution(double r = Defaults::resolution) {
         resolution = r;
         return *this;
     }
@@ -362,9 +362,9 @@ public:
     /**
      * @param b Level of randomness used during refinement.
      *
-     * @return A reference to this `ClusterSNNGraphLeiden` object.
+     * @return A reference to this `ClusterSnnGraphLeiden` object.
      */
-    ClusterSNNGraphLeiden& set_beta(double b = Defaults::beta) {
+    ClusterSnnGraphLeiden& set_beta(double b = Defaults::beta) {
         beta = b;
         return *this;
     }
@@ -373,9 +373,9 @@ public:
      * @param i Number of iterations of the Leiden algorithm.
      * More iterations can improve separation at the cost of computational time.
      *
-     * @return A reference to this `ClusterSNNGraphLeiden` object.
+     * @return A reference to this `ClusterSnnGraphLeiden` object.
      */
-    ClusterSNNGraphLeiden& set_iterations(int i = Defaults::iterations) {
+    ClusterSnnGraphLeiden& set_iterations(int i = Defaults::iterations) {
         iterations = i;
         return *this;
     }
@@ -385,9 +385,9 @@ public:
      *
      * The modularity is closely related to the Constant Potts Model, but the magnitude of the resolution is different.
      *
-     * @return A reference to this `ClusterSNNGraphLeiden` object.
+     * @return A reference to this `ClusterSnnGraphLeiden` object.
      */
-    ClusterSNNGraphLeiden& set_modularity(bool m = Defaults::modularity) {
+    ClusterSnnGraphLeiden& set_modularity(bool m = Defaults::modularity) {
         modularity = m;
         return *this;
     }
@@ -396,7 +396,7 @@ public:
     /**
      * @brief Result of the **igraph** leiden community detection algorithm.
      *
-     * Instances should be constructed using the `ClusterSNNGraphLeiden::run()` methods.
+     * Instances should be constructed using the `ClusterSnnGraphLeiden::run()` methods.
      */
     struct Results {
         /** 
@@ -419,18 +419,18 @@ public:
     /**
      * Run the Leiden community detection algorithm on a shared nearest-neighbor graph constructed from `knncolle::Base` object.
      *
-     * @param store SNN graph built by `BuildSNNGraph::run()`.
+     * @param store SNN graph built by `BuildSnnGraph::run()`.
      *
      * @return A `Results` object containing the clustering results for all cells.
      */
-    Results run(const BuildSNNGraph::Results& store) const {
+    Results run(const BuildSnnGraph::Results& store) const {
         return run(store.to_igraph(), store.weights.data());
     }
 
     /**
      * Run the Leiden community detection algorithm on a pre-constructed shared nearest-neighbor graph as a `Graph` object.
      *
-     * @param graph An existing `igraph::Graph` object, typically built by `BuildSNNGraph::Results::to_igraph()`.
+     * @param graph An existing `igraph::Graph` object, typically built by `BuildSnnGraph::Results::to_igraph()`.
      * @param weights Pointer to an array of weights of length equal to the number of edges in `graph`. 
      *
      * @return A `Results` object containing the clustering results for all cells.

@@ -10,8 +10,8 @@
 #include "feature_set_enrichment/ScoreFeatureSet.hpp"
 
 #if __has_include("igraph.h")
-#include "clustering/BuildSNNGraph.hpp"
-#include "clustering/ClusterSNNGraph.hpp"
+#include "clustering/BuildSnnGraph.hpp"
+#include "clustering/ClusterSnnGraph.hpp"
 #endif
 
 #include "differential_analysis/ScoreMarkers.hpp"

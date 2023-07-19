@@ -41,8 +41,8 @@ int npcs = 20;
 auto pca_res = scran::SimplePca().set_rank(npcs).run(normalized.get(), keep.data());
 
 // Performing clustering.
-auto graph = scran::BuildSNNGraph().run(npcs, pca_res.pcs.cols(), pca_res.pcs.data());
-auto clust_res = scran::ClusterSNNGraphMultiLevel().run(graph);
+auto graph = scran::BuildSnnGraph().run(npcs, pca_res.pcs.cols(), pca_res.pcs.data());
+auto clust_res = scran::ClusterSnnGraphMultiLevel().run(graph);
 const auto& best_clustering = clust_res.membership[clust_res.max];
 
 // Throw in some marker detection.
@@ -75,7 +75,7 @@ Alternatively, the `BlockedPCA` and `MultiBatchPCA` classes can be used when dea
 
 **Clustering of cells** is performed using the per-cell PC scores.
 We provide several flavors of graph-based clustering from a shared-nearest neighbor graph,
-using community detection algorithms such as multi-level (`ClusterSNNGraphMultiLevel`), Leiden (`ClusterSNNGraphLeiden`) or Walktrap clustering (`ClusterSNNGraphWalktrap`).
+using community detection algorithms such as multi-level (`ClusterSnnGraphMultiLevel`), Leiden (`ClusterSnnGraphLeiden`) or Walktrap clustering (`ClusterSnnGraphWalktrap`).
 Developers can also easily apply other algorithms, e.g., [k-means](https://github.com/LTLA/CppKmeans).
 
 **Per-cluster marker detection** is performed based on pairwise comparisons between clusters.

@@ -1,17 +1,17 @@
 #include <gtest/gtest.h>
 
-#include "scran/clustering/ClusterSNNGraph.hpp"
+#include "scran/clustering/ClusterSnnGraph.hpp"
 #include "aarand/aarand.hpp"
 
 #include <random>
 #include <cmath>
 #include <map>
 
-class ClusterSNNGraphTestCore {
+class ClusterSnnGraphTestCore {
 protected:
     size_t nobs, ndim;
     std::vector<double> data;
-    scran::BuildSNNGraph::Results snngraph;
+    scran::BuildSnnGraph::Results snngraph;
 
     void assemble(int nd, int no, int nclusters, double scale, int seed) {
         std::mt19937_64 rng(seed);
@@ -27,7 +27,7 @@ protected:
             ++counter;
         }
 
-        scran::BuildSNNGraph builder;
+        scran::BuildSnnGraph builder;
         snngraph = builder.run(ndim, nobs, data.data());
     }
 
@@ -39,12 +39,12 @@ protected:
 /*************************************************************
  *************************************************************/
 
-class ClusterSNNGraphMultiLevelTest : public ClusterSNNGraphTestCore, public ::testing::Test {};
+class ClusterSnnGraphMultiLevelTest : public ClusterSnnGraphTestCore, public ::testing::Test {};
 
-TEST_F(ClusterSNNGraphMultiLevelTest, Basic) {
+TEST_F(ClusterSnnGraphMultiLevelTest, Basic) {
     assemble(42);
 
-    scran::ClusterSNNGraphMultiLevel cluster;
+    scran::ClusterSnnGraphMultiLevel cluster;
     auto output = cluster.run(snngraph);
 
     EXPECT_EQ(output.membership.size(), output.modularity.size());
@@ -70,10 +70,10 @@ TEST_F(ClusterSNNGraphMultiLevelTest, Basic) {
     EXPECT_TRUE(has_multiple);
 }
 
-TEST_F(ClusterSNNGraphMultiLevelTest, Parameters) {
+TEST_F(ClusterSnnGraphMultiLevelTest, Parameters) {
     assemble(43);
 
-    scran::ClusterSNNGraphMultiLevel cluster;
+    scran::ClusterSnnGraphMultiLevel cluster;
     auto ref = cluster.run(snngraph);
 
     // Checking that the resolution has an effect.
@@ -85,17 +85,17 @@ TEST_F(ClusterSNNGraphMultiLevelTest, Parameters) {
     }
 }
 
-TEST_F(ClusterSNNGraphMultiLevelTest, Seeding) {
+TEST_F(ClusterSnnGraphMultiLevelTest, Seeding) {
     assemble(44);
 
     // We need to drop the number of neighbors to get more ambiguity so
     // that the seed has an effect.
-    scran::BuildSNNGraph builder;
+    scran::BuildSnnGraph builder;
     builder.set_neighbors(5);
     auto snngraph2 = builder.run(ndim, nobs, data.data());
 
     // Using the same seed... 
-    scran::ClusterSNNGraphMultiLevel cluster;
+    scran::ClusterSnnGraphMultiLevel cluster;
     auto ref1 = cluster.run(snngraph2);
     auto ref2 = cluster.run(snngraph2);
     EXPECT_EQ(ref1.modularity, ref2.modularity);
@@ -110,12 +110,12 @@ TEST_F(ClusterSNNGraphMultiLevelTest, Seeding) {
 /*************************************************************
  *************************************************************/
 
-class ClusterSNNGraphLeidenTest : public ClusterSNNGraphTestCore, public ::testing::Test {};
+class ClusterSnnGraphLeidenTest : public ClusterSnnGraphTestCore, public ::testing::Test {};
 
-TEST_F(ClusterSNNGraphLeidenTest, Basic) {
+TEST_F(ClusterSnnGraphLeidenTest, Basic) {
     assemble(66);
 
-    scran::ClusterSNNGraphLeiden cluster;
+    scran::ClusterSnnGraphLeiden cluster;
     auto output = cluster.run(snngraph);
 
     EXPECT_EQ(output.membership.size(), nobs);
@@ -123,10 +123,10 @@ TEST_F(ClusterSNNGraphLeidenTest, Basic) {
     EXPECT_TRUE(output.quality > 0);
 }
 
-TEST_F(ClusterSNNGraphLeidenTest, Parameters) {
+TEST_F(ClusterSnnGraphLeidenTest, Parameters) {
     assemble(67);
 
-    scran::ClusterSNNGraphLeiden cluster;
+    scran::ClusterSnnGraphLeiden cluster;
     auto ref = cluster.run(snngraph);
 
     {
@@ -146,7 +146,7 @@ TEST_F(ClusterSNNGraphLeidenTest, Parameters) {
     // Need to drop this lower so that there's more ambiguity,
     // such that the differences in the parameters may manifest.
     {
-        scran::BuildSNNGraph builder;
+        scran::BuildSnnGraph builder;
         builder.set_neighbors(5);
         auto snngraph2 = builder.run(ndim, nobs, data.data());
         auto fine_ref = cluster.run(snngraph2);
@@ -167,15 +167,15 @@ TEST_F(ClusterSNNGraphLeidenTest, Parameters) {
     }
 }
 
-TEST_F(ClusterSNNGraphLeidenTest, Seeding) {
+TEST_F(ClusterSnnGraphLeidenTest, Seeding) {
     assemble(67);
 
-    scran::BuildSNNGraph builder;
+    scran::BuildSnnGraph builder;
     builder.set_neighbors(5);
     auto snngraph2 = builder.run(ndim, nobs, data.data());
 
     // Using the same seed... 
-    scran::ClusterSNNGraphLeiden cluster;
+    scran::ClusterSnnGraphLeiden cluster;
     auto ref1 = cluster.run(snngraph2);
     auto ref2 = cluster.run(snngraph2);
     EXPECT_EQ(ref1.membership, ref2.membership);
@@ -189,12 +189,12 @@ TEST_F(ClusterSNNGraphLeidenTest, Seeding) {
 /*************************************************************
  *************************************************************/
 
-class ClusterSNNGraphWalktrapTest : public ClusterSNNGraphTestCore, public ::testing::Test {};
+class ClusterSnnGraphWalktrapTest : public ClusterSnnGraphTestCore, public ::testing::Test {};
 
-TEST_F(ClusterSNNGraphWalktrapTest, Basic) {
+TEST_F(ClusterSnnGraphWalktrapTest, Basic) {
     assemble(72);
 
-    scran::ClusterSNNGraphWalktrap cluster;
+    scran::ClusterSnnGraphWalktrap cluster;
     auto output = cluster.run(snngraph);
 
     EXPECT_EQ(output.membership.size(), nobs);
@@ -203,10 +203,10 @@ TEST_F(ClusterSNNGraphWalktrapTest, Basic) {
     EXPECT_TRUE(*std::max_element(output.membership.begin(), output.membership.end()) > 0); // at least two clusters
 }
 
-TEST_F(ClusterSNNGraphWalktrapTest, Parameters) {
+TEST_F(ClusterSnnGraphWalktrapTest, Parameters) {
     assemble(73);
 
-    scran::ClusterSNNGraphWalktrap cluster;
+    scran::ClusterSnnGraphWalktrap cluster;
     auto ref = cluster.run(snngraph);
 
     {
@@ -229,7 +229,7 @@ TEST_F(ClusterSNNGraphWalktrapTest, Parameters) {
 /*************************************************************
  *************************************************************/
 
-class ClusterSNNGraphSanityTest : public ClusterSNNGraphTestCore, public ::testing::Test {
+class ClusterSnnGraphSanityTest : public ClusterSnnGraphTestCore, public ::testing::Test {
 protected:
     int nclusters =4;
 
@@ -261,22 +261,22 @@ protected:
     }
 };
 
-TEST_F(ClusterSNNGraphSanityTest, MultiLevel) {
-    scran::ClusterSNNGraphMultiLevel cluster;
+TEST_F(ClusterSnnGraphSanityTest, MultiLevel) {
+    scran::ClusterSnnGraphMultiLevel cluster;
     cluster.set_resolution(0.5);
     auto output = cluster.run(snngraph);
     validate(output.membership[output.max]);
 }
 
-TEST_F(ClusterSNNGraphSanityTest, Leiden) {
-    scran::ClusterSNNGraphLeiden cluster;
+TEST_F(ClusterSnnGraphSanityTest, Leiden) {
+    scran::ClusterSnnGraphLeiden cluster;
     cluster.set_resolution(0.5);
     auto output = cluster.run(snngraph);
     validate(output.membership);
 }
 
-TEST_F(ClusterSNNGraphSanityTest, Walktrap) {
-    scran::ClusterSNNGraphWalktrap cluster;
+TEST_F(ClusterSnnGraphSanityTest, Walktrap) {
+    scran::ClusterSnnGraphWalktrap cluster;
     auto output = cluster.run(snngraph);
     validate(output.membership);
 }

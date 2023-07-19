@@ -1,14 +1,14 @@
 #include <gtest/gtest.h>
 #include "../utils/macros.h"
 
-#include "scran/clustering/BuildSNNGraph.hpp"
+#include "scran/clustering/BuildSnnGraph.hpp"
 
 #include <random>
 #include <cmath>
 #include <map>
 
 template<class PARAM>
-class BuildSNNGraphTestCore : public ::testing::TestWithParam<PARAM> {
+class BuildSnnGraphTestCore : public ::testing::TestWithParam<PARAM> {
 protected:
     size_t nobs, ndim;
     std::vector<double> data;
@@ -27,7 +27,7 @@ protected:
 
     typedef std::tuple<int, int, double> WeightedEdge;
 
-    std::deque<WeightedEdge> convert_to_deque(const scran::BuildSNNGraph::Results& res) {
+    std::deque<WeightedEdge> convert_to_deque(const scran::BuildSnnGraph::Results& res) {
         std::deque<WeightedEdge> expected;
         for (size_t e = 0; e < res.weights.size(); ++e) {
             expected.emplace_back(res.edges[e*2], res.edges[e*2+1], res.weights[e]);
@@ -39,9 +39,9 @@ protected:
 /*****************************************
  *****************************************/
 
-class BuildSNNGraphRefTest : public BuildSNNGraphTestCore<std::tuple<int, int, int, scran::BuildSNNGraph::Scheme, int> > {
+class BuildSnnGraphRefTest : public BuildSnnGraphTestCore<std::tuple<int, int, int, scran::BuildSnnGraph::Scheme, int> > {
 protected:
-    std::deque<WeightedEdge> reference(size_t ndims, size_t ncells, const double* mat, int k, scran::BuildSNNGraph::Scheme scheme) {
+    std::deque<WeightedEdge> reference(size_t ndims, size_t ncells, const double* mat, int k, scran::BuildSnnGraph::Scheme scheme) {
         std::deque<WeightedEdge> output;
         knncolle::VpTreeEuclidean<> vp(ndims, ncells, mat);
 
@@ -62,7 +62,7 @@ protected:
                     size_t candidate = (r == 0 ? j : static_cast<size_t>(neighbors_of_neighbors[r-1].first));
                     auto rIt = rankings.find(candidate);
                     if (rIt != rankings.end()) {
-                        if (scheme == scran::BuildSNNGraph::RANKED) {
+                        if (scheme == scran::BuildSnnGraph::RANKED) {
                             double otherrank = rIt->second + r;
                             if (!found || otherrank < weight) {
                                 weight = otherrank;
@@ -77,9 +77,9 @@ protected:
                 }
 
                 if (found) {
-                    if (scheme == scran::BuildSNNGraph::RANKED) {
+                    if (scheme == scran::BuildSnnGraph::RANKED) {
                         weight = static_cast<double>(neighbors.size()) - 0.5 * weight;
-                    } else if (scheme == scran::BuildSNNGraph::JACCARD) {
+                    } else if (scheme == scran::BuildSnnGraph::JACCARD) {
                         weight /= (2 * (neighbors.size() + 1) - weight);
                     }
                     output.emplace_back(i, j, std::max(weight, 1e-6));
@@ -91,14 +91,14 @@ protected:
     }
 };
 
-TEST_P(BuildSNNGraphRefTest, Reference) {
+TEST_P(BuildSnnGraphRefTest, Reference) {
     auto param = GetParam();
     assemble(param);
     int k = std::get<2>(param);
     auto scheme = std::get<3>(param);
     int nthreads = std::get<4>(param);
 
-    scran::BuildSNNGraph builder;
+    scran::BuildSnnGraph builder;
     builder.set_neighbors(k).set_weighting_scheme(scheme).set_num_threads(nthreads);
     auto res = builder.run(ndim, nobs, data.data());
 
@@ -114,13 +114,13 @@ TEST_P(BuildSNNGraphRefTest, Reference) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    BuildSNNGraph,
-    BuildSNNGraphRefTest,
+    BuildSnnGraph,
+    BuildSnnGraphRefTest,
     ::testing::Combine(
         ::testing::Values(10), // number of dimensions
         ::testing::Values(200), // number of observations
         ::testing::Values(2, 5, 10), // number of neighbors
-        ::testing::Values(scran::BuildSNNGraph::RANKED, scran::BuildSNNGraph::NUMBER, scran::BuildSNNGraph::JACCARD), // weighting scheme
+        ::testing::Values(scran::BuildSnnGraph::RANKED, scran::BuildSnnGraph::NUMBER, scran::BuildSnnGraph::JACCARD), // weighting scheme
         ::testing::Values(1, 3) // number of threads
     )
 );
@@ -128,15 +128,15 @@ INSTANTIATE_TEST_SUITE_P(
 /*****************************************
  *****************************************/
 
-class BuildSNNGraphSymmetryTest : public BuildSNNGraphTestCore<std::tuple<int, int, int, scran::BuildSNNGraph::Scheme> > {};
+class BuildSnnGraphSymmetryTest : public BuildSnnGraphTestCore<std::tuple<int, int, int, scran::BuildSnnGraph::Scheme> > {};
 
-TEST_P(BuildSNNGraphSymmetryTest, Symmetry) {
+TEST_P(BuildSnnGraphSymmetryTest, Symmetry) {
     auto param = GetParam();
     assemble(param);
     int k = std::get<2>(param);
     auto scheme = std::get<3>(param);
 
-    scran::BuildSNNGraph builder;
+    scran::BuildSnnGraph builder;
     builder.set_neighbors(k).set_weighting_scheme(scheme);
 
     // Checking for symmetry by flipping the matrix. The idea is that the
@@ -161,27 +161,27 @@ TEST_P(BuildSNNGraphSymmetryTest, Symmetry) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    BuildSNNGraph,
-    BuildSNNGraphSymmetryTest,
+    BuildSnnGraph,
+    BuildSnnGraphSymmetryTest,
     ::testing::Combine(
         ::testing::Values(10), // number of dimensions
         ::testing::Values(1000), // number of observations
         ::testing::Values(4, 9), // number of neighbors
-        ::testing::Values(scran::BuildSNNGraph::RANKED, scran::BuildSNNGraph::NUMBER, scran::BuildSNNGraph::JACCARD) // weighting scheme
+        ::testing::Values(scran::BuildSnnGraph::RANKED, scran::BuildSnnGraph::NUMBER, scran::BuildSnnGraph::JACCARD) // weighting scheme
     )
 );
 
 /*****************************************
  *****************************************/
 
-class BuildSNNGraphAnnoyTest : public BuildSNNGraphTestCore<std::tuple<int, int, int> > {};
+class BuildSnnGraphAnnoyTest : public BuildSnnGraphTestCore<std::tuple<int, int, int> > {};
 
-TEST_P(BuildSNNGraphAnnoyTest, Annoy) {
+TEST_P(BuildSnnGraphAnnoyTest, Annoy) {
     auto param = GetParam();
     assemble(param);
     int k = std::get<2>(param);
 
-    scran::BuildSNNGraph builder;
+    scran::BuildSnnGraph builder;
     builder.set_neighbors(k).set_approximate(true);
 
     auto output = builder.run(ndim, nobs, data.data());
@@ -190,8 +190,8 @@ TEST_P(BuildSNNGraphAnnoyTest, Annoy) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    BuildSNNGraph,
-    BuildSNNGraphAnnoyTest,
+    BuildSnnGraph,
+    BuildSnnGraphAnnoyTest,
     ::testing::Combine(
         ::testing::Values(5, 10), // number of dimensions
         ::testing::Values(100, 1000), // number of observations
@@ -207,7 +207,7 @@ TEST(IgraphUtils, GraphChecks) {
     std::normal_distribution distr;
     std::uniform_real_distribution distu;
 
-    scran::BuildSNNGraph::Results res;
+    scran::BuildSnnGraph::Results res;
     size_t nobs = 1001;
     res.ncells = nobs;
 

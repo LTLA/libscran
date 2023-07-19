@@ -30,8 +30,8 @@ int main(int argc, char * argv[]) {
     auto pca_res = scran::SimplePca().set_rank(npcs).run(normalized.get(), keep.data());
 
     // Performing clustering.
-    auto graph = scran::BuildSNNGraph().run(npcs, pca_res.pcs.cols(), pca_res.pcs.data());
-    auto clust_res = scran::ClusterSNNGraphMultiLevel().run(graph);
+    auto graph = scran::BuildSnnGraph().run(npcs, pca_res.pcs.cols(), pca_res.pcs.data());
+    auto clust_res = scran::ClusterSnnGraphMultiLevel().run(graph);
     const auto& best_clustering = clust_res.membership[clust_res.max];
 
     std::vector<int> counters;

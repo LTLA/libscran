@@ -13,7 +13,7 @@
 #include "knncolle/knncolle.hpp"
 
 /**
- * @file BuildSNNGraph.hpp
+ * @file BuildSnnGraph.hpp
  *
  * @brief Build a shared nearest-neighbor graph on the cells.
  */
@@ -29,7 +29,7 @@ namespace scran {
  * This provides a more sophisticated definition of similarity between cells compared to a simpler (unweighted) nearest neighbor graph that just focuses on immediate proximity.
  *
  * A key parameter in the construction of the graph is the number of nearest neighbors $k$ to consider.
- * Larger values increase the connectivity of the graph and reduce the granularity of any subsequent community detection steps (see `scran::ClusterSNNGraph`) at the cost of speed.
+ * Larger values increase the connectivity of the graph and reduce the granularity of any subsequent community detection steps (see `scran::ClusterSnnGraph`) at the cost of speed.
  * The nearest neighbor search can be performed using either vantage point trees (exact) or with the Annoy algorithm (approximate) -
  * see the [**knncolle**](https://github.com/LTLA/knncolle) library for details.
  * 
@@ -51,7 +51,7 @@ namespace scran {
  * Identification of cell types from single-cell transcriptomes using a novel clustering method.
  * _Bioinformatics_ 31, 1974-80
  */
-class BuildSNNGraph {
+class BuildSnnGraph {
 public:
     /** 
      * Choices for the edge weighting scheme during graph construction.
@@ -92,9 +92,9 @@ public:
     /** 
      * @param k Number of neighbors to use in the nearest neighbor search.
      *
-     * @return A reference to this `BuildSNNGraph` object.
+     * @return A reference to this `BuildSnnGraph` object.
      */
-    BuildSNNGraph& set_neighbors(int k = Defaults::neighbors) {
+    BuildSnnGraph& set_neighbors(int k = Defaults::neighbors) {
         num_neighbors = k;
         return *this;
     }
@@ -102,9 +102,9 @@ public:
     /** 
      * @param a Whether to perform an approximate nearest neighbor search.
      *
-     * @return A reference to this `BuildSNNGraph` object.
+     * @return A reference to this `BuildSnnGraph` object.
      */
-    BuildSNNGraph& set_approximate(bool a = Defaults::approximate) {
+    BuildSnnGraph& set_approximate(bool a = Defaults::approximate) {
         approximate = a;
         return *this;
     }
@@ -112,18 +112,18 @@ public:
     /** 
      * @param w The edge weighting scheme to use.
      *
-     * @return A reference to this `BuildSNNGraph` object.
+     * @return A reference to this `BuildSnnGraph` object.
      */
-    BuildSNNGraph& set_weighting_scheme(Scheme w = Defaults::weighting_scheme) {
+    BuildSnnGraph& set_weighting_scheme(Scheme w = Defaults::weighting_scheme) {
         weight_scheme = w;
         return *this;
     }
 
     /**
      * @param n Number of threads to use. 
-     * @return A reference to this `BuildSNNGraph` object.
+     * @return A reference to this `BuildSnnGraph` object.
      */
-    BuildSNNGraph& set_num_threads(int n = Defaults::num_threads) {
+    BuildSnnGraph& set_num_threads(int n = Defaults::num_threads) {
         nthreads = n;
         return *this;
     }
