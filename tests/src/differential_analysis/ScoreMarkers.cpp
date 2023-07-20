@@ -98,6 +98,11 @@ TEST_P(ScoreMarkersTest, Basic) {
     scran::ScoreMarkers chd;
     chd.set_compute_auc(do_auc); // false, if we want to check the running implementations.
     chd.set_num_threads(nthreads);
+
+    // Avoid issues with numerical precision when the weights are different,
+    // even if they ultimately cancel out in the calculation.
+    chd.set_block_weight_policy(scran::WeightPolicy::NONE);
+
     auto res = chd.run(dense_row.get(), groupings.data());
 
     // Running some further checks on the effects.

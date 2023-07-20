@@ -56,6 +56,7 @@ TEST_P(MultiBatchPcaBasicTest, WeightedOnly) {
 
     scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
+    runner.set_block_weight_policy(scran::WeightPolicy::EQUAL);
 
     auto block = generate_blocks(dense_row->ncol(), nblocks);
     auto ref = runner.run(dense_row.get(), block.data());
@@ -200,6 +201,7 @@ TEST_P(MultiBatchPcaBasicTest, WeightedResidual) {
     scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
     runner.set_use_residuals(true);
+    runner.set_block_weight_policy(scran::WeightPolicy::EQUAL);
 
     auto block = generate_blocks(dense_row->ncol(), nblocks);
     auto ref = runner.run(dense_row.get(), block.data());
@@ -279,6 +281,7 @@ TEST_P(MultiBatchPcaMoreTest, WeightedOnly_VersusSimple) {
 
     scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
+    runner.set_block_weight_policy(scran::WeightPolicy::EQUAL);
     auto res1 = runner.run(expanded.get(), block.data());
 
     // Checking that we get more-or-less the same results
@@ -323,7 +326,8 @@ TEST_P(MultiBatchPcaMoreTest, WeightedOnly_DuplicatedBlocks) {
     scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
 
-    // By default, every batch is equally weighted.
+    // Checking what happens when every batch is equally weighted.
+    runner.set_block_weight_policy(scran::WeightPolicy::EQUAL);
     {
         auto res2 = runner.run(com.get(), block2.data());
         res2.pcs.array() /= res2.pcs.norm();
@@ -404,6 +408,8 @@ TEST_P(MultiBatchPcaMoreTest, ResidualOnly_VersusReference) {
 
     scran::ResidualPca refrunner;
     refrunner.set_scale(scale).set_rank(rank);
+    refrunner.set_block_weight_policy(scran::WeightPolicy::NONE);
+
     auto ref = refrunner.run(dense_row.get(), block.data());
 
     expect_equal_vectors(res.variance_explained, ref.variance_explained);
@@ -422,6 +428,7 @@ TEST_P(MultiBatchPcaMoreTest, WeightedResidual_VersusReference) {
     scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
     runner.set_use_residuals(true);
+    runner.set_block_weight_policy(scran::WeightPolicy::EQUAL);
 
     auto res = runner.run(dense_row.get(), block.data());
 
@@ -462,7 +469,8 @@ TEST_P(MultiBatchPcaMoreTest, WeightedResidual_DuplicatedBlocks) {
     runner.set_scale(scale).set_rank(rank);
     runner.set_use_residuals(true);
 
-    // By default, it's all equally weighted.
+    // Checking what happens if they're all equally weighted.
+    runner.set_block_weight_policy(scran::WeightPolicy::EQUAL);
     {
         auto res2 = runner.run(com.get(), block2.data());
         res2.pcs.array() /= res2.pcs.norm();
@@ -551,6 +559,7 @@ TEST_P(MultiBatchPcaMoreTest, SubsetTest) {
 
     scran::MultiBatchPca runner;
     runner.set_scale(scale).set_rank(rank);
+    runner.set_block_weight_policy(scran::WeightPolicy::EQUAL);
 
     auto block = generate_blocks(dense_row->ncol(), 3);
     auto out = runner.run(dense_row.get(), block.data(), subset.data());

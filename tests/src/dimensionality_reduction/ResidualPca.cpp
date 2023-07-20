@@ -194,6 +194,7 @@ TEST_P(ResidualPcaBasicTest, BasicConsistency) {
 
     scran::ResidualPca runner;
     runner.set_scale(scale).set_rank(rank);
+    runner.set_block_weight_policy(scran::WeightPolicy::NONE);
     auto block = generate_blocks(dense_row->ncol(), nblocks);
     auto ref = runner.run(dense_row.get(), block.data());
 
@@ -330,6 +331,7 @@ TEST_P(ResidualPcaMoreTest, VersusSimple) {
 
     scran::ResidualPca runner;
     runner.set_scale(scale).set_rank(rank);
+    runner.set_block_weight_policy(scran::WeightPolicy::NONE);
     auto res1 = runner.run(dense_row.get(), block.data());
 
     if (nblocks == 1) {
@@ -466,6 +468,7 @@ TEST_P(ResidualPcaWeightedTest, VersusReference) {
 
     scran::ResidualPca runner;
     runner.set_scale(scale).set_rank(rank);
+    runner.set_block_weight_policy(scran::WeightPolicy::NONE);
     auto combined = tatami::make_DelayedBind<1>(components);
     auto ref = runner.run(combined.get(), blocking.data());
 

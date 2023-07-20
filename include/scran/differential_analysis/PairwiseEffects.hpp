@@ -125,7 +125,7 @@ public:
         /**
          * See `set_block_weight_policy()` for more details.
          */
-        static constexpr WeightPolicy block_weight_policy = WeightPolicy::NONE;
+        static constexpr WeightPolicy block_weight_policy = WeightPolicy::VARIABLE;
 
         /**
          * See `set_variable_block_weight_parameters()` for more details.

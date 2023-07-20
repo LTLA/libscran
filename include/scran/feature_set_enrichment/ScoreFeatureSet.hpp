@@ -47,7 +47,7 @@ public:
         /**
          * See `set_block_weight_policy()` for more details.
          */
-        static constexpr WeightPolicy block_weight_policy = WeightPolicy::EQUAL;
+        static constexpr WeightPolicy block_weight_policy = WeightPolicy::VARIABLE;
 
         /**
          * See `set_num_threads()` for more details.
