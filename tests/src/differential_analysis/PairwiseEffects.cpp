@@ -74,6 +74,9 @@ TEST_P(PairwiseEffectsUnblockedTest, Reference) {
     auto nthreads = std::get<2>(param);
     chd.set_num_threads(nthreads);
 
+    // Avoid issues with small numerical differences when the weights are different.
+    chd.set_block_weight_policy(scran::WeightPolicy::NONE);
+
     auto res = chd.run(dense_row.get(), groupings.data());
     auto ref = simple_reference(dense_row.get(), groupings.data(), ngroups, threshold);
 
