@@ -76,7 +76,6 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="structscran_1_1BuildSnnGraph_1_1Results-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">scran::BuildSnnGraph::Results Struct Reference</div></div>
@@ -88,52 +87,19 @@ $(function() {
 
 <p><code>#include &lt;<a class="el" href="BuildSnnGraph_8hpp_source.html">BuildSnnGraph.hpp</a>&gt;</code></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
-Public Member Functions</h2></td></tr>
-<tr class="memitem:a526c7cc94cdcb78fe25896a4f6accc2a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1igraph_1_1Graph.html">igraph::Graph</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1BuildSnnGraph_1_1Results.html#a526c7cc94cdcb78fe25896a4f6accc2a">to_igraph</a> () const</td></tr>
-<tr class="separator:a526c7cc94cdcb78fe25896a4f6accc2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:af26bc1c001db520af8eb5dc93bd44c42"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1BuildSnnGraph_1_1Results.html#af26bc1c001db520af8eb5dc93bd44c42">ncells</a></td></tr>
 <tr class="separator:af26bc1c001db520af8eb5dc93bd44c42"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad331f9c0061ed08a83e1933660994f01"><td class="memItemLeft" align="right" valign="top">std::vector&lt; igraph_integer_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1BuildSnnGraph_1_1Results.html#ad331f9c0061ed08a83e1933660994f01">edges</a></td></tr>
-<tr class="separator:ad331f9c0061ed08a83e1933660994f01"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac241d8ecdf1655464dfc0fa88d79331c"><td class="memItemLeft" align="right" valign="top">std::vector&lt; igraph_real_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1BuildSnnGraph_1_1Results.html#ac241d8ecdf1655464dfc0fa88d79331c">weights</a></td></tr>
-<tr class="separator:ac241d8ecdf1655464dfc0fa88d79331c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a39042a629d78f29508e4c65dfeb48cc4"><td class="memItemLeft" align="right" valign="top">std::vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1BuildSnnGraph_1_1Results.html#a39042a629d78f29508e4c65dfeb48cc4">edges</a></td></tr>
+<tr class="separator:a39042a629d78f29508e4c65dfeb48cc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf4b61a31f97b35b9185deff2a770d05"><td class="memItemLeft" align="right" valign="top">std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1BuildSnnGraph_1_1Results.html#abf4b61a31f97b35b9185deff2a770d05">weights</a></td></tr>
+<tr class="separator:abf4b61a31f97b35b9185deff2a770d05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="structscran_1_1BuildSnnGraph_1_1Results.html" title="Results of SNN graph construction.">Results</a> of SNN graph construction. </p>
 <p>Edges and weights are stored using <b>igraph</b> data types in preparation for community detection. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a526c7cc94cdcb78fe25896a4f6accc2a" name="a526c7cc94cdcb78fe25896a4f6accc2a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a526c7cc94cdcb78fe25896a4f6accc2a">&#9670;&#160;</a></span>to_igraph()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structscran_1_1igraph_1_1Graph.html">igraph::Graph</a> scran::BuildSnnGraph::Results::to_igraph </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Create an <b>igraph</b> graph object from the edges. Note that weights are not included in the output object and should be supplied separately to relevant functions.</p>
-<dl class="section return"><dt>Returns</dt><dd>An undirected graph created from <code>edges</code>. </dd></dl>
-
-</div>
-</div>
-<h2 class="groupheader">Member Data Documentation</h2>
+</div><h2 class="groupheader">Member Data Documentation</h2>
 <a id="af26bc1c001db520af8eb5dc93bd44c42" name="af26bc1c001db520af8eb5dc93bd44c42"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af26bc1c001db520af8eb5dc93bd44c42">&#9670;&#160;</a></span>ncells</h2>
 
@@ -149,14 +115,14 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="ad331f9c0061ed08a83e1933660994f01" name="ad331f9c0061ed08a83e1933660994f01"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad331f9c0061ed08a83e1933660994f01">&#9670;&#160;</a></span>edges</h2>
+<a id="a39042a629d78f29508e4c65dfeb48cc4" name="a39042a629d78f29508e4c65dfeb48cc4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a39042a629d78f29508e4c65dfeb48cc4">&#9670;&#160;</a></span>edges</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::vector&lt;igraph_integer_t&gt; scran::BuildSnnGraph::Results::edges</td>
+          <td class="memname">std::vector&lt;int&gt; scran::BuildSnnGraph::Results::edges</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -164,14 +130,14 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="ac241d8ecdf1655464dfc0fa88d79331c" name="ac241d8ecdf1655464dfc0fa88d79331c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac241d8ecdf1655464dfc0fa88d79331c">&#9670;&#160;</a></span>weights</h2>
+<a id="abf4b61a31f97b35b9185deff2a770d05" name="abf4b61a31f97b35b9185deff2a770d05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abf4b61a31f97b35b9185deff2a770d05">&#9670;&#160;</a></span>weights</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::vector&lt;igraph_real_t&gt; scran::BuildSnnGraph::Results::weights</td>
+          <td class="memname">std::vector&lt;double&gt; scran::BuildSnnGraph::Results::weights</td>
         </tr>
       </table>
 </div><div class="memdoc">

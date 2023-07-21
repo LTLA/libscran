@@ -1,8 +1,5 @@
 <map id="scran/clustering/igraph_utils.hpp" name="scran/clustering/igraph_utils.hpp">
-<area shape="rect" id="Node000001" title="Utilities for manipulating igraph data structures." alt="" coords="75,5,228,46"/>
-<area shape="rect" id="Node000002" href="$BuildSnnGraph_8hpp.html" title="Build a shared nearest&#45;neighbor graph on the cells." alt="" coords="5,94,175,135"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="131,60,106,95,102,92,127,57"/>
-<area shape="rect" id="Node000003" href="$ClusterSnnGraph_8hpp.html" title="Identify clusters of cells from a shared nearest&#45;neighbor graph." alt="" coords="72,183,231,223"/>
-<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="175,58,190,93,193,114,190,135,180,161,167,184,163,181,175,159,185,134,188,114,185,95,170,60"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="114,145,140,181,135,184,110,148"/>
+<area shape="rect" id="Node000001" title="Utilities for manipulating igraph data structures." alt="" coords="8,5,161,46"/>
+<area shape="rect" id="Node000002" href="$ClusterSnnGraph_8hpp.html" title="Identify clusters of cells from a shared nearest&#45;neighbor graph." alt="" coords="5,94,164,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,61,87,94,82,94,82,61"/>
 </map>
