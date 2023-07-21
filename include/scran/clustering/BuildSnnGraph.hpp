@@ -3,8 +3,10 @@
 
 #include "../utils/macros.hpp"
 
+#if __has_include("igraph.h")
 #include "igraph.h"
 #include "igraph_utils.hpp"
+#endif
 
 #include <vector>
 #include <algorithm>
@@ -144,14 +146,23 @@ public:
          * Vector of paired indices defining the edges between cells.
          * The number of edges is half the length of `edges`, where `edges[2*i]` and `edges[2*i+1]` define the vertices for edge `i`.
          */
+#if __has_include("igraph.h")
         std::vector<igraph_integer_t> edges;
+#else
+        std::vector<int> edges;
+#endif
 
         /**
          * Vector of weights for the edges.
          * This is of length equal to the number of edges, where each `weights[i]` corresponds to an edge `i` in `edges`. 
          */
+#if __has_include("igraph.h")
         std::vector<igraph_real_t> weights;
+#else
+        std::vector<double> weights;
+#endif
 
+#if __has_include("igraph.h")
         /**
          * Create an **igraph** graph object from the edges.
          * Note that weights are not included in the output object and should be supplied separately to relevant functions.
@@ -163,6 +174,7 @@ public:
             igraph_vector_int_view(&edge_view, edges.data(), edges.size());
             return igraph::Graph(&edge_view, ncells, /* directed = */ false);
         }
+#endif
     };
 
     /**

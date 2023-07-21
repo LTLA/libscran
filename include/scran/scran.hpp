@@ -9,8 +9,8 @@
 #include "feature_set_enrichment/HypergeometricTail.hpp"
 #include "feature_set_enrichment/ScoreFeatureSet.hpp"
 
-#if __has_include("igraph.h")
 #include "clustering/BuildSnnGraph.hpp"
+#if __has_include("igraph.h")
 #include "clustering/ClusterSnnGraph.hpp"
 #endif
 
