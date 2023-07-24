@@ -16,7 +16,14 @@ protected:
         mat = std::unique_ptr<tatami::NumericMatrix>(new tatami::DenseRowMatrix<double>(sparse_nrow, sparse_ncol, sparse_matrix));
         sf = tatami::column_sums(mat.get());
     }
-    
+
+    static const std::vector<double>& normalize(std::vector<double>& expr, double sf) {
+        for (auto& x : expr) {
+            x = std::log1p(x/sf)/std::log(2);
+        }
+        return expr;
+    }
+
     std::vector<int> create_block(size_t n) {
         std::vector<int> output(n);
         for (size_t i = 0; i < n; ++i) { 
@@ -43,10 +50,7 @@ TEST_F(LogNormCountsTester, Simple) {
     for (size_t i = 0; i < mat->ncol(); ++i) {
         auto output = lext->fetch(i);
         auto output2 = mext->fetch(i);
-        for (auto& o : output2) {
-            o = std::log1p(o/sf[i])/std::log(2);
-        }
-        EXPECT_EQ(output, output2);
+        EXPECT_EQ(output, normalize(output2, sf[i]));
     }
 }
 
@@ -82,10 +86,7 @@ TEST_F(LogNormCountsTester, AnotherPseudo) {
         for (size_t i = 0; i < mat->ncol(); ++i) {
             auto output = lext->fetch(i);
             auto output2 = mext->fetch(i);
-            for (auto& o : output2) {
-                o = std::log1p(o/(copy[i]*1.5))/std::log(2);
-            }
-            EXPECT_EQ(output, output2);
+            EXPECT_EQ(output, normalize(output2, copy[i] * 1.5));
         }
     }
 
@@ -103,10 +104,7 @@ TEST_F(LogNormCountsTester, AnotherPseudo) {
         for (size_t i = 0; i < mat->ncol(); ++i) {
             auto output = lext->fetch(i);
             auto output2 = mext->fetch(i);
-            for (auto& o : output2) {
-                o = std::log1p(o/(copy[i]*expected))/std::log(2);
-            }
-            EXPECT_EQ(output, output2);
+            EXPECT_EQ(output, normalize(output2, copy[i] * expected));
         }
     }
 }
@@ -130,10 +128,7 @@ TEST_F(LogNormCountsTester, Block) {
     for (size_t i = 0; i < mat->ncol(); ++i) {
         auto output = lext->fetch(i);
         auto output2 = mext->fetch(i);
-        for (auto& o : output2) {
-            o = std::log1p(o/sf[i])/std::log(2);
-        }
-        EXPECT_EQ(output, output2);
+        EXPECT_EQ(output, normalize(output2, sf[i]));
     }
 }
 
@@ -148,10 +143,7 @@ TEST_F(LogNormCountsTester, NoCenter) {
     for (size_t i = 0; i < mat->ncol(); ++i) {
         auto output = lext->fetch(i);
         auto output2 = mext->fetch(i);
-        for (auto& o : output2) {
-            o = std::log1p(o/sf[i])/std::log(2);
-        }
-        EXPECT_EQ(output, output2);
+        EXPECT_EQ(output, normalize(output2, sf[i]));
     }
 }
 
@@ -196,10 +188,30 @@ TEST_F(LogNormCountsTester, Error) {
     EXPECT_ANY_THROW(lnc.run(mat, sf2));
 
     std::vector<double> empty(mat->ncol());
-    EXPECT_ANY_THROW(lnc.run(mat, empty));
+    EXPECT_ANY_THROW({
+        try {
+            lnc.run(mat, empty);
+        } catch(std::exception& e) {
+            std::string msg = e.what();
+            EXPECT_TRUE(msg.find("positive") != std::string::npos);
+            throw;
+        }
+    });
+
+    std::fill(empty.begin(), empty.end(), std::numeric_limits<double>::infinity());
+    EXPECT_ANY_THROW({
+        try {
+            lnc.run(mat, empty);
+        } catch(std::exception& e) {
+            std::string msg = e.what();
+            EXPECT_TRUE(msg.find("finite") != std::string::npos);
+            throw;
+        
+        }
+    });
 }
 
-TEST_F(LogNormCountsTester, NonStrict) {
+TEST_F(LogNormCountsTester, NonStrictZeros) {
     scran::LogNormCounts lnc;
     lnc.set_handle_zeros(true);
     std::vector<double> empty(mat->ncol());
@@ -213,10 +225,7 @@ TEST_F(LogNormCountsTester, NonStrict) {
         for (size_t i = 0; i < mat->ncol(); ++i) {
             auto output = lext->fetch(i);
             auto output2 = mext->fetch(i);
-            for (auto& o : output2) {
-                o = std::log1p(o)/std::log(2);
-            }
-            EXPECT_EQ(output, output2);
+            EXPECT_EQ(output, normalize(output2, 1.0));
         }
     }
 
@@ -232,14 +241,62 @@ TEST_F(LogNormCountsTester, NonStrict) {
         for (size_t i = 0; i < mat->ncol(); ++i) {
             auto output = lext->fetch(i);
             auto output2 = mext->fetch(i);
-
-            // Uses 0.5 as the fill-in, which is the smallest non-zero.
-            auto sf = (i <= 1 ? empty[i] : 0.5) / center;
-            for (auto& o : output2) {
-                o = std::log1p(o/sf)/std::log(2);
-            }
-            EXPECT_EQ(output, output2);
+            auto sf = (i <= 1 ? empty[i] : 0.5) / center; // Uses 0.5 as the fill-in, which is the smallest non-zero.
+            EXPECT_EQ(output, normalize(output2, sf));
         }
     }
 }
 
+TEST_F(LogNormCountsTester, NonStrictInfinites) {
+    scran::LogNormCounts lnc;
+    lnc.set_handle_non_finite(true);
+    std::vector<double> empty(mat->ncol(), std::numeric_limits<double>::infinity());
+
+    // No division, effectively; all infinites set to 1.
+    {
+        auto lognormed = lnc.run(mat, empty);
+        auto lext = lognormed->dense_column();
+        auto mext = mat->dense_column();
+
+        for (size_t i = 0; i < mat->ncol(); ++i) {
+            auto output = lext->fetch(i);
+            auto output2 = mext->fetch(i);
+            EXPECT_EQ(output, normalize(output2, 1.0));
+        }
+    }
+
+    // centering only considers finite elements by default.
+    empty[0] = 0.5;
+    empty[1] = 1;
+
+    {
+        auto lognormed = lnc.run(mat, empty);
+        auto lext = lognormed->dense_column();
+        auto mext = mat->dense_column();
+
+        double center = 1.5 / 2; 
+        for (size_t i = 0; i < mat->ncol(); ++i) {
+            auto output = lext->fetch(i);
+            auto output2 = mext->fetch(i);
+            auto sf = (i <= 1 ? empty[i] : 1) / center; // Uses 1 as the fill-in, which is the largest non-zero.
+            EXPECT_EQ(output, normalize(output2, sf));
+        }
+    }
+
+    // Mixing zeros and non-finites.
+    empty[0] = 0;
+    empty[1] = 0;
+    lnc.set_handle_zeros(true);
+
+    {
+        auto lognormed = lnc.run(mat, empty);
+        auto lext = lognormed->dense_column();
+        auto mext = mat->dense_column();
+
+        for (size_t i = 0; i < mat->ncol(); ++i) {
+            auto output = lext->fetch(i);
+            auto output2 = mext->fetch(i);
+            EXPECT_EQ(output, normalize(output2, 1.0));
+        }
+    }
+}

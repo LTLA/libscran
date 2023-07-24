@@ -9,6 +9,7 @@
 
 #include "tatami/tatami.hpp"
 
+#include "utils.hpp"
 #include "CenterSizeFactors.hpp"
 #include "ChoosePseudoCount.hpp"
 
@@ -61,6 +62,11 @@ public:
         static constexpr bool handle_zeros = false;
 
         /**
+         * Set `set_handle_non_finite()` for more details.
+         */
+        static constexpr bool handle_non_finite = false;
+
+        /**
          * See `set_num_threads()` for more details.
          */
         static constexpr int num_threads = 1;
@@ -70,6 +76,7 @@ private:
     double pseudo_count = Defaults::pseudo_count;
     bool sparse_addition = Defaults::sparse_addition;
     bool handle_zeros = Defaults::handle_zeros;
+    bool handle_non_finite = Defaults::handle_non_finite;
     int nthreads = Defaults::num_threads;
 
     bool center = Defaults::center;
@@ -150,6 +157,21 @@ public:
      */
     LogNormCounts& set_handle_zeros(bool z = Defaults::handle_zeros) {
         handle_zeros = z;
+        return *this;
+    }
+
+    /**
+     * Specify whether to handle non-finite size factors. 
+     * If false, non-finite size factors will raise an error;
+     * otherwise, they will be automatically set to the largest finite size factor after centering (or 1, if all size factors are non-finite).
+     * Note that the centering process ignores non-finite factors, see `CenterSizeFactors` for more details.
+     *
+     * @param z Whether to replace non-finite size factors with the largest finite size factor.
+     *
+     * @return A reference to this `LogNormCounts` object.
+     */
+    LogNormCounts& set_handle_non_finite(bool n = Defaults::handle_non_finite) {
+        handle_non_finite = n;
         return *this;
     }
 
@@ -252,37 +274,26 @@ public:
             throw std::runtime_error("number of size factors and columns are not equal");
         }
 
-        bool has_zero = false;
+        typename CenterSizeFactors::Results cresults;
         if (center) {
-            // Falls back to centerer.run() if block=NULL.
-            has_zero = centerer.run_blocked(size_factors.size(), size_factors.data(), block).has_zero;
+            cresults = centerer.run_blocked(size_factors.size(), size_factors.data(), block);
         } else {
-            // CenterSizeFactors do their own validity checks, 
-            // so we don't need to call it again in that case.
-            has_zero = CenterSizeFactors::validate(size_factors.size(), size_factors.data()).has_zero;
+            cresults = CenterSizeFactors::validate(size_factors.size(), size_factors.data());
         }
 
-        if (has_zero) {
+        if (cresults.has_zero) {
             if (!handle_zeros) {
                 throw std::runtime_error("all size factors should be positive");
-            } else if (size_factors.size()) {
-                // Replacing them with the smallest non-zero size factor, or 1.
-                auto smallest = std::numeric_limits<double>::infinity();
-                for (auto s : size_factors) {
-                    if (s && smallest > s) {
-                        smallest = s;
-                    }
-                }
+            } else {
+                sanitize_zeros(size_factors);
+            }
+        }
 
-                if (std::isinf(smallest)) {
-                    smallest = 1;
-                }
-
-                for (auto& s : size_factors) {
-                    if (s == 0) {
-                        s = smallest;
-                    }
-                }
+        if (cresults.has_non_finite) {
+            if (!handle_non_finite) {
+                throw std::runtime_error("all size factors should be finite");
+            } else {
+                sanitize_non_finite(size_factors);
             }
         }
 

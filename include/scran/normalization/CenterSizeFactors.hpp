@@ -87,7 +87,7 @@ public:
             }
             if (size_factors[i] == 0) {
                 output.has_zero = true;
-            } else if (std::isfinite(size_factors[i])) {
+            } else if (!std::isfinite(size_factors[i])) {
                 output.has_non_finite = true;
             }
         }
