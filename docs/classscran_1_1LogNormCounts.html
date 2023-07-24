@@ -106,6 +106,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a37c8c824927e9404598628d479338544"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f72920b0712ca25dab1577a4558a2ed"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#a4f72920b0712ca25dab1577a4558a2ed">set_handle_zeros</a> (bool z=<a class="el" href="structscran_1_1LogNormCounts_1_1Defaults.html#a0b620ea5b5046b58c470297d621647dd">Defaults::handle_zeros</a>)</td></tr>
 <tr class="separator:a4f72920b0712ca25dab1577a4558a2ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4547f4bcd55130c69f2198429ab4e2ca"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#a4547f4bcd55130c69f2198429ab4e2ca">set_handle_non_finite</a> (bool n=<a class="el" href="structscran_1_1LogNormCounts_1_1Defaults.html#a6dd5eaf3b2c9b66e478ccfae07974d27">Defaults::handle_non_finite</a>)</td></tr>
+<tr class="separator:a4547f4bcd55130c69f2198429ab4e2ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a61dca9e53795b77524e79bd3aaa8b0d0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#a61dca9e53795b77524e79bd3aaa8b0d0">set_num_threads</a> (int n=<a class="el" href="structscran_1_1LogNormCounts_1_1Defaults.html#a18d8cbec5037430b2ac7e5a76e6b6d97">Defaults::num_threads</a>)</td></tr>
 <tr class="separator:a61dca9e53795b77524e79bd3aaa8b0d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adac1cf3781421591bb1337d12b9ae9eb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1LogNormCounts.html#adac1cf3781421591bb1337d12b9ae9eb">set_choose_pseudo_count</a> (bool c=<a class="el" href="structscran_1_1LogNormCounts_1_1Defaults.html#a53c44f0ab479e87a88dd43ad850f7690">Defaults::choose_pseudo_count</a>)</td></tr>
@@ -296,6 +298,40 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">z</td><td>Whether to replace zero size factors with the smallest non-zero size factor.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1LogNormCounts.html" title="Compute log-normalized expression values.">LogNormCounts</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a4547f4bcd55130c69f2198429ab4e2ca" name="a4547f4bcd55130c69f2198429ab4e2ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4547f4bcd55130c69f2198429ab4e2ca">&#9670;&#160;</a></span>set_handle_non_finite()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1LogNormCounts.html">LogNormCounts</a> &amp; scran::LogNormCounts::set_handle_non_finite </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1LogNormCounts_1_1Defaults.html#a6dd5eaf3b2c9b66e478ccfae07974d27">Defaults::handle_non_finite</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Specify whether to handle non-finite size factors. If false, non-finite size factors will raise an error; otherwise, they will be automatically set to the largest finite size factor after centering (or 1, if all size factors are non-finite). Note that the centering process ignores non-finite factors, see <code><a class="el" href="classscran_1_1CenterSizeFactors.html" title="Center size factors prior to scaling normalization.">CenterSizeFactors</a></code> for more details.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">z</td><td>Whether to replace non-finite size factors with the largest finite size factor.</td></tr>
   </table>
   </dd>
 </dl>

@@ -79,7 +79,6 @@ $(function() {
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="classscran_1_1CenterSizeFactors-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">scran::CenterSizeFactors Class Reference</div></div>
 </div><!--header-->
@@ -118,12 +117,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aad404c227ba4ec1744c19698afb062f4"><td class="memTemplParams" colspan="2">template&lt;typename T , typename B &gt; </td></tr>
 <tr class="memitem:aad404c227ba4ec1744c19698afb062f4"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1CenterSizeFactors_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1CenterSizeFactors.html#aad404c227ba4ec1744c19698afb062f4">run_blocked</a> (size_t n, T *size_factors, const B *block) const</td></tr>
 <tr class="separator:aad404c227ba4ec1744c19698afb062f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
-Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a51b14c735aba3d93b840b4ba2ef3c5d2"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a51b14c735aba3d93b840b4ba2ef3c5d2"><td class="memTemplItemLeft" align="right" valign="top">static <a class="el" href="structscran_1_1CenterSizeFactors_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1CenterSizeFactors.html#a51b14c735aba3d93b840b4ba2ef3c5d2">validate</a> (size_t n, const T *size_factors)</td></tr>
-<tr class="separator:a51b14c735aba3d93b840b4ba2ef3c5d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Center size factors prior to scaling normalization. </p>
@@ -145,59 +138,6 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a51b14c735aba3d93b840b4ba2ef3c5d2" name="a51b14c735aba3d93b840b4ba2ef3c5d2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a51b14c735aba3d93b840b4ba2ef3c5d2">&#9670;&#160;</a></span>validate()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static <a class="el" href="structscran_1_1CenterSizeFactors_1_1Results.html">Results</a> scran::CenterSizeFactors::validate </td>
-          <td>(</td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>n</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const T *&#160;</td>
-          <td class="paramname"><em>size_factors</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Validate size factors by checking that they are all non-zero. We also check whether any size factors are zero, which may be handled separately by callers.</p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">T</td><td>Floating-point type for the size factors.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir"></td><td class="paramname">n</td><td>Number of size factors. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">size_factors</td><td>Pointer to an array of non-negative size factors of length <code>n</code>.</td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Validation results, indicating whether any zero or non-finite size factors exist. </dd></dl>
-
-</div>
-</div>
 <a id="ac8edc812cc10eb1439d21c7d78570650" name="ac8edc812cc10eb1439d21c7d78570650"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac8edc812cc10eb1439d21c7d78570650">&#9670;&#160;</a></span>set_block_mode()</h2>
 
