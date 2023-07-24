@@ -255,11 +255,11 @@ public:
         bool has_zero = false;
         if (center) {
             // Falls back to centerer.run() if block=NULL.
-            has_zero = centerer.run_blocked(size_factors.size(), size_factors.data(), block);
+            has_zero = centerer.run_blocked(size_factors.size(), size_factors.data(), block).has_zero;
         } else {
             // CenterSizeFactors do their own validity checks, 
             // so we don't need to call it again in that case.
-            has_zero = CenterSizeFactors::validate(size_factors.size(), size_factors.data());
+            has_zero = CenterSizeFactors::validate(size_factors.size(), size_factors.data()).has_zero;
         }
 
         if (has_zero) {

@@ -52,6 +52,21 @@ private:
 
 public:
     /**
+     * @brief Diagnostics from size factor centering.
+     */
+    struct Results {
+        /**
+         * Whether size factors of zero were detected.
+         */
+        bool has_zero = false;
+
+        /**
+         * Whether non-finite size factors were detected.
+         */
+        bool has_non_finite = false;
+    };
+
+    /**
      * Validate size factors by checking that they are all non-zero.
      * We also check whether any size factors are zero, which may be handled separately by callers. 
      *
@@ -60,20 +75,24 @@ public:
      * @param n Number of size factors.
      * @param[in] size_factors Pointer to an array of non-negative size factors of length `n`.
      *
-     * @return Whether a size factor of zero was detected.
-     * An error is raised if a negative size factor is detected.
+     * @return Validation results, indicating whether any zero or non-finite size factors exist.
      */
     template<typename T>
-    static bool validate(size_t n, const T* size_factors) {
-        bool is_zero = false;
+    static Results validate(size_t n, const T* size_factors) {
+        Results output;
+
         for (size_t i = 0; i < n; ++i) {
              if (size_factors[i] < 0) {
                 throw std::runtime_error("negative size factors detected");
-            } else if (!is_zero && size_factors[i] == 0) {
-                is_zero = true;
+            }
+            if (size_factors[i] == 0) {
+                output.has_zero = true;
+            } else if (std::isfinite(size_factors[i])) {
+                output.has_non_finite = true;
             }
         }
-        return is_zero;
+
+        return output;
     }
 
 public:
@@ -104,6 +123,8 @@ public:
      * While size factors of zero are generally invalid, they may occur in datasets that have not been properly filtered to remove low-quality cells.
      * In such cases, we may wish to ignore size factors of zero so as to avoid a spurious deflation of the mean during centering.
      * This is useful if some filtering is to be applied after normalization - by ignoring zeros now, we ensure that we get the same result as if we had removed those zeros prior to centering. 
+     *
+     * Note that non-finite size factors (e.g., Inf, NaN) are always ignored when computing the mean.
      */
     CenterSizeFactors& set_ignore_zeros(bool i = Defaults::ignore_zeros) {
         ignore_zeros = i;
@@ -117,37 +138,46 @@ public:
      * @param n Number of size factors.
      * @param[in,out] size_factors Pointer to an array of positive size factors of length `n`.
      *
-     * @return Entries in `size_factors` are scaled so that their mean is equal to 1.
-     * A boolean is returned indicating whether size factors of zero were detected.
+     * @return A `Results` object is returned indicating whether invalid size factors (zero or non-finite) were detected.
+     *
+     * Entries in `size_factors` are scaled so that their mean is equal to 1.
+     * This only considers the mean across finite (and, if `set_ignore_zeros()` is `true`, positive) entries.
+     * If there are no non-zero finite size factors, no centering is performed.
      */
     template<typename T>
-    bool run(size_t n, T* size_factors) const {
-        size_t num_zeros = 0;
+    Results run(size_t n, T* size_factors) const {
+        size_t num_used = 0;
+        Results output;
 
-        if (n) { // avoid division by zero
-            double mean = 0;
-            for (size_t i = 0; i < n; ++i) {
-                const auto& current = size_factors[i];
-                if (current < 0) {
-                   throw std::runtime_error("negative size factors detected");
-                } 
+        double mean = 0;
+        for (size_t i = 0; i < n; ++i) {
+            const auto& current = size_factors[i];
+            if (current < 0) {
+               throw std::runtime_error("negative size factors detected");
+            } 
 
-                if (current == 0) {
-                   ++num_zeros;
-                } else {
-                    mean += current;
+            if (current == 0) {
+                output.has_zero = true;
+                if (ignore_zeros) {
+                    continue;
                 }
+            } else if (!std::isfinite(current)) {
+                output.has_non_finite = true;
+                continue;
             }
 
-            if (mean) { // avoid division by zero
-                mean /= (ignore_zeros ? n - num_zeros : n);
-                for (size_t i = 0; i < n; ++i){
-                    size_factors[i] /= mean;
-                }
+            ++num_used;
+            mean += current;
+        }
+
+        if (mean) {
+            mean /= num_used;
+            for (size_t i = 0; i < n; ++i){
+                size_factors[i] /= mean;
             }
         }
 
-        return num_zeros > 0;
+        return output;
     }
 
     /**
@@ -161,11 +191,14 @@ public:
      * Values should be integer IDs in \f$[0, N)\f$ where \f$N\f$ is the number of blocks.
      * This can also be a `NULL`, in which case all cells are assumed to belong to the same block.
      *
-     * @return Entries in `size_factors` are scaled according to the mode defined by `set_block_mode()`.
-     * A boolean is returned indicating whether size factors of zero were detected.
+     * @return A `Results` object is returned indicating whether invalid size factors (zero or non-finite) were detected.
+     *
+     * Entries in `size_factors` are scaled so that their mean is equal to 1 according to the strategy defined in `set_block_mode()`.
+     * This only considers the mean across finite (and, if `set_ignore_zeros()` is `true`, positive) entries within each block.
+     * If there are no non-zero finite size factors in a block, no centering is performed for that block.
      */
     template<typename T, typename B>
-    bool run_blocked(size_t n, T* size_factors, const B* block) const {
+    Results run_blocked(size_t n, T* size_factors, const B* block) const {
         if (block == NULL) {
             return run(n, size_factors);
         } 
@@ -174,23 +207,26 @@ public:
         std::vector<double> group_mean(ngroups);
         std::vector<double> group_num(ngroups);
 
-        bool has_zero = false;
+        Results output;
         for (size_t i = 0; i < n; ++i) {
             const auto& current = size_factors[i];
             if (current < 0) {
                throw std::runtime_error("negative size factors detected");
             }
 
-            const auto& b = block[i];
             if (current == 0) {
-                if (!ignore_zeros) {
-                    ++group_num[b];
+                output.has_zero = true;
+                if (ignore_zeros) {
+                    continue;
                 }
-                has_zero = true;
-            } else {
-                group_mean[b] += size_factors[i];
-                ++group_num[b];
+            } else if (!std::isfinite(current)) {
+                output.has_non_finite = true;
+                continue;
             }
+
+            const auto& b = block[i];
+            group_mean[b] += size_factors[i];
+            ++group_num[b];
         }
 
         for (size_t g = 0; g < ngroups; ++g) {
@@ -225,7 +261,7 @@ public:
             }
         }
 
-        return has_zero;
+        return output;
     }
 };
 

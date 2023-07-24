@@ -38,14 +38,26 @@ protected:
         return blocked_sf;
     }
 
+    static std::vector<double> interspersed_infinites(size_t n) {
+        std::vector<double> empty(n);
+        for (size_t i = 0; i < n; i += 2) {
+            empty[i] = std::numeric_limits<double>::infinity();
+        }
+        return empty;
+    }
+
 protected:
     std::shared_ptr<tatami::NumericMatrix> mat;
     std::vector<double> sf;
 };
 
+/***************************************/
+
 TEST_F(CenterSizeFactorsTester, Simple) {
     scran::CenterSizeFactors cen;
-    EXPECT_FALSE(cen.run(sf.size(), sf.data()));
+    auto out = cen.run(sf.size(), sf.data());
+    EXPECT_FALSE(out.has_zero);
+    EXPECT_FALSE(out.has_non_finite);
 
     double middle = std::accumulate(sf.begin(), sf.end(), 0.0) / sf.size();
     EXPECT_FLOAT_EQ(middle, 1);
@@ -59,14 +71,14 @@ TEST_F(CenterSizeFactorsTester, IgnoreZeros) {
         auto sf2 = sf;
 
         scran::CenterSizeFactors cen;
-        EXPECT_TRUE(cen.run(sf1.size(), sf1.data()));
+        EXPECT_TRUE(cen.run(sf1.size(), sf1.data()).has_zero);
         EXPECT_EQ(sf1[0], 0);
 
         double middle = std::accumulate(sf1.begin() + 1, sf1.end(), 0.0) / (sf1.size() - 1);
         EXPECT_FLOAT_EQ(middle, 1);
 
         // Zero is ignored as if it wasn't even there.
-        EXPECT_FALSE(cen.run(sf2.size() - 1, sf2.data() + 1));
+        EXPECT_FALSE(cen.run(sf2.size() - 1, sf2.data() + 1).has_zero);
         EXPECT_EQ(sf1, sf2);
     }
 
@@ -74,7 +86,7 @@ TEST_F(CenterSizeFactorsTester, IgnoreZeros) {
     {
         scran::CenterSizeFactors cen;
         cen.set_ignore_zeros(false);
-        EXPECT_TRUE(cen.run(sf.size(), sf.data()));
+        EXPECT_TRUE(cen.run(sf.size(), sf.data()).has_zero);
         EXPECT_EQ(sf[0], 0);
 
         double middle = std::accumulate(sf.begin(), sf.end(), 0.0) / sf.size();
@@ -82,17 +94,54 @@ TEST_F(CenterSizeFactorsTester, IgnoreZeros) {
     }
 
     // All-zeros avoid division by zero.
-    scran::CenterSizeFactors cen;
-    std::vector<double> empty(sf.size());
-    auto copy = empty;
-    EXPECT_TRUE(cen.run(copy.size(), copy.data()));
-    EXPECT_EQ(copy, empty); 
+    {
+        scran::CenterSizeFactors cen;
+        std::vector<double> empty(sf.size());
+        auto copy = empty;
+        EXPECT_TRUE(cen.run(copy.size(), copy.data()).has_zero);
+        EXPECT_EQ(copy, empty); 
+    }
 }
+
+TEST_F(CenterSizeFactorsTester, IgnoreNonFinite) {
+    sf.back() = std::numeric_limits<double>::infinity();
+
+    // Non-finite values are ignored as if they weren't even there.
+    {
+        auto sf1 = sf;
+        auto sf2 = sf;
+
+        scran::CenterSizeFactors cen;
+        EXPECT_TRUE(cen.run(sf1.size(), sf1.data()).has_non_finite);
+        EXPECT_TRUE(std::isinf(sf1.back()));
+
+        double middle = std::accumulate(sf1.begin(), sf1.end() - 1, 0.0) / (sf1.size() - 1);
+        EXPECT_FLOAT_EQ(middle, 1);
+
+        EXPECT_FALSE(cen.run(sf2.size() - 1, sf2.data()).has_non_finite);
+        EXPECT_EQ(sf1, sf2);
+    }
+
+    // All-infinite + all-zeros avoid any centering.
+    {
+        scran::CenterSizeFactors cen;
+        auto empty = interspersed_infinites(20);
+        auto copy = empty;
+        EXPECT_TRUE(cen.run(copy.size(), copy.data()).has_zero);
+        EXPECT_TRUE(cen.run(copy.size(), copy.data()).has_non_finite);
+        EXPECT_EQ(copy, empty); 
+    }
+}
+
+/***************************************/
 
 TEST_F(CenterSizeFactorsTester, BlockedLowest) {
     auto block = create_block(mat->ncol());
     scran::CenterSizeFactors cen;
-    cen.run_blocked(sf.size(), sf.data(), block.data());
+
+    auto out = cen.run_blocked(sf.size(), sf.data(), block.data());
+    EXPECT_FALSE(out.has_zero);
+    EXPECT_FALSE(out.has_non_finite);
 
     auto blockmeans = blockwise_means(block, sf);
     int at1 = 0, above1 = 0;
@@ -114,7 +163,10 @@ TEST_F(CenterSizeFactorsTester, BlockCenter) {
 
     scran::CenterSizeFactors cen;
     cen.set_block_mode(scran::CenterSizeFactors::PER_BLOCK);
-    cen.run_blocked(sf.size(), sf.data(), block.data());
+
+    auto out = cen.run_blocked(sf.size(), sf.data(), block.data());
+    EXPECT_FALSE(out.has_zero);
+    EXPECT_FALSE(out.has_non_finite);
 
     // All blocks centered at unity.
     auto blockmeans = blockwise_means(block, sf);
@@ -134,8 +186,8 @@ TEST_F(CenterSizeFactorsTester, BlockIgnoreZeros) {
 
         scran::CenterSizeFactors cen;
         cen.set_block_mode(scran::CenterSizeFactors::PER_BLOCK);
-        EXPECT_TRUE(cen.run_blocked(sf1.size(), sf1.data(), block.data()));
-        EXPECT_FALSE(cen.run_blocked(sf2.size() - 1, sf2.data() + 1, block.data() + 1));
+        EXPECT_TRUE(cen.run_blocked(sf1.size(), sf1.data(), block.data()).has_zero);
+        EXPECT_FALSE(cen.run_blocked(sf2.size() - 1, sf2.data() + 1, block.data() + 1).has_zero);
         EXPECT_EQ(sf1, sf2);
     }
 
@@ -146,8 +198,8 @@ TEST_F(CenterSizeFactorsTester, BlockIgnoreZeros) {
 
         scran::CenterSizeFactors cen;
         cen.set_block_mode(scran::CenterSizeFactors::LOWEST);
-        EXPECT_TRUE(cen.run_blocked(sf1.size(), sf1.data(), block.data()));
-        EXPECT_FALSE(cen.run_blocked(sf2.size() - 1, sf2.data() + 1, block.data() + 1));
+        EXPECT_TRUE(cen.run_blocked(sf1.size(), sf1.data(), block.data()).has_zero);
+        EXPECT_FALSE(cen.run_blocked(sf2.size() - 1, sf2.data() + 1, block.data() + 1).has_zero);
 
         EXPECT_EQ(sf1, sf2);
     }
@@ -160,7 +212,7 @@ TEST_F(CenterSizeFactorsTester, BlockIgnoreZeros) {
         scran::CenterSizeFactors cen;
         cen.set_ignore_zeros(false);
         cen.set_block_mode(scran::CenterSizeFactors::PER_BLOCK);
-        EXPECT_TRUE(cen.run_blocked(sf1.size(), sf1.data(), block.data()));
+        EXPECT_TRUE(cen.run_blocked(sf1.size(), sf1.data(), block.data()).has_zero);
 
         auto blockmeans = blockwise_means(block, sf1);
         for (size_t i = 0; i < blockmeans.size(); ++i) {
@@ -168,8 +220,39 @@ TEST_F(CenterSizeFactorsTester, BlockIgnoreZeros) {
         }
 
         cen.set_ignore_zeros(true);
-        EXPECT_TRUE(cen.run_blocked(sf2.size(), sf2.data(), block.data()));
+        EXPECT_TRUE(cen.run_blocked(sf2.size(), sf2.data(), block.data()).has_zero);
         EXPECT_NE(sf1, sf2);
+    }
+}
+
+TEST_F(CenterSizeFactorsTester, BlockIgnoreNonFinite) {
+    auto block = create_block(mat->ncol());
+    sf.front() = std::numeric_limits<double>::infinity();
+    sf.back() = std::numeric_limits<double>::infinity();
+
+    // Infinite values are basically ignored.
+    {
+        auto sf1 = sf;
+        auto sf2 = sf;
+
+        scran::CenterSizeFactors cen;
+        cen.set_block_mode(scran::CenterSizeFactors::PER_BLOCK);
+        EXPECT_TRUE(cen.run_blocked(sf1.size(), sf1.data(), block.data()).has_non_finite);
+        EXPECT_FALSE(cen.run_blocked(sf2.size() - 2, sf2.data() + 1, block.data() + 1).has_non_finite);
+        EXPECT_EQ(sf1, sf2);
+    }
+
+    // Same for the LOWEST mode.
+    {
+        auto sf1 = sf;
+        auto sf2 = sf;
+
+        scran::CenterSizeFactors cen;
+        cen.set_block_mode(scran::CenterSizeFactors::LOWEST);
+        EXPECT_TRUE(cen.run_blocked(sf1.size(), sf1.data(), block.data()).has_non_finite);
+        EXPECT_FALSE(cen.run_blocked(sf2.size() - 2, sf2.data() + 1, block.data() + 1).has_non_finite);
+
+        EXPECT_EQ(sf1, sf2);
     }
 }
 
@@ -186,7 +269,7 @@ TEST_F(CenterSizeFactorsTester, BlockAllZeros) {
         auto sf1 = sf;
         scran::CenterSizeFactors cen;
         cen.set_block_mode(scran::CenterSizeFactors::PER_BLOCK);
-        EXPECT_TRUE(cen.run_blocked(sf1.size(), sf1.data(), block.data()));
+        EXPECT_TRUE(cen.run_blocked(sf1.size(), sf1.data(), block.data()).has_zero);
 
         auto blockmeans = blockwise_means(block, sf1);
         for (size_t i = 0; i < blockmeans.size(); ++i) {
@@ -203,7 +286,7 @@ TEST_F(CenterSizeFactorsTester, BlockAllZeros) {
         auto sf1 = sf;
         scran::CenterSizeFactors cen;
         cen.set_block_mode(scran::CenterSizeFactors::LOWEST);
-        EXPECT_TRUE(cen.run_blocked(sf1.size(), sf1.data(), block.data()));
+        EXPECT_TRUE(cen.run_blocked(sf1.size(), sf1.data(), block.data()).has_zero);
 
         auto blockmeans = blockwise_means(block, sf1);
         for (size_t i = 0; i < blockmeans.size(); ++i) {
@@ -220,14 +303,74 @@ TEST_F(CenterSizeFactorsTester, BlockAllZeros) {
         scran::CenterSizeFactors cen;
         std::vector<double> empty(sf.size());
         auto copy = empty;
-        EXPECT_TRUE(cen.run_blocked(copy.size(), copy.data(), block.data()));
+        EXPECT_TRUE(cen.run_blocked(copy.size(), copy.data(), block.data()).has_zero);
         EXPECT_EQ(copy, empty); 
 
         cen.set_block_mode(scran::CenterSizeFactors::LOWEST);
-        EXPECT_TRUE(cen.run_blocked(copy.size(), copy.data(), block.data()));
+        EXPECT_TRUE(cen.run_blocked(copy.size(), copy.data(), block.data()).has_zero);
         EXPECT_EQ(copy, empty); 
     }
 }
+
+TEST_F(CenterSizeFactorsTester, BlockAllNonFinite) {
+    auto block = create_block(mat->ncol());
+    for (size_t i = 0; i < sf.size(); ++i) {
+        if (block[i] == 0) {
+            sf[i] = std::numeric_limits<double>::infinity();
+        }
+    }
+
+    // Perblock can handle all-infinite groups.
+    {
+        auto sf1 = sf;
+        scran::CenterSizeFactors cen;
+        cen.set_block_mode(scran::CenterSizeFactors::PER_BLOCK);
+        EXPECT_TRUE(cen.run_blocked(sf1.size(), sf1.data(), block.data()).has_non_finite);
+
+        auto blockmeans = blockwise_means(block, sf1);
+        for (size_t i = 0; i < blockmeans.size(); ++i) {
+            if (i == 0) {
+                EXPECT_TRUE(std::isinf(blockmeans[i]));
+            } else {
+                EXPECT_FLOAT_EQ(blockmeans[i], 1);
+            }
+        }
+    }
+
+    // Lowest survives.
+    {
+        auto sf1 = sf;
+        scran::CenterSizeFactors cen;
+        cen.set_block_mode(scran::CenterSizeFactors::LOWEST);
+        EXPECT_TRUE(cen.run_blocked(sf1.size(), sf1.data(), block.data()).has_non_finite);
+
+        auto blockmeans = blockwise_means(block, sf1);
+        for (size_t i = 0; i < blockmeans.size(); ++i) {
+            if (i == 0) {
+                EXPECT_TRUE(std::isinf(blockmeans[i]));
+            } else {
+                EXPECT_TRUE(blockmeans[i] >= 1);
+            }
+        }
+    }
+
+    // All-infinite avoids any centering.
+    {
+        scran::CenterSizeFactors cen;
+        auto empty = interspersed_infinites(block.size());
+        auto copy = empty;
+        EXPECT_TRUE(cen.run_blocked(copy.size(), copy.data(), block.data()).has_zero);
+        EXPECT_TRUE(cen.run_blocked(copy.size(), copy.data(), block.data()).has_non_finite);
+        EXPECT_EQ(copy, empty); 
+
+        cen.set_block_mode(scran::CenterSizeFactors::LOWEST);
+        EXPECT_TRUE(cen.run_blocked(copy.size(), copy.data(), block.data()).has_zero);
+        EXPECT_TRUE(cen.run_blocked(copy.size(), copy.data(), block.data()).has_non_finite);
+        EXPECT_EQ(copy, empty); 
+    }
+}
+
+/***************************************/
 
 TEST_F(CenterSizeFactorsTester, SimpleError) {
     scran::CenterSizeFactors cen;
