@@ -15,13 +15,11 @@ TEST(GroupedSizeFactors, LibSize) {
 
     // Just returns library size factors when there's one group.
     std::vector<double> contents(NR * NC);
-    std::vector<double> multiplier(NC);
     {
         std::mt19937_64 rng(1000);
         auto cIt = contents.begin();
         for (size_t c = 0; c < NC; ++c) {
-            double& mult = multiplier[c];
-            mult = static_cast<double>(rng() % 100 + 1)/10; // true scaling factor.
+            double mult = static_cast<double>(rng() % 100 + 1)/10; // true scaling factor.
             for (size_t r = 0; r < NR; ++r, ++cIt) {
                 *cIt = mult * (r * 100 + rng() % 100); // increasing gene abundance.
             }
@@ -165,5 +163,110 @@ TEST(GroupedSizeFactors, Reference) {
         }
     }
     EXPECT_TRUE(is_diff);
+}
+
+TEST(GroupedSizeFactors, ZeroHandler) {
+    size_t NR = 100, NC = 10;
+    size_t ngroups = 3;
+
+    std::vector<double> contents(NR * NC);
+    std::vector<int> groups(NC);
+    {
+        std::mt19937_64 rng(1005);
+        auto cIt = contents.begin();
+        for (size_t c = 0; c < NC; ++c) {
+            groups[c] = c % ngroups;
+            if (groups[c] == 2) {
+                for (size_t r = 0; r < NR; ++r, ++cIt) {
+                    *cIt = (r * 100 + rng() % 100); // increasing gene abundance.
+                }
+            } else {
+                *cIt = rng() % 200; // guarantee positive library sizes. 
+                cIt += NR;
+            }
+        }
+    }
+
+    auto copy = contents;
+    tatami::DenseColumnMatrix<double> mat(NR, NC, contents);
+
+    scran::GroupedSizeFactors grouper;
+    grouper.set_prior_count(0); // no protection from size factors of zero in the pseudo-cells.
+    EXPECT_ANY_THROW({
+        try {
+            grouper.run(&mat, groups.data(), 2);
+        } catch(std::exception& e) {
+            std::string msg = e.what();
+            EXPECT_TRUE(msg.find("positive") != std::string::npos);
+            throw;
+        }
+    });
+
+    grouper.set_handle_zeros(true);
+    auto res0 = grouper.run(&mat, groups.data(), 2);
+    int any_zero = 0;
+    for (auto x : res0.factors) {
+        any_zero += (x == 0);
+    }
+    EXPECT_TRUE(any_zero == 0);
+}
+
+TEST(GroupedSizeFactors, InfiniteHandler) {
+    size_t NR = 100, NC = 10;
+    size_t ngroups = 3;
+
+    std::vector<double> contents(NR * NC);
+    std::vector<int> groups(NC);
+    {
+        std::mt19937_64 rng(1005);
+        auto cIt = contents.begin();
+        for (size_t c = 0; c < NC; ++c) {
+            groups[c] = c % ngroups;
+            if (groups[c] == 2) {
+                for (size_t r = 0; r < NR; ++r, ++cIt) {
+                    *cIt = (r * 100 + rng() % 100); // increasing gene abundance.
+                }
+            } else {
+                *cIt = rng() % 200; // guarantee positive library sizes. 
+                cIt += NR;
+            }
+        }
+    }
+
+    auto copy = contents;
+    tatami::DenseColumnMatrix<double> mat(NR, NC, contents);
+
+    scran::GroupedSizeFactors grouper;
+    EXPECT_ANY_THROW({
+        try {
+            grouper.run(&mat, groups.data(), 0);
+        } catch(std::exception& e) {
+            std::string msg = e.what();
+            EXPECT_TRUE(msg.find("finite") != std::string::npos);
+            throw;
+        }
+    });
+
+    grouper.set_handle_non_finite(true);
+    auto res0 = grouper.run(&mat, groups.data(), 0);
+    int all_finite = 0;
+    for (auto x : res0.factors) {
+        all_finite += std::isfinite(x);
+    }
+    EXPECT_TRUE(all_finite == mat.ncol());
+}
+
+TEST(GroupedSizeFactors, Empty) { // handles all-zero matrices gracefully.
+    size_t NR = 100, NC = 10;
+
+    std::vector<double> contents(NR * NC);
+    tatami::DenseColumnMatrix<double> mat(NR, NC, contents);
+
+    scran::GroupedSizeFactors grouper;
+    grouper.set_handle_zeros(true);
+
+    std::vector<int> groups(NC);
+    auto res0 = grouper.run(&mat, groups.data(), 2);
+    EXPECT_EQ(res0.factors, std::vector<double>(NC)); 
 }
 

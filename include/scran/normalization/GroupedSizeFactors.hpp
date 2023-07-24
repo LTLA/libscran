@@ -3,6 +3,7 @@
 
 #include "../utils/macros.hpp"
 
+#include "utils.hpp"
 #include "MedianSizeFactors.hpp"
 #include "../aggregation/AggregateAcrossCells.hpp"
 
@@ -50,11 +51,22 @@ public:
         static constexpr bool center = true;
 
         /**
+         * Set `set_handle_zeros()` for more details.
+         */
+        static constexpr bool handle_zeros = false;
+
+        /**
+         * Set `set_handle_non_finite()` for more details.
+         */
+        static constexpr bool handle_non_finite = false;
+
+        /**
          * See `set_num_threads()`.
          */
         static constexpr int num_threads = 1;
     };
 
+public:
     /**
      * @param c Whether to center the size factors to have a mean of unity.
      * This is usually desirable for interpretation of relative values.
@@ -79,6 +91,34 @@ public:
     }
 
     /**
+     * Specify whether to handle zero size factors for the pseudo-cells.
+     * If false, size factors of zero will raise an error;
+     * otherwise, they will be automatically set to the smallest non-zero size factor (or 1, if all size factors are zero).
+     *
+     * @param z Whether to replace zero size factors with the smallest non-zero size factor.
+     *
+     * @return A reference to this `GroupedSizeFactors` object.
+     */
+    GroupedSizeFactors& set_handle_zeros(bool z = Defaults::handle_zeros) {
+        handle_zeros = z;
+        return *this;
+    }
+
+    /**
+     * Specify whether to handle non-finite size factors for the pseudo-cells.
+     * If false, non-finite size factors will raise an error;
+     * otherwise, they will be automatically set to the largest finite size factor (or 1, if all size factors are non-finite).
+     *
+     * @param z Whether to replace non-finite size factors with the largest finite size factor.
+     *
+     * @return A reference to this `GroupedSizeFactors` object.
+     */
+    GroupedSizeFactors& set_handle_non_finite(bool n = Defaults::handle_non_finite) {
+        handle_non_finite = n;
+        return *this;
+    }
+
+    /**
      * @param n Number of threads to use. 
      * @return A reference to this `AggregateAcrossCells` object.
      */
@@ -91,6 +131,8 @@ private:
     bool center = Defaults::center;
     double prior_count = MedianSizeFactors::Defaults::prior_count;
     int num_threads = Defaults::num_threads;
+    bool handle_zeros = Defaults::handle_zeros;
+    bool handle_non_finite = Defaults::handle_non_finite;
 
 public:
     /**
@@ -186,20 +228,45 @@ private:
         // here as we'll be recentering afterwards anyway.
         tatami::ArrayView view(combined.data(), combined.size());
         tatami::DenseColumnMatrix<T, IDX, decltype(view)> aggmat(NR, ngroups, std::move(view));
+
         MedianSizeFactors med;
         med.set_num_threads(num_threads).set_center(false).set_prior_count(prior_count);
         auto mres = med.run(&aggmat, combined.data() + ref * NR);
+
+        // We need to rescue odd size factors here; if they're zero or infinite,
+        // we lose information about the relative scaling of cells within each group.
+        auto cres = CenterSizeFactors::validate(mres.factors.size(), mres.factors.data());
+        if (cres.has_zero) {
+            if (!handle_zeros) {
+                throw std::runtime_error("all pseudo-cell size factors should be positive");
+            } else {
+                sanitize_zeros(mres.factors);
+            }
+        }
+
+        if (cres.has_non_finite) {
+            if (!handle_non_finite) {
+                throw std::runtime_error("all pseudo-cell size factors should be finite");
+            } else {
+                sanitize_non_finite(mres.factors);
+            }
+        }
 
         // Propagating to each cell via library size-based normalization.
         auto aggcolsums = tatami::column_sums(&aggmat, num_threads);
         auto colsums = tatami::column_sums(mat, num_threads);
         for (size_t i = 0; i < NC; ++i) {
             auto curgroup = group[i];
-            auto scale = static_cast<double>(colsums[i])/static_cast<double>(aggcolsums[curgroup]);
-            output[i] = scale * mres.factors[curgroup];
+            if (aggcolsums[curgroup]) { 
+                auto scale = static_cast<double>(colsums[i])/static_cast<double>(aggcolsums[curgroup]);
+                output[i] = scale * mres.factors[curgroup];
+            } else {
+                // implies colsums[i] == 0, so instead of getting NaN size factors,
+                // we just set the factors to zero, given that everything in the group is also zero.
+                output[i] = 0; 
+            }
         }
 
-        // Throwing in some centering.
         if (center) {
             CenterSizeFactors centerer;
             centerer.run(NC, output);
