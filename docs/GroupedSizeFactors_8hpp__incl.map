@@ -1,41 +1,46 @@
 <map id="scran/normalization/GroupedSizeFactors.hpp" name="scran/normalization/GroupedSizeFactors.hpp">
-<area shape="rect" id="Node000001" title="Compute size factors for groups of cells." alt="" coords="488,5,655,46"/>
-<area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,330,132,356"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="488,43,382,64,264,92,209,109,161,128,122,148,96,169,76,204,67,244,65,282,67,315,62,316,60,282,62,243,71,202,92,166,119,144,158,123,207,104,263,87,381,58,487,38"/>
-<area shape="rect" id="Node000003" href="$MedianSizeFactors_8hpp.html" title="Compute median&#45;based size factors." alt="" coords="268,94,424,120"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="516,49,395,91,393,86,514,44"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="397,330,455,356"/>
-<area shape="poly" id="edge26_Node000001_Node000004" title=" " alt="" coords="565,47,440,318,435,316,560,45"/>
-<area shape="rect" id="Node000006" title=" " alt="" coords="689,256,811,282"/>
-<area shape="poly" id="edge23_Node000001_Node000006" title=" " alt="" coords="617,44,653,65,692,92,728,126,756,166,762,186,764,206,760,242,755,242,759,205,757,187,751,169,724,129,689,96,651,69,615,49"/>
-<area shape="rect" id="Node000008" href="$blocking_8hpp.html" title="Utilities for handling blocks of cells." alt="" coords="258,256,389,282"/>
-<area shape="poly" id="edge24_Node000001_Node000008" title=" " alt="" coords="549,49,496,96,441,153,388,210,349,248,345,244,384,206,437,149,492,92,546,45"/>
-<area shape="rect" id="Node000009" title=" " alt="" coords="535,330,610,356"/>
-<area shape="poly" id="edge27_Node000001_Node000009" title=" " alt="" coords="638,44,683,64,726,92,781,136,825,181,839,205,845,230,841,256,825,284,812,295,792,305,740,321,680,332,625,339,624,334,679,327,739,316,790,300,809,291,821,280,836,254,840,230,834,207,821,184,777,140,723,96,681,69,636,49"/>
-<area shape="rect" id="Node000011" href="$AggregateAcrossCells_8hpp.html" title="Aggregate expression values across cells." alt="" coords="551,168,712,208"/>
-<area shape="poly" id="edge17_Node000001_Node000011" title=" " alt="" coords="581,46,621,153,616,155,576,48"/>
-<area shape="rect" id="Node000012" title=" " alt="" coords="888,94,956,120"/>
-<area shape="poly" id="edge25_Node000001_Node000012" title=" " alt="" coords="656,43,874,92,873,97,655,48"/>
-<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="268,118,199,136,165,150,134,170,119,184,106,202,88,241,77,281,72,316,67,315,72,280,83,239,101,199,115,181,131,166,163,146,197,131,267,113"/>
-<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="358,119,374,140,388,167,403,206,413,247,425,315,420,316,408,248,398,208,383,169,369,143,354,122"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="321,175,373,201"/>
-<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="349,120,349,160,344,160,343,120"/>
-<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="425,108,507,113,595,124,674,140,705,152,726,166,739,182,748,202,753,241,748,242,742,204,735,185,723,170,702,157,673,145,595,129,506,119,424,113"/>
-<area shape="rect" id="Node000007" href="$CenterSizeFactors_8hpp.html" title="Center size factors prior to normalization." alt="" coords="144,175,297,201"/>
-<area shape="poly" id="edge7_Node000003_Node000007" title=" " alt="" coords="328,122,253,169,250,165,325,118"/>
-<area shape="poly" id="edge8_Node000007_Node000002" title=" " alt="" coords="186,204,143,225,121,240,103,258,86,287,76,316,71,315,81,284,98,255,118,236,140,221,184,199"/>
-<area shape="poly" id="edge15_Node000007_Node000004" title=" " alt="" coords="223,201,228,240,235,261,248,280,278,304,313,320,350,330,383,336,382,341,349,336,311,325,275,308,244,284,231,264,223,241,218,202"/>
-<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="238,199,297,245,294,249,234,203"/>
-<area shape="poly" id="edge16_Node000007_Node000009" title=" " alt="" coords="257,199,402,254,539,320,536,325,399,259,256,204"/>
-<area shape="rect" id="Node000010" title=" " alt="" coords="221,330,298,356"/>
-<area shape="poly" id="edge14_Node000007_Node000010" title=" " alt="" coords="216,202,203,239,200,260,204,281,217,301,233,319,229,322,212,305,199,283,195,260,198,237,211,200"/>
-<area shape="poly" id="edge10_Node000008_Node000002" title=" " alt="" coords="281,285,127,328,125,323,279,280"/>
-<area shape="poly" id="edge11_Node000008_Node000004" title=" " alt="" coords="342,280,398,319,395,324,339,285"/>
-<area shape="poly" id="edge12_Node000008_Node000009" title=" " alt="" coords="366,280,522,324,521,329,365,285"/>
-<area shape="poly" id="edge13_Node000008_Node000010" title=" " alt="" coords="315,284,282,321,278,317,311,280"/>
-<area shape="poly" id="edge18_Node000011_Node000002" title=" " alt="" coords="550,200,407,220,326,237,247,259,168,291,102,325,100,320,166,286,245,254,325,232,406,215,550,194"/>
-<area shape="poly" id="edge20_Node000011_Node000004" title=" " alt="" coords="619,210,588,247,547,284,509,309,470,327,467,323,506,304,544,280,584,243,615,207"/>
-<area shape="poly" id="edge21_Node000011_Node000006" title=" " alt="" coords="662,207,721,245,718,250,659,211"/>
-<area shape="poly" id="edge22_Node000011_Node000008" title=" " alt="" coords="555,212,385,255,384,250,554,206"/>
-<area shape="poly" id="edge19_Node000011_Node000009" title=" " alt="" coords="627,210,600,283,586,317,581,315,595,281,622,208"/>
+<area shape="rect" id="Node000001" title="Compute size factors for groups of cells." alt="" coords="438,5,605,46"/>
+<area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="31,330,157,356"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="438,36,242,59,149,76,112,86,84,96,48,117,22,141,14,155,9,170,9,188,12,208,24,239,41,268,75,317,71,320,36,271,20,241,7,209,3,188,4,169,9,153,18,138,45,113,82,92,110,80,148,70,242,53,437,31"/>
+<area shape="rect" id="Node000003" href="$utils_8hpp_source.html" title=" " alt="" coords="95,94,164,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="438,46,180,98,179,93,437,41"/>
+<area shape="rect" id="Node000006" href="$MedianSizeFactors_8hpp.html" title="Compute median&#45;based size factors." alt="" coords="253,94,409,120"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="475,49,375,90,373,86,473,44"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="422,330,480,356"/>
+<area shape="poly" id="edge29_Node000001_Node000007" title=" " alt="" coords="520,47,459,316,454,315,515,46"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="698,256,820,282"/>
+<area shape="poly" id="edge26_Node000001_Node000008" title=" " alt="" coords="593,44,639,63,687,89,731,123,750,143,765,166,773,185,775,205,770,242,765,242,769,205,767,186,761,169,745,147,727,127,684,93,636,67,591,49"/>
+<area shape="rect" id="Node000010" href="$blocking_8hpp.html" title="Utilities for handling blocks of cells." alt="" coords="283,256,414,282"/>
+<area shape="poly" id="edge27_Node000001_Node000010" title=" " alt="" coords="511,48,397,210,369,246,365,243,393,207,507,45"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="559,330,634,356"/>
+<area shape="poly" id="edge30_Node000001_Node000011" title=" " alt="" coords="607,41,668,61,727,92,771,126,800,161,819,202,835,256,839,270,835,283,822,294,804,304,756,319,648,338,648,333,755,314,802,299,819,290,830,281,833,270,830,257,814,203,796,164,768,130,724,96,666,66,605,46"/>
+<area shape="rect" id="Node000013" href="$AggregateAcrossCells_8hpp.html" title="Aggregate expression values across cells." alt="" coords="560,168,721,208"/>
+<area shape="poly" id="edge20_Node000001_Node000013" title=" " alt="" coords="538,45,620,154,615,158,534,48"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="897,94,965,120"/>
+<area shape="poly" id="edge28_Node000001_Node000014" title=" " alt="" coords="606,39,880,91,883,92,882,97,879,97,605,45"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="104,175,156,201"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="132,120,132,160,127,160,127,120"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="22,175,80,201"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="120,122,75,166,71,163,116,118"/>
+<area shape="poly" id="edge6_Node000006_Node000002" title=" " alt="" coords="306,123,220,170,195,189,170,211,134,231,120,241,107,258,97,286,94,315,89,315,92,285,102,255,116,237,131,227,167,206,192,185,218,165,304,118"/>
+<area shape="poly" id="edge8_Node000006_Node000004" title=" " alt="" coords="300,123,176,170,171,172,169,167,174,165,298,118"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="350,118,374,139,397,166,418,204,433,245,450,315,444,316,428,247,413,207,393,169,370,143,346,122"/>
+<area shape="poly" id="edge9_Node000006_Node000008" title=" " alt="" coords="410,107,498,112,593,122,679,139,712,151,735,166,749,182,757,202,763,241,757,242,752,204,744,185,732,170,710,156,677,144,593,127,497,117,409,112"/>
+<area shape="rect" id="Node000009" href="$CenterSizeFactors_8hpp.html" title="Center size factors prior to normalization." alt="" coords="231,175,383,201"/>
+<area shape="poly" id="edge10_Node000006_Node000009" title=" " alt="" coords="330,121,318,161,312,160,325,119"/>
+<area shape="poly" id="edge11_Node000009_Node000002" title=" " alt="" coords="262,204,184,229,150,244,128,258,110,286,100,316,95,315,105,284,124,254,147,239,182,224,261,199"/>
+<area shape="poly" id="edge18_Node000009_Node000007" title=" " alt="" coords="298,203,284,219,273,240,267,261,273,281,301,307,336,324,373,334,408,338,408,343,372,339,334,329,298,311,269,283,262,261,268,238,280,216,294,199"/>
+<area shape="poly" id="edge12_Node000009_Node000010" title=" " alt="" coords="316,200,338,242,333,244,311,202"/>
+<area shape="poly" id="edge19_Node000009_Node000011" title=" " alt="" coords="331,199,562,320,559,325,329,204"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="246,330,323,356"/>
+<area shape="poly" id="edge17_Node000009_Node000012" title=" " alt="" coords="285,204,254,226,240,241,230,257,227,274,232,290,257,319,253,322,228,292,221,274,225,255,236,237,251,222,282,199"/>
+<area shape="poly" id="edge13_Node000010_Node000002" title=" " alt="" coords="306,285,152,328,150,323,304,280"/>
+<area shape="poly" id="edge14_Node000010_Node000007" title=" " alt="" coords="367,280,423,319,420,324,364,285"/>
+<area shape="poly" id="edge15_Node000010_Node000011" title=" " alt="" coords="391,280,545,324,544,329,390,285"/>
+<area shape="poly" id="edge16_Node000010_Node000012" title=" " alt="" coords="340,284,307,321,303,317,336,280"/>
+<area shape="poly" id="edge21_Node000013_Node000002" title=" " alt="" coords="560,200,423,221,347,238,272,259,193,291,128,325,126,320,191,286,270,254,345,233,422,216,559,195"/>
+<area shape="poly" id="edge23_Node000013_Node000007" title=" " alt="" coords="632,210,607,247,573,284,534,310,495,329,492,324,531,305,569,280,603,244,627,207"/>
+<area shape="poly" id="edge24_Node000013_Node000008" title=" " alt="" coords="671,207,730,245,727,250,668,211"/>
+<area shape="poly" id="edge25_Node000013_Node000010" title=" " alt="" coords="568,212,408,255,407,249,567,206"/>
+<area shape="poly" id="edge22_Node000013_Node000011" title=" " alt="" coords="640,209,624,283,611,317,606,315,619,281,635,208"/>
 </map>

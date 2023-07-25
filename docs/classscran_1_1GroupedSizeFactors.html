@@ -103,6 +103,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a907245f06f970a65c5a7c1a4a96af0fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aec88f173e14eb0df8dcc8e1e9d6db1c0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1GroupedSizeFactors.html">GroupedSizeFactors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1GroupedSizeFactors.html#aec88f173e14eb0df8dcc8e1e9d6db1c0">set_prior_count</a> (double p=<a class="el" href="structscran_1_1MedianSizeFactors_1_1Defaults.html#a909251588d34d41237a64df1dd85552c">MedianSizeFactors::Defaults::prior_count</a>)</td></tr>
 <tr class="separator:aec88f173e14eb0df8dcc8e1e9d6db1c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9471c099549a9d24c2fdc1bdbea98c7d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1GroupedSizeFactors.html">GroupedSizeFactors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1GroupedSizeFactors.html#a9471c099549a9d24c2fdc1bdbea98c7d">set_handle_zeros</a> (bool z=<a class="el" href="structscran_1_1GroupedSizeFactors_1_1Defaults.html#a95d70f82976a430a11c20c1e9a5a068e">Defaults::handle_zeros</a>)</td></tr>
+<tr class="separator:a9471c099549a9d24c2fdc1bdbea98c7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a084f2ef8e3d651ebc4604c59850cb360"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1GroupedSizeFactors.html">GroupedSizeFactors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1GroupedSizeFactors.html#a084f2ef8e3d651ebc4604c59850cb360">set_handle_non_finite</a> (bool n=<a class="el" href="structscran_1_1GroupedSizeFactors_1_1Defaults.html#a0586f933b7cd61f9f07daa8272360d2a">Defaults::handle_non_finite</a>)</td></tr>
+<tr class="separator:a084f2ef8e3d651ebc4604c59850cb360"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab9121d8622080b615083d0d2b53a32f1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classscran_1_1GroupedSizeFactors.html">GroupedSizeFactors</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classscran_1_1GroupedSizeFactors.html#ab9121d8622080b615083d0d2b53a32f1">set_num_threads</a> (int n=<a class="el" href="structscran_1_1GroupedSizeFactors_1_1Defaults.html#a26a37b3247734472ce814d356243c980">Defaults::num_threads</a>)</td></tr>
 <tr class="separator:ab9121d8622080b615083d0d2b53a32f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afec8d5ba32a045c587f40c832973de2e"><td class="memTemplParams" colspan="2">template&lt;typename T , typename IDX , typename Group , typename Out &gt; </td></tr>
@@ -184,6 +188,74 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">p</td><td>Prior count for the library size shrinkage, see <code><a class="el" href="classscran_1_1MedianSizeFactors.html#a5507419988ca1925e8f60bdc99436e51">MedianSizeFactors::set_prior_count()</a></code> for details.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1GroupedSizeFactors.html" title="Compute grouped size factors to handle composition bias.">GroupedSizeFactors</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a9471c099549a9d24c2fdc1bdbea98c7d" name="a9471c099549a9d24c2fdc1bdbea98c7d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9471c099549a9d24c2fdc1bdbea98c7d">&#9670;&#160;</a></span>set_handle_zeros()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1GroupedSizeFactors.html">GroupedSizeFactors</a> &amp; scran::GroupedSizeFactors::set_handle_zeros </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>z</em> = <code><a class="el" href="structscran_1_1GroupedSizeFactors_1_1Defaults.html#a95d70f82976a430a11c20c1e9a5a068e">Defaults::handle_zeros</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Specify whether to handle zero size factors for the pseudo-cells. If false, size factors of zero will raise an error; otherwise, they will be automatically set to the smallest non-zero size factor (or 1, if all size factors are zero).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">z</td><td>Whether to replace zero size factors with the smallest non-zero size factor.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to this <code><a class="el" href="classscran_1_1GroupedSizeFactors.html" title="Compute grouped size factors to handle composition bias.">GroupedSizeFactors</a></code> object. </dd></dl>
+
+</div>
+</div>
+<a id="a084f2ef8e3d651ebc4604c59850cb360" name="a084f2ef8e3d651ebc4604c59850cb360"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a084f2ef8e3d651ebc4604c59850cb360">&#9670;&#160;</a></span>set_handle_non_finite()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classscran_1_1GroupedSizeFactors.html">GroupedSizeFactors</a> &amp; scran::GroupedSizeFactors::set_handle_non_finite </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>n</em> = <code><a class="el" href="structscran_1_1GroupedSizeFactors_1_1Defaults.html#a0586f933b7cd61f9f07daa8272360d2a">Defaults::handle_non_finite</a></code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Specify whether to handle non-finite size factors for the pseudo-cells. If false, non-finite size factors will raise an error; otherwise, they will be automatically set to the largest finite size factor (or 1, if all size factors are non-finite).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">z</td><td>Whether to replace non-finite size factors with the largest finite size factor.</td></tr>
   </table>
   </dd>
 </dl>
