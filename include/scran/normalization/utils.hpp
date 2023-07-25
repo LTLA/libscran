@@ -41,8 +41,10 @@ void sanitize_non_finite(V& size_factors) {
     }
 
     for (auto& s : size_factors) {
-        if (!std::isfinite(s)) {
+        if (std::isinf(s)) {
             s = largest;
+        } else if (std::isnan(s)) { // no-op scaling if size factor is missing.
+            s = 1;
         }
     }
 }

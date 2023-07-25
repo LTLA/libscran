@@ -106,8 +106,9 @@ public:
 
     /**
      * Specify whether to handle non-finite size factors for the pseudo-cells.
-     * If false, non-finite size factors will raise an error;
-     * otherwise, they will be automatically set to the largest finite size factor (or 1, if all size factors are non-finite).
+     * If false, non-finite size factors will raise an error.
+     * Otherwise, infinite size factors will be automatically set to the largest finite size factor (or 1, if all size factors are non-finite),
+     * and missing size factors (i.e., NaN) will be set to 1.
      *
      * @param z Whether to replace non-finite size factors with the largest finite size factor.
      *

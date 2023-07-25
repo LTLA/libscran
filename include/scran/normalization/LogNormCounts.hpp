@@ -162,8 +162,9 @@ public:
 
     /**
      * Specify whether to handle non-finite size factors. 
-     * If false, non-finite size factors will raise an error;
-     * otherwise, they will be automatically set to the largest finite size factor after centering (or 1, if all size factors are non-finite).
+     * If false, non-finite size factors will raise an error.
+     * Otherwise, size factors of infinity will be automatically set to the largest finite size factor after centering (or 1, if all size factors are non-finite).
+     * Missing (i.e., NaN) size factors will be automatically set to 1 so that scaling is a no-op.
      * Note that the centering process ignores non-finite factors, see `CenterSizeFactors` for more details.
      *
      * @param z Whether to replace non-finite size factors with the largest finite size factor.

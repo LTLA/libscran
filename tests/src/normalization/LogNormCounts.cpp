@@ -268,17 +268,42 @@ TEST_F(LogNormCountsTester, NonStrictInfinites) {
     // centering only considers finite elements by default.
     empty[0] = 0.5;
     empty[1] = 1;
+    double center = 1.5 / 2; 
 
     {
         auto lognormed = lnc.run(mat, empty);
         auto lext = lognormed->dense_column();
         auto mext = mat->dense_column();
 
-        double center = 1.5 / 2; 
         for (size_t i = 0; i < mat->ncol(); ++i) {
             auto output = lext->fetch(i);
             auto output2 = mext->fetch(i);
             auto sf = (i <= 1 ? empty[i] : 1) / center; // Uses 1 as the fill-in, which is the largest non-zero.
+            EXPECT_EQ(output, normalize(output2, sf));
+        }
+    }
+
+    // Handles missing values as well.
+    empty[2] = std::numeric_limits<double>::quiet_NaN();
+
+    {
+        auto lognormed = lnc.run(mat, empty);
+        auto lext = lognormed->dense_column();
+        auto mext = mat->dense_column();
+
+        for (size_t i = 0; i < mat->ncol(); ++i) {
+            auto output = lext->fetch(i);
+            auto output2 = mext->fetch(i);
+
+            double sf = 0;
+            if (i <= 1) {
+                sf = empty[i] / center;
+            } else if (i == 2) {
+                sf = 1; // NaNs are converted to 1 without additional centering.
+            } else {
+                sf = 1 / center;
+            }
+
             EXPECT_EQ(output, normalize(output2, sf));
         }
     }
