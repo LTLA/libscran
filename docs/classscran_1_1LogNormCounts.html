@@ -328,7 +328,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Specify whether to handle non-finite size factors. If false, non-finite size factors will raise an error; otherwise, they will be automatically set to the largest finite size factor after centering (or 1, if all size factors are non-finite). Note that the centering process ignores non-finite factors, see <code><a class="el" href="classscran_1_1CenterSizeFactors.html" title="Center size factors prior to scaling normalization.">CenterSizeFactors</a></code> for more details.</p>
+<p>Specify whether to handle non-finite size factors. If false, non-finite size factors will raise an error. Otherwise, size factors of infinity will be automatically set to the largest finite size factor after centering (or 1, if all size factors are non-finite). Missing (i.e., NaN) size factors will be automatically set to 1 so that scaling is a no-op. Note that the centering process ignores non-finite factors, see <code><a class="el" href="classscran_1_1CenterSizeFactors.html" title="Center size factors prior to scaling normalization.">CenterSizeFactors</a></code> for more details.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">z</td><td>Whether to replace non-finite size factors with the largest finite size factor.</td></tr>

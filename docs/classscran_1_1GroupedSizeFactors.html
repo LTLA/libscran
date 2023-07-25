@@ -252,7 +252,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Specify whether to handle non-finite size factors for the pseudo-cells. If false, non-finite size factors will raise an error; otherwise, they will be automatically set to the largest finite size factor (or 1, if all size factors are non-finite).</p>
+<p>Specify whether to handle non-finite size factors for the pseudo-cells. If false, non-finite size factors will raise an error. Otherwise, infinite size factors will be automatically set to the largest finite size factor (or 1, if all size factors are non-finite), and missing size factors (i.e., NaN) will be set to 1.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">z</td><td>Whether to replace non-finite size factors with the largest finite size factor.</td></tr>
