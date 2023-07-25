@@ -263,10 +263,10 @@ TEST(GroupedSizeFactors, Empty) { // handles all-zero matrices gracefully.
     tatami::DenseColumnMatrix<double> mat(NR, NC, contents);
 
     scran::GroupedSizeFactors grouper;
-    grouper.set_handle_zeros(true);
+    grouper.set_handle_non_finite(true).set_handle_zeros(true);
 
     std::vector<int> groups(NC);
-    auto res0 = grouper.run(&mat, groups.data(), 2);
+    auto res0 = grouper.run(&mat, groups.data());
     EXPECT_EQ(res0.factors, std::vector<double>(NC)); 
 }
 
