@@ -121,9 +121,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4ec5918fd3b2a4537cc40ef86a4b705a"><td class="memTemplParams" colspan="2">template&lt;class Algorithm &gt; </td></tr>
 <tr class="memitem:a4ec5918fd3b2a4537cc40ef86a4b705a"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1BuildSnnGraph_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1BuildSnnGraph.html#a4ec5918fd3b2a4537cc40ef86a4b705a">run</a> (const Algorithm *search) const</td></tr>
 <tr class="separator:a4ec5918fd3b2a4537cc40ef86a4b705a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5198b295df2e211edc0d89d1a209e566"><td class="memTemplParams" colspan="2">template&lt;class Indices &gt; </td></tr>
-<tr class="memitem:a5198b295df2e211edc0d89d1a209e566"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1BuildSnnGraph_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1BuildSnnGraph.html#a5198b295df2e211edc0d89d1a209e566">run</a> (const std::vector&lt; Indices &gt; &amp;indices) const</td></tr>
-<tr class="separator:a5198b295df2e211edc0d89d1a209e566"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b2e241c4730af640653f928e9199783"><td class="memTemplParams" colspan="2">template&lt;typename Index_ , typename Distance_ &gt; </td></tr>
+<tr class="memitem:a2b2e241c4730af640653f928e9199783"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1BuildSnnGraph_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1BuildSnnGraph.html#a2b2e241c4730af640653f928e9199783">run</a> (const knncolle::NeighborList&lt; Index_, Distance_ &gt; &amp;neighbors) const</td></tr>
+<tr class="separator:a2b2e241c4730af640653f928e9199783"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee616523bdda1c63b1d24af1494e5477"><td class="memTemplParams" colspan="2">template&lt;class Indices_ &gt; </td></tr>
+<tr class="memitem:aee616523bdda1c63b1d24af1494e5477"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structscran_1_1BuildSnnGraph_1_1Results.html">Results</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classscran_1_1BuildSnnGraph.html#aee616523bdda1c63b1d24af1494e5477">run</a> (const std::vector&lt; Indices_ &gt; &amp;indices) const</td></tr>
+<tr class="separator:aee616523bdda1c63b1d24af1494e5477"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Build a shared nearest-neighbor graph with cells as nodes. </p>
@@ -135,7 +138,7 @@ Public Member Functions</h2></td></tr>
 <li><code>NUMBER</code> defines the weight between two nodes as the number of shared nearest neighbors between them. The weight can range from zero to $k + 1$, as the node itself is included in its own nearest-neighbor set. This is a simpler scheme that is also slightly faster but does not account for the ranking of neighbors within each set.</li>
 <li><code>JACCARD</code> defines the weight between two nodes as the Jaccard index of their neighbor sets. This weight can range from zero to 1, and is a monotonic transformation of the weight used by <code>NUMBER</code>.</li>
 </ul>
-<p>See the <code>ClusterSNNGraph</code> class to perform community detection on the graph returned by <code><a class="el" href="classscran_1_1BuildSnnGraph.html#ae491f72749e54804144bff07734ca511">run()</a></code>.</p>
+<p>See the <code>ClusterSNNGraph</code> class to perform community detection on the graph returned by <code>run()</code>.</p>
 <dl class="section see"><dt>See also</dt><dd>Xu C and Su Z (2015). Identification of cell types from single-cell transcriptomes using a novel clustering method. <em>Bioinformatics</em> 31, 1974-80 </dd></dl>
 </div><h2 class="groupheader">Member Enumeration Documentation</h2>
 <a id="a906e3225f1422bbb7eb1491d2e42cfe0" name="a906e3225f1422bbb7eb1491d2e42cfe0"></a>
@@ -287,7 +290,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <a id="ae491f72749e54804144bff07734ca511" name="ae491f72749e54804144bff07734ca511"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae491f72749e54804144bff07734ca511">&#9670;&#160;</a></span>run() <span class="overload">[1/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ae491f72749e54804144bff07734ca511">&#9670;&#160;</a></span>run() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -338,7 +341,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <a id="a4ec5918fd3b2a4537cc40ef86a4b705a" name="a4ec5918fd3b2a4537cc40ef86a4b705a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4ec5918fd3b2a4537cc40ef86a4b705a">&#9670;&#160;</a></span>run() <span class="overload">[2/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ec5918fd3b2a4537cc40ef86a4b705a">&#9670;&#160;</a></span>run() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -378,13 +381,13 @@ template&lt;class Algorithm &gt; </div>
 
 </div>
 </div>
-<a id="a5198b295df2e211edc0d89d1a209e566" name="a5198b295df2e211edc0d89d1a209e566"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5198b295df2e211edc0d89d1a209e566">&#9670;&#160;</a></span>run() <span class="overload">[3/3]</span></h2>
+<a id="a2b2e241c4730af640653f928e9199783" name="a2b2e241c4730af640653f928e9199783"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2b2e241c4730af640653f928e9199783">&#9670;&#160;</a></span>run() <span class="overload">[3/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class Indices &gt; </div>
+template&lt;typename Index_ , typename Distance_ &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
@@ -392,7 +395,50 @@ template&lt;class Indices &gt; </div>
         <tr>
           <td class="memname"><a class="el" href="structscran_1_1BuildSnnGraph_1_1Results.html">Results</a> scran::BuildSnnGraph::run </td>
           <td>(</td>
-          <td class="paramtype">const std::vector&lt; Indices &gt; &amp;&#160;</td>
+          <td class="paramtype">const knncolle::NeighborList&lt; Index_, Distance_ &gt; &amp;&#160;</td>
+          <td class="paramname"><em>neighbors</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Index_</td><td>Integer type for the indices. </td></tr>
+    <tr><td class="paramname">Distance_</td><td>Floating-point type for the distances.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">neighbors</td><td>Vector of indices and distances of the neighbors for each cell, sorted by increasing distance.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The edges and weights of the constructed SNN graph.</dd></dl>
+<p>Distances are ignored here; this overload is only provided to enable convenient usage with pre-computed neighbors from <b>knncolle</b>. </p>
+
+</div>
+</div>
+<a id="aee616523bdda1c63b1d24af1494e5477" name="aee616523bdda1c63b1d24af1494e5477"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee616523bdda1c63b1d24af1494e5477">&#9670;&#160;</a></span>run() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class Indices_ &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structscran_1_1BuildSnnGraph_1_1Results.html">Results</a> scran::BuildSnnGraph::run </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; Indices_ &gt; &amp;&#160;</td>
           <td class="paramname"><em>indices</em></td><td>)</td>
           <td> const</td>
         </tr>
@@ -405,7 +451,7 @@ template&lt;class Indices &gt; </div>
 </div><div class="memdoc">
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">Indices</td><td>Vector of integer indices.</td></tr>
+    <tr><td class="paramname">Indices_</td><td>Vector-like class containing integer indices. This should provide the <code>[</code> and <code>size()</code> methods.</td></tr>
   </table>
   </dd>
 </dl>
