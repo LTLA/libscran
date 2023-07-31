@@ -177,6 +177,141 @@ public:
 #endif
     };
 
+private:
+    template<class Indices_, class Function_>
+    Results run(const std::vector<Indices_>& indices, Function_ get_index) const {
+        size_t ncells = indices.size();
+
+        // Not parallel-frendly, so we don't construct this with the neighbor search
+        std::vector<std::vector<std::pair<int, int> > > hosts(ncells);
+        for (size_t i = 0; i < ncells; ++i) {
+            hosts[i].push_back(std::make_pair(0, i)); // each point is its own 0-th nearest neighbor
+            const auto& current = indices[i];
+            int counter = 1;
+            for (auto x : current) {
+                hosts[get_index(x)].push_back(std::make_pair(counter, i));
+                ++counter;
+            }
+        }
+
+        // Constructing the shared neighbor graph.
+        std::vector<std::vector<int> > edge_stores(ncells);
+        std::vector<std::vector<double> > weight_stores(ncells);
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+        #pragma omp parallel num_threads(nthreads)
+        {
+#else
+        SCRAN_CUSTOM_PARALLEL([&](size_t, size_t start, size_t length) -> void {
+#endif
+
+            std::vector<int> current_score(ncells);
+            std::vector<int> current_added;
+            current_added.reserve(ncells);
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+            #pragma omp for
+            for (size_t j = 0; j < ncells; ++j) {
+#else
+            for (size_t j = start, end = start + length; j < end; ++j) {
+#endif
+
+                const auto& current_neighbors = indices[j];
+                int nneighbors = current_neighbors.size();
+
+                for (int i = 0; i <= nneighbors; ++i) {
+                    // First iteration treats 'j' as the zero-th neighbor.
+                    // Remaining iterations go through the neighbors of 'j'.
+                    const int cur_neighbor = (i==0 ? j : get_index(current_neighbors[i-1]));
+
+                    // Going through all observations 'h' for which 'cur_neighbor'
+                    // is a nearest neighbor, a.k.a., 'cur_neighbor' is a shared
+                    // neighbor of both 'h' and 'j'.
+                    for (const auto& h : hosts[cur_neighbor]) {
+                        auto othernode = h.second;
+
+                        if (othernode < j) { // avoid duplicates from symmetry in the SNN calculations.
+                            int& existing_other = current_score[othernode];
+                            if (weight_scheme == RANKED) {
+                                // Recording the lowest combined rank per neighbor.
+                                int currank = h.first + i;
+                                if (existing_other == 0) { 
+                                    existing_other = currank;
+                                    current_added.push_back(othernode);
+                                } else if (existing_other > currank) {
+                                    existing_other = currank;
+                                }
+                            } else {
+                                // Recording the number of shared neighbors.
+                                if (existing_other==0) { 
+                                    current_added.push_back(othernode);
+                                } 
+                                ++existing_other;
+                            }
+                        }
+                    }
+                }
+               
+                // Converting to edges.
+                auto& current_edges = edge_stores[j];
+                current_edges.reserve(current_added.size() * 2);
+                auto& current_weights = weight_stores[j];
+                current_weights.reserve(current_added.size() * 2);
+
+                for (auto othernode : current_added) {
+                    int& otherscore = current_score[othernode];
+                    double finalscore;
+                    if (weight_scheme == RANKED) {
+                        finalscore = static_cast<double>(nneighbors) - 0.5 * static_cast<double>(otherscore);
+                    } else {
+                        finalscore = otherscore;
+                        if (weight_scheme == JACCARD) {
+                            finalscore = finalscore / (2 * (nneighbors + 1) - finalscore);
+                        }
+                    }
+
+                    current_edges.push_back(j);
+                    current_edges.push_back(othernode);
+                    current_weights.push_back(std::max(finalscore, 1e-6)); // Ensuring that an edge with a positive weight is always reported.
+
+                    // Resetting all those added to zero.
+                    otherscore = 0;
+                }
+                current_added.clear();
+
+#ifndef SCRAN_CUSTOM_PARALLEL
+            }
+        } 
+#else
+            }
+        }, ncells, nthreads);
+#endif
+
+        // Collating the total number of edges.
+        size_t nedges = 0;
+        for (const auto& w : weight_stores) {
+            nedges += w.size();
+        }
+
+        Results output;
+        output.ncells = ncells;
+
+        output.weights.reserve(nedges);
+        for (const auto& w : weight_stores) {
+            output.weights.insert(output.weights.end(), w.begin(), w.end());
+        }
+        weight_stores.clear();
+        weight_stores.shrink_to_fit(); // forcibly release memory so that we have some more space for edges.
+
+        output.edges.reserve(nedges * 2);
+        for (const auto& e : edge_stores) {
+            output.edges.insert(output.edges.end(), e.begin(), e.end());
+        }
+
+        return output;
+    }
+
+public:
     /**
      * @param ndims Number of dimensions.
      * @param ncells Number of cells.
@@ -230,141 +365,32 @@ public:
     }
 
     /**
-     * @tparam Indices Vector of integer indices.
+     * @tparam Index_ Integer type for the indices.
+     * @tparam Distance_ Floating-point type for the distances.
+     *
+     * @param neighbors Vector of indices and distances of the neighbors for each cell, sorted by increasing distance.
+     *
+     * @return The edges and weights of the constructed SNN graph.
+     *
+     * Distances are ignored here; this overload is only provided to enable convenient usage with pre-computed neighbors from **knncolle**.
+     */
+    template<typename Index_, typename Distance_>
+    Results run(const knncolle::NeighborList<Index_, Distance_>& neighbors) const {
+        return run(neighbors, [](const std::pair<Index_, Distance_>& x) -> Index_ { return x.first; });
+    }
+
+    /**
+     * @tparam Indices_ Vector-like class containing integer indices.
+     * This should provide the `[` and `size()` methods.
      *
      * @param indices Vector of indices of the neighbors for each cell, sorted by increasing distance.
      *
      * @return The edges and weights of the constructed SNN graph.
      */
-    template<class Indices>
-    Results run(const std::vector<Indices>& indices) const {
-        size_t ncells = indices.size();
-
-        // Not parallel-frendly, so we don't construct this with the neighbor search
-        std::vector<std::vector<std::pair<int, int> > > hosts(ncells);
-        for (size_t i = 0; i < ncells; ++i) {
-            hosts[i].push_back(std::make_pair(0, i)); // each point is its own 0-th nearest neighbor
-            const auto& current = indices[i];
-            int counter = 1;
-            for (auto x : current) {
-                hosts[x].push_back(std::make_pair(counter, i));
-                ++counter;
-            }
-        }
-
-        // Constructing the shared neighbor graph.
-        std::vector<std::vector<int> > edge_stores(ncells);
-        std::vector<std::vector<double> > weight_stores(ncells);
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-        #pragma omp parallel num_threads(nthreads)
-        {
-#else
-        SCRAN_CUSTOM_PARALLEL([&](size_t, size_t start, size_t length) -> void {
-#endif
-
-            std::vector<int> current_score(ncells);
-            std::vector<int> current_added;
-            current_added.reserve(ncells);
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-            #pragma omp for
-            for (size_t j = 0; j < ncells; ++j) {
-#else
-            for (size_t j = start, end = start + length; j < end; ++j) {
-#endif
-
-                const auto& current_neighbors = indices[j];
-                for (int i = 0; i <= current_neighbors.size(); ++i) {
-                    // First iteration treats 'j' as the zero-th neighbor.
-                    // Remaining iterations go through the neighbors of 'j'.
-                    const int cur_neighbor = (i==0 ? j : current_neighbors[i-1]);
-
-                    // Going through all observations 'h' for which 'cur_neighbor'
-                    // is a nearest neighbor, a.k.a., 'cur_neighbor' is a shared
-                    // neighbor of both 'h' and 'j'.
-                    for (const auto& h : hosts[cur_neighbor]) {
-                        auto othernode = h.second;
-
-                        if (othernode < j) { // avoid duplicates from symmetry in the SNN calculations.
-                            int& existing_other = current_score[othernode];
-                            if (weight_scheme == RANKED) {
-                                // Recording the lowest combined rank per neighbor.
-                                int currank = h.first + i;
-                                if (existing_other == 0) { 
-                                    existing_other = currank;
-                                    current_added.push_back(othernode);
-                                } else if (existing_other > currank) {
-                                    existing_other = currank;
-                                }
-                            } else {
-                                // Recording the number of shared neighbors.
-                                if (existing_other==0) { 
-                                    current_added.push_back(othernode);
-                                } 
-                                ++existing_other;
-                            }
-                        }
-                    }
-                }
-               
-                // Converting to edges.
-                auto& current_edges = edge_stores[j];
-                current_edges.reserve(current_added.size() * 2);
-                auto& current_weights = weight_stores[j];
-                current_weights.reserve(current_added.size() * 2);
-
-                for (auto othernode : current_added) {
-                    int& otherscore = current_score[othernode];
-                    double finalscore;
-                    if (weight_scheme == RANKED) {
-                        finalscore = static_cast<double>(current_neighbors.size()) - 0.5 * static_cast<double>(otherscore);
-                    } else {
-                        finalscore = otherscore;
-                        if (weight_scheme == JACCARD) {
-                            finalscore = finalscore / (2 * (current_neighbors.size() + 1) - finalscore);
-                        }
-                    }
-
-                    current_edges.push_back(j);
-                    current_edges.push_back(othernode);
-                    current_weights.push_back(std::max(finalscore, 1e-6)); // Ensuring that an edge with a positive weight is always reported.
-
-                    // Resetting all those added to zero.
-                    otherscore = 0;
-                }
-                current_added.clear();
-
-#ifndef SCRAN_CUSTOM_PARALLEL
-            }
-        } 
-#else
-            }
-        }, ncells, nthreads);
-#endif
-
-        // Collating the total number of edges.
-        size_t nedges = 0;
-        for (const auto& w : weight_stores) {
-            nedges += w.size();
-        }
-
-        Results output;
-        output.ncells = ncells;
-
-        output.weights.reserve(nedges);
-        for (const auto& w : weight_stores) {
-            output.weights.insert(output.weights.end(), w.begin(), w.end());
-        }
-        weight_stores.clear();
-        weight_stores.shrink_to_fit(); // forcibly release memory so that we have some more space for edges.
-
-        output.edges.reserve(nedges * 2);
-        for (const auto& e : edge_stores) {
-            output.edges.insert(output.edges.end(), e.begin(), e.end());
-        }
-
-        return output;
+    template<class Indices_>
+    Results run(const std::vector<Indices_>& indices) const {
+        typedef typename std::remove_cv<typename std::remove_reference<decltype(std::declval<Indices_>()[0])>::type>::type Element;
+        return run(indices, [](Element i) -> Element { return i; });
     }
 };
 

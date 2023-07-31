@@ -187,6 +187,13 @@ TEST_P(BuildSnnGraphAnnoyTest, Annoy) {
     auto output = builder.run(ndim, nobs, data.data());
     EXPECT_EQ(output.ncells, nobs);
     EXPECT_TRUE(output.weights.size() > 1); // well, it gives _something_, at least.
+
+    // Same results as if we had run it manually.
+    knncolle::AnnoyEuclidean<> idx(ndim, nobs, data.data());
+    auto res = knncolle::find_nearest_neighbors(&idx, k, 1);
+    auto output2 = builder.run(res);
+    EXPECT_EQ(output.edges, output2.edges);
+    EXPECT_EQ(output.weights, output2.weights);
 }
 
 INSTANTIATE_TEST_SUITE_P(
