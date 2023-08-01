@@ -686,6 +686,7 @@ public:
      * These should be 0-based and consecutive.
      * @param[in] block Pointer to an array of length equal to the number of columns in `p`, containing the blocking factor.
      * Levels should be 0-based and consecutive.
+     * If `NULL`, this is ignored and the result is the same as calling `run()`.
      * @param[out] means Vector of vectors of pointers to arrays of length equal to the number of rows in `p`.
      * Each inner vector corresponds to a group and each pointer therein contains the mean expression in a blocking level.
      * @param[out] detected Pointers to arrays of length equal to the number of rows in `p`.
@@ -706,6 +707,20 @@ public:
         std::vector<std::vector<Stat_*> > lfc,
         std::vector<std::vector<Stat_*> > delta_detected) 
     const {
+        if (block == NULL) {
+            run(
+                p, 
+                group, 
+                std::move(means),
+                std::move(detected),
+                std::move(cohen),
+                std::move(auc),
+                std::move(lfc),
+                std::move(delta_detected)
+            );
+            return;
+        }
+
         differential_analysis::MatrixCalculator runner(nthreads, threshold, block_weight_policy, variable_block_weight_parameters);
 
         size_t ngenes = p->nrow();
@@ -1103,19 +1118,15 @@ public:
      * These should be 0-based and consecutive.
      * @param[in] block Pointer to an array of length equal to the number of columns in `p`, containing the blocking factor.
      * Levels should be 0-based and consecutive.
+     * If `NULL`, this is ignored and the result is the same as calling `run()`.
      *
      * @return A `Results` object containing the summary statistics and the other per-group statistics.
      * Whether particular statistics are computed depends on the configuration from `set_compute_cohen()` and related setters.
      */
     template<typename Stat_ = double, typename Value_, typename Index_, typename Group_, typename Block_>
     Results<Stat_> run_blocked(const tatami::Matrix<Value_, Index_>* p, const Group_* group, const Block_* block) const {
-        if (block == NULL) {
-            return run(p, group);
-        }
-
         auto ngroups = count_ids(p->ncol(), group);
         Results<Stat_> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); 
-
         run_blocked(
             p, 
             group,

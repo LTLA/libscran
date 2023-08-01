@@ -135,6 +135,11 @@ TEST_P(ScoreMarkersTest, Basic) {
         auto res1 = chd.run(dense_row.get(), groupings.data());
         compare_basic(res, res1, ngroups, 1);
         compare_effects(ngroups, res, res1, do_auc);
+    } else {
+        // Checking that we get the same results with NULL blocking.
+        auto nres = chd.run_blocked(dense_row.get(), groupings.data(), static_cast<int*>(NULL));
+        compare_basic(res, nres, ngroups, 1);
+        compare_effects(ngroups, res, nres, do_auc);
     }
 }
 
