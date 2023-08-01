@@ -186,233 +186,229 @@ $(function() {
 <div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>        process_simple_effects(p-&gt;nrow(), ngroups, 1, state, means, detected, cohen, lfc, delta_detected);</div>
 <div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>    }</div>
 <div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span> </div>
-<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Data_, <span class="keyword">typename</span> Index_, <span class="keyword">typename</span> Group_, <span class="keyword">typename</span> Block_, <span class="keyword">typename</span> Stat_&gt;</div>
-<div class="line"><a id="l00320" name="l00320"></a><span class="lineno"><a class="line" href="classscran_1_1PairwiseEffects.html#afb171621973111cd81e268e32939fcf6">  320</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classscran_1_1PairwiseEffects.html#afb171621973111cd81e268e32939fcf6">run_blocked</a>(</div>
-<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>        <span class="keyword">const</span> tatami::Matrix&lt;Data_, Index_&gt;* p, </div>
-<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>        <span class="keyword">const</span> Group_* group, </div>
-<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>        <span class="keyword">const</span> Block_* block, </div>
-<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>        std::vector&lt;Stat_*&gt; means, </div>
-<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>        std::vector&lt;Stat_*&gt; detected, </div>
-<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>        Stat_* cohen,</div>
-<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>        Stat_* auc,</div>
-<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>        Stat_* lfc,</div>
-<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>        Stat_* delta_detected)<span class="keyword"></span></div>
-<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span><span class="keyword">    const </span>{</div>
-<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>        <span class="keywordflow">if</span> (block == NULL) {</div>
-<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>            <a class="code hl_function" href="classscran_1_1PairwiseEffects.html#a7d3a288d1e408f13842f405070925857">run</a>(p, group, std::move(means), std::move(detected), cohen, auc, lfc, delta_detected);</div>
-<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span> </div>
-<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>            <span class="keyword">auto</span> ngenes = p-&gt;nrow();</div>
-<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>            <span class="keywordtype">int</span> ngroups = means.size();</div>
-<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>            <span class="keywordtype">int</span> nblocks = <a class="code hl_function" href="namespacescran.html#a2d993d00e1fa75ce3f4864cc2999c321">count_ids</a>(p-&gt;ncol(), block);</div>
-<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span> </div>
-<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>            <span class="keywordtype">int</span> ncombos = ngroups * nblocks;</div>
-<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>            std::vector&lt;std::vector&lt;Stat_&gt; &gt; means_store(ncombos), detected_store(ncombos);</div>
-<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>            std::vector&lt;Stat_*&gt; means2(ncombos), detected2(ncombos);</div>
-<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> c = 0; c &lt; ncombos; ++c) {</div>
-<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>                means_store[c].resize(ngenes);</div>
-<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>                detected_store[c].resize(ngenes);</div>
-<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>                means2[c] = means_store[c].data();</div>
-<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>                detected2[c] = detected_store[c].data();</div>
-<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>            }</div>
-<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span> </div>
-<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>            differential_analysis::MatrixCalculator runner(nthreads, threshold, block_weight_policy, variable_block_weight_parameters);</div>
-<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>            Overlord overlord(auc);</div>
-<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>            <span class="keyword">auto</span> state = runner.run_blocked(p, group, ngroups, block, nblocks, overlord);</div>
-<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>            process_simple_effects(p-&gt;nrow(), ngroups, nblocks, state, means2, detected2, cohen, lfc, delta_detected);</div>
-<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span> </div>
-<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>            <span class="comment">// Averaging the remaining statistics.</span></div>
-<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>            std::vector&lt;double&gt; weights(nblocks);</div>
-<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>            std::vector&lt;Stat_*&gt; mstats(nblocks), dstats(nblocks);</div>
-<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span> </div>
-<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> gr = 0; gr &lt; ngroups; ++gr) {</div>
-<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> b = 0; b &lt; nblocks; ++b) {</div>
-<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>                    <span class="keywordtype">size_t</span> offset = gr * <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(nblocks) + b;</div>
-<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>                    weights[b] = state.level_weight[offset];</div>
-<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>                    mstats[b] = means2[offset];</div>
-<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>                    dstats[b] = detected2[offset];</div>
-<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>                }</div>
-<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span> </div>
-<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>                <a class="code hl_function" href="namespacescran.html#a90170f1fa4f0968c88bf2293b0428494">average_vectors_weighted</a>(ngenes, mstats, weights.data(), means[gr]);</div>
-<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>                <a class="code hl_function" href="namespacescran.html#a90170f1fa4f0968c88bf2293b0428494">average_vectors_weighted</a>(ngenes, dstats, weights.data(), detected[gr]);</div>
-<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>            }</div>
-<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>        }</div>
-<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>    }</div>
-<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span> </div>
-<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Stat_&gt;</div>
-<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>    <span class="keyword">struct </span>Overlord {</div>
-<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>        Overlord(Stat_* auc_) : auc(auc_) {}</div>
-<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span> </div>
-<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>        <span class="keywordtype">bool</span> needs_auc()<span class="keyword"> const </span>{ </div>
-<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>            <span class="keywordflow">return</span> auc != NULL;</div>
-<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span>        }</div>
-<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span> </div>
-<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>        Stat_* auc;</div>
-<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span> </div>
-<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>        Stat_* prepare_auc_buffer(<span class="keywordtype">size_t</span> gene, <span class="keywordtype">size_t</span> ngroups) { </div>
-<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>            <span class="keywordflow">return</span> auc + gene * ngroups * ngroups;</div>
-<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>        }</div>
-<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>    };</div>
-<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span> </div>
-<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Stat_&gt;</div>
-<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>    <span class="keywordtype">void</span> process_simple_effects(</div>
-<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>        <span class="keywordtype">size_t</span> ngenes, <span class="comment">// using size_t consistently here, to avoid integer overflow bugs when computing products.</span></div>
-<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>        <span class="keywordtype">size_t</span> ngroups,</div>
-<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>        <span class="keywordtype">size_t</span> nblocks,</div>
-<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>        <span class="keyword">const</span> differential_analysis::MatrixCalculator::State&amp; state, </div>
-<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>        std::vector&lt;Stat_*&gt;&amp; means, </div>
-<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>        std::vector&lt;Stat_*&gt;&amp; detected, </div>
-<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>        Stat_* cohen, </div>
-<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>        Stat_* lfc, </div>
-<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>        Stat_* delta_detected)<span class="keyword"> </span></div>
-<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span><span class="keyword">    const </span>{</div>
-<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>        <span class="keyword">const</span> <span class="keyword">auto</span>&amp; level_size = state.level_size;</div>
-<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>        <span class="keywordtype">size_t</span> nlevels = level_size.size();</div>
-<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span> </div>
-<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span>        tatami::parallelize([&amp;](<span class="keywordtype">size_t</span>, <span class="keywordtype">size_t</span> start, <span class="keywordtype">size_t</span> length) -&gt; <span class="keywordtype">void</span> {</div>
-<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>            <span class="keyword">auto</span> in_offset = nlevels * start;</div>
-<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>            <span class="keyword">const</span> <span class="keyword">auto</span>* tmp_means = state.means.data() + in_offset;</div>
-<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>            <span class="keyword">const</span> <span class="keyword">auto</span>* tmp_variances = state.variances.data() + in_offset;</div>
-<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>            <span class="keyword">const</span> <span class="keyword">auto</span>* tmp_detected = state.detected.data() + in_offset;</div>
-<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span> </div>
-<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span>            <span class="keywordtype">size_t</span> squared = ngroups * ngroups;</div>
-<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>            <span class="keywordtype">size_t</span> out_offset = start * squared;</div>
-<div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span>            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> gene = start, end = start + length; gene &lt; end; ++gene, out_offset += squared) {</div>
-<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> l = 0; l &lt; nlevels; ++l) {</div>
-<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span>                    means[l][gene] = tmp_means[l];</div>
-<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>                    detected[l][gene] = tmp_detected[l];</div>
-<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>                }</div>
-<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span> </div>
-<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>                <span class="keywordflow">if</span> (cohen != NULL) {</div>
-<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span>                    differential_analysis::compute_pairwise_cohens_d(tmp_means, tmp_variances, state.level_weight, ngroups, nblocks, threshold, cohen + out_offset);</div>
-<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>                }</div>
-<div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span> </div>
-<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span>                <span class="keywordflow">if</span> (delta_detected != NULL) {</div>
-<div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span>                    differential_analysis::compute_pairwise_simple_diff(tmp_detected, state.level_weight, ngroups, nblocks, delta_detected + out_offset);</div>
-<div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span>                }</div>
-<div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span> </div>
-<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span>                <span class="keywordflow">if</span> (lfc != NULL) {</div>
-<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span>                    differential_analysis::compute_pairwise_simple_diff(tmp_means, state.level_weight, ngroups, nblocks, lfc + out_offset);</div>
-<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>                }</div>
-<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span> </div>
-<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span>                tmp_means += nlevels;</div>
-<div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span>                tmp_variances += nlevels;</div>
-<div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span>                tmp_detected += nlevels;</div>
-<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>            }</div>
-<div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span>        }, ngenes, nthreads);</div>
-<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>    }</div>
-<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span> </div>
-<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00448" name="l00448"></a><span class="lineno">  448</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Stat_&gt;</div>
-<div class="line"><a id="l00449" name="l00449"></a><span class="lineno"><a class="line" href="structscran_1_1PairwiseEffects_1_1Results.html">  449</a></span>    <span class="keyword">struct </span><a class="code hl_struct" href="structscran_1_1PairwiseEffects_1_1Results.html">Results</a> {</div>
-<div class="line"><a id="l00453" name="l00453"></a><span class="lineno">  453</span>        <a class="code hl_struct" href="structscran_1_1PairwiseEffects_1_1Results.html">Results</a>(<span class="keywordtype">size_t</span> ngenes, <span class="keywordtype">size_t</span> ngroups, <span class="keywordtype">bool</span> do_cohen, <span class="keywordtype">bool</span> do_auc, <span class="keywordtype">bool</span> do_lfc, <span class="keywordtype">bool</span> do_delta) :</div>
-<div class="line"><a id="l00454" name="l00454"></a><span class="lineno">  454</span>            <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a72dbbc446340c0e4280d18667bbf1784">means</a>(ngroups, std::vector&lt;Stat_&gt;(ngenes)),</div>
-<div class="line"><a id="l00455" name="l00455"></a><span class="lineno">  455</span>            <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a496eb4c77c9e1c0ed40b8f943eba42d8">detected</a>(ngroups, std::vector&lt;Stat_&gt;(ngenes))</div>
-<div class="line"><a id="l00456" name="l00456"></a><span class="lineno">  456</span>        {</div>
-<div class="line"><a id="l00457" name="l00457"></a><span class="lineno">  457</span>            <span class="keywordtype">size_t</span> nelements = ngenes * ngroups * ngroups;</div>
-<div class="line"><a id="l00458" name="l00458"></a><span class="lineno">  458</span>            <span class="keywordflow">if</span> (do_cohen) {</div>
-<div class="line"><a id="l00459" name="l00459"></a><span class="lineno">  459</span>                <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#ab9436587663f72f33128b87d9ec47653">cohen</a>.resize(nelements);</div>
-<div class="line"><a id="l00460" name="l00460"></a><span class="lineno">  460</span>            }</div>
-<div class="line"><a id="l00461" name="l00461"></a><span class="lineno">  461</span>            <span class="keywordflow">if</span> (do_auc) {</div>
-<div class="line"><a id="l00462" name="l00462"></a><span class="lineno">  462</span>                <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a1fba82e77880d1a222f452f4843c399a">auc</a>.resize(nelements);</div>
-<div class="line"><a id="l00463" name="l00463"></a><span class="lineno">  463</span>            }</div>
-<div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span>            <span class="keywordflow">if</span> (do_lfc) {</div>
-<div class="line"><a id="l00465" name="l00465"></a><span class="lineno">  465</span>                <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#af6054db15f5ace1cb6622df801518c67">lfc</a>.resize(nelements);</div>
-<div class="line"><a id="l00466" name="l00466"></a><span class="lineno">  466</span>            }</div>
-<div class="line"><a id="l00467" name="l00467"></a><span class="lineno">  467</span>            <span class="keywordflow">if</span> (do_delta) {</div>
-<div class="line"><a id="l00468" name="l00468"></a><span class="lineno">  468</span>                <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a2b223fa37472fedb49c93459ba674d9c">delta_detected</a>.resize(nelements);</div>
-<div class="line"><a id="l00469" name="l00469"></a><span class="lineno">  469</span>            }</div>
-<div class="line"><a id="l00470" name="l00470"></a><span class="lineno">  470</span>        }</div>
-<div class="line"><a id="l00479" name="l00479"></a><span class="lineno"><a class="line" href="structscran_1_1PairwiseEffects_1_1Results.html#ab9436587663f72f33128b87d9ec47653">  479</a></span>        std::vector&lt;Stat_&gt; <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#ab9436587663f72f33128b87d9ec47653">cohen</a>;</div>
-<div class="line"><a id="l00480" name="l00480"></a><span class="lineno">  480</span> </div>
-<div class="line"><a id="l00485" name="l00485"></a><span class="lineno"><a class="line" href="structscran_1_1PairwiseEffects_1_1Results.html#a1fba82e77880d1a222f452f4843c399a">  485</a></span>        std::vector&lt;Stat_&gt; <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a1fba82e77880d1a222f452f4843c399a">auc</a>;</div>
-<div class="line"><a id="l00486" name="l00486"></a><span class="lineno">  486</span> </div>
-<div class="line"><a id="l00491" name="l00491"></a><span class="lineno"><a class="line" href="structscran_1_1PairwiseEffects_1_1Results.html#af6054db15f5ace1cb6622df801518c67">  491</a></span>        std::vector&lt;Stat_&gt; <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#af6054db15f5ace1cb6622df801518c67">lfc</a>;</div>
-<div class="line"><a id="l00492" name="l00492"></a><span class="lineno">  492</span> </div>
-<div class="line"><a id="l00497" name="l00497"></a><span class="lineno"><a class="line" href="structscran_1_1PairwiseEffects_1_1Results.html#a2b223fa37472fedb49c93459ba674d9c">  497</a></span>        std::vector&lt;Stat_&gt; <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a2b223fa37472fedb49c93459ba674d9c">delta_detected</a>;</div>
-<div class="line"><a id="l00498" name="l00498"></a><span class="lineno">  498</span> </div>
-<div class="line"><a id="l00504" name="l00504"></a><span class="lineno"><a class="line" href="structscran_1_1PairwiseEffects_1_1Results.html#a72dbbc446340c0e4280d18667bbf1784">  504</a></span>        std::vector&lt;std::vector&lt;Stat_&gt; &gt; <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a72dbbc446340c0e4280d18667bbf1784">means</a>;</div>
-<div class="line"><a id="l00505" name="l00505"></a><span class="lineno">  505</span> </div>
-<div class="line"><a id="l00511" name="l00511"></a><span class="lineno"><a class="line" href="structscran_1_1PairwiseEffects_1_1Results.html#a496eb4c77c9e1c0ed40b8f943eba42d8">  511</a></span>        std::vector&lt;std::vector&lt;Stat_&gt; &gt; <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a496eb4c77c9e1c0ed40b8f943eba42d8">detected</a>;</div>
-<div class="line"><a id="l00512" name="l00512"></a><span class="lineno">  512</span>    };</div>
-<div class="line"><a id="l00513" name="l00513"></a><span class="lineno">  513</span> </div>
-<div class="line"><a id="l00528" name="l00528"></a><span class="lineno">  528</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Stat_ = <span class="keywordtype">double</span>, <span class="keyword">typename</span> Data_ = <span class="keywordtype">double</span>, <span class="keyword">typename</span> Index_ = <span class="keywordtype">int</span>, <span class="keyword">typename</span> Group_ = <span class="keywordtype">int</span>&gt;</div>
-<div class="line"><a id="l00529" name="l00529"></a><span class="lineno"><a class="line" href="classscran_1_1PairwiseEffects.html#a3d6af62b31ac5ffd5fee2356e09eaf8d">  529</a></span>    <a class="code hl_struct" href="structscran_1_1PairwiseEffects_1_1Results.html">Results&lt;Stat_&gt;</a> <a class="code hl_function" href="classscran_1_1PairwiseEffects.html#a3d6af62b31ac5ffd5fee2356e09eaf8d">run</a>(<span class="keyword">const</span> tatami::Matrix&lt;Data_, Index_&gt;* p, <span class="keyword">const</span> Group_* group) {</div>
-<div class="line"><a id="l00530" name="l00530"></a><span class="lineno">  530</span>        <span class="keywordtype">size_t</span> ngroups = <a class="code hl_function" href="namespacescran.html#a2d993d00e1fa75ce3f4864cc2999c321">count_ids</a>(p-&gt;ncol(), group);</div>
-<div class="line"><a id="l00531" name="l00531"></a><span class="lineno">  531</span>        <a class="code hl_struct" href="structscran_1_1PairwiseEffects_1_1Results.html">Results&lt;Stat_&gt;</a> res(p-&gt;nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); </div>
-<div class="line"><a id="l00532" name="l00532"></a><span class="lineno">  532</span>        <a class="code hl_function" href="classscran_1_1PairwiseEffects.html#a7d3a288d1e408f13842f405070925857">run</a>(</div>
-<div class="line"><a id="l00533" name="l00533"></a><span class="lineno">  533</span>            p, </div>
-<div class="line"><a id="l00534" name="l00534"></a><span class="lineno">  534</span>            group, </div>
-<div class="line"><a id="l00535" name="l00535"></a><span class="lineno">  535</span>            <a class="code hl_function" href="namespacescran.html#ab4600cde1ede42175b03490d96949524">vector_to_pointers</a>(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a72dbbc446340c0e4280d18667bbf1784">means</a>), </div>
-<div class="line"><a id="l00536" name="l00536"></a><span class="lineno">  536</span>            <a class="code hl_function" href="namespacescran.html#ab4600cde1ede42175b03490d96949524">vector_to_pointers</a>(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a496eb4c77c9e1c0ed40b8f943eba42d8">detected</a>), </div>
-<div class="line"><a id="l00537" name="l00537"></a><span class="lineno">  537</span>            harvest_pointer(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#ab9436587663f72f33128b87d9ec47653">cohen</a>, do_cohen),</div>
-<div class="line"><a id="l00538" name="l00538"></a><span class="lineno">  538</span>            harvest_pointer(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a1fba82e77880d1a222f452f4843c399a">auc</a>, do_auc),</div>
-<div class="line"><a id="l00539" name="l00539"></a><span class="lineno">  539</span>            harvest_pointer(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#af6054db15f5ace1cb6622df801518c67">lfc</a>, do_lfc),</div>
-<div class="line"><a id="l00540" name="l00540"></a><span class="lineno">  540</span>            harvest_pointer(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a2b223fa37472fedb49c93459ba674d9c">delta_detected</a>, do_delta_detected)</div>
-<div class="line"><a id="l00541" name="l00541"></a><span class="lineno">  541</span>        );</div>
-<div class="line"><a id="l00542" name="l00542"></a><span class="lineno">  542</span>        <span class="keywordflow">return</span> res; </div>
-<div class="line"><a id="l00543" name="l00543"></a><span class="lineno">  543</span>    }</div>
-<div class="line"><a id="l00544" name="l00544"></a><span class="lineno">  544</span> </div>
-<div class="line"><a id="l00562" name="l00562"></a><span class="lineno">  562</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Stat_ = <span class="keywordtype">double</span>, <span class="keyword">typename</span> Data_ = <span class="keywordtype">double</span>, <span class="keyword">typename</span> Index_ = <span class="keywordtype">int</span>, <span class="keyword">typename</span> Group_ = <span class="keywordtype">int</span>, <span class="keyword">typename</span> Block_ = <span class="keywordtype">int</span>&gt;</div>
-<div class="line"><a id="l00563" name="l00563"></a><span class="lineno"><a class="line" href="classscran_1_1PairwiseEffects.html#a0b30b4b578484c239d3044fc1f1ca7f3">  563</a></span>    <a class="code hl_struct" href="structscran_1_1PairwiseEffects_1_1Results.html">Results&lt;Stat_&gt;</a> <a class="code hl_function" href="classscran_1_1PairwiseEffects.html#a0b30b4b578484c239d3044fc1f1ca7f3">run_blocked</a>(<span class="keyword">const</span> tatami::Matrix&lt;Data_, Index_&gt;* p, <span class="keyword">const</span> Group_* group, <span class="keyword">const</span> Block_* block) {</div>
-<div class="line"><a id="l00564" name="l00564"></a><span class="lineno">  564</span>        <span class="keywordflow">if</span> (block == NULL) {</div>
-<div class="line"><a id="l00565" name="l00565"></a><span class="lineno">  565</span>            <span class="keywordflow">return</span> <a class="code hl_function" href="classscran_1_1PairwiseEffects.html#a7d3a288d1e408f13842f405070925857">run</a>(p, group);</div>
-<div class="line"><a id="l00566" name="l00566"></a><span class="lineno">  566</span>        }</div>
-<div class="line"><a id="l00567" name="l00567"></a><span class="lineno">  567</span> </div>
-<div class="line"><a id="l00568" name="l00568"></a><span class="lineno">  568</span>        <span class="keywordtype">size_t</span> ngroups = <a class="code hl_function" href="namespacescran.html#a2d993d00e1fa75ce3f4864cc2999c321">count_ids</a>(p-&gt;ncol(), group);</div>
-<div class="line"><a id="l00569" name="l00569"></a><span class="lineno">  569</span>        <a class="code hl_struct" href="structscran_1_1PairwiseEffects_1_1Results.html">Results&lt;Stat_&gt;</a> res(p-&gt;nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); </div>
-<div class="line"><a id="l00570" name="l00570"></a><span class="lineno">  570</span>        <a class="code hl_function" href="classscran_1_1PairwiseEffects.html#afb171621973111cd81e268e32939fcf6">run_blocked</a>(</div>
-<div class="line"><a id="l00571" name="l00571"></a><span class="lineno">  571</span>            p,</div>
-<div class="line"><a id="l00572" name="l00572"></a><span class="lineno">  572</span>            group,</div>
-<div class="line"><a id="l00573" name="l00573"></a><span class="lineno">  573</span>            block,</div>
-<div class="line"><a id="l00574" name="l00574"></a><span class="lineno">  574</span>            <a class="code hl_function" href="namespacescran.html#ab4600cde1ede42175b03490d96949524">vector_to_pointers</a>(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a72dbbc446340c0e4280d18667bbf1784">means</a>),</div>
-<div class="line"><a id="l00575" name="l00575"></a><span class="lineno">  575</span>            <a class="code hl_function" href="namespacescran.html#ab4600cde1ede42175b03490d96949524">vector_to_pointers</a>(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a496eb4c77c9e1c0ed40b8f943eba42d8">detected</a>),</div>
-<div class="line"><a id="l00576" name="l00576"></a><span class="lineno">  576</span>            harvest_pointer(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#ab9436587663f72f33128b87d9ec47653">cohen</a>, do_cohen),</div>
-<div class="line"><a id="l00577" name="l00577"></a><span class="lineno">  577</span>            harvest_pointer(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a1fba82e77880d1a222f452f4843c399a">auc</a>, do_auc),</div>
-<div class="line"><a id="l00578" name="l00578"></a><span class="lineno">  578</span>            harvest_pointer(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#af6054db15f5ace1cb6622df801518c67">lfc</a>, do_lfc),</div>
-<div class="line"><a id="l00579" name="l00579"></a><span class="lineno">  579</span>            harvest_pointer(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a2b223fa37472fedb49c93459ba674d9c">delta_detected</a>, do_delta_detected)</div>
-<div class="line"><a id="l00580" name="l00580"></a><span class="lineno">  580</span>        );</div>
-<div class="line"><a id="l00581" name="l00581"></a><span class="lineno">  581</span>        <span class="keywordflow">return</span> res;</div>
-<div class="line"><a id="l00582" name="l00582"></a><span class="lineno">  582</span>    }</div>
-<div class="line"><a id="l00583" name="l00583"></a><span class="lineno">  583</span> </div>
-<div class="line"><a id="l00584" name="l00584"></a><span class="lineno">  584</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00585" name="l00585"></a><span class="lineno">  585</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Ptr&gt;</div>
-<div class="line"><a id="l00586" name="l00586"></a><span class="lineno">  586</span>    <span class="keyword">static</span> std::vector&lt;Ptr&gt; fetch_first(<span class="keyword">const</span> std::vector&lt;std::vector&lt;Ptr&gt; &gt;&amp; input) {</div>
-<div class="line"><a id="l00587" name="l00587"></a><span class="lineno">  587</span>        std::vector&lt;Ptr&gt; output;</div>
-<div class="line"><a id="l00588" name="l00588"></a><span class="lineno">  588</span>        output.reserve(input.size());</div>
-<div class="line"><a id="l00589" name="l00589"></a><span class="lineno">  589</span>        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; i : input) {</div>
-<div class="line"><a id="l00590" name="l00590"></a><span class="lineno">  590</span>            output.push_back(i.front());</div>
-<div class="line"><a id="l00591" name="l00591"></a><span class="lineno">  591</span>        }</div>
-<div class="line"><a id="l00592" name="l00592"></a><span class="lineno">  592</span>        <span class="keywordflow">return</span> output;</div>
-<div class="line"><a id="l00593" name="l00593"></a><span class="lineno">  593</span>    }</div>
-<div class="line"><a id="l00594" name="l00594"></a><span class="lineno">  594</span> </div>
-<div class="line"><a id="l00595" name="l00595"></a><span class="lineno">  595</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Stat&gt; </div>
-<div class="line"><a id="l00596" name="l00596"></a><span class="lineno">  596</span>    <span class="keyword">static</span> Stat* harvest_pointer(std::vector&lt;Stat&gt;&amp; source, <span class="keywordtype">bool</span> use) {</div>
-<div class="line"><a id="l00597" name="l00597"></a><span class="lineno">  597</span>        <span class="keywordflow">if</span> (use) {</div>
-<div class="line"><a id="l00598" name="l00598"></a><span class="lineno">  598</span>            <span class="keywordflow">return</span> source.data();</div>
-<div class="line"><a id="l00599" name="l00599"></a><span class="lineno">  599</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00600" name="l00600"></a><span class="lineno">  600</span>            <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>Stat*<span class="keyword">&gt;</span>(NULL);</div>
-<div class="line"><a id="l00601" name="l00601"></a><span class="lineno">  601</span>        }</div>
-<div class="line"><a id="l00602" name="l00602"></a><span class="lineno">  602</span>    }</div>
-<div class="line"><a id="l00603" name="l00603"></a><span class="lineno">  603</span>};</div>
-<div class="line"><a id="l00604" name="l00604"></a><span class="lineno">  604</span> </div>
-<div class="line"><a id="l00605" name="l00605"></a><span class="lineno">  605</span>}</div>
-<div class="line"><a id="l00606" name="l00606"></a><span class="lineno">  606</span> </div>
-<div class="line"><a id="l00607" name="l00607"></a><span class="lineno">  607</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Data_, <span class="keyword">typename</span> Index_, <span class="keyword">typename</span> Group_, <span class="keyword">typename</span> Block_, <span class="keyword">typename</span> Stat_&gt;</div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno"><a class="line" href="classscran_1_1PairwiseEffects.html#afb171621973111cd81e268e32939fcf6">  321</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="classscran_1_1PairwiseEffects.html#afb171621973111cd81e268e32939fcf6">run_blocked</a>(</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>        <span class="keyword">const</span> tatami::Matrix&lt;Data_, Index_&gt;* p, </div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>        <span class="keyword">const</span> Group_* group, </div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>        <span class="keyword">const</span> Block_* block, </div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>        std::vector&lt;Stat_*&gt; means, </div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>        std::vector&lt;Stat_*&gt; detected, </div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>        Stat_* cohen,</div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>        Stat_* auc,</div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>        Stat_* lfc,</div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>        Stat_* delta_detected)<span class="keyword"></span></div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span><span class="keyword">    const </span>{</div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>        <span class="keywordflow">if</span> (block == NULL) {</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>            <a class="code hl_function" href="classscran_1_1PairwiseEffects.html#a7d3a288d1e408f13842f405070925857">run</a>(p, group, std::move(means), std::move(detected), cohen, auc, lfc, delta_detected);</div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span> </div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>            <span class="keyword">auto</span> ngenes = p-&gt;nrow();</div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>            <span class="keywordtype">int</span> ngroups = means.size();</div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span>            <span class="keywordtype">int</span> nblocks = <a class="code hl_function" href="namespacescran.html#a2d993d00e1fa75ce3f4864cc2999c321">count_ids</a>(p-&gt;ncol(), block);</div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span> </div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>            <span class="keywordtype">int</span> ncombos = ngroups * nblocks;</div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>            std::vector&lt;std::vector&lt;Stat_&gt; &gt; means_store(ncombos), detected_store(ncombos);</div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>            std::vector&lt;Stat_*&gt; means2(ncombos), detected2(ncombos);</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> c = 0; c &lt; ncombos; ++c) {</div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>                means_store[c].resize(ngenes);</div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>                detected_store[c].resize(ngenes);</div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>                means2[c] = means_store[c].data();</div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>                detected2[c] = detected_store[c].data();</div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>            }</div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span> </div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>            differential_analysis::MatrixCalculator runner(nthreads, threshold, block_weight_policy, variable_block_weight_parameters);</div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>            Overlord overlord(auc);</div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>            <span class="keyword">auto</span> state = runner.run_blocked(p, group, ngroups, block, nblocks, overlord);</div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>            process_simple_effects(p-&gt;nrow(), ngroups, nblocks, state, means2, detected2, cohen, lfc, delta_detected);</div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span> </div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>            <span class="comment">// Averaging the remaining statistics.</span></div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>            std::vector&lt;double&gt; weights(nblocks);</div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>            std::vector&lt;Stat_*&gt; mstats(nblocks), dstats(nblocks);</div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span> </div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> gr = 0; gr &lt; ngroups; ++gr) {</div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> b = 0; b &lt; nblocks; ++b) {</div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>                    <span class="keywordtype">size_t</span> offset = gr * <span class="keyword">static_cast&lt;</span><span class="keywordtype">size_t</span><span class="keyword">&gt;</span>(nblocks) + b;</div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>                    weights[b] = state.level_weight[offset];</div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>                    mstats[b] = means2[offset];</div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>                    dstats[b] = detected2[offset];</div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>                }</div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span> </div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>                <a class="code hl_function" href="namespacescran.html#a90170f1fa4f0968c88bf2293b0428494">average_vectors_weighted</a>(ngenes, mstats, weights.data(), means[gr]);</div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>                <a class="code hl_function" href="namespacescran.html#a90170f1fa4f0968c88bf2293b0428494">average_vectors_weighted</a>(ngenes, dstats, weights.data(), detected[gr]);</div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>            }</div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>        }</div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>    }</div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span> </div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Stat_&gt;</div>
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>    <span class="keyword">struct </span>Overlord {</div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span>        Overlord(Stat_* auc_) : auc(auc_) {}</div>
+<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span> </div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>        <span class="keywordtype">bool</span> needs_auc()<span class="keyword"> const </span>{ </div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span>            <span class="keywordflow">return</span> auc != NULL;</div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>        }</div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span> </div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>        Stat_* auc;</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span> </div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>        Stat_* prepare_auc_buffer(<span class="keywordtype">size_t</span> gene, <span class="keywordtype">size_t</span> ngroups) { </div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>            <span class="keywordflow">return</span> auc + gene * ngroups * ngroups;</div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>        }</div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>    };</div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span> </div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Stat_&gt;</div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>    <span class="keywordtype">void</span> process_simple_effects(</div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>        <span class="keywordtype">size_t</span> ngenes, <span class="comment">// using size_t consistently here, to avoid integer overflow bugs when computing products.</span></div>
+<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>        <span class="keywordtype">size_t</span> ngroups,</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>        <span class="keywordtype">size_t</span> nblocks,</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>        <span class="keyword">const</span> differential_analysis::MatrixCalculator::State&amp; state, </div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>        std::vector&lt;Stat_*&gt;&amp; means, </div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>        std::vector&lt;Stat_*&gt;&amp; detected, </div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>        Stat_* cohen, </div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>        Stat_* lfc, </div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>        Stat_* delta_detected)<span class="keyword"> </span></div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span><span class="keyword">    const </span>{</div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>        <span class="keyword">const</span> <span class="keyword">auto</span>&amp; level_size = state.level_size;</div>
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>        <span class="keywordtype">size_t</span> nlevels = level_size.size();</div>
+<div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span> </div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span>        tatami::parallelize([&amp;](<span class="keywordtype">size_t</span>, <span class="keywordtype">size_t</span> start, <span class="keywordtype">size_t</span> length) -&gt; <span class="keywordtype">void</span> {</div>
+<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span>            <span class="keyword">auto</span> in_offset = nlevels * start;</div>
+<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>            <span class="keyword">const</span> <span class="keyword">auto</span>* tmp_means = state.means.data() + in_offset;</div>
+<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>            <span class="keyword">const</span> <span class="keyword">auto</span>* tmp_variances = state.variances.data() + in_offset;</div>
+<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>            <span class="keyword">const</span> <span class="keyword">auto</span>* tmp_detected = state.detected.data() + in_offset;</div>
+<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span> </div>
+<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span>            <span class="keywordtype">size_t</span> squared = ngroups * ngroups;</div>
+<div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span>            <span class="keywordtype">size_t</span> out_offset = start * squared;</div>
+<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>            <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> gene = start, end = start + length; gene &lt; end; ++gene, out_offset += squared) {</div>
+<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span>                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> l = 0; l &lt; nlevels; ++l) {</div>
+<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>                    means[l][gene] = tmp_means[l];</div>
+<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>                    detected[l][gene] = tmp_detected[l];</div>
+<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>                }</div>
+<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span> </div>
+<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span>                <span class="keywordflow">if</span> (cohen != NULL) {</div>
+<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>                    differential_analysis::compute_pairwise_cohens_d(tmp_means, tmp_variances, state.level_weight, ngroups, nblocks, threshold, cohen + out_offset);</div>
+<div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span>                }</div>
+<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span> </div>
+<div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span>                <span class="keywordflow">if</span> (delta_detected != NULL) {</div>
+<div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span>                    differential_analysis::compute_pairwise_simple_diff(tmp_detected, state.level_weight, ngroups, nblocks, delta_detected + out_offset);</div>
+<div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span>                }</div>
+<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span> </div>
+<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span>                <span class="keywordflow">if</span> (lfc != NULL) {</div>
+<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>                    differential_analysis::compute_pairwise_simple_diff(tmp_means, state.level_weight, ngroups, nblocks, lfc + out_offset);</div>
+<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span>                }</div>
+<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span> </div>
+<div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span>                tmp_means += nlevels;</div>
+<div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span>                tmp_variances += nlevels;</div>
+<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>                tmp_detected += nlevels;</div>
+<div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span>            }</div>
+<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>        }, ngenes, nthreads);</div>
+<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>    }</div>
+<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span> </div>
+<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00449" name="l00449"></a><span class="lineno">  449</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Stat_&gt;</div>
+<div class="line"><a id="l00450" name="l00450"></a><span class="lineno"><a class="line" href="structscran_1_1PairwiseEffects_1_1Results.html">  450</a></span>    <span class="keyword">struct </span><a class="code hl_struct" href="structscran_1_1PairwiseEffects_1_1Results.html">Results</a> {</div>
+<div class="line"><a id="l00454" name="l00454"></a><span class="lineno">  454</span>        <a class="code hl_struct" href="structscran_1_1PairwiseEffects_1_1Results.html">Results</a>(<span class="keywordtype">size_t</span> ngenes, <span class="keywordtype">size_t</span> ngroups, <span class="keywordtype">bool</span> do_cohen, <span class="keywordtype">bool</span> do_auc, <span class="keywordtype">bool</span> do_lfc, <span class="keywordtype">bool</span> do_delta) :</div>
+<div class="line"><a id="l00455" name="l00455"></a><span class="lineno">  455</span>            <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a72dbbc446340c0e4280d18667bbf1784">means</a>(ngroups, std::vector&lt;Stat_&gt;(ngenes)),</div>
+<div class="line"><a id="l00456" name="l00456"></a><span class="lineno">  456</span>            <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a496eb4c77c9e1c0ed40b8f943eba42d8">detected</a>(ngroups, std::vector&lt;Stat_&gt;(ngenes))</div>
+<div class="line"><a id="l00457" name="l00457"></a><span class="lineno">  457</span>        {</div>
+<div class="line"><a id="l00458" name="l00458"></a><span class="lineno">  458</span>            <span class="keywordtype">size_t</span> nelements = ngenes * ngroups * ngroups;</div>
+<div class="line"><a id="l00459" name="l00459"></a><span class="lineno">  459</span>            <span class="keywordflow">if</span> (do_cohen) {</div>
+<div class="line"><a id="l00460" name="l00460"></a><span class="lineno">  460</span>                <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#ab9436587663f72f33128b87d9ec47653">cohen</a>.resize(nelements);</div>
+<div class="line"><a id="l00461" name="l00461"></a><span class="lineno">  461</span>            }</div>
+<div class="line"><a id="l00462" name="l00462"></a><span class="lineno">  462</span>            <span class="keywordflow">if</span> (do_auc) {</div>
+<div class="line"><a id="l00463" name="l00463"></a><span class="lineno">  463</span>                <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a1fba82e77880d1a222f452f4843c399a">auc</a>.resize(nelements);</div>
+<div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span>            }</div>
+<div class="line"><a id="l00465" name="l00465"></a><span class="lineno">  465</span>            <span class="keywordflow">if</span> (do_lfc) {</div>
+<div class="line"><a id="l00466" name="l00466"></a><span class="lineno">  466</span>                <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#af6054db15f5ace1cb6622df801518c67">lfc</a>.resize(nelements);</div>
+<div class="line"><a id="l00467" name="l00467"></a><span class="lineno">  467</span>            }</div>
+<div class="line"><a id="l00468" name="l00468"></a><span class="lineno">  468</span>            <span class="keywordflow">if</span> (do_delta) {</div>
+<div class="line"><a id="l00469" name="l00469"></a><span class="lineno">  469</span>                <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a2b223fa37472fedb49c93459ba674d9c">delta_detected</a>.resize(nelements);</div>
+<div class="line"><a id="l00470" name="l00470"></a><span class="lineno">  470</span>            }</div>
+<div class="line"><a id="l00471" name="l00471"></a><span class="lineno">  471</span>        }</div>
+<div class="line"><a id="l00480" name="l00480"></a><span class="lineno"><a class="line" href="structscran_1_1PairwiseEffects_1_1Results.html#ab9436587663f72f33128b87d9ec47653">  480</a></span>        std::vector&lt;Stat_&gt; <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#ab9436587663f72f33128b87d9ec47653">cohen</a>;</div>
+<div class="line"><a id="l00481" name="l00481"></a><span class="lineno">  481</span> </div>
+<div class="line"><a id="l00486" name="l00486"></a><span class="lineno"><a class="line" href="structscran_1_1PairwiseEffects_1_1Results.html#a1fba82e77880d1a222f452f4843c399a">  486</a></span>        std::vector&lt;Stat_&gt; <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a1fba82e77880d1a222f452f4843c399a">auc</a>;</div>
+<div class="line"><a id="l00487" name="l00487"></a><span class="lineno">  487</span> </div>
+<div class="line"><a id="l00492" name="l00492"></a><span class="lineno"><a class="line" href="structscran_1_1PairwiseEffects_1_1Results.html#af6054db15f5ace1cb6622df801518c67">  492</a></span>        std::vector&lt;Stat_&gt; <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#af6054db15f5ace1cb6622df801518c67">lfc</a>;</div>
+<div class="line"><a id="l00493" name="l00493"></a><span class="lineno">  493</span> </div>
+<div class="line"><a id="l00498" name="l00498"></a><span class="lineno"><a class="line" href="structscran_1_1PairwiseEffects_1_1Results.html#a2b223fa37472fedb49c93459ba674d9c">  498</a></span>        std::vector&lt;Stat_&gt; <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a2b223fa37472fedb49c93459ba674d9c">delta_detected</a>;</div>
+<div class="line"><a id="l00499" name="l00499"></a><span class="lineno">  499</span> </div>
+<div class="line"><a id="l00505" name="l00505"></a><span class="lineno"><a class="line" href="structscran_1_1PairwiseEffects_1_1Results.html#a72dbbc446340c0e4280d18667bbf1784">  505</a></span>        std::vector&lt;std::vector&lt;Stat_&gt; &gt; <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a72dbbc446340c0e4280d18667bbf1784">means</a>;</div>
+<div class="line"><a id="l00506" name="l00506"></a><span class="lineno">  506</span> </div>
+<div class="line"><a id="l00512" name="l00512"></a><span class="lineno"><a class="line" href="structscran_1_1PairwiseEffects_1_1Results.html#a496eb4c77c9e1c0ed40b8f943eba42d8">  512</a></span>        std::vector&lt;std::vector&lt;Stat_&gt; &gt; <a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a496eb4c77c9e1c0ed40b8f943eba42d8">detected</a>;</div>
+<div class="line"><a id="l00513" name="l00513"></a><span class="lineno">  513</span>    };</div>
+<div class="line"><a id="l00514" name="l00514"></a><span class="lineno">  514</span> </div>
+<div class="line"><a id="l00529" name="l00529"></a><span class="lineno">  529</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Stat_ = <span class="keywordtype">double</span>, <span class="keyword">typename</span> Data_ = <span class="keywordtype">double</span>, <span class="keyword">typename</span> Index_ = <span class="keywordtype">int</span>, <span class="keyword">typename</span> Group_ = <span class="keywordtype">int</span>&gt;</div>
+<div class="line"><a id="l00530" name="l00530"></a><span class="lineno"><a class="line" href="classscran_1_1PairwiseEffects.html#a3d6af62b31ac5ffd5fee2356e09eaf8d">  530</a></span>    <a class="code hl_struct" href="structscran_1_1PairwiseEffects_1_1Results.html">Results&lt;Stat_&gt;</a> <a class="code hl_function" href="classscran_1_1PairwiseEffects.html#a3d6af62b31ac5ffd5fee2356e09eaf8d">run</a>(<span class="keyword">const</span> tatami::Matrix&lt;Data_, Index_&gt;* p, <span class="keyword">const</span> Group_* group) {</div>
+<div class="line"><a id="l00531" name="l00531"></a><span class="lineno">  531</span>        <span class="keywordtype">size_t</span> ngroups = <a class="code hl_function" href="namespacescran.html#a2d993d00e1fa75ce3f4864cc2999c321">count_ids</a>(p-&gt;ncol(), group);</div>
+<div class="line"><a id="l00532" name="l00532"></a><span class="lineno">  532</span>        <a class="code hl_struct" href="structscran_1_1PairwiseEffects_1_1Results.html">Results&lt;Stat_&gt;</a> res(p-&gt;nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); </div>
+<div class="line"><a id="l00533" name="l00533"></a><span class="lineno">  533</span>        <a class="code hl_function" href="classscran_1_1PairwiseEffects.html#a7d3a288d1e408f13842f405070925857">run</a>(</div>
+<div class="line"><a id="l00534" name="l00534"></a><span class="lineno">  534</span>            p, </div>
+<div class="line"><a id="l00535" name="l00535"></a><span class="lineno">  535</span>            group, </div>
+<div class="line"><a id="l00536" name="l00536"></a><span class="lineno">  536</span>            <a class="code hl_function" href="namespacescran.html#ab4600cde1ede42175b03490d96949524">vector_to_pointers</a>(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a72dbbc446340c0e4280d18667bbf1784">means</a>), </div>
+<div class="line"><a id="l00537" name="l00537"></a><span class="lineno">  537</span>            <a class="code hl_function" href="namespacescran.html#ab4600cde1ede42175b03490d96949524">vector_to_pointers</a>(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a496eb4c77c9e1c0ed40b8f943eba42d8">detected</a>), </div>
+<div class="line"><a id="l00538" name="l00538"></a><span class="lineno">  538</span>            harvest_pointer(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#ab9436587663f72f33128b87d9ec47653">cohen</a>, do_cohen),</div>
+<div class="line"><a id="l00539" name="l00539"></a><span class="lineno">  539</span>            harvest_pointer(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a1fba82e77880d1a222f452f4843c399a">auc</a>, do_auc),</div>
+<div class="line"><a id="l00540" name="l00540"></a><span class="lineno">  540</span>            harvest_pointer(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#af6054db15f5ace1cb6622df801518c67">lfc</a>, do_lfc),</div>
+<div class="line"><a id="l00541" name="l00541"></a><span class="lineno">  541</span>            harvest_pointer(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a2b223fa37472fedb49c93459ba674d9c">delta_detected</a>, do_delta_detected)</div>
+<div class="line"><a id="l00542" name="l00542"></a><span class="lineno">  542</span>        );</div>
+<div class="line"><a id="l00543" name="l00543"></a><span class="lineno">  543</span>        <span class="keywordflow">return</span> res; </div>
+<div class="line"><a id="l00544" name="l00544"></a><span class="lineno">  544</span>    }</div>
+<div class="line"><a id="l00545" name="l00545"></a><span class="lineno">  545</span> </div>
+<div class="line"><a id="l00563" name="l00563"></a><span class="lineno">  563</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Stat_ = <span class="keywordtype">double</span>, <span class="keyword">typename</span> Data_ = <span class="keywordtype">double</span>, <span class="keyword">typename</span> Index_ = <span class="keywordtype">int</span>, <span class="keyword">typename</span> Group_ = <span class="keywordtype">int</span>, <span class="keyword">typename</span> Block_ = <span class="keywordtype">int</span>&gt;</div>
+<div class="line"><a id="l00564" name="l00564"></a><span class="lineno"><a class="line" href="classscran_1_1PairwiseEffects.html#a0b30b4b578484c239d3044fc1f1ca7f3">  564</a></span>    <a class="code hl_struct" href="structscran_1_1PairwiseEffects_1_1Results.html">Results&lt;Stat_&gt;</a> <a class="code hl_function" href="classscran_1_1PairwiseEffects.html#a0b30b4b578484c239d3044fc1f1ca7f3">run_blocked</a>(<span class="keyword">const</span> tatami::Matrix&lt;Data_, Index_&gt;* p, <span class="keyword">const</span> Group_* group, <span class="keyword">const</span> Block_* block) {</div>
+<div class="line"><a id="l00565" name="l00565"></a><span class="lineno">  565</span>        <span class="keywordtype">size_t</span> ngroups = <a class="code hl_function" href="namespacescran.html#a2d993d00e1fa75ce3f4864cc2999c321">count_ids</a>(p-&gt;ncol(), group);</div>
+<div class="line"><a id="l00566" name="l00566"></a><span class="lineno">  566</span>        <a class="code hl_struct" href="structscran_1_1PairwiseEffects_1_1Results.html">Results&lt;Stat_&gt;</a> res(p-&gt;nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); </div>
+<div class="line"><a id="l00567" name="l00567"></a><span class="lineno">  567</span>        <a class="code hl_function" href="classscran_1_1PairwiseEffects.html#afb171621973111cd81e268e32939fcf6">run_blocked</a>(</div>
+<div class="line"><a id="l00568" name="l00568"></a><span class="lineno">  568</span>            p,</div>
+<div class="line"><a id="l00569" name="l00569"></a><span class="lineno">  569</span>            group,</div>
+<div class="line"><a id="l00570" name="l00570"></a><span class="lineno">  570</span>            block,</div>
+<div class="line"><a id="l00571" name="l00571"></a><span class="lineno">  571</span>            <a class="code hl_function" href="namespacescran.html#ab4600cde1ede42175b03490d96949524">vector_to_pointers</a>(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a72dbbc446340c0e4280d18667bbf1784">means</a>),</div>
+<div class="line"><a id="l00572" name="l00572"></a><span class="lineno">  572</span>            <a class="code hl_function" href="namespacescran.html#ab4600cde1ede42175b03490d96949524">vector_to_pointers</a>(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a496eb4c77c9e1c0ed40b8f943eba42d8">detected</a>),</div>
+<div class="line"><a id="l00573" name="l00573"></a><span class="lineno">  573</span>            harvest_pointer(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#ab9436587663f72f33128b87d9ec47653">cohen</a>, do_cohen),</div>
+<div class="line"><a id="l00574" name="l00574"></a><span class="lineno">  574</span>            harvest_pointer(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a1fba82e77880d1a222f452f4843c399a">auc</a>, do_auc),</div>
+<div class="line"><a id="l00575" name="l00575"></a><span class="lineno">  575</span>            harvest_pointer(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#af6054db15f5ace1cb6622df801518c67">lfc</a>, do_lfc),</div>
+<div class="line"><a id="l00576" name="l00576"></a><span class="lineno">  576</span>            harvest_pointer(res.<a class="code hl_variable" href="structscran_1_1PairwiseEffects_1_1Results.html#a2b223fa37472fedb49c93459ba674d9c">delta_detected</a>, do_delta_detected)</div>
+<div class="line"><a id="l00577" name="l00577"></a><span class="lineno">  577</span>        );</div>
+<div class="line"><a id="l00578" name="l00578"></a><span class="lineno">  578</span>        <span class="keywordflow">return</span> res;</div>
+<div class="line"><a id="l00579" name="l00579"></a><span class="lineno">  579</span>    }</div>
+<div class="line"><a id="l00580" name="l00580"></a><span class="lineno">  580</span> </div>
+<div class="line"><a id="l00581" name="l00581"></a><span class="lineno">  581</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00582" name="l00582"></a><span class="lineno">  582</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Ptr&gt;</div>
+<div class="line"><a id="l00583" name="l00583"></a><span class="lineno">  583</span>    <span class="keyword">static</span> std::vector&lt;Ptr&gt; fetch_first(<span class="keyword">const</span> std::vector&lt;std::vector&lt;Ptr&gt; &gt;&amp; input) {</div>
+<div class="line"><a id="l00584" name="l00584"></a><span class="lineno">  584</span>        std::vector&lt;Ptr&gt; output;</div>
+<div class="line"><a id="l00585" name="l00585"></a><span class="lineno">  585</span>        output.reserve(input.size());</div>
+<div class="line"><a id="l00586" name="l00586"></a><span class="lineno">  586</span>        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; i : input) {</div>
+<div class="line"><a id="l00587" name="l00587"></a><span class="lineno">  587</span>            output.push_back(i.front());</div>
+<div class="line"><a id="l00588" name="l00588"></a><span class="lineno">  588</span>        }</div>
+<div class="line"><a id="l00589" name="l00589"></a><span class="lineno">  589</span>        <span class="keywordflow">return</span> output;</div>
+<div class="line"><a id="l00590" name="l00590"></a><span class="lineno">  590</span>    }</div>
+<div class="line"><a id="l00591" name="l00591"></a><span class="lineno">  591</span> </div>
+<div class="line"><a id="l00592" name="l00592"></a><span class="lineno">  592</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Stat&gt; </div>
+<div class="line"><a id="l00593" name="l00593"></a><span class="lineno">  593</span>    <span class="keyword">static</span> Stat* harvest_pointer(std::vector&lt;Stat&gt;&amp; source, <span class="keywordtype">bool</span> use) {</div>
+<div class="line"><a id="l00594" name="l00594"></a><span class="lineno">  594</span>        <span class="keywordflow">if</span> (use) {</div>
+<div class="line"><a id="l00595" name="l00595"></a><span class="lineno">  595</span>            <span class="keywordflow">return</span> source.data();</div>
+<div class="line"><a id="l00596" name="l00596"></a><span class="lineno">  596</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00597" name="l00597"></a><span class="lineno">  597</span>            <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>Stat*<span class="keyword">&gt;</span>(NULL);</div>
+<div class="line"><a id="l00598" name="l00598"></a><span class="lineno">  598</span>        }</div>
+<div class="line"><a id="l00599" name="l00599"></a><span class="lineno">  599</span>    }</div>
+<div class="line"><a id="l00600" name="l00600"></a><span class="lineno">  600</span>};</div>
+<div class="line"><a id="l00601" name="l00601"></a><span class="lineno">  601</span> </div>
+<div class="line"><a id="l00602" name="l00602"></a><span class="lineno">  602</span>}</div>
+<div class="line"><a id="l00603" name="l00603"></a><span class="lineno">  603</span> </div>
+<div class="line"><a id="l00604" name="l00604"></a><span class="lineno">  604</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aclassscran_1_1PairwiseEffects_html"><div class="ttname"><a href="classscran_1_1PairwiseEffects.html">scran::PairwiseEffects</a></div><div class="ttdoc">Compute pairwise effect size between groups of cells.</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:89</div></div>
 <div class="ttc" id="aclassscran_1_1PairwiseEffects_html_a03200aae7ecd4a67af7172d2e13f0618"><div class="ttname"><a href="classscran_1_1PairwiseEffects.html#a03200aae7ecd4a67af7172d2e13f0618">scran::PairwiseEffects::set_compute_auc</a></div><div class="ttdeci">PairwiseEffects &amp; set_compute_auc(bool c=Defaults::compute_auc)</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:189</div></div>
 <div class="ttc" id="aclassscran_1_1PairwiseEffects_html_a05a970dad5e5ffcd4cbdb1407476c425"><div class="ttname"><a href="classscran_1_1PairwiseEffects.html#a05a970dad5e5ffcd4cbdb1407476c425">scran::PairwiseEffects::set_variable_block_weight_parameters</a></div><div class="ttdeci">PairwiseEffects &amp; set_variable_block_weight_parameters(VariableBlockWeightParameters v=Defaults::variable_block_weight_parameters)</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:236</div></div>
-<div class="ttc" id="aclassscran_1_1PairwiseEffects_html_a0b30b4b578484c239d3044fc1f1ca7f3"><div class="ttname"><a href="classscran_1_1PairwiseEffects.html#a0b30b4b578484c239d3044fc1f1ca7f3">scran::PairwiseEffects::run_blocked</a></div><div class="ttdeci">Results&lt; Stat_ &gt; run_blocked(const tatami::Matrix&lt; Data_, Index_ &gt; *p, const Group_ *group, const Block_ *block)</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:563</div></div>
+<div class="ttc" id="aclassscran_1_1PairwiseEffects_html_a0b30b4b578484c239d3044fc1f1ca7f3"><div class="ttname"><a href="classscran_1_1PairwiseEffects.html#a0b30b4b578484c239d3044fc1f1ca7f3">scran::PairwiseEffects::run_blocked</a></div><div class="ttdeci">Results&lt; Stat_ &gt; run_blocked(const tatami::Matrix&lt; Data_, Index_ &gt; *p, const Group_ *group, const Block_ *block)</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:564</div></div>
 <div class="ttc" id="aclassscran_1_1PairwiseEffects_html_a274b56d1255fece348c29f6acf511168"><div class="ttname"><a href="classscran_1_1PairwiseEffects.html#a274b56d1255fece348c29f6acf511168">scran::PairwiseEffects::set_threshold</a></div><div class="ttdeci">PairwiseEffects &amp; set_threshold(double t=Defaults::threshold)</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:154</div></div>
-<div class="ttc" id="aclassscran_1_1PairwiseEffects_html_a3d6af62b31ac5ffd5fee2356e09eaf8d"><div class="ttname"><a href="classscran_1_1PairwiseEffects.html#a3d6af62b31ac5ffd5fee2356e09eaf8d">scran::PairwiseEffects::run</a></div><div class="ttdeci">Results&lt; Stat_ &gt; run(const tatami::Matrix&lt; Data_, Index_ &gt; *p, const Group_ *group)</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:529</div></div>
+<div class="ttc" id="aclassscran_1_1PairwiseEffects_html_a3d6af62b31ac5ffd5fee2356e09eaf8d"><div class="ttname"><a href="classscran_1_1PairwiseEffects.html#a3d6af62b31ac5ffd5fee2356e09eaf8d">scran::PairwiseEffects::run</a></div><div class="ttdeci">Results&lt; Stat_ &gt; run(const tatami::Matrix&lt; Data_, Index_ &gt; *p, const Group_ *group)</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:530</div></div>
 <div class="ttc" id="aclassscran_1_1PairwiseEffects_html_a7d3a288d1e408f13842f405070925857"><div class="ttname"><a href="classscran_1_1PairwiseEffects.html#a7d3a288d1e408f13842f405070925857">scran::PairwiseEffects::run</a></div><div class="ttdeci">void run(const tatami::Matrix&lt; Data_, Index_ &gt; *p, const Group_ *group, std::vector&lt; Stat_ * &gt; means, std::vector&lt; Stat_ * &gt; detected, Stat_ *cohen, Stat_ *auc, Stat_ *lfc, Stat_ *delta_detected) const</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:271</div></div>
 <div class="ttc" id="aclassscran_1_1PairwiseEffects_html_a84ccf66ce778baa44e0ec226b9b469e3"><div class="ttname"><a href="classscran_1_1PairwiseEffects.html#a84ccf66ce778baa44e0ec226b9b469e3">scran::PairwiseEffects::set_compute_lfc</a></div><div class="ttdeci">PairwiseEffects &amp; set_compute_lfc(bool c=Defaults::compute_lfc)</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:202</div></div>
 <div class="ttc" id="aclassscran_1_1PairwiseEffects_html_a8502150c4ebec6bf8e13e6f7ef85b105"><div class="ttname"><a href="classscran_1_1PairwiseEffects.html#a8502150c4ebec6bf8e13e6f7ef85b105">scran::PairwiseEffects::set_compute_cohen</a></div><div class="ttdeci">PairwiseEffects &amp; set_compute_cohen(bool c=Defaults::compute_cohen)</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:176</div></div>
 <div class="ttc" id="aclassscran_1_1PairwiseEffects_html_aaad75a6f74edb5a45914e60eaa487fb5"><div class="ttname"><a href="classscran_1_1PairwiseEffects.html#aaad75a6f74edb5a45914e60eaa487fb5">scran::PairwiseEffects::set_num_threads</a></div><div class="ttdeci">PairwiseEffects &amp; set_num_threads(int n=Defaults::num_threads)</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:163</div></div>
 <div class="ttc" id="aclassscran_1_1PairwiseEffects_html_ad0f6c3655e8abfb22092ca858bcd396f"><div class="ttname"><a href="classscran_1_1PairwiseEffects.html#ad0f6c3655e8abfb22092ca858bcd396f">scran::PairwiseEffects::set_compute_delta_detected</a></div><div class="ttdeci">PairwiseEffects &amp; set_compute_delta_detected(bool c=Defaults::compute_delta_detected)</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:215</div></div>
 <div class="ttc" id="aclassscran_1_1PairwiseEffects_html_af75922cf51b7c2151d92beeb59beee21"><div class="ttname"><a href="classscran_1_1PairwiseEffects.html#af75922cf51b7c2151d92beeb59beee21">scran::PairwiseEffects::set_block_weight_policy</a></div><div class="ttdeci">PairwiseEffects &amp; set_block_weight_policy(WeightPolicy w=Defaults::block_weight_policy)</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:225</div></div>
-<div class="ttc" id="aclassscran_1_1PairwiseEffects_html_afb171621973111cd81e268e32939fcf6"><div class="ttname"><a href="classscran_1_1PairwiseEffects.html#afb171621973111cd81e268e32939fcf6">scran::PairwiseEffects::run_blocked</a></div><div class="ttdeci">void run_blocked(const tatami::Matrix&lt; Data_, Index_ &gt; *p, const Group_ *group, const Block_ *block, std::vector&lt; Stat_ * &gt; means, std::vector&lt; Stat_ * &gt; detected, Stat_ *cohen, Stat_ *auc, Stat_ *lfc, Stat_ *delta_detected) const</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:320</div></div>
+<div class="ttc" id="aclassscran_1_1PairwiseEffects_html_afb171621973111cd81e268e32939fcf6"><div class="ttname"><a href="classscran_1_1PairwiseEffects.html#afb171621973111cd81e268e32939fcf6">scran::PairwiseEffects::run_blocked</a></div><div class="ttdeci">void run_blocked(const tatami::Matrix&lt; Data_, Index_ &gt; *p, const Group_ *group, const Block_ *block, std::vector&lt; Stat_ * &gt; means, std::vector&lt; Stat_ * &gt; detected, Stat_ *cohen, Stat_ *auc, Stat_ *lfc, Stat_ *delta_detected) const</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:321</div></div>
 <div class="ttc" id="anamespacescran_html"><div class="ttname"><a href="namespacescran.html">scran</a></div><div class="ttdoc">Functions for single-cell RNA-seq analyses.</div><div class="ttdef"><b>Definition</b> AggregateAcrossCells.hpp:18</div></div>
 <div class="ttc" id="anamespacescran_html_a2d993d00e1fa75ce3f4864cc2999c321"><div class="ttname"><a href="namespacescran.html#a2d993d00e1fa75ce3f4864cc2999c321">scran::count_ids</a></div><div class="ttdeci">size_t count_ids(size_t length, const Id_ *ids)</div><div class="ttdef"><b>Definition</b> blocking.hpp:29</div></div>
 <div class="ttc" id="anamespacescran_html_a90170f1fa4f0968c88bf2293b0428494"><div class="ttname"><a href="namespacescran.html#a90170f1fa4f0968c88bf2293b0428494">scran::average_vectors_weighted</a></div><div class="ttdeci">void average_vectors_weighted(size_t n, std::vector&lt; Stat_ * &gt; in, const Weight_ *w, Output_ *out)</div><div class="ttdef"><b>Definition</b> average_vectors.hpp:158</div></div>
@@ -427,13 +423,13 @@ $(function() {
 <div class="ttc" id="astructscran_1_1PairwiseEffects_1_1Defaults_html_ad3c870919c617c5261bff3b5601b74c5"><div class="ttname"><a href="structscran_1_1PairwiseEffects_1_1Defaults.html#ad3c870919c617c5261bff3b5601b74c5">scran::PairwiseEffects::Defaults::variable_block_weight_parameters</a></div><div class="ttdeci">static constexpr VariableBlockWeightParameters variable_block_weight_parameters</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:133</div></div>
 <div class="ttc" id="astructscran_1_1PairwiseEffects_1_1Defaults_html_ad9a3f0f122ec6f4ab5654c691d3a8af7"><div class="ttname"><a href="structscran_1_1PairwiseEffects_1_1Defaults.html#ad9a3f0f122ec6f4ab5654c691d3a8af7">scran::PairwiseEffects::Defaults::compute_lfc</a></div><div class="ttdeci">static constexpr bool compute_lfc</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:118</div></div>
 <div class="ttc" id="astructscran_1_1PairwiseEffects_1_1Defaults_html_aed4f78128bfe84cd267010020a2c4f24"><div class="ttname"><a href="structscran_1_1PairwiseEffects_1_1Defaults.html#aed4f78128bfe84cd267010020a2c4f24">scran::PairwiseEffects::Defaults::compute_delta_detected</a></div><div class="ttdeci">static constexpr bool compute_delta_detected</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:123</div></div>
-<div class="ttc" id="astructscran_1_1PairwiseEffects_1_1Results_html"><div class="ttname"><a href="structscran_1_1PairwiseEffects_1_1Results.html">scran::PairwiseEffects::Results</a></div><div class="ttdoc">Pairwise effect size results.</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:449</div></div>
-<div class="ttc" id="astructscran_1_1PairwiseEffects_1_1Results_html_a1fba82e77880d1a222f452f4843c399a"><div class="ttname"><a href="structscran_1_1PairwiseEffects_1_1Results.html#a1fba82e77880d1a222f452f4843c399a">scran::PairwiseEffects::Results::auc</a></div><div class="ttdeci">std::vector&lt; Stat_ &gt; auc</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:485</div></div>
-<div class="ttc" id="astructscran_1_1PairwiseEffects_1_1Results_html_a2b223fa37472fedb49c93459ba674d9c"><div class="ttname"><a href="structscran_1_1PairwiseEffects_1_1Results.html#a2b223fa37472fedb49c93459ba674d9c">scran::PairwiseEffects::Results::delta_detected</a></div><div class="ttdeci">std::vector&lt; Stat_ &gt; delta_detected</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:497</div></div>
-<div class="ttc" id="astructscran_1_1PairwiseEffects_1_1Results_html_a496eb4c77c9e1c0ed40b8f943eba42d8"><div class="ttname"><a href="structscran_1_1PairwiseEffects_1_1Results.html#a496eb4c77c9e1c0ed40b8f943eba42d8">scran::PairwiseEffects::Results::detected</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; Stat_ &gt; &gt; detected</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:511</div></div>
-<div class="ttc" id="astructscran_1_1PairwiseEffects_1_1Results_html_a72dbbc446340c0e4280d18667bbf1784"><div class="ttname"><a href="structscran_1_1PairwiseEffects_1_1Results.html#a72dbbc446340c0e4280d18667bbf1784">scran::PairwiseEffects::Results::means</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; Stat_ &gt; &gt; means</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:504</div></div>
-<div class="ttc" id="astructscran_1_1PairwiseEffects_1_1Results_html_ab9436587663f72f33128b87d9ec47653"><div class="ttname"><a href="structscran_1_1PairwiseEffects_1_1Results.html#ab9436587663f72f33128b87d9ec47653">scran::PairwiseEffects::Results::cohen</a></div><div class="ttdeci">std::vector&lt; Stat_ &gt; cohen</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:479</div></div>
-<div class="ttc" id="astructscran_1_1PairwiseEffects_1_1Results_html_af6054db15f5ace1cb6622df801518c67"><div class="ttname"><a href="structscran_1_1PairwiseEffects_1_1Results.html#af6054db15f5ace1cb6622df801518c67">scran::PairwiseEffects::Results::lfc</a></div><div class="ttdeci">std::vector&lt; Stat_ &gt; lfc</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:491</div></div>
+<div class="ttc" id="astructscran_1_1PairwiseEffects_1_1Results_html"><div class="ttname"><a href="structscran_1_1PairwiseEffects_1_1Results.html">scran::PairwiseEffects::Results</a></div><div class="ttdoc">Pairwise effect size results.</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:450</div></div>
+<div class="ttc" id="astructscran_1_1PairwiseEffects_1_1Results_html_a1fba82e77880d1a222f452f4843c399a"><div class="ttname"><a href="structscran_1_1PairwiseEffects_1_1Results.html#a1fba82e77880d1a222f452f4843c399a">scran::PairwiseEffects::Results::auc</a></div><div class="ttdeci">std::vector&lt; Stat_ &gt; auc</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:486</div></div>
+<div class="ttc" id="astructscran_1_1PairwiseEffects_1_1Results_html_a2b223fa37472fedb49c93459ba674d9c"><div class="ttname"><a href="structscran_1_1PairwiseEffects_1_1Results.html#a2b223fa37472fedb49c93459ba674d9c">scran::PairwiseEffects::Results::delta_detected</a></div><div class="ttdeci">std::vector&lt; Stat_ &gt; delta_detected</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:498</div></div>
+<div class="ttc" id="astructscran_1_1PairwiseEffects_1_1Results_html_a496eb4c77c9e1c0ed40b8f943eba42d8"><div class="ttname"><a href="structscran_1_1PairwiseEffects_1_1Results.html#a496eb4c77c9e1c0ed40b8f943eba42d8">scran::PairwiseEffects::Results::detected</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; Stat_ &gt; &gt; detected</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:512</div></div>
+<div class="ttc" id="astructscran_1_1PairwiseEffects_1_1Results_html_a72dbbc446340c0e4280d18667bbf1784"><div class="ttname"><a href="structscran_1_1PairwiseEffects_1_1Results.html#a72dbbc446340c0e4280d18667bbf1784">scran::PairwiseEffects::Results::means</a></div><div class="ttdeci">std::vector&lt; std::vector&lt; Stat_ &gt; &gt; means</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:505</div></div>
+<div class="ttc" id="astructscran_1_1PairwiseEffects_1_1Results_html_ab9436587663f72f33128b87d9ec47653"><div class="ttname"><a href="structscran_1_1PairwiseEffects_1_1Results.html#ab9436587663f72f33128b87d9ec47653">scran::PairwiseEffects::Results::cohen</a></div><div class="ttdeci">std::vector&lt; Stat_ &gt; cohen</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:480</div></div>
+<div class="ttc" id="astructscran_1_1PairwiseEffects_1_1Results_html_af6054db15f5ace1cb6622df801518c67"><div class="ttname"><a href="structscran_1_1PairwiseEffects_1_1Results.html#af6054db15f5ace1cb6622df801518c67">scran::PairwiseEffects::Results::lfc</a></div><div class="ttdeci">std::vector&lt; Stat_ &gt; lfc</div><div class="ttdef"><b>Definition</b> PairwiseEffects.hpp:492</div></div>
 <div class="ttc" id="astructscran_1_1VariableBlockWeightParameters_html"><div class="ttname"><a href="structscran_1_1VariableBlockWeightParameters.html">scran::VariableBlockWeightParameters</a></div><div class="ttdoc">Parameters for variable_block_weight().</div><div class="ttdef"><b>Definition</b> blocking.hpp:87</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->

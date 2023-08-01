@@ -1172,7 +1172,7 @@ template&lt;typename Value_ , typename Index_ , typename Group_ , typename Block
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">p</td><td>Pointer to a <b>tatami</b> matrix instance. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the group assignments. These should be 0-based and consecutive. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the blocking factor. Levels should be 0-based and consecutive. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the blocking factor. Levels should be 0-based and consecutive. If <code>NULL</code>, this is ignored and the result is the same as calling <code><a class="el" href="classscran_1_1ScoreMarkers.html#ac694953ab47372abcd2eb51787744727">run()</a></code>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">means</td><td>Vector of vectors of pointers to arrays of length equal to the number of rows in <code>p</code>. Each inner vector corresponds to a group and each pointer therein contains the mean expression in a blocking level. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">detected</td><td>Pointers to arrays of length equal to the number of rows in <code>p</code>. Each inner vector corresponds to a group and each pointer therein contains the proportion of detected expression in a blocking level. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">cohen</td><td>Vector of vector of pointers to arrays of length equal to the number of rows in <code>p</code>. Each inner vector corresponds to a summary statistic for Cohen's d, ordered as in <code><a class="el" href="namespacescran_1_1differential__analysis.html#a9651cedd1ef5f3c2631ff3d7af955b23">differential_analysis::summary</a></code>. Each pointer corresponds to a group and is filled with the relevant summary statistic for that group. </td></tr>
@@ -1297,7 +1297,7 @@ template&lt;typename Stat_  = double, typename Value_ , typename Index_ , typena
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">p</td><td>Pointer to a <b>tatami</b> matrix instance. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the group assignments. These should be 0-based and consecutive. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the blocking factor. Levels should be 0-based and consecutive.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of length equal to the number of columns in <code>p</code>, containing the blocking factor. Levels should be 0-based and consecutive. If <code>NULL</code>, this is ignored and the result is the same as calling <code><a class="el" href="classscran_1_1ScoreMarkers.html#ac694953ab47372abcd2eb51787744727">run()</a></code>.</td></tr>
   </table>
   </dd>
 </dl>
