@@ -300,6 +300,7 @@ public:
      * Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
      * @param[in] block Pointer to an array of length equal to the number of columns in `p`, containing the blocking factor.
      * Block identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
+     * This can also be `NULL` in which case all cells are assumed to belong to the same block (i.e., like `run()`).
      * @param[out] means Vector of length equal to the number of groups.
      * Each element corresponds to a group and is another vector of length equal to the number of genes.
      * Each entry of the inner vector contains the grand average of the mean expression across all blocks.
@@ -555,16 +556,12 @@ public:
      * @param[in] group Pointer to an array of length equal to the number of columns in `p`, containing the group assignments.
      * Group identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
      * @param[in] block Pointer to an array of length equal to the number of columns in `p`, containing the blocking factor.
-     * Block identifiers should be 0-based and should contain all integers in $[0, N)$ where $N$ is the number of unique groups.
+     * See `run_blocked()` for more details.
      *
      * @return A `Results` object is returned containing the pairwise effects, plus the mean expression and detected proportion in each group and block.
      */
     template<typename Stat_ = double, typename Data_ = double, typename Index_ = int, typename Group_ = int, typename Block_ = int>
     Results<Stat_> run_blocked(const tatami::Matrix<Data_, Index_>* p, const Group_* group, const Block_* block) {
-        if (block == NULL) {
-            return run(p, group);
-        }
-
         size_t ngroups = count_ids(p->ncol(), group);
         Results<Stat_> res(p->nrow(), ngroups, do_cohen, do_auc, do_lfc, do_delta_detected); 
         run_blocked(

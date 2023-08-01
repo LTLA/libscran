@@ -92,6 +92,10 @@ TEST_P(PairwiseEffectsUnblockedTest, Reference) {
     EXPECT_EQ(res.lfc, ref.paired_lfc);
     EXPECT_EQ(res.delta_detected, ref.paired_delta_detected);
     EXPECT_EQ(res.auc, ref.paired_auc);
+
+    // Same with NULL blocking.
+    auto nres = chd.run_blocked(dense_row.get(), groupings.data(), static_cast<int*>(NULL));
+    EXPECT_EQ(nres.cohen, ref.paired_cohen);
 }
 
 INSTANTIATE_TEST_SUITE_P(
