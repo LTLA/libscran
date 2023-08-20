@@ -612,7 +612,7 @@ template&lt;class MAT , class V , typename B &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">mat</td><td>Pointer to an input count matrix, with features in the rows and cells in the columns. </td></tr>
-    <tr><td class="paramdir"></td><td class="paramname">size_factors</td><td>A vector of positive size factors, of length equal to the number of columns in <code>mat</code>. </td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">size_factors</td><td>A vector of size factors, of length equal to the number of columns in <code>mat</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">block</td><td>Pointer to an array of block identifiers. If provided, the array should be of length equal to the number of columns in <code>mat</code>. Values should be integer IDs in <picture><source srcset="form_0_dark.png" media="(prefers-color-scheme: dark)"/><img class="formulaInl" alt="$[0, N)$" src="form_0.png"/></picture> where <picture><source srcset="form_1_dark.png" media="(prefers-color-scheme: dark)"/><img class="formulaInl" alt="$N$" src="form_1.png"/></picture> is the number of blocks. This can also be a <code>NULL</code>, in which case all cells are assumed to belong to the same block.</td></tr>
   </table>
   </dd>

@@ -218,10 +218,10 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Specify whether to handle zero size factors for the pseudo-cells. If false, size factors of zero will raise an error; otherwise, they will be automatically set to the smallest non-zero size factor (or 1, if all size factors are zero).</p>
+<p>Should we gracefully handle size factors of zero for the pseudo-cells? Note that this does not sanitize the per-cell size factors - to do so, users should call <code><a class="el" href="classscran_1_1SanitizeSizeFactors.html" title="Sanitize invalid size factors.">SanitizeSizeFactors</a></code> separately on the output of <code><a class="el" href="classscran_1_1GroupedSizeFactors.html#afec8d5ba32a045c587f40c832973de2e">run()</a></code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">z</td><td>Whether to replace zero size factors with the smallest non-zero size factor.</td></tr>
+    <tr><td class="paramname">z</td><td>Whether to replace pseudo-cell size factors of zero with the smallest non-zero size factor across pseudo-cells, see <code>SanitizeSizeFactors::set_handle_zeros()</code> for more details.</td></tr>
   </table>
   </dd>
 </dl>
@@ -252,10 +252,10 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Specify whether to handle non-finite size factors for the pseudo-cells. If false, non-finite size factors will raise an error. Otherwise, infinite size factors will be automatically set to the largest finite size factor (or 1, if all size factors are non-finite), and missing size factors (i.e., NaN) will be set to 1.</p>
+<p>Should we gracefully handle non-finite size factors of zero for the pseudo-cells? Note that this does not sanitize the per-cell size factors - to do so, users should call <code><a class="el" href="classscran_1_1SanitizeSizeFactors.html" title="Sanitize invalid size factors.">SanitizeSizeFactors</a></code> separately on the output of <code><a class="el" href="classscran_1_1GroupedSizeFactors.html#afec8d5ba32a045c587f40c832973de2e">run()</a></code>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">z</td><td>Whether to replace non-finite size factors with the largest finite size factor.</td></tr>
+    <tr><td class="paramname">n</td><td>Whether to replace non-finite pseudo-cell size factors with the largest finite size factor across pseudo-cells, see <code><a class="el" href="classscran_1_1SanitizeSizeFactors.html#ac74f5998ee7f28a55545e06badd64f18">SanitizeSizeFactors::set_handle_non_finite()</a></code> for more details.</td></tr>
   </table>
   </dd>
 </dl>

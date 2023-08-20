@@ -86,6 +86,7 @@ $(function() {
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="macros_8hpp_source.html">../utils/macros.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="blocking_8hpp_source.html">../utils/blocking.hpp</a>&quot;</code><br />
+<code>#include &quot;SanitizeSizeFactors.hpp&quot;</code><br />
 <code>#include &lt;stdexcept&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 <code>#include &lt;algorithm&gt;</code><br />
@@ -94,21 +95,27 @@ Include dependency graph for CenterSizeFactors.hpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="CenterSizeFactors_8hpp__incl.png" border="0" usemap="#ascran_2normalization_2CenterSizeFactors_8hpp" alt=""/></div>
 <map name="ascran_2normalization_2CenterSizeFactors_8hpp" id="ascran_2normalization_2CenterSizeFactors_8hpp">
-<area shape="rect" title="Center size factors prior to normalization." alt="" coords="144,5,300,46"/>
+<area shape="rect" title="Center size factors prior to normalization." alt="" coords="194,5,351,46"/>
 <area shape="rect" href="macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,168,132,193"/>
-<area shape="poly" title=" " alt="" coords="195,49,138,96,87,158,83,154,135,92,192,45"/>
+<area shape="poly" title=" " alt="" coords="220,49,178,69,137,96,108,126,85,157,81,154,104,122,133,92,175,65,218,44"/>
 <area shape="rect" href="blocking_8hpp.html" title="Utilities for handling blocks of cells." alt="" coords="156,94,288,120"/>
-<area shape="poly" title=" " alt="" coords="225,46,225,79,219,79,219,46"/>
+<area shape="poly" title=" " alt="" coords="262,48,240,83,235,80,258,45"/>
 <area shape="rect" title=" " alt="" coords="156,168,213,193"/>
-<area shape="poly" title=" " alt="" coords="190,49,165,69,147,95,144,110,147,126,165,155,160,158,142,128,139,110,142,93,161,65,186,45"/>
+<area shape="poly" title=" " alt="" coords="205,49,172,68,147,95,143,110,145,126,164,155,160,158,140,127,137,110,142,93,169,64,203,44"/>
 <area shape="rect" title=" " alt="" coords="237,168,311,193"/>
-<area shape="poly" title=" " alt="" coords="258,45,282,65,302,93,306,109,304,126,293,156,288,154,299,125,300,110,297,95,278,69,254,49"/>
+<area shape="poly" title=" " alt="" coords="286,46,300,80,303,100,302,120,290,155,285,153,297,119,298,100,294,81,281,48"/>
 <area shape="rect" title=" " alt="" coords="335,168,413,193"/>
-<area shape="poly" title=" " alt="" coords="259,44,290,66,321,92,345,123,364,153,359,156,341,126,317,96,287,70,256,49"/>
+<area shape="poly" title=" " alt="" coords="288,45,321,93,361,154,357,157,317,95,284,48"/>
+<area shape="rect" href="SanitizeSizeFactors_8hpp_source.html" title=" " alt="" coords="412,94,573,120"/>
+<area shape="poly" title=" " alt="" coords="328,44,446,86,444,91,327,49"/>
 <area shape="poly" title=" " alt="" coords="197,123,109,163,107,159,195,118"/>
 <area shape="poly" title=" " alt="" coords="218,121,200,156,195,153,213,119"/>
 <area shape="poly" title=" " alt="" coords="233,118,259,154,254,157,228,121"/>
 <area shape="poly" title=" " alt="" coords="249,118,336,159,334,163,246,123"/>
+<area shape="rect" title=" " alt="" coords="452,168,504,193"/>
+<area shape="poly" title=" " alt="" coords="493,120,486,154,481,152,487,119"/>
+<area shape="rect" title=" " alt="" coords="528,168,585,193"/>
+<area shape="poly" title=" " alt="" coords="505,118,538,155,534,158,501,122"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -116,18 +123,19 @@ This graph shows which files directly or indirectly include this file:</div>
 <div class="dyncontent">
 <div class="center"><img src="CenterSizeFactors_8hpp__dep__incl.png" border="0" usemap="#ascran_2normalization_2CenterSizeFactors_8hppdep" alt=""/></div>
 <map name="ascran_2normalization_2CenterSizeFactors_8hppdep" id="ascran_2normalization_2CenterSizeFactors_8hppdep">
-<area shape="rect" title="Center size factors prior to normalization." alt="" coords="109,5,265,46"/>
-<area shape="rect" href="LogNormCounts_8hpp.html" title="Compute log&#45;normalized expression values." alt="" coords="5,183,150,223"/>
-<area shape="poly" title=" " alt="" coords="169,60,92,184,87,181,165,57"/>
-<area shape="rect" href="scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="156,271,269,297"/>
-<area shape="poly" title=" " alt="" coords="193,61,214,271,208,271,188,61"/>
-<area shape="rect" href="MedianSizeFactors_8hpp.html" title="Compute median&#45;based size factors." alt="" coords="224,94,384,135"/>
-<area shape="poly" title=" " alt="" coords="226,53,279,91,276,96,223,57"/>
-<area shape="poly" title=" " alt="" coords="125,229,193,268,190,273,122,233"/>
-<area shape="poly" title=" " alt="" coords="286,148,265,184,220,272,215,270,260,181,282,146"/>
-<area shape="rect" href="GroupedSizeFactors_8hpp.html" title="Compute size factors for groups of cells." alt="" coords="275,183,443,223"/>
-<area shape="poly" title=" " alt="" coords="326,146,349,181,344,184,322,149"/>
-<area shape="poly" title=" " alt="" coords="311,233,236,273,233,268,308,228"/>
+<area shape="rect" title="Center size factors prior to normalization." alt="" coords="90,5,246,46"/>
+<area shape="rect" href="GroupedSizeFactors_8hpp.html" title="Compute size factors for groups of cells." alt="" coords="30,183,197,223"/>
+<area shape="poly" title=" " alt="" coords="152,60,137,95,125,142,118,183,113,182,120,141,132,93,147,58"/>
+<area shape="rect" href="scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="117,271,230,297"/>
+<area shape="poly" title=" " alt="" coords="122,56,75,90,33,131,18,153,10,176,10,199,19,222,39,242,63,257,90,268,117,274,115,280,88,273,61,262,35,246,15,225,4,200,4,175,13,151,29,128,72,86,119,52"/>
+<area shape="rect" href="LogNormCounts_8hpp.html" title="Compute log&#45;normalized expression values." alt="" coords="272,183,416,223"/>
+<area shape="poly" title=" " alt="" coords="261,50,293,67,321,92,334,114,342,138,347,182,342,183,336,139,329,116,317,96,290,72,258,54"/>
+<area shape="rect" href="MedianSizeFactors_8hpp.html" title="Compute median&#45;based size factors." alt="" coords="146,94,307,135"/>
+<area shape="poly" title=" " alt="" coords="192,57,216,92,211,95,187,60"/>
+<area shape="poly" title=" " alt="" coords="139,234,166,269,162,272,135,237"/>
+<area shape="poly" title=" " alt="" coords="289,232,201,273,198,268,287,228"/>
+<area shape="poly" title=" " alt="" coords="191,146,140,184,137,180,188,142"/>
+<area shape="poly" title=" " alt="" coords="227,150,222,186,212,224,199,251,185,272,180,269,194,248,207,222,217,185,222,149"/>
 </map>
 </div>
 </div>
@@ -140,9 +148,6 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1CenterSizeFactors_1_1Defaults.html">scran::CenterSizeFactors::Defaults</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default parameter settings.  <a href="structscran_1_1CenterSizeFactors_1_1Defaults.html#details">More...</a><br /></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structscran_1_1CenterSizeFactors_1_1Results.html">scran::CenterSizeFactors::Results</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Diagnostics from size factor centering.  <a href="structscran_1_1CenterSizeFactors_1_1Results.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
