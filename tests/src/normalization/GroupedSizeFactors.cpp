@@ -197,7 +197,7 @@ TEST(GroupedSizeFactors, ZeroHandler) {
             grouper.run(&mat, groups.data(), 2);
         } catch(std::exception& e) {
             std::string msg = e.what();
-            EXPECT_TRUE(msg.find("positive") != std::string::npos);
+            EXPECT_TRUE(msg.find("size factor of zero") != std::string::npos);
             throw;
         }
     });

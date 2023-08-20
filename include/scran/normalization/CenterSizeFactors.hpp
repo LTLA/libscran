@@ -5,6 +5,7 @@
 
 #include "../utils/blocking.hpp"
 
+#include "SanitizeSizeFactors.hpp"
 #include <stdexcept>
 #include <vector>
 #include <algorithm>
@@ -52,51 +53,6 @@ private:
 
 public:
     /**
-     * @brief Diagnostics from size factor centering.
-     */
-    struct Results {
-        /**
-         * Whether size factors of zero were detected.
-         */
-        bool has_zero = false;
-
-        /**
-         * Whether non-finite size factors were detected.
-         */
-        bool has_non_finite = false;
-    };
-
-    /**
-     * Validate size factors by checking that they are all non-zero.
-     * We also check whether any size factors are zero, which may be handled separately by callers. 
-     *
-     * @tparam T Floating-point type for the size factors.
-     *
-     * @param n Number of size factors.
-     * @param[in] size_factors Pointer to an array of non-negative size factors of length `n`.
-     *
-     * @return Validation results, indicating whether any zero or non-finite size factors exist.
-     */
-    template<typename T>
-    static Results validate(size_t n, const T* size_factors) {
-        Results output;
-
-        for (size_t i = 0; i < n; ++i) {
-             if (size_factors[i] < 0) {
-                throw std::runtime_error("negative size factors detected");
-            }
-            if (size_factors[i] == 0) {
-                output.has_zero = true;
-            } else if (!std::isfinite(size_factors[i])) {
-                output.has_non_finite = true;
-            }
-        }
-
-        return output;
-    }
-
-public:
-    /**
      * @param b Strategy for handling blocks in `run_blocked()`.
      *
      * @return A reference to this `CenterSizeFactors` object.
@@ -136,33 +92,34 @@ public:
      * @tparam T Floating-point type for the size factors.
      *
      * @param n Number of size factors.
-     * @param[in,out] size_factors Pointer to an array of positive size factors of length `n`.
-     *
-     * @return A `Results` object is returned indicating whether invalid size factors (zero or non-finite) were detected.
-     *
-     * Entries in `size_factors` are scaled so that their mean is equal to 1.
-     * This only considers the mean across finite (and, if `set_ignore_zeros()` is `true`, positive) entries.
+     * @param[in,out] size_factors Pointer to an array of size factors of length `n`.
+     * On output, entries are scaled so that their mean is equal to 1.
+     * Note that this only considers the mean across finite (and, if `set_ignore_zeros()` is `true`, positive) entries.
      * If there are no non-zero finite size factors, no centering is performed.
+     *
+     * @return Object indicating whether invalid size factors (zero or non-finite) were detected.
      */
     template<typename T>
-    Results run(size_t n, T* size_factors) const {
+    SizeFactorValidity run(size_t n, T* size_factors) const {
         size_t num_used = 0;
-        Results output;
+        SizeFactorValidity output;
 
         double mean = 0;
         for (size_t i = 0; i < n; ++i) {
             const auto& current = size_factors[i];
             if (current < 0) {
-               throw std::runtime_error("negative size factors detected");
-            } 
-
-            if (current == 0) {
+                output.has_negative = true;
+                continue;
+            } else if (current == 0) {
                 output.has_zero = true;
                 if (ignore_zeros) {
                     continue;
                 }
-            } else if (!std::isfinite(current)) {
-                output.has_non_finite = true;
+            } else if (std::isnan(current)) {
+                output.has_nan = true;
+                continue;
+            } else if (std::isinf(current)) {
+                output.has_infinite = true;
                 continue;
             }
 
@@ -186,19 +143,18 @@ public:
      *
      * @param n Number of size factors.
      * @param[in,out] size_factors Pointer to an array of positive size factors of length 1n1.
+     * On output, entries are scaled so that their mean is equal to 1 according to the strategy defined in `set_block_mode()`.
+     * This only considers the mean across finite (and, if `set_ignore_zeros()` is `true`, positive) entries within each block.
+     * If there are no non-zero finite size factors in a block, no centering is performed for that block.
      * @param[in] block Pointer to an array of block identifiers.
      * If provided, the array should be of length equal to `n`.
      * Values should be integer IDs in \f$[0, N)\f$ where \f$N\f$ is the number of blocks.
      * This can also be a `NULL`, in which case all cells are assumed to belong to the same block.
      *
-     * @return A `Results` object is returned indicating whether invalid size factors (zero or non-finite) were detected.
-     *
-     * Entries in `size_factors` are scaled so that their mean is equal to 1 according to the strategy defined in `set_block_mode()`.
-     * This only considers the mean across finite (and, if `set_ignore_zeros()` is `true`, positive) entries within each block.
-     * If there are no non-zero finite size factors in a block, no centering is performed for that block.
+     * @return Object indicating whether invalid size factors (zero or non-finite) were detected.
      */
     template<typename T, typename B>
-    Results run_blocked(size_t n, T* size_factors, const B* block) const {
+    SizeFactorValidity run_blocked(size_t n, T* size_factors, const B* block) const {
         if (block == NULL) {
             return run(n, size_factors);
         } 
@@ -207,20 +163,22 @@ public:
         std::vector<double> group_mean(ngroups);
         std::vector<double> group_num(ngroups);
 
-        Results output;
+        SizeFactorValidity output;
         for (size_t i = 0; i < n; ++i) {
             const auto& current = size_factors[i];
             if (current < 0) {
-               throw std::runtime_error("negative size factors detected");
-            }
-
-            if (current == 0) {
+                output.has_negative = true;
+                continue;
+            } else if (current == 0) {
                 output.has_zero = true;
                 if (ignore_zeros) {
                     continue;
                 }
-            } else if (!std::isfinite(current)) {
-                output.has_non_finite = true;
+            } else if (std::isinf(current)) {
+                output.has_infinite = true;
+                continue;
+            } else if (std::isnan(current)) {
+                output.has_nan = true;
                 continue;
             }
 

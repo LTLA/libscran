@@ -3,8 +3,9 @@
 
 #include "../utils/macros.hpp"
 
-#include "utils.hpp"
 #include "MedianSizeFactors.hpp"
+#include "SanitizeSizeFactors.hpp"
+#include "CenterSizeFactors.hpp"
 #include "../aggregation/AggregateAcrossCells.hpp"
 
 #include "tatami/tatami.hpp"
@@ -91,11 +92,11 @@ public:
     }
 
     /**
-     * Specify whether to handle zero size factors for the pseudo-cells.
-     * If false, size factors of zero will raise an error;
-     * otherwise, they will be automatically set to the smallest non-zero size factor (or 1, if all size factors are zero).
-     *
-     * @param z Whether to replace zero size factors with the smallest non-zero size factor.
+     * Should we gracefully handle size factors of zero for the pseudo-cells?
+     * Note that this does not sanitize the per-cell size factors - to do so, users should call `SanitizeSizeFactors` separately on the output of `run()`. 
+
+     * @param z Whether to replace pseudo-cell size factors of zero with the smallest non-zero size factor across pseudo-cells,
+     * see `SanitizeSizeFactors::set_handle_zeros()` for more details.
      *
      * @return A reference to this `GroupedSizeFactors` object.
      */
@@ -105,12 +106,11 @@ public:
     }
 
     /**
-     * Specify whether to handle non-finite size factors for the pseudo-cells.
-     * If false, non-finite size factors will raise an error.
-     * Otherwise, infinite size factors will be automatically set to the largest finite size factor (or 1, if all size factors are non-finite),
-     * and missing size factors (i.e., NaN) will be set to 1.
+     * Should we gracefully handle non-finite size factors of zero for the pseudo-cells?
+     * Note that this does not sanitize the per-cell size factors - to do so, users should call `SanitizeSizeFactors` separately on the output of `run()`. 
      *
-     * @param z Whether to replace non-finite size factors with the largest finite size factor.
+     * @param n Whether to replace non-finite pseudo-cell size factors with the largest finite size factor across pseudo-cells,
+     * see `SanitizeSizeFactors::set_handle_non_finite()` for more details.
      *
      * @return A reference to this `GroupedSizeFactors` object.
      */
@@ -236,22 +236,11 @@ private:
 
         // We need to rescue odd size factors here; if they're zero or infinite,
         // we lose information about the relative scaling of cells within each group.
-        auto cres = CenterSizeFactors::validate(mres.factors.size(), mres.factors.data());
-        if (cres.has_zero) {
-            if (!handle_zeros) {
-                throw std::runtime_error("all pseudo-cell size factors should be positive");
-            } else {
-                sanitize_zeros(mres.factors);
-            }
-        }
-
-        if (cres.has_non_finite) {
-            if (!handle_non_finite) {
-                throw std::runtime_error("all pseudo-cell size factors should be finite");
-            } else {
-                sanitize_non_finite(mres.factors);
-            }
-        }
+        auto cres = validate_size_factors(mres.factors.size(), mres.factors.data());
+        SanitizeSizeFactors sanitizer;
+        sanitizer.set_handle_zero(handle_zeros ? SanitizeSizeFactors::HandlerAction::SANITIZE : SanitizeSizeFactors::HandlerAction::ERROR);
+        sanitizer.set_handle_non_finite(handle_non_finite ? SanitizeSizeFactors::HandlerAction::SANITIZE : SanitizeSizeFactors::HandlerAction::ERROR);
+        sanitizer.run(mres.factors.size(), mres.factors.data(), cres);
 
         // Propagating to each cell via library size-based normalization.
         auto aggcolsums = tatami::column_sums(&aggmat, num_threads);

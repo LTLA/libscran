@@ -9,8 +9,8 @@
 
 #include "tatami/tatami.hpp"
 
-#include "utils.hpp"
 #include "CenterSizeFactors.hpp"
+#include "SanitizeSizeFactors.hpp"
 #include "ChoosePseudoCount.hpp"
 
 /**
@@ -258,7 +258,7 @@ public:
      * @tparam B An integer type, to hold the block IDs.
      *
      * @param mat Pointer to an input count matrix, with features in the rows and cells in the columns.
-     * @param size_factors A vector of positive size factors, of length equal to the number of columns in `mat`.
+     * @param size_factors A vector of size factors, of length equal to the number of columns in `mat`.
      * @param[in] block Pointer to an array of block identifiers.
      * If provided, the array should be of length equal to the number of columns in `mat`.
      * Values should be integer IDs in \f$[0, N)\f$ where \f$N\f$ is the number of blocks.
@@ -275,28 +275,17 @@ public:
             throw std::runtime_error("number of size factors and columns are not equal");
         }
 
-        typename CenterSizeFactors::Results cresults;
+        SizeFactorValidity cresults;
         if (center) {
             cresults = centerer.run_blocked(size_factors.size(), size_factors.data(), block);
         } else {
-            cresults = CenterSizeFactors::validate(size_factors.size(), size_factors.data());
+            cresults = validate_size_factors(size_factors.size(), size_factors.data());
         }
 
-        if (cresults.has_zero) {
-            if (!handle_zeros) {
-                throw std::runtime_error("all size factors should be positive");
-            } else {
-                sanitize_zeros(size_factors);
-            }
-        }
-
-        if (cresults.has_non_finite) {
-            if (!handle_non_finite) {
-                throw std::runtime_error("all size factors should be finite");
-            } else {
-                sanitize_non_finite(size_factors);
-            }
-        }
+        SanitizeSizeFactors sanitizer;
+        sanitizer.set_handle_zero(handle_zeros ? SanitizeSizeFactors::HandlerAction::SANITIZE : SanitizeSizeFactors::HandlerAction::ERROR);
+        sanitizer.set_handle_non_finite(handle_non_finite ? SanitizeSizeFactors::HandlerAction::SANITIZE : SanitizeSizeFactors::HandlerAction::ERROR);
+        sanitizer.run(size_factors.size(), size_factors.data(), cresults);
 
         double current_pseudo = pseudo_count;
         if (choose_pseudo_count) {

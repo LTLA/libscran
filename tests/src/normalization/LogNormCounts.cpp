@@ -185,7 +185,15 @@ TEST_F(LogNormCountsTester, Error) {
     scran::LogNormCounts lnc;
     auto sf2 = sf;
     sf2.resize(sf.size() - 1);
-    EXPECT_ANY_THROW(lnc.run(mat, sf2));
+    EXPECT_ANY_THROW({
+        try {
+            lnc.run(mat, sf2);
+        } catch(std::exception& e) {
+            std::string msg = e.what();
+            EXPECT_TRUE(msg.find("not equal") != std::string::npos);
+            throw;
+        }
+    });
 
     std::vector<double> empty(mat->ncol());
     EXPECT_ANY_THROW({
@@ -193,7 +201,7 @@ TEST_F(LogNormCountsTester, Error) {
             lnc.run(mat, empty);
         } catch(std::exception& e) {
             std::string msg = e.what();
-            EXPECT_TRUE(msg.find("positive") != std::string::npos);
+            EXPECT_TRUE(msg.find("size factor of zero") != std::string::npos);
             throw;
         }
     });
@@ -204,7 +212,7 @@ TEST_F(LogNormCountsTester, Error) {
             lnc.run(mat, empty);
         } catch(std::exception& e) {
             std::string msg = e.what();
-            EXPECT_TRUE(msg.find("finite") != std::string::npos);
+            EXPECT_TRUE(msg.find("infinite size factor") != std::string::npos);
             throw;
         
         }

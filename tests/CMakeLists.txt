@@ -25,6 +25,7 @@ add_executable(
     src/quality_control/FilterCells.cpp
 
     src/normalization/LogNormCounts.cpp
+    src/normalization/SanitizeSizeFactors.cpp
     src/normalization/CenterSizeFactors.cpp
     src/normalization/MedianSizeFactors.cpp
     src/normalization/GroupedSizeFactors.cpp
