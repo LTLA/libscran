@@ -68,3 +68,50 @@ TEST_F(FilterCellsTester, DiscardSubset) {
         }
     }
 }
+
+TEST_F(FilterCellsTester, MultipleVectors) {
+    auto discard_s1 = to_filter({1, 5, 7, 8});
+    auto discard_s2 = to_filter({2, 4, 5, 7, 9 });
+
+    scran::FilterCells filter;
+
+    // Union by default.
+    {
+        auto filtered = filter.run(mat, std::vector<int*>{ discard_s1.data(), discard_s2.data() });
+        EXPECT_EQ(filtered->nrow(), mat->nrow());
+        EXPECT_EQ(filtered->ncol(), 3);
+
+        auto mext = mat->dense_column();
+        auto fext = filtered->dense_column();
+        EXPECT_EQ(mext->fetch(0), fext->fetch(0));
+        EXPECT_EQ(mext->fetch(3), fext->fetch(1));
+        EXPECT_EQ(mext->fetch(6), fext->fetch(2));
+    }
+
+    // Intersection by default.
+    filter.set_intersect(true);
+    {
+        auto filtered = filter.run(mat, std::vector<int*>{ discard_s1.data(), discard_s2.data() });
+        EXPECT_EQ(filtered->nrow(), mat->nrow());
+        EXPECT_EQ(filtered->ncol(), 8);
+
+        auto mext = mat->dense_column();
+        auto fext = filtered->dense_column();
+        EXPECT_EQ(mext->fetch(0), fext->fetch(0));
+        EXPECT_EQ(mext->fetch(6), fext->fetch(5));
+        EXPECT_EQ(mext->fetch(8), fext->fetch(6));
+    }
+
+    // Interacts nicely with discard.
+    filter.set_discard(false);
+    {
+        auto filtered = filter.run(mat, std::vector<int*>{ discard_s1.data(), discard_s2.data() });
+        EXPECT_EQ(filtered->nrow(), mat->nrow());
+        EXPECT_EQ(filtered->ncol(), 2);
+
+        auto mext = mat->dense_column();
+        auto fext = filtered->dense_column();
+        EXPECT_EQ(mext->fetch(5), fext->fetch(0));
+        EXPECT_EQ(mext->fetch(7), fext->fetch(1));
+    }
+}
