@@ -8,5 +8,7 @@ var searchData=
   ['fitted_5',['fitted',['../structscran_1_1ModelGeneVariances_1_1Results.html#ad38fd0ddc85db095acd499f34af898cb',1,'scran::ModelGeneVariances::Results::fitted'],['../structscran_1_1FitVarianceTrend_1_1Results.html#ae8b77f321d3b6dc405ce6ccc1feb8ced',1,'scran::FitVarianceTrend::Results::fitted']]],
   ['fitvariancetrend_6',['FitVarianceTrend',['../classscran_1_1FitVarianceTrend.html',1,'scran']]],
   ['fitvariancetrend_2ehpp_7',['FitVarianceTrend.hpp',['../FitVarianceTrend_8hpp.html',1,'']]],
-  ['fixed_5fwidth_8',['fixed_width',['../structscran_1_1FitVarianceTrend_1_1Defaults.html#af134fa2aa91836c7b9d7955e79f43084',1,'scran::FitVarianceTrend::Defaults']]]
+  ['fixed_5fwidth_8',['fixed_width',['../structscran_1_1FitVarianceTrend_1_1Defaults.html#af134fa2aa91836c7b9d7955e79f43084',1,'scran::FitVarianceTrend::Defaults']]],
+  ['fold_20change_20threshold_9',['With a log-fold change threshold',['../classscran_1_1PairwiseEffects.html#lfc-threshold',1,'']]],
+  ['for_20single_20cell_20data_20analysis_10',['A C++ library for single-cell data analysis',['../index.html',1,'']]]
 ];

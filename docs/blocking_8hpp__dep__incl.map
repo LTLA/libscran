@@ -1,30 +1,30 @@
 <map id="scran/utils/blocking.hpp" name="scran/utils/blocking.hpp">
 <area shape="rect" id="Node000001" title="Utilities for handling blocks of cells." alt="" coords="546,5,703,31"/>
 <area shape="rect" id="Node000002" href="$AggregateAcrossCells_8hpp.html" title="Aggregate expression values across cells." alt="" coords="5,168,193,208"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="531,29,353,49,270,63,212,81,182,100,155,123,115,169,111,166,151,120,179,96,210,77,269,58,352,43,531,24"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="531,29,352,49,270,63,212,81,182,100,155,123,115,169,111,166,151,120,179,96,210,77,269,58,352,43,530,24"/>
 <area shape="rect" id="Node000003" href="$GroupedSizeFactors_8hpp.html" title="Compute size factors for groups of cells." alt="" coords="197,256,364,297"/>
-<area shape="poly" id="edge18_Node000001_Node000003" title=" " alt="" coords="531,32,464,47,394,73,361,91,330,113,304,139,283,169,275,191,273,214,278,256,272,256,267,214,270,189,278,166,300,135,327,109,358,86,392,68,463,42,530,26"/>
+<area shape="poly" id="edge18_Node000001_Node000003" title=" " alt="" coords="531,32,464,47,394,73,360,91,330,113,304,139,283,169,275,191,273,214,278,256,272,256,267,214,270,189,278,166,300,135,327,109,358,86,391,68,462,42,530,27"/>
 <area shape="rect" id="Node000005" href="$PairwiseEffects_8hpp.html" title="Compute pairwise effect sizes between groups of cells." alt="" coords="822,79,1016,120"/>
-<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="684,33,846,76,845,81,683,38"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="685,33,846,76,845,81,683,38"/>
 <area shape="rect" id="Node000006" href="$ScoreMarkers_8hpp.html" title="Compute marker scores for each gene in each group of cells." alt="" coords="603,256,787,297"/>
-<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="645,42,681,97,698,131,711,167,714,191,713,215,704,257,699,255,708,215,709,191,706,168,693,133,676,99,641,45"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="646,42,681,97,698,131,711,167,714,191,713,215,704,257,699,255,708,215,709,191,706,168,693,133,677,100,641,45"/>
 <area shape="rect" id="Node000007" href="$ModelGeneVariances_8hpp.html" title="Model the per&#45;gene variance from log&#45;count data." alt="" coords="811,256,984,297"/>
-<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="653,38,699,77,803,175,881,254,877,258,799,179,696,81,650,42"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="653,39,699,77,803,175,881,254,877,258,799,179,696,81,650,43"/>
 <area shape="rect" id="Node000008" href="$CenterSizeFactors_8hpp.html" title="Center size factors prior to normalization." alt="" coords="437,79,593,120"/>
-<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="598,42,544,81,540,76,594,38"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="154,213,240,253,238,258,152,217"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="597,42,544,81,540,76,594,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="155,213,240,253,238,258,153,218"/>
 <area shape="rect" id="Node000004" href="$scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="458,345,572,371"/>
-<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="118,220,146,260,165,279,186,295,235,313,308,328,458,348,457,354,307,334,234,318,183,299,161,283,142,263,114,223"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="118,220,147,260,165,279,186,295,235,313,308,328,458,348,457,354,307,334,234,318,183,299,161,283,142,264,114,223"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="354,300,480,342,478,347,352,305"/>
-<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="638,306,544,347,542,342,636,301"/>
-<area shape="poly" id="edge9_Node000007_Node000004" title=" " alt="" coords="797,301,573,347,572,342,796,296"/>
-<area shape="poly" id="edge11_Node000008_Node000003" title=" " alt="" coords="423,112,392,121,361,132,332,148,308,169,295,190,287,213,282,256,277,256,282,211,290,187,304,166,329,144,359,127,390,115,421,107"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="637,306,544,347,542,342,635,301"/>
+<area shape="poly" id="edge9_Node000007_Node000004" title=" " alt="" coords="796,302,573,347,572,342,795,296"/>
+<area shape="poly" id="edge11_Node000008_Node000003" title=" " alt="" coords="422,113,391,121,361,132,332,148,308,169,295,190,287,213,282,256,277,256,282,211,290,187,304,166,329,144,358,128,389,116,421,107"/>
 <area shape="poly" id="edge17_Node000008_Node000004" title=" " alt="" coords="518,135,518,345,512,345,512,135"/>
 <area shape="rect" id="Node000009" href="$LogNormCounts_8hpp.html" title="Compute log&#45;normalized expression values." alt="" coords="552,168,697,208"/>
-<area shape="poly" id="edge12_Node000008_Node000009" title=" " alt="" coords="553,127,601,165,598,169,549,131"/>
+<area shape="poly" id="edge12_Node000008_Node000009" title=" " alt="" coords="553,128,601,165,598,169,550,132"/>
 <area shape="rect" id="Node000010" href="$MedianSizeFactors_8hpp.html" title="Compute median&#45;based size factors." alt="" coords="318,168,478,208"/>
-<area shape="poly" id="edge14_Node000008_Node000010" title=" " alt="" coords="479,131,426,169,423,165,475,126"/>
-<area shape="poly" id="edge13_Node000009_Node000004" title=" " alt="" coords="606,222,525,346,521,343,602,219"/>
-<area shape="poly" id="edge15_Node000010_Node000003" title=" " alt="" coords="361,219,308,258,305,254,358,215"/>
+<area shape="poly" id="edge14_Node000008_Node000010" title=" " alt="" coords="478,131,426,169,423,165,475,127"/>
+<area shape="poly" id="edge13_Node000009_Node000004" title=" " alt="" coords="606,223,525,346,521,343,601,220"/>
+<area shape="poly" id="edge15_Node000010_Node000003" title=" " alt="" coords="361,220,308,258,305,254,358,215"/>
 <area shape="poly" id="edge16_Node000010_Node000004" title=" " alt="" coords="422,219,509,343,504,346,417,222"/>
 </map>

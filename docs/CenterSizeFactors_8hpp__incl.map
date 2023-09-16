@@ -1,23 +1,23 @@
 <map id="scran/normalization/CenterSizeFactors.hpp" name="scran/normalization/CenterSizeFactors.hpp">
 <area shape="rect" id="Node000001" title="Center size factors prior to normalization." alt="" coords="194,5,351,46"/>
 <area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,168,132,193"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="220,49,178,69,137,96,108,126,85,157,81,154,104,122,133,92,175,65,218,44"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="220,49,178,69,137,96,108,126,85,156,81,153,104,122,133,92,175,65,218,44"/>
 <area shape="rect" id="Node000003" href="$blocking_8hpp.html" title="Utilities for handling blocks of cells." alt="" coords="156,94,288,120"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="262,48,240,83,235,80,258,45"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="262,48,240,82,236,79,258,45"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="156,168,213,193"/>
-<area shape="poly" id="edge11_Node000001_Node000004" title=" " alt="" coords="205,49,172,68,147,95,143,110,145,126,164,155,160,158,140,127,137,110,142,93,169,64,203,44"/>
+<area shape="poly" id="edge11_Node000001_Node000004" title=" " alt="" coords="205,49,172,68,147,95,143,110,145,125,164,155,159,158,140,127,137,110,142,93,169,64,203,44"/>
 <area shape="rect" id="Node000005" title=" " alt="" coords="237,168,311,193"/>
 <area shape="poly" id="edge12_Node000001_Node000005" title=" " alt="" coords="286,46,300,80,303,100,302,120,290,155,285,153,297,119,298,100,294,81,281,48"/>
 <area shape="rect" id="Node000006" title=" " alt="" coords="335,168,413,193"/>
-<area shape="poly" id="edge10_Node000001_Node000006" title=" " alt="" coords="288,45,321,93,361,154,357,157,317,95,284,48"/>
+<area shape="poly" id="edge10_Node000001_Node000006" title=" " alt="" coords="288,45,321,93,361,153,356,156,317,95,284,48"/>
 <area shape="rect" id="Node000007" href="$SanitizeSizeFactors_8hpp_source.html" title=" " alt="" coords="412,94,573,120"/>
-<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="328,44,446,86,444,91,327,49"/>
-<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="197,123,109,163,107,159,195,118"/>
-<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="218,121,200,156,195,153,213,119"/>
-<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="233,118,259,154,254,157,228,121"/>
-<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="249,118,336,159,334,163,246,123"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="328,44,445,86,443,91,327,49"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="197,123,109,163,107,158,195,118"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="218,121,200,155,195,153,213,119"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="233,118,258,153,254,157,228,121"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="249,118,335,158,333,163,246,123"/>
 <area shape="rect" id="Node000008" title=" " alt="" coords="452,168,504,193"/>
-<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="493,120,486,154,481,152,487,119"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="493,120,486,153,481,152,487,119"/>
 <area shape="rect" id="Node000009" title=" " alt="" coords="528,168,585,193"/>
-<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="505,118,538,155,534,158,501,122"/>
+<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="505,118,538,154,534,158,501,122"/>
 </map>

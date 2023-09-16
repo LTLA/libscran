@@ -1,22 +1,22 @@
 <map id="scran/quality_control/PerCellQcMetrics.hpp" name="scran/quality_control/PerCellQcMetrics.hpp">
 <area shape="rect" id="Node000001" title="Compute a variety of per&#45;cell quality control metrics from a count matrix." alt="" coords="280,5,432,46"/>
 <area shape="rect" id="Node000002" href="$PerCellAdtQcMetrics_8hpp.html" title="Compute per&#45;cell quality control metrics from an ADT count matrix." alt="" coords="68,94,239,135"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="298,55,200,96,198,91,296,50"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="297,55,200,96,198,91,295,50"/>
 <area shape="rect" id="Node000005" href="$PerCellCrisprQcMetrics_8hpp.html" title="Compute per&#45;cell quality control metrics from a CRISPR guide count matrix." alt="" coords="263,94,449,135"/>
-<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="359,61,359,94,353,94,353,61"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="359,62,359,94,353,94,353,62"/>
 <area shape="rect" id="Node000007" href="$PerCellRnaQcMetrics_8hpp.html" title="Compute typical per&#45;cell quality control metrics from an RNA count matrix." alt="" coords="473,94,647,135"/>
-<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="417,50,514,91,512,96,414,55"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="417,50,514,91,512,96,415,55"/>
 <area shape="rect" id="Node000003" href="$SuggestAdtQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from ADT&#45;derived QC metrics." alt="" coords="5,183,176,223"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="133,148,107,184,103,181,128,145"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="132,149,107,184,103,181,128,146"/>
 <area shape="rect" id="Node000004" href="$scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="271,271,385,297"/>
-<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="186,143,317,269,314,273,182,147"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="164,226,292,268,290,273,162,231"/>
-<area shape="poly" id="edge8_Node000005_Node000004" title=" " alt="" coords="319,146,303,164,292,184,287,203,292,222,304,248,319,269,315,272,299,251,287,224,282,203,287,182,299,161,315,143"/>
+<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="186,144,317,269,314,273,182,147"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="165,226,292,268,290,273,163,231"/>
+<area shape="poly" id="edge8_Node000005_Node000004" title=" " alt="" coords="318,147,303,164,292,184,287,203,292,222,304,248,319,269,315,272,299,251,287,224,282,203,287,182,299,161,314,143"/>
 <area shape="rect" id="Node000006" href="$SuggestCrisprQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from CRISPR&#45;derived QC metrics." alt="" coords="301,183,485,223"/>
-<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="372,147,387,181,382,183,368,149"/>
-<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="370,236,340,272,336,269,366,233"/>
-<area shape="poly" id="edge12_Node000007_Node000004" title=" " alt="" coords="550,150,530,189,516,208,499,225,472,243,443,258,386,276,384,271,441,253,470,239,495,221,512,205,525,186,546,147"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="373,148,387,181,382,183,368,150"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="369,237,340,272,336,269,365,234"/>
+<area shape="poly" id="edge12_Node000007_Node000004" title=" " alt="" coords="550,150,530,189,499,225,472,243,443,258,386,276,384,271,441,253,470,239,495,221,525,186,545,148"/>
 <area shape="rect" id="Node000008" href="$SuggestRnaQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from RNA&#45;derived QC metrics." alt="" coords="560,183,733,223"/>
-<area shape="poly" id="edge10_Node000007_Node000008" title=" " alt="" coords="592,143,629,180,625,184,588,147"/>
-<area shape="poly" id="edge11_Node000008_Node000004" title=" " alt="" coords="554,230,378,273,377,268,552,225"/>
+<area shape="poly" id="edge10_Node000007_Node000008" title=" " alt="" coords="592,144,629,180,625,184,588,148"/>
+<area shape="poly" id="edge11_Node000008_Node000004" title=" " alt="" coords="553,230,378,273,377,268,552,225"/>
 </map>

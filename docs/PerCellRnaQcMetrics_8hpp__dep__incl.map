@@ -1,8 +1,8 @@
 <map id="scran/quality_control/PerCellRnaQcMetrics.hpp" name="scran/quality_control/PerCellRnaQcMetrics.hpp">
 <area shape="rect" id="Node000001" title="Compute typical per&#45;cell quality control metrics from an RNA count matrix." alt="" coords="66,5,241,46"/>
 <area shape="rect" id="Node000002" href="$SuggestRnaQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from RNA&#45;derived QC metrics." alt="" coords="5,94,179,135"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,60,108,95,104,92,129,57"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,60,108,95,104,92,128,57"/>
 <area shape="rect" id="Node000003" href="$scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="97,183,210,208"/>
-<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="178,57,193,93,197,114,193,135,181,162,166,184,161,181,176,160,188,134,192,114,188,95,173,60"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="118,145,146,180,142,184,114,148"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="178,58,193,93,197,114,193,135,181,162,166,184,161,181,176,160,188,134,192,114,188,95,173,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="118,145,146,180,142,184,114,149"/>
 </map>

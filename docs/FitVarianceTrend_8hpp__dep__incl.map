@@ -1,8 +1,8 @@
 <map id="scran/feature_selection/FitVarianceTrend.hpp" name="scran/feature_selection/FitVarianceTrend.hpp">
 <area shape="rect" id="Node000001" title="Fit a mean&#45;variance trend to log&#45;count data." alt="" coords="75,5,232,46"/>
 <area shape="rect" id="Node000002" href="$ModelGeneVariances_8hpp.html" title="Model the per&#45;gene variance from log&#45;count data." alt="" coords="5,94,179,135"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,60,108,95,104,92,129,57"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="133,60,108,95,104,92,128,57"/>
 <area shape="rect" id="Node000003" href="$scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="97,183,210,208"/>
-<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="178,57,193,93,197,114,193,135,181,162,166,184,161,181,176,160,188,134,192,114,188,95,173,60"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="118,145,146,180,142,184,114,148"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="178,58,193,93,197,114,193,135,181,162,166,184,161,181,176,160,188,134,192,114,188,95,173,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="118,145,146,180,142,184,114,149"/>
 </map>

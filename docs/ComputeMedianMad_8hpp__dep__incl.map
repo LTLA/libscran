@@ -1,18 +1,18 @@
 <map id="scran/quality_control/ComputeMedianMad.hpp" name="scran/quality_control/ComputeMedianMad.hpp">
 <area shape="rect" id="Node000001" title="Compute the median and MAD from an array of values." alt="" coords="248,5,416,46"/>
 <area shape="rect" id="Node000002" href="$ChooseOutlierFilters_8hpp.html" title="Define outlier filters using a MAD&#45;based approach." alt="" coords="188,94,356,135"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="312,60,288,95,283,92,308,57"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="312,60,288,95,283,92,307,57"/>
 <area shape="rect" id="Node000003" href="$SuggestAdtQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from ADT&#45;derived QC metrics." alt="" coords="5,183,176,223"/>
-<area shape="poly" id="edge8_Node000001_Node000003" title=" " alt="" coords="255,54,215,73,177,96,155,117,134,140,104,184,100,181,130,137,151,113,174,92,212,68,253,49"/>
+<area shape="poly" id="edge8_Node000001_Node000003" title=" " alt="" coords="254,54,215,73,177,96,155,117,134,140,104,184,100,181,130,137,151,113,174,92,212,68,252,50"/>
 <area shape="rect" id="Node000005" href="$SuggestCrisprQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from CRISPR&#45;derived QC metrics." alt="" coords="200,183,384,223"/>
-<area shape="poly" id="edge9_Node000001_Node000005" title=" " alt="" coords="357,57,373,95,375,115,370,136,351,163,327,184,323,180,347,160,365,134,370,115,368,96,352,59"/>
+<area shape="poly" id="edge9_Node000001_Node000005" title=" " alt="" coords="357,58,373,95,375,116,370,136,351,163,327,184,323,180,347,160,365,134,370,115,368,96,353,60"/>
 <area shape="rect" id="Node000006" href="$SuggestRnaQcFilters_8hpp.html" title="Create filters to identify low&#45;quality cells from RNA&#45;derived QC metrics." alt="" coords="408,183,581,223"/>
-<area shape="poly" id="edge10_Node000001_Node000006" title=" " alt="" coords="361,55,478,180,474,184,358,58"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="219,144,133,185,130,180,216,139"/>
+<area shape="poly" id="edge10_Node000001_Node000006" title=" " alt="" coords="362,55,478,180,474,184,358,59"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="218,144,133,185,130,180,216,139"/>
 <area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="282,149,290,182,285,183,277,150"/>
-<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="337,138,445,180,443,185,335,143"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="337,138,445,180,443,185,336,143"/>
 <area shape="rect" id="Node000004" href="$scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="235,271,349,297"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="155,227,262,268,260,273,153,232"/>
-<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="295,238,295,271,289,271,289,238"/>
-<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="431,232,324,273,322,268,430,227"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="156,227,262,268,260,273,154,232"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="295,239,295,271,289,271,289,239"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="431,232,324,273,322,268,429,227"/>
 </map>

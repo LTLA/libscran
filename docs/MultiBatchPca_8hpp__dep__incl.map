@@ -1,5 +1,5 @@
 <map id="scran/dimensionality_reduction/MultiBatchPca.hpp" name="scran/dimensionality_reduction/MultiBatchPca.hpp">
 <area shape="rect" id="Node000001" title="Compute PCA after adjusting for differences between batch sizes." alt="" coords="5,5,200,46"/>
 <area shape="rect" id="Node000002" href="$scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="46,94,159,120"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,61,105,93,100,93,100,61"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,62,105,93,100,93,100,62"/>
 </map>

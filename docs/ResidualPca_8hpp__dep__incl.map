@@ -1,8 +1,8 @@
 <map id="scran/dimensionality_reduction/ResidualPca.hpp" name="scran/dimensionality_reduction/ResidualPca.hpp">
 <area shape="rect" id="Node000001" title="Compute PCA after regressing out an uninteresting factor." alt="" coords="78,5,260,46"/>
 <area shape="rect" id="Node000002" href="$ScoreFeatureSet_8hpp.html" title="Compute per&#45;cell scores for a feature set." alt="" coords="5,94,199,135"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,59,119,95,115,92,143,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,60,119,95,115,92,142,57"/>
 <area shape="rect" id="Node000003" href="$scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="112,183,225,208"/>
-<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="196,57,214,93,218,114,214,136,200,163,183,184,179,181,195,160,209,134,213,114,209,95,191,59"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="130,144,160,180,156,184,126,148"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="197,58,214,93,218,114,214,136,200,163,183,184,179,181,195,160,209,134,213,114,209,95,192,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="130,145,160,180,156,184,126,148"/>
 </map>

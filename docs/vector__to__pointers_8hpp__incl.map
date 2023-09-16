@@ -1,7 +1,7 @@
 <map id="scran/utils/vector_to_pointers.hpp" name="scran/utils/vector_to_pointers.hpp">
 <area shape="rect" id="Node000001" title="Create a vector of pointers from a vector of vectors." alt="" coords="37,5,158,46"/>
 <area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,94,94,120"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,48,67,82,62,80,83,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,48,67,82,62,79,83,45"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="118,94,176,120"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="112,45,134,80,129,82,107,48"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="112,45,133,79,129,82,107,48"/>
 </map>
