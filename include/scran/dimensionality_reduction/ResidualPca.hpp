@@ -112,7 +112,8 @@ private:
 public:
     /**
      * @param r Number of PCs to compute.
-     * This should be smaller than the smaller dimension of the input matrix.
+     * This should be no greater than the maximum number of PCs, i.e., the smaller dimension of the input matrix;
+     * otherwise, only the maximum number of PCs will be reported in the `Results`.
      *
      * @return A reference to this `ResidualPca` instance.
      */
@@ -340,6 +341,7 @@ private:
         irlba::EigenThreadScope t(nthreads);
         irlba::Irlba irb;
         irb.set_number(rank);
+        irb.set_cap_number(true);
 
         if (block_weight_policy == WeightPolicy::NONE) {
             auto bdetails = pca_utils::compute_blocking_details(mat->ncol(), block);
