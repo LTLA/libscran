@@ -4,11 +4,13 @@
 #include "../utils/macros.hpp"
 
 #include "tatami/tatami.hpp"
+#include "kmeans/Kmeans.hpp"
+#include "kmeans/InitializePCAPartition.hpp"
+
+#include "../utils/blocking.hpp"
 #include "../dimensionality_reduction/SimplePca.hpp"
 #include "LogNormCounts.hpp"
 #include "GroupedSizeFactors.hpp"
-#include "kmeans/Kmeans.hpp"
-#include "kmeans/InitializePCAPartition.hpp"
 
 /**
  * @brief Quickly compute grouped size factors.
@@ -48,7 +50,6 @@ struct Options {
      * Each entry should contain the block assignment for each cell,
      * as an integer in \f$[0, N)\f$ where \f$N\f$ is the total number of blocks.
      * If `NULL`, all cells are assumed to belong to a single block.
-     * This parameter is only used in the initial normalization step.
      */
     const Block_* block = NULL;
 
@@ -69,13 +70,53 @@ struct Options {
 };
 
 /**
+ * @cond
+ */
+namespace internal {
+
+template<
+    typename Value_, 
+    typename Index_, 
+    typename Block_,
+    typename SizeFactor_
+>
+auto cluster(const tatami::Matrix<Value_, Index_>* mat, const Options<Block_, SizeFactor_>& opt) {
+    // Now, we cut the dimensions.
+    SimplePca pca_runner;
+    pca_runner.set_rank(opt.rank);
+    auto pc_out = pca_runner.run(mat);
+    const auto& pcs = pc_out.pcs;
+
+    // And then we do some clustering.
+    kmeans::Kmeans kmeans_runner;
+    kmeans::InitializePCAPartition<Value_, Index_, Index_> init;
+    return kmeans_runner.run(
+        pcs.rows(), 
+        pcs.cols(), 
+        pcs.data(), 
+        opt.clusters,
+        &init
+    );
+}
+
+}
+/**
+ * @endcond
+ */
+
+/**
  * Quickly compute grouped size factors by deriving a sensible grouping from an expression matrix.
- * The idea is to break up the dataset into broad clusters so that `GroupedSizeFactors` can remove the composition biases between them;
- * it is primarily intended for ADT count data where large composition biases are introduced by the presence of a few highly abundant markers in each subpopulation.
- * This function will create an initial log-normalized matrix,
- * derive a low-dimensional representation via principal components analysis,
- * generate k-means clusters from the top principal components,
+ * The idea is to break up the dataset into broad clusters so that `GroupedSizeFactors` can remove the composition biases between them.
+ * It is primarily intended for ADT count data where large composition biases are introduced by the presence of a few highly abundant markers in each subpopulation.
+ *
+ * More specifically, this function will create an initial log-normalized matrix via `LogNormCounts`,
+ * derive a low-dimensional representation via principal components analysis with `SimplePca`,
+ * generate k-means clusters from the top principal components with the **kmeans** library,
  * and finally use those clusters in `GroupedSizeFactors`.
+ *
+ * If multiple blocks are present, dimensionality reduction and clustering is performed separately for each block.
+ * This avoids wasting the cluster partitions on irrelevant differences between blocks, e.g., due to batch effects.
+ * However, the final calculation of grouped size factors will be done using the entire dataset at once, so the factors will remove block-to-block scaling differences.
  *
  * @tparam Value_ Numeric type for the matrix values.
  * @tparam Index_ Integer type of the matrix row/column indices.
@@ -96,45 +137,61 @@ template<
     typename SizeFactor_
 >
 void run(const tatami::Matrix<Value_, Index_>* mat, OutputFactor_* output, const Options<Block_, SizeFactor_>& opt) {
-    // First, we normalize.
+    std::vector<Index_> clusters;
+    Index_ NC = mat->ncol();
     auto ptr = tatami::wrap_shared_ptr(mat);
     LogNormCounts logger;
 
-    if (opt.initial_factors) {
-        std::vector<SizeFactor_> fac(opt.initial_factors, opt.initial_factors + ptr->ncol());
-        if (opt.block) {
-            ptr = logger.run_blocked(ptr, std::move(fac), opt.block);
-        } else {
-            ptr = logger.run(ptr, std::move(fac));
+    if (opt.block) {
+        auto nblocks = count_ids(NC, opt.block);
+        std::vector<std::vector<Index_> > assignments(nblocks);
+        for (Index_ c = 0; c < NC; ++c) {
+            assignments[opt.block[c]].push_back(c);
         }
+
+        clusters.resize(NC);
+        Index_ last_cluster = 0;
+
+        for (size_t b = 0; b < nblocks; ++b) {
+            const auto& inblock = assignments[b];
+            auto subptr = tatami::make_DelayedSubset<1>(ptr, tatami::ArrayView<Index_>(inblock.data(), inblock.size()));
+
+            std::shared_ptr<tatami::Matrix<Value_, Index_> > normalized;
+            if (opt.initial_factors) {
+                std::vector<SizeFactor_> fac;
+                fac.reserve(inblock.size());
+                for (auto i : inblock) {
+                    fac.push_back(opt.initial_factors[i]);
+                }
+                normalized = logger.run(std::move(subptr), std::move(fac));
+            } else {
+                normalized = logger.run(std::move(subptr));
+            }
+
+            auto res = internal::cluster(normalized.get(), opt);
+            auto cIt = res.clusters.begin();
+            for (auto i : inblock) {
+                clusters[i] = *cIt + last_cluster;
+                ++cIt;
+            }
+            last_cluster += *std::max_element(res.clusters.begin(), res.clusters.end()) + 1;
+        }
+
     } else {
-        if (opt.block) {
-            ptr = logger.run_blocked(ptr, opt.block);
+        std::shared_ptr<const tatami::Matrix<Value_, Index_> > normalized; // TODO: avoid propagating const'ness from LogNormCounts.
+        if (opt.initial_factors) {
+            std::vector<SizeFactor_> fac(opt.initial_factors, opt.initial_factors + NC);
+            normalized = logger.run(std::move(ptr), std::move(fac));
         } else {
-            ptr = logger.run(ptr);
+            normalized = logger.run(std::move(ptr));
         }
+
+        auto res = internal::cluster(normalized.get(), opt);
+        clusters = std::move(res.clusters);
     }
 
-    // Now, we cut the dimensions.
-    SimplePca pca_runner;
-    pca_runner.set_rank(opt.rank);
-    auto pc_out = pca_runner.run(ptr.get());
-    const auto& pcs = pc_out.pcs;
-
-    // And then we do some clustering.
-    kmeans::Kmeans kmeans_runner;
-    kmeans::InitializePCAPartition<double, int, int> init;
-    auto clust_out = kmeans_runner.run(
-        pcs.rows(), 
-        pcs.cols(), 
-        pcs.data(), 
-        opt.clusters,
-        &init
-    );
-        
-    // Finally we use the clustering to run the groupings.
     GroupedSizeFactors group_runner;
-    group_runner.run(mat, clust_out.clusters.data(), output);
+    group_runner.run(mat, clusters.data(), output);
     return;
 }
 
