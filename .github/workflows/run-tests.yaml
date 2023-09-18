@@ -40,6 +40,16 @@ jobs:
     - name: Get latest CMake
       uses: lukka/get-cmake@latest
 
+    - name: Get ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+      with:
+        key: ${{ matrix.config.os }}-${{ matrix.config.omp }}-${{ matrix.config.cov }}-${{ matrix.config.custompar }}
+
+    - name: Enable ccache
+      run: |
+        echo "CMAKE_C_COMPILER_LAUNCHER=ccache" >> $GITHUB_ENV
+        echo "CMAKE_CXX_COMPILER_LAUNCHER=ccache" >> $GITHUB_ENV
+
     - name: Configure the build
       if: ${{ ! matrix.config.cov && ! matrix.config.omp && ! matrix.config.custompar }}
       run: cmake -S . -B build
@@ -62,7 +72,7 @@ jobs:
     - name: Run the tests
       run: |
         cd build
-        ctest
+        ctest --rerun-failed --output-on-failure
 
     - name: Generate code coverage
       if: ${{ matrix.config.cov }}
