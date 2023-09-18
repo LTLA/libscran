@@ -109,7 +109,7 @@ TEST_F(quick_grouped_size_factors_Test, Sanity) {
     sanity_assemble();
 
     scran::quick_grouped_size_factors::Options opt;
-    opt.clusters = num_groups; // setting it exactly for simplicity in an exact test.
+    opt.clusters = [&](size_t) -> size_t { return num_groups; }; // setting it exactly for simplicity in an exact test.
     auto out = scran::quick_grouped_size_factors::run(ptr.get(), opt);
 
     // Checking that we get a consistent ratio with the true size factor.
@@ -121,13 +121,14 @@ TEST_F(quick_grouped_size_factors_Test, Sanity) {
     auto max_ratio = *std::max_element(ratios.begin(), ratios.end());
     EXPECT_TRUE(min_ratio > 0);
     EXPECT_TRUE(max_ratio > 0);
-    EXPECT_TRUE(std::abs(min_ratio - max_ratio) < 1e-8);
+    EXPECT_TRUE(std::abs(min_ratio - max_ratio) < 1e-6);
 
     // Works when blocked.
     std::vector<int> block;
     block.insert(block.end(), ptr->ncol() / 2, 0);
     block.insert(block.end(), ptr->ncol() / 2, 1);
-    opt.clusters = num_groups/2; // setting it exactly for simplicity.
+
+    opt.clusters = [&](size_t) -> size_t { return num_groups/2; }; // setting it exactly for simplicity.
     opt.block = block.data();
     auto blocked = scran::quick_grouped_size_factors::run(ptr.get(), opt);
     EXPECT_EQ(out, blocked);

@@ -3,6 +3,12 @@
 
 #include "../utils/macros.hpp"
 
+#include <algorithm>
+#include <vector>
+#include <cmath>
+#include <functional>
+#include <memory>
+
 #include "tatami/tatami.hpp"
 #include "kmeans/Kmeans.hpp"
 #include "kmeans/InitializePCAPartition.hpp"
@@ -41,9 +47,10 @@ struct Options {
     int rank = 25;
 
     /**
-     * Number of k-means clusters to obtain.
+     * Number of k-means clusters to obtain, as a function of the number of cells in each block.
+     * This defaults to the square root with an upper bound of 50.
      */
-    int clusters = 25;
+    std::function<size_t(size_t)> clusters;
 
     /**
      * Pointer to an array of length equal to the number of cells.
@@ -76,25 +83,21 @@ namespace internal {
 
 template<
     typename Value_, 
-    typename Index_, 
-    typename Block_,
-    typename SizeFactor_
+    typename Index_
 >
-auto cluster(const tatami::Matrix<Value_, Index_>* mat, const Options<Block_, SizeFactor_>& opt) {
-    // Now, we cut the dimensions.
+auto cluster(const tatami::Matrix<Value_, Index_>* mat, int rank, size_t clusters) {
     SimplePca pca_runner;
-    pca_runner.set_rank(opt.rank);
+    pca_runner.set_rank(rank);
     auto pc_out = pca_runner.run(mat);
     const auto& pcs = pc_out.pcs;
 
-    // And then we do some clustering.
     kmeans::Kmeans kmeans_runner;
     kmeans::InitializePCAPartition<Value_, Index_, Index_> init;
     return kmeans_runner.run(
         pcs.rows(), 
         pcs.cols(), 
         pcs.data(), 
-        opt.clusters,
+        clusters,
         &init
     );
 }
@@ -142,6 +145,14 @@ void run(const tatami::Matrix<Value_, Index_>* mat, OutputFactor_* output, const
     auto ptr = tatami::wrap_shared_ptr(mat);
     LogNormCounts logger;
 
+    auto fun = opt.clusters;
+    if (!fun) {
+        fun = [](size_t n) -> size_t {
+            size_t candidate = std::sqrt(static_cast<double>(n));
+            return std::min(candidate, static_cast<size_t>(50));
+        };
+    }
+
     if (opt.block) {
         auto nblocks = count_ids(NC, opt.block);
         std::vector<std::vector<Index_> > assignments(nblocks);
@@ -168,7 +179,7 @@ void run(const tatami::Matrix<Value_, Index_>* mat, OutputFactor_* output, const
                 normalized = logger.run(std::move(subptr));
             }
 
-            auto res = internal::cluster(normalized.get(), opt);
+            auto res = internal::cluster(normalized.get(), opt.rank, fun(inblock.size()));
             auto cIt = res.clusters.begin();
             for (auto i : inblock) {
                 clusters[i] = *cIt + last_cluster;
@@ -186,7 +197,7 @@ void run(const tatami::Matrix<Value_, Index_>* mat, OutputFactor_* output, const
             normalized = logger.run(std::move(ptr));
         }
 
-        auto res = internal::cluster(normalized.get(), opt);
+        auto res = internal::cluster(normalized.get(), opt.rank, fun(NC));
         clusters = std::move(res.clusters);
     }
 
