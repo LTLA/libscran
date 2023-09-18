@@ -68,12 +68,9 @@ struct Options {
     const SizeFactor_* initial_factors = NULL;
 
     /**
-     * @cond
+     * Number of threads to use in all internal calculations.
      */
-    typedef SizeFactor_ SizeFactor;
-    /**
-     * @endcond
-     */
+    int num_threads = 1;
 };
 
 /**
@@ -85,13 +82,15 @@ template<
     typename Value_, 
     typename Index_
 >
-auto cluster(const tatami::Matrix<Value_, Index_>* mat, int rank, size_t clusters) {
+auto cluster(const tatami::Matrix<Value_, Index_>* mat, int rank, size_t clusters, int num_threads) {
     SimplePca pca_runner;
     pca_runner.set_rank(rank);
+    pca_runner.set_num_threads(num_threads);
     auto pc_out = pca_runner.run(mat);
     const auto& pcs = pc_out.pcs;
 
     kmeans::Kmeans kmeans_runner;
+    kmeans_runner.set_num_threads(num_threads);
     kmeans::InitializePCAPartition<Value_, Index_, Index_> init;
     return kmeans_runner.run(
         pcs.rows(), 
@@ -143,7 +142,9 @@ void run(const tatami::Matrix<Value_, Index_>* mat, OutputFactor_* output, const
     std::vector<Index_> clusters;
     Index_ NC = mat->ncol();
     auto ptr = tatami::wrap_shared_ptr(mat);
+
     LogNormCounts logger;
+    logger.set_num_threads(opt.num_threads);
 
     auto fun = opt.clusters;
     if (!fun) {
@@ -179,7 +180,7 @@ void run(const tatami::Matrix<Value_, Index_>* mat, OutputFactor_* output, const
                 normalized = logger.run(std::move(subptr));
             }
 
-            auto res = internal::cluster(normalized.get(), opt.rank, fun(inblock.size()));
+            auto res = internal::cluster(normalized.get(), opt.rank, fun(inblock.size()), opt.num_threads);
             auto cIt = res.clusters.begin();
             for (auto i : inblock) {
                 clusters[i] = *cIt + last_cluster;
@@ -197,11 +198,12 @@ void run(const tatami::Matrix<Value_, Index_>* mat, OutputFactor_* output, const
             normalized = logger.run(std::move(ptr));
         }
 
-        auto res = internal::cluster(normalized.get(), opt.rank, fun(NC));
+        auto res = internal::cluster(normalized.get(), opt.rank, fun(NC), opt.num_threads);
         clusters = std::move(res.clusters);
     }
 
     GroupedSizeFactors group_runner;
+    group_runner.set_num_threads(opt.num_threads);
     group_runner.run(mat, clusters.data(), output);
     return;
 }
