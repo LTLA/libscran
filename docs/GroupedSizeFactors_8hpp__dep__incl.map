@@ -1,5 +1,8 @@
 <map id="scran/normalization/GroupedSizeFactors.hpp" name="scran/normalization/GroupedSizeFactors.hpp">
-<area shape="rect" id="Node000001" title="Compute size factors for groups of cells." alt="" coords="5,5,173,46"/>
-<area shape="rect" id="Node000002" href="$scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="32,94,146,120"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,62,92,93,86,93,86,62"/>
+<area shape="rect" id="Node000001" title="Compute size factors for groups of cells." alt="" coords="45,5,212,46"/>
+<area shape="rect" id="Node000002" href="$quick__grouped__size__factors_8hpp.html" title="Quickly compute grouped size factors." alt="" coords="5,94,145,150"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,61,93,95,88,92,107,58"/>
+<area shape="rect" id="Node000003" href="$scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="72,198,185,223"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="148,59,159,93,163,122,159,150,150,177,138,199,133,196,145,175,154,149,158,122,154,95,143,61"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="102,161,123,196,119,198,97,164"/>
 </map>

@@ -114,22 +114,23 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &quot;<a class="code" href="MedianSizeFactors_8hpp.html">normalization/MedianSizeFactors.hpp</a>&quot;</span></div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &quot;<a class="code" href="CenterSizeFactors_8hpp.html">normalization/CenterSizeFactors.hpp</a>&quot;</span></div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &quot;<a class="code" href="ChoosePseudoCount_8hpp.html">normalization/ChoosePseudoCount.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;<a class="code" href="FilterCells_8hpp.html">quality_control/FilterCells.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &quot;<a class="code" href="SuggestRnaQcFilters_8hpp.html">quality_control/SuggestRnaQcFilters.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &quot;<a class="code" href="PerCellRnaQcMetrics_8hpp.html">quality_control/PerCellRnaQcMetrics.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include &quot;<a class="code" href="SuggestAdtQcFilters_8hpp.html">quality_control/SuggestAdtQcFilters.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#include &quot;<a class="code" href="PerCellAdtQcMetrics_8hpp.html">quality_control/PerCellAdtQcMetrics.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#include &quot;<a class="code" href="SuggestCrisprQcFilters_8hpp.html">quality_control/SuggestCrisprQcFilters.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#include &quot;<a class="code" href="PerCellCrisprQcMetrics_8hpp.html">quality_control/PerCellCrisprQcMetrics.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#include &quot;<a class="code" href="average__vectors_8hpp.html">utils/average_vectors.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#include &quot;<a class="code" href="subset__vector_8hpp.html">utils/subset_vector.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#include &quot;<a class="code" href="vector__to__pointers_8hpp.html">utils/vector_to_pointers.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacescran.html">scran</a> {}</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &quot;<a class="code" href="quick__grouped__size__factors_8hpp.html">normalization/quick_grouped_size_factors.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &quot;<a class="code" href="FilterCells_8hpp.html">quality_control/FilterCells.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &quot;<a class="code" href="SuggestRnaQcFilters_8hpp.html">quality_control/SuggestRnaQcFilters.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include &quot;<a class="code" href="PerCellRnaQcMetrics_8hpp.html">quality_control/PerCellRnaQcMetrics.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#include &quot;<a class="code" href="SuggestAdtQcFilters_8hpp.html">quality_control/SuggestAdtQcFilters.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#include &quot;<a class="code" href="PerCellAdtQcMetrics_8hpp.html">quality_control/PerCellAdtQcMetrics.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#include &quot;<a class="code" href="SuggestCrisprQcFilters_8hpp.html">quality_control/SuggestCrisprQcFilters.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#include &quot;<a class="code" href="PerCellCrisprQcMetrics_8hpp.html">quality_control/PerCellCrisprQcMetrics.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#include &quot;<a class="code" href="average__vectors_8hpp.html">utils/average_vectors.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="preprocessor">#include &quot;<a class="code" href="subset__vector_8hpp.html">utils/subset_vector.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#include &quot;<a class="code" href="vector__to__pointers_8hpp.html">utils/vector_to_pointers.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacescran.html">scran</a> {}</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aAggregateAcrossCells_8hpp_html"><div class="ttname"><a href="AggregateAcrossCells_8hpp.html">AggregateAcrossCells.hpp</a></div><div class="ttdoc">Aggregate expression values across cells.</div></div>
 <div class="ttc" id="aBuildSnnGraph_8hpp_html"><div class="ttname"><a href="BuildSnnGraph_8hpp.html">BuildSnnGraph.hpp</a></div><div class="ttdoc">Build a shared nearest-neighbor graph on the cells.</div></div>
 <div class="ttc" id="aCenterSizeFactors_8hpp_html"><div class="ttname"><a href="CenterSizeFactors_8hpp.html">CenterSizeFactors.hpp</a></div><div class="ttdoc">Center size factors prior to normalization.</div></div>
@@ -158,6 +159,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="ttc" id="aaverage__vectors_8hpp_html"><div class="ttname"><a href="average__vectors_8hpp.html">average_vectors.hpp</a></div><div class="ttdoc">Average parallel elements across vectors.</div></div>
 <div class="ttc" id="amacros_8hpp_html"><div class="ttname"><a href="macros_8hpp.html">macros.hpp</a></div><div class="ttdoc">Set common macros used through libscran.</div></div>
 <div class="ttc" id="anamespacescran_html"><div class="ttname"><a href="namespacescran.html">scran</a></div><div class="ttdoc">Functions for single-cell RNA-seq analyses.</div><div class="ttdef"><b>Definition</b> AggregateAcrossCells.hpp:18</div></div>
+<div class="ttc" id="aquick__grouped__size__factors_8hpp_html"><div class="ttname"><a href="quick__grouped__size__factors_8hpp.html">quick_grouped_size_factors.hpp</a></div><div class="ttdoc">Quickly compute grouped size factors.</div></div>
 <div class="ttc" id="asubset__vector_8hpp_html"><div class="ttname"><a href="subset__vector_8hpp.html">subset_vector.hpp</a></div><div class="ttdoc">Subset a vector easily.</div></div>
 <div class="ttc" id="avector__to__pointers_8hpp_html"><div class="ttname"><a href="vector__to__pointers_8hpp.html">vector_to_pointers.hpp</a></div><div class="ttdoc">Create a vector of pointers from a vector of vectors.</div></div>
 </div><!-- fragment --></div><!-- contents -->
