@@ -30,6 +30,7 @@ add_executable(
     src/normalization/MedianSizeFactors.cpp
     src/normalization/GroupedSizeFactors.cpp
     src/normalization/ChoosePseudoCount.cpp
+    src/normalization/quick_grouped_size_factors.cpp
 
     src/feature_selection/ModelGeneVariances.cpp
     src/feature_selection/FitVarianceTrend.cpp
