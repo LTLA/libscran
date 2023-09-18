@@ -6,7 +6,9 @@
 #include "tatami/tatami.hpp"
 #include "../dimensionality_reduction/SimplePca.hpp"
 #include "LogNormCounts.hpp"
+#include "GroupedSizeFactors.hpp"
 #include "kmeans/Kmeans.hpp"
+#include "kmeans/InitializePCAPartition.hpp"
 
 /**
  * @brief Quickly compute grouped size factors.
@@ -27,8 +29,8 @@ namespace quick_grouped_size_factors {
  * @tparam SizeFactor_ Floating-point type for initial size factors.
  */
 template<
-    typename Block_,
-    typename SizeFactor_
+    typename Block_ = int,
+    typename SizeFactor_ = double
 >
 struct Options {
     /**
@@ -78,7 +80,8 @@ struct Options {
  * @tparam Value_ Numeric type for the matrix values.
  * @tparam Index_ Integer type of the matrix row/column indices.
  * @tparam OutputFactor_ Floating-point ype of the output factors.
- * @tparam Options_ Realization of the `Options` class.
+ * @tparam Block_ See `Options`.
+ * @tparam SizeFactor_ See `Options`.
  *
  * @param mat Input count matrix, where rows are features and columns are cells.
  * @param[out] output Pointer to an array of length equal to the number of cells.
@@ -89,15 +92,16 @@ template<
     typename Value_, 
     typename Index_, 
     typename OutputFactor_, 
-    class Options_
+    typename Block_,
+    typename SizeFactor_
 >
-void run(const tatami::Matrix<Value_, Index_>* mat, OutputFactor_* output, const Options_& opt) {
+void run(const tatami::Matrix<Value_, Index_>* mat, OutputFactor_* output, const Options<Block_, SizeFactor_>& opt) {
     // First, we normalize.
     auto ptr = tatami::wrap_shared_ptr(mat);
     LogNormCounts logger;
 
     if (opt.initial_factors) {
-        std::vector<typename Options_::SizeFactor> fac(opt.initial_factors, opt.inital_factors + ptr->ncol());
+        std::vector<SizeFactor_> fac(opt.initial_factors, opt.initial_factors + ptr->ncol());
         if (opt.block) {
             ptr = logger.run_blocked(ptr, std::move(fac), opt.block);
         } else {
@@ -114,8 +118,8 @@ void run(const tatami::Matrix<Value_, Index_>* mat, OutputFactor_* output, const
     // Now, we cut the dimensions.
     SimplePca pca_runner;
     pca_runner.set_rank(opt.rank);
-    auto pc_out = runner.run(ptr.get());
-    const auto& pcs = pc_out.principal_components;
+    auto pc_out = pca_runner.run(ptr.get());
+    const auto& pcs = pc_out.pcs;
 
     // And then we do some clustering.
     kmeans::Kmeans kmeans_runner;
@@ -135,12 +139,33 @@ void run(const tatami::Matrix<Value_, Index_>* mat, OutputFactor_* output, const
 }
 
 /**
+ * Overload of `run()` with default options.
+ *
+ * @tparam Value_ Numeric type for the matrix values.
+ * @tparam Index_ Integer type of the matrix row/column indices.
+ * @tparam OutputFactor_ Floating-point ype of the output factors.
+ *
+ * @param mat Input count matrix, where rows are features and columns are cells.
+ * @param[out] output Pointer to an array of length equal to the number of cells.
+ * On output, this stores the output factors for each cell.
+ */
+template<
+    typename Value_, 
+    typename Index_, 
+    typename OutputFactor_
+>
+void run(const tatami::Matrix<Value_, Index_>* mat, OutputFactor_* output) {
+    run(mat, output, Options<>());
+}
+
+/**
  * Overload of `run()` that handles the memory allocation of the output factors.
  *
  * @tparam OutputFactor_ Floating-point ype of the output factors.
  * @tparam Value_ Numeric type for the matrix values.
  * @tparam Index_ Integer type of the matrix row/column indices.
- * @tparam Options_ Realization of the `Options` class.
+ * @tparam Block_ See `Options`.
+ * @tparam SizeFactor_ See `Options`.
  *
  * @param mat Input count matrix, where rows are features and columns are cells.
  * @param opt Further options.
@@ -151,11 +176,34 @@ template<
     typename OutputFactor_ = double, 
     typename Value_, 
     typename Index_, 
-    class Options_
+    typename Block_,
+    typename SizeFactor_
 >
-std::vector<OutputFactor_> run(const tatami::Matrix<Value_, Index_>* mat, const Options_& opt) {
+std::vector<OutputFactor_> run(const tatami::Matrix<Value_, Index_>* mat, const Options<Block_, SizeFactor_>& opt) {
     std::vector<OutputFactor_> output(mat->ncol());
     run(mat, output.data(), opt);
+    return output;
+}
+
+/**
+ * Overload of `run()` with default options.
+ *
+ * @tparam OutputFactor_ Floating-point ype of the output factors.
+ * @tparam Value_ Numeric type for the matrix values.
+ * @tparam Index_ Integer type of the matrix row/column indices.
+ *
+ * @param mat Input count matrix, where rows are features and columns are cells.
+ *
+ * @return Vector of length equal to the number of cells, containing the output factors for each cell.
+ */
+template<
+    typename OutputFactor_ = double, 
+    typename Value_, 
+    typename Index_
+>
+std::vector<OutputFactor_> run(const tatami::Matrix<Value_, Index_>* mat) {
+    std::vector<OutputFactor_> output(mat->ncol());
+    run(mat, output.data(), Options<>());
     return output;
 }
 
