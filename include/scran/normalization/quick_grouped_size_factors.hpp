@@ -202,12 +202,6 @@ void run(const tatami::Matrix<Value_, Index_>* mat, OutputFactor_* output, const
         clusters = std::move(res.clusters);
     }
 
-    std::cout << "YAY!" << std::endl;
-    auto tab = tabulate_ids(clusters.size(), clusters.data());
-    for (auto t : tab) {
-        std::cout << t << std::endl;
-    }
-
     GroupedSizeFactors group_runner;
     group_runner.set_num_threads(opt.num_threads);
     group_runner.run(mat, clusters.data(), output);
