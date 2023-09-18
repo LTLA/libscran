@@ -123,12 +123,15 @@ TEST_F(quick_grouped_size_factors_Test, Sanity) {
     EXPECT_TRUE(max_ratio > 0);
     EXPECT_TRUE(std::abs(min_ratio - max_ratio) < 1e-6);
 
-    // Works when blocked.
+    // Works when blocked. (Make sure the number of clusters is even
+    // otherwise the PCA partitioning can do crazy things in this
+    // highly contrived example where all points lie on the center.)
     std::vector<int> block;
-    block.insert(block.end(), ptr->ncol() / 2, 0);
-    block.insert(block.end(), ptr->ncol() / 2, 1);
+    block.insert(block.end(), 80, 0);
+    block.insert(block.end(), ptr->ncol() - 80, 1);
 
-    opt.clusters = [&](size_t) -> size_t { return num_groups/2; }; // setting it exactly for simplicity.
+    size_t group_size = NC / num_groups;
+    opt.clusters = [&](size_t n) -> size_t { return n / group_size; }; // setting it exactly for simplicity.
     opt.block = block.data();
     auto blocked = scran::quick_grouped_size_factors::run(ptr.get(), opt);
     EXPECT_EQ(out, blocked);
