@@ -86,10 +86,8 @@ auto cluster(const tatami::Matrix<Value_, Index_>* mat, int rank, size_t cluster
     SimplePca pca_runner;
     pca_runner.set_rank(rank);
     pca_runner.set_num_threads(num_threads);
-    std::cout << mat->nrow() << "\t" << mat->ncol() << std::endl;
     auto pc_out = pca_runner.run(mat);
     const auto& pcs = pc_out.pcs;
-    std::cout << pcs.topRows(5) << std::endl;
 
     kmeans::Kmeans kmeans_runner;
     kmeans_runner.set_num_threads(num_threads);
@@ -169,9 +167,6 @@ void run(const tatami::Matrix<Value_, Index_>* mat, OutputFactor_* output, const
         for (size_t b = 0; b < nblocks; ++b) {
             const auto& inblock = assignments[b];
             auto subptr = tatami::make_DelayedSubset<1>(ptr, tatami::ArrayView<Index_>(inblock.data(), inblock.size()));
-            auto subext = subptr->dense_column();
-            auto first = subext->fetch(0);
-            auto last = subext->fetch(inblock.size() - 1);
 
             std::shared_ptr<tatami::Matrix<Value_, Index_> > normalized;
             if (opt.initial_factors) {
@@ -184,10 +179,6 @@ void run(const tatami::Matrix<Value_, Index_>* mat, OutputFactor_* output, const
             } else {
                 normalized = logger.run(std::move(subptr));
             }
-
-            auto normext = normalized->dense_row();
-            auto nfirst = normext->fetch(0);
-            auto nlast = normext->fetch(inblock.size() - 1);
 
             auto res = internal::cluster(normalized.get(), opt.rank, fun(inblock.size()), opt.num_threads);
             auto cIt = res.clusters.begin();
