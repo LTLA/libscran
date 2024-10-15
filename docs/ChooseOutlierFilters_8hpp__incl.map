@@ -9,7 +9,7 @@
 <area shape="rect" id="Node000005" title=" " alt="" coords="496,168,553,193"/>
 <area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="384,44,429,64,472,92,497,121,516,152,511,155,493,125,468,96,427,69,382,49"/>
 <area shape="rect" id="Node000006" title=" " alt="" coords="578,168,647,193"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="386,44,443,65,502,92,550,123,590,155,587,159,547,127,499,96,441,70,384,49"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="385,44,442,65,500,92,549,123,590,155,586,159,546,127,498,96,440,70,383,49"/>
 <area shape="rect" id="Node000007" href="$ComputeMedianMad_8hpp.html" title="Compute the median and MAD from an array of values." alt="" coords="293,94,457,120"/>
 <area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="332,45,359,80,355,83,328,48"/>
 <area shape="poly" id="edge7_Node000007_Node000002" title=" " alt="" coords="323,123,136,166,135,161,322,118"/>

@@ -2,12 +2,12 @@
 <area shape="rect" id="Node000001" title="Compute a variety of per&#45;cell quality control metrics from a count matrix." alt="" coords="246,5,398,46"/>
 <area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,183,132,208"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="246,38,188,47,129,59,79,76,61,85,49,96,42,112,42,131,56,169,51,170,37,132,37,111,45,92,58,81,77,71,128,54,187,41,245,32"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="371,183,428,208"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="370,183,428,208"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="398,33,455,42,512,55,561,71,579,81,592,92,601,113,597,132,582,147,559,160,502,179,444,191,443,186,500,174,557,155,579,143,592,129,596,114,588,96,576,85,559,76,511,60,454,47,398,38"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="197,102,271,127"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="304,48,258,93,255,89,300,45"/>
 <area shape="rect" id="Node000005" title=" " alt="" coords="296,102,348,127"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="325,47,325,86,319,86,319,47"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="324,47,324,86,319,86,319,47"/>
 <area shape="rect" id="Node000006" title=" " alt="" coords="372,102,432,127"/>
 <area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="342,45,383,89,379,92,338,48"/>
 <area shape="rect" id="Node000007" title=" " alt="" coords="456,102,577,127"/>

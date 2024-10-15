@@ -1,11 +1,11 @@
 <map id="scran/differential_analysis/SummarizeEffects.hpp" name="scran/differential_analysis/SummarizeEffects.hpp">
 <area shape="rect" id="Node000001" title="Summarize the effect sizes from pairwise comparisons." alt="" coords="32,5,241,46"/>
 <area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="5,183,132,208"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,49,47,68,23,95,18,114,22,134,33,153,47,170,42,173,29,156,18,135,13,114,18,93,44,64,76,44"/>
-<area shape="rect" id="Node000003" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="33,94,147,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,49,48,68,24,95,19,114,24,134,34,153,47,170,43,173,30,156,19,135,14,114,19,93,45,64,77,44"/>
+<area shape="rect" id="Node000003" href="$vector__to__pointers_8hpp.html" title="Create a vector of pointers from a vector of vectors." alt="" coords="33,94,146,135"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="128,48,110,82,105,79,124,45"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="156,183,213,208"/>
-<area shape="poly" id="edge11_Node000001_Node000004" title=" " alt="" coords="145,45,160,93,180,167,175,168,155,95,140,47"/>
+<area shape="poly" id="edge11_Node000001_Node000004" title=" " alt="" coords="146,45,162,93,181,167,176,168,157,95,141,47"/>
 <area shape="rect" id="Node000005" href="$summarize__comparisons_8hpp.html" title="Utilities for effect summarization." alt="" coords="222,102,411,127"/>
 <area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="178,44,279,92,277,97,176,49"/>
 <area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="87,136,78,168,73,167,82,134"/>
@@ -16,6 +16,6 @@
 <area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="312,129,290,170,285,168,308,126"/>
 <area shape="rect" id="Node000007" title=" " alt="" coords="335,183,402,208"/>
 <area shape="poly" id="edge8_Node000005_Node000007" title=" " alt="" coords="327,126,354,168,350,171,322,129"/>
-<area shape="rect" id="Node000008" title=" " alt="" coords="427,183,484,208"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="426,183,484,208"/>
 <area shape="poly" id="edge10_Node000005_Node000008" title=" " alt="" coords="339,125,422,172,420,177,336,130"/>
 </map>

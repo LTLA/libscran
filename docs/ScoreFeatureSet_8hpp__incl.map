@@ -1,7 +1,7 @@
 <map id="scran/feature_set_enrichment/ScoreFeatureSet.hpp" name="scran/feature_set_enrichment/ScoreFeatureSet.hpp">
 <area shape="rect" id="Node000001" title="Compute per&#45;cell scores for a feature set." alt="" coords="273,5,467,46"/>
-<area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="208,183,335,208"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="357,48,324,95,285,170,281,167,320,93,353,45"/>
+<area shape="rect" id="Node000002" href="$macros_8hpp.html" title="Set common macros used through libscran." alt="" coords="208,183,334,208"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="358,48,326,95,286,170,281,167,321,93,353,45"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="792,102,866,127"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="468,36,613,58,773,91,782,94,781,99,772,97,612,63,467,41"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="5,183,63,208"/>

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['computesummaries_0',['ComputeSummaries',['../classscran_1_1ScoreMarkers.html#a836ea0c31fa496f274943e79035314b5',1,'scran::ScoreMarkers']]]
+  ['computesummaries_0',['ComputeSummaries',['../classscran_1_1ScoreMarkers.html#aabc5e3e958edb392d3c0dc4bf74a7aa6',1,'scran::ScoreMarkers']]]
 ];

@@ -3,20 +3,20 @@
 <area shape="rect" id="Node000002" href="$AggregateAcrossCells_8hpp.html" title="Aggregate expression values across cells." alt="" coords="5,168,193,208"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="575,27,373,46,279,62,241,71,212,81,182,100,155,123,115,169,111,166,151,120,179,96,210,77,239,66,277,56,373,41,574,22"/>
 <area shape="rect" id="Node000003" href="$GroupedSizeFactors_8hpp.html" title="Compute size factors for groups of cells." alt="" coords="194,256,361,297"/>
-<area shape="poly" id="edge21_Node000001_Node000003" title=" " alt="" coords="575,26,497,39,415,64,375,82,339,106,308,134,283,169,274,190,272,214,276,256,270,256,266,214,269,189,278,166,304,131,336,102,373,78,413,59,496,34,574,21"/>
+<area shape="poly" id="edge21_Node000001_Node000003" title=" " alt="" coords="575,26,497,38,455,49,414,63,374,82,338,105,306,134,281,169,273,190,271,214,275,256,270,256,265,214,268,189,277,166,303,131,335,101,372,77,412,58,454,44,496,33,574,21"/>
 <area shape="rect" id="Node000004" href="$quick__grouped__size__factors_8hpp.html" title="Quickly compute grouped size factors." alt="" coords="487,345,626,401"/>
 <area shape="poly" id="edge22_Node000001_Node000004" title=" " alt="" coords="675,46,679,96,679,160,669,231,659,265,645,298,626,325,602,346,599,342,622,321,641,296,654,264,664,230,673,160,674,96,670,47"/>
 <area shape="rect" id="Node000006" href="$PairwiseEffects_8hpp.html" title="Compute pairwise effect sizes between groups of cells." alt="" coords="808,79,1001,120"/>
 <area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="720,34,846,76,845,81,718,39"/>
-<area shape="rect" id="Node000007" href="$ScoreMarkers_8hpp.html" title="Compute marker scores for each gene in each group of cells." alt="" coords="700,353,885,393"/>
-<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="682,44,696,78,752,235,789,351,784,353,747,237,691,80,677,46"/>
+<area shape="rect" id="Node000007" href="$ScoreMarkers_8hpp.html" title="Compute marker scores for each gene in each group of cells." alt="" coords="700,352,884,393"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="683,44,697,78,753,235,789,351,784,353,748,237,693,80,678,46"/>
 <area shape="rect" id="Node000008" href="$ModelGeneVariances_8hpp.html" title="Model the per&#45;gene variance from log&#45;count data." alt="" coords="796,168,970,208"/>
 <area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="697,39,798,118,859,165,856,169,795,122,694,43"/>
 <area shape="rect" id="Node000009" href="$CenterSizeFactors_8hpp.html" title="Center size factors prior to normalization." alt="" coords="437,79,593,120"/>
 <area shape="poly" id="edge12_Node000001_Node000009" title=" " alt="" coords="633,41,554,81,552,76,630,36"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="154,213,238,253,236,258,152,218"/>
 <area shape="rect" id="Node000005" href="$scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="446,449,560,474"/>
-<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="122,220,150,257,184,295,247,354,278,375,320,398,387,426,451,446,449,451,385,431,318,403,275,379,244,358,180,299,146,260,118,223"/>
+<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="122,220,150,257,184,295,248,354,322,398,388,426,452,445,450,451,386,431,319,403,244,358,180,299,146,260,118,223"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="351,300,487,345,485,350,350,305"/>
 <area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="301,309,336,354,382,399,426,426,470,446,467,450,424,431,379,403,332,358,297,312"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="534,415,513,449,508,447,530,412"/>

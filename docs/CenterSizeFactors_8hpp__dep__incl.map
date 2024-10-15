@@ -1,19 +1,19 @@
 <map id="scran/normalization/CenterSizeFactors.hpp" name="scran/normalization/CenterSizeFactors.hpp">
 <area shape="rect" id="Node000001" title="Center size factors prior to normalization." alt="" coords="84,5,240,46"/>
-<area shape="rect" id="Node000002" href="$GroupedSizeFactors_8hpp.html" title="Compute size factors for groups of cells." alt="" coords="22,183,190,223"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,61,131,95,119,142,111,183,106,182,113,141,126,93,141,59"/>
-<area shape="rect" id="Node000004" href="$scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="65,375,179,401"/>
-<area shape="poly" id="edge11_Node000001_Node000004" title=" " alt="" coords="122,57,92,81,61,111,34,145,13,183,8,218,13,262,23,303,31,326,59,353,92,372,89,377,56,358,27,328,17,304,8,263,3,218,8,182,29,142,58,107,89,77,118,53"/>
+<area shape="rect" id="Node000002" href="$GroupedSizeFactors_8hpp.html" title="Compute size factors for groups of cells." alt="" coords="23,183,190,223"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,61,131,95,119,142,111,183,106,182,114,141,126,93,141,59"/>
+<area shape="rect" id="Node000004" href="$scran_8hpp.html" title="Umbrella header for all libscran functionality." alt="" coords="66,375,179,401"/>
+<area shape="poly" id="edge11_Node000001_Node000004" title=" " alt="" coords="122,57,92,81,62,111,34,145,13,183,8,218,12,262,21,302,30,326,42,341,58,353,91,372,89,377,55,358,39,344,25,328,16,304,7,262,3,218,8,182,29,142,58,107,89,77,118,53"/>
 <area shape="rect" id="Node000005" href="$LogNormCounts_8hpp.html" title="Compute log&#45;normalized expression values." alt="" coords="266,183,410,223"/>
-<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="256,50,288,68,315,92,328,114,336,138,341,182,336,183,331,139,323,116,311,96,284,72,253,54"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="256,50,288,68,315,92,328,114,336,138,341,182,336,183,331,139,323,116,311,96,285,72,253,54"/>
 <area shape="rect" id="Node000006" href="$MedianSizeFactors_8hpp.html" title="Compute median&#45;based size factors." alt="" coords="141,94,301,135"/>
 <area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="186,57,210,92,205,95,182,60"/>
-<area shape="rect" id="Node000003" href="$quick__grouped__size__factors_8hpp.html" title="Quickly compute grouped size factors." alt="" coords="52,271,192,327"/>
+<area shape="rect" id="Node000003" href="$quick__grouped__size__factors_8hpp.html" title="Quickly compute grouped size factors." alt="" coords="53,271,192,327"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="115,238,120,270,115,271,109,239"/>
 <area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="70,236,54,253,43,272,36,299,43,326,53,341,66,353,95,372,93,377,63,357,49,344,38,328,30,299,38,270,50,250,66,232"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="125,342,125,374,119,374,119,342"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="125,342,125,374,120,374,120,342"/>
 <area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="280,232,186,273,184,268,278,227"/>
 <area shape="poly" id="edge7_Node000005_Node000004" title=" " alt="" coords="323,238,292,284,249,329,205,357,161,377,158,372,202,353,246,325,287,281,318,235"/>
 <area shape="poly" id="edge9_Node000006_Node000002" title=" " alt="" coords="184,146,134,184,130,180,181,142"/>
-<area shape="poly" id="edge10_Node000006_Node000004" title=" " alt="" coords="229,150,232,189,231,235,223,283,206,328,180,357,150,377,148,372,177,353,201,326,218,281,226,234,227,189,224,151"/>
+<area shape="poly" id="edge10_Node000006_Node000004" title=" " alt="" coords="229,150,232,189,231,235,224,283,206,328,180,357,150,377,148,372,177,353,201,326,218,281,226,234,227,189,224,151"/>
 </map>
