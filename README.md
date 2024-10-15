@@ -4,6 +4,8 @@
 ![Documentation](https://github.com/LTLA/libscran/actions/workflows/doxygenate.yaml/badge.svg)
 [![Codecov](https://codecov.io/gh/LTLA/libscran/branch/master/graph/badge.svg?token=CPER7Q7FEH)](https://codecov.io/gh/LTLA/libscran)
 
+⚠️ ⚠️ ⚠️ ⚠️  **This repository is deprecated, see the various `scran_` component libraries in the [libscran](https://github.com/libscran) organization instead.** ⚠️ ⚠️ ⚠️ ⚠️  
+
 ## Overview 
 
 The **libscran** library takes core parts of the [**scran**](https://github.com/MarioniLab/scran) Bioconductor package (as well as other useful bits from other packages) and implements them in C++.
